@@ -56,7 +56,7 @@ protected:
     void NotifyCmdResult() override;
 
 private:
-    static void StopMedia1to1Session();
+    void StopMedia1to1Session();
     static void Resume1to1Session();
     void ProcessJoinAfterExpand();
     void RecoverOnCreating();

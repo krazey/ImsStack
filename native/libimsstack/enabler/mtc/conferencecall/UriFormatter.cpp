@@ -22,7 +22,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/UriFormatter.h"
@@ -36,7 +36,8 @@ const IMS_CHAR UriFormatter::STR_USER_PHONE[] = ";user=phone";
 PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(OUT AString& strUri,
         IN IMtcCallContext& objContext, IN IMS_BOOL bEnforcePaid /* = IMS_FALSE*/)
 {
-    if (bEnforcePaid || ConferenceConfigurationWrapper::IsPaidPreferred())
+    if (bEnforcePaid ||
+            ConferenceConfigurationHelper::IsPaidPreferred(objContext.GetConfigurationProxy()))
     {
         IMtcSession* pMtcSession = objContext.GetSession();
         if (pMtcSession != IMS_NULL)
@@ -76,8 +77,9 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
     return strUri;
 }
 
-PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
-        OUT AString& strUri, IN const ConfUser* pConfUser, IN const AString& strInvitedUri)
+PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(OUT AString& strUri,
+        IN MtcConfigurationProxy& objConfig, IN const ConfUser* pConfUser,
+        IN const AString& strInvitedUri)
 {
     AString strUserEntity = pConfUser ? pConfUser->strUserEntity : AString::ConstNull();
     if (strUserEntity.GetLength() == 0)
@@ -100,7 +102,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
         return strUri;
     }
 
-    if (ConferenceConfigurationWrapper::IsReUseReferToUri() == IMS_TRUE)
+    if (ConferenceConfigurationHelper::IsReUseReferToUri(objConfig) == IMS_TRUE)
     {
         strUri = strInvitedUri;
         return strUri;

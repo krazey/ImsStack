@@ -21,6 +21,7 @@
 
 class AString;
 class IMtcCallContext;
+class MtcConfigurationProxy;
 struct ConfUser;
 
 class UriFormatter
@@ -30,8 +31,8 @@ public:
             IN IMS_BOOL bEnforcePaid = IMS_FALSE);
     static AString& GetReferToForInvite(
             OUT AString& strUri, IN IMtcCallContext& objContext, IN const ConfUser* pConfUser);
-    static AString& GetReferToForBye(
-            OUT AString& strUri, IN const ConfUser* pConfUser, IN const AString& strInvitedUri);
+    static AString& GetReferToForBye(OUT AString& strUri, IN MtcConfigurationProxy& objConfig,
+            IN const ConfUser* pConfUser, IN const AString& strInvitedUri);
 
 private:
     static void ConvertToValidSipUri(IN_OUT AString& strUri, IN IMtcCallContext& objContext);

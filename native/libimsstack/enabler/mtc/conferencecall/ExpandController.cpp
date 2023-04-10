@@ -20,7 +20,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/ParticipantInfo.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/IConferenceReference.h"
 #include <memory>
@@ -54,7 +54,8 @@ PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_
         return;
     }
 
-    if ((ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE) ||
+    if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
+                 m_objContext.GetConfigurationProxy()) == REFER_INVITE_SINGLE) ||
             GetState() != STATE_EXPANDING)
     {
         return;
@@ -82,7 +83,8 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
     // LGU+
-    if ((ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE) &&
+    if ((ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                 m_objContext.GetConfigurationProxy()) == IMS_FALSE) &&
             (GetState() == STATE_EXPANDING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
     {
         m_pNotifier->NotifyExpanded();
@@ -202,7 +204,8 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers);
     ClearListForConfUsers(objUsers);
 
-    IMS_SINT32 nReferType = ConferenceConfigurationWrapper::GetReferTypeForInvite();
+    IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
+            m_objContext.GetConfigurationProxy());
 
     if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
@@ -286,7 +289,8 @@ PROTECTED VIRTUAL void ExpandController::Recover()
 PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
         IN IConferenceReference* piConfRef, IN IMS_SINT32 nStatusCode /* = SipStatusCode::SC_200*/)
 {
-    if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() &&
+    if (ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                m_objContext.GetConfigurationProxy()) &&
             (GetState() == STATE_JOINING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE) &&
             SipStatusCode::IsFinalFailure(nStatusCode))
     {
@@ -359,7 +363,8 @@ PROTECTED VIRTUAL void ExpandController::NotifyCmdResult()
 PRIVATE
 void ExpandController::StopMedia1to1Session()
 {
-    if (ConferenceConfigurationWrapper::GetReferTypeForInvite() != REFER_INVITE_SINGLE)
+    if (ConferenceConfigurationHelper::GetReferTypeForInvite(
+                m_objContext.GetConfigurationProxy()) != REFER_INVITE_SINGLE)
     {
         return;
     }
@@ -449,7 +454,8 @@ void ExpandController::RecoverOnReferring()
         m_pOperationQueue->Clear();
         SetState(STATE_IDLE);
 
-        if (ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE)
+        if (ConferenceConfigurationHelper::GetReferTypeForInvite(
+                    m_objContext.GetConfigurationProxy()) == REFER_INVITE_SINGLE)
         {
             Resume1to1Session();
             GetConferenceCall()->Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));

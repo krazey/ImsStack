@@ -17,7 +17,6 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockITimer.h"
-#include "MtcContextRepository.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -55,7 +54,6 @@ namespace android
 {
 
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
-LOCAL IMS_SINT32 SLOT_ID = 0;
 
 class ConferenceControllerTest : public ::testing::Test
 {
@@ -84,8 +82,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
-
         pMockIdManager = IMS_NULL;
         pMockInterfaceFactory = IMS_NULL;
         pMockSubsHolder = IMS_NULL;
@@ -370,7 +366,7 @@ TEST_F(ConferenceControllerTest, OnSubscriptionStateNotifyReceivedWithoutUsers)
 
 TEST_F(ConferenceControllerTest, OnInviteReferenceStarted)
 {
-    // TODO: ConferenceConfigurationWrapper
+    // TODO: ConferenceConfigurationHelper
 }
 
 TEST_F(ConferenceControllerTest, OnByeReferenceStarted)
@@ -470,7 +466,7 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsSubscribe)
     MockIConferenceSubscriptionListener objSubsListener;
     MockConferenceSubscription* pSubscription = CreateSubscription(objSubsListener);
 
-    // TODO: ConferenceConfigurationWrapper
+    // TODO: ConferenceConfigurationHelper
     EXPECT_CALL(*pSubscription, Subscribe(_)).Times(1);
 
     pController->OnOperationReady();

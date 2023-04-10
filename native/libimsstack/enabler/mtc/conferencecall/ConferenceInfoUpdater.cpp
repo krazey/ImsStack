@@ -17,20 +17,23 @@
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipParameter.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/ConferenceUtils.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "algorithm"
 #include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ConferenceInfoUpdater::ConferenceInfoUpdater(IN ConferenceFactory& objFactory) :
+ConferenceInfoUpdater::ConferenceInfoUpdater(
+        IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy) :
+        m_objConfigProxy(objConfigProxy),
         m_pConferenceInfo(IMS_NULL),
         m_objFactory(objFactory),
         m_pParticipantList(IMS_NULL),
@@ -155,7 +158,7 @@ IMS_RESULT ConferenceInfoUpdater::ParseConferenceInfo(IN const AString& strEvent
 PROTECTED
 IMS_RESULT ConferenceInfoUpdater::CheckValidVersion() const
 {
-    if (ConferenceConfigurationWrapper::IsPackageVersionCheckRequired() == IMS_FALSE)
+    if (ConferenceConfigurationHelper::IsPackageVersionCheckRequired(m_objConfigProxy) == IMS_FALSE)
     {
         return IMS_SUCCESS;
     }
@@ -289,7 +292,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
     // For 'Joined & subscription' case.
     if ((m_eCurrentMatchPolicy == MatchingPolicy::ORDER) &&
             (m_pConferenceInfo->GetState() == ConferenceInfo::STATE_FULL) &&
-            ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired())
+            ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(m_objConfigProxy))
     {
         IMS_TRACE_I("FindAndUpdate : subscription by participant case [%d]",
                 m_objNotMatchedUsers.GetSize(), 0, 0);
@@ -903,7 +906,7 @@ IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
 PRIVATE
 void ConferenceInfoUpdater::ModifyParticipantInfoByConfig(IN ConfUser* pConfUser)
 {
-    if (ConferenceConfigurationWrapper::IsDisconnectingStatusUsed() &&
+    if (ConferenceConfigurationHelper::IsDisconnectingStatusUsed(m_objConfigProxy) &&
             (pConfUser->eStatus == STATUS_DISCONNECTING))
     {
         pConfUser->eStatus = STATUS_DISCONNECTED;

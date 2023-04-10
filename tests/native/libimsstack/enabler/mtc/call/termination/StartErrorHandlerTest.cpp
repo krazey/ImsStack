@@ -21,7 +21,6 @@
 #include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
@@ -70,7 +69,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objMessageUtils, GetCauseFromReasonHeader).WillByDefault(Return(-1));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objMtcService));
