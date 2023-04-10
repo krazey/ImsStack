@@ -29,6 +29,8 @@ import android.content.Context;
 import android.telephony.ims.feature.MmTelFeature;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.imsstack.util.AppContext;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +52,7 @@ public class ImsServiceRegistryTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        AppContext.init(mContext);
         mServiceRegistry = ImsServiceRegistry.getInstance(SLOT0);
         mServiceRegistry.setImsEnabled(false);
         mServiceRegistry.setMmTelFeature(null);
@@ -57,6 +60,10 @@ public class ImsServiceRegistryTest {
 
     @After
     public void tearDown() throws Exception {
+        AppContext.deinit();
+        mListener = null;
+        mMmTelFeature = null;
+        mContext = null;
     }
 
     @Test

@@ -46,10 +46,8 @@ public final class AgentFactory {
     public static final int TELEPHONY_SUBSCRIBER = 15;
     public static final int CELL_INFO = 17;
     public static final int PHONE_CALL_DB = 18;
-    public static final int IMS_PHONE = 19;
-    public static final int CALL_SETTING = 20;
 
-    private static final int AGENT_END = (CALL_SETTING + 1);
+    private static final int AGENT_END = (PHONE_CALL_DB + 1);
     private static final int AGENT_MAX = AGENT_END;
 
     private static Map<Integer, IAgent> sAgents =

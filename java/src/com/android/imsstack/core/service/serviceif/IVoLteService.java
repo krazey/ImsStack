@@ -20,8 +20,7 @@ import android.content.Context;
 public interface IVoLteService extends IService {
 
     int TYPE_DEFAULT = 0;
-    int TYPE_CALLSETTING = TYPE_DEFAULT + 1;
-    int TYPE_MAX = TYPE_DEFAULT + 2;
+    int TYPE_MAX = TYPE_DEFAULT + 1;
 
     void start(int slotID);
 

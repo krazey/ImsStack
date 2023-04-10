@@ -16,9 +16,21 @@
 
 package com.android.imsstack.internal.imsservice;
 
+import android.annotation.Nullable;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
+import android.provider.Settings;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsManager;
+import android.telephony.ims.ImsMmTelManager;
 
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -55,18 +67,297 @@ public class MmTelFeatureRegistry {
          */
         default void onSrvccStateChanged(int srvccState) {
         }
+
+        /**
+         * Notifies the components who monitor the advanced calling setting that it's changed.
+         */
+        default void onAdvancedCallingSettingChanged() {
+        }
+
+        /**
+         * Notifies the components who monitor the video call setting when it's changed.
+         */
+        default void onVtSettingChanged() {
+        }
+
+        /**
+         * Notifies the components who monitor the Wi-Fi calling setting when it's changed.
+         */
+        default void onVoWiFiSettingChanged() {
+        }
+
+        /**
+         * Notifies the components who monitor the RTT calling mode when it's changed.
+         */
+        default void onRttModeChanged() {
+        }
     }
 
-    private final Object mLock;
+    /**
+     * A class to access the user's setting related methods of {@link ImsMmTelManager}.
+     */
+    public class UserSettings {
+        private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        private ImsMmTelManager mMmTelManager;
+        private Uri mAdvancedCallingSettingUri;
+        private Uri mVtSettingUri;
+        private Uri mVoWiFiSettingUri;
+        private Uri mVoWiFiRoamingSettingUri;
+        private Uri mVoWiFiModeUri;
+        private Uri mVoWiFiRoamingModeUri;
+        private Uri mRttModeUri;
+        private ContentObserver mSettingsObserver;
+
+        protected void init() {
+            int subId = MSimUtils.getSubId(mSlotId);
+
+            if (mSubId != subId) {
+                ImsLog.i(mSlotId, "UserSettings#init: " + mSubId + " >> " + subId);
+                unregisterSettingsObserver();
+
+                mSubId = subId;
+                mMmTelManager = getImsMmTelManager();
+
+                if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                    registerSettingsObserver();
+                }
+            }
+        }
+
+        /**
+         * Returns the {@link ContentObserver} for monitoring the user's settings.
+         */
+        @VisibleForTesting
+        protected ContentObserver getContentObserver() {
+            return mSettingsObserver;
+        }
+
+        /**
+         * Checks whether the advanced calling(VoLTE) setting is enabled or not.
+         *
+         * @return {@code true} if the advanced calling setting is enabled, {@code false} otherwise.
+         */
+        public boolean isAdvancedCallingSettingEnabled() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.isAdvancedCallingSettingEnabled()
+                        : false;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "isAdvancedCallingSettingEnabled: " + e.toString());
+                return false;
+            }
+        }
+
+        /**
+         * Checks whether the video call(VT) setting is enabled or not.
+         *
+         * @return {@code true} if the video call setting is enabled, {@code false} otherwise.
+         */
+        public boolean isVtSettingEnabled() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.isVtSettingEnabled()
+                        : false;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "isVtSettingEnabled: " + e.toString());
+                return false;
+            }
+        }
+
+        /**
+         * Checks whether the Wi-Fi calling setting is enabled or not.
+         *
+         * @return {@code true} if the Wi-Fi calling setting is enabled, {@code false} otherwise.
+         */
+        public boolean isVoWiFiSettingEnabled() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.isVoWiFiSettingEnabled()
+                        : false;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "isVoWiFiSettingEnabled: " + e.toString());
+                return false;
+            }
+        }
+
+        /**
+         * Returns the Wi-Fi calling mode.
+         *
+         * @return The current Wi-Fi calling mode. Possible values are:
+         *         {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
+         *         {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED},
+         *         {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}
+         */
+        public int getVoWiFiModeSetting() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.getVoWiFiModeSetting()
+                        : ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "getVoWiFiModeSetting: " + e.toString());
+                return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+            }
+        }
+
+        /**
+         * Checks whether the Wi-Fi calling setting is enabled or not at the roaming network.
+         *
+         * @return {@code true} if the Wi-Fi calling setting is enabled, {@code false} otherwise.
+         */
+        public boolean isVoWiFiRoamingSettingEnabled() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.isVoWiFiRoamingSettingEnabled()
+                        : false;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "isVoWiFiRoamingSettingEnabled: " + e.toString());
+                return false;
+            }
+        }
+
+        /**
+         * Returns the Wi-Fi calling mode at the roaming network.
+         *
+         * @return The current Wi-Fi calling mode. Possible values are:
+         *         {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
+         *         {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED},
+         *         {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}
+         */
+        public int getVoWiFiRoamingModeSetting() {
+            try {
+                return (mMmTelManager != null)
+                        ? mMmTelManager.getVoWiFiRoamingModeSetting()
+                        : ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+            } catch (Exception e) {
+                ImsLog.e(mSlotId, "getVoWiFiRoamingModeSetting: " + e.toString());
+                return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+            }
+        }
+
+        private ImsMmTelManager getImsMmTelManager() {
+            if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                return null;
+            }
+
+            ImsManager imsManager = AppContext.getInstance().getSystemService(ImsManager.class);
+            return (imsManager != null) ? imsManager.getImsMmTelManager(mSubId) : null;
+        }
+
+        private void registerSettingsObserver() {
+            if (mSettingsObserver == null) {
+                mSettingsObserver = new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange, @Nullable Uri uri) {
+                        if (uri == null) {
+                            return;
+                        }
+
+                        if (uri.equals(mAdvancedCallingSettingUri)) {
+                            updateAdvancedCallingSetting();
+                        } else if (uri.equals(mVtSettingUri)) {
+                            updateVtSetting();
+                        } else if (uri.equals(mVoWiFiSettingUri)) {
+                            updateVoWiFiSetting();
+                        } else if (uri.equals(mVoWiFiModeUri)) {
+                            updateVoWiFiMode();
+                        } else if (uri.equals(mVoWiFiRoamingSettingUri)) {
+                            updateVoWiFiRoamingSetting();
+                        } else if (uri.equals(mVoWiFiRoamingModeUri)) {
+                            updateVoWiFiRoamingMode();
+                        } else if (uri.equals(mRttModeUri)) {
+                            updateRttMode();
+                        } else {
+                            ImsLog.d(mSlotId, "Unknown URI: " + uri);
+                        }
+                    }
+                };
+            }
+
+            ContentResolver cr = AppContext.getInstance().getContentResolver();
+
+            mAdvancedCallingSettingUri =
+                    getUriFor(SubscriptionManager.ADVANCED_CALLING_ENABLED_CONTENT_URI);
+            cr.registerContentObserver(mAdvancedCallingSettingUri, true, mSettingsObserver);
+
+            mVtSettingUri = getUriFor(SubscriptionManager.VT_ENABLED_CONTENT_URI);
+            cr.registerContentObserver(mVtSettingUri, true, mSettingsObserver);
+
+            mVoWiFiSettingUri = getUriFor(SubscriptionManager.WFC_ENABLED_CONTENT_URI);
+            cr.registerContentObserver(mVoWiFiSettingUri, true, mSettingsObserver);
+
+            mVoWiFiModeUri = getUriFor(SubscriptionManager.WFC_MODE_CONTENT_URI);
+            cr.registerContentObserver(mVoWiFiModeUri, true, mSettingsObserver);
+
+            mVoWiFiRoamingSettingUri =
+                    getUriFor(SubscriptionManager.WFC_ROAMING_ENABLED_CONTENT_URI);
+            cr.registerContentObserver(mVoWiFiRoamingSettingUri, true, mSettingsObserver);
+
+            mVoWiFiRoamingModeUri = getUriFor(SubscriptionManager.WFC_ROAMING_MODE_CONTENT_URI);
+            cr.registerContentObserver(mVoWiFiRoamingModeUri, true, mSettingsObserver);
+
+            mRttModeUri = Settings.Secure.getUriFor(RTT_MODE_SETTING);
+            cr.registerContentObserver(mRttModeUri, true, mSettingsObserver);
+        }
+
+        private void unregisterSettingsObserver() {
+            if (mSettingsObserver != null) {
+                AppContext.getInstance().getContentResolver()
+                        .unregisterContentObserver(mSettingsObserver);
+
+                mAdvancedCallingSettingUri = null;
+                mVtSettingUri = null;
+                mVoWiFiSettingUri = null;
+                mVoWiFiModeUri = null;
+                mVoWiFiRoamingSettingUri = null;
+                mVoWiFiRoamingModeUri = null;
+                mRttModeUri = null;
+                mSettingsObserver = null;
+            }
+        }
+
+        private Uri getUriFor(Uri uri) {
+            return Uri.withAppendedPath(uri, String.valueOf(mSubId));
+        }
+    }
+
+    /**
+     * For the dialer's RTT configuration, use "dialer_rtt_configuration".
+     * Otherwise, use {@link Settings.Secure#RTT_CALLING_MODE}.
+     */
+    @VisibleForTesting
+    public static final String RTT_MODE_SETTING = "dialer_rtt_configuration";
     private final int mSlotId;
-    private boolean mTerminalBasedCallWaitingEnabled;
-    private int mSrvccState = SRVCC_STATE_NONE;
-    private int mTtyMode = TelecomManager.TTY_MODE_OFF;
+    private volatile boolean mTerminalBasedCallWaitingEnabled;
+    private volatile int mSrvccState = SRVCC_STATE_NONE;
+    private volatile int mTtyMode = TelecomManager.TTY_MODE_OFF;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
-    MmTelFeatureRegistry(int slotId, Object lock) {
+    // User's settings
+    private final Handler mHandler;
+    private final UserSettings mUserSettings = new UserSettings();
+    private volatile boolean mAdvancedCallingSettingEnabled;
+    private volatile boolean mVtSettingEnabled;
+    private volatile boolean mVoWiFiSettingEnabled;
+    private volatile int mVoWiFiMode = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+    private volatile boolean mVoWiFiRoamingSettingEnabled;
+    private volatile int mVoWiFiRoamingMode = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+    private volatile int mRttMode = 0; // OFF
+
+    MmTelFeatureRegistry(int slotId) {
         mSlotId = slotId;
-        mLock = lock;
+        mHandler = new Handler(AppContext.getInstance().getMainLooper());
+    }
+
+    /**
+     * Initializes the user's settings for MmTelFeature.
+     */
+    public void initUserSettings() {
+        // Updates all the settings.
+        mUserSettings.init();
+        updateAdvancedCallingSetting();
+        updateVtSetting();
+        updateVoWiFiSettings();
+        updateRttMode();
     }
 
     /**
@@ -75,29 +366,19 @@ public class MmTelFeatureRegistry {
      * @return true if the terminal-based call waiting is enabled, false otherwise.
      */
     public boolean isTerminalBasedCallWaitingEnabled() {
-        synchronized (mLock) {
-            return mTerminalBasedCallWaitingEnabled;
-        }
+        return mTerminalBasedCallWaitingEnabled;
     }
 
     /**
      * Sets the terminal-based call waiting status.
-     *
+     *updateServiceSettings
      * @param enabled The flag specifying that the service is capable.
      */
     public void setTerminalBasedCallWaitingStatus(boolean enabled) {
-        boolean notifyChange = false;
-
-        synchronized (mLock) {
-            if (mTerminalBasedCallWaitingEnabled != enabled) {
-                ImsLog.i(mSlotId, "setTerminalBasedCallWaitingStatus: "
-                        + mTerminalBasedCallWaitingEnabled + " >> " + enabled);
-                mTerminalBasedCallWaitingEnabled = enabled;
-                notifyChange = true;
-            }
-        }
-
-        if (notifyChange) {
+        if (mTerminalBasedCallWaitingEnabled != enabled) {
+            ImsLog.i(mSlotId, "setTerminalBasedCallWaitingStatus: "
+                    + mTerminalBasedCallWaitingEnabled + " >> " + enabled);
+            mTerminalBasedCallWaitingEnabled = enabled;
             notifyTerminalBasedCallWaitingStatusChanged();
         }
     }
@@ -114,9 +395,7 @@ public class MmTelFeatureRegistry {
      *         {@link #SRVCC_STATE_NONE}.
      */
     public int getSrvccState() {
-        synchronized (mLock) {
-            return mSrvccState;
-        }
+        return mSrvccState;
     }
 
     /**
@@ -125,22 +404,14 @@ public class MmTelFeatureRegistry {
      * @param srvccState The SRVCC state to be set.
      */
     public void setSrvccState(int srvccState) {
-        boolean notifyChange = false;
-
-        synchronized (mLock) {
-            if (mSrvccState != srvccState) {
-                ImsLog.i(mSlotId, "setSrvccState: " + srvccStateToString(mSrvccState)
-                        + " >> " + srvccStateToString(srvccState));
-                if (srvccState == SRVCC_STATE_STARTED) {
-                    mSrvccState = srvccState;
-                } else {
-                    mSrvccState = SRVCC_STATE_NONE;
-                }
-                notifyChange = true;
+        if (mSrvccState != srvccState) {
+            ImsLog.i(mSlotId, "setSrvccState: " + srvccStateToString(mSrvccState)
+                    + " >> " + srvccStateToString(srvccState));
+            if (srvccState == SRVCC_STATE_STARTED) {
+                mSrvccState = srvccState;
+            } else {
+                mSrvccState = SRVCC_STATE_NONE;
             }
-        }
-
-        if (notifyChange) {
             notifySrvccStateChanged(srvccState);
         }
     }
@@ -155,9 +426,7 @@ public class MmTelFeatureRegistry {
      *         {@link TelecomManager#TTY_MODE_VCO}
      */
     public int getTtyMode() {
-        synchronized (mLock) {
-            return mTtyMode;
-        }
+        return mTtyMode;
     }
 
     /**
@@ -171,12 +440,112 @@ public class MmTelFeatureRegistry {
      *                {@link TelecomManager#TTY_MODE_VCO}
      */
     public void setTtyMode(int ttyMode) {
-        synchronized (mLock) {
-            if (mTtyMode != ttyMode) {
-                ImsLog.i(mSlotId, "setTtyMode: " + mTtyMode + " >> " + ttyMode);
-                mTtyMode = ttyMode;
-            }
+        if (mTtyMode != ttyMode) {
+            ImsLog.i(mSlotId, "setTtyMode: " + mTtyMode + " >> " + ttyMode);
+            mTtyMode = ttyMode;
         }
+    }
+
+    /**
+     * Returns the {@link UserSettings} instance to access the setting related methods of
+     * {@link ImsMmTelManager}.
+     *
+     * @return A {@link UserSettings} instance.
+     */
+    public UserSettings getUserSettings() {
+        synchronized (mUserSettings) {
+            // Checks whether the subscription is valid or not first
+            // and returns the {@link UserSettings} instance.
+            mUserSettings.init();
+        }
+
+        return mUserSettings;
+    }
+
+    /**
+     * Checks whether the advanced calling(VoLTE) setting is enabled or not.
+     *
+     * @return {@code true} if the advanced calling setting is enabled, {@code false} otherwise.
+     */
+    public boolean isAdvancedCallingSettingEnabled() {
+        return mAdvancedCallingSettingEnabled;
+    }
+
+    /**
+     * Checks whether the video call(VT) setting is enabled or not.
+     *
+     * @return {@code true} if the video call setting is enabled, {@code false} otherwise.
+     */
+    public boolean isVtSettingEnabled() {
+        return mVtSettingEnabled;
+    }
+
+    /**
+     * Checks whether the Wi-Fi calling setting is enabled or not.
+     *
+     * @return {@code true} if the Wi-Fi calling setting is enabled, {@code false} otherwise.
+     */
+    public boolean isVoWiFiSettingEnabled() {
+        return mVoWiFiSettingEnabled;
+    }
+
+    /**
+     * Returns the Wi-Fi calling mode.
+     *
+     * @return The current Wi-Fi calling mode. Possible values are:
+     *         {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
+     *         {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED},
+     *         {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}
+     */
+    public int getVoWiFiModeSetting() {
+        return mVoWiFiMode;
+    }
+
+    /**
+     * Checks whether the Wi-Fi calling setting is enabled or not at the roaming network.
+     *
+     * @return {@code true} if the Wi-Fi calling setting is enabled, {@code false} otherwise.
+     */
+    public boolean isVoWiFiRoamingSettingEnabled() {
+        return mVoWiFiRoamingSettingEnabled;
+    }
+
+    /**
+     * Returns the Wi-Fi calling mode at the roaming network.
+     *
+     * @return The current Wi-Fi calling mode. Possible values are:
+     *         {@link ImsMmTelManager#WIFI_MODE_WIFI_ONLY},
+     *         {@link ImsMmTelManager#WIFI_MODE_CELLULAR_PREFERRED},
+     *         {@link ImsMmTelManager#WIFI_MODE_WIFI_PREFERRED}
+     */
+    public int getVoWiFiRoamingModeSetting() {
+        return mVoWiFiRoamingMode;
+    }
+
+    /**
+     * Returns the RTT calling mode.
+     *
+     * @return The RTT calling mode (1 if the RTT is enabled, 0 otherwise).
+     */
+    public int getRttMode() {
+        return mRttMode;
+    }
+
+    /**
+     * Reloads all the user's settings.
+     * This method will update the user's settings based on its working thread.
+     */
+    public void reloadAllUserSettings() {
+        mHandler.post(() -> {
+            synchronized (mUserSettings) {
+                mUserSettings.init();
+            }
+
+            updateAdvancedCallingSetting();
+            updateVtSetting();
+            updateVoWiFiSettings();
+            updateRttMode();
+        });
     }
 
     /**
@@ -206,6 +575,111 @@ public class MmTelFeatureRegistry {
     private void notifyTerminalBasedCallWaitingStatusChanged() {
         for (Listener l : mListeners) {
             l.onTerminalBasedCallWaitingStatusChanged();
+        }
+    }
+
+    private void notifyAdvancedCallingSettingChanged() {
+        for (Listener l : mListeners) {
+            l.onAdvancedCallingSettingChanged();
+        }
+    }
+
+    private void updateAdvancedCallingSetting() {
+        boolean enabled = mUserSettings.isAdvancedCallingSettingEnabled();
+
+        if (mAdvancedCallingSettingEnabled != enabled) {
+            ImsLog.i(mSlotId, "isAdvancedCallingSettingEnabled: " + mAdvancedCallingSettingEnabled
+                    + " >> " + enabled);
+            mAdvancedCallingSettingEnabled = enabled;
+            notifyAdvancedCallingSettingChanged();
+        }
+    }
+
+    private void notifyVtSettingChanged() {
+        for (Listener l : mListeners) {
+            l.onVtSettingChanged();
+        }
+    }
+
+    private void updateVtSetting() {
+        boolean enabled = mUserSettings.isVtSettingEnabled();
+
+        if (mVtSettingEnabled != enabled) {
+            ImsLog.i(mSlotId, "isVtSettingEnabled: " + mVtSettingEnabled + " >> " + enabled);
+            mVtSettingEnabled = enabled;
+            notifyVtSettingChanged();
+        }
+    }
+
+    private void notifyVoWiFiSettingChanged() {
+        for (Listener l : mListeners) {
+            l.onVoWiFiSettingChanged();
+        }
+    }
+
+    private void updateVoWiFiSetting() {
+        boolean enabled = mUserSettings.isVoWiFiSettingEnabled();
+
+        if (mVoWiFiSettingEnabled != enabled) {
+            ImsLog.i(mSlotId, "updateVoWiFiSetting: " + mVoWiFiSettingEnabled + " >> " + enabled);
+            mVoWiFiSettingEnabled = enabled;
+            notifyVoWiFiSettingChanged();
+        }
+    }
+
+    private void updateVoWiFiMode() {
+        int voWiFiMode = mUserSettings.getVoWiFiModeSetting();
+
+        if (mVoWiFiMode != voWiFiMode) {
+            ImsLog.i(mSlotId, "updateVoWiFiMode: " + mVoWiFiMode + " >> " + voWiFiMode);
+            mVoWiFiMode = voWiFiMode;
+            notifyVoWiFiSettingChanged();
+        }
+    }
+
+    private void updateVoWiFiRoamingSetting() {
+        boolean enabled = mUserSettings.isVoWiFiRoamingSettingEnabled();
+
+        if (mVoWiFiRoamingSettingEnabled != enabled) {
+            ImsLog.i(mSlotId, "updateVoWiFiRoamingSetting: " + mVoWiFiSettingEnabled
+                    + " >> " + enabled);
+            mVoWiFiRoamingSettingEnabled = enabled;
+            notifyVoWiFiSettingChanged();
+        }
+    }
+
+    private void updateVoWiFiRoamingMode() {
+        int voWiFiMode = mUserSettings.getVoWiFiRoamingModeSetting();
+
+        if (mVoWiFiRoamingMode != voWiFiMode) {
+            ImsLog.i(mSlotId, "updateVoWiFiRoamingMode: " + mVoWiFiRoamingMode
+                    + " >> " + voWiFiMode);
+            mVoWiFiRoamingMode = voWiFiMode;
+            notifyVoWiFiSettingChanged();
+        }
+    }
+
+    private void updateVoWiFiSettings() {
+        updateVoWiFiSetting();
+        updateVoWiFiMode();
+        updateVoWiFiRoamingSetting();
+        updateVoWiFiRoamingMode();
+    }
+
+    private void notifyRttModeChanged() {
+        for (Listener l : mListeners) {
+            l.onRttModeChanged();
+        }
+    }
+
+    private void updateRttMode() {
+        int rttMode = Settings.Secure.getInt(
+                AppContext.getInstance().getContentResolver(), RTT_MODE_SETTING, 0);
+
+        if (mRttMode != rttMode) {
+            ImsLog.i(mSlotId, "updateRttMode: " + mRttMode + " >> " + rttMode);
+            mRttMode = rttMode;
+            notifyRttModeChanged();
         }
     }
 
