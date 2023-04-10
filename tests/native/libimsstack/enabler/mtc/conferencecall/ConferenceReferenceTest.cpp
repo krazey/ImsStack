@@ -17,7 +17,6 @@
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "call/IMtcSession.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -54,7 +53,6 @@ namespace android
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
 LOCAL CallKey JOINING_CALL_KEY = 101;
 LOCAL IMS_UINT32 JOINING_CALL_ID = 1000;
-LOCAL IMS_SINT32 SLOT_ID = 0;
 
 class ConferenceReferenceTest : public ::testing::Test
 {
@@ -90,8 +88,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
-
         pMockConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)

@@ -17,7 +17,6 @@
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
 #include "core/MockIMessage.h"

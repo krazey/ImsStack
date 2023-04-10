@@ -15,7 +15,6 @@
  */
 
 #include "CarrierConfig.h"
-#include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceDef.h"
@@ -51,9 +50,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        // For ConferenceConfigurationWrapper
-        MtcContextRepository::GetInstance()->AddContext(0, &objContext);
-
         ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
@@ -127,7 +123,7 @@ TEST_F(UriFormatterTest, GetReferToForByeUserNull)
     // ConfUser null -> Invited URI
     ConfUser* pConfUser = IMS_NULL;
     AString strUri;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
     delete pConfUser;
 }
@@ -137,7 +133,7 @@ TEST_F(UriFormatterTest, GetReferToForByeEmptyUserEntity)
     // emnpty User Entity -> Invited URI
     AString strUri;
     ConfUser* pConfUser = new ConfUser();
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 }
 
@@ -149,7 +145,7 @@ TEST_F(UriFormatterTest, GetReferToForByeAnonymous)
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = strAnonymousUserEntiry;
     pConfUser->strTarget = ANY_SIP_URI_WITH_USER;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANONYMOUS_URI);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANONYMOUS_URI);
     EXPECT_STREQ(strAnonymousUserEntiry.GetStr(), strUri.GetStr());
 }
 
@@ -160,7 +156,7 @@ TEST_F(UriFormatterTest, GetReferToForByeTelUri)
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = "tel:12345";
     pConfUser->strTarget = ANY_TEL_URI;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 }
 
@@ -175,7 +171,7 @@ TEST_F(UriFormatterTest, GetReferToForByeReuseUri)
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = "sip:anyUri";
     pConfUser->strTarget = "sip:anotherUri";
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 }
 
@@ -190,7 +186,7 @@ TEST_F(UriFormatterTest, GetReferToForByeInvalidAnonymous)
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = "sip:anonymous@anonymous.invalid";
     pConfUser->strTarget = ANONYMOUS_URI;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 }
 
@@ -201,7 +197,7 @@ TEST_F(UriFormatterTest, GetReferToForBye)
     ConfUser* pConfUser = new ConfUser();
     pConfUser->strUserEntity = ANY_SIP_URI;
     pConfUser->strTarget = ANY_SIP_URI_WITH_USER;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
+    UriFormatter::GetReferToForBye(strUri, *pConfigurationProxy, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 
     delete pConfUser;

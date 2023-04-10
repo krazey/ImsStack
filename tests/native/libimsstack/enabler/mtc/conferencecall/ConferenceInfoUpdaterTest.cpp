@@ -15,7 +15,6 @@
  */
 
 #include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
 #include "conferencecall/ConferenceInfo.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -70,7 +69,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         pInfo = IMS_NULL;
         pDescription = IMS_NULL;
 
@@ -85,7 +83,7 @@ protected:
         objParticipantList.SetLocalUri(LOCAL_URI);
 
         pFactory = new MockConferenceFactory(objContext);
-        pUpdater = new ConferenceInfoUpdater(*pFactory);
+        pUpdater = new ConferenceInfoUpdater(*pFactory, *pConfigurationProxy);
     }
 
     virtual void TearDown() override
