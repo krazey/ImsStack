@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IMtcContext.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
 #include "conferencecall/ConferenceEventNotifier.h"
@@ -27,6 +28,7 @@
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -79,7 +81,7 @@ PUBLIC VIRTUAL ConferenceEventNotifier* ConferenceFactory::CreateEventNotifier(
 
 PUBLIC VIRTUAL ConferenceInfoUpdater* ConferenceFactory::CreateInfoUpdater()
 {
-    return new ConferenceInfoUpdater(*this);
+    return new ConferenceInfoUpdater(*this, m_objContext.GetConfigurationProxy());
 }
 
 PUBLIC VIRTUAL ConferenceInfo* ConferenceFactory::CreateInfo()

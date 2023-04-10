@@ -27,7 +27,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "conferencecall/CallConnectionIdManager.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceReference.h"
@@ -115,7 +115,8 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
     switch (eType)
     {
         case SubscriptionUpdateType::SUCCEEDED:
-            if (!ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            if (!ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
+                        m_objContext.GetConfigurationProxy()))
             {
                 CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
             }
@@ -135,7 +136,8 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
                     CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_NONE, IMS_TRUE);
             break;
         case SubscriptionUpdateType::NOTIFY_RECEIVED:
-            if (ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            if (ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
+                        m_objContext.GetConfigurationProxy()))
             {
                 CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
             }
@@ -176,7 +178,8 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceStarted(IN IConferenceRefer
         if (GetState() == STATE_JOINING)
         {
             ConfUser* pTempUser = IMS_NULL;
-            if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired())
+            if (ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                        m_objContext.GetConfigurationProxy()))
             {
                 pTempUser = m_pParticipantList->GetConfUser(piConfRef);
             }
@@ -399,7 +402,8 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& 
     }
 
     SetState(STATE_JOINING);
-    IMS_SINT32 nReferType = ConferenceConfigurationWrapper::GetReferTypeForInvite();
+    IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
+            m_objContext.GetConfigurationProxy());
 
     if (nReferType == REFER_INVITE_SINGLE)
     {
@@ -419,7 +423,8 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& 
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_REFER_INVITE, objJoinList);
     }
 
-    if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE)
+    if (ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                m_objContext.GetConfigurationProxy()) == IMS_FALSE)
     {
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
@@ -458,7 +463,8 @@ PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN ImsList<ConfUser*>& 
 PROTECTED
 void ConferenceController::ProcessSubscribeOnParticipant()
 {
-    if (ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired() == IMS_FALSE)
+    if (ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(
+                m_objContext.GetConfigurationProxy()) == IMS_FALSE)
     {
         return;
     }
@@ -723,7 +729,8 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
 {
     IMS_TRACE_D("InviteParticipants : [%d] users", objUsers.GetSize(), 0, 0);
 
-    IMS_SINT32 nReferTypeForInvite = ConferenceConfigurationWrapper::GetReferTypeForInvite();
+    IMS_SINT32 nReferTypeForInvite = ConferenceConfigurationHelper::GetReferTypeForInvite(
+            m_objContext.GetConfigurationProxy());
     ClearOngoingReferences();
 
     if (nReferTypeForInvite == REFER_INVITE_SINGLE)
@@ -887,7 +894,8 @@ void ConferenceController::DoNextOperation()
             RemoveParticipants(pOperation->GetUsers());
             break;
         case CONTROL_OPERATION_CHECK_CONNECTED:
-            if (!ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            if (!ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
+                        m_objContext.GetConfigurationProxy()))
             {
                 CheckUserEntityConnected(pOperation->GetUsers().GetAt(0));
             }
@@ -995,8 +1003,8 @@ PROTECTED VIRTUAL void ConferenceController::OnCallUpdated(
             Recover();
             if (m_pSubscription && m_pSubscription->GetState() == SubscriptionState::ACTIVE)
             {
-                IMS_SINT32 nWaitTime =
-                        ConferenceConfigurationWrapper::GetWaitTimeNotifyTerminated();
+                IMS_SINT32 nWaitTime = ConferenceConfigurationHelper::GetWaitTimeNotifyTerminated(
+                        m_objContext.GetConfigurationProxy());
                 if (nWaitTime >= 0)
                 {
                     m_pOperationQueue->AddDelay(nWaitTime);

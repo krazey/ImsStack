@@ -30,7 +30,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "conferencecall/CallConnectionIdManager.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceReference.h"
 #include "conferencecall/ConferenceUtils.h"
@@ -91,7 +91,8 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piRef
 {
     IMS_TRACE_I("ReferenceDelivered", 0, 0, 0);
 
-    if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired())
+    if (ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                m_objContext.GetConfigurationProxy()))
     {
         return m_objListener.OnReferenceStarted(this);
     }
@@ -200,7 +201,8 @@ PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendBye(
 
     m_nType = REFERENCE_TYPE_BYE;
     AString strReferToUri;
-    UriFormatter::GetReferToForBye(strReferToUri, m_pConfUser, strInvitedUri);
+    UriFormatter::GetReferToForBye(
+            strReferToUri, m_objContext.GetConfigurationProxy(), m_pConfUser, strInvitedUri);
 
     m_piReference = GetIReference(strReferToUri, METHOD_BYE);
     if (m_piReference == IMS_NULL)
@@ -275,8 +277,9 @@ IMS_RESULT ConferenceReference::SendInviteForSingleUser(
     SetReferredByHeader();
 
     // 5. Send Refer
-    return m_piReference->ReferEx(
-            ConferenceConfigurationWrapper::IsReferSubscriptionRequired(), strHeadersForReferTo);
+    return m_piReference->ReferEx(ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+                                          m_objContext.GetConfigurationProxy()),
+            strHeadersForReferTo);
 }
 
 PRIVATE
@@ -309,7 +312,8 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
     SetReferredByHeader();
 
     // 5. Send Refer
-    return m_piReference->ReferEx(ConferenceConfigurationWrapper::IsReferSubscriptionRequired());
+    return m_piReference->ReferEx(ConferenceConfigurationHelper::IsReferSubscriptionRequired(
+            m_objContext.GetConfigurationProxy()));
 }
 
 PRIVATE
@@ -376,7 +380,7 @@ void ConferenceReference::SetHeadersForReferTo(OUT AString& strHeadersForReferTo
 {
     strHeadersForReferTo = AString::ConstNull();
 
-    if (ConferenceConfigurationWrapper::IsReferToExHeaderUsed())
+    if (ConferenceConfigurationHelper::IsReferToExHeaderUsed(m_objContext.GetConfigurationProxy()))
     {
         strHeadersForReferTo = "Require=replaces";
     }

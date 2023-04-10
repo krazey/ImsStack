@@ -18,7 +18,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "conferencecall/CallConnectionIdManager.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ConferenceUtils.h"
@@ -62,13 +62,16 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
     }
 
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers, IMS_TRUE);
-    if (ConferenceConfigurationWrapper::IsReferUsed() == IMS_FALSE)
+    if (ConferenceConfigurationHelper::IsReferUsed(m_objContext.GetConfigurationProxy()) ==
+            IMS_FALSE)
     {
         return ProcessMergeWithoutRefer(objUsers);
     }
 
-    IMS_BOOL bSubFirstAndRefer = ConferenceConfigurationWrapper::IsSubscriptionFirst() ||
-            ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer();
+    IMS_BOOL bSubFirstAndRefer = ConferenceConfigurationHelper::IsSubscriptionFirst(
+                                         m_objContext.GetConfigurationProxy()) ||
+            ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
+                    m_objContext.GetConfigurationProxy());
     IMS_SINT32 nOldState = GetState();
     SetState(STATE_MERGING);
 
@@ -78,7 +81,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
         // ClearListForConfUsers(objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
-                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
+                ConferenceConfigurationHelper::IsConferenceSubscriptionRequired(
+                        m_objContext.GetConfigurationProxy()))
         {
             m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
@@ -91,7 +95,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
                 CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers().GetAt(i));
         m_pOperationQueue->CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL,
                 m_pParticipantList->GetConfUsers().GetAt(i)->nConnectionId);
-        if (ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+        if (ConferenceConfigurationHelper::IsSubscriptionNotifyRequiredForRefer(
+                    m_objContext.GetConfigurationProxy()))
         {
             m_pOperationQueue->CreateNPutWithUser(
                     CONTROL_OPERATION_CHECK_CONNECTED, m_pParticipantList->GetConfUsers().GetAt(i));
@@ -103,7 +108,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
     if (nOldState == STATE_CREATED)
     {
         if (bSubFirstAndRefer == IMS_FALSE &&
-                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
+                ConferenceConfigurationHelper::IsConferenceSubscriptionRequired(
+                        m_objContext.GetConfigurationProxy()))
         {
             m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
@@ -200,7 +206,9 @@ PROTECTED VIRTUAL void MergeController::OnIndividualCallTerminated(IN IMS_UINTP 
 {
     ConferenceController::OnIndividualCallTerminated(nCallKey);
 
-    if (m_pSubscription == IMS_NULL && ConferenceConfigurationWrapper::IsReferUsed() == IMS_FALSE)
+    if (m_pSubscription == IMS_NULL &&
+            ConferenceConfigurationHelper::IsReferUsed(m_objContext.GetConfigurationProxy()) ==
+                    IMS_FALSE)
     {
         UpdateUserStateByCallTerminated(nCallKey);
     }

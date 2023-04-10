@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include <gtest/gtest.h>
 
 namespace android
 {
 
-class ConferenceConfigurationWrapperTest : public ::testing::Test
+class ConferenceConfigurationHelperTest : public ::testing::Test
 {
 protected:
     virtual void SetUp() override {}

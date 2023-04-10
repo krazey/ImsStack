@@ -17,7 +17,6 @@
 #include "IMtcService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -91,9 +90,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        // For ConferenceConfigurationWrapper through UriFormatter
-        MtcContextRepository::GetInstance()->AddContext(0, &objMockContext);
-
         pMockConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)
@@ -151,6 +147,8 @@ protected:
         ON_CALL(objMockTargetContext, GetSession()).WillByDefault(Return(&objMockTargetMtcSession));
         ON_CALL(objMockTargetMtcSession, GetISession())
                 .WillByDefault(ReturnRef(objMockTargetSession));
+        ON_CALL(objMockTargetContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
     }
 
     void SetUpUriFormatter(IN const AString& strUri)

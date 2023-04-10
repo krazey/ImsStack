@@ -18,7 +18,6 @@
 #include "ImsAosParameter.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -74,8 +73,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetPreconditionManager)

@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/GroupCallController.h"
 #include <memory>
