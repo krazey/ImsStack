@@ -36,18 +36,18 @@ public:
     /// RTT mode
     enum
     {
-        RTT_MODE_NONE = 0,
+        RTT_MODE_NONE = -1,
+        RTT_MODE_CAPABLE_OFF = 0,
         RTT_MODE_VISIBLE_DURING_CALLS = 1,
-        RTT_MODE_ALWAYS_VISIBLE = 2,
-        RTT_MODE_CAPABLE_OFF = 3
+        RTT_MODE_ALWAYS_VISIBLE = 2
     };
 
     /// Wi-Fi calling mode
     enum
     {
-        WFC_MODE_WFC_PREFERRED = 0,
-        WFC_MODE_WFC_ONLY = 1,
-        WFC_MODE_CELLULAR_PREFERRED = 2
+        WFC_MODE_WFC_ONLY = 0,
+        WFC_MODE_CELLULAR_PREFERRED = 1,
+        WFC_MODE_WFC_PREFERRED = 2
     };
 
 public:
@@ -75,9 +75,9 @@ public:
      *
      * @return The RTT mode setting.\n
      *         #RTT_MODE_NONE\n
+     *         #RTT_MODE_CAPABLE_OFF\n
      *         #RTT_MODE_VISIBLE_DURING_CALLS\n
-     *         #RTT_MODE_ALWAYS_VISIBLE\n
-     *         #RTT_MODE_CAPABLE_OFF
+     *         #RTT_MODE_ALWAYS_VISIBLE
      */
     virtual IMS_UINT32 GetRttMode() const = 0;
 
@@ -92,9 +92,9 @@ public:
      * @brief Returns the Wi-Fi calling mode.
      *
      * @return The Wi-Fi calling mode.\n
-     *         #WFC_MODE_WFC_PREFERRED\n
      *         #WFC_MODE_WFC_ONLY\n
-     *         #WFC_MODE_CELLULAR_PREFERRED
+     *         #WFC_MODE_CELLULAR_PREFERRED\n
+     *         #WFC_MODE_WFC_PREFERRED
      */
     virtual IMS_UINT32 GetWifiCallingPreferences() = 0;
 

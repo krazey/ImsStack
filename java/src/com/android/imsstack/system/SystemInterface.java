@@ -19,8 +19,6 @@ import android.os.Parcel;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ICallSetting;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -834,13 +832,12 @@ public class SystemInterface implements JniSystemListener {
         parcelOut = null;
     }
 
-    private class ImsSystem implements ISystem {
+    private class ImsSystem implements ISystem, MmTelFeatureRegistry.Listener {
         private ISystemAPICallInfo mISystemAPICallInfo;
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPISendEvent mISystemAPISendEvent;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
-        private ISystemAPIWifiCalling mISystemAPIWifiCalling;
         private ISystemAPILocation mISystemAPILocation;
 
         private ThreadMessageExecutor mExecutor =
@@ -858,10 +855,16 @@ public class SystemInterface implements JniSystemListener {
 
         public void init() {
             mExecutor.start();
+            MmTelFeatureRegistry mtfr =
+                    ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+            mtfr.addListener(this);
         }
 
         public void cleanup() {
             mExecutor = null;
+            MmTelFeatureRegistry mtfr =
+                    ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+            mtfr.removeListener(this);
         }
 
         @Override
@@ -911,13 +914,6 @@ public class SystemInterface implements JniSystemListener {
         public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api) {
             synchronized (mLock) {
                 mISystemAPITelephonySubscriber = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPIWifiCalling(ISystemAPIWifiCalling api) {
-            synchronized (mLock) {
-                mISystemAPIWifiCalling = api;
             }
         }
 
@@ -1425,6 +1421,33 @@ public class SystemInterface implements JniSystemListener {
             });
         }
 
+        @Override
+        public void onAdvancedCallingSettingChanged() {
+            MmTelFeatureRegistry mtfr =
+                    ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+            notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
+                    mtfr.isAdvancedCallingSettingEnabled()
+                    ? ImsEventDef.IMS_VOLTE_SETTING_ON
+                    : ImsEventDef.IMS_VOLTE_SETTING_OFF, 0);
+        }
+
+        @Override
+        public void onVoWiFiSettingChanged() {
+            MmTelFeatureRegistry mtfr =
+                    ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+            notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
+                    mtfr.isVoWiFiSettingEnabled()
+                    ? ImsEventDef.IMS_WFC_ON
+                    : ImsEventDef.IMS_WFC_OFF, mtfr.getVoWiFiModeSetting());
+        }
+
+        @Override
+        public void onRttModeChanged() {
+            MmTelFeatureRegistry mtfr =
+                    ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+            notifyEvent(ImsEventDef.IMS_EVENT_RTT_SETTING, mtfr.getRttMode(), 0);
+        }
+
         // Private/Protected methods ---------------------------------
         public boolean isEventRegistered(final int event) {
             synchronized (mLock) {
@@ -1516,7 +1539,6 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_UICC_GBA_SUPPORT:
                         result = handleSystemAPITelephonySubscriber(method);
                         break;
-                    //mISystemAPIWifiCalling
                     case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
                     case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
                     case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
@@ -1575,20 +1597,17 @@ public class SystemInterface implements JniSystemListener {
                     result.writeInt(mISystemAPICallInfo.isEmergencyNumber(parcel.readString()));
                     break;
                 case SystemConstants.GET_TTY_MODE: {
-                    ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
-                    MmTelFeatureRegistry mtfr = isr.getMmTelFeatureRegistry();
+                    MmTelFeatureRegistry mtfr =
+                            ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
                     result.writeInt(mtfr.getTtyMode());
                     break;
                 }
-                case SystemConstants.GET_RTT_MODE:
-                    int nRTTmode = 0;
-                    ICallSetting cso = (ICallSetting)
-                            AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
-                    if (cso != null) {
-                        nRTTmode = cso.getRTTMode();
-                    }
-                    result.writeInt(nRTTmode);
+                case SystemConstants.GET_RTT_MODE: {
+                    MmTelFeatureRegistry mtfr =
+                            ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+                    result.writeInt(mtfr.getRttMode());
                     break;
+                }
                 case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
                     result.writeInt(mISystemAPICallInfo.getCallStateInOtherSlot());
                     break;
@@ -1996,27 +2015,33 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemAPIWifiCalling(int method) {
-            if (mISystemAPIWifiCalling == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.IS_WFC_ENABLED:
-                result.writeInt(mISystemAPIWifiCalling.isWifiCallingEnabled4Sys());
-                break;
-            case SystemConstants.GET_WFC_PREFERENCES:
-                result.writeInt(mISystemAPIWifiCalling.getWifiCallingPreferences4Sys());
-                break;
-            case SystemConstants.IS_WFC_PROVISIONED:
-                result.writeInt(mISystemAPIWifiCalling.isWifiCallingProvisioned4Sys());
-                break;
-            case SystemConstants.GET_WFC_ADDRESS_ID:
-                result.writeString(mISystemAPIWifiCalling.getWifiCallingAddressID4Sys());
-                break;
-            default:
-                result.recycle();
-                return null;
+                case SystemConstants.IS_WFC_ENABLED: {
+                    MmTelFeatureRegistry mtfr =
+                            ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+                    result.writeInt(mtfr.isVoWiFiSettingEnabled() ? 1 : 0);
+                    break;
+                }
+                case SystemConstants.GET_WFC_PREFERENCES: {
+                    MmTelFeatureRegistry mtfr =
+                            ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
+                    result.writeInt(mtfr.getVoWiFiModeSetting());
+                    break;
+                }
+                case SystemConstants.IS_WFC_PROVISIONED:
+                    // Need to be checked whether this is necessary or not.
+                    result.writeInt(1);
+                    break;
+                case SystemConstants.GET_WFC_ADDRESS_ID: {
+                    result.writeString(ImsPrivateProperties.Persistent.get(
+                            ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
+                            "", mSlotId));
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

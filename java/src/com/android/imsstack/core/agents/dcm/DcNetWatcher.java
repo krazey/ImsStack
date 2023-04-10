@@ -37,7 +37,6 @@ import android.telephony.VopsSupportInfo;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.ICallSetting;
 import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ITelephonyState;
@@ -1001,15 +1000,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         mNetworkOperatorChangedRegistrants.notifyResult(mNetworkOperator);
 
         mAosInfo.notifyPlmnChanged();
-
-        ICallSetting cso = (ICallSetting) AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
-
-        if ((cso != null) && (mNetworkOperator != null)) {
-            if (mNetworkOperator.startsWith("450")) {
-                ImsLog.i(mSlotId, "return to KR from roaming, HD voice re-setting");
-                cso.updateForSetting();
-            }
-        }
     }
 
     private void handleDataServiceStateChanged() {
@@ -1041,10 +1031,8 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private void handleRoamingStateChanged(ServiceState ss) {
         // Notify combination of data and voice roaming state
-        boolean stateChanged = false;
         boolean roaming = ss.getRoaming();
         if (isRoaming() != roaming) {
-            stateChanged = true;
             mRoamingStateChangedRegistrants.notifyResult(Boolean.valueOf(roaming));
         }
 
@@ -1061,14 +1049,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         } else if (mDataRoaming != isDataRoaming) {
             mDataRoaming = isDataRoaming;
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
-        }
-
-        if (stateChanged) {
-            ICallSetting cso =
-                    (ICallSetting) AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
-            if (cso != null) {
-                cso.updateForRoamingSetting(isRoaming());
-            }
         }
     }
 

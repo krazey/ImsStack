@@ -92,9 +92,9 @@ TEST_F(OsPhoneInfoCallTest, GetWifiCallingPreferences)
 
     EXPECT_CALL(m_objSystem, GetWifiCallingPreferences(_))
             .Times(AnyNumber())
-            .WillRepeatedly(Return(ICallInfo::WFC_MODE_WFC_ONLY));
+            .WillRepeatedly(Return(ICallInfo::WFC_MODE_WFC_PREFERRED));
 
-    EXPECT_EQ(ICallInfo::WFC_MODE_WFC_ONLY, objOsPhoneInfoCall.GetWifiCallingPreferences());
+    EXPECT_EQ(ICallInfo::WFC_MODE_WFC_PREFERRED, objOsPhoneInfoCall.GetWifiCallingPreferences());
 }
 
 TEST_F(OsPhoneInfoCallTest, IsWifiCallingProvisioned)
