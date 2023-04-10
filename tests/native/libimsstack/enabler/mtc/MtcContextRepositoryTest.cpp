@@ -15,6 +15,7 @@
  */
 
 #include "IMtcContext.h"
+#include "ImsTypeDef.h"
 #include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
 #include <gtest/gtest.h>
@@ -24,6 +25,9 @@ namespace android
 
 class MtcContextRepositoryTest : public ::testing::Test
 {
+public:
+    MockIMtcContext objContext;
+
 protected:
     virtual void SetUp() override {}
 
@@ -40,61 +44,55 @@ TEST_F(MtcContextRepositoryTest, GetInstanceCreateInstanceOnlyOnce)
 
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithInvalidSlotId)
 {
-    const IMS_SINT32 SLOT_ID_0 = 0;
-    MockIMtcContext* pContext = new MockIMtcContext();
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
     IMtcContext* pContextByGetter = MtcContextRepository::GetContext();
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
-    EXPECT_EQ(pContext, pContextByGetter);
+    EXPECT_EQ(&objContext, pContextByGetter);
 }
 
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextWithSlotId0)
 {
-    const IMS_SINT32 SLOT_ID_0 = 0;
-    MockIMtcContext* pContext = new MockIMtcContext();
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
-    IMtcContext* pContextByGetter = MtcContextRepository::GetContext(SLOT_ID_0);
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
+    IMtcContext* pContextByGetter = MtcContextRepository::GetContext(IMS_SLOT_0);
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
-    EXPECT_EQ(pContext, pContextByGetter);
+    EXPECT_EQ(&objContext, pContextByGetter);
 }
 
 TEST_F(MtcContextRepositoryTest, AddContextToSlotId0AndGetContextBySlot)
 {
-    const IMS_SINT32 SLOT_ID_0 = 0;
-    MockIMtcContext* pContext = new MockIMtcContext();
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContext);
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
     IMtcContext* pContextByGetter =
-            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+            MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
-    EXPECT_EQ(pContext, pContextByGetter);
+    EXPECT_EQ(&objContext, pContextByGetter);
 }
 
 TEST_F(MtcContextRepositoryTest, AddContextsWithDifferentSlot)
 {
-    const IMS_SINT32 SLOT_ID_0 = 0;
-    const IMS_SINT32 SLOT_ID_1 = 1;
-    MockIMtcContext* pContextSlot0 = new MockIMtcContext();
-    MockIMtcContext* pContextSlot1 = new MockIMtcContext();
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContextSlot0);
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_1, pContextSlot1);
+    MockIMtcContext objContextSlot1;
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_1, &objContextSlot1);
 
     IMtcContext* pContextByGetterSlot0 =
-            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+            MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
     IMtcContext* pContextByGetterSlot1 =
-            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_1);
+            MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_1);
 
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_1);
     EXPECT_NE(pContextByGetterSlot0, pContextByGetterSlot1);
 }
 
 TEST_F(MtcContextRepositoryTest, AddContextAndRemove)
 {
-    const IMS_SINT32 SLOT_ID_0 = 0;
-    MockIMtcContext* pContextSlot0 = new MockIMtcContext();
-    MtcContextRepository::GetInstance()->AddContext(SLOT_ID_0, pContextSlot0);
-    MtcContextRepository::GetInstance()->RemoveContext(SLOT_ID_0);
+    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
+    MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
 
     IMtcContext* pContextByGetterSlot0 =
-            MtcContextRepository::GetInstance()->GetContextBySlot(SLOT_ID_0);
+            MtcContextRepository::GetInstance()->GetContextBySlot(IMS_SLOT_0);
 
     EXPECT_EQ(pContextByGetterSlot0, nullptr);
 }
