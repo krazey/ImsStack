@@ -15,6 +15,7 @@
  */
 
 #include "IMtcCallStateListener.h"
+#include "ImsTypeDef.h"
 #include "MockIMtcContext.h"
 #include "MtcConnector.h"
 #include "MtcContextRepository.h"
@@ -22,8 +23,6 @@
 #include <gtest/gtest.h>
 
 using ::testing::ReturnRef;
-
-LOCAL IMS_SINT32 SLOT_ID = 0;
 
 namespace android
 {
@@ -37,25 +36,28 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objContext);
+        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        MtcContextRepository::GetInstance()->RemoveContext(IMS_SLOT_0);
+    }
 };
 
 TEST_F(MtcConnectorTest, AddCallStateListener)
 {
     IMtcCallStateListener* pListener = reinterpret_cast<IMtcCallStateListener*>(0x01);
     EXPECT_CALL(objCallStateProxy, AddListener(pListener)).Times(1);
-    MtcConnector::AddCallStateListener(SLOT_ID, pListener);
+    MtcConnector::AddCallStateListener(IMS_SLOT_0, pListener);
 }
 
 TEST_F(MtcConnectorTest, RemoveCallStateListener)
 {
     IMtcCallStateListener* pListener = reinterpret_cast<IMtcCallStateListener*>(0x01);
     EXPECT_CALL(objCallStateProxy, RemoveListener(pListener)).Times(1);
-    MtcConnector::RemoveCallStateListener(SLOT_ID, pListener);
+    MtcConnector::RemoveCallStateListener(IMS_SLOT_0, pListener);
 }
 
 }  // namespace android
