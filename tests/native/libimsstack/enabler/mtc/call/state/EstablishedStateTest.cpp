@@ -25,6 +25,8 @@
 #include "call/MockIMtcUiNotifier.h"
 #include "call/MockMtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
+#include "call/block/IMtcBlockChecker.h"
+#include "call/block/MockIMtcBlockChecker.h"
 #include "call/state/EstablishedState.h"
 #include "call/state/MtcCallState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -64,6 +66,7 @@ public:
     MockMtcTimerWrapper objTimerWrapper;
     MockIMessage objMessage;
     MockIMessageUtils objMessageUtils;
+    MockIMtcBlockChecker* pBlockChecker;
     MtcConfigurationProxy* pConfigurationProxy;
     UpdatingInfo* pUpdatingInfo;
     MediaInfo objMediaInfo;
@@ -104,6 +107,10 @@ protected:
                 new MtcSupplementaryService(objMockCallContext, *pConfigurationProxy);
         ON_CALL(objMockCallContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
+
+        // This will be deleted by EstablishedState.
+        pBlockChecker = new MockIMtcBlockChecker();
+        ON_CALL(objMockCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
@@ -287,15 +294,15 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
 
 TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
 {
-    ON_CALL(*pMockConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
     ON_CALL(*pMockConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
             .WillByDefault(Return(
                     CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
 
-    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
     // SetUp IsNeedToAlert() true.
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
@@ -308,15 +315,15 @@ TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
 
 TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSupported)
 {
-    ON_CALL(*pMockConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
     ON_CALL(*pMockConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
             .WillByDefault(Return(
                     CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
 
-    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
     // SetUp IsNeedToAlert() true.
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
@@ -326,6 +333,24 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSup
     EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
+{
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    CallReasonInfo objAnyReason(CODE_UNSPECIFIED);
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(Return(IMtcBlockChecker::Result(
+                    IMtcBlockChecker::Result::Status::BLOCKED, objAnyReason)));
+
+    CallType eAnyCallType = CallType::VIDEO_RTT;
+    EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
+    EXPECT_CALL(objMockMtcSession, Reject(objAnyReason));
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
 TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)

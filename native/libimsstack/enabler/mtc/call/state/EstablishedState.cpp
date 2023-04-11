@@ -179,7 +179,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
-    m_objContext.GetSession()->HandleRequest(RequestType::UPDATE, *piMessage);
+    IMtcSession* pSession = m_objContext.GetSession();
+    pSession->HandleRequest(RequestType::UPDATE, *piMessage);
     m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetUpdatingInfo().SetTargetCallType(
@@ -192,7 +193,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
     if (m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
-        auto pBlockChecker = std::make_unique<MtcBlockChecker>(GetCallUpdateBlockRules(), nullptr);
+        auto pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
+                m_objContext.CreateBlockChecker(GetCallUpdateBlockRules()));
         IMtcBlockChecker::Result objResult = pBlockChecker->Check();
 
         if (objResult.eStatus == IMtcBlockChecker::Result::Status::UNBLOCKED)
@@ -201,7 +203,9 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
         }
         else
         {
-            m_objContext.GetSession()->Reject(objResult.objReason);
+            // Restore the CallType that was changed by MtcSession#HandleRequest.
+            pSession->SetCallType(pSession->GetPreviousCallType());
+            pSession->Reject(objResult.objReason);
             eStateName = CallStateName::ESTABLISHED;
         }
     }
