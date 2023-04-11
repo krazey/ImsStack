@@ -62,6 +62,7 @@ public:
     static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
     static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
+    static const IMS_SINT32 DEFAULT_VIDEO_LOWEST_BITRATE = 0;
 
 public:
     /**
@@ -190,6 +191,12 @@ public:
      * Return false if BandwidthNegoOption is disabled
      */
     IMS_BOOL GetBandwidthNegoOption() const;
+    /**
+     * @brief Get the video lowest Bitrate bps
+     *
+     * @return IMS_SINT32 video lowest Bitrate bps
+     */
+    IMS_SINT32 GetVideoLowestBitrateBps() const;
 
 protected:
     /**
@@ -221,6 +228,7 @@ private:
     IMS_SINT32 m_nChannel;
     IMS_SINT32 m_nVideoSamplingRate;
     IMS_BOOL m_bVideoBwNegoOptionEnabled;
+    IMS_SINT32 m_nVideoLowestBitrateBps;
 };
 
 #endif

@@ -44,6 +44,8 @@ static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = VideoConfiguration::DEFAULT_I
 static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE =
         VideoConfiguration::DEFAULT_VIDEO_SAMPLING_RATE;
 static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = VideoConfiguration::DEFAULT_BW_NEGO_OPTION;
+static const IMS_BOOL DEFAULT_VIDEO_LOWEST_BITRATE =
+        VideoConfiguration::DEFAULT_VIDEO_LOWEST_BITRATE;
 class VideoConfigurationTest : public ::testing::Test {
 
 public:
@@ -87,6 +89,7 @@ TEST_F(VideoConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetVideoSamplingRate(), DEFAULT_VIDEO_SAMPLING_RATE);
     EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPTION);
+    EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(), DEFAULT_VIDEO_LOWEST_BITRATE);
 
     delete m_pConfig;
 }
@@ -108,6 +111,8 @@ TEST_F(VideoConfigurationTest, GetConfigTest)
             GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT));
     EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(),
             GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL));
+    EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(),
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT));
     delete m_pConfig;
 }
 

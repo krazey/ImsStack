@@ -72,6 +72,7 @@ public:
             IMMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
             IMMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
             IMMEDIA_CASE_ENUM(CHANGE_ORIENTATION_CMD);
+            IMMEDIA_CASE_ENUM(NOTIFY_VIDEO_BITRATE);
             IMMEDIA_CASE_ENUM(CHANGE_NETWORK_CONNECTION);
             IMMEDIA_CASE_ENUM(CHANGE_MTU);
         }
@@ -184,6 +185,8 @@ public:
     static const IMS_SINT32 SET_PAUSE_IMAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 4;
     /** request from the Ui to update device orientation change */
     static const IMS_SINT32 CHANGE_ORIENTATION_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 5;
+    /** notification of the video bitrate is decreased under the threshold */
+    static const IMS_SINT32 NOTIFY_VIDEO_BITRATE = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 11;
     static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_END = IMMEDIA_IND + 79;
 
     static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IND_IDX_START = IMMEDIA_IND + 80;

@@ -335,3 +335,23 @@ TEST_F(MediaSessionTest, testGetRemotePort)
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO), -1);
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_VIDEO), -1);
 }
+
+TEST_F(MediaSessionTest, testNotifyVideoBitrate)
+{
+    createAudioSession();
+
+    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
+    pParam->nValue = 100000;
+
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IMMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
+
+    pParam = IMS_NULL;
+
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IMMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_FALSE);
+
+    destroyAudioSession();
+}
