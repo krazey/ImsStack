@@ -131,15 +131,15 @@ public class VideoSessionCallbackHandlerTest {
     }
 
     @Test
-    public void testNotifyPacketLoss() {
+    public void testNotifyBitrate() {
 
         Parcel testParcel = Parcel.obtain();
 
-        testParcel.writeInt(MediaConstants.NOTIFY_PACKET_LOSS);
+        testParcel.writeInt(MediaConstants.NOTIFY_BITRATE);
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        testParcel.writeInt(MediaTestUtils.PACKET_LOSS_PERCENT);
+        testParcel.writeInt(MediaTestUtils.VIDEO_BITRATE_BPS);
 
-        mVideoSessionCallbackHandler.onNotifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
+        mVideoSessionCallbackHandler.onNotifyBitrate(MediaTestUtils.VIDEO_BITRATE_BPS);
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
