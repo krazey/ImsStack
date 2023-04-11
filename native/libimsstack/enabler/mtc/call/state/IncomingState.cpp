@@ -18,6 +18,7 @@
 #include "ISession.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
@@ -277,5 +278,22 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
             {
                 return pState->OnIpcanChanged(eIpcan);
             });
+    return GetStateName();
+}
+
+PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
+{
+    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
+    m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
+
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
+            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
+            !m_objContext.GetEpsFallbackTrigger().IsVoNr())
+    {
+        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+        SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
     return GetStateName();
 }

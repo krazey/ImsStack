@@ -15,6 +15,8 @@
  */
 
 #include "MockIMtcService.h"
+#include "MtcContextRepository.h"
+#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
@@ -58,6 +60,7 @@ public:
     MockISipMessage objISipMessage;
     MockIMtcMediaManager objMediaManager;
     MockIMessageUtils objMessageUtils;
+    MockEpsFallbackTrigger* pEpsFbTrigger;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
@@ -69,6 +72,9 @@ public:
 protected:
     virtual void SetUp() override
     {
+        pEpsFbTrigger = new MockEpsFallbackTrigger(objCallContext);
+        ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
+
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
 
@@ -99,6 +105,7 @@ protected:
         delete pConfigurationProxy;
         delete pSupplementaryService;
         delete pParticipantInfo;
+        delete pEpsFbTrigger;
     }
 
     void MakeIsPreviewOfAnswerReturnsTrue(IN const SipMethod& objMethod)
@@ -394,6 +401,32 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
 
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->OnSrvccStateUpdated(SrvccState::FAILED));
+}
+
+TEST_F(IncomingStateTest, OnAosConnectedInvokesPreconditionManagerIpCanChanged)
+{
+    IMS_UINT32 nAnyAosReason = 1;
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(0));
+    EXPECT_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).Times(0);
+    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged);
+
+    EXPECT_EQ(CallStateName::INCOMING,
+            pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+}
+
+TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback)
+{
+    IMS_UINT32 nAnyAosReason = 1;
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
+    SetParamsForIncomingCallReceived();
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_EQ(CallStateName::ALERTING,
+            pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
 }
 
 }  // namespace android
