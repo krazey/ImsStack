@@ -822,6 +822,8 @@ public class CarrierConfig {
                 "video_send_periodic_sps_pps_int";
         public static final String KEY_VIDEO_BW_NEGO_OPTION_BOOL =
                 "video_bw_nego_option_bool";
+        public static final String KEY_VIDEO_LOWEST_BITRATE_BPS_INT =
+                "video_lowest_bitrate_bps_int";
         public static final String KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY =
                 "text_rtp_port_range_int_array";
         public static final String KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL =

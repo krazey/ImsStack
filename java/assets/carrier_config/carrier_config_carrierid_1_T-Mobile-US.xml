@@ -419,6 +419,7 @@
     </int-array>
     <int name="video_cvo_value_int" value="4"/>
     <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
+    <int name="video_lowest_bitrate_bps_int" value="100000"/>
     <boolean name="video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="31"/>
     <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
