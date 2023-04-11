@@ -36,8 +36,6 @@ import com.android.imsstack.core.agents.LocationPolicy;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.service.serviceif.IService;
@@ -94,8 +92,6 @@ public class VoLteService implements IVoLteService {
 
         startServices();
 
-        dcGov_SetApnEnable(true);
-
         // 8. local application load (Auto Configuration...)
         initOperatorSpecificApp();
 
@@ -142,7 +138,6 @@ public class VoLteService implements IVoLteService {
         }
 
         clearOperatorSpecificApp();
-        dcGov_SetApnEnable(false);
         cleanServices();
 
         if (mSubscriptionListener != null) {
@@ -225,15 +220,6 @@ public class VoLteService implements IVoLteService {
                 continue;
             }
             service.update(context);
-        }
-    }
-
-    protected void dcGov_SetApnEnable(boolean enable) {
-        IDcApn dcapn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotID);
-        if (dcapn != null) {
-            dcapn.changeApnEmployState(EApnType.IMS, enable);
-            dcapn.changeApnEmployState(EApnType.EMERGENCY, enable);
-            dcapn.changeApnEmployState(EApnType.XCAP, enable);
         }
     }
 

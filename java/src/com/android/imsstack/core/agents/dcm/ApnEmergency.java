@@ -48,11 +48,6 @@ public class ApnEmergency extends Apn {
 
     @Override
     public boolean connect() {
-        if (!isApnEmployed()) {
-            ImsLog.w(mSlotId, "apn is not employed");
-            return false;
-        }
-
         if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "request is already done");
             return true;

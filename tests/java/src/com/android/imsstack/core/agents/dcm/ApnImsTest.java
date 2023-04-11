@@ -108,11 +108,6 @@ public class ApnImsTest {
 
     @Test
     public void testConnect() throws Exception {
-        // do not handle request to connect because ApnIms is not enabled
-        assertFalse(mApnIms.connect());
-
-        // handle request to connect if ApnIms is enabled
-        mApnIms.employApn();
         assertTrue(mApnIms.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnIms.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnIms.getDataState());
@@ -132,7 +127,6 @@ public class ApnImsTest {
         assertFalse(mApnIms.disconnect());
 
         // handle request to disconnect if request to connect is done
-        mApnIms.employApn();
         mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         assertTrue(mApnIms.disconnect());

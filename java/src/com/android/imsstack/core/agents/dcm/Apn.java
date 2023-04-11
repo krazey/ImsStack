@@ -155,7 +155,6 @@ public abstract class Apn extends Handler implements IApn {
             new LinkedHashMap<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
-    protected int mApnEmployCount = 0;
     protected boolean mIsMonitoringCallbackRegistered = false;
     protected int mSubId = MSimUtils.INVALID_SUB_ID;
     protected ApnSubscriptionListener mSubscriptionListener = null;
@@ -307,24 +306,6 @@ public abstract class Apn extends Handler implements IApn {
     @Override
     public int getSlotId() {
         return this.mSlotId;
-    }
-
-    @Override
-    public int employApn() {
-        return ++mApnEmployCount;
-    }
-
-    @Override
-    public int dismissApn() {
-        if (mApnEmployCount > 0) {
-            mApnEmployCount--;
-        }
-        return mApnEmployCount;
-    }
-
-    @Override
-    public int getApnEmployCount() {
-        return mApnEmployCount;
     }
 
     @Override
@@ -602,15 +583,6 @@ public abstract class Apn extends Handler implements IApn {
             sendDataStateUpdateMessage(mType, EDataState.convertIntTypeToEnum(
                     (EDataState.convertFromTMtoImsType(mDataState))));
         }
-    }
-
-    protected boolean isApnEmployed() {
-        if (mApnEmployCount > 0) {
-            ImsLog.d(mSlotId, "apn is employed (" + mApnEmployCount + ")");
-            return true;
-        }
-
-        return false;
     }
 
     /**

@@ -564,20 +564,6 @@ public class DcApnTest {
     }
 
     @Test
-    public void testChangeApnEmployState() throws Exception {
-        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
-
-        mDcApn.changeApnEmployState(null, true);
-        verify(mMockIApn, never()).employApn();
-
-        mDcApn.changeApnEmployState(EApnType.IMS, true);
-        verify(mMockIApn, times(1)).employApn();
-
-        mDcApn.changeApnEmployState(EApnType.IMS, false);
-        verify(mMockIApn, times(1)).dismissApn();
-    }
-
-    @Test
     public void testPreciseDataConnectionStateChanged_NullApnSetting() throws Exception {
         PreciseDataConnectionState dataConnectionState = new PreciseDataConnectionState.Builder()
                 .setState(TelephonyManager.DATA_CONNECTED)
