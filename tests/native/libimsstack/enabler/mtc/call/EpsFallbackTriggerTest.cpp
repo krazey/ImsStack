@@ -230,6 +230,9 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIf
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))
             .Times(1);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+    EXPECT_TRUE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
+    pEpsFbTrigger->OnEpsFallbackCompleted();
+    EXPECT_FALSE(pEpsFbTrigger->IsWaitingEpsFallbackForNoTrigger());
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackSetsTimerAndTriggersEpsFallback)
