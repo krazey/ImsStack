@@ -22,6 +22,7 @@ import android.net.InetAddresses;
 import android.os.Parcel;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AmrParams;
 import android.telephony.imsmedia.AudioConfig;
@@ -91,13 +92,14 @@ public class MediaTestUtils {
     private static final byte BYTE_DATA = 10;
 
     // MediaQualityThreshold
-    private static final int[] RTP_TIMEOUT = { 10000, 20000 };
-    private static final int RTCP_TIMEOUT = 20000;
-    private static final int RTP_HYSTERESIS_TIME = 3000;
-    private static final int PACKET_LOSS_DURATION = 30000;
-    private static final int[] PACKET_LOSS_RATE = { 10, 30 };
-    private static final int[] JITTER_THRESHOLD = { 100, 200 };
-    private static final boolean NOTIFY_STATUS = false;
+    public static final int[] RTP_TIMEOUT = { 10000, 20000 };
+    public static final int RTCP_TIMEOUT = 20000;
+    public static final int RTP_HYSTERESIS_TIME = 3000;
+    public static final int PACKET_LOSS_DURATION = 3000;
+    public static final int[] PACKET_LOSS_RATE = { 10, 30 };
+    public static final int[] JITTER_THRESHOLD = { 100, 200 };
+    public static final boolean NOTIFY_STATUS = false;
+    public static final long[] RTP_TIMEOUT_LONG = { 5000, 15000 };
 
     //Media Quality Status
     private static final int RTP_INACTIVITY_TIME = 10000;
@@ -227,6 +229,14 @@ public class MediaTestUtils {
                 .setRtpJitterMillis(JITTER_THRESHOLD)
                 .setNotifyCurrentStatus(NOTIFY_STATUS)
                 .build();
+    }
+
+    static MediaThreshold createMediaThreshold() {
+        return new MediaThreshold.Builder()
+            .setThresholdsRtpInactivityTimeMillis(RTP_TIMEOUT_LONG)
+            .setThresholdsRtpPacketLossRate(PACKET_LOSS_RATE)
+            .setThresholdsRtpJitterMillis(JITTER_THRESHOLD)
+            .build();
     }
 
     static MediaQualityStatus createMediaQualityStatus() {

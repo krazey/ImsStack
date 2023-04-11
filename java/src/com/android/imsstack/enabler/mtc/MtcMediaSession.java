@@ -17,7 +17,11 @@
 package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.view.Surface;
 
@@ -25,6 +29,8 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
+import com.android.imsstack.internal.imsservice.MmTelMediaQualityReporter;
+import com.android.imsstack.internal.imsservice.MmTelMediaRegistry;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Iterator;
@@ -168,6 +174,18 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
+     * A class to implement Listener interface for Media Threshold callback
+     */
+    private class MediaThresholdListener implements MmTelMediaRegistry.Listener {
+        @Override
+        public void onMediaThresholdChanged(
+                @MediaQualityStatus.MediaSessionType int mediaSessionType,
+                MediaThreshold mediaThreshold) {
+            notifyMediaThresholdChanged(mediaSessionType, mediaThreshold);
+        }
+    }
+
+    /**
      * This surface variables will be accessed by the native layer.
      * It just grabs the object to be enable to access the surface.
      */
@@ -186,12 +204,17 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private boolean mIsVideoSessionOpened = false;
     private boolean mIsPendingSelectCamera = false;
     private int mCamera = -1;
+    private boolean mIsAudioSessionOpened = false;
+    private MmTelMediaQualityReporter mMediaQualityReporter = null;
+    private MmTelMediaRegistry.Listener mMediaThresholdListener = null;
 
     public MtcMediaSession(IBaseContext context, Call call) {
         mCall = call;
         mMediaSession = MediaFactory.createMediaSession(context, this);
         mIsVideoSessionOpened = false;
         mIsPendingSelectCamera = false;
+        mIsAudioSessionOpened = false;
+        mMediaThresholdListener = new MediaThresholdListener();
     }
 
     public void dispose() {
@@ -207,6 +230,11 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             mTextListener = null;
             mMediaListener = null;
             mMediaInfoEvent = null;
+            if (mMediaQualityReporter != null && mIsAudioSessionOpened) {
+                mMediaQualityReporter.getMediaRegistry().removeListener(mMediaThresholdListener);
+            }
+            mMediaQualityReporter = null;
+            mMediaThresholdListener = null;
         }
     }
 
@@ -338,17 +366,31 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
+    /**
+     * Notified when audio session is opened
+     */
     @Override
     public void audioSessionOpened() {
         log("audioSessionOpened");
+        mIsAudioSessionOpened = true;
+        if (mMediaQualityReporter != null) {
+            mMediaQualityReporter.getMediaRegistry().addListener(mMediaThresholdListener);
+        }
         if (mAudioListener != null) {
             mAudioListener.onAudioSessionOpened();
         }
     }
 
+    /**
+     * Notified when audio session is closed
+     */
     @Override
     public void audioSessionClosed() {
         log("audioSessionClosed");
+        mIsAudioSessionOpened = false;
+        if (mMediaQualityReporter != null) {
+            mMediaQualityReporter.getMediaRegistry().removeListener(mMediaThresholdListener);
+        }
         if (mAudioListener != null) {
             mAudioListener.onAudioSessionClosed();
         }
@@ -366,6 +408,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      * Notifies when the remote party has sent RTP header extension data
      * @param extensions the RTP header extension data
      */
+    @Override
     public void rtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
         log("rtpHeaderExtensionsReceived");
         if (mAudioListener != null) {
@@ -373,6 +416,9 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
+    /**
+     * Notified when video session is opened
+     */
     @Override
     public void videoSessionOpened() {
         log("videoSessionOpened");
@@ -383,6 +429,44 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             parcel.writeInt(mCamera);
             sendRequest(parcel);
             mIsPendingSelectCamera = false;
+        }
+    }
+
+    /**
+     * Get the media threshold information for specific session type.
+     *
+     * @param mediaSessionType media session type for this Threshold info.
+     * @return MediaThreshold media threshold information
+     */
+    @Override
+    public MediaThreshold getMediaThreshold(int mediaSessionType) {
+        if (mMediaQualityReporter != null) {
+            return mMediaQualityReporter.getMediaRegistry().getMediaThreshold(
+                    convertToQualityStatusType(mediaSessionType));
+        }
+        return null;
+    }
+
+    /**
+     * Notified when the media quality status is changed
+     * @param mediaSessionType media session type for this MediaQualityStatus info.
+     * @param accessNetwork Access Network type
+     * @param mediaQualityStatus Defined in android.telephony.ims
+     */
+    @Override
+    public void mediaQualityStatusChanged(int mediaSessionType, int accessNetwork,
+            android.telephony.imsmedia.MediaQualityStatus mediaQualityStatus) {
+        log("mediaQualityStatusChanged: " + mediaQualityStatus.toString());
+        if (mMediaQualityReporter != null
+                && (mediaQualityStatus.getRtpPacketLossRate() != 0
+                || mediaQualityStatus.getRtpJitterMillis() != 0
+                || mediaQualityStatus.getRtpInactivityTimeMillis() != 0)) {
+            mMediaQualityReporter.notifyMediaQualityStatusChanged(
+                    convertToQualityStatusType(mediaSessionType),
+                    convertToTransportType(accessNetwork),
+                    mediaQualityStatus.getRtpPacketLossRate(),
+                    mediaQualityStatus.getRtpJitterMillis(),
+                    mediaQualityStatus.getRtpInactivityTimeMillis());
         }
     }
 
@@ -566,6 +650,86 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
 
         MtcJniProxy.getInstance().sendDataToNative(sessionId, parcel);
+    }
+
+    /**
+     * converts MediaQualityStatus Session type ({@link #MEDIA_SESSION_TYPE_AUDIO}
+     * or {@link #MEDIA_SESSION_TYPE_VIDEO}) to Media Session type.
+     *
+     * @param mediaSessionType MediaQualityStatus Session type for which
+     *        the media quality threshold is set.
+     * @return Media Session Type int.
+     */
+    private int convertToMediaSessionType(
+            @MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        switch (mediaSessionType) {
+            case MediaQualityStatus.MEDIA_SESSION_TYPE_VIDEO:
+                return IUMtcMedia.SESSION_TYPE_VIDEO;
+            case MediaQualityStatus.MEDIA_SESSION_TYPE_AUDIO:   // FALL-THROUGH
+            default:
+                return IUMtcMedia.SESSION_TYPE_AUDIO;
+        }
+    }
+
+    /**
+     * converts Media Session type ({@link #SESSION_TYPE_AUDIO}
+     * or {@link #SESSION_TYPE_VIDEO}) to MediaQualityStatus Session type.
+     *
+     * @param mediaSessionType Media Session type for which the media quality threshold is set.
+     * @return MediaQualityStatus Session Type int.
+     */
+    private int convertToQualityStatusType(int mediaSessionType) {
+        switch (mediaSessionType) {
+            case IUMtcMedia.SESSION_TYPE_VIDEO:
+                return MediaQualityStatus.MEDIA_SESSION_TYPE_VIDEO;
+            case IUMtcMedia.SESSION_TYPE_AUDIO:   // FALL-THROUGH
+            default:
+                return MediaQualityStatus.MEDIA_SESSION_TYPE_AUDIO;
+        }
+    }
+
+    private int convertToTransportType(int accessNetwork) {
+        switch (accessNetwork) {
+            case AccessNetworkType.EUTRAN:
+                return AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+            case AccessNetworkType.IWLAN:
+                return AccessNetworkConstants.TRANSPORT_TYPE_WLAN;
+            default:
+                return AccessNetworkConstants.TRANSPORT_TYPE_INVALID;
+        }
+    }
+
+    /**
+     * Called by ImsCallManager when ImsCallSessionImpl is created.
+     * Adds the listener to monitor the {@link MediaThreshold} value change.
+     *
+     * @param mediaQualityReporter MmTelMediaQualityReporter object.
+     */
+    public void setMediaQualityReporter(MmTelMediaQualityReporter mediaQualityReporter) {
+        synchronized (mLock) {
+            log("setMediaQualityReporter");
+            mMediaQualityReporter = mediaQualityReporter;
+        }
+    }
+
+    /**
+     * Notify Media Session that the {@link MediaThreshold} is changed.
+     *
+     * @param mediaSessionType media session type for this threshold info
+     * @param mediaThreshold media threshold information
+     */
+    void notifyMediaThresholdChanged(int mediaSessionType, MediaThreshold mediaThreshold) {
+        log("notifyMediaThresholdChanged");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.SET_QNS_MEDIA_THRESHOLD);
+        parcel.writeInt(convertToMediaSessionType(mediaSessionType));
+        if (mediaThreshold != null) {
+            mediaThreshold.writeToParcel(parcel, 0);
+        }
+        parcel.setDataPosition(0);
+
+        onMessage(parcel);
     }
 
     private static void log(String s) {

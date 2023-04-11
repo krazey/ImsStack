@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
@@ -174,7 +175,8 @@ public class AudioSessionCallbackHandlerTest {
         testParcel.writeInt(qualityStatus.getRtpInactivityTimeMillis());
         testParcel.writeInt(qualityStatus.getRtcpInactivityTimeMillis());
 
-        mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(qualityStatus);
+        mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(AccessNetworkType.EUTRAN,
+                qualityStatus);
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());

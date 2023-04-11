@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
@@ -154,16 +155,31 @@ public class AudioSessionCallbackHandler {
      *
      * @param qualityStatus The object of MediaQualityStatus with the rtp and the rtcp statistics.
      */
-    public void onNotifyMediaQualityStatus(MediaQualityStatus qualityStatus) {
+    public void onNotifyMediaQualityStatus(int accessNetwork, MediaQualityStatus qualityStatus) {
         ImsLog.v("onNotifyMediaQualityStatus");
 
+        // Send Rtp/Rtcp Inactivity information to native
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_INACTIVITY);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(qualityStatus.getRtpInactivityTimeMillis());
         parcel.writeInt(qualityStatus.getRtcpInactivityTimeMillis());
-
         getMtcMediaInterface().sendRequest(parcel);
+
+        // Send MediaQualityStatus to frameworks
+        getMtcMediaInterface().mediaQualityStatusChanged(ImsMediaSession.SESSION_TYPE_AUDIO,
+                accessNetwork, qualityStatus);
+    }
+
+    /**
+     * Get the media threshold information for specific session type
+     * @param mediaSessionType media session type for this Threshold info.
+     * @return MediaThreshold media threshold information
+     */
+    public MediaThreshold getMediaThreshold(int mediaSessionType) {
+        ImsLog.v("getMediaThreshold for sessionType[" + mediaSessionType + "]");
+
+        return getMtcMediaInterface().getMediaThreshold(mediaSessionType);
     }
 
     /**

@@ -18,7 +18,9 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.MediaQualityStatus;
 
 import com.android.imsstack.enabler.media.IMediaListener;
 
@@ -55,7 +57,7 @@ public interface IMtcMediaInterface {
     void audioSessionClosed();
 
     /**
-     * Notified when the call qualtiy changed
+     * Notified when the call quality changed
      * @param callQuality Defined in android.telephony.CallQuality
      */
     void callQualityChanged(CallQuality callQuality);
@@ -70,4 +72,21 @@ public interface IMtcMediaInterface {
      * Notified when the video session opened
      */
     void videoSessionOpened();
+
+    /**
+     * Get the media threshold information for specific session type
+     * @param mediaSessionType media session type for this Threshold info.
+     * @return MediaThreshold media threshold information
+     */
+    MediaThreshold getMediaThreshold(int mediaSessionType);
+
+    /**
+     * Notified when the media quality status change
+     * @param mediaSessionType media session type for this MediaQualityStatus info.
+     * @param accessNetwork Access Network type
+     * @param mediaQualityStatus Defined in android.telephony.ims
+     */
+    void mediaQualityStatusChanged(int mediaSessionType, int accessNetwork,
+            MediaQualityStatus mediaQualityStatus);
+
 }
