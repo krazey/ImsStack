@@ -16,10 +16,11 @@
 
 package com.android.imsstack.test;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,8 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
@@ -48,6 +51,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -69,6 +74,8 @@ public class ImsTestHelperTest extends ImsStackTest {
     @Mock private ImsCallApp mCallApp;
     private ImsTestHelper mImsTestHelper;
     private SystemInterface mMockSystemInterface;
+
+    @Captor ArgumentCaptor<CapabilityPairs> mChangeCapabilitiesCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -100,10 +107,29 @@ public class ImsTestHelperTest extends ImsStackTest {
         intent.setAction(INTENT_AOS_TEST);
         intent.putExtra("event", "capa");
         intent.putExtra("network", "LTE,NR,IWLAN,UTRAN");
-        intent.putExtra("video", "0,0,1,2,1");
-        intent.putExtra("voice", "0,0,1,2,1");
+        intent.putExtra("video", "1,1,1,0");
+        intent.putExtra("voice", "1,1,1,0");
+        intent.putExtra("call_composer", "1,1,0,0");
         mImsTestHelperReceiver.onReceive(mContext, intent);
-        verify(mMockAosService).changeCapabilities(any());
+        verify(mMockAosService).changeCapabilities(mChangeCapabilitiesCaptor.capture());
+
+        CapabilityPairs capturedCapabilityPairs = mChangeCapabilitiesCaptor.getValue();
+        CapabilityPairs expectedCapabilityPairs = new CapabilityPairs();
+        expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.VOICE
+                | IAosRegistrationListener.Capability.VIDEO
+                | IAosRegistrationListener.Capability.CALL_COMPOSER);
+        expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.Capability.VOICE
+                | IAosRegistrationListener.Capability.VIDEO
+                | IAosRegistrationListener.Capability.CALL_COMPOSER);
+        expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.VOICE
+                | IAosRegistrationListener.Capability.VIDEO);
+        expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.UTRAN,
+                IAosRegistrationListener.Capability.NONE);
+
+        assertThat(capturedCapabilityPairs).isEqualTo(expectedCapabilityPairs);
     }
 
     @Test

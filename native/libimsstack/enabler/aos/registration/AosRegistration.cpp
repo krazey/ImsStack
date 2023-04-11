@@ -1933,6 +1933,13 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddFeatureTagForMtc(
     {
         m_piRegContact->AddExtraCapability(AosString::STR_USSI_FEATURE, AString::ConstNull());
     }
+
+    if (((nRegFeatures & ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY) > 0) && !bFinalFeatureTag)
+    {
+        m_piRegContact->AddExtraCapability(
+                FeatureTags::CALL_COMPOSER_VIA_TELEPHONY, AString::ConstNull());
+    }
+
     if ((nRegFeatures & ImsAosFeature::VERSTAT) > 0)
     {
         m_piRegContact->AddHeaderParameter(AosString::STR_VERSTAT_FEATURE);
@@ -1996,6 +2003,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::RemoveFeatureTagForMtc(IN IMS_UINT32
     if ((nRegFeatures & ImsAosFeature::USSI) > 0)
     {
         m_piRegContact->RemoveExtraCapability(AosString::STR_USSI_FEATURE, AString::ConstNull());
+    }
+    if ((nRegFeatures & ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY) > 0)
+    {
+        m_piRegContact->RemoveExtraCapability(
+                FeatureTags::CALL_COMPOSER_VIA_TELEPHONY, AString::ConstNull());
     }
     if ((nRegFeatures & ImsAosFeature::VERSTAT) > 0)
     {
