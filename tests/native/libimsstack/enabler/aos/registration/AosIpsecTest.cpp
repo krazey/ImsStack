@@ -28,41 +28,41 @@ const IMS_SINT32 SLOT_ID = 0;
 class AosIpsecTest : public ::testing::Test
 {
 public:
-    AosIpsec* pAosIpsec;
+    AosIpsec* m_pAosIpsec;
 
     MockIAosIpsecListener objIAosIpsecListener;
 
 protected:
     virtual void SetUp() override
     {
-        pAosIpsec = new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
-        ASSERT_TRUE(pAosIpsec != nullptr);
+        m_pAosIpsec = new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+        ASSERT_TRUE(m_pAosIpsec != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (pAosIpsec)
+        if (m_pAosIpsec)
         {
-            delete pAosIpsec;
+            delete m_pAosIpsec;
         }
     }
 
-    void SetIIpsecPolicy(IN IIpSecPolicy* piPolicy) { pAosIpsec->m_piPolicy = piPolicy; }
+    void SetIIpsecPolicy(IN IIpSecPolicy* piPolicy) { m_pAosIpsec->m_piPolicy = piPolicy; }
 
-    IIpSecPolicy* GetIpsecPolicy() { return pAosIpsec->m_piPolicy; }
+    IIpSecPolicy* GetIpsecPolicy() { return m_pAosIpsec->m_piPolicy; }
 
     void SetIgnorePolicyExpired(IN IMS_BOOL bIgnorePolicyExpired)
     {
-        pAosIpsec->m_bIgnorePolicyExpired = bIgnorePolicyExpired;
+        m_pAosIpsec->m_bIgnorePolicyExpired = bIgnorePolicyExpired;
     }
 
-    IMS_UINT32 GetSecurityProtocol() { return pAosIpsec->m_nSecuProto; }
+    IMS_UINT32 GetSecurityProtocol() { return m_pAosIpsec->m_nSecuProto; }
 
-    IMS_UINT32 GetEncryptionlgorithm() { return pAosIpsec->m_nEncrAlgo; }
+    IMS_UINT32 GetEncryptionlgorithm() { return m_pAosIpsec->m_nEncrAlgo; }
 
-    void CreateSpforTcp(IN IMS_UINT32 nType) { pAosIpsec->CreateSpforTcp(nType); }
+    void CreateSpforTcp(IN IMS_UINT32 nType) { m_pAosIpsec->CreateSpforTcp(nType); }
 
-    void CreateSa(IN IMS_UINT32 nType) { pAosIpsec->CreateSa(nType); }
+    void CreateSa(IN IMS_UINT32 nType) { m_pAosIpsec->CreateSa(nType); }
 };
 
 TEST_F(AosIpsecTest, IpSecPolicy_OnSecurityAssociationExpired)
@@ -71,10 +71,10 @@ TEST_F(AosIpsecTest, IpSecPolicy_OnSecurityAssociationExpired)
     MockIIpSecPolicy objMockIIpsecPolicy;
     SetIIpsecPolicy(static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
 
-    pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(IMS_NULL);
+    m_pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(IMS_NULL);
 
     SetIgnorePolicyExpired(IMS_TRUE);
-    pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(
+    m_pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(
             static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
 
     SetIIpsecPolicy(origpiPolicy);
@@ -82,19 +82,19 @@ TEST_F(AosIpsecTest, IpSecPolicy_OnSecurityAssociationExpired)
     // Hold the below due to " delete this."
     // SetIgnorePolicyExpired(IMS_FALSE);
     // EXPECT_CALL(objIAosIpsecListener, IPSecPolicyExpired())
-    // pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(
+    // m_pAosIpsec->IpSecPolicy_OnSecurityAssociationExpired(
     //        static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
 }
 
 TEST_F(AosIpsecTest, CreateUePort)
 {
-    EXPECT_GE(39000, pAosIpsec->CreateUePort());
-    EXPECT_LE(38001, pAosIpsec->CreateUePort());
+    EXPECT_GE(39000, m_pAosIpsec->CreateUePort());
+    EXPECT_LE(38001, m_pAosIpsec->CreateUePort());
 }
 
 TEST_F(AosIpsecTest, CreateUeSpi)
 {
-    EXPECT_LE(1000000000, pAosIpsec->CreateUeSpi());
+    EXPECT_LE(1000000000, m_pAosIpsec->CreateUeSpi());
 }
 
 TEST_F(AosIpsecTest, AddPolicy)
@@ -103,44 +103,44 @@ TEST_F(AosIpsecTest, AddPolicy)
     IIpSecPolicy* origpiPolicy = GetIpsecPolicy();
     SetIIpsecPolicy(IMS_NULL);
 
-    EXPECT_FALSE(pAosIpsec->AddPolicy());
+    EXPECT_FALSE(m_pAosIpsec->AddPolicy());
     SetIIpsecPolicy(origpiPolicy);
 }
 
 TEST_F(AosIpsecTest, SetSecurityAlgorithm)
 {
-    pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_AH,
+    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_AH,
             SipSecurityHeader::ALG_HMAC_MD5_96, SipSecurityHeader::EALG_DES_EDE3_CBC);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_AH);
-    EXPECT_EQ(pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_MD5_96);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_MD5_96);
     EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_DES_EDE3_CBC);
 
-    pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_AES_CBC);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
     EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_AES_CBC);
 
-    pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_NULL);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
     EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_NULL);
 
-    pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_UNSPECIFIED);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
     EXPECT_EQ(GetEncryptionlgorithm(), IpSecType::ENCRYPTION_ALGORITHM_NO);
 }
 
 TEST_F(AosIpsecTest, SetPcscfPortsAndSpis)
 {
-    pAosIpsec->SetPcscfPortsAndSpis(38002, 39002, 12345678, 87654321);
-    EXPECT_EQ(pAosIpsec->GetPcscfPort(AosIpsec::TYPE_CLIENT), 38002);
-    EXPECT_EQ(pAosIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER), 39002);
-    EXPECT_EQ(pAosIpsec->GetPcscfSpi(AosIpsec::TYPE_CLIENT), 12345678);
-    EXPECT_EQ(pAosIpsec->GetPcscfSpi(AosIpsec::TYPE_SERVER), 87654321);
+    m_pAosIpsec->SetPcscfPortsAndSpis(38002, 39002, 12345678, 87654321);
+    EXPECT_EQ(m_pAosIpsec->GetPcscfPort(AosIpsec::TYPE_CLIENT), 38002);
+    EXPECT_EQ(m_pAosIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER), 39002);
+    EXPECT_EQ(m_pAosIpsec->GetPcscfSpi(AosIpsec::TYPE_CLIENT), 12345678);
+    EXPECT_EQ(m_pAosIpsec->GetPcscfSpi(AosIpsec::TYPE_SERVER), 87654321);
 }
 
 TEST_F(AosIpsecTest, GetPolicy)
@@ -149,10 +149,10 @@ TEST_F(AosIpsecTest, GetPolicy)
     MockIIpSecPolicy objMockIIpsecPolicy;
     SetIIpsecPolicy(IMS_NULL);
 
-    EXPECT_EQ(IMS_NULL, pAosIpsec->GetPolicy());
+    EXPECT_EQ(IMS_NULL, m_pAosIpsec->GetPolicy());
 
     SetIIpsecPolicy(static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
-    EXPECT_EQ(static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy), pAosIpsec->GetPolicy());
+    EXPECT_EQ(static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy), m_pAosIpsec->GetPolicy());
 
     SetIIpsecPolicy(origpiPolicy);
 }

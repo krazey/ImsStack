@@ -44,21 +44,21 @@ const IMS_SINT32 SLOT_ID = 0;
 class AosIpsecHelperTest : public ::testing::Test
 {
 public:
-    AosIpsecHelper* pAosIpsecHelper;
+    AosIpsecHelper* m_pAosIpsecHelper;
 
-    MockIRegContact objMockIRegContact;
-    MockIRegParameter objMockIRegParameter;
-    AosStaticProfile* pAosStaticProfile;
-    MockAosAppContext* pMockAosAppContext;
+    MockIRegContact m_objMockIRegContact;
+    MockIRegParameter m_objMockIRegParameter;
+    AosStaticProfile* m_pAosStaticProfile;
+    MockAosAppContext* m_pMockAosAppContext;
     AString* pRegId;
 
-    IAosNConfiguration* pOriginAosNConfiguration;
-    MockIAosNConfiguration objMockAosConfig;
+    IAosNConfiguration* m_pOriginAosNConfiguration;
+    MockIAosNConfiguration m_objMockAosConfig;
 
-    MockIAosIpsecListener objIAosIpsecListener;
-    AosIpsec* pAosOldIpsec;
-    AosIpsec* pAosCurrIpsec;
-    AosIpsec* pAosNewIpsec;
+    MockIAosIpsecListener m_objIAosIpsecListener;
+    AosIpsec* m_pAosOldIpsec;
+    AosIpsec* m_pAosCurrIpsec;
+    AosIpsec* m_pAosNewIpsec;
 
     const AString strRegId = "aos_normal_reg";
     const AString ADDRESS1 = "sip:1234@ims.google.com:5060";
@@ -88,64 +88,64 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pAosStaticProfile = new AosStaticProfile();
-        pMockAosAppContext = new MockAosAppContext(pAosStaticProfile);
-        EXPECT_CALL(*pMockAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
+        m_pAosStaticProfile = new AosStaticProfile();
+        m_pMockAosAppContext = new MockAosAppContext(m_pAosStaticProfile);
+        EXPECT_CALL(*m_pMockAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
 
         pRegId = new AString(strRegId);
 
-        pAosIpsecHelper = new AosIpsecHelper(static_cast<IRegContact*>(&objMockIRegContact),
-                static_cast<IRegParameter*>(&objMockIRegParameter),
-                static_cast<IAosAppContext*>(pMockAosAppContext), *pRegId);
-        ASSERT_TRUE(pAosIpsecHelper != nullptr);
-        pAosIpsecHelper->InitIpsec();
+        m_pAosIpsecHelper = new AosIpsecHelper(static_cast<IRegContact*>(&m_objMockIRegContact),
+                static_cast<IRegParameter*>(&m_objMockIRegParameter),
+                static_cast<IAosAppContext*>(m_pMockAosAppContext), *pRegId);
+        ASSERT_TRUE(m_pAosIpsecHelper != nullptr);
+        m_pAosIpsecHelper->InitIpsec();
 
-        pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        m_pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
+                static_cast<IAosNConfiguration*>(&m_objMockAosConfig), SLOT_ID);
 
-        pAosOldIpsec =
-                new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
-        pAosCurrIpsec =
-                new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
-        pAosNewIpsec =
-                new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+        m_pAosOldIpsec =
+                new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
+        m_pAosCurrIpsec =
+                new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
+        m_pAosNewIpsec =
+                new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     }
 
     virtual void TearDown() override
     {
-        AosProvider::GetInstance()->SetNConfiguration(pOriginAosNConfiguration, SLOT_ID);
+        AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
 
         SetIpsec(OLD_IPSEC, IMS_NULL);
         SetIpsec(CURR_IPSEC, IMS_NULL);
         SetIpsec(NEW_IPSEC, IMS_NULL);
 
-        if (pAosOldIpsec)
+        if (m_pAosOldIpsec)
         {
-            delete pAosOldIpsec;
+            delete m_pAosOldIpsec;
         }
-        if (pAosCurrIpsec)
+        if (m_pAosCurrIpsec)
         {
-            delete pAosCurrIpsec;
+            delete m_pAosCurrIpsec;
         }
-        if (pAosNewIpsec)
+        if (m_pAosNewIpsec)
         {
-            delete pAosNewIpsec;
-        }
-
-        if (pAosIpsecHelper)
-        {
-            delete pAosIpsecHelper;
+            delete m_pAosNewIpsec;
         }
 
-        if (pMockAosAppContext)
+        if (m_pAosIpsecHelper)
         {
-            delete pMockAosAppContext;
+            delete m_pAosIpsecHelper;
         }
 
-        if (pAosStaticProfile)
+        if (m_pMockAosAppContext)
         {
-            delete pAosStaticProfile;
+            delete m_pMockAosAppContext;
+        }
+
+        if (m_pAosStaticProfile)
+        {
+            delete m_pAosStaticProfile;
         }
 
         if (pRegId)
@@ -156,17 +156,17 @@ protected:
 
     void SetRegContact(IN IRegContact* piRegContact)
     {
-        pAosIpsecHelper->m_piRegContact = piRegContact;
+        m_pAosIpsecHelper->m_piRegContact = piRegContact;
     }
 
     void SetRegParameter(IN IRegParameter* piRegParameter)
     {
-        pAosIpsecHelper->m_piRegParameter = piRegParameter;
+        m_pAosIpsecHelper->m_piRegParameter = piRegParameter;
     }
 
     void CallIPSecPolicyExpired(IN AosIpsec* pAosIpsec)
     {
-        pAosIpsecHelper->IPSecPolicyExpired(pAosIpsec);
+        m_pAosIpsecHelper->IPSecPolicyExpired(pAosIpsec);
     }
 
     void SetUeIpsecInfo(IN IMS_SINT32 nUeInfo, IN IMS_SINT32 nWhere, IN IMS_UINT32 nValue)
@@ -175,22 +175,22 @@ protected:
         {
             if (nWhere == TYPE_CLIENT)
             {
-                pAosIpsecHelper->m_pUeIpsecInfo->nSpiC = nValue;
+                m_pAosIpsecHelper->m_pUeIpsecInfo->nSpiC = nValue;
             }
             else
             {
-                pAosIpsecHelper->m_pUeIpsecInfo->nSpiS = nValue;
+                m_pAosIpsecHelper->m_pUeIpsecInfo->nSpiS = nValue;
             }
         }
         else
         {
             if (nWhere == TYPE_CLIENT)
             {
-                pAosIpsecHelper->m_pUeIpsecInfo->nPortC = nValue;
+                m_pAosIpsecHelper->m_pUeIpsecInfo->nPortC = nValue;
             }
             else
             {
-                pAosIpsecHelper->m_pUeIpsecInfo->nPortS = nValue;
+                m_pAosIpsecHelper->m_pUeIpsecInfo->nPortS = nValue;
             }
         }
     }
@@ -199,15 +199,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            pAosIpsecHelper->m_pNewIpsec = pAosIpsec;
+            m_pAosIpsecHelper->m_pNewIpsec = pAosIpsec;
         }
         else if (nType == CURR_IPSEC)
         {
-            pAosIpsecHelper->m_pCurrIpsec = pAosIpsec;
+            m_pAosIpsecHelper->m_pCurrIpsec = pAosIpsec;
         }
         else  // OLD_IPSEC
         {
-            pAosIpsecHelper->m_pOldIpsec = pAosIpsec;
+            m_pAosIpsecHelper->m_pOldIpsec = pAosIpsec;
         }
     }
 
@@ -215,15 +215,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            return pAosIpsecHelper->m_pNewIpsec;
+            return m_pAosIpsecHelper->m_pNewIpsec;
         }
         else if (nType == CURR_IPSEC)
         {
-            return pAosIpsecHelper->m_pCurrIpsec;
+            return m_pAosIpsecHelper->m_pCurrIpsec;
         }
         else  // OLD_IPSEC
         {
-            return pAosIpsecHelper->m_pOldIpsec;
+            return m_pAosIpsecHelper->m_pOldIpsec;
         }
     }
 
@@ -233,33 +233,33 @@ protected:
         {
             if (bSaEstablished)
             {
-                pAosIpsecHelper->m_pNewIpsec->SetSaEstablished();
+                m_pAosIpsecHelper->m_pNewIpsec->SetSaEstablished();
             }
             else
             {
-                pAosIpsecHelper->m_pNewIpsec->m_bSaEstablished = IMS_FALSE;
+                m_pAosIpsecHelper->m_pNewIpsec->m_bSaEstablished = IMS_FALSE;
             }
         }
         else if (nType == CURR_IPSEC)
         {
             if (bSaEstablished)
             {
-                pAosIpsecHelper->m_pCurrIpsec->SetSaEstablished();
+                m_pAosIpsecHelper->m_pCurrIpsec->SetSaEstablished();
             }
             else
             {
-                pAosIpsecHelper->m_pCurrIpsec->m_bSaEstablished = IMS_FALSE;
+                m_pAosIpsecHelper->m_pCurrIpsec->m_bSaEstablished = IMS_FALSE;
             }
         }
         else
         {
             if (bSaEstablished)
             {
-                pAosIpsecHelper->m_pOldIpsec->SetSaEstablished();
+                m_pAosIpsecHelper->m_pOldIpsec->SetSaEstablished();
             }
             else
             {
-                pAosIpsecHelper->m_pOldIpsec->m_bSaEstablished = IMS_FALSE;
+                m_pAosIpsecHelper->m_pOldIpsec->m_bSaEstablished = IMS_FALSE;
             }
         }
     }
@@ -268,15 +268,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            return pAosIpsecHelper->m_pNewIpsec->m_piPolicy;
+            return m_pAosIpsecHelper->m_pNewIpsec->m_piPolicy;
         }
         else if (nType == CURR_IPSEC)
         {
-            return pAosIpsecHelper->m_pCurrIpsec->m_piPolicy;
+            return m_pAosIpsecHelper->m_pCurrIpsec->m_piPolicy;
         }
         else
         {
-            return pAosIpsecHelper->m_pOldIpsec->m_piPolicy;
+            return m_pAosIpsecHelper->m_pOldIpsec->m_piPolicy;
         }
     }
 
@@ -284,15 +284,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            pAosIpsecHelper->m_pNewIpsec->m_piPolicy = piPolicy;
+            m_pAosIpsecHelper->m_pNewIpsec->m_piPolicy = piPolicy;
         }
         else if (nType == CURR_IPSEC)
         {
-            pAosIpsecHelper->m_pCurrIpsec->m_piPolicy = piPolicy;
+            m_pAosIpsecHelper->m_pCurrIpsec->m_piPolicy = piPolicy;
         }
         else
         {
-            pAosIpsecHelper->m_pOldIpsec->m_piPolicy = piPolicy;
+            m_pAosIpsecHelper->m_pOldIpsec->m_piPolicy = piPolicy;
         }
     }
 
@@ -300,15 +300,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            return pAosIpsecHelper->m_pNewIpsec->m_piNetIpsec;
+            return m_pAosIpsecHelper->m_pNewIpsec->m_piNetIpsec;
         }
         else if (nType == CURR_IPSEC)
         {
-            return pAosIpsecHelper->m_pCurrIpsec->m_piNetIpsec;
+            return m_pAosIpsecHelper->m_pCurrIpsec->m_piNetIpsec;
         }
         else
         {
-            return pAosIpsecHelper->m_pOldIpsec->m_piNetIpsec;
+            return m_pAosIpsecHelper->m_pOldIpsec->m_piNetIpsec;
         }
     }
 
@@ -316,15 +316,15 @@ protected:
     {
         if (nType == NEW_IPSEC)
         {
-            pAosIpsecHelper->m_pNewIpsec->m_piNetIpsec = piNetIpsec;
+            m_pAosIpsecHelper->m_pNewIpsec->m_piNetIpsec = piNetIpsec;
         }
         else if (nType == CURR_IPSEC)
         {
-            pAosIpsecHelper->m_pCurrIpsec->m_piNetIpsec = piNetIpsec;
+            m_pAosIpsecHelper->m_pCurrIpsec->m_piNetIpsec = piNetIpsec;
         }
         else  // OLD_IPSEC
         {
-            pAosIpsecHelper->m_pOldIpsec->m_piNetIpsec = piNetIpsec;
+            m_pAosIpsecHelper->m_pOldIpsec->m_piNetIpsec = piNetIpsec;
         }
     }
 
@@ -337,22 +337,22 @@ protected:
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nPortC = nValue;
+                    m_pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nPortC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nPortS = nValue;
+                    m_pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nPortS = nValue;
                 }
             }
             else  // SPI
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nSpiC = nValue;
+                    m_pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nSpiC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nSpiS = nValue;
+                    m_pAosIpsecHelper->m_pNewIpsec->m_pPcscfInfo->nSpiS = nValue;
                 }
             }
         }
@@ -362,22 +362,22 @@ protected:
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nPortC = nValue;
+                    m_pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nPortC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nPortS = nValue;
+                    m_pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nPortS = nValue;
                 }
             }
             else  // SPI
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nSpiC = nValue;
+                    m_pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nSpiC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nSpiS = nValue;
+                    m_pAosIpsecHelper->m_pCurrIpsec->m_pPcscfInfo->nSpiS = nValue;
                 }
             }
         }
@@ -387,22 +387,22 @@ protected:
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nPortC = nValue;
+                    m_pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nPortC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nPortS = nValue;
+                    m_pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nPortS = nValue;
                 }
             }
             else  // SPI
             {
                 if (nWhere == TYPE_CLIENT)
                 {
-                    pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nSpiC = nValue;
+                    m_pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nSpiC = nValue;
                 }
                 else  // TYPE_SERVER
                 {
-                    pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nSpiS = nValue;
+                    m_pAosIpsecHelper->m_pOldIpsec->m_pPcscfInfo->nSpiS = nValue;
                 }
             }
         }
@@ -410,51 +410,51 @@ protected:
 
     IMS_BOOL GetCurrentIgnorePolicyExpired()
     {
-        return pAosIpsecHelper->m_pCurrIpsec->m_bIgnorePolicyExpired;
+        return m_pAosIpsecHelper->m_pCurrIpsec->m_bIgnorePolicyExpired;
     }
 
     void DestroyIpsec(IN IMS_SINT32 nType)
     {
         if (nType == NEW_IPSEC)
         {
-            delete pAosIpsecHelper->m_pNewIpsec;
+            delete m_pAosIpsecHelper->m_pNewIpsec;
         }
         else if (nType == CURR_IPSEC)
         {
-            delete pAosIpsecHelper->m_pCurrIpsec;
+            delete m_pAosIpsecHelper->m_pCurrIpsec;
         }
         else
         {
-            delete pAosIpsecHelper->m_pOldIpsec;
+            delete m_pAosIpsecHelper->m_pOldIpsec;
         }
         SetIpsec(nType, IMS_NULL);
     }
 
-    void CallDestroy() { pAosIpsecHelper->Destroy(); }
+    void CallDestroy() { m_pAosIpsecHelper->Destroy(); }
 };
 
 TEST_F(AosIpsecHelperTest, Create)
 {
     SetRegContact(IMS_NULL);
     SetRegParameter(IMS_NULL);
-    EXPECT_FALSE(pAosIpsecHelper->Create(IMS_TRUE));
+    EXPECT_FALSE(m_pAosIpsecHelper->Create(IMS_TRUE));
 
-    SetRegContact(static_cast<IRegContact*>(&objMockIRegContact));
-    SetRegParameter(static_cast<IRegParameter*>(&objMockIRegParameter));
+    SetRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
+    SetRegParameter(static_cast<IRegParameter*>(&m_objMockIRegParameter));
 
     // SetUePortnSpi() - GetValidUePort()
     IpAddress objIpAddr(IPADDR1);
-    EXPECT_CALL(objMockIRegContact, GetIpAddress()).Times(3).WillRepeatedly(ReturnRef(objIpAddr));
+    EXPECT_CALL(m_objMockIRegContact, GetIpAddress()).Times(3).WillRepeatedly(ReturnRef(objIpAddr));
 
-    EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(AnyNumber());
+    EXPECT_CALL(m_objMockIRegContact, SetPort(_)).Times(AnyNumber());
 
     // SetSecurityClientHeader() return IMS_FALSE;
     ImsVector<IMS_SINT32> objAuthenticationAlgs;
     objAuthenticationAlgs.Clear();
-    EXPECT_CALL(objMockAosConfig, GetIpsecAuthenticationAlgorithms())
+    EXPECT_CALL(m_objMockAosConfig, GetIpsecAuthenticationAlgorithms())
             .Times(AnyNumber())
             .WillOnce(ReturnRef(objAuthenticationAlgs));
-    EXPECT_FALSE(pAosIpsecHelper->Create(IMS_TRUE));
+    EXPECT_FALSE(m_pAosIpsecHelper->Create(IMS_TRUE));
     DestroyIpsec(NEW_IPSEC);
 
     // SetSecurityClientHeader() return IMS_TRUE;
@@ -462,7 +462,7 @@ TEST_F(AosIpsecHelperTest, Create)
     objAuthenticationAlgs.Add(0);
     objAuthenticationAlgs.Add(1);
 
-    EXPECT_CALL(objMockAosConfig, GetIpsecAuthenticationAlgorithms())
+    EXPECT_CALL(m_objMockAosConfig, GetIpsecAuthenticationAlgorithms())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objAuthenticationAlgs));
 
@@ -472,30 +472,30 @@ TEST_F(AosIpsecHelperTest, Create)
     objEncryptionAlgs.Add(1);
     objEncryptionAlgs.Add(2);
 
-    EXPECT_CALL(objMockAosConfig, GetIpsecEncryptionAlgorithms())
+    EXPECT_CALL(m_objMockAosConfig, GetIpsecEncryptionAlgorithms())
             .Times(2)
             .WillRepeatedly(ReturnRef(objEncryptionAlgs));
 
-    EXPECT_CALL(objMockIRegParameter, RemoveSecurityClients()).Times(2);
-    EXPECT_CALL(objMockIRegParameter, AddSecurityClient(_)).Times(12);
+    EXPECT_CALL(m_objMockIRegParameter, RemoveSecurityClients()).Times(2);
+    EXPECT_CALL(m_objMockIRegParameter, AddSecurityClient(_)).Times(12);
 
     // SetSecurityServerPortInRegistration()
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInInitRegUsed())
+    EXPECT_CALL(m_objMockAosConfig, IsSecurityServerPortInInitRegUsed())
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIRegParameter, SetPort(_)).Times(2);
+    EXPECT_CALL(m_objMockIRegParameter, SetPort(_)).Times(2);
 
     // SetSecurityServerPortInRegContact - call if bInitial == IMS_TRUE
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
+    EXPECT_CALL(m_objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
     // create m_pNewIpsec
-    EXPECT_TRUE(pAosIpsecHelper->Create(IMS_TRUE));
+    EXPECT_TRUE(m_pAosIpsecHelper->Create(IMS_TRUE));
     DestroyIpsec(NEW_IPSEC);
 
-    EXPECT_TRUE(pAosIpsecHelper->Create(IMS_FALSE));
+    EXPECT_TRUE(m_pAosIpsecHelper->Create(IMS_FALSE));
 
     DestroyIpsec(NEW_IPSEC);
 }
@@ -503,10 +503,10 @@ TEST_F(AosIpsecHelperTest, Create)
 TEST_F(AosIpsecHelperTest, CreateOnChallenging)
 {
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(NEW_IPSEC, pAosTestIpsec);
     AosIpsec* pAosTestIpsec2 =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(OLD_IPSEC, pAosTestIpsec2);
 
     SetIpsec(CURR_IPSEC, IMS_NULL);
@@ -516,7 +516,7 @@ TEST_F(AosIpsecHelperTest, CreateOnChallenging)
     SetUeIpsecInfo(SPI, TYPE_CLIENT, 12345678);
     SetUeIpsecInfo(SPI, TYPE_SERVER, 87654321);
 
-    pAosIpsecHelper->CreateOnChallenging();
+    m_pAosIpsecHelper->CreateOnChallenging();
 
     EXPECT_EQ(GetIpsec(NEW_IPSEC)->GetUePort(AosIpsec::TYPE_CLIENT), 38002);
     EXPECT_EQ(GetIpsec(NEW_IPSEC)->GetUePort(AosIpsec::TYPE_SERVER), 39002);
@@ -529,21 +529,21 @@ TEST_F(AosIpsecHelperTest, CreateOnChallenging)
 TEST_F(AosIpsecHelperTest, IsPcscfServerPortDifferent)
 {
     SetIpsec(NEW_IPSEC, IMS_NULL);
-    EXPECT_FALSE(pAosIpsecHelper->IsPcscfServerPortDifferent());
+    EXPECT_FALSE(m_pAosIpsecHelper->IsPcscfServerPortDifferent());
 
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
     SetIpsec(CURR_IPSEC, IMS_NULL);
-    EXPECT_FALSE(pAosIpsecHelper->IsPcscfServerPortDifferent());
+    EXPECT_FALSE(m_pAosIpsecHelper->IsPcscfServerPortDifferent());
 
-    SetIpsec(CURR_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosCurrIpsec);
 
     SetPcscf(CURR_IPSEC, PORT, TYPE_SERVER, 39002);
     SetPcscf(NEW_IPSEC, PORT, TYPE_SERVER, 39002);
 
-    EXPECT_FALSE(pAosIpsecHelper->IsPcscfServerPortDifferent());
+    EXPECT_FALSE(m_pAosIpsecHelper->IsPcscfServerPortDifferent());
 
     SetPcscf(NEW_IPSEC, PORT, TYPE_SERVER, 39004);
-    EXPECT_TRUE(pAosIpsecHelper->IsPcscfServerPortDifferent());
+    EXPECT_TRUE(m_pAosIpsecHelper->IsPcscfServerPortDifferent());
 }
 
 TEST_F(AosIpsecHelperTest, UpdatePreloadedRoute)
@@ -551,19 +551,19 @@ TEST_F(AosIpsecHelperTest, UpdatePreloadedRoute)
     AString strPcscf = IPADDR1;
 
     SetIpsec(NEW_IPSEC, IMS_NULL);
-    EXPECT_FALSE(pAosIpsecHelper->UpdatePreloadedRoute(strPcscf));
+    EXPECT_FALSE(m_pAosIpsecHelper->UpdatePreloadedRoute(strPcscf));
 
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
     SetPcscf(NEW_IPSEC, PORT, TYPE_SERVER, 39002);
-    EXPECT_CALL(objMockIRegParameter, RemoveAllPreloadedRoutes()).Times(1);
-    EXPECT_CALL(objMockIRegParameter, AddPreloadedRoute(strPcscf, 39002, AString::ConstNull()))
+    EXPECT_CALL(m_objMockIRegParameter, RemoveAllPreloadedRoutes()).Times(1);
+    EXPECT_CALL(m_objMockIRegParameter, AddPreloadedRoute(strPcscf, 39002, AString::ConstNull()))
             .Times(1);
-    EXPECT_TRUE(pAosIpsecHelper->UpdatePreloadedRoute(strPcscf));
+    EXPECT_TRUE(m_pAosIpsecHelper->UpdatePreloadedRoute(strPcscf));
 }
 
 TEST_F(AosIpsecHelperTest, MakeSas)
 {
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
 
     AString strPcscf = IPADDR1;
     IpAddress objIpa(IPADDR2);
@@ -632,11 +632,11 @@ TEST_F(AosIpsecHelperTest, MakeSas)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
-    EXPECT_FALSE(pAosIpsecHelper->MakeSas(strPcscf, objIpa, objIk, objCk));
+    EXPECT_FALSE(m_pAosIpsecHelper->MakeSas(strPcscf, objIpa, objIk, objCk));
 
-    EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(1);
+    EXPECT_CALL(m_objMockIRegContact, SetPort(_)).Times(1);
 
-    EXPECT_TRUE(pAosIpsecHelper->MakeSas(strPcscf, objIpa, objIk, objCk));
+    EXPECT_TRUE(m_pAosIpsecHelper->MakeSas(strPcscf, objIpa, objIk, objCk));
 
     // return to origin variable
     SetIIpsecPolicy(NEW_IPSEC, origpiPolicy);
@@ -648,39 +648,39 @@ TEST_F(AosIpsecHelperTest, ProcessAuthChallenged)
     ImsList<SipSecurityHeader> objSecuServerHs;
     objSecuServerHs.Clear();
 
-    EXPECT_CALL(objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerHs));
+    EXPECT_CALL(m_objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerHs));
 
-    EXPECT_FALSE(pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
+    EXPECT_FALSE(m_pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
 
     // compare to Algorithm
     SipSecurityHeader objSecurityH;
     objSecuServerHs.Append(objSecurityH);
-    EXPECT_CALL(objMockIRegParameter, GetSecurityServers())
+    EXPECT_CALL(m_objMockIRegParameter, GetSecurityServers())
             .WillRepeatedly(ReturnRef(objSecuServerHs));
 
-    EXPECT_FALSE(pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv2_MD5));
+    EXPECT_FALSE(m_pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv2_MD5));
 
     // check bOldSaRemovedOnEstablisingSa
-    EXPECT_CALL(objMockAosConfig, IsOldSaOnEstablishingSaRemoved)
+    EXPECT_CALL(m_objMockAosConfig, IsOldSaOnEstablishingSaRemoved)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_TRUE(pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
+    EXPECT_TRUE(m_pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
 
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(OLD_IPSEC, pAosTestIpsec);
-    EXPECT_TRUE(pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
+    EXPECT_TRUE(m_pAosIpsecHelper->ProcessAuthChallenged(Credential::TYPE_AKAv1_MD5));
 }
 
 TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 {
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(OLD_IPSEC, pAosTestIpsec);
-    SetIpsec(CURR_IPSEC, pAosOldIpsec);
-    SetIpsec(NEW_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosOldIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosCurrIpsec);
 
-    EXPECT_CALL(objMockIRegContact, GetExpires()).Times(3).WillRepeatedly(Return(1200));
+    EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(3).WillRepeatedly(Return(1200));
 
     // ManagePolicyLifetime()
     IIpSecPolicy* origpiPolicy = GetIpsecPolicy(NEW_IPSEC);
@@ -697,12 +697,12 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 
     // CloseUnsecureTCPSocket();
     // bUnsecureTcpSocketDestroyed = IMS_FALSE
-    EXPECT_CALL(objMockAosConfig, IsUnsecureTcpSocketOnAccomplishingRegDestroyed())
+    EXPECT_CALL(m_objMockAosConfig, IsUnsecureTcpSocketOnAccomplishingRegDestroyed())
             .Times(3)
             .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
 
-    pAosIpsecHelper->ProcessRegStarted();
+    m_pAosIpsecHelper->ProcessRegStarted();
 
     // return to origin variable
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
@@ -710,8 +710,8 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 
     // For 2nd ProcessRegStarted()
     SetIpsec(OLD_IPSEC, IMS_NULL);
-    SetIpsec(CURR_IPSEC, pAosOldIpsec);
-    SetIpsec(NEW_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosOldIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosCurrIpsec);
 
     // bUnsecureTcpSocketDestroyed = IMS_TRUE
     MockIAosPcscf objMockIAosPcscf;
@@ -720,17 +720,19 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
-    EXPECT_CALL(*pMockAosAppContext, GetPcscf()).Times(2).WillRepeatedly(Return(&objMockIAosPcscf));
+    EXPECT_CALL(*m_pMockAosAppContext, GetPcscf())
+            .Times(2)
+            .WillRepeatedly(Return(&objMockIAosPcscf));
 
     MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*pMockAosAppContext, GetConnection())
+    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
             .Times(1)
             .WillOnce(Return(&objMockIAosConnection));
 
     IpAddress ipAddr(ADDRESS1);
     EXPECT_CALL(objMockIAosConnection, GetLocalAddress(_)).Times(1).WillOnce(ReturnRef(ipAddr));
 
-    pAosIpsecHelper->ProcessRegStarted();
+    m_pAosIpsecHelper->ProcessRegStarted();
 
     // return to origin variable
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
@@ -738,15 +740,15 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 
     // For 3rd ProcessRegStarted()
     SetIpsec(OLD_IPSEC, IMS_NULL);
-    SetIpsec(CURR_IPSEC, pAosOldIpsec);
-    SetIpsec(NEW_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosOldIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosCurrIpsec);
 
     origpiPolicy = GetIpsecPolicy(NEW_IPSEC);
     SetIIpsecPolicy(NEW_IPSEC, static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
     origpiNetIpsec = GetIpsecNetIpsec(NEW_IPSEC);
     SetIIpsecNetIpsec(NEW_IPSEC, static_cast<INetworkIpSec*>(&objMockINetworkIpsec));
 
-    pAosIpsecHelper->ProcessRegStarted();
+    m_pAosIpsecHelper->ProcessRegStarted();
 
     // return to origin variable
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
@@ -760,24 +762,24 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 TEST_F(AosIpsecHelperTest, ProcessRegUpdated)
 {
     SetIpsec(NEW_IPSEC, IMS_NULL);
-    pAosIpsecHelper->ProcessRegUpdated();
+    m_pAosIpsecHelper->ProcessRegUpdated();
 
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
-    EXPECT_CALL(objMockIRegContact, GetExpires()).Times(1).WillRepeatedly(Return(1200));
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
+    EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(1).WillRepeatedly(Return(1200));
 
     // m_pNewIpsec->IsSaEstablished() == IMS_FALSE
     SetIpsecSaEstablished(NEW_IPSEC, IMS_FALSE);
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(NEW_IPSEC, pAosTestIpsec);
-    SetIpsec(CURR_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosCurrIpsec);
 
     IIpSecPolicy* origpiPolicy = GetIpsecPolicy(CURR_IPSEC);
     MockIIpSecPolicy objMockIIpsecPolicy;
     SetIIpsecPolicy(CURR_IPSEC, static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
     EXPECT_CALL(objMockIIpsecPolicy, ManageLifetime(_)).Times(1);
 
-    pAosIpsecHelper->ProcessRegUpdated();
+    m_pAosIpsecHelper->ProcessRegUpdated();
 
     // return to origin variable
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
@@ -785,13 +787,13 @@ TEST_F(AosIpsecHelperTest, ProcessRegUpdated)
 
 TEST_F(AosIpsecHelperTest, ProcessRegUpdated2)
 {
-    EXPECT_CALL(objMockIRegContact, GetExpires()).Times(1).WillRepeatedly(Return(1200));
+    EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(1).WillRepeatedly(Return(1200));
 
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(OLD_IPSEC, pAosTestIpsec);
-    SetIpsec(CURR_IPSEC, pAosOldIpsec);
-    SetIpsec(NEW_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosOldIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosCurrIpsec);
 
     // m_pNewIpsec->IsSaEstablished() == IMS_TRUE
     SetIpsecSaEstablished(NEW_IPSEC, IMS_TRUE);
@@ -808,7 +810,7 @@ TEST_F(AosIpsecHelperTest, ProcessRegUpdated2)
     SetIIpsecNetIpsec(NEW_IPSEC, static_cast<INetworkIpSec*>(&objMockINetworkIpsec));
     EXPECT_CALL(objMockINetworkIpsec, DumpPolicy(_)).Times(1);
 
-    pAosIpsecHelper->ProcessRegUpdated();
+    m_pAosIpsecHelper->ProcessRegUpdated();
 
     // return to origin variable
     SetIIpsecPolicy(CURR_IPSEC, origpiPolicy);
@@ -820,42 +822,42 @@ TEST_F(AosIpsecHelperTest, IsEstablished)
     SetIpsec(OLD_IPSEC, IMS_NULL);
     SetIpsec(CURR_IPSEC, IMS_NULL);
     SetIpsec(NEW_IPSEC, IMS_NULL);
-    EXPECT_FALSE(pAosIpsecHelper->IsEstablished());
+    EXPECT_FALSE(m_pAosIpsecHelper->IsEstablished());
 
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
     SetIpsecSaEstablished(NEW_IPSEC, IMS_TRUE);
-    EXPECT_TRUE(pAosIpsecHelper->IsEstablished());
+    EXPECT_TRUE(m_pAosIpsecHelper->IsEstablished());
 
-    SetIpsec(CURR_IPSEC, pAosCurrIpsec);
+    SetIpsec(CURR_IPSEC, m_pAosCurrIpsec);
     SetIpsecSaEstablished(CURR_IPSEC, IMS_FALSE);
-    EXPECT_TRUE(pAosIpsecHelper->IsEstablished());
+    EXPECT_TRUE(m_pAosIpsecHelper->IsEstablished());
 
     SetIpsecSaEstablished(CURR_IPSEC, IMS_TRUE);
-    EXPECT_TRUE(pAosIpsecHelper->IsEstablished());
+    EXPECT_TRUE(m_pAosIpsecHelper->IsEstablished());
 
-    SetIpsec(OLD_IPSEC, pAosOldIpsec);
+    SetIpsec(OLD_IPSEC, m_pAosOldIpsec);
     SetIpsecSaEstablished(OLD_IPSEC, IMS_TRUE);
-    EXPECT_TRUE(pAosIpsecHelper->IsEstablished());
+    EXPECT_TRUE(m_pAosIpsecHelper->IsEstablished());
 }
 
 TEST_F(AosIpsecHelperTest, SetSecurityServerPortInRegContact)
 {
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
+    EXPECT_CALL(m_objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
             .Times(2)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
-    pAosIpsecHelper->SetSecurityServerPortInRegContact();
+    m_pAosIpsecHelper->SetSecurityServerPortInRegContact();
 
-    SetIpsec(NEW_IPSEC, pAosNewIpsec);
-    EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(1);
+    SetIpsec(NEW_IPSEC, m_pAosNewIpsec);
+    EXPECT_CALL(m_objMockIRegContact, SetPort(_)).Times(1);
 
-    pAosIpsecHelper->SetSecurityServerPortInRegContact();
+    m_pAosIpsecHelper->SetSecurityServerPortInRegContact();
 }
 
 TEST_F(AosIpsecHelperTest, IgnoreCurrentPolicyExpired)
 {
-    SetIpsec(CURR_IPSEC, pAosCurrIpsec);
-    pAosIpsecHelper->IgnoreCurrentPolicyExpired();
+    SetIpsec(CURR_IPSEC, m_pAosCurrIpsec);
+    m_pAosIpsecHelper->IgnoreCurrentPolicyExpired();
     EXPECT_TRUE(GetCurrentIgnorePolicyExpired());
 }
 
@@ -864,8 +866,8 @@ TEST_F(AosIpsecHelperTest, SetPcscfPortnSpi)
     ImsList<SipSecurityHeader> objSecuServerH;
     objSecuServerH.Clear();
 
-    EXPECT_CALL(objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerH));
-    EXPECT_FALSE(pAosIpsecHelper->SetPcscfPortnSpi());
+    EXPECT_CALL(m_objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerH));
+    EXPECT_FALSE(m_pAosIpsecHelper->SetPcscfPortnSpi());
 }
 
 TEST_F(AosIpsecHelperTest, IPSecPolicyExpired)
@@ -873,7 +875,7 @@ TEST_F(AosIpsecHelperTest, IPSecPolicyExpired)
     CallIPSecPolicyExpired(IMS_NULL);
 
     AosIpsec* pAosTestIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
 
     SetIpsec(OLD_IPSEC, IMS_NULL);
     SetIpsec(CURR_IPSEC, IMS_NULL);
@@ -884,11 +886,11 @@ TEST_F(AosIpsecHelperTest, IPSecPolicyExpired)
 TEST_F(AosIpsecHelperTest, Destroy)
 {
     AosIpsec* pAosTestOldIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     AosIpsec* pAosTestCurrIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     AosIpsec* pAosTestNewIpsec =
-            new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
+            new AosIpsec(static_cast<IAosIpsecListener*>(&m_objIAosIpsecListener), SLOT_ID);
     SetIpsec(OLD_IPSEC, pAosTestOldIpsec);
     SetIpsec(CURR_IPSEC, pAosTestCurrIpsec);
     SetIpsec(NEW_IPSEC, pAosTestNewIpsec);
