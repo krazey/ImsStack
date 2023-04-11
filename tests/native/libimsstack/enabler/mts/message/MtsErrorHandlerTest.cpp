@@ -314,7 +314,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
-TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
+TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportGenericError)
 {
     ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_406);
@@ -336,6 +336,29 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
     EXPECT_EQ(nResult, MO_ERROR_GENERIC);
+}
+
+TEST_F(MtsErrorHandlerTest, HandleTimerFExpiredAndReportErrorRetry)
+{
+    ImsVector<IMS_SINT32> objArray;
+    objArray.Push(SipStatusCode::SC_406);
+    objArray.Push(SipStatusCode::SC_503);
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
+            .WillByDefault(Return(objArray));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT,
+                    MTS_REG_RECOVERY_POLICY_NONE))
+            .WillByDefault(Return(ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION));
+
+    EXPECT_CALL(objMockMtsService,
+            RequestRegistrationRecovery(
+                    ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION))
+            .Times(1);
+
+    IMS_SINT32 nResult = pMtsErrorHandler->Handle(&objMockMtsService, pMtsDynamicLoader);
+    EXPECT_EQ(nResult, MO_ERROR_RETRY);
 }
 
 }  // namespace android
