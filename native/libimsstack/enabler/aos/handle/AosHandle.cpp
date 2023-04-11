@@ -781,6 +781,10 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
             nFeature = ImsAosFeature::SMSIP;
             break;
 
+        case BLOCK_CALL_COMPOSER_CAPABILITY:
+            nFeature = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+            break;
+
         default:
             break;
     }

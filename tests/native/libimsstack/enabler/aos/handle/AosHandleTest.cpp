@@ -1801,6 +1801,9 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_SMS_CAPABILITY), ImsAosFeature::SMSIP);
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION), ImsAosFeature::SMSIP);
 
+    EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY),
+            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
+
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
 }
 

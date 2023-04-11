@@ -157,13 +157,14 @@ public:
         BLOCK_VILTE_CAPABILITY = 0x2,
         BLOCK_VOWIFI_CAPABILITY = 0x4,
         BLOCK_VIWIFI_CAPABILITY = 0x8,
-        BLOCK_SMS_CAPABILITY = 0x10,
+        BLOCK_CALL_COMPOSER_CAPABILITY = 0x10,
+        BLOCK_SMS_CAPABILITY = 0x20,
 
         // Network
-        BLOCK_VOPS = 0x20,
-        BLOCK_SSAC = 0x40,
-        BLOCK_NETWORK = 0x80,
-        BLOCK_3G = 0x100,
+        BLOCK_VOPS = 0x40,
+        BLOCK_SSAC = 0x80,
+        BLOCK_NETWORK = 0x100,
+        BLOCK_3G = 0x200,
 
         // DM
         BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x400

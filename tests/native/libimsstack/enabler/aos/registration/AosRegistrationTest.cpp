@@ -1133,7 +1133,6 @@ TEST_F(AosRegistrationTest, CheckBool)
 TEST_F(AosRegistrationTest, FeatureTagForMtc)
 {
     m_pTestAosRegistration->SetISipConfigV(static_cast<ISipConfigV*>(&m_objMockISipConfigV));
-
     m_pTestAosRegistration->SetIRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
 
     EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
@@ -1154,6 +1153,20 @@ TEST_F(AosRegistrationTest, FeatureTagForMtc)
     EXPECT_TRUE(m_pTestAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::TEXT));
     EXPECT_TRUE(m_pTestAosRegistration->RemoveFeatureTagForMtc(
             ImsAosFeature::VIDEO | ImsAosFeature::TEXT));
+
+    EXPECT_CALL(m_objMockIRegContact,
+            AddExtraCapability(
+                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()))
+            .Times(1);
+    EXPECT_CALL(m_objMockIRegContact,
+            RemoveExtraCapability(
+                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()))
+            .Times(1);
+    m_pTestAosRegistration->AddFeatureTagForMtc(
+            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY, IMS_FALSE);
+    m_pTestAosRegistration->AddFeatureTagForMtc(
+            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY, IMS_TRUE);
+    m_pTestAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
 
     m_pTestAosRegistration->SetIRegContact(IMS_NULL);
     m_pTestAosRegistration->SetISipConfigV(IMS_NULL);
