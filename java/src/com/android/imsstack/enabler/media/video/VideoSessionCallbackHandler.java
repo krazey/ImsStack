@@ -114,19 +114,19 @@ public class VideoSessionCallbackHandler {
     }
 
     /**
-     * Handles notification when RTP packet loss observed as per thresholds set by
-     * setMediaQualityThreshold()
+     * Handles notification when the video bitrate decreased below the threshold set by
+     * setMediaQualityThreshold() API
      *
-     * @param packetLossPercentage percentage of packet loss calculated over the duration
+     * @param bitrate The bitrate of sending video packets in bps unit
      */
-    public void onNotifyPacketLoss(int packetLossPercentage) {
-        ImsLog.v("onNotifyPacketLoss");
+    public void onNotifyBitrate(int bitrate) {
+        ImsLog.v("onNotifyBitrate");
 
         Parcel parcel = Parcel.obtain();
 
-        parcel.writeInt(MediaConstants.NOTIFY_PACKET_LOSS);
+        parcel.writeInt(MediaConstants.NOTIFY_BITRATE);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        parcel.writeInt(packetLossPercentage);
+        parcel.writeInt(bitrate);
 
         getMtcMediaInterface().sendRequest(parcel);
     }

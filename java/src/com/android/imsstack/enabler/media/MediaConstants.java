@@ -67,8 +67,9 @@ public class MediaConstants {
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);
-    public static final int NOTIFY_PEER_DIMENSION_CHANGED = (IMSMEDIA_VIDEO_RESPONSE + 1);
-    public static final int NOTIFY_VIDEO_DATA_USAGE       = (IMSMEDIA_VIDEO_RESPONSE + 2);
+    public static final int NOTIFY_BITRATE                = (IMSMEDIA_VIDEO_RESPONSE + 1);
+    public static final int NOTIFY_PEER_DIMENSION_CHANGED = (IMSMEDIA_VIDEO_RESPONSE + 2);
+    public static final int NOTIFY_VIDEO_DATA_USAGE       = (IMSMEDIA_VIDEO_RESPONSE + 3);
 
     // Notifications for text
     public static final int IMSMEDIA_RTT_RESPONSE         = (IMSMEDIA_RESPONSE + 80);

@@ -42,7 +42,7 @@ import java.util.Set;
 public class MediaTestUtils {
 
     //Media Quality Settings
-    public static final int PACKET_LOSS_PERCENT = 30;
+    public static final int VIDEO_BITRATE_BPS = 100000;
 
     // AudioConfig
     public static final String REMOTE_RTP_ADDRESS = "2401:4900:4b88:94fd:2:2:666c:7803";
