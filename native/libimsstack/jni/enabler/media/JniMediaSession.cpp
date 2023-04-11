@@ -191,6 +191,7 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IMMedia::SELECT_CAMERA_CMD:
         case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
         case IMMedia::CHANGE_ORIENTATION_CMD:
+        case IMMedia::NOTIFY_VIDEO_BITRATE:
             OnVideoMessage(nMsg, objParcel);
             break;
         default:

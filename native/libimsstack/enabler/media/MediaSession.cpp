@@ -1004,6 +1004,7 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IMMedia::NOTIFY_JITTER:
         case IMMedia::NOTIFY_MEDIA_DETACH:
         case IMMedia::NOTIFY_QOS_INFO:
+        case IMMedia::NOTIFY_VIDEO_BITRATE:
             bRet = OnNotify(nMsg, pParam);
             break;
         case IMMedia::SEND_DTMF:
@@ -1178,6 +1179,22 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                         m_pClientListener->MediaSession_NotifyQos(
                                 negoId, bResult, pMatchedParam->m_eMediaType);
                     }
+                }
+
+                delete pParam;
+                return IMS_TRUE;
+            }
+        }
+        break;
+        case IMMedia::NOTIFY_VIDEO_BITRATE:
+        {
+            ImsMediaVideoParam* pParam = reinterpret_cast<ImsMediaVideoParam*>(nParam);
+
+            if (pParam != IMS_NULL)
+            {
+                if (pParam->nValue > 0)
+                {
+                    m_pClientListener->MediaSession_Notify(REPORT_VIDEO_LOWEST_BITRATE);
                 }
 
                 delete pParam;
