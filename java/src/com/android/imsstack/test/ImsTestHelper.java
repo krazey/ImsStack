@@ -108,7 +108,8 @@ public final class ImsTestHelper {
                 String strEvent = intent.getStringExtra("event");
                 if (strEvent.equalsIgnoreCase("capa")) {
                     sendCapabilitiesChanged(intent.getStringExtra("network"),
-                            intent.getStringExtra("voice"), intent.getStringExtra("video"));
+                            intent.getStringExtra("voice"), intent.getStringExtra("video"),
+                            intent.getStringExtra("call_composer"));
                 } else if (strEvent.equalsIgnoreCase("vops")) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
@@ -125,14 +126,16 @@ public final class ImsTestHelper {
         }
 
         // CAPABILITIES CHANGED TEST
-        // extra parameter : network type, voice capa, video capa
+        // extra parameter : network type, voice capa, video capa, call_composer capa
         // network = LTE / NR / IWLAN / UTRAN (multiple use with comma separated)
-        // voice, video = 0 / 1 (multiple use with comma separated. Followed network input order.)
-        // ex) adb shell am broadcast -a com.android.imsstack.action.IMS_AOS_TEST
+        // capa = 0 / 1 (multiple use with comma separated in network input order.)
+        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST
         //     --es event capa --es network LTE,NR,IWLAN,UTRAN --es voice 1,1,0,0 --es video 0,0,1,0
-        private void sendCapabilitiesChanged(String strNetwork, String strVoice, String strVideo) {
+        //     --es call_composer 1,1,1,0
+        private void sendCapabilitiesChanged(
+                String strNetwork, String strVoice, String strVideo, String strCallComposer) {
             ImsLog.d("sendCapabilitiesChanged :: network=" + strNetwork + ", voice=" + strVoice +
-                    ", video=" + strVideo);
+                    ", video=" + strVideo + ", call_composer=" + strCallComposer);
 
             AosFactory aosFactory = AosFactory.getInstance();
             IAosRegistration iAosRegistration = aosFactory.getAosRegistration(0);
@@ -140,6 +143,7 @@ public final class ImsTestHelper {
             String[] strNetworks = strNetwork.split(",");
             String[] strVoices = strVoice.split(",");
             String[] strVideos = strVideo.split(",");
+            String[] strCallComposers = strCallComposer.split(",");
 
             CapabilityPairs objCapabilityPairs = new CapabilityPairs();
 
@@ -165,6 +169,10 @@ public final class ImsTestHelper {
                     nCapabilities |= IAosRegistrationListener.Capability.VIDEO;
                 }
 
+                if (strCallComposers[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.CALL_COMPOSER;
+                }
+
                 objCapabilityPairs.addCapability(nNetwork, nCapabilities);
             }
 
@@ -174,7 +182,7 @@ public final class ImsTestHelper {
         // VOPS CHANGED TEST
         // extra parameter : vops state
         // state = 0 / 1
-        // ex) adb shell am broadcast -a com.android.imsstack.action.IMS_AOS_TEST
+        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST
         //     --es event vops --ei state 1
         private void sendVopsChanged(int nState) {
             ISystem iSystem = SystemInterface.getInstance().getSystem(0);
