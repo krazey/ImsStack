@@ -150,7 +150,7 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithVideoLowestBitRateReport)
 {
     EXPECT_CALL(*pListener, OnVideoLowestBitRate).Times(1);
 
-    pMediaManager->MediaSession_Notify(REPORT_VIDEO_LOWEST_BIT_RATE);
+    pMediaManager->MediaSession_Notify(REPORT_VIDEO_LOWEST_BITRATE);
 }
 
 TEST_F(MtcMediaManagerTest,

@@ -1000,6 +1000,7 @@ public:
         static const IMS_CHAR KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[];
         static const IMS_CHAR KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[];
         static const IMS_CHAR KEY_VIDEO_BW_NEGO_OPTION_BOOL[];
+        static const IMS_CHAR KEY_VIDEO_LOWEST_BITRATE_BPS_INT[];
         static const IMS_CHAR KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[];
         static const IMS_CHAR KEY_TEXT_RTP_DSCP_INT[];

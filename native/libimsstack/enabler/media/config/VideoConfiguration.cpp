@@ -37,7 +37,8 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         m_nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
         m_nChannel(DEFAULT_CHANNEL),
         m_nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE),
-        m_bVideoBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPTION)
+        m_bVideoBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPTION),
+        m_nVideoLowestBitrateBps(DEFAULT_VIDEO_LOWEST_BITRATE)
 {
     IMS_TRACE_D("+VideoConfiguration eSessionType(%d)", eSessionType, 0, 0);
     nAsBandwidthKbps = DEFAULT_AS_VIDEO;
@@ -101,6 +102,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL);
     // m_nChannel = DEFAULT_CHANNEL; // already set by default at creator
     // m_nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
+    m_nVideoLowestBitrateBps =
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT);
     if (!CreateCodecConfigs(piCc))
     {
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
@@ -194,6 +197,7 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
     IMS_TRACE_D("m_nVideoIframeIntervalSec(%d), m_nVideoSamplingRate(%d), "
                 "m_bVideoBwNegoOptionEnabled(%d)",
             m_nVideoIframeIntervalSec, m_nVideoSamplingRate, m_bVideoBwNegoOptionEnabled);
+    IMS_TRACE_D("m_nVideoLowestBitrate(%d)", m_nVideoLowestBitrateBps, 0, 0);
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
         ToDebugStringCodecs(objCodecConfigs.GetAt(i));
@@ -288,4 +292,10 @@ PUBLIC
 IMS_BOOL VideoConfiguration::GetBandwidthNegoOption() const
 {
     return m_bVideoBwNegoOptionEnabled;
+}
+
+PUBLIC
+IMS_SINT32 VideoConfiguration::GetVideoLowestBitrateBps() const
+{
+    return m_nVideoLowestBitrateBps;
 }

@@ -122,7 +122,7 @@ typedef enum _REPORT_TYPE
     // Notify the qos callback
     REPORT_QOS,
     // Notify that the video bitrate is decreased under the threshold
-    REPORT_VIDEO_LOWEST_BIT_RATE,
+    REPORT_VIDEO_LOWEST_BITRATE,
     // Notify that the radio connection is failed
     REPORT_CHECK_RADIO_CONNECTION,
     // Notify that the network rtp packets are received in early media session

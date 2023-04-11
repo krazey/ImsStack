@@ -363,21 +363,23 @@ IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
 
         m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
                 (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
+        m_objMediaQualityThreshold.setVideoBitrateBps(m_pConfig->GetVideoLowestBitrateBps());
     }
     else
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{0});
         m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
                 m_pConfig->GetRtcpInactivityTimerMillis());
+        m_objMediaQualityThreshold.setVideoBitrateBps(0);
     }
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
-                "RtcpInactivity[%d]",
-            bActiveSession,
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], VideoLowestBitrate[%d]",
+            bActiveSession, m_objMediaQualityThreshold.getVideoBitrateBps(), 0);
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - RtpInactivity[%d], RtcpInactivity[%d]",
             (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
                     ? -1
                     : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front(),
-            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
+            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis(), 0);
 
     return IMS_TRUE;
 }
