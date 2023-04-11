@@ -251,6 +251,11 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strTargetAddress)
 PUBLIC
 IMS_SINT32 MtsSipFormUtils::GetRetryAfterValue(IN const IMessage* piMessage) const
 {
+    if (piMessage == IMS_NULL)
+    {
+        return -1;
+    }
+
     ImsList<AString> objHeaderList = piMessage->GetHeaders(SipHeaderName::RETRY_AFTER);
     if (objHeaderList.IsEmpty())
     {
