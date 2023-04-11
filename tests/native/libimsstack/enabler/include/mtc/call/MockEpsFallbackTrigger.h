@@ -36,6 +36,7 @@ public:
     MOCK_METHOD(void, OnEpsFallbackCompleted, (), (override));
     MOCK_METHOD(void, TriggerEpsFallback, (IN EpsFallbackReason), (override));
     MOCK_METHOD(IMS_BOOL, IsWaitingEpsFallbackForNoResponse, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsWaitingEpsFallbackForNoTrigger, (), (const, override));
 };
 
 #endif
