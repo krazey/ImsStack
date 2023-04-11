@@ -47,6 +47,10 @@ public:
     {
         return m_bWaitingEpsFallbackForNoResponse;
     }
+    inline virtual IMS_BOOL IsWaitingEpsFallbackForNoTrigger() const
+    {
+        return m_bWaitingEpsFallbackForNoTrigger;
+    }
 
 private:
     IMS_BOOL IsEpsFallbackTriggeredByNetwork() const;
@@ -55,6 +59,7 @@ private:
     ITimer* m_piTimerWatchdogWait;
     ITimer* m_piTimerEpsFallbackWait;
     IMS_BOOL m_bWaitingEpsFallbackForNoResponse;
+    IMS_BOOL m_bWaitingEpsFallbackForNoTrigger;
     static const IMS_UINT32 EPS_FALLBACK_COMPLETE_INTERVAL = 12000;
 };
 

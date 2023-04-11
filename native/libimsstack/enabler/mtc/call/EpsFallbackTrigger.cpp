@@ -38,7 +38,8 @@ EpsFallbackTrigger::EpsFallbackTrigger(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_piTimerWatchdogWait(IMS_NULL),
         m_piTimerEpsFallbackWait(IMS_NULL),
-        m_bWaitingEpsFallbackForNoResponse(IMS_FALSE)
+        m_bWaitingEpsFallbackForNoResponse(IMS_FALSE),
+        m_bWaitingEpsFallbackForNoTrigger(IMS_FALSE)
 {
     IMS_TRACE_D("+EpsFallbackTrigger[%d]", m_objContext.GetCallKey(), 0, 0);
 }
@@ -75,7 +76,6 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(
 PUBLIC
 IMS_BOOL EpsFallbackTrigger::IsVoNr() const
 {
-    // check NR network
     if (m_objContext.GetService().IsWlanIpCanType())
     {
         return IMS_FALSE;
@@ -106,12 +106,20 @@ PUBLIC
 void EpsFallbackTrigger::OnEpsFallbackCompleted()
 {
     IMS_TRACE_D("OnEpsFallbackCompleted", 0, 0, 0);
-    m_bWaitingEpsFallbackForNoResponse = IMS_FALSE;
-    if (m_piTimerEpsFallbackWait)
+
+    if (m_bWaitingEpsFallbackForNoResponse)
     {
-        m_piTimerEpsFallbackWait->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piTimerEpsFallbackWait);
-        m_piTimerEpsFallbackWait = IMS_NULL;
+        m_bWaitingEpsFallbackForNoResponse = IMS_FALSE;
+        if (m_piTimerEpsFallbackWait)
+        {
+            m_piTimerEpsFallbackWait->KillTimer();
+            TimerService::GetTimerService()->DestroyTimer(m_piTimerEpsFallbackWait);
+            m_piTimerEpsFallbackWait = IMS_NULL;
+        }
+    }
+    else if (m_bWaitingEpsFallbackForNoTrigger)
+    {
+        m_bWaitingEpsFallbackForNoTrigger = IMS_FALSE;
     }
 }
 
@@ -155,7 +163,7 @@ PUBLIC
 void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
 {
     IMS_TRACE_D("TriggerEpsFallback Reason[%d]", eReason, 0, 0);
-    IMS_UINT32 eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER;
+    IMS_UINT32 eRadioReason;
     if (eReason == EpsFallbackReason::NO_NETWORK_RESPONSE)
     {
         eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE;
@@ -166,6 +174,11 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
 
         m_piTimerEpsFallbackWait = TimerService::GetTimerService()->CreateTimer();
         m_piTimerEpsFallbackWait->SetTimer(EPS_FALLBACK_COMPLETE_INTERVAL, this);
+    }
+    else
+    {
+        eRadioReason = IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER;
+        m_bWaitingEpsFallbackForNoTrigger = IMS_TRUE;
     }
 
     ImsRadioService::GetImsRadioService()
