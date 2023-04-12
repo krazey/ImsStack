@@ -456,17 +456,21 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
             return SIP_FALSE;
         }
 
-        SIP_CHAR* pszPortTemp = SIP_NULL;
+        SIP_INT32 nLength = pEndPt - pTempPos + SIP_ONE;
 
-        pszPortTemp = SipPercentEncoding::DoPercentDecoding(pszPort);
-
-        m_nPort = SipPf_Atoi(pszPortTemp);
-        delete[] pszPortTemp;
-
-        if (m_nPort == SIP_ZERO)
+        for (SIP_INT32 nCount = SIP_ZERO; nCount < nLength; nCount++)
         {
-            return SIP_FALSE;
+            if ((pszPort[nCount] < '0') || (pszPort[nCount] > '9'))
+            {
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "non numeric port number received",
+                        SIP_ZERO, SIP_ZERO);
+                delete[] pszPort;
+                return SIP_FALSE;
+            }
         }
+
+        m_nPort = SipPf_Atoi(pszPort);
+        delete[] pszPort;
     }
     else
     {
