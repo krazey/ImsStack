@@ -446,8 +446,16 @@ public class ImsMmTelService extends MmTelFeature
 
             // If any exception is thrown by this method call,
             // the incoming call is automatically rejected.
-            mImsContext.getDefaultHandler().post(() -> notifyIncomingCall(incomingSession,
-                    incomingSession.getCallId(), extras));
+            mImsContext.getDefaultHandler().post(
+                    () -> {
+                        try {
+                            notifyIncomingCall(incomingSession,
+                                    incomingSession.getCallId(), extras);
+                        } catch (RuntimeException e) {
+                            loge("onIncomingCallReceived Exception:" + e.toString());
+                        }
+                    }
+            );
 
             // Notify user alerting to native MTC logic if not USSD.
             if (isUSSD == null || isUSSD.equals("false")) {
