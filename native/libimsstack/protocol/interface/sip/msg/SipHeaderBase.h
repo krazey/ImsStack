@@ -151,6 +151,7 @@ public:
     enum  // eHeaderAttributes
     {
         HEADER_EMPTY_BODY_ALLOWED = 0,  // Empty header value allowed or not
+        HEADER_MULTI_VALUE_ALLOWED,     // Header will have more than one value, e.g., via
         HEADER_ATTRIBUTE_END
     };
 
@@ -183,6 +184,7 @@ public:
     virtual SIP_BOOL SetValue(const SIP_CHAR* pszValue);
     virtual const SIP_CHAR* GetValue() const;
     static SIP_BOOL IsHeaderTypeValid(SIP_INT32 eHdrType);
+    static SIP_BOOL IsMultiValueHeader(SIP_INT32 eHdrType);
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 protected:
