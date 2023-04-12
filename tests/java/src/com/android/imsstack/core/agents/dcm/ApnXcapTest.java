@@ -107,11 +107,6 @@ public class ApnXcapTest {
 
     @Test
     public void testConnect() throws Exception {
-        // do not handle request to connect because ApnIms is not enabled
-        assertFalse(mApnXcap.connect());
-
-        // handle request to connect if ApnIms is enabled
-        mApnXcap.employApn();
         assertTrue(mApnXcap.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnXcap.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnXcap.getDataState());

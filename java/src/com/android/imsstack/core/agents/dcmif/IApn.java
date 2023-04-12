@@ -93,23 +93,6 @@ public interface IApn {
     boolean sendMessage(Message msg);
 
     /**
-     * Set to use this apn. This api increase the value of EmployCount.
-     */
-    int employApn();
-
-    /**
-     * Set not to use this apn. This api decreate the value of EmployCount.
-     */
-    int dismissApn();
-
-    /**
-     * Return how many service was registered to use  use this apn.
-     * When employ counter is 0 or below, this means there is no service to use this apn.
-     * In this case, apn should not trigger 'requestNetwork' to use this apn.
-     */
-    int getApnEmployCount();
-
-    /**
      * Return cached network of APN
      */
     Network getCachedNetwork();

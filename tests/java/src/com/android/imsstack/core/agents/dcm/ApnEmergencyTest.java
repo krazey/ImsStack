@@ -106,11 +106,6 @@ public class ApnEmergencyTest {
 
     @Test
     public void testConnect() throws Exception {
-        // do not handle request to connect because mApnEmergency is not enabled
-        assertFalse(mApnEmergency.connect());
-
-        // handle request to connect if mApnEmergency is enabled
-        mApnEmergency.employApn();
         assertTrue(mApnEmergency.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnEmergency.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnEmergency.getDataState());
@@ -130,7 +125,6 @@ public class ApnEmergencyTest {
         assertFalse(mApnEmergency.disconnect());
 
         // handle request to disconnect if request to connect is done
-        mApnEmergency.employApn();
         mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
         mApnEmergency.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
 

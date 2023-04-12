@@ -457,26 +457,6 @@ public class DcApn implements IDcApn {
         return (apn != null) ? apn.getCachedNetwork() : null;
     }
 
-    @Override
-    public void changeApnEmployState(EApnType apnType, boolean enable) {
-        if (apnType == null) {
-            ImsLog.w(mSlotId, "ApnType is null");
-            return;
-        }
-
-        IApn apn = getApnControl(apnType.getType());
-        if (apn == null) {
-            ImsLog.w(mSlotId, "apn is null");
-            return;
-        }
-
-        if (enable) {
-            apn.employApn();
-        } else {
-            apn.dismissApn();
-        }
-    }
-
     // Interface implementation methods --------------------------
     // Private/Protected methods ---------------------------------
     private void apnFactory() {
