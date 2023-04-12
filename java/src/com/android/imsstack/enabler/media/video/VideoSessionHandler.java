@@ -167,7 +167,7 @@ public class VideoSessionHandler extends MediaState {
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
                 {
-                    handleVideoOpenSession((VideoConfig) msg.obj);
+                    handleVideoOpenSession(null);
                 }
                     break;
 
@@ -403,11 +403,10 @@ public class VideoSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 mLocalIpAddress = parcel.readString();
                 mLocalPortNumber = parcel.readInt();
-                VideoConfig videoConfig = VideoConfig.CREATOR.createFromParcel(parcel);
                 ImsLog.v("localIpAddress= " + mLocalIpAddress
                         + " localPortNumber= " + mLocalPortNumber);
 
-                Message.obtain(mVideoMessageHandler, requestType, videoConfig).sendToTarget();
+                Message.obtain(mVideoMessageHandler, requestType).sendToTarget();
             }
                 break;
 
