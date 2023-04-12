@@ -59,6 +59,7 @@
 
 class SipHeaders
 {
+private:
     SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END + SIP_ONE];
 
 public:
@@ -88,7 +89,18 @@ public:
     static SIP_BOOL SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 private:
-    SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType);
+    inline SipHeaderBase* GetHeader(SIP_INT32 eHdrType) { return m_HeaderArray[eHdrType]; }
+    inline SIP_VOID SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
+    {
+        if (m_HeaderArray[eHdrType] != SIP_NULL)
+        {
+            m_HeaderArray[eHdrType]->SipDelete();
+        }
+
+        m_HeaderArray[eHdrType] = pHeader;
+    }
+
+    SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader = SIP_NULL);
 
     SIP_BOOL EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
