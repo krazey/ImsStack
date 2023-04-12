@@ -255,22 +255,6 @@ public class ApnTest {
     }
 
     @Test
-    public void testEmployApn() throws Exception {
-        int apnNum = 5;
-        for (int i = 1; i <= apnNum; i++) {
-            mApn.employApn();
-            assertEquals(i, mApn.getApnEmployCount());
-        }
-        assertTrue(mApn.isApnEmployed());
-
-        for (int i = apnNum; i > 0; i--) {
-            mApn.dismissApn();
-            assertEquals(i - 1, mApn.getApnEmployCount());
-        }
-        assertFalse(mApn.isApnEmployed());
-    }
-
-    @Test
     public void testGetCachedNetwork_AllCallbackNull() throws Exception {
         // return null when both NetworkCallback and NetworkMonitoringCallback is null
         assertNull(mApn.mNetworkCallback);

@@ -267,22 +267,4 @@ public interface IDcApn extends IDc {
      *         Network object
      */
     Network getNetworkByCapability(int apnType);
-
-    /**
-     * changeApnPermission
-     *
-     * This API is made to change Apn Permission for operator/service specific.
-     * This API can be called whenever after DCApn & Apn objected is created.
-     * It changes block reason in target apn's connect() request.
-     * so, if apn is not employed, that apn doesn't request network to connect.
-     *
-     * @param apnType
-     *             EApnType.IMS.getType()
-     *             EApnType.INTERNET.getType()
-     *             EApnType.XCAP.getType()
-     *             EApnType.EMERGENCY.getType()
-     * @param enable If true, increases Apn Employment count. If false, decreases Apn employment
-     * count.
-     */
-    void changeApnEmployState(EApnType apnType, boolean enable);
 }

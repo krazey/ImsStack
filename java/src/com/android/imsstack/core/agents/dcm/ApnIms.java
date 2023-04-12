@@ -71,11 +71,6 @@ public class ApnIms extends Apn {
                 }
             }
 
-            if (!isApnEmployed()) {
-                ImsLog.w(mSlotId, "apn is not employed");
-                return false;
-            }
-
             if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
                 ImsLog.i(mSlotId, "apn request is already done");
                 return true;
