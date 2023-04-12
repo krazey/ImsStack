@@ -202,7 +202,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             if (pAmrConfig->GetOctetAlign() != -1)
             {
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
-                if (pAmrFmtp->nOctetAlign == 1)
+                if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->nModeSetList == 0)
                 {
                     pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
                 }
