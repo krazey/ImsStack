@@ -40,7 +40,6 @@ public final class AgentFactory {
     public static final int DEVICE = 6;
 
     // agents with slot id
-    public static final int SHARED_STATE = 10;
     public static final int PHONE_STATE = 13;
     public static final int TELEPHONY_STATE = 14;
     public static final int TELEPHONY_SUBSCRIBER = 15;
@@ -186,7 +185,6 @@ public final class AgentFactory {
         agents.put(TELEPHONY_STATE, new TelephonyStateAgent(slotId));
         agents.put(TELEPHONY_SUBSCRIBER, new TelephonySubscriberAgent(slotId));
         agents.put(PHONE_CALL_DB, new PhoneCallDBAgent(slotId));
-        agents.put(SHARED_STATE, new SharedStateAgent(slotId));
 
         // below types should be initialized and cleaned up from VoLTE package
         agents.put(CELL_INFO, new CellInfoAgent(slotId));
@@ -208,7 +206,6 @@ public final class AgentFactory {
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
-        agentList.add(agents.get(SHARED_STATE));
 
         for (int i = 0; i < agentList.size(); i++) {
             IAgent agent = agentList.get(i);
@@ -243,7 +240,6 @@ public final class AgentFactory {
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
-        agentList.add(agents.get(SHARED_STATE));
 
         for (int i = 0; i < agentList.size(); i++) {
             IAgent agent = agentList.get(i);
@@ -268,10 +264,11 @@ public final class AgentFactory {
 
     public static void setAgentForMIms(IAgent agent, int agentType, int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
-
-        if (agents != null) {
-            agents.put(agentType, agent);
+        if (agents == null) {
+            agents = new HashMap<Integer, IAgent>(AGENT_MAX);
+            sAgentSlots.put(slotId, agents);
         }
+        agents.put(agentType, agent);
     }
 
     /**
@@ -325,6 +322,7 @@ public final class AgentFactory {
 
         if (agents != null) {
             synchronized(mLock) {
+                agents.put(NativeStateInterface.class, new NativeStateAgent(slotId));
                 agents.put(SimInterface.class, new SimAgent(slotId));
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));

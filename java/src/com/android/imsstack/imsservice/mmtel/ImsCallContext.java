@@ -27,8 +27,8 @@ import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ILocationAgent;
 import com.android.imsstack.core.agents.ILocationAgentManager;
-import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -211,8 +211,8 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public ISharedState getSharedState() {
-        return (ISharedState)AgentFactory.getAgent(AgentFactory.SHARED_STATE, getSlotId());
+    public NativeStateInterface getNativeStateInterface() {
+        return AgentFactory.getInstance().getAgent(NativeStateInterface.class, getSlotId());
     }
 
     @Override

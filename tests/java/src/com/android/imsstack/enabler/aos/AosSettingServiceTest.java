@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.aos;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,10 +36,9 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.enabler.aos.service.AosService;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
@@ -46,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -65,11 +66,9 @@ public class AosSettingServiceTest {
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private AosSettingService mAosSettingService;
-    private JNIUpCallEvtManager mBackupJniUpCallEvtManager;
 
-    @Mock JNIUpCallEvtManager mMockJniUpCallEvtManager;
-    @Mock IJNIUpCallEvt mMockJniUpCallEvt;
     @Mock ISubscription mMockSubscription;
+    @Mock NativeStateInterface mMockNativeStateInterface;
 
     @Before
     public void setup() throws Exception {
@@ -90,12 +89,9 @@ public class AosSettingServiceTest {
         when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
 
-        mBackupJniUpCallEvtManager = JNIUpCallEvtManager.getInstance();
-        when(mMockJniUpCallEvtManager.getJNIUpCallEvt(SLOT_0)).thenReturn(mMockJniUpCallEvt);
-        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
-                mMockJniUpCallEvtManager);
-
         AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockSubscription);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
 
         mAosSettingService = new FakeAosSettingService(SLOT_0);
         mAosSettingService.init();
@@ -104,18 +100,16 @@ public class AosSettingServiceTest {
     @After
     public void tearDown() throws Exception {
         mAosSettingService.cleanup();
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
+        AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         AppContext.deinit();
-
-        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
-                mBackupJniUpCallEvtManager);
     }
 
     @Test
     public void init_initializeNecessaryClasses() {
         // mAosSettingService.init() is called in setup()
 
-        verify(mMockJniUpCallEvt).registerForNativeBootComplete(mAosSettingService.mHandler,
-                AosSettingService.EVENT_NATIVE_BOOT_COMPLETED, null);
+        verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mContext).registerReceiver(mAosSettingService.mIntentReceiverListener,
                 mAosSettingService.mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
         verify(mMockSubscription).addListener(mAosSettingService.mSubscriptionListener);
@@ -136,17 +130,19 @@ public class AosSettingServiceTest {
         verify(mTelephonyManager).unregisterTelephonyCallback(callback);
         verify(mMockSubscription).removeListener(listener);
         verify(mContext).unregisterReceiver(receiver);
-        verify(mMockJniUpCallEvt).unregisterForNativeBootComplete(handler);
+        verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
     }
 
     @Test
-    public void settingServiceHandler_nativeBootCompleted() {
+    public void nativeStateListener_onNativeServiceReady() {
         AosService mockAosService = Mockito.mock(AosService.class);
         AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
 
-        Message msg = Message.obtain(mAosSettingService.mHandler,
-                AosSettingService.EVENT_NATIVE_BOOT_COMPLETED);
-        mAosSettingService.mHandler.handleMessage(msg);
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
 
         verify(mockAosService).notifyMobileDataSetting(false);
     }

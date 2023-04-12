@@ -48,7 +48,6 @@ public class SimAgent implements SimInterface {
     private static final int EVENT_REQUEST_SIM_AUTHENTICATION = 1;
     private static final int EVENT_READ_ISIM_FILE_ATTRIBUTES = 2;
     private static final int EVENT_READ_ISIM_RECORD = 3;
-    private static final int EVENT_NATIVE_BOOT_COMPLETED = 4;
 
     /** SIM related notifications */
     private static final int NOTIFICATION_ISIM_STATE_CHANGED = 102;
@@ -88,6 +87,7 @@ public class SimAgent implements SimInterface {
     private String mIsimImpi;
     private final List<String> mIsimImpu = new ArrayList<>();
     private final Set<Sim.IsimListener> mIsimListeners = new CopyOnWriteArraySet<>();
+    private NativeStateInterface.Listener mNativeStateListener;
 
     public SimAgent(int slotId) {
         mSlotId = slotId;
@@ -102,11 +102,17 @@ public class SimAgent implements SimInterface {
 
         mSimStateReceiver.register();
 
-        ISharedState iss = (ISharedState) AgentFactory.getAgent(
-                AgentFactory.SHARED_STATE, getSlotId());
-
-        if (iss != null) {
-            iss.registerForNativeBootComplete(mSimHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, getSlotId());
+        if (nsi != null) {
+            mNativeStateListener = new NativeStateInterface.Listener() {
+                @Override
+                public void onNativeServiceReady() {
+                    ImsLog.i(mSlotId, "NativeState: service ready.");
+                    handleNativeServiceReady();
+                }
+            };
+            nsi.addListener(mNativeStateListener);
         }
 
         updateSimState();
@@ -122,11 +128,13 @@ public class SimAgent implements SimInterface {
                     isimStateToString(Sim.ISIM_STATE_REMOVED));
         }
 
-        ISharedState iss = (ISharedState) AgentFactory.getAgent(
-                AgentFactory.SHARED_STATE, getSlotId());
-
-        if (iss != null) {
-            iss.unregisterForNativeBootComplete(mSimHandler);
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi =
+                    AgentFactory.getInstance().getAgent(NativeStateInterface.class, getSlotId());
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
+            }
+            mNativeStateListener = null;
         }
 
         mSimStateReceiver.unregister();
@@ -400,7 +408,7 @@ public class SimAgent implements SimInterface {
         }
     }
 
-    private void handleNativeBootCompleted() {
+    private void handleNativeServiceReady() {
         if (isSimLoaded()) {
             ImsLog.d(getSlotId(), "[SIM] SIM is already loaded");
             return;
@@ -732,10 +740,6 @@ public class SimAgent implements SimInterface {
                 }
                 case EVENT_READ_ISIM_RECORD: {
                     handleReadIsimRecord(msg.arg1, msg.arg2);
-                    break;
-                }
-                case EVENT_NATIVE_BOOT_COMPLETED: {
-                    handleNativeBootCompleted();
                     break;
                 }
                 default:

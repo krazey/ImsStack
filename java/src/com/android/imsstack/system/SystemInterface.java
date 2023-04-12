@@ -389,31 +389,28 @@ public class SystemInterface implements JniSystemListener {
         Parcel result = null;
 
         switch (method) {
-        //mISystemAPISendEvent
-        case SystemConstants.SEND_EVENT:
-            result = system.handleSystemAPISendEvent(event, wParam, lParam);
-            break;
-            // setEvent
-        case SystemConstants.SET_EVENT: {
-            int setEvent = parcel.readInt();
-            ImsLog.d(slotId, "set event = " + Integer.toString(setEvent, 16));
-            system.registerEvent(setEvent);
-            result = Parcel.obtain();
-            result.writeInt(1);
-            break;
-        }
-            // resetEvent
-        case SystemConstants.RESET_EVENT: {
-            int resetEvent = parcel.readInt();
-            ImsLog.d(slotId, "reset event = " + Integer.toString(resetEvent, 16));
-            system.unregisterEvent(resetEvent);
-            result = Parcel.obtain();
-            result.writeInt(1);
-            break;
-        }
-        default:
-            result = system.handleSystemAPI(method, parcel, fd);
-            break;
+            case SystemConstants.SEND_EVENT:
+                result = system.handleSystemCallForEvent(event, wParam, lParam);
+                break;
+            case SystemConstants.SET_EVENT: {
+                int setEvent = parcel.readInt();
+                ImsLog.d(slotId, "set event = " + Integer.toString(setEvent, 16));
+                system.registerEvent(setEvent);
+                result = Parcel.obtain();
+                result.writeInt(1);
+                break;
+            }
+            case SystemConstants.RESET_EVENT: {
+                int resetEvent = parcel.readInt();
+                ImsLog.d(slotId, "reset event = " + Integer.toString(resetEvent, 16));
+                system.unregisterEvent(resetEvent);
+                result = Parcel.obtain();
+                result.writeInt(1);
+                break;
+            }
+            default:
+                result = system.handleSystemAPI(method, parcel, fd);
+                break;
         }
 
         if (result == null) {
@@ -835,7 +832,6 @@ public class SystemInterface implements JniSystemListener {
     private class ImsSystem implements ISystem, MmTelFeatureRegistry.Listener {
         private ISystemAPICallInfo mISystemAPICallInfo;
         private ISystemAPINetwork mISystemAPINetwork;
-        private ISystemAPISendEvent mISystemAPISendEvent;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
         private ISystemAPILocation mISystemAPILocation;
@@ -893,13 +889,6 @@ public class SystemInterface implements JniSystemListener {
         public void setISystemAPINetwork(ISystemAPINetwork api) {
             synchronized (mLock) {
                 mISystemAPINetwork = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPISendEvent(ISystemAPISendEvent api) {
-            synchronized (mLock) {
-                mISystemAPISendEvent = api;
             }
         }
 
@@ -1572,17 +1561,23 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        public Parcel handleSystemAPISendEvent(int event, int wParam, int lParam) {
-            synchronized (mLock) {
-                if (mISystemAPISendEvent == null) {
-                    return null;
-                }
-
-                Parcel result = Parcel.obtain();
-                result.writeInt(mISystemAPISendEvent.processEvent4Sys(event, wParam, lParam));
-
-                return result;
+        public Parcel handleSystemCallForEvent(int event, int wParam, int lParam) {
+            if (mSystemCall == null) {
+                return null;
             }
+
+            Parcel result = Parcel.obtain();
+
+            switch (event) {
+                case ImsEventDef.IMS_EVENT_NATIVE_BOOT_COMPLETED:
+                    result.writeInt(mSystemCall.updateNativeServiceReady(true));
+                    break;
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
         }
 
         private Parcel handleSystemAPICallInfo(int method, Parcel parcel) {
