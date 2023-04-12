@@ -35,9 +35,6 @@ public:
     static IMS_BOOL IsSubscriptionNotifyRequiredForRefer(IN MtcConfigurationProxy& objProxy);
     static IMS_BOOL IsPaidPreferred(IN MtcConfigurationProxy& objProxy);
     static IMS_BOOL IsReUseReferToUri(IN MtcConfigurationProxy& objProxy);
-    static IMS_BOOL IsReferUsed(IN MtcConfigurationProxy& objProxy);
-    // SKT always receive disconnecting status when participant leaves conference call.
-    static IMS_BOOL IsDisconnectingStatusUsed(IN MtcConfigurationProxy& objProxy);
     static IMS_BOOL IsReferToExHeaderUsed(IN MtcConfigurationProxy& objProxy);
 
     static IMS_BOOL IsSubscriptionForParticipantRequired(IN MtcConfigurationProxy& objProxy);

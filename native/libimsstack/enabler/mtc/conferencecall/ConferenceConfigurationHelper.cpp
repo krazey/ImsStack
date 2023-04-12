@@ -73,19 +73,6 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReUseReferToUri(
             CarrierConfig::ImsVoice::CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE;
 }
 
-PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReferUsed(
-        IN MtcConfigurationProxy& objProxy)
-{
-    return objProxy.GetInt(Feature::CONFERENCE_INVITING_REFER_TYPE) == 1;
-}
-
-PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsDisconnectingStatusUsed(
-        IN MtcConfigurationProxy& /*objProxy*/)
-{
-    // TODO: it's really not necessary?
-    return IMS_TRUE;
-}
-
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsReferToExHeaderUsed(
         IN MtcConfigurationProxy& objProxy)
 {
@@ -101,6 +88,7 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationHelper::IsSubscriptionForParticipa
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationHelper::GetWaitTimeNotifyTerminated(
         IN MtcConfigurationProxy& /*objProxy*/)
 {
+    // TODO: Add configuration for VZW.
     // if this value is less than 0, no Un-Subscription
     return 3000;
 }

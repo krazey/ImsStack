@@ -906,8 +906,7 @@ IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
 PRIVATE
 void ConferenceInfoUpdater::ModifyParticipantInfoByConfig(IN ConfUser* pConfUser)
 {
-    if (ConferenceConfigurationHelper::IsDisconnectingStatusUsed(m_objConfigProxy) &&
-            (pConfUser->eStatus == STATUS_DISCONNECTING))
+    if (pConfUser->eStatus == STATUS_DISCONNECTING)
     {
         pConfUser->eStatus = STATUS_DISCONNECTED;
     }
