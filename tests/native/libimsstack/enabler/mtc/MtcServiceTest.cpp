@@ -24,6 +24,7 @@
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
+#include "MockIFeatureCaps.h"
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcCallController.h"
@@ -67,6 +68,12 @@ public:
     inline TestMtcService(IN IMtcContext& objContext, IN ServiceType eType) :
             MtcService(objContext, eType)
     {
+    }
+
+    inline void ReplaceCoreService(IN ICoreService* pCoreService)
+    {
+        m_piCoreService->Close();
+        m_piCoreService = pCoreService;
     }
 
     inline void ReplaceAosEventHandler(IN MtcAosEventHandler* pAosEventHandler)
@@ -166,6 +173,8 @@ protected:
     MtcService* CreateNormalService()
     {
         TestMtcService* pService = new TestMtcService(objMockContext, ServiceType::NORMAL);
+
+        pService->ReplaceCoreService(&objMockCoreService);
 
         pMockAosEventHandler = new MockMtcAosEventHandler(*pService, *pConfigurationProxy);
         pService->ReplaceAosEventHandler(pMockAosEventHandler);
@@ -329,6 +338,56 @@ TEST_F(MtcServiceTest, ImsAosConnectedEmergencyServiceInvokesSetReady)
     EXPECT_CALL(*pMockEmergencyAosConnector, SetReady(IMS_FALSE, ImsAosService::EMERGENCY_MTC))
             .Times(1);
     pEmergencyMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureAddsFeature)
+{
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(AString("+g.gsma.callcomposer"), AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_ANY))
+            .Times(1);
+    const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
+    pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedWithoutCallComposerFeatureDoesNotRemovesFeatureIfNotAdded)
+{
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps, AddFeature(AString("+g.gsma.callcomposer"), _, _, _)).Times(0);
+    const IMS_UINT32 nEmptyFeatures = 0;
+    pNormalMtcService->ImsAos_Connected(nEmptyFeatures, IIpcan::CATEGORY_ANY);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedWithoutCallComposerFeatureRemovesFeatureIfAddedBefore)
+{
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
+
+    EXPECT_CALL(objFeatureCaps,
+            RemoveFeature(AString("+g.gsma.callcomposer"), AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_ANY))
+            .Times(1);
+    const IMS_UINT32 nEmptyFeatures = 0;
+    pNormalMtcService->ImsAos_Connected(nEmptyFeatures, IIpcan::CATEGORY_ANY);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureDoesNothingForEmergencyService)
+{
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps, AddFeature(AString("+g.gsma.callcomposer"), _, _, _)).Times(0);
+    const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    pEmergencyMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
 }
 
 TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
