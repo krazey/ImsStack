@@ -33,7 +33,6 @@ public interface ISystem {
      */
     public void setISystemAPICallInfo(ISystemAPICallInfo api);
     public void setISystemAPINetwork(ISystemAPINetwork api);
-    public void setISystemAPISendEvent(ISystemAPISendEvent api);
     public void setISystemAPITelephonyState(ISystemAPITelephonyState api);
     public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api);
     public void setISystemAPILocation(ISystemAPILocation api);

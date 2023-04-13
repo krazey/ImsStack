@@ -22,9 +22,11 @@ import java.io.FileDescriptor;
 
 public interface SystemCallInterface {
     /** Result code of execution with no error. */
-    public static final int RESULT_OK = 1;
+    int RESULT_OK = 1;
+    /** Result code of execution for operation failure. */
+    int RESULT_FAIL = 0;
     /** Result code of execution with a specific error. */
-    public static final int RESULT_ERROR = -1;
+    int RESULT_ERROR = -1;
 
     //// ConfigInterface {
     /**
@@ -85,6 +87,7 @@ public interface SystemCallInterface {
      * Reads the file attributes of the specified ISIM record.
      *
      * @param fileId The file id to be read.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int readIsimFileAttributes(int fileId);
 
@@ -93,6 +96,7 @@ public interface SystemCallInterface {
      *
      * @param fileId The file id to be read.
      * @param index The index of the record for the given file.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int readIsimRecord(int fileId, int index);
 
@@ -101,6 +105,7 @@ public interface SystemCallInterface {
      *
      * @param nonce The authentication challenge data, base64 encoded.
      * @param owner The owner of this request.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int requestIsimAuthentication(String nonce, long owner);
 
@@ -109,6 +114,7 @@ public interface SystemCallInterface {
      *
      * @param nonce The authentication challenge data, base64 encoded.
      * @param owner The owner of this request.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int requestUsimAuthentication(String nonce, long owner);
     ////}
@@ -119,4 +125,12 @@ public interface SystemCallInterface {
      * @return true if the IMS voice call is supported, false otherwise.
      */
     boolean isImsVoiceCallSupported();
+
+    /**
+     * Updates the native service ready state.
+     *
+     * @param serviceReady A flag specifying whether the native service is ready or not.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     */
+    int updateNativeServiceReady(boolean serviceReady);
 }

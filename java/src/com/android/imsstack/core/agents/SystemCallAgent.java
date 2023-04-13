@@ -137,6 +137,7 @@ public class SystemCallAgent implements SystemCallInterface {
      * Reads the file attributes of the specified ISIM record.
      *
      * @param fileId The file id to be read.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     @Override
     public int readIsimFileAttributes(int fileId) {
@@ -145,10 +146,10 @@ public class SystemCallAgent implements SystemCallInterface {
 
         if (sim != null) {
             sim.readIsimFileAttributes(fileId);
-            return 1;
+            return RESULT_OK;
         }
 
-        return 0;
+        return RESULT_FAIL;
     }
 
     /**
@@ -156,6 +157,7 @@ public class SystemCallAgent implements SystemCallInterface {
      *
      * @param fileId The file id to be read.
      * @param index The index of the record for the given file.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     @Override
     public int readIsimRecord(int fileId, int index) {
@@ -164,10 +166,10 @@ public class SystemCallAgent implements SystemCallInterface {
 
         if (sim != null) {
             sim.readIsimRecord(fileId, index);
-            return 1;
+            return RESULT_OK;
         }
 
-        return 0;
+        return RESULT_FAIL;
     }
 
     /**
@@ -175,6 +177,7 @@ public class SystemCallAgent implements SystemCallInterface {
      *
      * @param nonce The authentication challenge data, base64 encoded.
      * @param owner The owner of this request.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     @Override
     public int requestIsimAuthentication(String nonce, long owner) {
@@ -183,10 +186,10 @@ public class SystemCallAgent implements SystemCallInterface {
 
         if (sim != null) {
             sim.requestSimAuthentication(Sim.APP_TYPE_ISIM, nonce, owner);
-            return 1;
+            return RESULT_OK;
         }
 
-        return 0;
+        return RESULT_FAIL;
     }
 
     /**
@@ -194,6 +197,7 @@ public class SystemCallAgent implements SystemCallInterface {
      *
      * @param nonce The authentication challenge data, base64 encoded.
      * @param owner The owner of this request.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     @Override
     public int requestUsimAuthentication(String nonce, long owner) {
@@ -202,10 +206,10 @@ public class SystemCallAgent implements SystemCallInterface {
 
         if (sim != null) {
             sim.requestSimAuthentication(Sim.APP_TYPE_USIM, nonce, owner);
-            return 1;
+            return RESULT_OK;
         }
 
-        return 0;
+        return RESULT_FAIL;
     }
 
     /**
@@ -215,5 +219,22 @@ public class SystemCallAgent implements SystemCallInterface {
     public boolean isImsVoiceCallSupported() {
         IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         return (dcnw != null) ? dcnw.isVops() : false;
+    }
+
+    /**
+     * Updates the native service ready state.
+     *
+     * @param serviceReady A flag specifying whether the native service is ready or not.
+     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     */
+    @Override
+    public int updateNativeServiceReady(boolean serviceReady) {
+        NativeStateAgent nsa = (NativeStateAgent) AgentFactory.getInstance().getAgent(
+                NativeStateInterface.class, mSlotId);
+        if (nsa != null) {
+            nsa.updateServiceReady(serviceReady);
+            return RESULT_OK;
+        }
+        return RESULT_FAIL;
     }
 }

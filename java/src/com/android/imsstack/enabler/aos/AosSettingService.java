@@ -27,9 +27,8 @@ import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SubscriptionListener;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
@@ -38,8 +37,6 @@ import com.android.internal.annotations.VisibleForTesting;
 public class AosSettingService {
 
     private final Object mLock = new Object();
-    @VisibleForTesting
-    protected static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
     @VisibleForTesting
     protected static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
     @VisibleForTesting
@@ -59,6 +56,7 @@ public class AosSettingService {
     protected SubscriptionListenerProxy mSubscriptionListener = null;
     @VisibleForTesting
     protected IntentReceiverListener mIntentReceiverListener = null;
+    private NativeStateListener mNativeStateListener;
 
     public AosSettingService(int slotId) {
         ImsLog.d(slotId, "");
@@ -70,9 +68,11 @@ public class AosSettingService {
 
         mHandler = new SettingServiceHandler(Looper.myLooper());
 
-        IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-        if (jniEvt != null) {
-            jniEvt.registerForNativeBootComplete(mHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            mNativeStateListener = new NativeStateListener();
+            nsi.addListener(mNativeStateListener);
         }
 
         mIntentReceiverListener = new IntentReceiverListener();
@@ -113,12 +113,16 @@ public class AosSettingService {
             mIntentReceiverListener = null;
         }
 
-        if (mHandler != null) {
-            IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-            if (jniEvt != null) {
-                jniEvt.unregisterForNativeBootComplete(mHandler);
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi =
+                    AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
             }
+            mNativeStateListener = null;
+        }
 
+        if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
@@ -212,10 +216,6 @@ public class AosSettingService {
                 ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
 
                 switch (msg.what) {
-                    case EVENT_NATIVE_BOOT_COMPLETED:
-                        handleNativeBootCompleted();
-                        break;
-
                     case EVENT_MOBILE_DATA_STATE_CHANGED:
                         handleMobileDataStateChanged(msg);
                         break;
@@ -228,14 +228,6 @@ public class AosSettingService {
                     default:
                         break;
                 }
-            }
-        }
-
-        private void handleNativeBootCompleted() {
-            ImsLog.d(mSlotId, "");
-            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-            if (aosInfo != null) {
-                aosInfo.notifyMobileDataSetting(mMobileDataEnabled);
             }
         }
     }
@@ -331,6 +323,17 @@ public class AosSettingService {
             sb.append("intent=" + intent.getAction());
 
             return sb.toString();
+        }
+    }
+
+    private final class NativeStateListener implements NativeStateInterface.Listener {
+        @Override
+        public void onNativeServiceReady() {
+            ImsLog.i(mSlotId, "NativeState: service ready.");
+            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
+            if (aosInfo != null) {
+                aosInfo.notifyMobileDataSetting(mMobileDataEnabled);
+            }
         }
     }
 }
