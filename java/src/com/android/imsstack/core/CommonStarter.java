@@ -23,7 +23,6 @@ import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
@@ -126,8 +125,6 @@ public class CommonStarter {
         NativeCommands.setDeviceConfig(context);
         SystemInterface.getInstance().init();
 
-        JNIUpCallEvtManager.getInstance().init();
-
         AgentFactory.createDefaultAgents();
         AgentFactory.initDefaultAgents(context);
     }
@@ -150,19 +147,12 @@ public class CommonStarter {
         Context context = AppContext.getInstance();
 
         ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
-
         ImsTestMode.getInstance().init(slotId);
-
         FeatureConfig.init(slotId);
-
         SystemInterface.getInstance().start(slotId);
-
-        JNIUpCallEvtManager.getInstance().start(slotId);
-
-        AosFactory.getInstance().init(slotId);
-
         AgentFactory.createAgents(context, slotId);
         AgentFactory.initAgentsForMIms(context, slotId);
+        AosFactory.getInstance().init(slotId);
 
         ConfigLoader.updateCarrierConfig(slotId);
 
@@ -170,9 +160,7 @@ public class CommonStarter {
         DcFactory.initDc(context, slotId);
 
         setStateOnStart(slotId);
-
         notifyPackageReady(slotId);
-
         AosFactory.getInstance().start(slotId);
     }
 
@@ -180,21 +168,13 @@ public class CommonStarter {
         Log.i(TAG, "stopAgents(" + slotId + ")");
 
         setStateOnStop(slotId);
-
         notifyPackageStop(slotId);
 
         AosFactory.getInstance().stop(slotId);
-
         DcFactory.cleanUpDc(slotId);
-
-        AgentFactory.cleanUpAgents(slotId);
-
-        JNIUpCallEvtManager.getInstance().stop(slotId);
-
         AosFactory.getInstance().cleanup(slotId);
-
+        AgentFactory.cleanUpAgents(slotId);
         SystemInterface.getInstance().stop(slotId);
-
         ImsTestMode.getInstance().cleanUp(slotId);
     }
 

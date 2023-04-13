@@ -23,7 +23,8 @@ import android.os.Parcel;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.agents.ISharedState;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
@@ -79,9 +80,8 @@ public class MtcApp implements Closeable {
         }
     }
 
-    private static final int MSG_NATIVE_BOOT_COMPLETED = 1;
-    private static final int MSG_COMMON_PACKAGE_READY = 2;
-    private static final int MSG_SEND_NOTIFICATION = 3;
+    private static final int MSG_COMMON_PACKAGE_READY = 1;
+    private static final int MSG_SEND_NOTIFICATION = 2;
 
     private final IBaseContext mContext;
     private final IMtcCallManager mCM;
@@ -93,6 +93,7 @@ public class MtcApp implements Closeable {
     private CallListener mCallListener = null;
     private MtcJniProxy mMtcJniProxy;
     protected MmtelFeatureListener mMmtelFeatureListener = null;
+    private NativeStateInterface.Listener mNativeStateListener;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -155,6 +156,15 @@ public class MtcApp implements Closeable {
                 mmtelFr.removeListener(mMmtelFeatureListener);
             }
             mMmtelFeatureListener = null;
+        }
+
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi = AgentFactory.getInstance().getAgent(
+                    NativeStateInterface.class, mContext.getSlotId());
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
+            }
+            mNativeStateListener = null;
         }
     }
 
@@ -260,6 +270,15 @@ public class MtcApp implements Closeable {
         mCM.dispose();
 
         initializeState();
+
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi = AgentFactory.getInstance().getAgent(
+                    NativeStateInterface.class, mContext.getSlotId());
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
+            }
+            mNativeStateListener = null;
+        }
     }
 
     @VisibleForTesting
@@ -344,12 +363,22 @@ public class MtcApp implements Closeable {
             return;
         }
 
-        ISharedState ss = mContext.getSharedState();
+        NativeStateInterface nsi = mContext.getNativeStateInterface();
 
-        if (ss != null) {
-            if (!ss.isNativeBootCompleted()) {
-                ss.unregisterForNativeBootComplete(mHandler);
-                ss.registerForNativeBootComplete(mHandler, MSG_NATIVE_BOOT_COMPLETED, null);
+        if (nsi != null) {
+            if (!nsi.isServiceReady()) {
+                if (mNativeStateListener == null) {
+                    mNativeStateListener = new NativeStateInterface.Listener() {
+                        @Override
+                        public void onNativeServiceReady() {
+                            log("bindJNIService :: onNativeServiceReady.");
+                            bindJNIService();
+                        }
+                    };
+                } else {
+                    nsi.removeListener(mNativeStateListener);
+                }
+                nsi.addListener(mNativeStateListener);
                 log("bindJNIService :: Wait for native ready...");
                 return;
             }
@@ -358,8 +387,9 @@ public class MtcApp implements Closeable {
                 mContext.getSlotId(), IUIMS.APP_MTC, mNativeListener);
 
         if (mNativeObject != 0) {
-            if (ss != null) {
-                ss.unregisterForNativeBootComplete(mHandler);
+            if (nsi != null && mNativeStateListener != null) {
+                nsi.removeListener(mNativeStateListener);
+                mNativeStateListener = null;
             }
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
@@ -532,12 +562,6 @@ public class MtcApp implements Closeable {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_NATIVE_BOOT_COMPLETED: {
-                    log("bindJNIService :: onBootCompleted");
-                    bindJNIService();
-                    break;
-                }
-
                 case MSG_COMMON_PACKAGE_READY: {
                     log("bindJNIService :: onCommonPackageReady");
                     bindJNIService();

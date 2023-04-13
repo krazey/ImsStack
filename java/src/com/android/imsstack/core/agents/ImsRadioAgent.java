@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.BarringInfo;
 import android.telephony.BarringInfo.BarringServiceInfo;
@@ -30,9 +29,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
-import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.system.SystemRadioInterface;
 import com.android.imsstack.util.ImsLog;
@@ -52,19 +49,18 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     private final int mSlotId;
     private boolean mImsHalTestEnabled = false;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
-    private ImsRadioHandler mHandler;
+    private Handler mHandler;
     private ImsRadioPhoneStateListener mPhoneStateListener;
     private SsacInfo mSsacInfo;
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
     private Map<Integer, TrafficCallback> mTrafficCallbacks =
                 new HashMap<Integer, TrafficCallback>();
+    private NativeStateInterface.Listener mNativeStateListener;
 
     private static final int EVENT_CONNECTION_FAILED = 1;
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
     private static final int EVENT_SSAC_STATE_CHANGED = 3;
-
-    private static final int EVENT_NATIVE_BOOT_COMPLETED = 101;
 
     private static final int ID_MIN = 1000000;
     private static final int ID_MAX = 1100000;
@@ -88,15 +84,23 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
     @Override
     public void init(Context context) {
-        mHandler = new ImsRadioHandler(Looper.myLooper());
+        mHandler = new Handler(Looper.myLooper());
         mPhoneStateListener = new ImsRadioPhoneStateListener();
         mPhoneStateListener.setListener();
         mSsacInfo = new SsacInfo();
         setSystemRadioInterface(this);
 
-        IJNIUpCallEvt juce = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-        if (juce != null) {
-            juce.registerForNativeBootComplete(mHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            mNativeStateListener = new NativeStateInterface.Listener() {
+                @Override
+                public void onNativeServiceReady() {
+                    ImsLog.i(mSlotId, "NativeState: service ready.");
+                    notifySsacInfoToNative();
+                }
+            };
+            nsi.addListener(mNativeStateListener);
         }
 
         mImsHalTestEnabled = (ImsPrivateProperties.Persistent.getInt(
@@ -105,9 +109,13 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
     @Override
     public void cleanup() {
-        IJNIUpCallEvt juce = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-        if (juce != null) {
-            juce.unregisterForNativeBootComplete(mHandler);
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi =
+                    AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
+            }
+            mNativeStateListener = null;
         }
 
         setSystemRadioInterface(null);
@@ -372,10 +380,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         notifySsacInfo(ssacInfo);
     }
 
-    private void handleNativeBootCompleted() {
-        notifySsacInfoToNative();
-    }
-
     private void handleTrafficCallbackOnError(
             int id, int reason, int causeCode, int waitTimeMillis) {
         ImsLog.d(mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
@@ -581,30 +585,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
             ImsLog.d(mSlotId, "update :: voicefactor=" + mBarringFactorForVoice + ", timeSec="
                     + mBarringTimeSecForVoice + ", videofactor=" + mBarringFactorForVideo
                     + ", timeSec=" + mBarringTimeSecForVideo);
-        }
-    }
-
-    private final class ImsRadioHandler extends Handler {
-        ImsRadioHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg == null) {
-                return;
-            }
-
-            ImsLog.d(mSlotId, "ImsRadioHandler :: msg=" + msg.what);
-
-            switch (msg.what) {
-                case EVENT_NATIVE_BOOT_COMPLETED:
-                    handleNativeBootCompleted();
-                    break;
-
-                default:
-                    break;
-            }
         }
     }
 
