@@ -183,10 +183,15 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private MediaInfoEvent mMediaInfoEvent = null;
     public int mPrevOrientation = 0;
     private MediaSession mMediaSession = null;
+    private boolean mIsVideoSessionOpened = false;
+    private boolean mIsPendingSelectCamera = false;
+    private int mCamera = -1;
 
     public MtcMediaSession(IBaseContext context, Call call) {
         mCall = call;
         mMediaSession = MediaFactory.createMediaSession(context, this);
+        mIsVideoSessionOpened = false;
+        mIsPendingSelectCamera = false;
     }
 
     public void dispose() {
@@ -366,6 +371,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
+    @Override
+    public void videoSessionOpened() {
+        log("videoSessionOpened");
+        mIsVideoSessionOpened = true;
+        if (mIsPendingSelectCamera) {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(IUMtcMedia.SELECT_CAMERA_CMD);
+            parcel.writeInt(mCamera);
+            sendRequest(parcel);
+            mIsPendingSelectCamera = false;
+        }
+    }
+
     // TODO MEDIA : RTT audio indicator to be implemented
 
     /**
@@ -379,11 +397,15 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     public void selectCamera(int camera) {
         log("selectCamera :: camera=" + camera);
 
-        Parcel parcel = Parcel.obtain();
+        if (!mIsVideoSessionOpened) {
+            mCamera = camera;
+            mIsPendingSelectCamera = true;
+            return;
+        }
 
+        Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcMedia.SELECT_CAMERA_CMD);
         parcel.writeInt(camera);
-
         sendRequest(parcel);
     }
 
