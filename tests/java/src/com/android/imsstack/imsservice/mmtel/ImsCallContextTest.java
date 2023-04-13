@@ -27,8 +27,8 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -67,8 +67,6 @@ public class ImsCallContextTest extends ImsStackTest {
     /* Indicates that geolocation information is required to make a call */
     private static final int FLAG_LOCATION_REQUIRED = 0x00000001;
     private int mSlotId = 0;
-    private static final int SUBSCRIPTION = 1;
-    private static final int SHARED_STATE = 10;
 
     private ImsCallContext mImsCallContext;
     private MtcServiceStateTracker mStateTracker;
@@ -97,7 +95,7 @@ public class ImsCallContextTest extends ImsStackTest {
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, mSlotId);
-        AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, mMockISubscription);
+        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockISubscription);
 
         HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
         dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
@@ -118,7 +116,7 @@ public class ImsCallContextTest extends ImsStackTest {
     @After
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId);
-        AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, null);
+        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         DcFactory.setObjects(mSlotId, null);
         mStateTracker = null;
         mImsCallContext.dispose();
@@ -147,13 +145,14 @@ public class ImsCallContextTest extends ImsStackTest {
     }
 
     @Test
-    public void getSharedStateTest() {
-        ISharedState mockISharedState = Mockito.mock(ISharedState.class);
-        Assert.assertNull(mImsCallContext.getSharedState());
+    public void getNativeStateInterfaceTest() {
+        NativeStateInterface mockNativeStateInterface = Mockito.mock(NativeStateInterface.class);
+        Assert.assertNull(mImsCallContext.getNativeStateInterface());
 
-        AgentFactory.getInstance().setDefaultAgent(SHARED_STATE, mockISharedState);
-        Assert.assertNotNull(mImsCallContext.getSharedState());
-        AgentFactory.getInstance().setDefaultAgent(SHARED_STATE, null);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mockNativeStateInterface, mSlotId);
+        Assert.assertNotNull(mImsCallContext.getNativeStateInterface());
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, mSlotId);
     }
 
     @Test

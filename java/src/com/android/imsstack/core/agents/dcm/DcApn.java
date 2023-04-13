@@ -28,8 +28,8 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -138,13 +138,7 @@ public class DcApn implements IDcApn {
 
     @Override
     public boolean connect(int apnType) {
-        ISharedState ss = getSharedState(mSlotId);
-
-        if (ss == null) {
-            return false;
-        }
-
-        if (!ss.isNativeBootCompleted()) {
+        if (!isNativeServiceReady()) {
             ImsLog.w(mSlotId, "native is not ready, apnType = " + apnType);
             return false;
         }
@@ -651,6 +645,12 @@ public class DcApn implements IDcApn {
         return apn.getIpVersion();
     }
 
+    private boolean isNativeServiceReady() {
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        return nsi != null && nsi.isServiceReady();
+    }
+
     private void sendDataConnectionState(int apnType,
             PreciseDataConnectionState dataConnectionState) {
         IApn apn = getApnControl(apnType);
@@ -769,11 +769,6 @@ public class DcApn implements IDcApn {
     @VisibleForTesting
     protected ISubscription getSubscription() {
         return (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-    }
-
-    @VisibleForTesting
-    protected ISharedState getSharedState(int slotId) {
-        return (ISharedState) AgentFactory.getAgent(AgentFactory.SHARED_STATE, slotId);
     }
 
     @VisibleForTesting

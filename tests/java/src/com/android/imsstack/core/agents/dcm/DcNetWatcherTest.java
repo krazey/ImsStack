@@ -55,22 +55,22 @@ import com.android.imsstack.core.agents.IAgent;
 import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -90,13 +90,12 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock DcSettings mMockDcSetting;
     @Mock ISystem mMockSystem;
     @Mock IAosInfo mMockAosInfo;
-    @Mock IJNIUpCallEvt mMockJniUpCallEvt;
     @Mock IPhoneState mMockPhoneState;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
     @Mock ITelephonyState mMockTelephonyState;
     @Mock SystemInterface mMockSystemInterface;
     @Mock AosFactory mMockAosFactory;
-    @Mock JNIUpCallEvtManager mMockJniUpCallEventManager;
+    @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock Handler mMockHandler;
 
     @Before
@@ -114,9 +113,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         when(mMockAosFactory.getAosInfo(SLOT_0)).thenReturn(mMockAosInfo);
         replaceInstance(AosFactory.class, "sFactory", null, mMockAosFactory);
 
-        when(mMockJniUpCallEventManager.getJNIUpCallEvt(SLOT_0)).thenReturn(mMockJniUpCallEvt);
-        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
-                mMockJniUpCallEventManager);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
 
         when(mMockPhoneState.createNotifier(any(), eq(null))).thenReturn(mMockPhoneStateNotifier);
 
@@ -146,6 +144,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         mDcNetWatcher.cleanup();
         super.tearDown();
 
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
         DcFactory.setObjects(SLOT_0, null);
     }
 
@@ -154,8 +153,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockDcSetting).getImsSupportedRats();
         verify(mMockSystemInterface).getSystem(SLOT_0);
         verify(mMockAosFactory).getAosInfo(SLOT_0);
-        verify(mMockJniUpCallEvt).registerForNativeBootComplete(any(),
-                eq(DcNetWatcher.EVENT_NATIVE_BOOT_COMPLETED), eq(null));
+        verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mContext).registerReceiver(any(), any(), eq(Context.RECEIVER_EXPORTED));
         verify(mMockPhoneState).createNotifier(any(), eq(null));
         verify(mMockPhoneStateNotifier).setEvents(ImsPhoneStateListener.LISTEN_CALL_STATE
@@ -171,7 +169,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockPhoneState).removeNotifier(mMockPhoneStateNotifier);
         verify(mMockPhoneStateNotifier).setListener(null);
         verify(mContext).unregisterReceiver(any());
-        verify(mMockJniUpCallEvt).unregisterForNativeBootComplete(any());
+        verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
     }
 
     @Test
@@ -1121,29 +1119,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testDcNetWatcherHandler_handleNativeBootCompleted() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneMode", mDcNetWatcher, true);
-        replaceInstance(DcNetWatcher.class, "mDataRoaming", mDcNetWatcher, false);
-        replaceInstance(DcNetWatcher.class, "mVoiceRoaming", mDcNetWatcher, true);
-        replaceInstance(DcNetWatcher.class, "mVoiceServiceState", mDcNetWatcher,
-                ServiceState.STATE_IN_SERVICE);
-
-        mDcNetWatcher.mDcNetWatcherHandler
-                .sendEmptyMessage(DcNetWatcher.EVENT_NATIVE_BOOT_COMPLETED);
-        processAllMessages();
-
-        verify(mMockAosInfo).notifyAirplaneSetting(true);
-        verify(mMockSystem).notifyAirplaneModeChanged(1);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
-                ImsEventDef.IMS_ROAMING_STATE_OFF, ImsEventDef.IMS_ROAMING_STATE_ON);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_VOICE_SERVICE_STATE,
-                ServiceState.STATE_IN_SERVICE, 0);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO,
-                ImsEventDef.IMS_LTE_INFO_UNKNOWN,
-                ImsEventDef.IMS_LTE_INFO_EXTRA_NONE);
-    }
-
-    @Test
     public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenInvalidInfo() throws Exception {
         replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
@@ -1173,6 +1148,32 @@ public class DcNetWatcherTest extends ImsStackTest {
                 ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0);
         assertEquals(ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION,
                 mDcNetWatcher.getNrRegistrationInfo());
+    }
+
+    @Test
+    public void testOnNativeServiceReady() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mAirplaneMode", mDcNetWatcher, true);
+        replaceInstance(DcNetWatcher.class, "mDataRoaming", mDcNetWatcher, false);
+        replaceInstance(DcNetWatcher.class, "mVoiceRoaming", mDcNetWatcher, true);
+        replaceInstance(DcNetWatcher.class, "mVoiceServiceState", mDcNetWatcher,
+                ServiceState.STATE_IN_SERVICE);
+
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
+
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
+
+        verify(mMockAosInfo).notifyAirplaneSetting(true);
+        verify(mMockSystem).notifyAirplaneModeChanged(1);
+        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
+                ImsEventDef.IMS_ROAMING_STATE_OFF, ImsEventDef.IMS_ROAMING_STATE_ON);
+        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_VOICE_SERVICE_STATE,
+                ServiceState.STATE_IN_SERVICE, 0);
+        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO,
+                ImsEventDef.IMS_LTE_INFO_UNKNOWN,
+                ImsEventDef.IMS_LTE_INFO_EXTRA_NONE);
     }
 
     @Test

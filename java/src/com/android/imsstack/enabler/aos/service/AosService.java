@@ -18,11 +18,11 @@ package com.android.imsstack.enabler.aos.service;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Parcel;
 import android.util.ArraySet;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.enabler.IUIMS;
@@ -36,8 +36,6 @@ import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,10 +48,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * This class provides an interface to manage and control the AoS related information.
  */
 public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener {
-
-    public static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
-    @VisibleForTesting
-    protected AosServiceHandler mHandler;
+    private Handler mHandler;
 
     @VisibleForTesting
     protected final Set<IAosRegistrationListener> mAosRegistationListeners =
@@ -84,20 +79,23 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     protected final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
     @VisibleForTesting
     protected boolean mIsConnectedOverCrossSim = false;
+    private NativeStateListener mNativeStateListener;
 
     public void init(int slotId) {
         mSlotId = slotId;
 
-        mHandler = new AosServiceHandler(Looper.myLooper());
+        mHandler = new Handler(Looper.myLooper());
 
         mNativeObject = JniImsProxy.getInterface(IUIMS.AOS_SERVICE, mSlotId);
         if (mNativeObject != 0) {
             JniImsProxy.setListener(mNativeObject, mNativeListener);
         }
 
-        IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-        if (jniEvt != null) {
-            jniEvt.registerForNativeBootComplete(mHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            mNativeStateListener = new NativeStateListener();
+            nsi.addListener(mNativeStateListener);
         }
 
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
@@ -108,12 +106,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         isr.removeListener(mListener);
 
-        if (mHandler != null) {
-            IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-            if (jniEvt != null) {
-                jniEvt.unregisterForNativeBootComplete(mHandler);
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi =
+                    AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
             }
+            mNativeStateListener = null;
+        }
 
+        if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
@@ -682,29 +684,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         });
     }
 
-    private final class AosServiceHandler extends Handler {
-        private AosServiceHandler(Looper looper) {
-            super(looper);
-        }
-
+    private final class NativeStateListener implements NativeStateInterface.Listener {
         @Override
-        public void handleMessage(Message msg) {
-            if (msg != null) {
-                ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
-
-                switch (msg.what) {
-                    case EVENT_NATIVE_BOOT_COMPLETED:
-                        handleNativeBootCompleted();
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private void handleNativeBootCompleted() {
-            ImsLog.d(mSlotId, "");
+        public void onNativeServiceReady() {
+            ImsLog.d(mSlotId, "NativeState: service ready.");
             notifyCapabilitiesChanged();
             notifyImsServiceChanged();
 
@@ -734,6 +717,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                         break;
                 }
             }
+
+            notifyAosStart();
         }
     }
 
