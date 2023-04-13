@@ -20,8 +20,8 @@ import android.os.Looper;
 
 import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ILocationAgent;
-import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -53,7 +53,10 @@ public interface IBaseContext extends IContext {
      * wrapper to get the object of DcNetWatcher.
      */
     IDcNetWatcher getDcNetWatcher();
-    public ISharedState getSharedState();
+    /**
+     * Returns the {@link NativeStateInterface} instance.
+     */
+    NativeStateInterface getNativeStateInterface();
     public ISubscription getSubscription();
     public ISystem getSystem();
 

@@ -27,9 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Parcel;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -38,6 +36,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -63,13 +62,12 @@ import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -81,14 +79,13 @@ public class AosServiceTest extends ImsStackTest {
     private AosService mAosService;
     private final long mNativeObject = 1000;
 
-    @Mock IJNIUpCallEvt mMockJniUpCallEvt;
     @Mock JniIms mMockJniIms;
-    @Mock JNIUpCallEvtManager mMockJniUpCallEvtManager;
     @Mock SparseArray<ImsServiceRegistry> mMockImsServiceRegistrys;
     @Mock ImsServiceRegistry mMockImsServiceRegistry;
     @Mock SimInterface mMockSimInterface;
     @Mock IAosRegistrationListener mMockAosRegistrationListener;
     @Mock IAosInfoListener mMockAosInfoListener;
+    @Mock NativeStateInterface mMockNativeStateInterface;
 
     @Before
     public void setup() throws Exception {
@@ -102,15 +99,13 @@ public class AosServiceTest extends ImsStackTest {
         when(mMockJniIms.getInterface(IUIMS.AOS_SERVICE, SLOT_0)).thenReturn(mNativeObject);
         replaceInstance(JniImsProxy.class, "sJniIms", null, mMockJniIms);
 
-        when(mMockJniUpCallEvtManager.getJNIUpCallEvt(SLOT_0)).thenReturn(mMockJniUpCallEvt);
-        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
-                mMockJniUpCallEvtManager);
-
         when(mMockImsServiceRegistrys.get(SLOT_0)).thenReturn(mMockImsServiceRegistry);
         replaceInstance(ImsServiceRegistry.class, "sImsServiceRegistrys", null,
                 mMockImsServiceRegistrys);
 
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
 
         mAosService = new AosService();
         mAosService.init(SLOT_0);
@@ -123,6 +118,7 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.cleanup();
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
 
         super.tearDown();
     }
@@ -131,8 +127,7 @@ public class AosServiceTest extends ImsStackTest {
     public void initAndStart() {
         // mAosService.init(SLOT_0) and mAosService.start() are called in setup
         verify(mMockJniIms).setListener(mNativeObject, mAosService.mNativeListener);
-        verify(mMockJniUpCallEvt).registerForNativeBootComplete(mAosService.mHandler,
-                AosService.EVENT_NATIVE_BOOT_COMPLETED, null);
+        verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mMockImsServiceRegistry).addListener(mAosService.mListener);
         verify(mMockSimInterface).addListener(mAosService);
         verify(mMockSimInterface).addIsimListener(mAosService);
@@ -140,15 +135,13 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void stopAndCleanup() {
-        Handler handler = mAosService.mHandler;
-
         mAosService.stop();
         verify(mMockSimInterface).removeListener(mAosService);
         verify(mMockSimInterface).removeIsimListener(mAosService);
 
         mAosService.cleanup();
         verify(mMockImsServiceRegistry).removeListener(mAosService.mListener);
-        verify(mMockJniUpCallEvt).unregisterForNativeBootComplete(handler);
+        verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
         verify(mMockJniIms).removeListener(mNativeObject);
         verify(mMockJniIms).releaseInterface(mNativeObject);
     }
@@ -574,44 +567,54 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void aosServiceHandler_bootCompletedWhenSimNotPresent() {
+    public void nativeStateListener_onNativeServiceReadyWhenSimNotPresent() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 IsimState.NOT_PRESENT);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_PRESENT);
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
 
-        Message.obtain(mAosService.mHandler, AosService.EVENT_NATIVE_BOOT_COMPLETED).sendToTarget();
-        processAllMessages();
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
 
-        verify(mMockJniIms, times(2)).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms, times(3)).sendData(eq(mNativeObject), any());
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
+        verify(mMockJniIms).sendData(mNativeObject, aosStartData);
     }
 
     @Test
-    public void aosServiceHandler_bootCompletedWhenSimNotReady() {
+    public void nativeStateListener_onNativeServiceReadyWhenSimNotReady() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.NOT_READY);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_READY);
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
 
-        Message.obtain(mAosService.mHandler, AosService.EVENT_NATIVE_BOOT_COMPLETED).sendToTarget();
-        processAllMessages();
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
 
-        verify(mMockJniIms, times(2)).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms, times(3)).sendData(eq(mNativeObject), any());
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
+        verify(mMockJniIms).sendData(mNativeObject, aosStartData);
     }
 
     @Test
-    public void aosServiceHandler_bootCompletedWhenSimLoaded() {
+    public void nativeStateListener_onNativeServiceReadyWhenSimLoaded() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
@@ -620,24 +623,29 @@ public class AosServiceTest extends ImsStackTest {
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.UT);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(true);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_LOADED);
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
 
-        Message.obtain(mAosService.mHandler, AosService.EVENT_NATIVE_BOOT_COMPLETED).sendToTarget();
-        processAllMessages();
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
 
-        verify(mMockJniIms, times(4)).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms, times(5)).sendData(eq(mNativeObject), any());
         verify(mMockJniIms).sendData(mNativeObject, capabilityData);
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
         verify(mMockJniIms).sendData(mNativeObject, phoneNumberStateData);
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
+        verify(mMockJniIms).sendData(mNativeObject, aosStartData);
     }
 
     @Test
-    public void aosServiceHandler_bootCompletedWhenRefreshStarted() {
+    public void nativeStateListener_onNativeServiceReadyWhenRefreshStarted() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
@@ -645,19 +653,24 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 IsimState.REFRESH_STARTED);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.UT);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_REFRESH_STARTED);
+        ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
+        verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
 
-        Message.obtain(mAosService.mHandler, AosService.EVENT_NATIVE_BOOT_COMPLETED).sendToTarget();
-        processAllMessages();
+        NativeStateInterface.Listener listener = listenerCaptor.getValue();
+        listener.onNativeServiceReady();
 
-        verify(mMockJniIms, times(3)).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms, times(4)).sendData(eq(mNativeObject), any());
         verify(mMockJniIms).sendData(mNativeObject, capabilityData);
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
+        verify(mMockJniIms).sendData(mNativeObject, aosStartData);
     }
 
     @Test

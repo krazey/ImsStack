@@ -41,16 +41,15 @@ import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -79,7 +78,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     public static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
     public static final int EVENT_VOLTE_LTE_STATE_INFO = 2002;
-    public static final int EVENT_NATIVE_BOOT_COMPLETED = 2003;
     public static final int EVENT_NR_REGISTRATION_INFO = 2006;
 
     // Variables--------------------------------------------------
@@ -93,6 +91,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     @VisibleForTesting
     protected DcNetWatcherPhoneStateListener mPhoneStateListener = null;
     protected DcNetWatcherConfigListener mConfigListener = null;
+    private DcNetWatcherNativeStateListener mNativeStateListener;
 
     private RegistrantList mStateDataConnectionState = new RegistrantList();
     private RegistrantList mDataServiceStateChangedRegistrants = new RegistrantList();
@@ -183,10 +182,11 @@ public class DcNetWatcher implements IDcNetWatcher {
             return;
         }
 
-        IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-        if (jniEvt != null) {
-            jniEvt.registerForNativeBootComplete(
-                    mDcNetWatcherHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            mNativeStateListener = new DcNetWatcherNativeStateListener();
+            nsi.addListener(mNativeStateListener);
         }
 
         mDcNetWatcherReceiver = new DcNetWatcherReceiver();
@@ -230,13 +230,13 @@ public class DcNetWatcher implements IDcNetWatcher {
             mDcNetWatcherReceiver = null;
         }
 
-        if (mDcNetWatcherHandler != null) {
-            IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
-            if (jniEvt != null) {
-                jniEvt.unregisterForNativeBootComplete(mDcNetWatcherHandler);
+        if (mNativeStateListener != null) {
+            NativeStateInterface nsi =
+                    AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+            if (nsi != null) {
+                nsi.removeListener(mNativeStateListener);
             }
-
-            mDcNetWatcherHandler = null;
+            mNativeStateListener = null;
         }
 
         mAosInfo = null;
@@ -1177,6 +1177,28 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
     }
 
+    private final class DcNetWatcherNativeStateListener implements NativeStateInterface.Listener {
+        @Override
+        public void onNativeServiceReady() {
+            ImsLog.i(mSlotId, "NativeState: service ready.");
+
+            if (mAosInfo != null) {
+                mAosInfo.notifyAirplaneSetting(mAirplaneMode);
+            }
+
+            if (mSystem != null) {
+                mSystem.notifyAirplaneModeChanged(mAirplaneMode ? 1 : 0);
+            }
+
+            // roaming state
+            notifyRoamingState(mDataRoaming, mVoiceRoaming);
+
+            handleVoiceServiceStateChanged();
+            mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
+                    mLteAttachExtraInfo);
+        }
+    }
+
     private class DcNetWatcherPhoneStateListener extends ImsPhoneStateListener {
         private IPhoneStateNotifier mNotifier = null;
         private IPhoneState mIps = null;
@@ -1374,9 +1396,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                     case EVENT_VOLTE_LTE_STATE_INFO:
                         // TODO: will be implemented
                         break;
-                    case EVENT_NATIVE_BOOT_COMPLETED:
-                        handleNativeBootCompleted();
-                        break;
                     case EVENT_NR_REGISTRATION_INFO:
                         handleNrRegistrationInfo(msg.arg1, msg.arg2);
                         break;
@@ -1456,23 +1475,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                 // Notify the state changed to the applications
                 mAirplaneModeChangedRegistrants.notifyResult(Boolean.valueOf(mAirplaneMode));
             }
-        }
-
-        private void handleNativeBootCompleted() {
-            if (mAosInfo != null) {
-                mAosInfo.notifyAirplaneSetting(mAirplaneMode);
-            }
-
-            if (mSystem != null) {
-                mSystem.notifyAirplaneModeChanged(mAirplaneMode ? 1 : 0);
-            }
-
-            // roaming state
-            notifyRoamingState(mDataRoaming, mVoiceRoaming);
-
-            handleVoiceServiceStateChanged();
-            mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
-                    mLteAttachExtraInfo);
         }
 
         private void handleNrRegistrationInfo(int state, int reason) {

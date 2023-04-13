@@ -44,8 +44,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.ISharedState;
+import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -82,8 +83,8 @@ public class DcApnTest {
     private FakeDcApn mDcApn;
 
     @Mock IApn mMockIApn;
-    @Mock ISharedState mMockISharedState;
     @Mock ISubscription mMockISubscription;
+    @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock Network mMockNetwork;
 
     @Before
@@ -100,6 +101,9 @@ public class DcApnTest {
         when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_IDS);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
 
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+
         // create the instance to test
         mDcApn = new FakeDcApn(SLOT_0);
         mDcApn.init(mContext);
@@ -115,6 +119,7 @@ public class DcApnTest {
         mTelephonyManager = null;
         mSubscriptionManager = null;
         mConnectivityManager = null;
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
 
         AppContext.deinit();
     }
@@ -154,7 +159,7 @@ public class DcApnTest {
 
     @Test
     public void testConnect_NativeReady() throws Exception {
-        when(mMockISharedState.isNativeBootCompleted()).thenReturn(true);
+        when(mMockNativeStateInterface.isServiceReady()).thenReturn(true);
         when(mMockIApn.connect()).thenReturn(true);
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
@@ -165,7 +170,7 @@ public class DcApnTest {
 
     @Test
     public void testConnect_NativeNotReady() throws Exception {
-        when(mMockISharedState.isNativeBootCompleted()).thenReturn(false);
+        when(mMockNativeStateInterface.isServiceReady()).thenReturn(false);
         when(mMockIApn.connect()).thenReturn(true);
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
@@ -713,12 +718,6 @@ public class DcApnTest {
         protected ISubscription getSubscription() {
             super.getSubscription();
             return mMockISubscription;
-        }
-
-        @Override
-        protected ISharedState getSharedState(int slotId) {
-            super.getSharedState(slotId);
-            return mMockISharedState;
         }
 
         @Override
