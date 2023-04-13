@@ -52,7 +52,7 @@ public:
      *
      * @return
      */
-    virtual IMS_RESULT SendPrack() = 0;
+    virtual IMS_RESULT SendPrack(IN IMS_BOOL bAllowReOffer) = 0;
 
     /**
      * @brief Responds

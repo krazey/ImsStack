@@ -1468,7 +1468,7 @@ TEST_F(OutgoingStateTest, SessionRPRReceivedTerminatesCallIfSendingPrackFails)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMtcSession, SendPrack).WillByDefault(Return(IMS_FAILURE));
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_FAILURE));
 
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
     EXPECT_CALL(objNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
@@ -1486,7 +1486,7 @@ TEST_F(OutgoingStateTest, SessionRPRReceivedInvokesSendProgressing)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMtcSession, SendPrack).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
@@ -1506,7 +1506,7 @@ TEST_F(OutgoingStateTest, SessionRPRReceivedInvokesStartWatchdogIfSupportedAndSd
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMtcSession, SendPrack).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
 
     MockISipMessage objSipMessage;
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
