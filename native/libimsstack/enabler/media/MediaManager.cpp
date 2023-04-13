@@ -122,8 +122,8 @@ MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
     return pSessionNode->pMessageHandler;
 }
 
-PUBLIC
-IMediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
+PUBLIC VIRTUAL IMediaSession* MediaManager::CreateSession(
+        IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
 {
     IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
 
@@ -143,8 +143,7 @@ IMediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IM
     return pSession;
 }
 
-PUBLIC
-void MediaManager::DestroySession(IN const IMediaSession* piSession)
+PUBLIC VIRTUAL void MediaManager::DestroySession(IN const IMediaSession* piSession)
 {
     if (piSession == IMS_NULL)
     {
