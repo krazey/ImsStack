@@ -295,7 +295,7 @@ TEST_F(MtcConfigurationManagerTest, GetPrackUpdateResponseWaitTimerReturnsValueI
 TEST_F(MtcConfigurationManagerTest, GetSessionRefreshTriggerIntervalReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetSessionRefreshTriggerInterval(),
-            GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_MILLIS_INT));
+            GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,

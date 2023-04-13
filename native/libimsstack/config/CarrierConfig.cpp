@@ -463,8 +463,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANS
         KEY_IMS_VOICE_PREFIX "incoming_call_reject_code_for_no_answer_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "prack_update_response_wait_timer_millis_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_MILLIS_INT[] =
-        KEY_IMS_VOICE_PREFIX "session_refresh_trigger_interval_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT[] =
+        KEY_IMS_VOICE_PREFIX "session_refresh_trigger_interval_sec_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT[] =
         KEY_IMS_VOICE_PREFIX "registration_restoration_mode_on_504_for_invite_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[] =
