@@ -533,6 +533,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG), nullptr);
+    EXPECT_FALSE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
 
     ImsList<AString> lstPriorityHeaders;
     lstPriorityHeaders.Append("none");
@@ -549,11 +550,17 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
     ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::CALL_INFO)))
             .WillByDefault(Return(lstCallInfoHeaders));
 
+    ImsList<AString> lstOrganizationHeaders;
+    lstOrganizationHeaders.Append("some_org");
+    ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
+            .WillByDefault(Return(lstOrganizationHeaders));
+
     pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
     EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
     EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
     EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
     // TODO: Location is hard to test now
+    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
 }
 
 }  // namespace android

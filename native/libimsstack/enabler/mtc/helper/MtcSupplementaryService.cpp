@@ -337,6 +337,11 @@ IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMess
         Add(SuppType::CALL_COMPOSER_LOCATION_LONG, objLocation.second);
     }
 
+    if (CallComposerUtil::IsBusiness(*piMessage))
+    {
+        Add(SuppType::CALL_COMPOSER_IS_BUSINESS, IMS_TRUE);
+    }
+
     return IMS_TRUE;
 }
 
