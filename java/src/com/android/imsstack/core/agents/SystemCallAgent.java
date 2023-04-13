@@ -237,4 +237,57 @@ public class SystemCallAgent implements SystemCallInterface {
         }
         return RESULT_FAIL;
     }
+
+    /**
+     * Returns the best location information from the last known location.
+     *
+     * @param category The location category. Possible values are:
+     *                 {@link LocationInterface#LOCATION_CATEGORY_ALL},
+     *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION_N_COUNTRY},
+     *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION}
+     */
+    @Override
+    public String[] getLastKnownLocation(int category) {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        return (location != null) ? location.getLastKnownLocation(category) : null;
+    }
+
+    /**
+     * Starts listening the location information with the given interval.
+     *
+     * @param updateIntervalSec The location update interval in seconds.
+     */
+    @Override
+    public void startListeningForLocation(int updateIntervalSec) {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.startListeningForLocation(updateIntervalSec);
+        }
+    }
+
+    /**
+     * Stops listening the location information.
+     */
+    @Override
+    public void stopListeningForLocation() {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.stopListeningForLocation();
+        }
+    }
+
+    /**
+     * Starts an instant location update (one-time update).
+     */
+    @Override
+    public void startInstantLocationUpdate() {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.startInstantLocationUpdate();
+        }
+    }
 }

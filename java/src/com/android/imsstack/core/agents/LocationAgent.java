@@ -33,14 +33,15 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
-import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SystemUtils;
 
@@ -49,7 +50,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public final class LocationAgent implements ILocationAgent {
+/**
+ * A class for providing the location information to report the device's location to the network.
+ * This information will be used to form PIDF-LO XML body.
+ */
+public class LocationAgent implements LocationInterface {
     /** Intenal events */
     private static final int EVENT_ASYNC_START = 1001;
     private static final int EVENT_UPDATE_INTERVAL_TIMER_EXPIRED = 1002;
@@ -67,9 +72,14 @@ public final class LocationAgent implements ILocationAgent {
     }
 
     private final Object mLock = new Object();
-    private final Context mContext;
-    private final LocationApi mLocationApi;
     private final int mSlotId;
+    private final LocationApi mLocationApi;
+    private final LocationHandler mLocationHandler;
+    private final GeocoderProxy mGeocoderProxy;
+    private final AddressResolver mAddressResolver;
+    private final LocationPolicy mPolicy = new LocationPolicy();
+    /** Cached locations */
+    private final Location[] mLocations = new Location[MAX_LOCATIONS];
 
     // NOTICE !!!
     // LOCATION UPDATE has two states, IDLE and ACTIVE.
@@ -100,16 +110,8 @@ public final class LocationAgent implements ILocationAgent {
     private boolean mIsSmdRequested = false;
     private boolean mIsLocationUpdatedAfterMotionDetected = false;
     private long mCachedTimeMotionDetected = 0L;
-
     private String mLastKnownCountryCode = GeocoderProxy.UNKNOWN_COUNTRY;
-    private String[] mLocationInfo = null;
 
-    private LocationPolicy mPolicy = new LocationPolicy();
-    /** Cached locations */
-    private Location[] mLocations = new Location[MAX_LOCATIONS];
-    private GeocoderProxy mGeocoderProxy;
-    private LocationInfoHandler mLocationInfoHandler;
-    private AddressResolver mAddressResolver;
     private LocationApi.Listener mLocationListener = new LocationApi.Listener () {
         public void onLocationChanged(Location location) {
             ImsLog.d(mSlotId, "Provider: " +
@@ -135,7 +137,7 @@ public final class LocationAgent implements ILocationAgent {
                     removeLocationUpdates();
 
                     if (location != null) {
-                        requestSMD();
+                        requestSmd();
                     }
                 } else {
                     ImsLog.d(mSlotId, "Wait for an update by gps");
@@ -151,7 +153,7 @@ public final class LocationAgent implements ILocationAgent {
                 removeLocationUpdates();
 
                 if (location != null) {
-                    requestSMD();
+                    requestSmd();
                 }
             }
 
@@ -170,7 +172,7 @@ public final class LocationAgent implements ILocationAgent {
         }
     };
 
-    private final TriggerEventListener mSMDListener = new TriggerEventListener() {
+    private final TriggerEventListener mSmdListener = new TriggerEventListener() {
         @Override
         public void onTrigger(TriggerEvent event) {
             ImsLog.d(mSlotId, "onTrigger");
@@ -197,92 +199,51 @@ public final class LocationAgent implements ILocationAgent {
         }
     };
 
-    public LocationAgent(Context context, int slotId) {
-        ImsLog.d("SlotId=" + slotId);
+    public LocationAgent(int slotId) {
+        ImsLog.d("LocationAgent" + slotId);
 
-        mContext = context;
         mSlotId = slotId;
-
-        mLocationInfoHandler = new LocationInfoHandler(AppContext.getInstance().getMainLooper());
-        mGeocoderProxy = new GeocoderProxy(mContext, mLocationInfoHandler);
-
         mLocationApi = LocationApi.getInstance();
-        mLocationApi.start();
-
+        mLocationHandler = new LocationHandler(AppContext.getInstance().getMainLooper());
+        mGeocoderProxy = new GeocoderProxy(AppContext.getInstance(), mLocationHandler);
         // Instantiate AddressResolver to update location details
         // when location is fixed by LocationManager.
         mAddressResolver = new AddressResolver();
-
         mLocations[CACHE_I_GPS] = new Location(LocationApi.GPS_PROVIDER);
         mLocations[CACHE_I_NLP] = new Location(LocationApi.NETWORK_PROVIDER);
         mLocations[CACHE_I_FLP] = new Location(LocationApi.FUSED_PROVIDER);
-
-        ISystem system = SystemInterface.getInstance().getSystem(slotId);
-
-        if (system != null) {
-            system.setISystemAPILocation(this);
-        }
     }
 
-    public void dispose() {
-        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+    @Override
+    public void init(Context context) {
+        initPolicy();
+        mLocationApi.start();
+    }
 
-        if (system != null) {
-            system.setISystemAPILocation(null);
-        }
-
-        cancelSMD();
-
+    @Override
+    public void cleanup() {
+        mLocationApi.stop();
+        stopListeningForLocation();
         removeLocationUpdates();
+        mLocationHandler.removeCallbacksAndMessages(null);
 
         stopTimer(ETimerType.TIMER_SEARCH_DURATION);
         stopTimer(ETimerType.TIMER_ASYNC_START);
         stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
 
-        mLocationInfoStarted = false;
         mLocationRequestState = EReqState.STATE_IDLE;
-
+        mGpsLocationRequested = false;
+        mNetworkLocation = null;
+        mGpsLocation = null;
+        mFusedLocation = null;
         mResolvedAddress = null;
-        mPolicy = null;
-        mLocations = null;
-        mAddressResolver = null;
-        mGeocoderProxy = null;
-        if (mLocationInfoHandler != null) {
-            mLocationInfoHandler.removeCallbacksAndMessages(null);
-            mLocationInfoHandler = null;
-        }
+        mUpdateInterval = LocationPolicy.LOCATION_UPDATE_INTERVAL;
+        mLastKnownCountryCode = GeocoderProxy.UNKNOWN_COUNTRY;
     }
 
-    /** ISystempAPILocation */
-    @Override
-    public int startLocationInfo4Sys(int updateIntervalInSec) {
-         return startLocationUpdates(updateIntervalInSec) ? 1 : 0;
-    }
-
-    @Override
-    public void stopLocationInfo4Sys() {
-        stopLocationUpdates();
-    }
-
-    @Override
-    public int makeInstantLocationUpdates4Sys() {
-        return makeInstantLocationUpdates() ? 1 : 0;
-    }
-
-    @Override
-    public String[] getLocationInformation4Sys(int type) {
-        try {
-            return getLastKnownLocation(type);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-    /** ISystempAPILocation */
-
-    /** ILocationAgent */
     @Override
     public void initLastKnownLocation() {
-        getLastKnownLocation(LOCATION_ALL);
+        getLastKnownLocation(LOCATION_CATEGORY_ALL);
     }
 
     @Override
@@ -322,128 +283,128 @@ public final class LocationAgent implements ILocationAgent {
     }
 
     @Override
-    public String[] getLastKnownLocation(int type) {
-        initLocationIfRequired();
+    public String[] getLastKnownLocation(@LocationCategory int category) {
+        try {
+            initLocationIfRequired();
 
-        StringBuilder log = new StringBuilder("Last known location ::");
+            StringBuilder log = new StringBuilder("Last known location ::");
 
-        Location locationFromFlp = null;
-        if (mLocationApi.isProviderEnabled(LocationApi.FUSED_PROVIDER)
-                && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FLP)) {
-            log.append(" FLP enabled");
+            Location locationFromFlp = null;
+            if (mLocationApi.isProviderEnabled(LocationApi.FUSED_PROVIDER)
+                    && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FLP)) {
+                log.append(" FLP enabled");
 
-            locationFromFlp = mLocationApi.getLastKnownLocation(LocationApi.FUSED_PROVIDER);
-            updateFusedLocation(locationFromFlp);
+                locationFromFlp = mLocationApi.getLastKnownLocation(LocationApi.FUSED_PROVIDER);
+                updateFusedLocation(locationFromFlp);
+
+                if (locationFromFlp == null) {
+                    log.append("(null)");
+                }
+            }
 
             if (locationFromFlp == null) {
-                log.append("(null)");
-            }
-        }
+                if (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)) {
+                    log.append(" GPS enabled");
 
-        if (locationFromFlp == null) {
-            if (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)) {
-                log.append(" GPS enabled");
+                    Location location = mLocationApi.getLastKnownLocation(LocationApi.GPS_PROVIDER);
+                    updateGpsLocation(location);
 
-                Location location = mLocationApi.getLastKnownLocation(LocationApi.GPS_PROVIDER);
-                updateGpsLocation(location);
+                    if (location == null) {
+                        log.append("(null)");
+                    }
+                }
 
-                if (location == null) {
-                    log.append("(null)");
+                if (mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)) {
+                    log.append(" NLP enabled");
+
+                    Location location = mLocationApi.getLastKnownLocation(
+                            LocationApi.NETWORK_PROVIDER);
+                    updateNetworkLocation(location);
+
+                    if (location == null) {
+                        log.append("(null)");
+                    }
                 }
             }
 
-            if (mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)) {
-                log.append(" NLP enabled");
+            ImsLog.w(mSlotId, log.toString());
 
-                Location location = mLocationApi.getLastKnownLocation(
-                        LocationApi.NETWORK_PROVIDER);
-                updateNetworkLocation(location);
+            if (mIsSmdRequested) {
+                // If motion is not detect yet, update current time to cache time
+                mCachedTimeMotionDetected = System.currentTimeMillis();
+            }
 
-                if (location == null) {
-                    log.append("(null)");
+            Location location = getBestLocation();
+            String[] locationInfo = parseLocationInfo(location, category);
+
+            if (locationInfo == null || locationInfo[7] == null
+                    || "".equals(locationInfo[7].trim())) {
+                String cc = getCountryCodeViaOtherScheme();
+
+                if (cc != null) {
+                    if (locationInfo == null) {
+                        locationInfo = new String[13];
+                    }
+                    locationInfo[7] = cc;
                 }
             }
+
+            return locationInfo;
+        } catch (Exception e) {
+            ImsLog.d(mSlotId, "getLastKnownLocation: " + e.toString());
+            return null;
         }
-
-        ImsLog.w(mSlotId, log.toString());
-
-        if (mIsSmdRequested) {
-            // If motion is not detect yet, update current time to cache time
-            mCachedTimeMotionDetected = System.currentTimeMillis();
-        }
-
-        Location location = getBestLocation();
-
-        mLocationInfo = parseLocationInfo(location, type);
-        if ((mLocationInfo == null) || mLocationInfo[7] == null
-                || "".equals(mLocationInfo[7].trim())) {
-            String cc = getCountryCodeViaOtherScheme();
-
-            if (cc != null) {
-                if (mLocationInfo == null) {
-                    mLocationInfo = new String[13];
-                }
-                mLocationInfo[7] = cc;
-            }
-        }
-
-        return mLocationInfo;
     }
-    /** ILocationAgent */
 
-    public boolean startLocationUpdates(int internalInSeconds) {
+    @Override
+    public void startListeningForLocation(int updateIntervalSec) {
         synchronized (mLock) {
-            if (internalInSeconds < mPolicy.getDefaultUpdateInterval()) {
-                ImsLog.e(mSlotId, "very short");
-                internalInSeconds = mPolicy.getDefaultUpdateInterval();
+            if (updateIntervalSec < mPolicy.getDefaultUpdateInterval()) {
+                ImsLog.w(mSlotId, "Update interval is very short. Use a default interval.");
+                updateIntervalSec = mPolicy.getDefaultUpdateInterval();
             }
 
-            ImsLog.d(mSlotId, "InternalInterval=" + internalInSeconds + "s");
+            ImsLog.d(mSlotId, "startListeningForLocation: interval(sec)=" + updateIntervalSec);
 
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FIXED_LOCATION_UPDATE_INTERVAL)) {
                 mUpdateInterval = mPolicy.getFixedUpdateInterval();
                 ImsLog.d(mSlotId, "Forced to " + mUpdateInterval);
             } else {
-                mUpdateInterval = internalInSeconds;
+                mUpdateInterval = updateIntervalSec;
             }
 
             if (mLocationInfoStarted) {
-                // already started.
-                return true;
+                ImsLog.d(mSlotId, "Location listening is already started.");
+                return;
             }
 
             mLocationInfoStarted = true;
 
             startTimer(ETimerType.TIMER_ASYNC_START, 100);
-
-            return true;
         }
     }
 
-    public void stopLocationUpdates() {
+    @Override
+    public void stopListeningForLocation() {
         synchronized (mLock) {
             ImsLog.d(mSlotId, "");
 
             mLocationInfoStarted = false;
 
-            cancelSMD();
+            cancelSmd();
 
             mIsLocationUpdatedAfterMotionDetected = false;
             mCachedTimeMotionDetected = 0L;
         }
     }
 
-    public boolean makeInstantLocationUpdates() {
+    @Override
+    public void startInstantLocationUpdate() {
         synchronized (mLock) {
-            if (mInstantLocationInfoRequested) {
-                return true;
+            if (!mInstantLocationInfoRequested) {
+                mInstantLocationInfoRequested = true;
+                startTimer(ETimerType.TIMER_ASYNC_START, 100);
             }
-
-            mInstantLocationInfoRequested = true;
-
-            startTimer(ETimerType.TIMER_ASYNC_START, 100);
-
-            return true;
         }
     }
 
@@ -453,7 +414,7 @@ public final class LocationAgent implements ILocationAgent {
             return false;
         }
 
-        cancelSMD();
+        cancelSmd();
 
         mGpsLocationRequested = false;
 
@@ -482,7 +443,7 @@ public final class LocationAgent implements ILocationAgent {
                     .setLocationSettingsIgnored(true)
                     .build();
             mLocationApi.requestLocationUpdates(LocationApi.FUSED_PROVIDER,
-                    request, mLocationListener, mLocationInfoHandler::post);
+                    request, mLocationListener, mLocationHandler::post);
 
             searchTime = mPolicy.getSearchDurationForFlp();
         } else {
@@ -492,7 +453,7 @@ public final class LocationAgent implements ILocationAgent {
                         .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                         .build();
                 mLocationApi.requestLocationUpdates(LocationApi.GPS_PROVIDER,
-                        request, mLocationListener, mLocationInfoHandler::post);
+                        request, mLocationListener, mLocationHandler::post);
                 mGpsLocationRequested = true;
             }
 
@@ -502,7 +463,7 @@ public final class LocationAgent implements ILocationAgent {
                         .setQuality(LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
                         .build();
                 mLocationApi.requestLocationUpdates(LocationApi.NETWORK_PROVIDER,
-                        request, mLocationListener, mLocationInfoHandler::post);
+                        request, mLocationListener, mLocationHandler::post);
             }
 
             searchTime = Math.max(
@@ -570,7 +531,7 @@ public final class LocationAgent implements ILocationAgent {
         return latestLocation;
     }
 
-    private String[] parseLocationInfo(Location location, int type) {
+    private String[] parseLocationInfo(Location location, @LocationCategory int category) {
         if (location == null) {
             ImsLog.e(mSlotId, "Location is null");
             return null;
@@ -602,7 +563,8 @@ public final class LocationAgent implements ILocationAgent {
             method = "DBH";     // Device-Based Hybrid
         }
 
-        ImsLog.d(mSlotId, method + " :: accuracy=" + location.getAccuracy() + ", type=" + type);
+        ImsLog.d(mSlotId, method + " :: accuracy=" + location.getAccuracy()
+                + ", category=" + category);
 
         if (TextUtils.isEmpty(method)) {
             return null;
@@ -610,9 +572,9 @@ public final class LocationAgent implements ILocationAgent {
 
         Address address = null;
 
-        if (type != LOCATION_POSITION) {
+        if (category != LOCATION_CATEGORY_POSITION) {
             // Use network country first
-            if (type == LOCATION_POSITION_N_COUNTRY) {
+            if (category == LOCATION_CATEGORY_POSITION_N_COUNTRY) {
                 String networkCountry = getCountryCodeFromNetwork();
                 if (networkCountry != null) {
                     address = new Address(Locale.US);
@@ -626,8 +588,8 @@ public final class LocationAgent implements ILocationAgent {
 
                     if (address == null) {
                         if (mPolicy.hasPolicy(LocationPolicy.POLICY_USE_ONLY_CACHED_ADDRESS)
-                            && mPolicy.hasPolicy(
-                                LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
+                                && mPolicy.hasPolicy(LocationPolicy
+                                        .POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
                             // Do not get address by policy
                         } else {
                             address = translateLocationIntoAddress(location);
@@ -655,7 +617,7 @@ public final class LocationAgent implements ILocationAgent {
         }
 
         // Latitude / Longitude / Radius / Shape / Confidence / Timestamp / Method /
-        // Altitude / VAccuracy
+        // Altitude / Vertical Accuracy
         String[] locationInfo = new String[13];
 
         locationInfo[0] = Double.toString(location.getLatitude());
@@ -816,10 +778,6 @@ public final class LocationAgent implements ILocationAgent {
 
         // Update cached data from the recent location when location is fixed.
         if (mPolicy.hasPolicy(LocationPolicy.POLICY_UPDATE_ADDRESS_AFTER_LOCATION_ACQUIRED)) {
-            if (mAddressResolver == null) {
-                return;
-            }
-
             Location betterLocation = null;
 
             synchronized (mLock) {
@@ -866,28 +824,27 @@ public final class LocationAgent implements ILocationAgent {
     }
 
     public int getUpdateInterval() {
-        ImsLog.d(mSlotId, "UpdateInterval=" + mUpdateInterval + "s");
         return mUpdateInterval;
     }
 
     private void startTimer(ETimerType eType, int nDuration) {
         if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
             if (mTimerIdUpdateInterval != (-1)) {
-                ImsLog.w(mSlotId, "already running");
+                ImsLog.w(mSlotId, "LocationUpdate timer already running");
                 return;
             }
         }
 
         if (eType == ETimerType.TIMER_SEARCH_DURATION) {
             if (mTimerIdSearchDuration != (-1)) {
-                ImsLog.w(mSlotId, "already running");
+                ImsLog.w(mSlotId, "Search timer already running");
                 return;
             }
         }
 
         if (eType == ETimerType.TIMER_ASYNC_START) {
             if (mTimerIdAsyncStart != (-1)) {
-                ImsLog.w(mSlotId, "already running");
+                ImsLog.w(mSlotId, "AsyncStart timer already running");
                 return;
             }
         }
@@ -898,28 +855,28 @@ public final class LocationAgent implements ILocationAgent {
             return;
         }
 
-        int nTimerID = ata.getTimerId();
+        int timerId = ata.getTimerId();
 
-        if (nTimerID <= 0) {
+        if (timerId <= 0) {
             ImsLog.e(mSlotId, "failed to allocate a timer");
             return;
         }
 
         if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
-            ata.registerForTimerExpired(nTimerID,
-                    mLocationInfoHandler, EVENT_UPDATE_INTERVAL_TIMER_EXPIRED, null);
-            mTimerIdUpdateInterval = nTimerID;
+            ata.registerForTimerExpired(timerId,
+                    mLocationHandler, EVENT_UPDATE_INTERVAL_TIMER_EXPIRED, null);
+            mTimerIdUpdateInterval = timerId;
         } else if (eType == ETimerType.TIMER_SEARCH_DURATION) {
-            ata.registerForTimerExpired(nTimerID,
-                    mLocationInfoHandler, EVENT_SEARCH_DURATION_EXPIRED, null);
-            mTimerIdSearchDuration = nTimerID;
+            ata.registerForTimerExpired(timerId,
+                    mLocationHandler, EVENT_SEARCH_DURATION_EXPIRED, null);
+            mTimerIdSearchDuration = timerId;
         } else if (eType == ETimerType.TIMER_ASYNC_START) {
-            ata.registerForTimerExpired(nTimerID, mLocationInfoHandler, EVENT_ASYNC_START, null);
-            mTimerIdAsyncStart = nTimerID;
+            ata.registerForTimerExpired(timerId, mLocationHandler, EVENT_ASYNC_START, null);
+            mTimerIdAsyncStart = timerId;
         }
 
-        if (!ata.startTimer(nTimerID, nDuration)) {
-            ata.unregisterForTimerExpired(nTimerID, mLocationInfoHandler);
+        if (!ata.startTimer(timerId, nDuration)) {
+            ata.unregisterForTimerExpired(timerId, mLocationHandler);
             ImsLog.e(mSlotId, "starting timer failed");
 
             if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
@@ -937,31 +894,31 @@ public final class LocationAgent implements ILocationAgent {
             return;
         }
 
-        ImsLog.i(mSlotId, "timer started :: tid=" + nTimerID + ", duration=" + nDuration);
+        ImsLog.i(mSlotId, "timer started :: tid=" + timerId + ", duration=" + nDuration);
     }
 
     private void stopTimer(ETimerType eType) {
-        int nTimerID = (-1);
+        int timerId = (-1);
 
         if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
-            nTimerID = mTimerIdUpdateInterval;
+            timerId = mTimerIdUpdateInterval;
             mTimerIdUpdateInterval = (-1);
         } else if (eType == ETimerType.TIMER_SEARCH_DURATION) {
-            nTimerID = mTimerIdSearchDuration;
+            timerId = mTimerIdSearchDuration;
             mTimerIdSearchDuration = (-1);
         } else if (eType == ETimerType.TIMER_ASYNC_START) {
-            nTimerID = mTimerIdAsyncStart;
+            timerId = mTimerIdAsyncStart;
             mTimerIdAsyncStart = (-1);
         }
 
-        if (nTimerID == (-1)) {
+        if (timerId == (-1)) {
             return;
         }
 
         IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
         if (atm != null) {
-            atm.stopTimer(nTimerID);
-            atm.unregisterForTimerExpired(nTimerID, mLocationInfoHandler);
+            atm.stopTimer(timerId);
+            atm.unregisterForTimerExpired(timerId, mLocationHandler);
         }
     }
 
@@ -1026,7 +983,7 @@ public final class LocationAgent implements ILocationAgent {
 
         if (!GeocoderProxy.UNKNOWN_COUNTRY.equals(oldCountryCode)
                 && !GeocoderProxy.UNKNOWN_COUNTRY.equals(newCountryCode)) {
-            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(0 /*slot id*/);
+            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
             if (aosInfo != null) {
                 aosInfo.notifyLocationInfo(LocationInfo.COUNTRY_CHANGED);
             }
@@ -1042,7 +999,7 @@ public final class LocationAgent implements ILocationAgent {
             }
         }
 
-        IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(0 /*slot id*/);
+        IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
         if (aosInfo != null) {
             aosInfo.notifyLocationInfo(LocationInfo.FIXED);
         }
@@ -1079,7 +1036,7 @@ public final class LocationAgent implements ILocationAgent {
         synchronized (mLock) {
             location = findLatestLocation(mFusedLocation, mGpsLocation, mNetworkLocation);
 
-            if ((location != null)
+            if (location != null
                     && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_LOCATION)) {
 
                 location = updateCurrentTimeFromCachedTime(location);
@@ -1090,7 +1047,7 @@ public final class LocationAgent implements ILocationAgent {
             }
         }
 
-        if ((location == null)
+        if (location == null
                 && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_LOCATION)
                 && (mLocationApi.isProviderEnabled(LocationApi.GPS_PROVIDER)
                         || mLocationApi.isProviderEnabled(LocationApi.NETWORK_PROVIDER)
@@ -1292,13 +1249,13 @@ public final class LocationAgent implements ILocationAgent {
         return sb.toString();
     }
 
-    private final class LocationInfoHandler extends Handler {
-        public LocationInfoHandler(Looper looper) {
+    private final class LocationHandler extends Handler {
+        LocationHandler(Looper looper) {
             super(looper);
         }
 
         public void handleMessage(Message msg) {
-            ImsLog.d(mSlotId, "LocationInfoHandler :: what=" + msg.what);
+            ImsLog.d(mSlotId, "LocationHandler :: what=" + msg.what);
 
             switch (msg.what) {
                 case EVENT_ASYNC_START: {
@@ -1313,7 +1270,6 @@ public final class LocationAgent implements ILocationAgent {
                     }
                     break;
                 }
-
                 case EVENT_UPDATE_INTERVAL_TIMER_EXPIRED: {
                     stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
 
@@ -1322,22 +1278,19 @@ public final class LocationAgent implements ILocationAgent {
                     if (mLocationInfoStarted) {
                         requestLocationUpdates();
                     } else {
-                        ImsLog.d(mSlotId, "Location is not required, so stop location update ...");
+                        ImsLog.d(mSlotId, "Location is not required, so stop location update.");
                     }
                     break;
                 }
-
                 case EVENT_SEARCH_DURATION_EXPIRED: {
                     removeLocationUpdates();
 
                     // Only if location is updated after motion detection, request SMD
-                    if (mIsLocationUpdatedAfterMotionDetected == true) {
-                        requestSMD();
+                    if (mIsLocationUpdatedAfterMotionDetected) {
+                        requestSmd();
                     }
-
                     break;
                 }
-
                 default:
                     break;
             }
@@ -1400,8 +1353,8 @@ public final class LocationAgent implements ILocationAgent {
                 final Location location = getLocation();
 
                 if (location != null) {
-                    final List<Address> addresses = GeocoderProxy.getAddressesFromLocation(
-                            mContext, location.getLatitude(), location.getLongitude(), 1);
+                    final List<Address> addresses = mGeocoderProxy.getAddressesFromLocation(
+                            location.getLatitude(), location.getLongitude(), 1);
 
                     if ((addresses != null) && !addresses.isEmpty()) {
                         updateLocationDetailsInternal(location, addresses.get(0));
@@ -1411,7 +1364,7 @@ public final class LocationAgent implements ILocationAgent {
         }
     }
 
-    private boolean requestSMD() {
+    private boolean requestSmd() {
         ImsLog.d(mSlotId, "");
 
         if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD) == false) {
@@ -1425,12 +1378,12 @@ public final class LocationAgent implements ILocationAgent {
         }
 
         try {
-            SensorManager sensorManager
-                    = mContext.getSystemService(SensorManager.class);
+            SensorManager sensorManager =
+                    AppContext.getInstance().getSystemService(SensorManager.class);
 
             if (sensorManager != null) {
                 Sensor sigMotion = sensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-                sensorManager.requestTriggerSensor(mSMDListener, sigMotion);
+                sensorManager.requestTriggerSensor(mSmdListener, sigMotion);
             }
         } catch (Throwable t) {
             t.printStackTrace();
@@ -1446,7 +1399,7 @@ public final class LocationAgent implements ILocationAgent {
         return true;
     }
 
-    private void cancelSMD() {
+    private void cancelSmd() {
         ImsLog.d(mSlotId, "");
 
         if (!mIsSmdRequested) {
@@ -1455,13 +1408,12 @@ public final class LocationAgent implements ILocationAgent {
         }
 
         mIsSmdRequested = false;
-
-        SensorManager sensorManager
-                = mContext.getSystemService(SensorManager.class);
+        SensorManager sensorManager =
+                AppContext.getInstance().getSystemService(SensorManager.class);
 
         if (sensorManager != null) {
             Sensor sigMotion = sensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-            sensorManager.cancelTriggerSensor(mSMDListener, sigMotion);
+            sensorManager.cancelTriggerSensor(mSmdListener, sigMotion);
         }
     }
 
@@ -1510,7 +1462,7 @@ public final class LocationAgent implements ILocationAgent {
     }
 
     private void processLocationUpdateDone() {
-        if (requestSMD() == false) {
+        if (!requestSmd()) {
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING)) {
                 ImsLog.d(mSlotId, "Blocked, because periodic lcoation polling is not allowed");
             } else {
@@ -1525,6 +1477,95 @@ public final class LocationAgent implements ILocationAgent {
         if (mPolicy.hasPolicy(
                 LocationPolicy.POLICY_NOTIFY_LOCATION_FIXED_FOR_INSTANT_REQUEST)) {
             notifyEventOnLocationFixedForInstantRequest();
+        }
+    }
+
+    // TODO: Need to refactor this based on carrier requirements.
+    private void initPolicy() {
+        LocationPolicy lp = null;
+        int policy = LocationPolicy.POLICY_ENABLE_CACHED_LOCATION
+                | LocationPolicy.POLICY_USE_CACHED_LOCATION;
+        int addressResolutionTimeMillis = -1;
+        long validityPeriod = -1L;
+        SimCarrierId carrierId = CarrierInfo.getInstance().getCarrierId(mSlotId);
+
+        if (carrierId.getCarrierId() == 1) {
+            lp = getLocationPolicy();
+
+            policy |= LocationPolicy.POLICY_USE_CACHED_ADDRESS;
+            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
+            policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
+            policy |= LocationPolicy.POLICY_USE_FLP;
+            policy |= LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT;
+
+            addressResolutionTimeMillis = 1000;
+            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD;
+
+            lp.setAddressValidityPeriod(LocationPolicy.LOCATION_VALIDITY_PERIOD);
+            lp.setAddressTolerableDistance(150);
+            lp.setSearchDurationForGps(20);
+            lp.setShape(LocationPolicy.SHAPE_ELLIPSOID);
+        } else if (carrierId.getCarrierId() == 1187 || carrierId.getCarrierId() == 2119) {
+            lp = getLocationPolicy();
+
+            policy |= LocationPolicy.POLICY_NOTIFY_LOCATION_FIXED_FOR_INSTANT_REQUEST;
+            policy |= LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT;
+            policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
+            policy |= LocationPolicy.POLICY_USE_CACHED_ADDRESS;
+            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
+            policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_VIA_OTHER_SCHEME;
+
+            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                    SubsInfoInterface.class, mSlotId);
+            if (subsInfo != null && subsInfo.isTestModeEnabled()) {
+                // For WFC E911 test which should be tested in Puerto Rico area,
+                // allow mock location
+                policy |= LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE;
+            }
+
+            addressResolutionTimeMillis = LocationPolicy.ADDRESS_RESOLUTION_RTD_TIME;
+            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD;
+
+            lp.setAddressTolerableDistance(150);
+        } else if (carrierId.getCarrierId() == 1839
+                && ImsUtils.isWfcEnabledByPlatform(AppContext.getInstance(), mSlotId)) {
+            lp = getLocationPolicy();
+
+            policy |= LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING;
+            policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
+
+            addressResolutionTimeMillis = LocationPolicy.ADDRESS_RESOLUTION_MAX_TIME;
+            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD_SHORT;
+        } else if (ImsUtils.isWfcEnabledByPlatform(AppContext.getInstance(), mSlotId)) {
+            lp = getLocationPolicy();
+
+            policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
+            policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
+            policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_VIA_OTHER_SCHEME;
+            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
+            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_TIME;
+            // policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_FROM_USIM;
+
+            lp.setAddressTolerableDistance(3000);
+            lp.setDefaultUpdateInterval(3600);
+            // 10 Min: 10 * 60 * 1000 * 1000000L
+            lp.setAddressValidityPeriod(10 * 60 * 1000 * 1000000L);
+        }
+
+        if (lp != null) {
+            lp.setPolicy(policy);
+
+            if (addressResolutionTimeMillis > 0) {
+                lp.setDefaultAddressResolutionTime(addressResolutionTimeMillis);
+            }
+
+            if (validityPeriod > 0) {
+                lp.setValidityPeriod(validityPeriod);
+            }
+
+            ImsLog.d(mSlotId, lp.toString());
+
+            setLocationPolicy(lp);
         }
     }
 }

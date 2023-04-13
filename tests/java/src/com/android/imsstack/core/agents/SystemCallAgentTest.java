@@ -51,6 +51,7 @@ public class SystemCallAgentTest {
     @Mock ISystem mSystem;
     @Mock SystemInterface mSystemInterface;
     @Mock ConfigInterface mConfigInterface;
+    @Mock LocationInterface mLocationInterface;
     @Mock IpSecInterface mIpSecInterface;
     @Mock IDcNetWatcher mDcNetWatcher;
     @Mock SimAgent mSimAgent;
@@ -65,6 +66,7 @@ public class SystemCallAgentTest {
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, SLOT0);
+        AgentFactory.getInstance().setAgent(LocationInterface.class, mLocationInterface, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, mIpSecInterface, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimAgent, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, mNativeStateAgent, SLOT0);
@@ -82,6 +84,7 @@ public class SystemCallAgentTest {
 
         DcFactory.setObjects(SLOT0, null);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
@@ -251,12 +254,12 @@ public class SystemCallAgentTest {
     @Test
     @SmallTest
     public void testIsImsVoiceCallSupported() {
-        boolean result = mSystemCallAgent.isImsVoiceCallSupported();
+        mSystemCallAgent.isImsVoiceCallSupported();
 
         verify(mDcNetWatcher).isVops();
 
         replaceDcNetWatcher(null);
-        result = mSystemCallAgent.isImsVoiceCallSupported();
+        boolean result = mSystemCallAgent.isImsVoiceCallSupported();
 
         assertFalse(result);
         verifyNoMoreInteractions(mDcNetWatcher);
@@ -275,6 +278,61 @@ public class SystemCallAgentTest {
 
         assertEquals(SystemCallInterface.RESULT_FAIL, result);
         verifyNoMoreInteractions(mNativeStateAgent);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetLastKnownLocation() {
+        mSystemCallAgent.getLastKnownLocation(LocationInterface.LOCATION_CATEGORY_ALL);
+
+        verify(mLocationInterface).getLastKnownLocation(
+                eq(LocationInterface.LOCATION_CATEGORY_ALL));
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        String[] result = mSystemCallAgent.getLastKnownLocation(
+                LocationInterface.LOCATION_CATEGORY_ALL);
+
+        assertNull(result);
+        verifyNoMoreInteractions(mLocationInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testStartListeningForLocation() {
+        mSystemCallAgent.startListeningForLocation(10);
+
+        verify(mLocationInterface).startListeningForLocation(eq(10));
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        mSystemCallAgent.startListeningForLocation(10);
+
+        verifyNoMoreInteractions(mLocationInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testStopListeningForLocation() {
+        mSystemCallAgent.stopListeningForLocation();
+
+        verify(mLocationInterface).stopListeningForLocation();
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        mSystemCallAgent.stopListeningForLocation();
+
+        verifyNoMoreInteractions(mLocationInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testStartInstantLocationUpdate() {
+        mSystemCallAgent.startInstantLocationUpdate();
+
+        verify(mLocationInterface).startInstantLocationUpdate();
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        mSystemCallAgent.startInstantLocationUpdate();
+
+        verifyNoMoreInteractions(mLocationInterface);
     }
 
     private void replaceDcNetWatcher(IDcNetWatcher dcNetWatcher) {

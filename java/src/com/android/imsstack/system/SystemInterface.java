@@ -778,12 +778,14 @@ public class SystemInterface implements JniSystemListener {
                 "IS_WFC_PROVISIONED");
         sMethodToString.put(SystemConstants.GET_WFC_ADDRESS_ID,
                 "GET_WFC_ADDRESS_ID");
-        sMethodToString.put(SystemConstants.START_LOCATION_INFO,
-                "START_LOCATION_INFO");
-        sMethodToString.put(SystemConstants.STOP_LOCATION_INFO,
-                "STOP_LOCATION_INFO");
-        sMethodToString.put(SystemConstants.GET_LOCATION_INFO,
-                "GET_LOCATION_INFO");
+        sMethodToString.put(SystemConstants.START_LISTENING_FOR_LOCATION,
+                "START_LISTENING_FOR_LOCATION");
+        sMethodToString.put(SystemConstants.STOP_LISTENING_FOR_LOCATION,
+                "STOP_LISTENING_FOR_LOCATION");
+        sMethodToString.put(SystemConstants.GET_LAST_KNOWN_LOCATION,
+                "GET_LAST_KNOWN_LOCATION");
+        sMethodToString.put(SystemConstants.START_INSTANT_LOCATION_UPDATE,
+                "START_INSTANT_LOCATION_UPDATE");
         sMethodToString.put(SystemConstants.SET_EVENT,
                 "SET_EVENT");
         sMethodToString.put(SystemConstants.RESET_EVENT,
@@ -834,7 +836,6 @@ public class SystemInterface implements JniSystemListener {
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
-        private ISystemAPILocation mISystemAPILocation;
 
         private ThreadMessageExecutor mExecutor =
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
@@ -903,13 +904,6 @@ public class SystemInterface implements JniSystemListener {
         public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api) {
             synchronized (mLock) {
                 mISystemAPITelephonySubscriber = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPILocation(ISystemAPILocation api) {
-            synchronized (mLock) {
-                mISystemAPILocation = api;
             }
         }
 
@@ -1534,12 +1528,11 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_WFC_ADDRESS_ID:
                         result = handleSystemAPIWifiCalling(method);
                         break;
-                    //mISystemAPILocation
-                    case SystemConstants.START_LOCATION_INFO: //FALL-THROUGH
-                    case SystemConstants.STOP_LOCATION_INFO: //FALL-THROUGH
-                    case SystemConstants.GET_LOCATION_INFO: //FALL-THROUGH
-                    case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
-                        result = handleSystemAPILocation(method, parcel);
+                    case SystemConstants.START_LISTENING_FOR_LOCATION: //FALL-THROUGH
+                    case SystemConstants.STOP_LISTENING_FOR_LOCATION: //FALL-THROUGH
+                    case SystemConstants.GET_LAST_KNOWN_LOCATION: //FALL-THROUGH
+                    case SystemConstants.START_INSTANT_LOCATION_UPDATE:
+                        result = handleSystemApiLocation(method, parcel);
                         break;
                     case SystemConstants.START_IMS_TRAFFIC: //FALL-THROUGH
                     case SystemConstants.STOP_IMS_TRAFFIC: //FALL-THROUGH
@@ -2042,41 +2035,42 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPILocation(int method, Parcel parcel) {
-            if (mISystemAPILocation == null) {
+        private Parcel handleSystemApiLocation(int method, Parcel parcel) {
+            if (mSystemCall == null) {
                 return null;
             }
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.START_LOCATION_INFO:
-                result.writeInt(mISystemAPILocation.startLocationInfo4Sys(parcel.readInt()));
-                break;
-            case SystemConstants.STOP_LOCATION_INFO:
-                mISystemAPILocation.stopLocationInfo4Sys();
-                result.writeInt(1);
-                break;
-            case SystemConstants.GET_LOCATION_INFO:
-                int nType = parcel.readInt();
-                String[] locationParam = mISystemAPILocation.getLocationInformation4Sys(nType);
-
-                if (locationParam == null) {
-                    result.writeInt(0);
+                case SystemConstants.START_LISTENING_FOR_LOCATION:
+                    mSystemCall.startListeningForLocation(parcel.readInt());
+                    result.writeInt(1);
                     break;
-                }
+                case SystemConstants.STOP_LISTENING_FOR_LOCATION:
+                    mSystemCall.stopListeningForLocation();
+                    result.writeInt(1);
+                    break;
+                case SystemConstants.GET_LAST_KNOWN_LOCATION:
+                    String[] locationParam = mSystemCall.getLastKnownLocation(parcel.readInt());
 
-                result.writeInt(locationParam.length);
+                    if (locationParam == null) {
+                        result.writeInt(0);
+                        break;
+                    }
 
-                for (int i = 0; i < locationParam.length; ++i) {
-                    result.writeString(locationParam[i]);
-                }
-                break;
-            case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
-                result.writeInt(mISystemAPILocation.makeInstantLocationUpdates4Sys());
-                break;
-            default:
-                result.recycle();
-                return null;
+                    result.writeInt(locationParam.length);
+
+                    for (int i = 0; i < locationParam.length; ++i) {
+                        result.writeString(locationParam[i]);
+                    }
+                    break;
+                case SystemConstants.START_INSTANT_LOCATION_UPDATE:
+                    mSystemCall.startInstantLocationUpdate();
+                    result.writeInt(1);
+                    break;
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;
