@@ -817,6 +817,7 @@ public class ImsRegistrationTracker {
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms\"");
             mFeatureTags.put(FeatureTagMask.CALL_COMPOSER_ENRICHED_CALLING, "+g.3gpp.icsi-ref="
                     + "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callcomposer\"");
+            mFeatureTags.put(FeatureTagMask.CALL_COMPOSER_VIA_TELEPHONY, "+g.gsma.callcomposer");
             mFeatureTags.put(FeatureTagMask.POST_CALL, "+g.3gpp.icsi-ref="
                     + "\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callunanswered\"");
             mFeatureTags.put(FeatureTagMask.SHARED_MAP, "+g.3gpp.icsi-ref="
