@@ -647,7 +647,7 @@ TEST_F(UpdatingStateTest, SessionRPRReceivedInvokesSendPrack)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
-    EXPECT_CALL(objMtcSession, SendPrack).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionRPRReceived(&objSession, -1));
 }
@@ -658,7 +658,7 @@ TEST_F(UpdatingStateTest, SessionRPRReceivedNotifiesFailureIfSdpNegoFailed)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
-    EXPECT_CALL(objMtcSession, SendPrack).Times(0);
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).Times(0);
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
     EXPECT_CALL(objUiNotifier,

@@ -129,12 +129,11 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserA
             nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack()
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bAllowReOffer)
 {
     IMS_TRACE_D("SendPrack", 0, 0, 0);
 
-    // Not supporting to send Offer in PRACK.
-    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(bAllowReOffer) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }

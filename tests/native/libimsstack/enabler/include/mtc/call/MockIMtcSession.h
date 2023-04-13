@@ -36,7 +36,7 @@ public:
 
     MOCK_METHOD(IMS_RESULT, Start, (), (override));
     MOCK_METHOD(IMS_RESULT, SendProvisionalResponse, (IN IMS_BOOL bUserAlert), (override));
-    MOCK_METHOD(IMS_RESULT, SendPrack, (), (override));
+    MOCK_METHOD(IMS_RESULT, SendPrack, (IN IMS_BOOL bAllowReOffer), (override));
     MOCK_METHOD(IMS_RESULT, RespondToPrack, (IN IMS_SINT32 eStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SendEarlyUpdate, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(IMS_RESULT, RespondToEarlyUpdate, (IN IMS_SINT32 eStatusCode), (override));
