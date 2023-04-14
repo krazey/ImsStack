@@ -453,7 +453,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRPRReceived(
         return CallStateName::ESTABLISHED;
     }
 
-    if (pSession->SendPrack() == IMS_FAILURE)
+    if (pSession->SendPrack(IMS_FALSE) == IMS_FAILURE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();

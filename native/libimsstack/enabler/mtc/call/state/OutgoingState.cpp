@@ -559,7 +559,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (pSession->SendPrack() == IMS_FAILURE)
+    if (pSession->SendPrack(IMS_FALSE) == IMS_FAILURE)
     {
         // TODO: If there is no ISession in ISession::STATE_ESTABLISHED state and
         // not piSession->IsFinalResponseReceivedForInitialInviteRequest())

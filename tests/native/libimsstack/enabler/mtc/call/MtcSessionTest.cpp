@@ -249,10 +249,9 @@ TEST_F(MtcSessionTest, SendPrackSendsPrack)
 {
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
-
     EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
 
-    pMtcSession->SendPrack();
+    pMtcSession->SendPrack(IMS_FALSE);
 }
 
 TEST_F(MtcSessionTest, SendPrackFailsIfSetSdpFails)
@@ -262,7 +261,47 @@ TEST_F(MtcSessionTest, SendPrackFailsIfSetSdpFails)
 
     EXPECT_CALL(*pMessageSender, SendPrack).Times(0);
 
-    pMtcSession->SendPrack();
+    pMtcSession->SendPrack(IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendPrackSendsPrackWithoutReOfferIfSdpOfferIsSent)
+{
+    CreateMtcSession();
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    EXPECT_CALL(objMediaManager, FormSdp(&objSession, CallType::VOIP, IMS_FALSE)).Times(0);
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objSession, IMS_FALSE)).Times(0);
+    EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
+
+    pMtcSession->SendPrack(IMS_TRUE);
+}
+
+TEST_F(MtcSessionTest, SendPrackSendsPrackWithReOffer)
+{
+    CreateMtcSession();
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMediaManager, FormSdp(&objSession, CallType::VOIP, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objSession, IMS_FALSE)).Times(1);
+    EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
+
+    pMtcSession->SendPrack(IMS_TRUE);
+}
+
+TEST_F(MtcSessionTest, SendPrackSendsPrackWithoutReOffer)
+{
+    CreateMtcSession();
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMediaManager, FormSdp(&objSession, CallType::VOIP, IMS_FALSE)).Times(0);
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objSession, IMS_FALSE)).Times(0);
+    EXPECT_CALL(*pMessageSender, SendPrack).Times(1);
+
+    pMtcSession->SendPrack(IMS_FALSE);
 }
 
 TEST_F(MtcSessionTest, RespondToPrackRespondsToPrack)
