@@ -66,6 +66,14 @@ public:
     static std::pair<AString, AString> GetLocation(IN const IMessage& objMessage);
 
     /**
+     * Checks if the message indicates that it is a business call.
+     *
+     * @param objMessage Source message.
+     * @return True if it's a business call.
+     */
+    static IMS_BOOL IsBusiness(IN const IMessage& objMessage);
+
+    /**
      * Sets the call composer priority to the message.
      *
      * @param nPriority CALL_COMPOSER_PRIORITY_NONE or CALL_COMPOSER_PRIORITY_URGENT.

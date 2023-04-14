@@ -78,6 +78,12 @@ GLOBAL std::pair<AString, AString> CallComposerUtil::GetLocation(IN const IMessa
     return std::make_pair(pLocation->GetLatitude(), pLocation->GetLongitude());
 }
 
+GLOBAL IMS_BOOL CallComposerUtil::IsBusiness(IN const IMessage& objMessage)
+{
+    ImsList<AString> lstHeaders = objMessage.GetHeaders(SipHeaderName::ORGANIZATION);
+    return lstHeaders.GetSize() > 0 && lstHeaders.GetAt(0).GetLength() > 0;
+}
+
 GLOBAL void CallComposerUtil::SetPriority(IN IMS_SINT32 nPriority, OUT IMessage& objMessage)
 {
     switch (nPriority)
