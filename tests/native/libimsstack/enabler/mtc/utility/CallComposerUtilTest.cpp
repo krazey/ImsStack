@@ -107,6 +107,35 @@ TEST_F(CallComposerUtilTest, GetLocationNotExist)
             std::make_pair(AString::ConstNull(), AString::ConstNull()));
 }
 
+TEST_F(CallComposerUtilTest, IsBusinessReturnsFalseIfHeaderNotExists)
+{
+    ImsList<AString> lstHeaders;
+    ON_CALL(objMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
+            .WillByDefault(Return(lstHeaders));
+
+    EXPECT_FALSE(CallComposerUtil::IsBusiness(objMessage));
+}
+
+TEST_F(CallComposerUtilTest, IsBusinessReturnsFalseIfHeaderEmpty)
+{
+    ImsList<AString> lstHeaders;
+    lstHeaders.Append("");
+    ON_CALL(objMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
+            .WillByDefault(Return(lstHeaders));
+
+    EXPECT_FALSE(CallComposerUtil::IsBusiness(objMessage));
+}
+
+TEST_F(CallComposerUtilTest, IsBusinessReturnsTrueIfHeaderExists)
+{
+    ImsList<AString> lstHeaders;
+    lstHeaders.Append("some_org");
+    ON_CALL(objMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
+            .WillByDefault(Return(lstHeaders));
+
+    EXPECT_TRUE(CallComposerUtil::IsBusiness(objMessage));
+}
+
 TEST_F(CallComposerUtilTest, SetPriority)
 {
     EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::PRIORITY), AString("none"))).Times(1);
