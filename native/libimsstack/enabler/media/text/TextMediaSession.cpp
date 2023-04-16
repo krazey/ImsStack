@@ -85,33 +85,34 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
     pTextConfig->setRemotePort(pPeerProfile->nDataPort);
     pTextConfig->setDscp(0); /** TODO: add interface to get text dscp value */
 
-    IMS_SINT32 nTextDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
-
-    switch (pNegoProfile->eDirection)
-    {
-        case MEDIA_DIRECTION_RECEIVE:
-            nTextDerection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
-            break;
-        case MEDIA_DIRECTION_SEND:
-            nTextDerection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
-            break;
-        case MEDIA_DIRECTION_SEND_RECEIVE:
-            nTextDerection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-            break;
-        case MEDIA_DIRECTION_INACTIVE:
-            nTextDerection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
-            break;
-        default:
-            nTextDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
-            break;
-    }
+    IMS_SINT32 nTextDirection;
 
     if (pNegoProfile->nDataPort == 0 || pLocalProfile->nDataPort == 0)
     {
-        nTextDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+        nTextDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }
-
-    pTextConfig->setMediaDirection((int32_t)nTextDerection);
+    else
+    {
+        switch (pNegoProfile->eDirection)
+        {
+            case MEDIA_DIRECTION_RECEIVE:
+                nTextDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                break;
+            case MEDIA_DIRECTION_SEND:
+                nTextDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
+                break;
+            case MEDIA_DIRECTION_SEND_RECEIVE:
+                nTextDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+                break;
+            case MEDIA_DIRECTION_INACTIVE:
+                nTextDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+                break;
+            default:
+                nTextDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+                break;
+        }
+    }
+    pTextConfig->setMediaDirection((int32_t)nTextDirection);
 
     IMS_TRACE_D("UpdateRtpConfig() - RemoteAddress[%s], RemotePort[%d]",
             pTextConfig->getRemoteAddress().c_str(), pTextConfig->getRemotePort(), 0);
