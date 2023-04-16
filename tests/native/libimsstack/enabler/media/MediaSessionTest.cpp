@@ -16,27 +16,70 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <MediaSession.h>
-#include <MediaEnvironment.h>
+
 #include <IMMedia.h>
+#include <MediaEnvironment.h>
+#include <MediaNego.h>
+#include <MediaSession.h>
 #include <MockICoreService.h>
 #include <MockIMediaSessionClientListener.h>
 #include <MockISession.h>
+#include <config/MediaSessionConfigFactory.h>
 
+#include "MockICarrierConfig.h"
+
+using ::testing::Return;
 using ::testing::ReturnRef;
 
 const AString LOCAL_IP = "127.0.0.1";
 const AString REMOTE_IP = "127.0.0.1";
 const IMS_UINT32 REMOTE_PORT = 40000;
 
+class FakeMediaSessionConfig : public MediaSessionConfig
+{
+public:
+    virtual IMS_BOOL Create(IN IMS_SINT32 nSlotId)
+    {
+        (void)nSlotId;
+        MockICarrierConfig* m_pMockICarrierConfig = new MockICarrierConfig();
+        MockICarrierConfig* m_pAudioBundle = new MockICarrierConfig();
+        MockICarrierConfig* m_pVideoBundle = new MockICarrierConfig();
+        MockICarrierConfig* m_pTextBundle = new MockICarrierConfig();
+
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsVoice::KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pAudioBundle));
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pVideoBundle));
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pTextBundle));
+
+        if (m_pMockICarrierConfig == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        CreateAudioConfiguration(m_pMockICarrierConfig);
+        CreateVideoConfiguration(m_pMockICarrierConfig);
+        CreateTextConfiguration(m_pMockICarrierConfig);
+
+        return IMS_TRUE;
+    }
+};
+
 class FakeMediaSession : public MediaSession
 {
 public:
+    FakeMediaSessionConfig* m_pMediaSessionConfig;
+
     FakeMediaSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
             MediaSession(nService, nCallKey, nSlotId)
     {
+        CreateMediaConfig(nService);
     }
-    virtual ~FakeMediaSession() {}
+    virtual ~FakeMediaSession() { delete m_pMediaSessionConfig; }
     IMS_BOOL ModifySession(IN IMS_UINTP nNegoId)
     {
         return m_objAudioController.ModifySession(nNegoId);
@@ -49,7 +92,7 @@ public:
         return new QosRequestParam(eMediaType, IpAddress(REMOTE_IP), REMOTE_PORT);
     }
 
-    IMS_BOOL MediaSession_SendMsgToMediaManager(
+    virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) override
     {
         if (pParam == NULL)
@@ -84,6 +127,61 @@ public:
                 break;
             default:
                 break;
+        }
+
+        return IMS_TRUE;
+    }
+
+    virtual IMS_UINTP CreateProfile(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType) override
+    {
+        MediaNego* pMediaNego = CreateMediaNego(nNegoId);
+
+        if (pMediaNego == IMS_NULL)
+        {
+            return IMS_NULL;
+        }
+
+        IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);
+
+        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+
+        if (pAudioNego != IMS_NULL)
+        {
+            m_objAudioController.CreateSession(
+                    this, nMediaNego, m_pMediaSessionConfig->GetAudioConfiguration());
+        }
+
+        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+
+        if (pVideoNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+        {
+            m_objVideoController.CreateSession(
+                    this, m_pMediaSessionConfig->GetVideoConfiguration());
+        }
+
+        TextNego* pTextNego = pMediaNego->GetTextNego();
+
+        if (pTextNego != IMS_NULL && MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+        {
+            m_objTextController.CreateSession(this, m_pMediaSessionConfig->GetTextConfiguration());
+        }
+
+        return nMediaNego;
+    }
+
+    virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType) override
+    {
+        (void)eServiceType;
+
+        m_pMediaSessionConfig = new FakeMediaSessionConfig();
+        if (m_pMediaSessionConfig == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        if (!m_pMediaSessionConfig->Create(m_nSlotId))
+        {
+            return IMS_FALSE;
         }
 
         return IMS_TRUE;

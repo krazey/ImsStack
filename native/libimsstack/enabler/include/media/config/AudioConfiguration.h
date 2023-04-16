@@ -156,24 +156,6 @@ public:
      */
     IMS_SINT32 GetDTMFDuration() const;
     /**
-     * @brief Get mode-change-capability
-     *
-     * @return IMS_SINT32 Return mode-change-capability
-     */
-    IMS_SINT32 GetModeChangeCapability() const;
-    /**
-     * @brief Get mode-change-period
-     *
-     * @return IMS_SINT32 Return mode-change-period
-     */
-    IMS_SINT32 GetModeChangePeriod() const;
-    /**
-     * @brief Get the mode-change-neighbor
-     *
-     * @return IMS_SINT32 Return mode-change-neighbor
-     */
-    IMS_SINT32 GetModeChangeNeighbor() const;
-    /**
      * @brief Get the audio candidate attribute
      *
      * @return const ImsVector<AString>& Return audio-candidate-attribute
@@ -194,6 +176,7 @@ public:
     };
 
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
+    static const IMS_SINT32 DEFAULT_SUPPORT_EVS = IMS_FALSE;
     static const IMS_SINT32 DEFAULT_PTIME = 20;
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
@@ -209,9 +192,6 @@ public:
     static const IMS_BOOL DEFAULT_RTCPXR_PACKET_LOSS_RLE = IMS_FALSE;
     static const IMS_BOOL DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE = IMS_FALSE;
     static const IMS_SINT32 DEFAULT_DTMF_DURATION = 200;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
-    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
 
 protected:
     IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc) override;
@@ -234,9 +214,6 @@ private:
     IMS_BOOL m_bAudioRtcpxrPacketLossRleEnabled;
     IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled;
     IMS_SINT32 m_nDtmfDuration;
-    IMS_SINT32 m_nModeChangeCapability;
-    IMS_SINT32 m_nModeChangePeriod;
-    IMS_SINT32 m_nModeChangeNeighbor;
     ImsVector<AString> m_objAudioCandidateAttribute;
 };
 

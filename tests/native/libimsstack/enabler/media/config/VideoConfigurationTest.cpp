@@ -26,13 +26,12 @@
 
 using ::testing::Return;
 
-static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_VIDEO_DSCP = VideoConfiguration::DEFAULT_VIDEO_DSCP;
 static const IMS_SINT32 DEFAULT_CVO_ID = VideoConfiguration::DEFAULT_CVO_ID;
 static const IMS_SINT32 DEFAULT_AVPF_ENABLED = VideoConfiguration::DEFAULT_AVPF_ENABLED;
+static const IMS_SINT32 DEFAULT_AVPF_FEATURE = VideoConfiguration::DEFAULT_AVPF_FEATURE;
 static const IMS_SINT32 DEFAULT_AVPF_CAPA_NEGO = VideoConfiguration::DEFAULT_AVPF_CAPA_NEGO;
 static const IMS_SINT32 DEFAULT_CHANNEL = VideoConfiguration::DEFAULT_CHANNEL;
-
 static const IMS_SINT32 DEFAULT_SEND_PERIODIC_SPS_PPS =
         VideoConfiguration::DEFAULT_SEND_PERIODIC_SPS_PPS;
 static const IMS_BOOL DEFAULT_AVPF_TRR = VideoConfiguration::DEFAULT_AVPF_TRR;
@@ -46,34 +45,48 @@ static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE =
 static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = VideoConfiguration::DEFAULT_BW_NEGO_OPTION;
 static const IMS_BOOL DEFAULT_VIDEO_LOWEST_BITRATE =
         VideoConfiguration::DEFAULT_VIDEO_LOWEST_BITRATE;
+static const IMS_SINT32 DEFAULT_AS_VIDEO = VideoConfiguration::DEFAULT_AS_VIDEO;
+static const IMS_SINT32 DEFAULT_RS_VIDEO = VideoConfiguration::DEFAULT_RS_VIDEO;
+static const IMS_SINT32 DEFAULT_RR_VIDEO = VideoConfiguration::DEFAULT_RR_VIDEO;
+static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = MediaConfiguration::DEFAULT_RTP_INACTIVITY;
+static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = MediaConfiguration::DEFAULT_RTCP_INACTIVITY;
+
 class VideoConfigurationTest : public ::testing::Test {
 
 public:
-    ICarrierConfig* m_piCc;
+    VideoConfiguration* m_pConfig;
+    MockICarrierConfig* m_pMockICarrierConfig;
+    MockICarrierConfig* m_pVideoBundle;
 
 protected:
-    virtual void SetUp() override {
-        m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    virtual void SetUp() override
+    {
+        m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
+        m_pMockICarrierConfig = new MockICarrierConfig();
+        m_pVideoBundle = new MockICarrierConfig();
     }
-    virtual void TearDown() override {}
 
-    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
-    IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
-    AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    virtual void TearDown() override
     {
-        return m_piCc->GetIntArray(pszKey);
+        delete m_pConfig;
+        delete m_pMockICarrierConfig;
+        delete m_pVideoBundle;
+
+        m_pConfig = IMS_NULL;
+        m_pMockICarrierConfig = IMS_NULL;
+        m_pVideoBundle = IMS_NULL;
     }
-    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+
+    inline void GetReadyToCreate()
     {
-        return m_piCc->GetStringArray(pszKey);
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pVideoBundle));
     }
 };
 
 TEST_F(VideoConfigurationTest, GetConfigDefault)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-
     EXPECT_EQ(m_pConfig->GetVideoDscp(), DEFAULT_VIDEO_DSCP);
     EXPECT_EQ(m_pConfig->GetVideoSendPeriodicSpsPps(), DEFAULT_SEND_PERIODIC_SPS_PPS);
     EXPECT_EQ(m_pConfig->GetCvoId(), DEFAULT_CVO_ID);
@@ -90,138 +103,244 @@ TEST_F(VideoConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetVideoSamplingRate(), DEFAULT_VIDEO_SAMPLING_RATE);
     EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPTION);
     EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(), DEFAULT_VIDEO_LOWEST_BITRATE);
-
-    delete m_pConfig;
 }
 
-TEST_F(VideoConfigurationTest, GetConfigTest)
+TEST_F(VideoConfigurationTest, GetVideoDscp)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
+    IMS_SINT32 nVideoDscp = 40;
 
-    EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT, DEFAULT_VIDEO_DSCP))
+            .WillByDefault(Return(nVideoDscp));
 
-    EXPECT_EQ(m_pConfig->GetVideoSendPeriodicSpsPps(),
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT));
-    EXPECT_EQ(m_pConfig->GetCvoId(), GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT));
-    EXPECT_EQ(m_pConfig->IsVideoAvpfEnabled(),
-            GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL));
-    EXPECT_EQ(m_pConfig->GetSdpOfferCapNegoForAvpf(),
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT));
-    EXPECT_EQ(m_pConfig->GetVideoIframeIntervalSec(),
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT));
-    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(),
-            GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL));
-    EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(),
-            GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT));
-    delete m_pConfig;
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetVideoDscp(), nVideoDscp << 2);
 }
 
-TEST_F(VideoConfigurationTest, GetConfigVideoDscp)
+TEST_F(VideoConfigurationTest, GetVideoSendPeriodicSpsPps)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    IMS_SINT32 nMockVideoDscp = 40;
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    IMS_SINT32 nVideoSendPeriodicSpsPps = 2;
 
-    ON_CALL(*pMockICarrierConfig, GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT, -1))
-            .WillByDefault(Return(nMockVideoDscp));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT,
+                    DEFAULT_SEND_PERIODIC_SPS_PPS))
+            .WillByDefault(Return(nVideoSendPeriodicSpsPps));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
-    EXPECT_EQ(m_pConfig->GetVideoDscp(), nMockVideoDscp << 2);
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetVideoSendPeriodicSpsPps(), nVideoSendPeriodicSpsPps);
+}
+
+TEST_F(VideoConfigurationTest, GetCvoId)
+{
+    IMS_SINT32 nCvoId = 1;
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT, DEFAULT_CVO_ID))
+            .WillByDefault(Return(nCvoId));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetCvoId(), nCvoId);
 }
 
 TEST_F(VideoConfigurationTest, GetConfigVideoAvpfFeature)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    IMS_SINT32 nMockVideoAvpfFeature = 31;  // 0x00011111
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
+    IMS_BOOL bVideoAvpfEnabled = IMS_TRUE;
+    IMS_BOOL bVideoAvpfTrrEnabled = IMS_FALSE;
+    IMS_BOOL bVideoAvpfNackEnabled = IMS_TRUE;
+    IMS_BOOL bVideoAvpfTmmbrEnabled = IMS_FALSE;
+    IMS_BOOL bVideoAvpfPliEnabled = IMS_FALSE;
+    IMS_BOOL bVideoAvpfFirEnabled = IMS_TRUE;
 
-    ON_CALL(*pMockICarrierConfig, GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT, -1))
-            .WillByDefault(Return(nMockVideoAvpfFeature));
+    IMS_SINT32 nVideoAvpfFeature = 0;
+    nVideoAvpfFeature |= bVideoAvpfTrrEnabled;
+    nVideoAvpfFeature |= bVideoAvpfNackEnabled << 1;
+    nVideoAvpfFeature |= bVideoAvpfTmmbrEnabled << 2;
+    nVideoAvpfFeature |= bVideoAvpfPliEnabled << 3;
+    nVideoAvpfFeature |= bVideoAvpfFirEnabled << 4;
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL, DEFAULT_AVPF_ENABLED))
+            .WillByDefault(Return(bVideoAvpfEnabled));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT, DEFAULT_AVPF_FEATURE))
+            .WillByDefault(Return(nVideoAvpfFeature));
 
-    EXPECT_EQ(m_pConfig->IsVideoAvpfTrrEnabled(), IMS_TRUE);
-    EXPECT_EQ(m_pConfig->IsVideoAvpfNackEnabled(), IMS_TRUE);
-    EXPECT_EQ(m_pConfig->IsVideoAvpfTmmbrEnabled(), IMS_TRUE);
-    EXPECT_EQ(m_pConfig->IsVideoAvpfPliEnabled(), IMS_TRUE);
-    EXPECT_EQ(m_pConfig->IsVideoAvpfFirEnabled(), IMS_TRUE);
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->IsVideoAvpfEnabled(), bVideoAvpfEnabled);
+
+    EXPECT_EQ(m_pConfig->IsVideoAvpfTrrEnabled(), bVideoAvpfTrrEnabled);
+    EXPECT_EQ(m_pConfig->IsVideoAvpfNackEnabled(), bVideoAvpfNackEnabled);
+    EXPECT_EQ(m_pConfig->IsVideoAvpfTmmbrEnabled(), bVideoAvpfTmmbrEnabled);
+    EXPECT_EQ(m_pConfig->IsVideoAvpfPliEnabled(), bVideoAvpfPliEnabled);
+    EXPECT_EQ(m_pConfig->IsVideoAvpfFirEnabled(), bVideoAvpfFirEnabled);
 }
 
-TEST_F(VideoConfigurationTest, GetConfigVideoPort)
+TEST_F(VideoConfigurationTest, GetSdpOfferCapNegoForAvpf)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    ImsVector<IMS_SINT32> objVideoPortRtp;
-    objVideoPortRtp.Push(50100);
-    objVideoPortRtp.Push(50700);
+    IMS_SINT32 nSdpOfferCapNegoForAvpf = 1;
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT,
+                    DEFAULT_AVPF_CAPA_NEGO))
+            .WillByDefault(Return(nSdpOfferCapNegoForAvpf));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->IsAvpfCapabilityNegotiationEnabled(), (nSdpOfferCapNegoForAvpf > 0));
+    EXPECT_EQ(m_pConfig->GetSdpOfferCapNegoForAvpf(), nSdpOfferCapNegoForAvpf);
+}
+
+TEST_F(VideoConfigurationTest, GetVideoIframeIntervalSec)
+{
+    IMS_SINT32 nVideoIframeIntervalSec = 2;
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT,
+                    DEFAULT_I_FRAME_INTERVAL))
+            .WillByDefault(Return(nVideoIframeIntervalSec));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetVideoIframeIntervalSec(), nVideoIframeIntervalSec);
+}
+
+TEST_F(VideoConfigurationTest, GetBandwidthNegoOption)
+{
+    IMS_BOOL bVideoBwNegoOptionEnabled = 2;
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION))
+            .WillByDefault(Return(bVideoBwNegoOptionEnabled));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), bVideoBwNegoOptionEnabled);
+}
+
+TEST_F(VideoConfigurationTest, GetChannel)
+{
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
+}
+
+TEST_F(VideoConfigurationTest, GetVideoSamplingRate)
+{
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetVideoSamplingRate(), DEFAULT_VIDEO_SAMPLING_RATE);
+}
+
+TEST_F(VideoConfigurationTest, GetVideoPort)
+{
+    IMS_SINT32 nVideoRtpStart = 50100;
+    IMS_SINT32 nVideoRtpEnd = 50700;
+    ImsVector<IMS_SINT32> objVideoPortRtp;
+    objVideoPortRtp.Push(nVideoRtpStart);
+    objVideoPortRtp.Push(nVideoRtpEnd);
+
+    ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objVideoPortRtp));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetPortRtp(), objVideoPortRtp.GetAt(0));
-    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), objVideoPortRtp.GetAt(1));
-    EXPECT_EQ(m_pConfig->GetPortRtcp(), objVideoPortRtp.GetAt(0) + 1);
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetPortRtp(), nVideoRtpStart);
+    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), nVideoRtpEnd);
+    EXPECT_EQ(m_pConfig->GetPortRtcp(), nVideoRtpStart + 1);
 }
 
-TEST_F(VideoConfigurationTest, GetConfigVideoRtcpInterval)
+TEST_F(VideoConfigurationTest, GetVideoRtcpInterval)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    ImsVector<IMS_SINT32> objVideoRtcpInterval;
-    objVideoRtcpInterval.Push(3);
-    objVideoRtcpInterval.Push(10);
+    IMS_SINT32 nVideoRtcpLiveInterval = 30;
+    IMS_SINT32 nVideoRtcpInterval = 15;
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
+    ImsVector<IMS_SINT32> objVideoRtcpInterval;
+    objVideoRtcpInterval.Push(nVideoRtcpLiveInterval);
+    objVideoRtcpInterval.Push(nVideoRtcpInterval);
+
+    ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY))
             .WillByDefault(Return(objVideoRtcpInterval));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), objVideoRtcpInterval.GetAt(0));
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), objVideoRtcpInterval.GetAt(1));
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nVideoRtcpLiveInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nVideoRtcpInterval);
 }
 
 TEST_F(VideoConfigurationTest, GetConfigVideoBandwidth)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    IMS_SINT32 nAsBandwidthKbps = 30;
+    IMS_SINT32 nRsBandwidthBps = 200;
+    IMS_SINT32 nRrBandwidthBps = 300;
 
-    EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT, DEFAULT_AS_VIDEO))
+            .WillByDefault(Return(nAsBandwidthKbps));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RS_BANDWIDTH_BPS_INT, DEFAULT_RS_VIDEO))
+            .WillByDefault(Return(nRsBandwidthBps));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RR_BANDWIDTH_BPS_INT, DEFAULT_RR_VIDEO))
+            .WillByDefault(Return(nRrBandwidthBps));
 
-    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(),
-            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT));
-    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(),
-            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RS_BANDWIDTH_BPS_INT));
-    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(),
-            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RR_BANDWIDTH_BPS_INT));
-    delete m_pConfig;
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), nAsBandwidthKbps);
+    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), nRsBandwidthBps);
+    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), nRrBandwidthBps);
 }
 
-TEST_F(VideoConfigurationTest, GetConfigVideoInactivityTimer)
+TEST_F(VideoConfigurationTest, GetVideoInactivityTimer)
 {
-    VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    IMS_SINT32 nRtpInactivityTimerMillis = 30;
+    IMS_SINT32 nRtcpInactivityTimerMillis = 30;
 
-    EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTP_INACTIVITY))
+            .WillByDefault(Return(nRtpInactivityTimerMillis));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTCP_INACTIVITY))
+            .WillByDefault(Return(nRtcpInactivityTimerMillis));
 
-    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(),
-            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT));
-    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(),
-            GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT));
-    delete m_pConfig;
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), nRtpInactivityTimerMillis);
+    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), nRtcpInactivityTimerMillis);
+}
+
+TEST_F(VideoConfigurationTest, GetVideoLowestBitrateBps)
+{
+    IMS_SINT32 nVideoLowestBitrateBps = 90000;
+
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT,
+                    DEFAULT_VIDEO_LOWEST_BITRATE))
+            .WillByDefault(Return(nVideoLowestBitrateBps));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+
+    EXPECT_EQ(m_pConfig->GetVideoLowestBitrateBps(), nVideoLowestBitrateBps);
 }
