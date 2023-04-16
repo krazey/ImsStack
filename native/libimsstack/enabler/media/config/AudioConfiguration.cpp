@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         MediaConfiguration(eSessionType),
-        m_bEvsSupported(IMS_FALSE),
+        m_bEvsSupported(DEFAULT_SUPPORT_EVS),
         m_nAudioPtime(DEFAULT_PTIME),
         m_nAudioMaxPtime(DEFAULT_MAX_PTIME),
         m_nAudioMaxRed(DEFAULT_MAX_RED),
@@ -43,9 +43,6 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpxrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
         m_bAudioRtcpxrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
-        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
         m_objAudioCandidateAttribute(ImsVector<AString>())
 {
     IMS_TRACE_D("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
@@ -73,28 +70,36 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     SetPorts(piCc, CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY);
 
-    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_AS_BANDWIDTH_KBPS_INT);
-    nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RS_BANDWIDTH_BPS_INT);
-    nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT);
+    m_nAsBandwidthKbps =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_AS_BANDWIDTH_KBPS_INT, DEFAULT_AS);
+    m_nRsBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RS_BANDWIDTH_BPS_INT, DEFAULT_RS);
+    m_nRrBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT, DEFAULT_RR);
 
-    nRtpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT);
-    nRtcpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
+    m_nRtpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTP_INACTIVITY);
+    m_nRtcpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTCP_INACTIVITY);
 
-    m_bAudioBwNegoOptionEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
+    m_bAudioBwNegoOptionEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
 
     // Audio Configuration attributes
-    m_bEvsSupported = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL);
-    m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT);
-    m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT);
-    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT);
+    m_bEvsSupported = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_EVS_SUPPORT_BOOL, DEFAULT_SUPPORT_EVS);
+    m_nAudioPtime = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_PTIME_MILLIS_INT, DEFAULT_PTIME);
+    m_nAudioMaxPtime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXPTIME_MILLIS_INT, DEFAULT_MAX_PTIME);
+    m_nAudioMaxRed = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_MAXRED_INT, DEFAULT_MAX_RED);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
-    m_nAudioRtpDscp = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT);
+    m_nAudioRtpDscp =
+            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
     m_nAudioRtpDscp = m_nAudioRtpDscp << 2;
 
     ImsVector<IMS_SINT32> objAudioJitterBufferSize =
@@ -120,36 +125,23 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetStringArray(CarrierConfig::Assets::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
 
     // rtcp-xr
-    m_bAudioRtcpxrEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL);
-    m_bAudioRtcpxrStatisticsEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL);
-    m_bAudioRtcpxrVoipMetricsEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL);
+    m_bAudioRtcpxrEnabled =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_ENABLE_BOOL, DEFAULT_RTCPXR);
+    m_bAudioRtcpxrStatisticsEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_STATISTICS_BOOL, DEFAULT_RTCPXR_STATISTICS);
+    m_bAudioRtcpxrVoipMetricsEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL, DEFAULT_RTCPXR_VOIP_METRICS);
     m_bAudioRtcpxrPacketLossRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL,
+                    DEFAULT_RTCPXR_PACKET_LOSS_RLE);
     m_bAudioRtcpxrPacketDuplicateRleEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL,
+                    DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE);
 
     // DTMF Duration Parameter
     m_nDtmfDuration =
-            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT);
-    /** TODO: use Asset temporarily - need to change bundle code later
-    m_nModeChangeCapability =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
-    m_nModeChangePeriod =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT);
-    m_nModeChangeNeighbor =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);*/
-    m_nModeChangeCapability = piCc->GetInt(
-            CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
-    m_nModeChangePeriod =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT);
-    m_nModeChangeNeighbor =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);
-
-    IMS_TRACE_D("Create - m_nModeChangeCapability: %d m_nModeChangePeriod: %d "
-                "m_nModeChangeNeighbor: %d",
-            m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
+            piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
+                    DEFAULT_DTMF_DURATION);
 
     // Creates a codec configuration
     if (!CreateCodecConfigs(piCc))
@@ -190,8 +182,6 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
-    /** TODO: Need to enable bundle logic later */
-    /**
     ICarrierConfig* piCcBundle = piCc->GetBundle(
             CarrierConfig::ImsVoice::KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
@@ -213,25 +203,8 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
 
     piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;
-    */
-
-    /** TODO: Need to change to carrier configuration bundle later */
-    IMS_TRACE_D("CreateCodecConfigs - Update the values with Assets", 0, 0, 0);
-    ImsVector<IMS_SINT32> objEvsPayloadType =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY);
-    ImsVector<IMS_SINT32> objAmrwbPayloadType =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
-    ImsVector<IMS_SINT32> objAmrnbPayloadType =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
-    ImsVector<IMS_SINT32> objDtmfwbPayloadType =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
-    ImsVector<IMS_SINT32> objDtmfnbPayloadType =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
-    /** TODO: END - Need to change to carrier configuration bundle later */
 
     IMS_UINT32 nCodecCnt = 0;
-    AString strTemp;
 
     if (m_bEvsSupported == IMS_TRUE && objEvsPayloadType.GetSize() > 0)
     {
@@ -282,17 +255,15 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_bAudioRtcpxrPacketDuplicateRleEnabled[%d]",
             m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
             m_bAudioRtcpxrPacketDuplicateRleEnabled);
-    IMS_TRACE_D("m_nModeChangeCapability(%d), m_nModeChangePeriod(%d), m_nModeChangeNeighbor(%d)",
-            m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
         IMS_TRACE_D("m_objAudioCandidateAttribute[%d] : [%s]", i,
                 m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);
     }
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
-        ToDebugStringCodecs(objCodecConfigs.GetAt(i));
+        ToDebugStringCodecs(m_objCodecConfigs.GetAt(i));
     }
 }
 
@@ -410,24 +381,6 @@ PUBLIC
 IMS_SINT32 AudioConfiguration::GetDTMFDuration() const
 {
     return m_nDtmfDuration;
-}
-
-PUBLIC
-IMS_SINT32 AudioConfiguration::GetModeChangeCapability() const
-{
-    return m_nModeChangeCapability;
-}
-
-PUBLIC
-IMS_SINT32 AudioConfiguration::GetModeChangePeriod() const
-{
-    return m_nModeChangePeriod;
-}
-
-PUBLIC
-IMS_SINT32 AudioConfiguration::GetModeChangeNeighbor() const
-{
-    return m_nModeChangeNeighbor;
 }
 
 PUBLIC
