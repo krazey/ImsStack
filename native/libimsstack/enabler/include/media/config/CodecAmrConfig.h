@@ -98,6 +98,24 @@ public:
      * Return false if drx is not supported
      */
     IMS_BOOL GetDtx() const;
+    /**
+     * @brief Get mode-change-capability
+     *
+     * @return IMS_SINT32 Return mode-change-capability
+     */
+    IMS_SINT32 GetModeChangeCapability() const;
+    /**
+     * @brief Get mode-change-period
+     *
+     * @return IMS_SINT32 Return mode-change-period
+     */
+    IMS_SINT32 GetModeChangePeriod() const;
+    /**
+     * @brief Get the mode-change-neighbor
+     *
+     * @return IMS_SINT32 Return mode-change-neighbor
+     */
+    IMS_SINT32 GetModeChangeNeighbor() const;
 
 public:
     enum
@@ -115,6 +133,9 @@ public:
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = 8000;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = 16000;
     static const IMS_BOOL DEFAULT_AMR_DTX = IMS_TRUE;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
 
 private:
     /**
@@ -160,6 +181,9 @@ private:
     IMS_SINT32 m_nOctetAlign;
     IMS_SINT32 m_nSamplingRate;
     IMS_BOOL m_bDtx;
+    IMS_SINT32 m_nModeChangeCapability;
+    IMS_SINT32 m_nModeChangePeriod;
+    IMS_SINT32 m_nModeChangeNeighbor;
 };
 
 #endif

@@ -22,8 +22,8 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
-        MediaConfiguration(_nSessionType),
+VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType) :
+        MediaConfiguration(eSessionType),
         m_nVideoDscp(DEFAULT_VIDEO_DSCP),
         m_nVideoSendPeriodicSpsPps(DEFAULT_SEND_PERIODIC_SPS_PPS),
         m_nCvoId(DEFAULT_CVO_ID),
@@ -41,9 +41,6 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         m_nVideoLowestBitrateBps(DEFAULT_VIDEO_LOWEST_BITRATE)
 {
     IMS_TRACE_D("+VideoConfiguration eSessionType(%d)", eSessionType, 0, 0);
-    nAsBandwidthKbps = DEFAULT_AS_VIDEO;
-    nRsBandwidthBps = DEFAULT_RR_VIDEO;
-    nRrBandwidthBps = DEFAULT_RS_VIDEO;
 }
 
 PUBLIC VIRTUAL VideoConfiguration::~VideoConfiguration()
@@ -65,27 +62,35 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     SetPorts(piCc, CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY);
 
-    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT);
-    nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RS_BANDWIDTH_BPS_INT);
-    nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RR_BANDWIDTH_BPS_INT);
+    m_nAsBandwidthKbps =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT, DEFAULT_AS_VIDEO);
+    m_nRsBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RS_BANDWIDTH_BPS_INT, DEFAULT_RS_VIDEO);
+    m_nRrBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RR_BANDWIDTH_BPS_INT, DEFAULT_RR_VIDEO);
 
-    nRtpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT);
-    nRtcpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
+    m_nRtpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTP_INACTIVITY);
+    m_nRtcpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTCP_INACTIVITY);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
-    m_nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
+    m_nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT, DEFAULT_VIDEO_DSCP);
     m_nVideoDscp = m_nVideoDscp << 2;
 
     m_nVideoSendPeriodicSpsPps =
-            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
-    m_nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT);
-    m_bVideoAvpfEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL);
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT,
+                    DEFAULT_SEND_PERIODIC_SPS_PPS);
+    m_nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT, DEFAULT_CVO_ID);
+    m_bVideoAvpfEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_VIDEO_AVPF_ENABLE_BOOL, DEFAULT_AVPF_ENABLED);
 
-    IMS_SINT32 nVideoAvpfFeature = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT);
+    IMS_SINT32 nVideoAvpfFeature =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FEATURE_INT, DEFAULT_AVPF_FEATURE);
     m_bVideoAvpfTrrEnabled = nVideoAvpfFeature & 0x01 ? IMS_TRUE : IMS_FALSE;
     m_bVideoAvpfNackEnabled = (nVideoAvpfFeature >> 1) & 0x01 ? IMS_TRUE : IMS_FALSE;
     m_bVideoAvpfTmmbrEnabled = (nVideoAvpfFeature >> 2) & 0x01 ? IMS_TRUE : IMS_FALSE;
@@ -94,16 +99,17 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
 
     /** TODO_MEDIA need to check if it is needed for KR */
     m_nSdpOfferCapNegoForAvpf =
-            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT,
+                    DEFAULT_AVPF_CAPA_NEGO);
 
-    m_nVideoIframeIntervalSec =
-            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
-    m_bVideoBwNegoOptionEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL);
+    m_nVideoIframeIntervalSec = piCc->GetInt(
+            CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT, DEFAULT_I_FRAME_INTERVAL);
+    m_bVideoBwNegoOptionEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL, DEFAULT_BW_NEGO_OPTION);
     // m_nChannel = DEFAULT_CHANNEL; // already set by default at creator
     // m_nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
-    m_nVideoLowestBitrateBps =
-            piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT);
+    m_nVideoLowestBitrateBps = piCc->GetInt(
+            CarrierConfig::Assets::KEY_VIDEO_LOWEST_BITRATE_BPS_INT, DEFAULT_VIDEO_LOWEST_BITRATE);
     if (!CreateCodecConfigs(piCc))
     {
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
@@ -141,25 +147,23 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
-    /** TODO: to access bundle for Video codec - later */
-    /* ICarrierConfig* piCcBundle =
+    ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
+        IMS_TRACE_E(0, "piCcBundle is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
     ImsVector<IMS_SINT32> objAvcPayloadType =
-            piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY); */
+            piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    // TODO: read carrier_config xml instead of Bundle due to comment out above
-    ImsVector<IMS_SINT32> objAvcPayloadType =
-            piCc->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+    // TODO: H.265
+    // ImsVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
+    //         CarrierConfig::ImsVt::KEY_H265_PAYLOAD_TYPE_INT_ARRAY);
 
-    /** TODO: need to add after creating HEVC in CarrierConfig */
-    /* ImsVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
-            CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY); */
+    piCcBundle->ReleaseBundle();
 
     IMS_UINT32 nCodecCnt = 0;
     if (objAvcPayloadType.GetSize() > 0)
@@ -167,18 +171,14 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
     }
 
+    // TODO: H.265
+    // if (objHevcPayloadType.GetSize() > 0)
+    // {
+    //     nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+    // }
+
     // to avoid static analysis issue (not used variable and variable scope)
     IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
-
-    /** TODO: need to add after creating HEVC in CarrierConfig */
-    /* if (objHevcPayloadType.GetSize() > 0)
-    {
-        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
-    }*/
-
-    /** TODO: to access bundle for Video codec - later */
-    /* piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL; */
 
     return IMS_TRUE;
 }
@@ -198,9 +198,10 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
                 "m_bVideoBwNegoOptionEnabled(%d)",
             m_nVideoIframeIntervalSec, m_nVideoSamplingRate, m_bVideoBwNegoOptionEnabled);
     IMS_TRACE_D("m_nVideoLowestBitrate(%d)", m_nVideoLowestBitrateBps, 0, 0);
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
+
+    for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
-        ToDebugStringCodecs(objCodecConfigs.GetAt(i));
+        ToDebugStringCodecs(m_objCodecConfigs.GetAt(i));
     }
 }
 

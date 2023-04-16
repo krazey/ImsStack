@@ -46,6 +46,7 @@ public:
     static const IMS_SINT32 DEFAULT_SEND_PERIODIC_SPS_PPS = SEND_EVERY_TIME;
     static const IMS_SINT32 DEFAULT_CVO_ID = -1;  // TODO: need to check.
     static const IMS_BOOL DEFAULT_AVPF_ENABLED = IMS_FALSE;
+    static const IMS_SINT32 DEFAULT_AVPF_FEATURE = 0;
     static const IMS_BOOL DEFAULT_AVPF_TRR = IMS_FALSE;
     static const IMS_BOOL DEFAULT_AVPF_NACK = IMS_TRUE;
     static const IMS_BOOL DEFAULT_AVPF_TMMBR = IMS_TRUE;
@@ -68,9 +69,9 @@ public:
     /**
      * @brief Construct a new video configuration
      *
-     * @param _nSessionType mediasession type
+     * @param eSessionType mediasession type
      */
-    explicit VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType = MEDIA_TYPE_AUDIOVIDEO);
+    explicit VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIOVIDEO);
     /**
      * @brief Destroy the video configuration
      *

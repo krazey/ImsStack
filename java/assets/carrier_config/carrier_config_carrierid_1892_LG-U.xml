@@ -147,11 +147,13 @@
             <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="98">
             <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
@@ -177,85 +179,24 @@
         <item value="1236"/>
     </int-array>
     <boolean name="audio_evs_support_bool" value="true"/>
-    <int-array name="asset_evs_payload_type_int_array" num="1">
-        <item value="110"/>
-    </int-array>
-    <int-array name="asset_amrwb_payload_type_int_array" num="2">
-        <item value="100"/>
-        <item value="97"/>
-    </int-array>
-    <int-array name="asset_amrnb_payload_type_int_array" num="2">
-        <item value="96"/>
-        <item value="98"/>
-    </int-array>
-    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
-        <item value="107"/>
-    </int-array>
-    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
-        <item value="101"/>
-    </int-array>
-    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
-        <item value="3"/>
-        <item value="6"/>
-    </int-array>
+
     <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
-    <int name="asset_evs_codec_attribute_hf_only_int" value="-1"/>
-    <int name="asset_evs_codec_attribute_mode_switch_int" value="-1"/>
-    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
-    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
-    <int name="asset_evs_codec_attribute_ch_aw_recv_int" value="-1"/>
     <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
-    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
-    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
 
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
-    <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-    <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
-    <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
-    <!-- <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/> -->
-    <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
-    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
-        <item value="3"/>
-        <item value="6"/>
-    </int-array>
-    <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
-    <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
-    <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
+
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
     <int-array name="video_rtp_port_range_int_array" num="2">
         <item value="1254"/>
         <item value="1254"/>
     </int-array>
-    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
-        <item value="480"/>
-        <item value="640"/>
-    </int-array>
-    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
-    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
-    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
+
     <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
         <item value="send [x=480,y=640] recv [x=480,y=640] "/>
     </string-array>
-    <int-array name="imsvt.h264_payload_type_int_array" num="1">
-        <item value="104"/>
-    </int-array>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="639"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>

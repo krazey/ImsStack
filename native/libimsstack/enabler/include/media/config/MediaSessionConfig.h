@@ -119,14 +119,15 @@ public:
     static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = IMS_FALSE;
     static const IMS_BOOL DEFAULT_SUPPORT_MULTICONFIG = IMS_TRUE;
 
+protected:
+    IMS_BOOL CreateAudioConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL CreateVideoConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL CreateTextConfiguration(IN ICarrierConfig* piCc);
+
 private:
     void Clear();
     void ResetMediaConfigurations(IN IMS_SINT32 nSlotId);
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
-
-    IMS_BOOL CreateAudioConfiguration(IN ICarrierConfig* piCc);
-    IMS_BOOL CreateVideoConfiguration(IN ICarrierConfig* piCc);
-    IMS_BOOL CreateTextConfiguration(IN ICarrierConfig* piCc);
 
 private:
     AudioConfiguration* m_pAudioConfig;

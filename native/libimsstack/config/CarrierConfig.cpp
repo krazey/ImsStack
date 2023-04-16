@@ -1073,65 +1073,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[]
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[] =
         "text_rtcp_inactivity_timer_millis_int";
 
-// TODO - Need to change to carrier configuration bundle later
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_evs_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_amrwb_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_amrnb_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_dtmfwb_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_dtmfnb_payload_type_int_array";
-
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY[] =
-        "asset_amrwb_codec_attribute_payload_format_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMRNB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY[] =
-        "asset_amrnb_codec_attribute_payload_format_int_array";
-
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMR_AMRWB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY[] =
-        "asset_amr_amrwb_codec_attribute_modeset_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMR_AMRNB_CODEC_ATTRIBUTE_MODESET_INT_ARRAY[] =
-        "asset_amr_amrnb_codec_attribute_modeset_int_array";
-
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT[] =
-        "asset_evs_codec_attribute_channels_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT[] =
-        "asset_evs_codec_attribute_hf_only_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT[] =
-        "asset_evs_codec_attribute_mode_switch_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT[] =
-        "asset_evs_codec_attribute_bandwidth_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT[] =
-        "asset_evs_codec_attribute_cmr_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT[] =
-        "asset_evs_codec_attribute_ch_aw_recv_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT[] =
-        "asset_amr_codec_attribute_payload_format_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT[] =
-        "asset_codec_attribute_mode_change_period_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT[] =
-        "asset_codec_attribute_mode_change_capability_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT[] =
-        "asset_codec_attribute_mode_change_neighbor_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL[] =
-        "asset_evs_codec_attribute_dtx_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL[] =
-        "asset_evs_codec_attribute_dtx_recv_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT[] =
-        "asset_evs_amrwb_io_mode_set_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY[] =
-        "asset_evs_codec_attribute_bitrate_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY[] =
-        "asset_amr_codec_attribute_modeset_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPE_INT_ARRAY[] =
-        "asset_text_codec_capability_payload_type_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_T140_PAYLOAD_TYPE_INT[] =
-        "asset_t140_payload_type_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ASSET_RED_PAYLOAD_TYPE_INT[] =
-        "asset_red_payload_type_int";
-
 // Mts
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =
         "sms_request_uri_type_int";
