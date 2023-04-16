@@ -192,7 +192,7 @@ PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IM
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("CreateAudioConfiguration()", 0, 0, 0);
@@ -217,7 +217,7 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("CreateVideoConfiguration()", 0, 0, 0);
@@ -242,7 +242,7 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("CreateTextConfiguration()", 0, 0, 0);

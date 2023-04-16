@@ -34,9 +34,9 @@ public:
     /**
      * @brief Construct a new media configuration
      *
-     * @param _eSessionType Set media ssession_type (ex: audio, video etc)
+     * @param eSessionType Set media ssession_type (ex: audio, video etc)
      */
-    explicit MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_AUDIO);
+    explicit MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
     /**
      * @brief Destroy the media configuration
      *
@@ -202,20 +202,20 @@ public:
     static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 20000;
 
 protected:
-    MEDIA_CONTENT_TYPE eSessionType;
-    IMS_SINT32 nPortRtp;
-    IMS_SINT32 nPortRtpEnd;
-    IMS_SINT32 nPortRtcp;
-    IMS_SINT32 nRtcpLiveInterval;
-    IMS_SINT32 nRtcpInterval;
-    IMS_SINT32 nAsBandwidthKbps;
-    IMS_SINT32 nRsBandwidthBps;
-    IMS_SINT32 nRrBandwidthBps;
-    IMS_SINT32 nRtpInactivityTimerMillis;
-    IMS_SINT32 nRtcpInactivityTimerMillis;
+    MEDIA_CONTENT_TYPE m_eSessionType;
+    IMS_SINT32 m_nPortRtp;
+    IMS_SINT32 m_nPortRtpEnd;
+    IMS_SINT32 m_nPortRtcp;
+    IMS_SINT32 m_nRtcpLiveInterval;
+    IMS_SINT32 m_nRtcpInterval;
+    IMS_SINT32 m_nAsBandwidthKbps;
+    IMS_SINT32 m_nRsBandwidthBps;
+    IMS_SINT32 m_nRrBandwidthBps;
+    IMS_SINT32 m_nRtpInactivityTimerMillis;
+    IMS_SINT32 m_nRtcpInactivityTimerMillis;
 
     // Provisioned codecs
-    ImsList<CodecConfig*> objCodecConfigs;
+    ImsList<CodecConfig*> m_objCodecConfigs;
 };
 
 #endif

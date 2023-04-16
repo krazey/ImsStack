@@ -20,6 +20,8 @@
 #include <text/MockTextNego.h>
 #include <MockIMediaSessionListener.h>
 
+#include "MockICarrierConfig.h"
+
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -36,6 +38,9 @@ public:
     MockIMediaSessionListener m_objListener;
     MockTextNego* m_pTextNego;
 
+    MockICarrierConfig* m_pMockICarrierConfig;
+    MockICarrierConfig* m_pTextPayloads;
+
     TextProfile* m_pLocalProfile;
     TextProfile* m_pPeerProfile;
     TextProfile* m_pNegoProfile;
@@ -46,7 +51,15 @@ protected:
     {
         m_pController = new TextController();
         m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-        m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
+
+        m_pMockICarrierConfig = new MockICarrierConfig();
+        m_pTextPayloads = new MockICarrierConfig();
+
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pTextPayloads));
+
+        m_pConfig->Create(m_pMockICarrierConfig);
         m_pTextNego = new MockTextNego(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
@@ -81,6 +94,8 @@ protected:
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;
+        delete m_pMockICarrierConfig;
+        delete m_pTextPayloads;
     }
 };
 

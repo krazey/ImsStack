@@ -23,20 +23,20 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType) :
-        eSessionType(_eSessionType),
-        nPortRtp(DEFAULT_RTP_PORT),
-        nPortRtpEnd(DEFAULT_RTP_PORT_END),
-        nPortRtcp(DEFAULT_RTCP_PORT),
-        nRtcpLiveInterval(DEFAULT_RTCP_INVERVAL_LIVE),
-        nRtcpInterval(DEFAULT_RTCP_INVERVAL),
-        nAsBandwidthKbps(DEFAULT_AS),
-        nRsBandwidthBps(DEFAULT_RS),
-        nRrBandwidthBps(DEFAULT_RR),
-        nRtpInactivityTimerMillis(DEFAULT_RTP_INACTIVITY),
-        nRtcpInactivityTimerMillis(DEFAULT_RTCP_INACTIVITY)
+MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
+        m_eSessionType(eSessionType),
+        m_nPortRtp(DEFAULT_RTP_PORT),
+        m_nPortRtpEnd(DEFAULT_RTP_PORT_END),
+        m_nPortRtcp(DEFAULT_RTCP_PORT),
+        m_nRtcpLiveInterval(DEFAULT_RTCP_INVERVAL_LIVE),
+        m_nRtcpInterval(DEFAULT_RTCP_INVERVAL),
+        m_nAsBandwidthKbps(DEFAULT_AS),
+        m_nRsBandwidthBps(DEFAULT_RS),
+        m_nRrBandwidthBps(DEFAULT_RR),
+        m_nRtpInactivityTimerMillis(DEFAULT_RTP_INACTIVITY),
+        m_nRtcpInactivityTimerMillis(DEFAULT_RTCP_INACTIVITY)
 {
-    IMS_TRACE_I("+MediaConfiguration sessiontype[%d]", _eSessionType, 0, 0);
+    IMS_TRACE_I("+MediaConfiguration eSessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC VIRTUAL MediaConfiguration::~MediaConfiguration()
@@ -58,9 +58,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaConfiguration::Update(IN ICarrierConfig* piCc)
 
 PUBLIC VIRTUAL CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCodec) const
 {
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); i++)
     {
-        CodecConfig* pCodecConfig = objCodecConfigs.GetAt(i);
+        CodecConfig* pCodecConfig = m_objCodecConfigs.GetAt(i);
 
         if (pCodecConfig->GetCodec() == nCodec)
         {
@@ -73,7 +73,7 @@ PUBLIC VIRTUAL CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCo
 
 PUBLIC VIRTUAL const ImsList<CodecConfig*>& MediaConfiguration::GetCodecConfigs() const
 {
-    return objCodecConfigs;
+    return m_objCodecConfigs;
 }
 
 PROTECTED VIRTUAL IMS_BOOL MediaConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
@@ -149,7 +149,7 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
         }
     }*/
 
-    if (objCodecConfigs.InsertAt(pCodecConfig, nCodecIndex))
+    if (m_objCodecConfigs.InsertAt(pCodecConfig, nCodecIndex))
     {
         nCodecIndex++;
         IMS_TRACE_D("MakeCodec Added PayloadNum[%d], CodecIndex[%d], nPayloadTypeNum[%d]",
@@ -166,13 +166,14 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
 
 PROTECTED VIRTUAL void MediaConfiguration::ToDebugString() const
 {
-    IMS_TRACE_D("session_type[%d], nRtcpLiveInterval[%d], nRtcpInterval[%d]",
-            (IMS_SINT32)eSessionType, nRtcpLiveInterval, nRtcpInterval);
-    IMS_TRACE_D("nPortRtp[%d], nPortRtpEnd[%d], nPortRtcp[%d]", nPortRtp, nPortRtpEnd, nPortRtcp);
-    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps[%d]", nAsBandwidthKbps,
-            nRsBandwidthBps, nRrBandwidthBps);
-    IMS_TRACE_D("nRtpInactivityTimerMillis[%d], nRtcpInactivityTimerMillis[%d]",
-            nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis, 0);
+    IMS_TRACE_D("session_type[%d], m_nRtcpLiveInterval[%d], m_nRtcpInterval[%d]",
+            (IMS_SINT32)m_eSessionType, m_nRtcpLiveInterval, m_nRtcpInterval);
+    IMS_TRACE_D("m_nPortRtp[%d], m_nPortRtpEnd[%d], m_nPortRtcp[%d]", m_nPortRtp, m_nPortRtpEnd,
+            m_nPortRtcp);
+    IMS_TRACE_D("m_nAsBandwidthKbps[%d], m_nRsBandwidthBps[%d], m_nRrBandwidthBps[%d]",
+            m_nAsBandwidthKbps, m_nRsBandwidthBps, m_nRrBandwidthBps);
+    IMS_TRACE_D("m_nRtpInactivityTimerMillis[%d], m_nRtcpInactivityTimerMillis[%d]",
+            m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis, 0);
 }
 
 PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
@@ -271,9 +272,9 @@ PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* p
 
 PROTECTED VIRTUAL void MediaConfiguration::Clear()
 {
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
-        CodecConfig* pCodecConfig = objCodecConfigs.GetAt(i);
+        CodecConfig* pCodecConfig = m_objCodecConfigs.GetAt(i);
 
         if (pCodecConfig != IMS_NULL)
         {
@@ -281,7 +282,7 @@ PROTECTED VIRTUAL void MediaConfiguration::Clear()
         }
     }
 
-    objCodecConfigs.Clear();
+    m_objCodecConfigs.Clear();
 }
 
 PROTECTED
@@ -314,12 +315,12 @@ void MediaConfiguration::SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* ps
     ImsVector<IMS_SINT32> objPortRtp = piCc->GetIntArray(pszKey);
     if (!objPortRtp.IsEmpty())
     {
-        nPortRtp = objPortRtp.GetAt(0);
-        nPortRtcp = nPortRtp + 1;
+        m_nPortRtp = objPortRtp.GetAt(0);
+        m_nPortRtcp = m_nPortRtp + 1;
 
         if (objPortRtp.GetSize() > 1)
         {
-            nPortRtpEnd = objPortRtp.GetAt(1);
+            m_nPortRtpEnd = objPortRtp.GetAt(1);
         }
     }
 }
@@ -330,11 +331,11 @@ void MediaConfiguration::SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_
     ImsVector<IMS_SINT32> objRtcpInterval = piCc->GetIntArray(pszKey);
     if (!objRtcpInterval.IsEmpty())
     {
-        nRtcpLiveInterval = objRtcpInterval.GetAt(0);
+        m_nRtcpLiveInterval = objRtcpInterval.GetAt(0);
 
         if (objRtcpInterval.GetSize() > 1)
         {
-            nRtcpInterval = objRtcpInterval.GetAt(1);
+            m_nRtcpInterval = objRtcpInterval.GetAt(1);
         }
     }
 }
@@ -342,65 +343,65 @@ void MediaConfiguration::SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_
 PUBLIC
 MEDIA_CONTENT_TYPE MediaConfiguration::GetSessionType() const
 {
-    return eSessionType;
+    return m_eSessionType;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetPortRtp() const
 {
-    return nPortRtp;
+    return m_nPortRtp;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetPortRtpEnd() const
 {
-    return nPortRtpEnd;
+    return m_nPortRtpEnd;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetPortRtcp() const
 {
-    return nPortRtcp;
+    return m_nPortRtcp;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRtcpLiveInterval() const
 {
-    return nRtcpLiveInterval;
+    return m_nRtcpLiveInterval;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRtcpInterval() const
 {
-    return nRtcpInterval;
+    return m_nRtcpInterval;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetAsBandwidthKbps() const
 {
-    return nAsBandwidthKbps;
+    return m_nAsBandwidthKbps;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRsBandwidthBps() const
 {
-    return nRsBandwidthBps;
+    return m_nRsBandwidthBps;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRrBandwidthBps() const
 {
-    return nRrBandwidthBps;
+    return m_nRrBandwidthBps;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRtpInactivityTimerMillis() const
 {
-    return nRtpInactivityTimerMillis;
+    return m_nRtpInactivityTimerMillis;
 }
 
 PUBLIC
 IMS_SINT32 MediaConfiguration::GetRtcpInactivityTimerMillis() const
 {
-    return nRtcpInactivityTimerMillis;
+    return m_nRtcpInactivityTimerMillis;
 }

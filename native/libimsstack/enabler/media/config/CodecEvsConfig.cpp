@@ -34,7 +34,10 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
         m_nChAwRecv(DEFAULT_CH_AW_RECV),
         m_bShowAmrwbIoModeSet(IMS_FALSE),
         m_nAmrWbIoModeSetList(DEFAULT_AMRWB_IO_MODESET),
-        m_nDefaultRtpModeSet(DEFAULT_AMRWB_IO_MODESET)
+        m_nDefaultRtpModeSet(DEFAULT_AMRWB_IO_MODESET),
+        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
+        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
+        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
 {
     IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType_, 0, 0);
 }
@@ -50,12 +53,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
 
     if (piCc == IMS_NULL || nCodecIdx < 0)
     {
-        IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - piBuffer is NULL or invalid codecIdx", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    /** TODO: to access bundle for EVS - later */
-    /*ICarrierConfig* piCcBundle =
+    ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
@@ -72,36 +74,24 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     {
         IMS_TRACE_E(0, "Create - piCcSubBundle is NULL", 0, 0, 0);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
         return IMS_FALSE;
-    }*/
+    }
 
-    m_nChannel = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CHANNELS_INT);
-    m_bShowDtx = piCc->GetBoolean(CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL);
-    m_bDtx = piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_BOOL);
-    m_bDtxRecv =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
+    m_nChannel = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL);
+    m_bShowDtx = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_DTX_BOOL, IMS_FALSE);
+    m_bDtx = piCcSubBundle->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX);
+    m_bDtxRecv = piCcSubBundle->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, DEFAULT_DTX_RECV);
+    m_nHfOnly =
+            piCcSubBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, -1);
+    m_nEvsModeSwitch = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT, -1);
 
-    IMS_TRACE_D("Create - EvsCodecConfig - m_nChannel: %d m_bDtx: %d m_bDtxRecv: %d", m_nChannel,
-            m_bDtx, m_bDtxRecv);
-
-    m_nHfOnly = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
-    m_nEvsModeSwitch =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
-    ImsVector<IMS_SINT32> objBitrateList = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);
-
-    /** TODO - to access bundle for EVS - later */
-    /* m_nChannel =
-    piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT); m_bDtx =
-    piCcBundle->GetBoolean( CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, IMS_TRUE);
-    m_bDtxRecv = piCcBundle->GetBoolean(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, IMS_TRUE);
-    m_nHfOnly = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
-    m_nEvsModeSwitch =
-            piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
-    ImsVector<IMS_SINT32> objBitrateList = piCcBundle->GetIntArray(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);*/
+    ImsVector<IMS_SINT32> objBitrateList = piCcSubBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);
 
     IMS_SINT32 nBrStart = DEFAULT_BR;
     IMS_SINT32 nBrEnd = DEFAULT_BR;
@@ -116,56 +106,32 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
         }
     }
     m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
-
-    m_nBwList = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT);
-    if (m_nBwList < 0)
-    {
-        m_nBwList = DEFAULT_BW_LIST;
-    }
+    m_nBwList = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT, DEFAULT_BW_LIST);
     m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
 
-    m_nCmr = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CMR_INT);
-    m_nChAwRecv = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
+    m_nCmr = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, DEFAULT_CMR);
+    m_nChAwRecv = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT, DEFAULT_CH_AW_RECV);
     m_bShowAmrwbIoModeSet = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL);
-    m_nAmrWbIoModeSetList =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_AMRWB_IO_MODE_SET_INT);
-
-    if (m_nAmrWbIoModeSetList < 0)
-    {
-        m_nAmrWbIoModeSetList = DEFAULT_AMRWB_IO_MODESET;
-    }
+            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL, IMS_FALSE);
+    m_nAmrWbIoModeSetList = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT, DEFAULT_AMRWB_IO_MODESET);
 
     m_nDefaultRtpModeSet = piCc->GetInt(
-            CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
+            CarrierConfig::Assets::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
+            DEFAULT_AMRWB_IO_MODESET);
 
-    if (m_nDefaultRtpModeSet < 0)
-    {
-        m_nDefaultRtpModeSet = DEFAULT_AMRWB_IO_MODESET;
-    }
-
-    IMS_TRACE_D("Create - EvsCodecConfig - m_nCmr: %d m_nChAwRecv: %d m_nAmrWbIoModeSetList: %d",
-            m_nCmr, m_nChAwRecv, m_nAmrWbIoModeSetList);
-    IMS_TRACE_D("Create - EvsCodecConfig - nBrStart: %d nBrEnd: %d m_nBwList: %d", nBrStart, nBrEnd,
-            m_nBwList);
-    IMS_TRACE_D("Create - EvsCodecConfig - m_nDefaultRtpModeSet: %d", m_nDefaultRtpModeSet, 0, 0);
-
-    /** TODO - to access bundle for EVS - later */
-    /* m_nBwList = piCcBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT);
-    m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
-    m_nCmr = piCcBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT);
-    m_nChAwRecv =
-            piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
-    m_nAmrWbIoModeSetList =
-            piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT);
+    m_nModeChangeCapability = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT, -1);
+    m_nModeChangePeriod = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT, -1);
+    m_nModeChangeNeighbor = piCcSubBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT, -1);
 
     piCcSubBundle->ReleaseBundle();
-    piCcSubBundle = IMS_NULL;
-
     piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;*/
 
     ToDebugString();
     return IMS_TRUE;
@@ -175,11 +141,15 @@ PUBLIC VIRTUAL void CodecEvsConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
-    IMS_TRACE_D("nChannel(%d), bDtx(%d), bDtxRecv(%d)", m_nChannel, m_bDtx, m_bDtxRecv);
-    IMS_TRACE_D("nHfOnly(%d), nEvsModeSwitch(%d)", m_nHfOnly, m_nEvsModeSwitch, 0);
+    IMS_TRACE_D("nChannel(%d), bShowDtx(%d), bDtx(%d), ", m_nChannel, m_bShowDtx, m_bDtx);
+    IMS_TRACE_D("bDtxRecv(%d), nHfOnly(%d), nEvsModeSwitch(%d)", m_bDtxRecv, m_nHfOnly,
+            m_nEvsModeSwitch);
     IMS_TRACE_D("nBrList(0x%04x), nBwList(%d)", m_nBrList, m_nBwList, 0);
-    IMS_TRACE_D("nCmr(%d), nChAwRecv(%d), nModeSetList(%d)", m_nCmr, m_nChAwRecv,
-            m_nAmrWbIoModeSetList);
+    IMS_TRACE_D("nCmr(%d), nChAwRecv(%d)", m_nCmr, m_nChAwRecv, 0);
+    IMS_TRACE_D("bShowAmrwbIoModeSet(%d), nAmrWbIoModeSetList(%d), nDefaultRtpModeSet(%d)",
+            m_bShowAmrwbIoModeSet, m_nAmrWbIoModeSetList, m_nDefaultRtpModeSet);
+    IMS_TRACE_D("nModeChangeCapability(%d), nModeChangePeriod(%d), nModeChangeNeighbor(%d)",
+            m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 }
 
 PRIVATE
@@ -410,4 +380,22 @@ IMS_SINT32 CodecEvsConfig::GetAmrWbIoModeSet() const
         }
     }
     return 0;
+}
+
+PUBLIC
+IMS_SINT32 CodecEvsConfig::GetModeChangeCapability() const
+{
+    return m_nModeChangeCapability;
+}
+
+PUBLIC
+IMS_SINT32 CodecEvsConfig::GetModeChangePeriod() const
+{
+    return m_nModeChangePeriod;
+}
+
+PUBLIC
+IMS_SINT32 CodecEvsConfig::GetModeChangeNeighbor() const
+{
+    return m_nModeChangeNeighbor;
 }
