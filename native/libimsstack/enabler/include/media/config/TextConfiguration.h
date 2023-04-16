@@ -25,9 +25,9 @@ public:
     /**
      * @brief Construct a new text configuration
      *
-     * @param _eSessionType mediasession type (as: text)
+     * @param eSessionType mediasession type (as: text)
      */
-    explicit TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
+    explicit TextConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_TEXT);
     /**
      * @brief Destroy the text configuration
      *

@@ -102,6 +102,9 @@ public:
     static const IMS_SINT32 DEFAULT_CMR = 0;
     static const IMS_SINT32 DEFAULT_CH_AW_RECV = 0;
     static const IMS_SINT32 DEFAULT_AMRWB_IO_MODESET = 8;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
     static const IMS_SINT32 CMR_NOT_PRESENT = -2;
 
 public:
@@ -225,6 +228,24 @@ public:
      * @return IMS_SINT32 Return the amr-wb io modeset
      */
     IMS_SINT32 GetAmrWbIoModeSet() const;
+    /**
+     * @brief Get mode-change-capability
+     *
+     * @return IMS_SINT32 Return mode-change-capability
+     */
+    IMS_SINT32 GetModeChangeCapability() const;
+    /**
+     * @brief Get mode-change-period
+     *
+     * @return IMS_SINT32 Return mode-change-period
+     */
+    IMS_SINT32 GetModeChangePeriod() const;
+    /**
+     * @brief Get the mode-change-neighbor
+     *
+     * @return IMS_SINT32 Return mode-change-neighbor
+     */
+    IMS_SINT32 GetModeChangeNeighbor() const;
 
 private:
     static IMS_SINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd);
@@ -247,6 +268,9 @@ private:
                                      // SDP
     IMS_SINT32 m_nAmrWbIoModeSetList;  // AMR-WB IO parameter
     IMS_SINT32 m_nDefaultRtpModeSet;   // default mode-set for EVS AMR-WB IO mode
+    IMS_SINT32 m_nModeChangeCapability;
+    IMS_SINT32 m_nModeChangePeriod;
+    IMS_SINT32 m_nModeChangeNeighbor;
 };
 
 #endif
