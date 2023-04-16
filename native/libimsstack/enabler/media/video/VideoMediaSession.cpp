@@ -123,33 +123,35 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setMaxMtuBytes(pMediaManager->GetResourceManager()->GetMtu());
     }
 
-    IMS_SINT32 nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
-
-    switch (pNegoProfile->eDirection)
-    {
-        case MEDIA_DIRECTION_RECEIVE:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
-            break;
-        case MEDIA_DIRECTION_SEND:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
-            break;
-        case MEDIA_DIRECTION_SEND_RECEIVE:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
-            break;
-        case MEDIA_DIRECTION_INACTIVE:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
-            break;
-        default:
-            nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
-            break;
-    }
+    IMS_SINT32 nVideoDirection;
 
     if (pNegoProfile->nDataPort == 0 || pLocalProfile->nDataPort == 0)
     {
-        nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+        nVideoDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+    }
+    else
+    {
+        switch (pNegoProfile->eDirection)
+        {
+            case MEDIA_DIRECTION_RECEIVE:
+                nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                break;
+            case MEDIA_DIRECTION_SEND:
+                nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
+                break;
+            case MEDIA_DIRECTION_SEND_RECEIVE:
+                nVideoDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+                break;
+            case MEDIA_DIRECTION_INACTIVE:
+                nVideoDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+                break;
+            default:
+                nVideoDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+                break;
+        }
     }
 
-    pVideoConfig->setMediaDirection((int32_t)nVideoDerection);
+    pVideoConfig->setMediaDirection((int32_t)nVideoDirection);
 
     IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",
             pVideoConfig->getMediaDirection(), pVideoConfig->getTxPayloadTypeNumber(),

@@ -141,18 +141,26 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     objAudioConfig.setRxPayloadTypeNumber(pPeerPayload->objRtpMap.nPayloadNum);
 
+    IMS_SINT32 nAudioDirection;
+
     switch (pNegoProfile->eDirection)
     {
-        default:
-        case MEDIA_DIRECTION_INACTIVE:
         case MEDIA_DIRECTION_RECEIVE:
-        case MEDIA_DIRECTION_SEND:
-            objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
+            nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
             break;
         case MEDIA_DIRECTION_SEND_RECEIVE:
-            objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+            nAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
+            break;
+        case MEDIA_DIRECTION_SEND:
+        case MEDIA_DIRECTION_INACTIVE:
+            nAudioDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+            break;
+        default:
+            nAudioDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
             break;
     }
+
+    objAudioConfig.setMediaDirection((int32_t)nAudioDirection);
 
     IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",
             objAudioConfig.getMediaDirection(), objAudioConfig.getTxPayloadTypeNumber(),
