@@ -159,23 +159,20 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
     ImsVector<IMS_SINT32> objAvcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    // TODO: H.265
-    // ImsVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
-    //         CarrierConfig::ImsVt::KEY_H265_PAYLOAD_TYPE_INT_ARRAY);
+    ImsVector<IMS_SINT32> objHevcPayloadType =
+            piCcBundle->GetIntArray(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
 
     piCcBundle->ReleaseBundle();
 
     IMS_UINT32 nCodecCnt = 0;
+    if (objHevcPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
+    }
     if (objAvcPayloadType.GetSize() > 0)
     {
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
     }
-
-    // TODO: H.265
-    // if (objHevcPayloadType.GetSize() > 0)
-    // {
-    //     nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_HEVC, nCodecCnt, objHevcPayloadType);
-    // }
 
     // to avoid static analysis issue (not used variable and variable scope)
     IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
