@@ -199,7 +199,7 @@ TEST_F(CodecAvcConfigTest, GetProfileLevelId)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
 
-    EXPECT_EQ(m_pConfig->GetProfileLevelId(), strProfileLevelId.GetStr());
+    EXPECT_EQ(m_pConfig->GetProfileLevelId(), strProfileLevelId);
 }
 
 TEST_F(CodecAvcConfigTest, GetVideoImageAttr)
@@ -214,5 +214,5 @@ TEST_F(CodecAvcConfigTest, GetVideoImageAttr)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
 
-    EXPECT_EQ(m_pConfig->GetImageAttr(), "send [x=640,y=480] recv [x=640,y=480]");
+    EXPECT_EQ(m_pConfig->GetImageAttr(), objImageAttr.GetAt(0));
 }

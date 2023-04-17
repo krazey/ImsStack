@@ -135,20 +135,6 @@ PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* pi
         return nCodecIndex;
     }
 
-    /** TODO_MEDIA - For hevc // Chipset Feature
-    if (nHEVCCodecEnable == IMS_FALSE)
-    {
-        IMS_SINT32 nCodec = ImsCodec::VtoType(pCodecConfig->GetCodecName());
-        if (nCodec == ImsCodec::VIDEO_HEVC)
-        {
-            IMS_TRACE_D("MakeEachCodecs - Remove Payload Num[%d], Name[VIDEO_HEVC]",
-                pCodecConfig->GetProfileNum(), 0, 0);
-            delete pCodecConfig;
-            pCodecConfig = IMS_NULL;
-            continue;
-        }
-    }*/
-
     if (m_objCodecConfigs.InsertAt(pCodecConfig, nCodecIndex))
     {
         nCodecIndex++;

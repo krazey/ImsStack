@@ -146,6 +146,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY)),
             Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
+                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY)),
             Map.entry(ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
                     ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
@@ -180,6 +181,13 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY)),
+            Map.entry(Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY,
+                    Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+                    Assets.KEY_HEVC_PROFILE_INT,
+                    Assets.KEY_HEVC_LEVEL_INT)),
             Map.entry(Assets.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
                     Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
                     Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
@@ -214,6 +222,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
             ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+            Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
             ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
     private static SparseArray<ArrayList<String>> sConfigKeys = null;
@@ -1070,6 +1079,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
         if (videoPayloadTypes != null) {
+            int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
+                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+            addPayloadDescriptionKeys(mBundleKeys,
+                    Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE,
+                    hevcPayloadTypes);
+
             int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
             addPayloadDescriptionKeys(mBundleKeys,

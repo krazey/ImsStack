@@ -196,149 +196,94 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
                 reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->pFmtp);
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
-        pVideoConfig->setFramerate(pFmtp->nFrameRate);
-        pVideoConfig->setBitrate(pFmtp->nBitrate);
-        pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
-
-        IMS_UINT32 nTempAvcProfile = VideoConfig::CODEC_PROFILE_NONE;
-
-        switch (pFmtp->nProfile)
-        {
-            case AVC_PROFILE_NONE:
-                nTempAvcProfile = VideoConfig::CODEC_PROFILE_NONE;
-                break;
-            case AVC_PROFILE_B:
-                nTempAvcProfile = VideoConfig::AVC_PROFILE_BASELINE;
-                break;
-            case AVC_PROFILE_CB:
-                nTempAvcProfile = VideoConfig::AVC_PROFILE_CONSTRAINED_BASELINE;
-                break;
-            case AVC_PROFILE_H:
-                nTempAvcProfile = VideoConfig::AVC_PROFILE_HIGH;
-                break;
-            case AVC_PROFILE_M:
-            case AVC_PROFILE_E:
-                nTempAvcProfile = VideoConfig::AVC_PROFILE_MAIN;
-                break;
-            default:
-                break;
-        }
-
-        pVideoConfig->setCodecProfile(nTempAvcProfile);
-
-        IMS_UINT32 nTempAvcLevel = VideoConfig::AVC_LEVEL_1;
-
-        switch (pFmtp->nLevel)
-        {
-            case 31:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_31;
-                break;
-            case 30:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_3;
-                break;
-            case 22:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_22;
-                break;
-            case 21:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_21;
-                break;
-            case 20:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_2;
-                break;
-            case 13:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_13;
-                break;
-            case 12:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_12;
-                break;
-            case 11:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_11;
-                break;
-            case 10:
-            default:
-                nTempAvcLevel = VideoConfig::AVC_LEVEL_1;
-                break;
-        }
+        pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->nProfile)));
 
         /** TODO: check the case for setting AVC_LEVEL_1B */
-        pVideoConfig->setCodecLevel(nTempAvcLevel);
-        pVideoConfig->setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
+        pVideoConfig->setCodecLevel(convertAvcLevel(pFmtp->nLevel));
+
+        pVideoConfig->setFramerate(pFmtp->nFrameRate);
+        pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCameraId(m_nCameraId);
-        pVideoConfig->setCameraZoom(m_nCameraZoom);
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
         VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
-        pVideoConfig->setPauseImagePath(android::String8("/image/path"));
-        pVideoConfig->setDeviceOrientationDegree(0);
-        pVideoConfig->setCvoValue(pNegoProfile->nCvoId);
-
-        IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
-
-        if (pNegoPayload->objRtcpFbAttr.bNackSupported == IMS_TRUE)
-        {
-            nRtcpFbAttr += VideoConfig::RTP_FB_NACK;
-        }
-
-        if (pNegoPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
-        {
-            nRtcpFbAttr += VideoConfig::RTP_FB_TMMBR;
-            nRtcpFbAttr += VideoConfig::RTP_FB_TMMBN;
-        }
-
-        if (pNegoPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
-        {
-            nRtcpFbAttr += VideoConfig::PSFB_PLI;
-        }
-
-        if (pNegoPayload->objRtcpFbAttr.bFirSupported == IMS_TRUE)
-        {
-            nRtcpFbAttr += VideoConfig::PSFB_FIR;
-        }
-
-        pVideoConfig->setRtcpFbType(nRtcpFbAttr);
-
-        IMS_TRACE_D("UpdateRtpConfig() - VideoMode[%d], Codectype[%d]",
-                pVideoConfig->getVideoMode(), pVideoConfig->getCodecType(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - Framerate[%d], Bitrate[%d]", pVideoConfig->getFramerate(),
-                pVideoConfig->getBitrate(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - CodecProfil[%d], CodecLevel[%d]",
-                pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - IntraFrameInterval[%d], PacketizationMode[%d]",
-                pVideoConfig->getIntraFrameInterval(), pVideoConfig->getPacketizationMode(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - CameraId[%d], CameraZoom[%d]", pVideoConfig->getCameraId(),
-                pVideoConfig->getCameraZoom(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - ResolutionWidth[%d], ResolutionHeight[%d]",
-                pVideoConfig->getResolutionWidth(), pVideoConfig->getResolutionHeight(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - PauseImagePath[%s], DeviceOrientationDegree[%d]",
-                pVideoConfig->getPauseImagePath().c_str(),
-                pVideoConfig->getDeviceOrientationDegree(), 0);
-        IMS_TRACE_D("UpdateRtpConfig() - CvoValue[%d], RtcpFbType[%d]", pVideoConfig->getCvoValue(),
-                pVideoConfig->getRtcpFbType(), 0);
     }
     else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
     {
-        /** TODO_MEDIA */
+        VideoProfile::HevcFmtp* pFmtp =
+                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->pFmtp);
 
-        // CODEC_LEVEL_NONE,
-        // HEVC_HIGHTIER_LEVEL_1,
-        // HEVC_HIGHTIER_LEVEL_2,
-        // HEVC_HIGHTIER_LEVEL_21,
-        // HEVC_HIGHTIER_LEVEL_3,
-        // HEVC_HIGHTIER_LEVEL_31,
-        // HEVC_HIGHTIER_LEVEL_4,
-        // HEVC_HIGHTIER_LEVEL_41,
-        // HEVC_MAINTIER_LEVEL_1,
-        // HEVC_MAINTIER_LEVEL_2,
-        // HEVC_MAINTIER_LEVEL_21,
-        // HEVC_MAINTIER_LEVEL_3,
-        // HEVC_MAINTIER_LEVEL_31,
-        // HEVC_MAINTIER_LEVEL_4,
-        // HEVC_MAINTIER_LEVEL_41,
+        pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
+        pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->nProfile)));
+
+        /** TODO: check the case for setting HIGHTIER */
+        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->nLevel));
+
+        pVideoConfig->setFramerate(pFmtp->nFrameRate);
+        pVideoConfig->setBitrate(pFmtp->nBitrate);
+        pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
+
+        IMS_UINT32 nWidth = 0;
+        IMS_UINT32 nHeight = 0;
+        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
+        pVideoConfig->setResolutionWidth(nWidth);
+        pVideoConfig->setResolutionHeight(nHeight);
     }
+
+    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
+    pVideoConfig->setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
+    pVideoConfig->setCameraId(m_nCameraId);
+    pVideoConfig->setCameraZoom(m_nCameraZoom);
+    pVideoConfig->setPauseImagePath(android::String8("/image/path"));
+    pVideoConfig->setDeviceOrientationDegree(0);
+    pVideoConfig->setCvoValue(pNegoProfile->nCvoId);
+
+    IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
+
+    if (pNegoPayload->objRtcpFbAttr.bNackSupported)
+    {
+        nRtcpFbAttr |= VideoConfig::RTP_FB_NACK;
+    }
+
+    if (pNegoPayload->objRtcpFbAttr.bTmmbrSupported)
+    {
+        nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBR;
+        nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBN;
+    }
+
+    if (pNegoPayload->objRtcpFbAttr.bPliSupported)
+    {
+        nRtcpFbAttr |= VideoConfig::PSFB_PLI;
+    }
+
+    if (pNegoPayload->objRtcpFbAttr.bFirSupported)
+    {
+        nRtcpFbAttr |= VideoConfig::PSFB_FIR;
+    }
+
+    pVideoConfig->setRtcpFbType(nRtcpFbAttr);
+
+    IMS_TRACE_D("UpdateRtpConfig() - VideoMode[%d], Codectype[%d]", pVideoConfig->getVideoMode(),
+            pVideoConfig->getCodecType(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - Framerate[%d], Bitrate[%d]", pVideoConfig->getFramerate(),
+            pVideoConfig->getBitrate(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - CodecProfil[%d], CodecLevel[%d]",
+            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - IntraFrameInterval[%d], PacketizationMode[%d]",
+            pVideoConfig->getIntraFrameInterval(), pVideoConfig->getPacketizationMode(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - CameraId[%d], CameraZoom[%d]", pVideoConfig->getCameraId(),
+            pVideoConfig->getCameraZoom(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - ResolutionWidth[%d], ResolutionHeight[%d]",
+            pVideoConfig->getResolutionWidth(), pVideoConfig->getResolutionHeight(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - PauseImagePath[%s], DeviceOrientationDegree[%d]",
+            pVideoConfig->getPauseImagePath().c_str(), pVideoConfig->getDeviceOrientationDegree(),
+            0);
+    IMS_TRACE_D("UpdateRtpConfig() - CvoValue[%d], RtcpFbType[%d]", pVideoConfig->getCvoValue(),
+            pVideoConfig->getRtcpFbType(), 0);
+
     return IMS_TRUE;
 }
 
@@ -723,4 +668,89 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+IMS_UINT32 VideoMediaSession::convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile)
+{
+    switch (eProfile)
+    {
+        case AVC_PROFILE_B:
+            return VideoConfig::AVC_PROFILE_BASELINE;
+        case AVC_PROFILE_CB:
+            return VideoConfig::AVC_PROFILE_CONSTRAINED_BASELINE;
+        case AVC_PROFILE_H:
+            return VideoConfig::AVC_PROFILE_HIGH;
+        case AVC_PROFILE_M:  // FALL-THROUGH
+        case AVC_PROFILE_E:
+            return VideoConfig::AVC_PROFILE_MAIN;
+        case AVC_PROFILE_NONE:  // FALL-THROUGH
+        default:
+            return VideoConfig::CODEC_PROFILE_NONE;
+    }
+}
+
+PRIVATE
+IMS_UINT32 VideoMediaSession::convertHevcProfile(IN VIDEO_PROFILE_HEVC eProfile)
+{
+    switch (eProfile)
+    {
+        case HEVC_PROFILE_MAIN:
+            return VideoConfig::HEVC_PROFILE_MAIN;
+        case HEVC_PROFILE_MAIN10:
+            return VideoConfig::HEVC_PROFILE_MAIN10;
+        case HEVC_PROFILE_NONE:  // FALL-THROUGH
+        default:
+            return VideoConfig::CODEC_PROFILE_NONE;
+    }
+}
+
+PRIVATE
+IMS_UINT32 VideoMediaSession::convertAvcLevel(IN IMS_UINT32 nLevel)
+{
+    switch (nLevel)
+    {
+        case 31:
+            return VideoConfig::AVC_LEVEL_31;
+        case 30:
+            return VideoConfig::AVC_LEVEL_3;
+        case 22:
+            return VideoConfig::AVC_LEVEL_22;
+        case 21:
+            return VideoConfig::AVC_LEVEL_21;
+        case 20:
+            return VideoConfig::AVC_LEVEL_2;
+        case 13:
+            return VideoConfig::AVC_LEVEL_13;
+        case 12:
+            return VideoConfig::AVC_LEVEL_12;
+        case 11:
+            return VideoConfig::AVC_LEVEL_11;
+        case 10:  // FALL-THROUGH
+        default:
+            return VideoConfig::AVC_LEVEL_1;
+    }
+}
+
+PRIVATE
+IMS_UINT32 VideoMediaSession::convertHevcLevel(IN IMS_UINT32 nLevel)
+{
+    switch (nLevel)
+    {
+        case 41:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_41;
+        case 40:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_4;
+        case 31:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_31;
+        case 30:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_3;
+        case 21:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_21;
+        case 20:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_2;
+        case 10:  // FALL-THROUGH
+        default:
+            return VideoConfig::HEVC_MAINTIER_LEVEL_1;
+    }
 }
