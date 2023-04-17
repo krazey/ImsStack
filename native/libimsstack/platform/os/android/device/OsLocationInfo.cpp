@@ -109,14 +109,15 @@ OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL OsLocationInfo::~OsLocationInfo() {}
 
-PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec)
+PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartListeningForLocation(
+        IN IMS_UINT32 nUpdateIntervalInSec)
 {
     if (m_bIsStarted)
     {
         return IMS_TRUE;
     }
 
-    if (PlatformContext::GetInstance()->GetSystem()->StartLocationInfo(
+    if (PlatformContext::GetInstance()->GetSystem()->StartListeningForLocation(
                 nUpdateIntervalInSec, GetSlotId()))
     {
         m_bIsStarted = IMS_TRUE;
@@ -129,14 +130,14 @@ PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateI
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void OsLocationInfo::StopLocationInfo()
+PUBLIC VIRTUAL void OsLocationInfo::StopListeningForLocation()
 {
     if (!m_bIsStarted)
     {
         return;
     }
 
-    PlatformContext::GetInstance()->GetSystem()->StopLocationInfo(GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->StopListeningForLocation(GetSlotId());
     m_bIsStarted = IMS_FALSE;
 }
 
@@ -150,7 +151,7 @@ PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS
         m_pLocationProperties = IMS_NULL;
     }
 
-    if (PlatformContext::GetInstance()->GetSystem()->GetLocationInformation(
+    if (PlatformContext::GetInstance()->GetSystem()->GetLastKnownLocation(
                 objLocationInfo, nType, GetSlotId()) == 1)
     {
         m_pLocationProperties = new LocationProperties();
@@ -195,9 +196,9 @@ PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS
     return m_pLocationProperties;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::MakeInstantLocationInfo()
+PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartInstantLocationUpdate()
 {
-    return PlatformContext::GetInstance()->GetSystem()->MakeInstantLocationInfo(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->StartInstantLocationUpdate(GetSlotId());
 }
 
 PUBLIC VIRTUAL void OsLocationInfo::SetDefaultLocationProperties(

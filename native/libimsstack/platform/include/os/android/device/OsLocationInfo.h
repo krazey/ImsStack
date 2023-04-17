@@ -31,10 +31,10 @@ public:
     OsLocationInfo& operator=(IN const OsLocationInfo&) = delete;
 
 public:
-    IMS_BOOL StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec) override;
-    void StopLocationInfo() override;
+    IMS_BOOL StartListeningForLocation(IN IMS_UINT32 nUpdateIntervalInSec) override;
+    void StopListeningForLocation() override;
     ILocationProperties* GetLocationProperties(IN IMS_SINT32 nType = LOCATION_ALL) override;
-    IMS_BOOL MakeInstantLocationInfo() override;
+    IMS_BOOL StartInstantLocationUpdate() override;
     void SetDefaultLocationProperties(IN IMS_BOOL bFromUicc = IMS_TRUE) override;
     const AString& GetLastKnownCountry() const override;
 

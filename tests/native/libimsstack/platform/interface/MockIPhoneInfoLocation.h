@@ -49,10 +49,11 @@ public:
     inline MockILocationInfo() {}
     inline virtual ~MockILocationInfo() {}
 
-    MOCK_METHOD(IMS_BOOL, StartLocationInfo, (IN IMS_UINT32 nUpdateIntervalInSec), (override));
-    MOCK_METHOD(void, StopLocationInfo, (), (override));
+    MOCK_METHOD(
+            IMS_BOOL, StartListeningForLocation, (IN IMS_UINT32 nUpdateIntervalInSec), (override));
+    MOCK_METHOD(void, StopListeningForLocation, (), (override));
     MOCK_METHOD(ILocationProperties*, GetLocationProperties, (IN IMS_SINT32 nType), (override));
-    MOCK_METHOD(IMS_BOOL, MakeInstantLocationInfo, (), (override));
+    MOCK_METHOD(IMS_BOOL, StartInstantLocationUpdate, (), (override));
     MOCK_METHOD(void, SetDefaultLocationProperties, (IN IMS_BOOL bFromUICC), (override));
     MOCK_METHOD(const AString&, GetLastKnownCountry, (), (const, override));
 };

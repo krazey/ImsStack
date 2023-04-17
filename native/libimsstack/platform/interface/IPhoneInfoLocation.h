@@ -45,10 +45,10 @@ protected:
     virtual ~ILocationInfo() = default;
 
 public:
-    virtual IMS_BOOL StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec) = 0;
-    virtual void StopLocationInfo() = 0;
+    virtual IMS_BOOL StartListeningForLocation(IN IMS_UINT32 nUpdateIntervalInSec) = 0;
+    virtual void StopListeningForLocation() = 0;
     virtual ILocationProperties* GetLocationProperties(IN IMS_SINT32 nType = LOCATION_ALL) = 0;
-    virtual IMS_BOOL MakeInstantLocationInfo() = 0;
+    virtual IMS_BOOL StartInstantLocationUpdate() = 0;
     virtual void SetDefaultLocationProperties(IN IMS_BOOL bFromUICC = IMS_TRUE) = 0;
     virtual const AString& GetLastKnownCountry() const = 0;
 

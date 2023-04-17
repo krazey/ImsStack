@@ -164,12 +164,12 @@ public:
     ////
     // Location information
     ////
-    virtual IMS_BOOL StartLocationInfo(
+    virtual IMS_BOOL StartListeningForLocation(
             IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId) = 0;
-    virtual void StopLocationInfo(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 GetLocationInformation(
+    virtual void StopListeningForLocation(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetLastKnownLocation(
             OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_BOOL MakeInstantLocationInfo(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_BOOL StartInstantLocationUpdate(IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // Ims radio interface

@@ -100,6 +100,19 @@ public class GeocoderProxy {
     }
 
     /**
+     * Returns the addresses from the given location information.
+     *
+     * @param latitude The GPS information - latitude.
+     * @param longitude The GPS information - longitude.
+     * @param maxResults The maximum result count.
+     * @return A list of resolved {@link Address} object.
+     */
+    public List<Address> getAddressesFromLocation(
+            double latitude, double longitude, int maxResults) {
+        return getAddressesFromLocation(mContext, latitude, longitude, maxResults);
+    }
+
+    /**
      * @param waitTime waiting time to decode the location
      */
     @SuppressWarnings("WaitNotInLoop")
