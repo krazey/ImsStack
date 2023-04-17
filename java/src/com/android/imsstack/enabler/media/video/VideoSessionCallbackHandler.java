@@ -56,6 +56,9 @@ public class VideoSessionCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         parcel.writeInt(result);
 
+        if (result == ImsMediaSession.RESULT_SUCCESS) {
+            getMtcMediaInterface().videoSessionOpened();
+        }
         getMtcMediaInterface().sendRequest(parcel);
     }
 

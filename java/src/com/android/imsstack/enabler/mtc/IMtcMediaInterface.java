@@ -65,4 +65,9 @@ public interface IMtcMediaInterface {
      * @param extensions the RTP header extension data
      */
     void rtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions);
+
+    /**
+     * Notified when the video session opened
+     */
+    void videoSessionOpened();
 }
