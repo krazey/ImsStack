@@ -21,14 +21,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import com.android.ims.ImsManager;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.test.IImsTestMode;
-import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import java.util.Objects;
@@ -62,10 +58,6 @@ public class ImsGlobal extends ContextWrapper {
         return sImsGlobal;
     }
 
-    public static ImsManager getImsManager(int slotId) {
-        return ImsUtils.getImsManager(slotId);
-    }
-
     public static boolean isVoLteProvisioningRequired(Context context, int slotId) {
         ConfigInterface config = AgentFactory.getInstance().getAgent(
                 ConfigInterface.class, slotId);
@@ -89,40 +81,6 @@ public class ImsGlobal extends ContextWrapper {
         }
 
         return false;
-    }
-
-    public static boolean isVoLteEnabled(Context context, int slotId) {
-        IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
-
-        if ((itm != null) && itm.isGenericTestMode()) {
-            return true;
-        }
-
-        return (context == null) ? false : ImsUtils.isVoLteEnabledByPlatform(context, slotId);
-    }
-
-    public static boolean isVtEnabled(Context context, int slotId) {
-        IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
-
-        if ((itm != null) && itm.isGenericTestMode()) {
-            return true;
-        }
-
-        return (context == null) ? false : ImsUtils.isVtEnabledByPlatform(context, slotId);
-    }
-
-    public static boolean isWfcEnabled(Context context, int slotId) {
-        IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
-
-        if ((itm != null) && itm.isGenericTestMode()) {
-            return true;
-        }
-
-        return (context == null) ? false : ImsUtils.isWfcEnabledByPlatform(context, slotId);
-    }
-
-    public static boolean isWfcSettingEditable(int slotId) {
-        return isWfcEnabled(ImsGlobal.getInstance(), slotId);
     }
 
     // OPERATOR_COUNTRY {

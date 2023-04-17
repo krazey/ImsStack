@@ -35,13 +35,13 @@ import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SystemUtils;
 
@@ -1528,7 +1528,7 @@ public class LocationAgent implements LocationInterface {
 
             lp.setAddressTolerableDistance(150);
         } else if (carrierId.getCarrierId() == 1839
-                && ImsUtils.isWfcEnabledByPlatform(AppContext.getInstance(), mSlotId)) {
+                && ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
             lp = getLocationPolicy();
 
             policy |= LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING;
@@ -1536,7 +1536,7 @@ public class LocationAgent implements LocationInterface {
 
             addressResolutionTimeMillis = LocationPolicy.ADDRESS_RESOLUTION_MAX_TIME;
             validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD_SHORT;
-        } else if (ImsUtils.isWfcEnabledByPlatform(AppContext.getInstance(), mSlotId)) {
+        } else if (ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
             lp = getLocationPolicy();
 
             policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;

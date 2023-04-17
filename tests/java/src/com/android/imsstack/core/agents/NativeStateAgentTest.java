@@ -30,16 +30,15 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
 
-import com.android.ims.ImsManager;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +55,6 @@ import java.util.HashMap;
 public class NativeStateAgentTest {
     private static final int SLOT0 = 0;
 
-    @Mock ImsManager mImsManager;
     @Mock IBatteryState mBatteryState;
     @Mock ICellInfo mCellInfo;
     @Mock IDcNetWatcher mDcNetWatcher;
@@ -77,8 +75,7 @@ public class NativeStateAgentTest {
         TelephonyManager tm = context.getSystemService(TelephonyManager.class);
         when(tm.getSupportedModemCount()).thenReturn(1);
         AppContext.init(context);
-        ImsUtils.setImsManager(SLOT0, mImsManager);
-        when(mImsManager.isWfcEnabledByPlatform()).thenReturn(true);
+        ServiceCaps.setServiceCapabilities(SLOT0, false, false, true);
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         AgentFactory.setDefaultAgent(AgentFactory.BATTERY_STATE, mBatteryState);
@@ -113,9 +110,9 @@ public class NativeStateAgentTest {
         mSystem = null;
         mSystemInterface = null;
         mNativeStateListener = null;
-        mImsManager = null;
-        AppContext.deinit();
         mContextFixture = null;
+        AppContext.deinit();
+        ServiceCaps.clear();
     }
 
     @Test
