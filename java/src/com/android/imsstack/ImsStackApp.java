@@ -33,12 +33,12 @@ import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.test.ImsTestHelper;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.LogUtils;
 import com.android.imsstack.util.MSimUtils;
@@ -84,9 +84,6 @@ public class ImsStackApp extends Application {
     }
 
     private void init() {
-        // Initialize any static data
-        ImsUtils.init();
-
         mActiveSimCount = MSimUtils.getActiveSimCount();
 
         int supportedSimCount = MSimUtils.getSupportedSimCount();
@@ -216,9 +213,11 @@ public class ImsStackApp extends Application {
             if (slotState.isServiceStarted()) {
                 if (slotState.isCarrierConfigChanged()) {
                     Log.d(TAG, "SimState: carrier-config is changed while running.");
+                    ServiceCaps.updateServiceCapabilities(this, slotId, subId);
                     ConfigLoader.updateCarrierConfig(slotId);
                 }
             } else {
+                ServiceCaps.updateServiceCapabilities(this, slotId, subId);
                 loadConfigAndStartServices(slotId);
                 slotState.setServiceStarted(true);
             }
@@ -234,6 +233,7 @@ public class ImsStackApp extends Application {
                 stopServices(slotId);
             }
 
+            ServiceCaps.updateServiceCapabilities(this, slotId, subId);
             loadConfigAndStartServices(slotId);
             slotState.setServiceStarted(true);
         }
