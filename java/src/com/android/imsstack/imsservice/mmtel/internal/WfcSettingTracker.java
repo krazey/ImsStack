@@ -19,14 +19,13 @@ import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 
-import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
 public class WfcSettingTracker {
     private final IBaseContext mContext;
-    private boolean mWfcEnabled;
 
     public WfcSettingTracker(IBaseContext context) {
         mContext = context;
@@ -39,12 +38,9 @@ public class WfcSettingTracker {
     }
 
     public void init() {
-        mWfcEnabled = ImsGlobal.isWfcEnabled(mContext.getContext(), mContext.getSlotId());
-
     }
 
     public void clear() {
-        mWfcEnabled = false;
     }
 
     public boolean isWfcAvailable() {
@@ -63,11 +59,11 @@ public class WfcSettingTracker {
     }
 
     public boolean isWfcEnabled() {
-        return mWfcEnabled;
+        return ServiceCaps.isWfcEnabledByPlatform(mContext.getSlotId());
     }
 
     public boolean isWfcSettingEditable() {
-        return mWfcEnabled;
+        return isWfcEnabled();
     }
 
     private ImsMmTelManager getImsMmTelManager() {

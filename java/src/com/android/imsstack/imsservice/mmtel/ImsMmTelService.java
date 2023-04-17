@@ -32,14 +32,12 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
 
-import com.android.ims.ImsManager;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -325,11 +323,6 @@ public class ImsMmTelService extends MmTelFeature
     public void onFeatureReady() {
         logi("onFeatureReady");
 
-        postAndRunTask(() -> {
-            logi("updateImsManager");
-            ImsUtils.updateImsManager();
-        });
-
         ImsServiceManager sm = ImsServiceManager.getDefault();
         ImsCallApp callApp = sm.getCallApp(mImsContext.getPhoneId());
 
@@ -440,9 +433,6 @@ public class ImsMmTelService extends MmTelFeature
             if (isUSSD != null && isUSSD.equals("true")) {
                 extras.putBoolean(MmTelFeature.EXTRA_IS_USSD, true);
             }
-
-            // EXTRA_IS_UNKNOWN_CALL
-            extras.putLong(ImsManager.EXTRA_PHONE_ID, mImsContext.getPhoneId());
 
             // If any exception is thrown by this method call,
             // the incoming call is automatically rejected.

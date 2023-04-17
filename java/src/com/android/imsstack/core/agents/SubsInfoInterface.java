@@ -29,12 +29,4 @@ public interface SubsInfoInterface extends IAgent {
     boolean isDebugEnabled();
     /** Checks if the testmode is enabled or not. */
     boolean isTestModeEnabled();
-    /** Checks if VoLte service is available or not */
-    boolean isVoLteServiceOn();
-    /** Checks if ViLte service is available or not */
-    boolean isViLteServiceOn();
-    /** Checks if VoWifi service is available or not */
-    boolean isVoWiFiServiceOn();
-    /** Checks if ViWifi service is available or not */
-    boolean isViWiFiServiceOn();
 }

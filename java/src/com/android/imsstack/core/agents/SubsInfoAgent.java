@@ -20,7 +20,6 @@ import android.content.Context;
 
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsUtils;
 
 public class SubsInfoAgent implements SubsInfoInterface {
     private final int mSlotId;
@@ -73,34 +72,5 @@ public class SubsInfoAgent implements SubsInfoInterface {
     public boolean isTestModeEnabled() {
         return ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED, mSlotId);
-    }
-
-    @Override
-    public boolean isVoLteServiceOn() {
-        ImsUtils.ServiceCaps sc = ImsUtils.getServiceCapsFromLocalStorage(mSlotId);
-        return (sc != null) ? sc.isVoLteEnabled() : false;
-    }
-
-    @Override
-    public boolean isViLteServiceOn() {
-        ImsUtils.ServiceCaps sc = ImsUtils.getServiceCapsFromLocalStorage(mSlotId);
-        return (sc != null) ? sc.isVtEnabled() : false;
-    }
-
-    @Override
-    public boolean isVoWiFiServiceOn() {
-        ImsUtils.ServiceCaps sc = ImsUtils.getServiceCapsFromLocalStorage(mSlotId);
-        return (sc != null) ? sc.isWfcEnabled() : false;
-    }
-
-    @Override
-    public boolean isViWiFiServiceOn() {
-        ImsUtils.ServiceCaps sc = ImsUtils.getServiceCapsFromLocalStorage(mSlotId);
-
-        if (sc != null) {
-            return sc.isVtEnabled() && sc.isWfcEnabled();
-        }
-
-        return false;
     }
 }

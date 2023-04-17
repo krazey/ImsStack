@@ -44,6 +44,7 @@ import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
@@ -1319,7 +1320,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     // DISPLAY_WFC_ICON_DURING_CALLING
     public static void setCallExtraForRatType(ICallContext callContext, ImsCallProfile profile) {
-        if (!ImsGlobal.isWfcEnabled(callContext.getContext(), callContext.getSlotId())) {
+        if (!ServiceCaps.isWfcEnabledByPlatform(callContext.getSlotId())) {
             // If Wi-Fi calling is not supported, do not update this call extra.
             return;
         }
@@ -3234,7 +3235,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void setApnStateListener() {
-        if (!ImsGlobal.isWfcEnabled(mCallContext.getContext(), mCallContext.getSlotId())) {
+        if (!ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId())) {
             return;
         }
 

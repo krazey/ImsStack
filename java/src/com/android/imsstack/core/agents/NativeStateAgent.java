@@ -20,6 +20,7 @@ import android.os.Handler;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.system.ISystem;
@@ -27,7 +28,6 @@ import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -132,7 +132,7 @@ public class NativeStateAgent implements NativeStateInterface {
             system.notifyEvent(ImsEventDef.IMS_EVENT_RTT_SETTING, mtfr.getRttMode(), 0);
         }
 
-        if (ImsUtils.isWfcEnabledByPlatform(AppContext.getInstance(), mSlotId)) {
+        if (ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
             ICellInfo ci = (ICellInfo) AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotId);
             if (ci != null) {
                 ci.init(AppContext.getInstance());

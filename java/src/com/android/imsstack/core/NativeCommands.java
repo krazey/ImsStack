@@ -18,8 +18,8 @@ package com.android.imsstack.core;
 import android.content.Context;
 import android.os.Parcel;
 
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
 
 /**
@@ -38,9 +38,9 @@ public class NativeCommands {
         int supportedSimCount = MSimUtils.getSupportedSimCount();
         int activeSimCount = MSimUtils.getActiveSimCount();
         boolean imsEmergencyEnabled = true;
-        boolean voLteEnabled = ImsUtils.isVoLteEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
-        boolean vtEnabled = ImsUtils.isVtEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
-        boolean wfcEnabled = ImsUtils.isWfcEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
+        boolean voLteEnabled = ServiceCaps.isVoLteEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
+        boolean vtEnabled = ServiceCaps.isVtEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
+        boolean wfcEnabled = ServiceCaps.isWfcEnabledByDevice(c, MSimUtils.DEFAULT_PHONE_ID);
 
         Parcel p = Parcel.obtain();
         p.writeInt(supportedSimCount);
