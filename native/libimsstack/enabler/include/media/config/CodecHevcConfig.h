@@ -49,6 +49,12 @@ public:
      */
     virtual void ToDebugString() const override;
     /**
+     * @brief Get the channel
+     *
+     * @return IMS_SINT32 Return the channel id - default : 0
+     */
+    IMS_SINT32 GetChannel() const;
+    /**
      * @brief Get the resolution width
      *
      * @return IMS_SINT32 Return the resolution configuration - width for hevc
@@ -79,12 +85,11 @@ public:
      */
     IMS_SINT32 GetPacketizationMode() const;
     /**
-     * @brief Get the include sprop parameter sets
+     * @brief Get the SpropParameterSets
      *
-     * @return IMS_BOOL Return true if the setting that includes sprop-parameter-sets in sdp is
-     * enabled Return false if the setting that includes sprop-parameter-sets in sdp is disabled
+     * @return const AString& SpropParameterSets
      */
-    IMS_BOOL GetIncludeSpropParameterSets() const;
+    const AString& GetSpropParameterSets() const;
     /**
      * @brief Get the hevc profile
      *
@@ -112,24 +117,23 @@ public:
 
 public:
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_WIDTH = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_HEIGHT = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_HEVC_FRAMERATE = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_CHANNEL = 0;
+    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_WIDTH = 720;
+    static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_HEIGHT = 1280;
+    static const IMS_SINT32 DEFAULT_HEVC_FRAMERATE = 30;
     static const IMS_SINT32 DEFAULT_HEVC_BITRATE = NEED_TO_CHECK_I;
     static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = NEED_TO_CHECK_I;
-    static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_FALSE;
     static const IMS_SINT32 DEFAULT_HEVC_PROFILE = 1;
     static const IMS_SINT32 DEFAULT_HEVC_LEVEL = 93;
-#define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
-#define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
 
 private:
+    IMS_SINT32 m_nChannel;
     IMS_SINT32 m_nResolutionWidth;
     IMS_SINT32 m_nResolutionHeight;
     IMS_SINT32 m_nFramerate;
     IMS_SINT32 m_nBitrate;
     IMS_SINT32 m_nPacketizationMode;
-    IMS_BOOL m_bIncludeSpropParameterSets;
+    AString m_strSpropParameterSets;
     IMS_SINT32 m_nHevcProfile;
     IMS_SINT32 m_nHevcLevel;
     AString m_strImageAttr;

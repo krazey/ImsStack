@@ -1744,7 +1744,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     for (IMS_UINT32 nIndex = 0; nIndex < pProfile->objCandidateAttr.GetSize(); nIndex++)
     {
         AString strCandidateAttr = pProfile->objCandidateAttr.GetAt(nIndex);
-        if (!strCandidateAttr.IsEmpty() && !strCandidateAttr.IsNULL())
+        if (strCandidateAttr.GetLength() != 0)
         {
             strCandidateAttr.Sprintf("%d, %s", nIndex + 1, strCandidateAttr.GetStr());
             pDescriptor->AddAttribute(SdpAttribute::CANDIDATE, strCandidateAttr);

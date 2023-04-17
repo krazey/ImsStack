@@ -1039,6 +1039,14 @@ const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
         "audio_rtcpxr_packet_loss_rle_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
         "audio_rtcpxr_packet_duplicate_rle_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =
+        "hevc_payload_type_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[] =
+        "hevc_payload_description_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_SPROP_PARAMETER_SETS_STRING[] =
+        "hevc_sprop_parameter_sets_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PROFILE_INT[] = "hevc_profile_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_LEVEL_INT[] = "hevc_level_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[] =
         "video_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT[] = "video_cvo_value_int";

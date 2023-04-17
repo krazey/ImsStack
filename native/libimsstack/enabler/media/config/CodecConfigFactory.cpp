@@ -134,8 +134,20 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
         break;
 
         case ImsCodec::VIDEO_HEVC:
-            // pCodecConfig = new CodecHevcConfig(nCodec, nPayloadTypeNum);   //Need to add later
-            break;
+        {
+            CodecHevcConfig* pHevcConfig = new CodecHevcConfig(nCodec, nPayloadTypeNum);
+
+            if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc, nCodecIdx))
+            {
+                IMS_TRACE_D("pHevcConfig Create failure", 0, 0, 0);
+
+                delete pHevcConfig;
+                return IMS_NULL;
+            }
+
+            pCodecConfig = pHevcConfig;
+        }
+        break;
     }
     return pCodecConfig;
 }
