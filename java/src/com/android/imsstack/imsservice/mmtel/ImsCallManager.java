@@ -24,8 +24,8 @@ import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.SrvccCall;
 
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.ImsWakeLock;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
@@ -400,7 +400,7 @@ public class ImsCallManager {
     }
 
     protected boolean isCallOverWifiSupported() {
-        return ImsGlobal.isWfcEnabled(mCallContext.getContext(), mCallContext.getSlotId());
+        return ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId());
     }
 
     private void checkAndExitEcbm() {

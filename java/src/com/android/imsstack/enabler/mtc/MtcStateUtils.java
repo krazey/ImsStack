@@ -20,6 +20,7 @@ import android.content.Context;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
@@ -49,9 +50,9 @@ public class MtcStateUtils {
 
         ImsStateStore.init(phoneId);
 
-        boolean isVoLteEnabled = ImsGlobal.isVoLteEnabled(context, slotId);
-        boolean isWfcEnabled = ImsGlobal.isWfcEnabled(context, slotId);
-        boolean isVtEnabled = ImsGlobal.isVtEnabled(context, slotId);
+        boolean isVoLteEnabled = ServiceCaps.isVoLteEnabledByPlatform(slotId);
+        boolean isWfcEnabled = ServiceCaps.isWfcEnabledByPlatform(slotId);
+        boolean isVtEnabled = ServiceCaps.isVtEnabledByPlatform(slotId);
         boolean isVoLteProvisioningRequired
                 = ImsGlobal.isVoLteProvisioningRequired(context, slotId);
         boolean isVtProvisioningRequired = ImsGlobal.isVtProvisioningRequired(context, slotId);

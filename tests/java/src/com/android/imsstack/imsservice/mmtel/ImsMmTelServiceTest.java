@@ -60,7 +60,6 @@ import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
@@ -126,12 +125,10 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         when(AppContext.getTelephonyManager(0)).thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(1);
         UtFactory.getInstance().setUtInterfaceForSlot(0, mMockUtInterface);
-        ImsUtils.init();
     }
 
     @After
     public void tearDown() throws Exception {
-        ImsUtils.clear();
         mMmTelFeature = null;
         mServiceManager.getServiceRecordMap().clear();
         ImsServiceManager.setDefault(null);

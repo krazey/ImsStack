@@ -26,12 +26,12 @@ import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
+import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
@@ -542,7 +542,7 @@ public class ImsServiceManager {
     }
 
     private int getVoLteServiceFeaturesFromPlatformConfig(int phoneId) {
-        ImsUtils.ServiceCaps serviceCaps = ImsUtils.getServiceCapsByPlatform(mContext, phoneId);
+        ServiceCaps serviceCaps = ServiceCaps.getServiceCaps(phoneId);
         int serviceFeatures = 0;
 
         logi(serviceCaps.toString());
