@@ -75,6 +75,7 @@ private:
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);
     IMS_BOOL IsRefreshInProgress() const;
+    void SendIncomingResume();
 
     CallStateName TerminateUssiAfterInfoTransaction();
 };

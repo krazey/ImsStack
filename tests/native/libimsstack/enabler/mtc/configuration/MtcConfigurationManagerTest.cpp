@@ -1286,4 +1286,10 @@ TEST_F(MtcConfigurationManagerTest,
                             KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest, IsCheckUiConditionForIncomingResumeReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->IsCheckUiConditionForIncomingResume(),
+            GetBool(CarrierConfig::Assets::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL));
+}
+
 }  // namespace android

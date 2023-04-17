@@ -286,6 +286,38 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->RejectUpdate(objInfo));
 }
 
+TEST_F(UpdatingStateTest, AcceptResumeReturnsEstablishedWhenPreviousRequestIsUpdate)
+{
+    // AcceptResume codes are almost same with AcceptUpdate, so simply checks tiny differences.
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    MediaInfo objMediaInfo;
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND;
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
+    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
+    EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    EXPECT_CALL(objUiNotifier, SendResumedBy(_, _, _)).Times(1);
+
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pUpdatingState->AcceptResume(CallType::VOIP, objMediaInfo));
+    EXPECT_EQ(DIRECTION_SEND_RECEIVE, objMediaInfo.eAudioDirection);
+}
+
+TEST_F(UpdatingStateTest, RejectResumeInvokesReject)
+{
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_CALL(objMtcSession, Reject(objInfo)).Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->RejectResume(objInfo));
+}
+
 TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
 {
     MockISession objSession;

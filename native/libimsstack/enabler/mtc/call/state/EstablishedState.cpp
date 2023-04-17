@@ -557,6 +557,15 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         return IMS_SUCCESS;
     }
 
+    if (m_objContext.GetUpdatingInfo().IsResumedBy() &&
+            m_objContext.GetConfigurationProxy().Is(
+                    Feature::CHECK_UI_CONDITION_FOR_INCOMING_RESUME))
+    {
+        SendIncomingResume();
+
+        return IMS_SUCCESS;
+    }
+
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
@@ -681,6 +690,19 @@ IMS_BOOL EstablishedState::IsRefreshInProgress() const
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
     return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
+}
+
+PRIVATE
+void EstablishedState::SendIncomingResume()
+{
+    IMS_TRACE_D("SendIncomingResume", 0, 0, 0);
+
+    m_objContext.GetUiNotifier().SendIncomingResume(&m_objContext.GetCallInfo(),
+            m_objContext.GetUpdatingInfo().GetAlertingInfo(),
+            m_objContext.GetSupplementaryService().GetServices());
+
+    m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
 }
 
 PRIVATE

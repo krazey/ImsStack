@@ -992,6 +992,13 @@ public:
      * @return
      */
     virtual IMS_BOOL IsEmergencyCallCurrentLocationDiscoverySupported() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsCheckUiConditionForIncomingResume() const = 0;
 };
 
 #endif

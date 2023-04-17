@@ -770,6 +770,8 @@ public class CarrierConfig {
                 "policy_for_alert_not_using_precondition_mechanism_int";
         public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
                 "emergency_call_current_location_discovery_supported_bool";
+        public static final String KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL =
+                "check_ui_condition_for_incoming_resume_bool";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
