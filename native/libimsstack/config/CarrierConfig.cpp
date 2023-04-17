@@ -1005,6 +1005,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITIO
 const IMS_CHAR
         CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
                 "emergency_call_current_location_discovery_supported_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL[] =
+        "check_ui_condition_for_incoming_resume_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

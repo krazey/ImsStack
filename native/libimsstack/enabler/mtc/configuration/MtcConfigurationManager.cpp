@@ -870,6 +870,12 @@ IMS_BOOL MtcConfigurationManager::IsEmergencyCallCurrentLocationDiscoverySupport
     return m_objCarrierConfig.bEmergencyCallCurrentLocationDiscoverySupported;
 }
 
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsCheckUiConditionForIncomingResume() const
+{
+    return m_objCarrierConfig.bCheckUiConditionForIncomingResume;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)

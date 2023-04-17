@@ -189,6 +189,53 @@ PUBLIC VIRTUAL CallStateName UpdatingState::CancelUpdate(IN const CallReasonInfo
     return CallStateName::UPDATING;
 }
 
+PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
+        IN CallType eCallType, IN MediaInfo& objMediaInfo)
+{
+    IMS_TRACE_D("AcceptResume", 0, 0, 0);
+
+    m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
+
+    IMtcSession* pSession = m_objContext.GetSession();
+    ISession& objSession = pSession->GetISession();
+
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    pSession->SetCallType(eCallType);
+
+    m_objContext.GetUpdatingInfo().GetModifiedInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
+
+    if (pSession->AcceptUpdate() == IMS_FAILURE)
+    {
+        // TODO
+    }
+
+    IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
+    {
+        m_objContext.GetUiNotifier().SendResumedBy(&(m_objContext.GetCallInfo()),
+                m_objContext.GetUpdatingInfo().GetModifiedInfo(),
+                m_objContext.GetSupplementaryService().GetServices());
+        return CallStateName::ESTABLISHED;
+    }
+
+    return CallStateName::UPDATING;
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::RejectResume(IN const CallReasonInfo& objReason)
+{
+    IMS_TRACE_D("RejectResume", 0, 0, 0);
+
+    m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
+
+    if (m_objContext.GetSession()->Reject(objReason) == IMS_FAILURE)
+    {
+        // TODO
+    }
+
+    return CallStateName::UPDATING;
+}
+
 PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);

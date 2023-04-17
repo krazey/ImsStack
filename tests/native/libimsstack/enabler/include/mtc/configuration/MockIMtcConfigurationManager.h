@@ -174,6 +174,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetPolicyForAlertNotUsingPreconditionMechanism, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredCdmalessFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallCurrentLocationDiscoverySupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCheckUiConditionForIncomingResume, (), (const, override));
 };
 
 #endif

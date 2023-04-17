@@ -222,6 +222,7 @@
     <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
     <int name="policy_for_alert_not_using_precondition_mechanism_int" value="1"/>
+    <boolean name="check_ui_condition_for_incoming_resume_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

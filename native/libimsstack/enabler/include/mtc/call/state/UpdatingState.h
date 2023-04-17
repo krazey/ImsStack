@@ -47,6 +47,8 @@ public:
     CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName RejectResume(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;

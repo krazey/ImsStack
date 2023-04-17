@@ -148,7 +148,8 @@ public:
             bVoiceQosPreconditionSupported(IMS_TRUE),
             bReleaseEmergencyPdnWithEmergencyCallFail(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
-            bEmergencyCallCurrentLocationDiscoverySupported(IMS_TRUE)
+            bEmergencyCallCurrentLocationDiscoverySupported(IMS_TRUE),
+            bCheckUiConditionForIncomingResume(IMS_FALSE)
     {
     }
     ~CarrierConfigItems()
@@ -302,6 +303,7 @@ public:
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallFail;
     IMS_BOOL bRequiredCdmalessFeatureTag;
     IMS_BOOL bEmergencyCallCurrentLocationDiscoverySupported;
+    IMS_BOOL bCheckUiConditionForIncomingResume;
 };
 
 #endif

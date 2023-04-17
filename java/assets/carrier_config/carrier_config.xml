@@ -529,6 +529,7 @@
     <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="false"/>
     <int name="policy_for_alert_not_using_precondition_mechanism_int" value="0"/>
     <boolean name="emergency_call_current_location_discovery_supported_bool" value="true"/>
+    <boolean name="check_ui_condition_for_incoming_resume_bool" value="false"/>
 
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>

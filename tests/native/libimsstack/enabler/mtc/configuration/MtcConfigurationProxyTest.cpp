@@ -246,6 +246,9 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsEmergencyCallCurrentLocationDiscoverySupported)
             .WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED));
+
+    EXPECT_CALL(*pConfigManager, IsCheckUiConditionForIncomingResume).WillOnce(Return(bValue));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::CHECK_UI_CONDITION_FOR_INCOMING_RESUME));
 }
 
 TEST_F(MtcConfigurationProxyTest, IsWithStringArgReturnsFromConfigManager)

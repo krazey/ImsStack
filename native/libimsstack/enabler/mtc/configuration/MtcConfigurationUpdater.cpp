@@ -345,4 +345,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
     objItems.bEmergencyCallCurrentLocationDiscoverySupported = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL);
+    objItems.bCheckUiConditionForIncomingResume = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL);
 }
