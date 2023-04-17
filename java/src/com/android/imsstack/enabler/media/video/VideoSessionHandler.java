@@ -505,8 +505,6 @@ public class VideoSessionHandler extends MediaState {
                     return;
                 }
 
-                mPreviewSurfaceSet = true;
-                mDisplaySurfaceSet = true;
                 mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_VIDEO, videoConfig, mVideoSessionCallback);
                 setMediaState(MEDIA_STATE_OPENING);
@@ -562,8 +560,12 @@ public class VideoSessionHandler extends MediaState {
 
     private void handleSetPreviewSurface() {
         if (mVideoSession != null && mMtcMediaVideoCallProvider != null) {
-            mVideoSession.setPreviewSurface(mMtcMediaVideoCallProvider.getPreviewSurface());
-            mPreviewSurfaceSet = true;
+            if (mMtcMediaVideoCallProvider.getPreviewSurface() != null) {
+                mVideoSession.setPreviewSurface(mMtcMediaVideoCallProvider.getPreviewSurface());
+                mPreviewSurfaceSet = true;
+            } else {
+                mPreviewSurfaceSet = false;
+            }
         } else {
             mPreviewSurfaceSet = false;
         }
@@ -571,8 +573,12 @@ public class VideoSessionHandler extends MediaState {
 
     private void handleSetDisplaySurface() {
         if (mVideoSession != null && mMtcMediaVideoCallProvider != null) {
-            mVideoSession.setDisplaySurface(mMtcMediaVideoCallProvider.getDisplaySurface());
-            mDisplaySurfaceSet = true;
+            if (mMtcMediaVideoCallProvider.getDisplaySurface() != null) {
+                mVideoSession.setDisplaySurface(mMtcMediaVideoCallProvider.getDisplaySurface());
+                mDisplaySurfaceSet = true;
+            } else {
+                mDisplaySurfaceSet = false;
+            }
         } else {
             mDisplaySurfaceSet = false;
         }
