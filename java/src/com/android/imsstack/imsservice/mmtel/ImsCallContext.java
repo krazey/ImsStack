@@ -23,11 +23,9 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ILocationAgent;
-import com.android.imsstack.core.agents.ILocationAgentManager;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
@@ -226,15 +224,8 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public ILocationAgent getLocationAgent() {
-        ILocationAgentManager lam = (ILocationAgentManager)VoLteFactory.getInstance().getAgent(
-                VoLteFactory.AGENT_LOCATION_AGENT_MANAGER);
-
-        if (lam != null) {
-            return lam.getAgent(getSlotId());
-        }
-
-        return null;
+    public LocationInterface getLocationInterface() {
+        return AgentFactory.getInstance().getAgent(LocationInterface.class, getSlotId());
     }
 
     @Override

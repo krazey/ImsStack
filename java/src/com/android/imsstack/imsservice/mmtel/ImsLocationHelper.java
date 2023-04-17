@@ -25,8 +25,8 @@ import android.os.SystemClock;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IAlarmTimer;
-import com.android.imsstack.core.agents.ILocationAgent;
 import com.android.imsstack.core.agents.LocationApi;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
@@ -286,8 +286,8 @@ public class ImsLocationHelper {
     }
 
     private Location[] getCachedLocations() {
-        ILocationAgent la = mCallContext.getLocationAgent();
-        return (la != null) ? la.getCachedLocations() : null;
+        LocationInterface location = mCallContext.getLocationInterface();
+        return (location != null) ? location.getCachedLocations() : null;
     }
 
     private static void log(String s) {

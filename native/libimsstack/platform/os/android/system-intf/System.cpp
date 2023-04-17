@@ -1383,19 +1383,21 @@ AString System::GetWifiCallingAddressId(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_BOOL System::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId)
+IMS_BOOL System::StartListeningForLocation(
+        IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId)
 {
-    return (GetInt2(SystemConstants::START_LOCATION_INFO, nUpdateIntervalInSec, 0, nSlotId) == 1);
+    return GetInt2(SystemConstants::START_LISTENING_FOR_LOCATION, nUpdateIntervalInSec, 0,
+                   nSlotId) == 1;
 }
 
 PUBLIC
-void System::StopLocationInfo(IN IMS_SINT32 nSlotId)
+void System::StopListeningForLocation(IN IMS_SINT32 nSlotId)
 {
-    (void)GetInt(SystemConstants::STOP_LOCATION_INFO, 0, nSlotId);
+    (void)GetInt(SystemConstants::STOP_LISTENING_FOR_LOCATION, 0, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetLocationInformation(
+IMS_SINT32 System::GetLastKnownLocation(
         OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
@@ -1407,7 +1409,7 @@ IMS_SINT32 System::GetLocationInformation(
     android::Parcel out;
 
     in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::GET_LOCATION_INFO);
+    in.writeInt32(SystemConstants::GET_LAST_KNOWN_LOCATION);
     in.writeInt32(nType);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
@@ -1433,9 +1435,9 @@ IMS_SINT32 System::GetLocationInformation(
 }
 
 PUBLIC
-IMS_BOOL System::MakeInstantLocationInfo(IN IMS_SINT32 nSlotId)
+IMS_BOOL System::StartInstantLocationUpdate(IN IMS_SINT32 nSlotId)
 {
-    return (GetInt(SystemConstants::MAKE_INSTATNT_LOCATION_INFO, 0, nSlotId) == 1);
+    return GetInt(SystemConstants::START_INSTANT_LOCATION_UPDATE, 0, nSlotId) == 1;
 }
 
 PUBLIC
