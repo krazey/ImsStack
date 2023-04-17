@@ -58,6 +58,7 @@ typedef enum  // AVC profile
     AVC_PROFILE_H,   // high profile
     AVC_PROFILE_NOT_USED
 } VIDEO_PROFILE_AVC;
+
 typedef enum  // HEVC profile
 {
     HEVC_PROFILE_NONE = 0,

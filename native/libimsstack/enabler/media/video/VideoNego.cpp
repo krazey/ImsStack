@@ -2940,7 +2940,7 @@ PRIVATE VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecTyp
     IMS_UINT32 nWidth, nHeight;
 
     // Get nWidth, nHeight From Image Attribute
-    if (!strImageAttrFromSdp.IsEmpty() && !strImageAttrFromSdp.IsNULL() &&
+    if (strImageAttrFromSdp.GetLength() != 0 &&
             (GetWidthHeightFromSdp_ImageAttr(strImageAttrFromSdp, &nWidth, &nHeight) != IMS_FALSE))
     {
         return GetResolutionFromWidthHeight(nWidth, nHeight);
@@ -2950,7 +2950,7 @@ PRIVATE VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecTyp
     (void)codecType;
     (void)strSpropParam;
     // // - Get nWidth, nHeight From SpropParam
-    // if (!strSpropParam.IsEmpty() && !strSpropParam.IsNULL() &&
+    // if (strSpropParam.GetLength() != 0 &&
     //        (GetWidthHeightFromSdp_SpropParam(
     //                 codecType, strSpropParam.GetStr(), &nWidth, &nHeight) != IMS_FALSE))
     // {
@@ -2958,7 +2958,7 @@ PRIVATE VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecTyp
     // }
 
     // Get nWidth, nHeight From Framesize
-    if (!strFrameSizeFromSdp.IsEmpty() && !strFrameSizeFromSdp.IsNULL() &&
+    if (strFrameSizeFromSdp.GetLength() != 0 &&
             (GetWidthHeightFromSdp_FrameSize(strFrameSizeFromSdp, &nWidth, &nHeight) != IMS_FALSE))
     {
         return GetResolutionFromWidthHeight(nWidth, nHeight);

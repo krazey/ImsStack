@@ -120,7 +120,6 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
                 continue;
             }
 
-            pVideoProfile->nFrameRate = pAvcConfig->GetFramerate();
             pAvcFmtp->nFrameRate = pAvcConfig->GetFramerate();
             pAvcFmtp->eResolution = GetResolutionFromWidthHeight(
                     pAvcConfig->GetResolutionWidth(), pAvcConfig->GetResolutionHeight());
@@ -149,7 +148,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
                 continue;
             }
 
-            if (!pAvcConfig->GetProfileLevelId().IsEmpty())
+            if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
             {
                 pAvcFmtp->strProfileLevelId = pAvcConfig->GetProfileLevelId();
                 pAvcFmtp->bShow_ProfileLevelId = IMS_TRUE;
@@ -174,12 +173,12 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
                     pConfig->GetVideoSamplingRate(), pAvcConfig->GetChannel());
             pAvcPayload->pFmtp = reinterpret_cast<void*>(pAvcFmtp);
 
-            if (!pAvcConfig->GetImageAttr().IsEmpty() && !pAvcConfig->GetImageAttr().IsNULL())
+            if (pAvcConfig->GetImageAttr().GetLength() != 0)
             {
                 pAvcPayload->bIncludeImageAttr = IMS_TRUE;
                 pAvcPayload->strImageAttr = pAvcConfig->GetImageAttr();
             }
-            else if (!pAvcConfig->GetFrameSize().IsEmpty() && !pAvcConfig->GetFrameSize().IsNULL())
+            else if (pAvcConfig->GetFrameSize().GetLength() != 0)
             {
                 pAvcPayload->bIncludeFrameSize = IMS_TRUE;
             }
@@ -244,26 +243,21 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
         }
         else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_HEVC)
         {
-            /** TODO: need to update later for HEVC
             CodecHevcConfig* pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
 
             VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
 
-            pVideoProfile->nFrameRate = pHevcConfig->GetFramerate();
             pHevcFmtp->nFrameRate = pHevcConfig->GetFramerate();
             pHevcFmtp->eResolution = GetResolutionFromWidthHeight(
                     pHevcConfig->GetResolutionWidth(), pHevcConfig->GetResolutionHeight());
             pHevcFmtp->nBitrate = pHevcConfig->GetBitrate();
 
             pHevcFmtp->nAs = pConfig->GetAsBandwidthKbps();
-            // video sprop
-            // const IMS_CHAR* pHevcSpropParameterSets =
-            //         GetHevcSpropParameterSets(pHevcFmtp->eResolution, pHevcFmtp->nProfile);
 
             if (pHevcConfig->GetHevcProfile() != -1)
             {
                 pHevcFmtp->nProfile =
-                        reinterpret_cast<VIDEO_PROFILE_HEVC*>(pHevcConfig->GetHevcProfile());
+                        static_cast<VIDEO_PROFILE_HEVC>(pHevcConfig->GetHevcProfile());
                 pHevcFmtp->bShow_Profile = IMS_TRUE;
             }
 
@@ -279,26 +273,24 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
                 pHevcFmtp->bShow_PacketizationMode = IMS_TRUE;
             }
 
-            if (pHevcConfig->GetIncludeSpropParameterSets())
+            if (pHevcConfig->GetSpropParameterSets().GetLength() != 0)
             {
-                pHevcFmtp->strSpropParam = pHevcSpropParameterSets;
+                pHevcFmtp->strSpropParam = pHevcConfig->GetSpropParameterSets();
                 pHevcFmtp->bShow_SpropParam = IMS_TRUE;
             }
 
             VideoProfile::Payload* pHevcPayload = new VideoProfile::Payload();
 
-            pHevcPayload->SetRtpMap(pHevcPayload->GetPayloadType(),
-                    ImsCodec::CodecToString(pHevcPayload->GetCodec()),
+            pHevcPayload->SetRtpMap(pHevcConfig->GetPayloadType(),
+                    ImsCodec::CodecToString(pHevcConfig->GetCodec()),
                     pConfig->GetVideoSamplingRate(), pHevcConfig->GetChannel());
-            pHevcPayload->pFmtp = reinterpret_cast<void*>(pHevcPayload);
+            pHevcPayload->pFmtp = reinterpret_cast<void*>(pHevcFmtp);
 
-            if (!pHevcConfig->GetImageAttr().IsEmpty() && !pHevcConfig->GetImageAttr().IsNULL())
+            if (pHevcConfig->GetImageAttr().GetLength() != 0)
             {
                 pHevcPayload->bIncludeImageAttr = IMS_TRUE;
             }
-
-            else if (!pHevcConfig->GetIncludeFrameSize().IsEmpty() &&
-            !pHevcConfig->GetIncludeFrameSize().IsNULL())
+            else if (pHevcConfig->GetFrameSize().GetLength() != 0)
             {
                 pHevcPayload->bIncludeFrameSize = IMS_TRUE;
             }
@@ -341,9 +333,9 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
 
             pVideoProfile->lstPayload.Append(pHevcPayload);
 
-            if (pHevcConfig->GetAsBandwidthKbps() > nMaxAS)
+            if (pConfig->GetAsBandwidthKbps() > nMaxAS)
             {
-                nMaxAS = pHevcConfig->GetAsBandwidthKbps();
+                nMaxAS = pConfig->GetAsBandwidthKbps();
             }
             if (pHevcConfig->GetFramerate() > nMaxFramerate)
             {
@@ -352,17 +344,16 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
 
             IMS_TRACE_D("CreateProfile() add payload(%d) - %s", i,
                     ImsCodec::CodecToString(pHevcConfig->GetCodec()), 0);
-            */
         }
     }
 
     // 5. Setting direction, candidate, framerate, as/rr/rs
     pVideoProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+    pVideoProfile->nFrameRate = nMaxFramerate;
 
     // 6. Setting CVO
     pVideoProfile->nCvoId = pConfig->GetCvoId();
 
-    // framerate is in CodecAvc/HevcConfig
     pVideoProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
     SetVideoRsRr(pVideoProfile, pConfig);
 

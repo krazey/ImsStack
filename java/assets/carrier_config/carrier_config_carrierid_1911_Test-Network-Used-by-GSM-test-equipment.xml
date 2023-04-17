@@ -79,9 +79,25 @@
         </pbundle>
     </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="hevc_payload_type_int_array" num="1">
+            <item value="125"/>
+        </int-array>
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="119"/>
         </int-array>
+    </pbundle>
+    <pbundle name="hevc_payload_description_bundle">
+        <pbundle name="125">
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="30"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="480"/>
+                <item value="640"/>
+            </int-array>
+            <string name="hevc_sprop_parameter_sets_string">AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,AAAAAUQBwPPAAhA=</string>
+            <int name="hevc_profile_int" value="1"/>
+            <int name="hevc_level_int" value="93"/>
+        </pbundle>
     </pbundle>
     <pbundle name="imsvt.h264_payload_description_bundle">
         <pbundle name="119">

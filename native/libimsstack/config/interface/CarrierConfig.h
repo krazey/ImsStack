@@ -994,6 +994,11 @@ public:
         static const IMS_CHAR KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL[];
         static const IMS_CHAR KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[];
         static const IMS_CHAR KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[];
+        static const IMS_CHAR KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[];
+        static const IMS_CHAR KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[];
+        static const IMS_CHAR KEY_HEVC_SPROP_PARAMETER_SETS_STRING[];
+        static const IMS_CHAR KEY_HEVC_PROFILE_INT[];
+        static const IMS_CHAR KEY_HEVC_LEVEL_INT[];
         static const IMS_CHAR KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_CVO_VALUE_INT[];
         static const IMS_CHAR KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT[];
