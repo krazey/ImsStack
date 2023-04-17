@@ -196,13 +196,13 @@ public:
     ////
     // Location information
     ////
-    MOCK_METHOD(IMS_BOOL, StartLocationInfo,
+    MOCK_METHOD(IMS_BOOL, StartListeningForLocation,
             (IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(void, StopLocationInfo, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetLocationInformation,
+    MOCK_METHOD(void, StopListeningForLocation, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetLastKnownLocation,
             (OUT AStringArray & objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(IMS_BOOL, MakeInstantLocationInfo, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_BOOL, StartInstantLocationUpdate, (IN IMS_SINT32 nSlotId), (override));
 
     ////
     // Ims radio interface

@@ -254,8 +254,8 @@ public class ImsCallContextTest extends ImsStackTest {
     }
 
     @Test
-    public void getLocationAgentTest() {
-        Assert.assertNull(mImsCallContext.getLocationAgent());
+    public void getLocationInterfaceTest() {
+        Assert.assertNull(mImsCallContext.getLocationInterface());
     }
 
     @Test

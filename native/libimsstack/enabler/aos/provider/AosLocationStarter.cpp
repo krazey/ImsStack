@@ -63,7 +63,7 @@ PUBLIC VIRTUAL AosLocationStarter::~AosLocationStarter()
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
     if (piLocation != IMS_NULL)
     {
-        piLocation->StopLocationInfo();
+        piLocation->StopListeningForLocation();
     }
 }
 
@@ -307,7 +307,7 @@ IMS_BOOL AosLocationStarter::Start()
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
     if (piLocation != IMS_NULL)
     {
-        piLocation->StartLocationInfo(m_nDefaultUpdateInterval);
+        piLocation->StartListeningForLocation(m_nDefaultUpdateInterval);
     }
 
     return IMS_TRUE;
@@ -327,7 +327,7 @@ IMS_BOOL AosLocationStarter::Stop(IN IMS_UINT32 nDelayTime)
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
     if (piLocation != IMS_NULL)
     {
-        piLocation->StopLocationInfo();
+        piLocation->StopListeningForLocation();
     }
 
     return IMS_TRUE;

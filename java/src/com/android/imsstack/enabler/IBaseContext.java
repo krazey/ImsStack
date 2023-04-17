@@ -19,8 +19,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.agents.ILocationAgent;
 import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -60,7 +60,10 @@ public interface IBaseContext extends IContext {
     public ISubscription getSubscription();
     public ISystem getSystem();
 
-    public ILocationAgent getLocationAgent();
+    /**
+     * Returns the {@link LocationInterface} instance.
+     */
+    LocationInterface getLocationInterface();
 
     /** Returns the USAT interface. */
     UsatInterface getUsatInterface();

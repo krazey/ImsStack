@@ -325,6 +325,7 @@ public final class AgentFactory {
                 agents.put(NativeStateInterface.class, new NativeStateAgent(slotId));
                 agents.put(SimInterface.class, new SimAgent(slotId));
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
+                agents.put(LocationInterface.class, new LocationAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
                 agents.put(GbaInterface.class, new GbaAgent(slotId));

@@ -26,7 +26,10 @@ import com.android.imsstack.util.ImsLog;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PhoneNumberAgent implements IVoLteAgent {
+/**
+ * A class for providing the phone number ready to start an IMS service.
+ */
+public class PhoneNumberAgent {
     /** Internal events */
     private static final int EVENT_PHONE_NUMBER_READY_RETRY = 1001;
     private static final int EVENT_OBTAIN_PHONE_NUMBER_RETRY = 1002;
@@ -45,13 +48,11 @@ public class PhoneNumberAgent implements IVoLteAgent {
 
     }
 
-    @Override
     public void cleanup() {
         ImsLog.d("size=" + sPhoneNumber.size());
         sPhoneNumber.clear();
     }
 
-    @Override
     public void start(int slotID) {
         ImsLog.d("size=" + sPhoneNumber.size() + ", slotId=" + slotID);
 
@@ -60,7 +61,6 @@ public class PhoneNumberAgent implements IVoLteAgent {
         }
     }
 
-    @Override
     public void stop(int slotID) {
         ImsLog.d("size=" + sPhoneNumber.size() + ", slotId=" + slotID);
 

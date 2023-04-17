@@ -76,38 +76,44 @@ protected:
     TestPhoneInfoService* m_pPhoneInfoService;
 };
 
-TEST_F(OsLocationInfoTest, StartLocationInfo)
+TEST_F(OsLocationInfoTest, StartListeningForLocation)
 {
     IMS_UINT32 nUpdateIntervalInSec = 10;
     OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
 
-    EXPECT_CALL(m_objSystem, StartLocationInfo(_, _)).Times(1).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objSystem, StartListeningForLocation(_, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartLocationInfo(nUpdateIntervalInSec));
+    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartListeningForLocation(nUpdateIntervalInSec));
 
-    EXPECT_CALL(m_objSystem, StartLocationInfo(_, _)).Times(1).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objSystem, StartListeningForLocation(_, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartLocationInfo(nUpdateIntervalInSec));
-    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartLocationInfo(nUpdateIntervalInSec));
+    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartListeningForLocation(nUpdateIntervalInSec));
+    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartListeningForLocation(nUpdateIntervalInSec));
 }
 
-TEST_F(OsLocationInfoTest, StopLocationInfo)
+TEST_F(OsLocationInfoTest, StopListeningForLocation)
 {
     IMS_UINT32 nUpdateIntervalInSec = 10;
     OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
 
-    EXPECT_CALL(m_objSystem, StopLocationInfo(_)).Times(0);
+    EXPECT_CALL(m_objSystem, StopListeningForLocation(_)).Times(0);
 
-    objOsLocationInfo.StopLocationInfo();
+    objOsLocationInfo.StopListeningForLocation();
 
-    EXPECT_CALL(m_objSystem, StartLocationInfo(_, _)).Times(1).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objSystem, StartListeningForLocation(_, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    objOsLocationInfo.StartLocationInfo(nUpdateIntervalInSec);
+    objOsLocationInfo.StartListeningForLocation(nUpdateIntervalInSec);
 
-    EXPECT_CALL(m_objSystem, StopLocationInfo(_)).Times(1);
+    EXPECT_CALL(m_objSystem, StopListeningForLocation(_)).Times(1);
 
-    objOsLocationInfo.StopLocationInfo();
-    objOsLocationInfo.StopLocationInfo();
+    objOsLocationInfo.StopListeningForLocation();
+    objOsLocationInfo.StopListeningForLocation();
 }
 
 TEST_F(OsLocationInfoTest, GetLocationProperties)
@@ -130,14 +136,14 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
 
-    EXPECT_CALL(m_objSystem, GetLocationInformation(_, _, _)).Times(1).WillRepeatedly(Return(0));
+    EXPECT_CALL(m_objSystem, GetLastKnownLocation(_, _, _)).Times(1).WillRepeatedly(Return(0));
 
-    // 1. Returns null if GetLocationInformation fails
+    // 1. Returns null if GetLastKnownLocation fails
     EXPECT_EQ(IMS_NULL, objOsLocationInfo.GetLocationProperties());
 
-    EXPECT_CALL(m_objSystem, GetLocationInformation(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(m_objSystem, GetLastKnownLocation(_, _, _)).Times(AnyNumber());
 
-    ON_CALL(m_objSystem, GetLocationInformation(_, _, _))
+    ON_CALL(m_objSystem, GetLastKnownLocation(_, _, _))
             .WillByDefault(Invoke(
                     [&](AStringArray& objLocationInfo, Unused, Unused)
                     {
@@ -150,7 +156,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
     EXPECT_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetCountry(_)).Times(0);
 
     // 2. Get default network country from GetNetworkCountry() if country not present in
-    // location information received from GetLocationInformation()
+    // location information received from GetLastKnownLocation()
     ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
 
     EXPECT_TRUE(piLocationProperties != nullptr);
@@ -161,7 +167,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     objLocationInformation.SetElementAt(strCountryName, 7);  // Add Country at index 7
 
-    // 3. Get network country from location information - GetLocationInformation()
+    // 3. Get network country from location information - GetLastKnownLocation()
     piLocationProperties = objOsLocationInfo.GetLocationProperties();
 
     EXPECT_TRUE(piLocationProperties != nullptr);
@@ -184,19 +190,21 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     EXPECT_TRUE(piLocationProperties != nullptr);
 
-    // 4. Get network country UNKNOWN if location information from GetLocationInformation()
+    // 4. Get network country UNKNOWN if location information from GetLastKnownLocation()
     // and GetNetworkCountry() does not provide country.
     EXPECT_EQ(
             objOsLocationInfo.GetLastKnownCountry(), AString(OsLocationInfo::COUNTRY_ISO_UNKNOWN));
 }
 
-TEST_F(OsLocationInfoTest, MakeInstantLocationInfo)
+TEST_F(OsLocationInfoTest, StartInstantLocationUpdate)
 {
     OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
 
-    EXPECT_CALL(m_objSystem, MakeInstantLocationInfo(_)).Times(1).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objSystem, StartInstantLocationUpdate(_))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.MakeInstantLocationInfo());
+    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartInstantLocationUpdate());
 }
 
 TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)

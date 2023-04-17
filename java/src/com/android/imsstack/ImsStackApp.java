@@ -28,12 +28,14 @@ import android.util.SparseArray;
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ConfigLoader;
 import com.android.imsstack.core.NativeCommands;
-import com.android.imsstack.core.VoLteFactory;
+import com.android.imsstack.core.agents.PhoneNumberAgent;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.imsservice.ImsServiceController;
+import com.android.imsstack.test.ImsTestHelper;
+import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsUtils;
@@ -339,14 +341,22 @@ public class ImsStackApp extends Application {
 
         ImsServiceController.start(this, slotId);
 
-        VoLteFactory.getInstance().startService(this, slotId);
+        if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
+            ImsTestHelper.getInstance();
+        }
+        PhoneNumberAgent.getInstance().start(slotId);
 
         CommonStarter.getInstance().notifyVoltePackageReady(slotId);
     }
 
     private void stopVoLteService(int slotId) {
-        Log.i(TAG, "stopVoLTEService(" + slotId + ")");
-        VoLteFactory.getInstance().stopService(slotId);
+        Log.i(TAG, "stopVoLteService(" + slotId + ")");
+
+        PhoneNumberAgent.getInstance().stop(slotId);
+
+        if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
+            ImsTestHelper.getInstance().cleanup();
+        }
     }
 
     private void displayCarrierConfigs(int phoneId, int subId) {

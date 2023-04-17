@@ -175,10 +175,10 @@ public class SystemConstants {
     /**
      * Location information
      */
-    public static final int START_LOCATION_INFO = CATEGORY_BASE + 1201;
-    public static final int STOP_LOCATION_INFO = CATEGORY_BASE + 1202;
-    public static final int GET_LOCATION_INFO = CATEGORY_BASE + 1203;
-    public static final int MAKE_INSTATNT_LOCATION_INFO = CATEGORY_BASE + 1204;
+    public static final int START_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1201;
+    public static final int STOP_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1202;
+    public static final int GET_LAST_KNOWN_LOCATION = CATEGORY_BASE + 1203;
+    public static final int START_INSTANT_LOCATION_UPDATE = CATEGORY_BASE + 1204;
 
     /**
      * Ims radio interface

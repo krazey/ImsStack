@@ -1760,29 +1760,29 @@ TEST_F(SystemTest, GetWifiCallingAddressId)
     EXPECT_EQ(m_pSystem->GetWifiCallingAddressId(0), strValue);
 }
 
-TEST_F(SystemTest, StartLocationInfo)
+TEST_F(SystemTest, StartListeningForLocation)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->StartLocationInfo(30, 0), 0);
+    EXPECT_EQ(m_pSystem->StartListeningForLocation(30, 0), 0);
 }
 
-TEST_F(SystemTest, StopLocationInfo)
+TEST_F(SystemTest, StopListeningForLocation)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    m_pSystem->StopLocationInfo(0);
+    m_pSystem->StopListeningForLocation(0);
 }
 
-TEST_F(SystemTest, GetLocationInformation)
+TEST_F(SystemTest, GetLastKnownLocation)
 {
     AStringArray objLocationInfo;
 
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->GetLocationInformation(
+    EXPECT_EQ(m_pSystem->GetLastKnownLocation(
                       objLocationInfo, ILocationInfo::LOCATION_POSITION_N_COUNTRY, 0),
             0);
 
@@ -1801,7 +1801,7 @@ TEST_F(SystemTest, GetLocationInformation)
                         out.setDataPosition(0);
                         return 1;
                     }));
-    EXPECT_EQ(m_pSystem->GetLocationInformation(
+    EXPECT_EQ(m_pSystem->GetLastKnownLocation(
                       objLocationInfo, ILocationInfo::LOCATION_POSITION_N_COUNTRY, 0),
             1);
     EXPECT_EQ(objLocationInfo.GetFirstElement(), strValue);
@@ -1809,24 +1809,24 @@ TEST_F(SystemTest, GetLocationInformation)
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetLocationInformation(
+    EXPECT_EQ(m_pSystem->GetLastKnownLocation(
                       objLocationInfo, ILocationInfo::LOCATION_POSITION_N_COUNTRY, 0),
             0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetLocationInformation(
+    EXPECT_EQ(m_pSystem->GetLastKnownLocation(
                       objLocationInfo, ILocationInfo::LOCATION_POSITION_N_COUNTRY, 0),
             0);
 }
 
-TEST_F(SystemTest, MakeInstantLocationInfo)
+TEST_F(SystemTest, StartInstantLocationUpdate)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->MakeInstantLocationInfo(0), 0);
+    EXPECT_EQ(m_pSystem->StartInstantLocationUpdate(0), 0);
 }
 
 TEST_F(SystemTest, StartImsTraffic)

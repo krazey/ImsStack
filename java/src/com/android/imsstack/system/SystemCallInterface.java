@@ -133,4 +133,31 @@ public interface SystemCallInterface {
      * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int updateNativeServiceReady(boolean serviceReady);
+
+    /**
+     * Returns the best location information from the last known location.
+     *
+     * @param category The location category. Possible values are:
+     *                 {@link LocationInterface#LOCATION_CATEGORY_ALL},
+     *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION_N_COUNTRY},
+     *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION}
+     */
+    String[] getLastKnownLocation(int category);
+
+    /**
+     * Starts listening the location information with the given interval.
+     *
+     * @param updateIntervalSec The location update interval in seconds.
+     */
+    void startListeningForLocation(int updateIntervalSec);
+
+    /**
+     * Stops listening the location information.
+     */
+    void stopListeningForLocation();
+
+    /**
+     * Starts an instant location update (one-time update).
+     */
+    void startInstantLocationUpdate();
 }
