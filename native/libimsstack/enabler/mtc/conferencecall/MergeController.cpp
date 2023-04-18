@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -62,8 +63,9 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
     }
 
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers, IMS_TRUE);
-    if (ConferenceConfigurationHelper::IsReferUsed(m_objContext.GetConfigurationProxy()) ==
-            IMS_FALSE)
+    if (ConferenceConfigurationHelper::GetReferTypeForInvite(
+                m_objContext.GetConfigurationProxy()) ==
+            CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL)
     {
         return ProcessMergeWithoutRefer(objUsers);
     }
@@ -207,8 +209,9 @@ PROTECTED VIRTUAL void MergeController::OnIndividualCallTerminated(IN IMS_UINTP 
     ConferenceController::OnIndividualCallTerminated(nCallKey);
 
     if (m_pSubscription == IMS_NULL &&
-            ConferenceConfigurationHelper::IsReferUsed(m_objContext.GetConfigurationProxy()) ==
-                    IMS_FALSE)
+            ConferenceConfigurationHelper::GetReferTypeForInvite(
+                    m_objContext.GetConfigurationProxy()) ==
+                    CarrierConfig::ImsVoice::CONFERENCE_INVITE_COPYCONTROL)
     {
         UpdateUserStateByCallTerminated(nCallKey);
     }
