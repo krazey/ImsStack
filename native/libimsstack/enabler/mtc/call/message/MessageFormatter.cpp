@@ -767,10 +767,10 @@ void MessageFormatter::SetReplacesHeader()
 
     IMultiEndpointManager::PullingDialogInfo objDialogInfo = piMultiEndpointManager->GetDialogInfo(
             m_objContext.GetParticipantInfo().GetRemoteNumber());
-    Replaces* pReplaces = new Replaces(
+    Replaces objReplaces(
             objDialogInfo.strCallId, objDialogInfo.strLocalTag, objDialogInfo.strRemoteTag);
     m_objContext.GetMessageUtils().AddValueIfNotExists(
-            m_piNextMessage, pReplaces->ToString(IMS_FALSE), ISipHeader::REPLACES);
+            m_piNextMessage, objReplaces.ToString(IMS_FALSE), ISipHeader::REPLACES);
 }
 
 /* -------------------------------------------------------------------------------------------------
