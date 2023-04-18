@@ -444,7 +444,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         m_pszHost = SipPercentEncoding::DoPercentDecoding(m_pszHost);
     }
 
-    pStartPt = pTempPos;
+    pStartPt = pTempPos + SIP_ONE;
     /* Port number */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
     {
