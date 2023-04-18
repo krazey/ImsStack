@@ -17,9 +17,6 @@
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/MockIConferenceReference.h"
 #include <gtest/gtest.h>
-// #include "conferencecall/MockCallConnectionIdManager.h"
-// #include "MockIMtcContext.h"
-// #include "helper/MockICallStateProxy.h"
 
 LOCAL const IMS_CHAR USER_ENTITY[] = "sip:testuser@ims.google.com;user=phone";
 

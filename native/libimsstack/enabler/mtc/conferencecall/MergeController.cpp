@@ -15,9 +15,9 @@
  */
 
 #include "ServiceTrace.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
@@ -151,7 +151,7 @@ PROTECTED VIRTUAL void MergeController::StartConferenceCall(
         eType = CallType::VT;
     }
 
-    IMS_TRACE_D("StartConferenceCall calltype[%d]", eType, 0, 0);
+    IMS_TRACE_D("StartConferenceCall CallType[%d]", eType, 0, 0);
 
     ClearListForConfUsers(objUsers);
     GetConferenceCall()->StartConference(eType, AString::ConstNull(), objUsers);

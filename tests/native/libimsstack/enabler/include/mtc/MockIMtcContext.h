@@ -22,6 +22,7 @@
 #include <gmock/gmock.h>
 #include <functional>
 
+class CallConnectionIdManager;
 class ICallStateProxy;
 class IConferenceManager;
 class IEctManager;
@@ -65,6 +66,7 @@ public:
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
     MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));
+    MOCK_METHOD(CallConnectionIdManager&, GetCallConnectionIdManager, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));
 };
 

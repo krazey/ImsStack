@@ -70,15 +70,12 @@ public:
         }
 
         // destructor
-        inline ~ConferenceOperation()
-        {
-            m_objConfUsers.Clear();
-            delete m_pParam;
-        }
+        inline ~ConferenceOperation() { delete m_pParam; }
 
         // setters
         inline void SetConfUsers(IN const ImsList<ConfUser*>& objConfUsers)
         {
+            // Copy only ImsList.
             m_objConfUsers = objConfUsers;
         }
 
