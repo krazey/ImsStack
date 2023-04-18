@@ -66,7 +66,6 @@ private:
     CallStateName ContinueHandleIncoming();
     CallStateName ContinueStartUssi();
 
-    AString GenerateSessionId();
     void SetResourceListForConference(
             IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();

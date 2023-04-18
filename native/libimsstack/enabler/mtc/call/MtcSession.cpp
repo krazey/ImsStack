@@ -19,7 +19,6 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ImsAosParameter.h"
-#include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
@@ -56,7 +55,6 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
-        m_strSessionIdHeader(AString::ConstNull()),
         m_eOngoingUpdateType(UpdateType::NONE)
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
@@ -71,12 +69,6 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
 
     m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::VIDEO);
     m_bRttCapable = IsRegisteredFeature(ImsAosFeature::TEXT);
-
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO &&
-            m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
-    {
-        m_strSessionIdHeader = GenerateSessionId();
-    }
 }
 
 PUBLIC VIRTUAL MtcSession::~MtcSession()
@@ -283,14 +275,6 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 {
     m_objExtensionSet.HandleRequest(eType, objRequest);
 
-    if (eType == RequestType::START)
-    {
-        if (m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
-        {
-            UpdateSessionIdFromMessage(objRequest);
-        }
-    }
-
     if (eType == RequestType::START || eType == RequestType::UPDATE)
     {
         UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
@@ -440,21 +424,6 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 }
 
 PRIVATE
-void MtcSession::UpdateSessionIdFromMessage(IN const IMessage& objMessage)
-{
-    AString strSessionIdHeader = m_objContext.GetMessageUtils().GetHeader(
-            &objMessage, ISipHeader::UNKNOWN, SipHeaderName::SESSION_ID);
-
-    if (strSessionIdHeader.GetLength() <= 0)
-    {
-        return;
-    }
-
-    IMS_TRACE_D("UpdateSessionIdFromMessage : [%s]", m_strSessionIdHeader.GetStr(), 0, 0);
-    m_strSessionIdHeader = strSessionIdHeader;
-}
-
-PRIVATE
 void MtcSession::SetInConference(IN const IMessage& objMessage)
 {
     if (m_objContext.GetCallInfo().bConference == IMS_TRUE)
@@ -511,17 +480,6 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(
     m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
 
     return ResultSetSdp::SUCCESS;
-}
-
-PRIVATE
-AString MtcSession::GenerateSessionId()
-{
-    // Pseudo-random 128-bit system secret key
-    AString strSessionId;
-    strSessionId.Sprintf("%08x%08x%08x%08x", IMS_SYS_GetTimeInMicroSeconds(), IMS_SYS_GetRandom0(),
-            IMS_SYS_GetRandom0(), IMS_SYS_GetRandom0());
-
-    return strSessionId;
 }
 
 PRIVATE
