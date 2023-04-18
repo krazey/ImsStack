@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "IMtcService.h"
@@ -405,7 +406,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& 
     IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
             m_objContext.GetConfigurationProxy());
 
-    if (nReferType == REFER_INVITE_SINGLE)
+    if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
     {
         for (IMS_UINT32 i = nStartIndex; i < m_pParticipantList->GetSize(); i++)
         {
@@ -413,8 +414,9 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& 
                     CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers().GetAt(i));
         }
     }
-    else if (nReferType == REFER_INVITE_MULTIPLE)  // send REFER with resource list
+    else if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE)
     {
+        // send REFER with resource list
         ImsList<ConfUser*> objJoinList;
         for (IMS_UINT32 i = nStartIndex; i < m_pParticipantList->GetSize(); i++)
         {
@@ -733,7 +735,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
             m_objContext.GetConfigurationProxy());
     ClearOngoingReferences();
 
-    if (nReferTypeForInvite == REFER_INVITE_SINGLE)
+    if (nReferTypeForInvite == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
     {
         StopFinalSipfragWaitTimer();
 
@@ -751,8 +753,9 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
             Recover();
         }
     }
-    else if (nReferTypeForInvite == REFER_INVITE_MULTIPLE)  // REFER with resource list
+    else if (nReferTypeForInvite == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE)
     {
+        // REFER with resource list
         IConferenceReference* piConfRefer = CreateReference(objUsers);
         AString strReferInviteUri;  // not used.
         IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri, m_objConnectionIdManager);
