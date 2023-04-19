@@ -25,11 +25,11 @@
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceReference.h"
@@ -305,8 +305,8 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
     AString strContentDisposition = "recipient-list";
     piReferMessage->AddHeader(SipHeaderName::CONTENT_DISPOSITION, strContentDisposition);
 
-    m_objContext.GetMessageUtils().SetResourceListByConfUser(
-            piReferMessage, strReferToUri, m_objConfUsers, IMS_FALSE, IMS_TRUE);
+    m_objContext.GetMessageUtils().SetResourceList(
+            piReferMessage, m_objContext, strReferToUri, m_objConfUsers, IMS_FALSE, IMS_FALSE);
 
     // 4. Set Referred-By header
     SetReferredByHeader();

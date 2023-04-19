@@ -18,8 +18,8 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceController.h"
 #include "helper/ICallStateProxy.h"
 

@@ -16,8 +16,14 @@
 
 #include "CallReasonInfo.h"
 #include "ImsList.h"
+#include "MockIMtcContext.h"
 #include "TextParser.h"
 #include "call/IMtcCall.h"
+#include "call/MockCallConnectionIdManager.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
 #include "core/IReference.h"
 #include "core/MockIMessage.h"
@@ -26,6 +32,7 @@
 #include "core/media/IMedia.h"
 #include "core/media/MockIMedia.h"
 #include "core/media/MockIMediaDescriptor.h"
+#include "helper/MockICallStateProxy.h"
 #include "sdp/SdpMedia.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/ISipMessageBodyPart.h"
@@ -1019,14 +1026,15 @@ TEST_F(MessageUtilsTest, GenerateContentId)
     // TODO: how to check
 }
 
-TEST_F(MessageUtilsTest, SetResourceListByConfUser)
+TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
 {
+    MockIMtcContext objContext;
     ImsList<ConfUser*> lstConfUser;
     ConfUser objUser1;
-    objUser1.strUserEntity = "sip:user1Entity";
+    objUser1.strTarget = "sip:user1Target";
     objUser1.eCcType = COPYCONTROLTYPE_TO;
     ConfUser objUser2;
-    objUser2.strUserEntity = "sip:user2Entity";
+    objUser2.strTarget = "sip:user2Target";
     objUser2.eCcType = COPYCONTROLTYPE_CC;
     ConfUser objUser3;
     objUser3.strTarget = "sip:user3Target";
@@ -1038,13 +1046,13 @@ TEST_F(MessageUtilsTest, SetResourceListByConfUser)
 
     const AString strAnyContentId("any content id");
 
-    EXPECT_EQ(objMessageUtils.SetResourceListByConfUser(
-                      IMS_NULL, strAnyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      IMS_NULL, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceListByConfUser(
-                      piMessage, strAnyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1063,57 +1071,103 @@ TEST_F(MessageUtilsTest, SetResourceListByConfUser)
     EXPECT_CALL(objMessageBodyPart, SetHeader(strContentId, strAnyContentId));
 
     ImsList<AString> objResourceList;
-    objResourceList.Append("entry uri=\"sip:user1Entity\" cp:copyControl=\"to\"");
-    objResourceList.Append("entry uri=\"sip:user2Entity\" cp:copyControl=\"cc\"");
+    objResourceList.Append("entry uri=\"sip:user1Target\" cp:copyControl=\"to\"");
+    objResourceList.Append("entry uri=\"sip:user2Target\" cp:copyControl=\"cc\"");
     objResourceList.Append(
             "entry uri=\"sip:user3Target\" cp:copyControl=\"bcc\" cp:anonymize=\"true\"");
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceListByConfUser(
-                      piMessage, strAnyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
-TEST_F(MessageUtilsTest, SetResourceListByEntryUri)
+TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 {
-    ImsList<AString> lstEntryUri;
-    AString strUser1("user1");
-    AString strUser2("user2");
-    lstEntryUri.Append(strUser1);
-    lstEntryUri.Append(strUser2);
+    // Sets up to get a ISession using a ConfUser#nCallConnectionId
+    MockIMtcContext objContext;
+    MockICallStateProxy objStateProxy;
+    ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objStateProxy));
+    MockCallConnectionIdManager objIdManager(objContext);
+    ON_CALL(objContext, GetCallConnectionIdManager).WillByDefault(ReturnRef(objIdManager));
+    ON_CALL(objIdManager, GetCallKey(1)).WillByDefault(Return(1));
+    MockIMtcCallManager objCallManager;
+    ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+    MockIMtcCall objCall;
+    ON_CALL(objCallManager, GetCallByCallKey(1)).WillByDefault(Return(&objCall));
+    MockIMtcCallContext objCallContext;
+    ON_CALL(objCall, GetCallContext).WillByDefault(ReturnRef(objCallContext));
+    MockIMtcSession objMtcSession;
+    ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(*piSession));
+
+    MockIMessage objConfirmedMessage;
+    ON_CALL(*piSession, GetPreviousResponse(IMessage::SESSION_START))
+            .WillByDefault(Return(&objConfirmedMessage));
+
+    CallInfo objCallInfo;
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    ImsList<ConfUser*> lstConfUser;
+    ConfUser objUser1;
+    objUser1.nConnectionId = 1;
+    lstConfUser.Append(&objUser1);
+
+    // TODO:
+    // GetRemoteUri
+    ImsList<AString> objAddresses;
+    ON_CALL(*piSession, GetRemoteUserId).WillByDefault(Return(objAddresses));
+    AString strSomeUri = "sip:someUri";
+    ImsList<AString> objHeaders;
+    objHeaders.Append(strSomeUri);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::TO, _)).WillByDefault(Return(objHeaders));
+    ON_CALL(*piSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(piMessage));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objConfirmedMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+
+    // GetHeader for CALL_ID
+    ImsList<AString> objCallIdHeaders;
+    objCallIdHeaders.Append("someCallId");
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::CALL_ID, _))
+            .WillByDefault(Return(objCallIdHeaders));
+
+    // GetHeader for FROM
+    ImsList<AString> objFromHeaders;
+    objFromHeaders.Append("sip:someFrom;tag=fromtag");
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::FROM, _)).WillByDefault(Return(objFromHeaders));
+
+    // GetHeader for TO
+    ImsList<AString> objToHeaders;
+    objToHeaders.Append("sip:someTo;tag=totag");
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::TO, _)).WillByDefault(Return(objToHeaders));
 
     AString strEmptyContentId;
-    EXPECT_EQ(objMessageUtils.SetResourceListByEntryUri(
-                      IMS_NULL, strEmptyContentId, lstEntryUri, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      IMS_NULL, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceListByEntryUri(
-                      piMessage, strEmptyContentId, lstEntryUri, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(&objMessageBodyPart));
 
-    const AString strContentType(SipHeaderName::CONTENT_TYPE);
-    const AString strResourceList(MessageUtil::STR_CONTENT_TYPE_RESOURCE_LISTS_XML);
-    const AString strDisposition(SipHeaderName::CONTENT_DISPOSITION);
-    const AString strRecipientList(MessageUtil::STR_CONTENT_DISPOSITION_RECIPIENT_LIST);
-    const AString strLength(SipHeaderName::CONTENT_LENGTH);
-    const AString strContentId(MessageUtil::STR_CONTENT_ID);
-
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strContentType, strResourceList));
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strDisposition, strRecipientList));
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strLength, _));
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strContentId, _));
-
     ImsList<AString> objResourceList;
-    objResourceList.Append("entry uri=\"user1\" cp:copyControl=\"to\"");
-    objResourceList.Append("entry uri=\"user2\" cp:copyControl=\"to\"");
+    AString strEntry("entry uri=\"<sip:someUri?Call-ID=someCallId>&amp;");
+    strEntry += "From=%3Csip%3AsomeFrom%3E%3Btag%3Dfromtag&amp;";
+    strEntry += "To=%3Csip%3AsomeTo%3E%3Btag%3Dtotag\"";
+    strEntry += " cp:copyControl=\"to\"";
+    objResourceList.Append(strEntry);
+
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceListByEntryUri(
-                      piMessage, strEmptyContentId, lstEntryUri, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(
+                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
