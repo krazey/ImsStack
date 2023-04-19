@@ -26,6 +26,7 @@
 #include <gmock/gmock.h>
 
 class IMessage;
+class IMtcContext;
 class Ims3gpp;
 class ISession;
 struct ConfUser;
@@ -105,11 +106,9 @@ public:
     MOCK_METHOD(IMS_RESULT, AddValueIfNotExists,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GenerateContentId, (IN const AString&), (override));
-    MOCK_METHOD(IMS_RESULT, SetResourceListByConfUser,
-            (IN_OUT IMessage*, IN const AString&, IN ImsList<ConfUser*>&, IN IMS_BOOL, IN IMS_BOOL),
-            (override));
-    MOCK_METHOD(IMS_RESULT, SetResourceListByEntryUri,
-            (IN_OUT IMessage*, IN const AString&, IN ImsList<AString>&, IN IMS_BOOL, IN IMS_BOOL),
+    MOCK_METHOD(IMS_RESULT, SetResourceList,
+            (IN_OUT IMessage*, IN IMtcContext&, IN const AString&, IN const ImsList<ConfUser*>&,
+                    IN IMS_BOOL, IN IMS_BOOL),
             (override));
     MOCK_METHOD(IMS_BOOL, IsVideoFeatureIncluded, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsTextFeatureIncluded, (IN const IMessage*), (override));

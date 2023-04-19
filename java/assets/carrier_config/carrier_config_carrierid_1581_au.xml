@@ -58,6 +58,10 @@
         </int-array>
     </pbundle>
 
+    <!-- Mtc -->
+    <int name="imsvoice.conference_inviting_refer_type_int" value="0"/>
+    <int name="imsvoice.conference_subscribe_type_int" value="-1"/>
+
     <!-- Mts -->
     <int-array name="sms_generic_error_codes_int_array" num="7">
         <item value="0"/>

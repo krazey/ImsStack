@@ -23,10 +23,12 @@
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
+#include <tuple>
 
 class AStringBuffer;
 class IMessage;
 class IMessageBodyPart;
+class IMtcContext;
 class Ims3gpp;
 class ISession;
 class ISipHeader;
@@ -123,12 +125,9 @@ public:
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GenerateContentId(IN const AString& strHost) override;
-    IMS_RESULT SetResourceListByConfUser(IN_OUT IMessage* piMessage, IN const AString& strContentId,
-            IN ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bMultiPart,
-            IN IMS_BOOL bCopyControl = IMS_TRUE) override;
-    IMS_RESULT SetResourceListByEntryUri(IN_OUT IMessage* piMessage, IN const AString& strContentId,
-            IN ImsList<AString>& lstEntryUri, IN IMS_BOOL bMultiPart,
-            IN IMS_BOOL bCopyControl = IMS_TRUE) override;
+    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
+            IN const AString& strContentId, IN const ImsList<ConfUser*>& lstConfUser,
+            IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) override;
     IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
     IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) override;
     CallType GetCallType(
@@ -149,8 +148,13 @@ private:
     IMS_RESULT GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
             IN IMS_SINT32 eHeaderType, OUT AString& strValue,
             IN const AString& strHeaderName = AString::ConstNull());
-    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN const AString& strContentId,
-            IN IMS_BOOL bMultiPart, IN AStringBuffer& objXml);
+    IMS_RESULT SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
+            IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml);
+    AString CreateResourceListXml(
+            IN const ImsList<std::tuple<AString, AString, AString>>& objEntries);
+    AString CreateEntryUri(
+            IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId);
+    AString CreateFromToPartWithTagValue(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType);
 };
 
 #endif

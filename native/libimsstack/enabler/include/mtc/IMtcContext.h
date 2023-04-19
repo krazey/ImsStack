@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include <functional>
 
+class CallConnectionIdManager;
 class ICallStateProxy;
 class IConferenceManager;
 class IEctManager;
@@ -179,6 +180,13 @@ public:
      * @return
      */
     virtual ILastComeFirstServedHelper& GetLastComeFirstServedHelper() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual CallConnectionIdManager& GetCallConnectionIdManager() = 0;
 
     /**
      * @brief Checks

@@ -48,6 +48,7 @@
 #include <functional>
 #include <memory>
 
+class CallConnectionIdManager;
 class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
 class IConferenceManager;
@@ -234,6 +235,10 @@ public:
     inline ILastComeFirstServedHelper& GetLastComeFirstServedHelper() override
     {
         return m_objContext.GetLastComeFirstServedHelper();
+    }
+    inline CallConnectionIdManager& GetCallConnectionIdManager() override
+    {
+        return m_objContext.GetCallConnectionIdManager();
     }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext
