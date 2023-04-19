@@ -32,7 +32,7 @@ MtcPendingOperationHolder::MtcPendingOperationHolder()
 PUBLIC MtcPendingOperationHolder::~MtcPendingOperationHolder()
 {
     IMS_TRACE_D("~MtcPendingOperationHolder ", 0, 0, 0);
-    for (IMS_UINT32 nIndex = 0; nIndex < m_objPendingOperations.GetSize(); nIndex++)
+    while (!m_objPendingOperations.IsEmpty())
     {
         PopPendingOperation();
     }
