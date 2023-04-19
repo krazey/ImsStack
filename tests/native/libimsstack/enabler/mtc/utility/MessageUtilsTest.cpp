@@ -1144,6 +1144,13 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     objToHeaders.Append("sip:someTo;tag=totag");
     ON_CALL(objSipMessage, GetHeaders(ISipHeader::TO, _)).WillByDefault(Return(objToHeaders));
 
+    // GetHeader for Session-ID
+    ImsList<AString> objSessionIdHeaders;
+    objSessionIdHeaders.Append("sessionid123456");
+    AString strSessionId("Session-ID");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strSessionId))
+            .WillByDefault(Return(objSessionIdHeaders));
+
     AString strEmptyContentId;
     EXPECT_EQ(objMessageUtils.SetResourceList(
                       IMS_NULL, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
@@ -1160,7 +1167,8 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     ImsList<AString> objResourceList;
     AString strEntry("entry uri=\"<sip:someUri?Call-ID=someCallId>&amp;");
     strEntry += "From=%3Csip%3AsomeFrom%3E%3Btag%3Dfromtag&amp;";
-    strEntry += "To=%3Csip%3AsomeTo%3E%3Btag%3Dtotag\"";
+    strEntry += "To=%3Csip%3AsomeTo%3E%3Btag%3Dtotag&amp;";
+    strEntry += "Session-ID=sessionid123456\"";
     strEntry += " cp:copyControl=\"to\"";
     objResourceList.Append(strEntry);
 

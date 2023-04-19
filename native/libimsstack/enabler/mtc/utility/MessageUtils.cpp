@@ -1554,6 +1554,15 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     strEntryUri.Append("&amp;To=");
     strEntryUri.Append(strToPart);
 
+    const IMessage* piInitialInvite = objSession.GetPreviousRequest(IMessage::SESSION_START);
+    AString strSessionId =
+            GetHeader(piInitialInvite, ISipHeader::UNKNOWN, SipHeaderName::SESSION_ID);
+    if (strSessionId.GetLength() > 0)
+    {
+        strEntryUri.Append("&amp;Session-ID=");
+        strEntryUri.Append(strSessionId);
+    }
+
     return strEntryUri;
 }
 
