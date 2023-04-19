@@ -345,6 +345,7 @@ void ConferenceReference::SetReplaces(IN IMtcCall* pi1To1Call)
     {
         return;
     }
+
     AString strSessionId = m_objContext.GetMessageUtils().GetSessionId(
             &(pi1To1Call->GetCallContext().GetSession()->GetISession()));
     m_piReference->SetReplaces(strSessionId);

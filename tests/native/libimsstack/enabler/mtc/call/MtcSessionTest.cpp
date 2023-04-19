@@ -147,13 +147,6 @@ TEST_F(MtcSessionTest, CreateMtSessionaInvokesAddISessionInSessionHolder)
     CreateMtcSession(CallType::VOIP, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, CreateMoSessionGenerateSessionId)
-{
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_TRUE));
-    // TODO: check Session-Id header
-    CreateMtcSession();
-}
-
 TEST_F(MtcSessionTest, StartInvokesStartInMessageSender)
 {
     IMS_RESULT eResult = IMS_SUCCESS;
@@ -535,30 +528,11 @@ TEST_F(MtcSessionTest, GetExtensionSetReturnsMember)
     EXPECT_NE(&objExtensionSet, nullptr);
 }
 
-TEST_F(MtcSessionTest, HandleStartRequestUpdatesSessionIdIfSupported)
-{
-    CreateMtcSession();
-    RequestType eType = RequestType::START;
-
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
-            .WillByDefault(Return(IMS_TRUE));
-
-    AString strHeaderName(SipHeaderName::SESSION_ID);
-    EXPECT_CALL(objMessageUtils, GetHeader(&objMessage, ISipHeader::UNKNOWN, strHeaderName));
-
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::VOIP));
-
-    pMtcSession->HandleRequest(eType, objMessage);
-}
-
 TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallType)
 {
     CreateMtcSession();
     RequestType eType = RequestType::START;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -582,7 +556,6 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeToVoIpIfMessageDoesNotIn
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -606,7 +579,6 @@ TEST_F(MtcSessionTest, HandleStartRequestDoesNotChangeCallTypeIfVideoIsOnlyOneRe
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_FALSE, IMS_TRUE, IMS_FALSE);
     RequestType eType = RequestType::START;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -629,7 +601,6 @@ TEST_F(MtcSessionTest, HandleRequestUpdatesVideoCapabilityByAvchange)
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::EARLY_UPDATE;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -654,7 +625,6 @@ TEST_F(MtcSessionTest, HandleUpdateRequestInvokesSetCallTypeIfSameCallType)
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::UPDATE;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -682,7 +652,6 @@ TEST_F(MtcSessionTest, HandleEarlyUpdateRequestDoesNotInvokeSetCallTypeIfSameCal
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::EARLY_UPDATE;
 
-    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
             .WillByDefault(Return(IMS_FALSE));
     AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
