@@ -121,9 +121,17 @@ public class ServiceCaps {
      */
     public static void updateServiceCapabilities(Context c, int slotId, int subId) {
         CarrierConfigManager ccm = c.getSystemService(CarrierConfigManager.class);
-        PersistableBundle b = (ccm != null)
-                ? ccm.getConfigForSubId(subId, CARRIER_CONFIG_KEYS)
-                : CarrierConfigManager.getDefaultConfig();
+        PersistableBundle b;
+
+        try {
+            b = (ccm != null)
+                    ? ccm.getConfigForSubId(subId, CARRIER_CONFIG_KEYS)
+                    : CarrierConfigManager.getDefaultConfig();
+        } catch (Exception e) {
+            ImsLog.w(slotId, "updateServiceCapabilities: " + e.toString());
+            b = new PersistableBundle();
+        }
+
         boolean voLteEnabled = isVoLteEnabledByDevice(c, slotId)
                 && b.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL);
         boolean vtEnabled = isVtEnabledByDevice(c, slotId)
