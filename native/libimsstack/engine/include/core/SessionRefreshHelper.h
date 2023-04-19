@@ -39,8 +39,8 @@ public:
     IMS_BOOL AddSpecificHeaderOnEarlyUpdate(
             IN ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported);
     IMS_SINT32 GetRefreshMethod() const;
-    IMS_BOOL IsSessionTimerSupported(
-            IN const ISipConnection* piSc, IN IMS_BOOL bCheckSePresentity = IMS_TRUE);
+    IMS_BOOL IsSessionTimerSupported(IN const ISipConnection* piSc, IN IMS_BOOL bSent,
+            IN IMS_BOOL bCheckSePresentity = IMS_TRUE);
     inline IMS_BOOL IsSessionTimerSupportedBySessionExpires() const
     {
         return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES) != 0);
@@ -124,6 +124,7 @@ private:
     void SetSessionRefreshParameters(IN IMS_SINT32 nRefresher, IN IMS_SINT32 nRefreshRequest,
             IN IMS_SINT32 nMinSe, IN IMS_SINT32 nSessionTimerDuration,
             IN IMS_SINT32 nLocalSessionTimerDuration);
+    static IMS_BOOL IsUpdateMethodSupported(IN const ISipMessage* piSipMsg);
 
 public:
     enum
