@@ -88,13 +88,11 @@ private:
     void UpdateSessionProperty();
     void UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
-    void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
     void CheckCallTypeWithRegisteredFeature();
     ResultSetSdp SetSdpToSend(
             IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE);
 
-    static AString GenerateSessionId();
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
@@ -111,7 +109,6 @@ private:
     IMS_BOOL m_bVideoCapable;
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
-    AString m_strSessionIdHeader;
     UpdateType m_eOngoingUpdateType;
 };
 
