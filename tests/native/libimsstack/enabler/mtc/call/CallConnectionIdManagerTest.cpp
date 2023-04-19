@@ -16,8 +16,8 @@
 
 #include "IMtcCallStateListener.h"
 #include "MockIMtcContext.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "helper/MockICallStateProxy.h"

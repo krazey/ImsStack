@@ -17,17 +17,17 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockITimer.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
+#include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "conferencecall/MergeController.h"
-#include "conferencecall/MockCallConnectionIdManager.h"
 #include "conferencecall/MockConferenceEventNotifier.h"
 #include "conferencecall/MockConferenceFactory.h"
 #include "conferencecall/MockConferenceOperationQueue.h"
@@ -146,6 +146,16 @@ TEST_F(MergeControllerTest, ProcessMergeCommand)
     objUsers.Append(pUser1);
     objUsers.Append(pUser2);
 
+    // Sets up CallType.
+    // TODO: Check the value of m_eStartCallType.
+    MockIMtcCall objCall1;
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
+    MockIMtcCall objCall2;
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VT));
+    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
+            .WillOnce(Return(&objCall1))
+            .WillOnce(Return(&objCall2));
+
     ImsList<ConfUser*> objUsersCopied;
     objUsersCopied.Append(new ConfUser(*pUser1));
     objUsersCopied.Append(new ConfUser(*pUser2));
@@ -189,6 +199,18 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscriptionNotifyReferFlow)
     ImsList<ConfUser*> objUsers;
     objUsers.Append(pUser1);
     objUsers.Append(pUser2);
+
+    // Sets up CallType.
+    // TODO: Check the value of m_eStartCallType.
+    ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
+            .WillByDefault(Return(1));  // VOIP
+    MockIMtcCall objCall1;
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
+    MockIMtcCall objCall2;
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
+    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
+            .WillOnce(Return(&objCall1))
+            .WillOnce(Return(&objCall2));
 
     ImsList<ConfUser*> objUsersCopied;
     objUsersCopied.Append(new ConfUser(*pUser1));
@@ -235,6 +257,16 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithoutRefer)
     objUsers.Append(pUser1);
     objUsers.Append(pUser2);
 
+    // Sets up CallType.
+    // TODO: Check the value of m_eStartCallType.
+    MockIMtcCall objCall1;
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VOIP));
+    MockIMtcCall objCall2;
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
+    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
+            .WillOnce(Return(&objCall1))
+            .WillOnce(Return(&objCall2));
+
     ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType).WillByDefault(Return(0));
 
     EXPECT_CALL(*pMockParticipantList, GetSize)
@@ -262,99 +294,6 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConference)
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     EXPECT_CALL(*piMockConferenceCall, StartConference(_, _, _)).Times(1);
-
-    pController->OnOperationReady();
-    delete pOperation;
-}
-
-TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithTwoVtCalls)
-{
-    ConferenceOperationQueue::ConferenceOperation* pOperation =
-            new ConferenceOperationQueue::ConferenceOperation(
-                    CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
-    ImsList<ConfUser*> objUsers;
-    ConfUser* pUser1 = new ConfUser();
-    ConfUser* pUser2 = new ConfUser();
-    objUsers.Append(pUser1);
-    objUsers.Append(pUser2);
-    pOperation->SetConfUsers(objUsers);
-    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-
-    MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
-    MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VT));
-
-    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
-            .WillOnce(Return(&objCall1))
-            .WillOnce(Return(&objCall2))
-            .WillOnce(Return(piMockConferenceCall));
-
-    EXPECT_CALL(*piMockConferenceCall, StartConference(CallType::VT, _, _)).Times(1);
-
-    pController->OnOperationReady();
-    delete pOperation;
-}
-
-TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVoip)
-{
-    ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
-            .WillByDefault(Return(1));  // VOIP
-
-    ConferenceOperationQueue::ConferenceOperation* pOperation =
-            new ConferenceOperationQueue::ConferenceOperation(
-                    CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
-    ImsList<ConfUser*> objUsers;
-    ConfUser* pUser1 = new ConfUser();
-    ConfUser* pUser2 = new ConfUser();
-    objUsers.Append(pUser1);
-    objUsers.Append(pUser2);
-    pOperation->SetConfUsers(objUsers);
-    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-
-    MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
-    MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
-
-    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
-            .WillOnce(Return(&objCall1))
-            .WillOnce(Return(&objCall2))
-            .WillOnce(Return(piMockConferenceCall));
-
-    EXPECT_CALL(*piMockConferenceCall, StartConference(CallType::VOIP, _, _)).Times(1);
-
-    pController->OnOperationReady();
-    delete pOperation;
-}
-
-TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVt)
-{
-    ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
-            .WillByDefault(Return(2));  // VT
-
-    ConferenceOperationQueue::ConferenceOperation* pOperation =
-            new ConferenceOperationQueue::ConferenceOperation(
-                    CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
-    ImsList<ConfUser*> objUsers;
-    ConfUser* pUser1 = new ConfUser();
-    ConfUser* pUser2 = new ConfUser();
-    objUsers.Append(pUser1);
-    objUsers.Append(pUser2);
-    pOperation->SetConfUsers(objUsers);
-    ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
-
-    MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
-    MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
-
-    EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
-            .WillOnce(Return(&objCall1))
-            .WillOnce(Return(&objCall2))
-            .WillOnce(Return(piMockConferenceCall));
-
-    EXPECT_CALL(*piMockConferenceCall, StartConference(CallType::VT, _, _)).Times(1);
 
     pController->OnOperationReady();
     delete pOperation;

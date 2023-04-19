@@ -18,6 +18,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
@@ -42,19 +43,26 @@ public:
     MockIMtcService objMtcService;
     MockICoreService objCoreService;
     MockIMtcCallContext objMockCallContext;
+    MockCallConnectionIdManager* pIdManager;
 
     ConferenceManager* pConferenceManager;
 
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
+        pIdManager = new MockCallConnectionIdManager(objMockContext);
+        ON_CALL(objMockContext, GetCallConnectionIdManager).WillByDefault(ReturnRef(*pIdManager));
+        ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
 
         pConferenceManager = new ConferenceManager(objMockContext);
     }
 
-    virtual void TearDown() override { delete pConferenceManager; }
+    virtual void TearDown() override
+    {
+        delete pConferenceManager;
+        delete pIdManager;
+    }
 
     MockIMtcCall* CreateMockIMtcCall(IN CallKey nKey)
     {

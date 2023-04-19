@@ -16,9 +16,9 @@
 
 #include "CarrierConfig.h"
 #include "ServiceTrace.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
@@ -34,7 +34,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MergeController::MergeController(IN CallKey nConfCallKey, IMtcContext& objContext,
         IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory) :
-        ConferenceController(nConfCallKey, objContext, objConnectionIdManager, objFactory)
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager, objFactory),
+        m_eStartCallType(CallType::VOIP)
 {
     IMS_TRACE_I("+MergeController", 0, 0, 0);
 }
@@ -79,8 +80,9 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
 
     if (nOldState == STATE_CREATED)
     {
+        UpdateStartCallType(objUsers);
+        ClearListForConfUsers(objUsers);
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
-        // ClearListForConfUsers(objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
                 ConferenceConfigurationHelper::IsConferenceSubscriptionRequired(
@@ -123,40 +125,13 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
 PROTECTED VIRTUAL void MergeController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
-    CallType eType = CallType::VOIP;
-    IMS_BOOL bVoip = IMS_FALSE;
-    IMS_BOOL bVt = IMS_FALSE;
-
     ImsList<ConfUser*> objUsers = pOperation->GetUsers();
-    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
-    {
-        CallKey nkey = m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId);
-        CallType eIndividualType = m_objCallManager.GetCallByCallKey(nkey)->GetCallType();
 
-        if (eIndividualType == CallType::VT || eIndividualType == CallType::VIDEO_RTT)
-        {
-            bVt = IMS_TRUE;
-        }
-        else
-        {
-            bVoip = IMS_TRUE;
-        }
-    }
+    IMS_TRACE_D("StartConferenceCall CallType[%d] UserSize[%d]", m_eStartCallType,
+            objUsers.GetSize(), 0);
 
-    if (bVoip && bVt)
-    {
-        eType = static_cast<CallType>(m_objContext.GetConfigurationProxy().GetInt(
-                Feature::CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED));
-    }
-    else if (bVt)
-    {
-        eType = CallType::VT;
-    }
-
-    IMS_TRACE_D("StartConferenceCall calltype[%d]", eType, 0, 0);
-
+    GetConferenceCall()->StartConference(m_eStartCallType, AString::ConstNull(), objUsers);
     ClearListForConfUsers(objUsers);
-    GetConferenceCall()->StartConference(eType, AString::ConstNull(), objUsers);
 }
 
 PROTECTED VIRTUAL IMS_BOOL MergeController::IsStartFinalSipfragWaitTimer() const
@@ -227,6 +202,7 @@ void MergeController::ProcessMergeWithoutRefer(IN ImsList<ConfUser*>& objUsers)
 
     if (nOldState == STATE_CREATED)
     {
+        UpdateStartCallType(objUsers);
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_pOperationQueue->SetAddingOperationSetCompleted();
@@ -385,5 +361,37 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : 1-to-1 is terminating", 0, 0, 0);
             m_pNotifier->NotifyIndividualCallTerminated(nTempCallKey);
         }
+    }
+}
+
+PRIVATE
+void MergeController::UpdateStartCallType(IN const ImsList<ConfUser*> objUsers)
+{
+    IMS_BOOL bVoip = IMS_FALSE;
+    IMS_BOOL bVt = IMS_FALSE;
+
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        CallKey nkey = m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId);
+        CallType eIndividualType = m_objCallManager.GetCallByCallKey(nkey)->GetCallType();
+
+        if (eIndividualType == CallType::VT || eIndividualType == CallType::VIDEO_RTT)
+        {
+            bVt = IMS_TRUE;
+        }
+        else
+        {
+            bVoip = IMS_TRUE;
+        }
+    }
+
+    if (bVoip && bVt)
+    {
+        m_eStartCallType = static_cast<CallType>(m_objContext.GetConfigurationProxy().GetInt(
+                Feature::CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED));
+    }
+    else if (bVt)
+    {
+        m_eStartCallType = CallType::VT;
     }
 }

@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "MtcDef.h"
+#include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
@@ -23,7 +24,6 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
-#include "conferencecall/MockCallConnectionIdManager.h"
 #include "conferencecall/MockConferenceParticipantList.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"

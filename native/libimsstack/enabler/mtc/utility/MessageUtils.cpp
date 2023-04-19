@@ -19,6 +19,7 @@
 #include "Const3GPP.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
+#include "IMtcContext.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -32,10 +33,16 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "TextParser.h"
+#include "call/CallConnectionIdManager.h"
+#include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
 #include "media/IMedia.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
+#include <tuple>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -1103,15 +1110,11 @@ PUBLIC AString MessageUtils::GenerateContentId(IN const AString& strHost)
     return strContentId;
 }
 
-PUBLIC IMS_RESULT MessageUtils::SetResourceListByConfUser(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bMultiPart,
-        IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
+PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
+        IN IMtcContext& objContext, IN const AString& strContentId,
+        IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
 {
-    AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
-    objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
-    objXml += "<list>\n";
-
+    ImsList<std::tuple<AString, AString, AString>> objEntries;
     for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
     {
         ConfUser* pConfUser = lstConfUser.GetAt(i);
@@ -1120,73 +1123,34 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceListByConfUser(IN_OUT IMessage* piMes
             continue;
         }
 
-        objXml += "<entry uri=\"";
-        if (pConfUser->strUserEntity.GetLength() < 1)
-        {
-            objXml += pConfUser->strTarget;
-        }
-        else
-        {
-            objXml += pConfUser->strUserEntity;
-        }
-        objXml += "\"";
+        AString strEntry = CreateEntryUri(objContext, *pConfUser, bWithDialogId);
 
-        if (bCopyControl)
+        AString strCc;
+        switch (pConfUser->eCcType)
         {
-            objXml += " cp:copyControl=";
-            switch (pConfUser->eCcType)
-            {
-                case COPYCONTROLTYPE_TO:
-                    objXml += "\"to\"";
-                    break;
-                case COPYCONTROLTYPE_CC:
-                    objXml += "\"cc\"";
-                    break;
-                default:  // COPYCONTROLTYPE_BCC:
-                    objXml += "\"bcc\"";
-                    break;
-            }
-
-            if (pConfUser->bAnonymize)
-            {
-                objXml += " cp:anonymize=\"true\"";
-            }
+            case COPYCONTROLTYPE_TO:
+                strCc = "to";
+                break;
+            case COPYCONTROLTYPE_CC:
+                strCc = "cc";
+                break;
+            case COPYCONTROLTYPE_BCC:
+                strCc = "bcc";
+                break;
         }
-        objXml += " />\n";
+
+        AString strAnonymize;
+        if (pConfUser->bAnonymize)
+        {
+            // TODO: Check if no need to set false.
+            strAnonymize = "true";
+        }
+
+        objEntries.Append(std::make_tuple(strEntry, strCc, strAnonymize));
     }
 
-    objXml += "</list>\n"
-              "</resource-lists>";
-
-    return SetResourceList(piMessage, strContentId, bMultiPart, objXml);
-}
-
-PUBLIC IMS_RESULT MessageUtils::SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN ImsList<AString>& lstEntryUri, IN IMS_BOOL bMultiPart,
-        IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
-{
-    AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
-    objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
-    objXml += "<list>\n";
-
-    for (IMS_UINT32 i = 0; i < lstEntryUri.GetSize(); i++)
-    {
-        objXml += "<entry uri=\"";
-        objXml += lstEntryUri.GetAt(i);
-        objXml += "\"";
-
-        if (bCopyControl)
-        {
-            objXml += " cp:copyControl=\"to\"";
-        }
-        objXml += " />\n";
-    }
-
-    objXml += "</list>\n"
-              "</resource-lists>";
-
-    return SetResourceList(piMessage, strContentId, bMultiPart, objXml);
+    return SetResourceListWithHeaders(
+            piMessage, strContentId, bMultiPart, CreateResourceListXml(objEntries));
 }
 
 PUBLIC IMS_BOOL MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
@@ -1444,8 +1408,8 @@ PRIVATE IMS_RESULT MessageUtils::GetUrnValue(IN const IMessage* piMessage, IN co
     return IMS_SUCCESS;
 }
 
-PRIVATE IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN AStringBuffer& objXml)
+PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
+        IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml)
 {
     if (piMessage == IMS_NULL)
     {
@@ -1466,13 +1430,13 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
                 MessageUtil::STR_CONTENT_DISPOSITION_RECIPIENT_LIST);
 
         AString strContentLength;
-        strContentLength.SetNumber(objXml.GetLength());
+        strContentLength.SetNumber(strXml.GetLength());
         piBodyPart->SetHeader(SipHeaderName::CONTENT_LENGTH, strContentLength);
 
+        // TODO: Need to check the requirement of Content-ID
         if (strContentId.GetLength() < 1)
         {
-            AString strHost;
-            GetHost(piMessage, ISipHeader::CONTACT_NORMAL, strHost);
+            AString strHost = GetHost(piMessage, ISipHeader::CONTACT_NORMAL);
             AString strGeneratedContentId = GenerateContentId(strHost);
             piBodyPart->SetHeader(MessageUtil::STR_CONTENT_ID, strGeneratedContentId);
         }
@@ -1482,6 +1446,138 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
         }
     }
 
-    ByteArray objContent(objXml.GetString());
-    return piBodyPart->SetContent(objContent);
+    return piBodyPart->SetContent(ByteArray(strXml));
+}
+
+PRIVATE AString MessageUtils::CreateResourceListXml(
+        IN const ImsList<std::tuple<AString, AString, AString>>& objEntries)
+{
+    // TODO: use IXmlStreamWriter
+    AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
+    objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
+    objXml += "<list>\n";
+
+    for (IMS_UINT32 i = 0; i < objEntries.GetSize(); i++)
+    {
+        objXml += "<entry uri=\"";
+        objXml += std::get<0>(objEntries.GetAt(i));
+        objXml += "\"";
+
+        if (std::get<1>(objEntries.GetAt(i)).GetLength() > 0)
+        {
+            objXml += " cp:copyControl=\"";
+            objXml += std::get<1>(objEntries.GetAt(i));
+            objXml += "\"";
+        }
+
+        if (std::get<2>(objEntries.GetAt(i)).GetLength() > 0)
+        {
+            // TODO: Not need to add false?
+            objXml += " cp:anonymize=\"true\"";
+        }
+
+        objXml += " />\n";
+    }
+
+    objXml += "</list>\n"
+              "</resource-lists>";
+
+    return objXml.GetString();
+}
+
+PRIVATE AString MessageUtils::CreateEntryUri(
+        IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId)
+{
+    if (!bWithDialogId)
+    {
+        // It's not possible to have user entity before inviting. If there is a case that the host
+        // drops a participant using resource-list, a user entity should be used.
+        return objUser.strTarget;
+    }
+
+    // KDDI carrier requires 3GPP 24.147 5.3.1.5.4
+    // <entry uri="[SIP-URI]?[Call-ID]?[From header including tag value];
+    // [To header including tag value];[Session-ID]
+    // <entry uri="B?Call-ID=1a&amp;From=A%3Btag%3Da1&amp;To=B%3Btag%3Db&amp;Session-ID=1"
+    // cp:copyControl="to"/>
+
+    CallKey nKey = objContext.GetCallConnectionIdManager().GetCallKey(objUser.nConnectionId);
+    if (nKey == 0)
+    {
+        IMS_TRACE_E(0, "No call exists.", 0, 0, 0);
+        return AString::ConstNull();
+    }
+
+    IMtcCallContext& objCallContext =
+            objContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext();
+    ISession& objSession = objCallContext.GetSession()->GetISession();
+
+    // To get a dialog ID, a confirmed dialog message is needed.
+    IMessage* piMessage = objSession.GetPreviousResponse(IMessage::SESSION_START);
+    if (!piMessage)
+    {
+        return AString::ConstNull();
+    }
+
+    AString strRemoteUri = GetRemoteUri(&objSession, objCallContext.GetCallInfo().ePeerType);
+    // TODO: tel URI case will be covered after refactorying UriFormatter.
+    SipAddress objSipAddress;
+    if (!objSipAddress.Create(strRemoteUri))
+    {
+        return AString::ConstNull();
+    }
+
+    objSipAddress.SetHeader(ISipHeader::CALL_ID, GetHeader(piMessage, ISipHeader::CALL_ID));
+
+    // SIP URI + "?" + Call-ID
+    AString strEntryUri(objSipAddress.ToString());
+
+    // TODO: According to the previous implementation, From is local and To is remote.
+    // Need to find requirement and leave a comment.
+    AString strFromPart;
+    AString strToPart;
+    if (objCallContext.GetCallInfo().ePeerType == PeerType::MO)
+    {
+        strFromPart = CreateFromToPartWithTagValue(piMessage, ISipHeader::FROM);
+        strToPart = CreateFromToPartWithTagValue(piMessage, ISipHeader::TO);
+    }
+    else
+    {
+        strFromPart = CreateFromToPartWithTagValue(piMessage, ISipHeader::TO);
+        strToPart = CreateFromToPartWithTagValue(piMessage, ISipHeader::FROM);
+    }
+
+    strEntryUri.Append("&amp;From=");
+    strEntryUri.Append(strFromPart);
+
+    strEntryUri.Append("&amp;To=");
+    strEntryUri.Append(strToPart);
+
+    return strEntryUri;
+}
+
+PRIVATE
+AString MessageUtils::CreateFromToPartWithTagValue(
+        IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType)
+{
+    AString strHeader = GetHeader(piMessage, eHeaderType);
+    ISipHeader* piHeader = SipParsingHelper::CreateHeader(eHeaderType, strHeader);
+    if (!piHeader)
+    {
+        IMS_TRACE_E(0, "piHeader is null.", 0, 0, 0);
+        return AString::ConstNull();
+    }
+
+    const AString strEscaped("\"<>");
+    AString strValue(TextParser::DoPercentEncoding(piHeader->GetValue(), strEscaped));
+    const SipParameter* pTagParam = piHeader->GetParameter("tag");
+    if (pTagParam)
+    {
+        strValue.Append(TextParser::DoPercentEncoding(";tag="));
+        strValue.Append(pTagParam->GetValue());
+    }
+
+    piHeader->Destroy();
+    return strValue;
 }
