@@ -365,15 +365,14 @@ CallStateName IdleState::ContinueStart()
 PRIVATE
 CallStateName IdleState::ContinueConference(IN const ImsList<ConfUser*>& lstUsers)
 {
-    IMS_TRACE_D("ContinueConference", 0, 0, 0);
+    IMS_TRACE_D("ContinueConference UserSize[%d]", lstUsers.GetSize(), 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
-    ImsList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
-    SetResourceListForConference(*GetISession()->GetNextRequest(), lstUris);
+    SetResourceListForConference(*GetISession()->GetNextRequest(), lstUsers);
 
     InitMediaSession();
 
@@ -437,29 +436,18 @@ CallStateName IdleState::ContinueStartUssi()
 }
 
 PRIVATE
-ImsList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const ImsList<ConfUser*>& lstUsers)
-{
-    // TODO: Pass param as entry URIs for MtcCall I/F.
-    // So this method will be moved to outside of MtcCall
-    ImsList<AString> lstEntryUris;
-    for (IMS_SIZE_T index = 0; index < lstUsers.GetSize(); index++)
-    {
-        // TODO: Implement GetEntryUri (operatior specific?)
-        // lstEntryUris.Append(GetEntryUri(lstUsers.GetAt(index)));
-    }
-    return lstEntryUris;
-}
-
-PRIVATE
 void IdleState::SetResourceListForConference(
-        IN_OUT IMessage& objMessage, IN const ImsList<AString>& lstEntryUris)
+        IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers)
 {
-    if (lstEntryUris.GetSize() == 0)
+    if (lstUsers.GetSize() == 0)
     {
         return;
     }
     objMessage.AddHeader(SipHeaderName::CONTENT_TYPE, "multipart/mixed");
-    // TODO: SetResourceListsBody(pIMessage, AString::ConstNull(), lstEntryUris, IMS_TRUE);
+
+    // TODO: LGU needs to set false the 5th param.
+    m_objContext.GetMessageUtils().SetResourceList(
+            &objMessage, m_objContext, AString::ConstNull(), lstUsers, IMS_TRUE, IMS_TRUE);
 }
 
 PRIVATE

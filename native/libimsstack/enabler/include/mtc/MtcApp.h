@@ -23,6 +23,7 @@
 #include "ImsApp.h"
 #include "ImsList.h"
 #include "MtcImsEventReceiver.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
 #include "call/radio/MtcRadioChecker.h"
@@ -97,6 +98,10 @@ public:
         return m_pMultiEndpointManager.get();
     }
     ILastComeFirstServedHelper& GetLastComeFirstServedHelper() override;
+    inline CallConnectionIdManager& GetCallConnectionIdManager() override
+    {
+        return m_objCallConnectionIdManager;
+    }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
 
 protected:
@@ -123,6 +128,7 @@ protected:
     std::unique_ptr<MultiEndpointManager> m_pMultiEndpointManager;
     MtcRadioChecker m_objMtcRadioChecker;
     std::unique_ptr<LastComeFirstServedHelper> m_pLastComeFirstServedHelper;
+    CallConnectionIdManager m_objCallConnectionIdManager;
 
     IMS_BOOL m_bWifiTestMode;
 };

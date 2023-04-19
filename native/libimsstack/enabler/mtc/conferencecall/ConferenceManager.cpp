@@ -32,7 +32,7 @@ ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
         m_objConferenceFactory(ConferenceFactory(objContext)),
         m_objControllers(ImsMap<CallKey, ConferenceController*>()),
         m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>()),
-        m_objCallConnectionIdManager(CallConnectionIdManager(objContext))
+        m_objCallConnectionIdManager(objContext.GetCallConnectionIdManager())
 {
     IMS_TRACE_D("+ConferenceManager", 0, 0, 0);
 }

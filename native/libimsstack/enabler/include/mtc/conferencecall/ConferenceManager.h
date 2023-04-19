@@ -18,8 +18,8 @@
 #define CONFERENCE_MANAGER_H_
 
 #include "ImsMap.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
@@ -52,7 +52,7 @@ private:
     ConferenceFactory m_objConferenceFactory;
     ImsMap<CallKey, ConferenceController*> m_objControllers;
     ObjectAsyncDestroyer<ConferenceController> m_objDestroyer;
-    CallConnectionIdManager m_objCallConnectionIdManager;
+    CallConnectionIdManager& m_objCallConnectionIdManager;
 };
 
 #endif

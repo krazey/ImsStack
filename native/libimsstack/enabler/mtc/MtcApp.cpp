@@ -27,6 +27,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
+#include "call/CallConnectionIdManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
 #include "conferencecall/ConferenceManager.h"
@@ -68,6 +69,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_pMultiEndpointManager(nullptr),
         m_objMtcRadioChecker(*this, m_objCallController),
         m_pLastComeFirstServedHelper(nullptr),
+        m_objCallConnectionIdManager(CallConnectionIdManager(*this)),
         m_bWifiTestMode(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);

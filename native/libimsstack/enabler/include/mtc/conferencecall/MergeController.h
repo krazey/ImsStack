@@ -49,6 +49,8 @@ private:
     void RecoverOnReferring();
     IMS_BOOL RecoverOnConferenceCallFailed();
     void ClearIndividualCallOnMergeFailed();
+    void UpdateStartCallType(IN const ImsList<ConfUser*> objUsers);
+    CallType m_eStartCallType;
 };
 
 #endif

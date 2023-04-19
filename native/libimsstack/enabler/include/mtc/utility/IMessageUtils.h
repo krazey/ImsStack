@@ -25,6 +25,7 @@
 #include "call/IMtcCall.h"
 
 class IMessage;
+class IMtcContext;
 class ISession;
 struct ConfUser;
 struct Ims3gppData;
@@ -485,29 +486,16 @@ public:
      * @brief Sets
      *
      * @param piMessage
+     * @param objContext
      * @param strContentId
      * @param lstConfUser
+     * @param bWithDialogId
      * @param bMultiPart
-     * @param bCopyControl
      * @return
      */
-    virtual IMS_RESULT SetResourceListByConfUser(IN_OUT IMessage* piMessage,
-            IN const AString& strContentId, IN ImsList<ConfUser*>& lstConfUser,
-            IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl = IMS_TRUE) = 0;
-
-    /**
-     * @brief Sets
-     *
-     * @param piMessage
-     * @param strContentId
-     * @param lstEntryUri
-     * @param bMultiPart
-     * @param bCopyControl
-     * @return
-     */
-    virtual IMS_RESULT SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
-            IN const AString& strContentId, IN ImsList<AString>& lstEntryUri,
-            IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl = IMS_TRUE) = 0;
+    virtual IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
+            IN const AString& strContentId, IN const ImsList<ConfUser*>& lstConfUser,
+            IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) = 0;
 
     /**
      * @brief Checks
