@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -100,6 +101,25 @@ public class ServiceCapsTest {
     @SmallTest
     public void testUpdateServiceCapabilitiesWhenCarrierConfigDisabled() {
         setUpServiceCapabilities(false);
+        ServiceCaps.updateServiceCapabilities(mContext, SLOT0, SUB_ID);
+        ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
+
+        assertNotNull(sc);
+        assertFalse(sc.isVoLteEnabled());
+        assertFalse(sc.isVtEnabled());
+        assertFalse(sc.isWfcEnabled());
+        assertNotNull(sc.toString());
+        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(SLOT0));
+        assertFalse(ServiceCaps.isVtEnabledByPlatform(SLOT0));
+        assertFalse(ServiceCaps.isWfcEnabledByPlatform(SLOT0));
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateServiceCapabilitiesWithIllegalStateException() {
+        CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
+        doThrow(new IllegalStateException("Carrier config loader is not available."))
+                .when(ccm).getConfigForSubId(eq(SUB_ID), any());
         ServiceCaps.updateServiceCapabilities(mContext, SLOT0, SUB_ID);
         ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
 
