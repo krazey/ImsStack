@@ -21,6 +21,7 @@
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnectionListener.h"
+#include "interface/IAosNConfiguration.h"
 
 #include "provider/AosProvider.h"
 #include "connection/AosConnection.h"
@@ -36,7 +37,8 @@ AosConnection::AosConnection(IN IAosAppContext* piAppContext) :
         m_nCnxType(NetworkPolicy::APN_NONE),
         m_piConnection(IMS_NULL),
         m_nState(STATE_IDLE),
-        m_bActivationRequested(IMS_FALSE)
+        m_bActivationRequested(IMS_FALSE),
+        m_nPcoValue(PCO_INVALID_VALUE)
 {
     m_nCnxType = piAppContext->GetStaticProfile()->GetConnectionType();
 
@@ -210,6 +212,27 @@ PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetIpcanCategory()
     return IsEpdgEnabled() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosConnection::IsLimitedServicePcoValue()
+{
+    return GetCarrierSignalPcoValue() == PCO_LIMITED_SERVICE_VALUE;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetCarrierSignalPcoValue()
+{
+    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL &&
+            GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
+    {
+        return m_nPcoValue;
+    }
+
+    return PCO_INVALID_VALUE;
+}
+
+PUBLIC VIRTUAL void AosConnection::SetCarrierSignalPcoValue(IN IMS_SINT32 nValue)
+{
+    m_nPcoValue = nValue;
+}
+
 PUBLIC GLOBAL const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
@@ -319,6 +342,7 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnDisconnected(
     A_IMS_TRACE_I(CNXID, "Connection_Disconnected :: nErrorCode(%d)", nErrorCode, 0, 0);
 
     SetState(STATE_IDLE);
+    SetCarrierSignalPcoValue(PCO_INVALID_VALUE);
     Notify();
 }
 
@@ -333,6 +357,7 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnectionFailed(
     A_IMS_TRACE_I(CNXID, "Connection_ConnectionFailed :: nErrorCode(%d)", nErrorCode, 0, 0);
 
     SetState(STATE_IDLE);
+    SetCarrierSignalPcoValue(PCO_INVALID_VALUE);
     Notify(TYPE_CONNECTION_FAILED);
 }
 

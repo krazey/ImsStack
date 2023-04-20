@@ -43,6 +43,9 @@ public:
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
     MOCK_METHOD(IMS_SINT32, GetIpcanCategory, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsLimitedServicePcoValue, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetCarrierSignalPcoValue, (), (override));
+    MOCK_METHOD(void, SetCarrierSignalPcoValue, (IN IMS_SINT32 nValue), (override));
 };
 
 #endif // MOCK_I_AOS_CONNECTION_H_

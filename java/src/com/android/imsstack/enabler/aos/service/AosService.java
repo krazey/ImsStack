@@ -15,10 +15,13 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -40,6 +43,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -48,6 +52,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * This class provides an interface to manage and control the AoS related information.
  */
 public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener {
+
+    public static final int PCO_TARGET_ID = 0xff00;
+    public static final int PCO_NONE_VALUE = 0;
+
     private Handler mHandler;
 
     @VisibleForTesting
@@ -345,6 +353,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void notifyCarrierSignalPcoValueChanged(Intent intent) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleCarrierSignalPcoValueChanged(intent);
+            }
+        });
+    }
+
+    @Override
     public void notifyCrossSimStatus(boolean isConnectedOverCrossSim) {
         ImsLog.d(mSlotId, "AosService: notifyCrossSimStatus");
         if (mIsConnectedOverCrossSim == isConnectedOverCrossSim) {
@@ -458,6 +476,43 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
 
         sendRequest(parcel);
+    }
+
+    private void handleCarrierSignalPcoValueChanged(Intent intent) {
+        String apn = ApnSetting.getApnTypeString(
+                intent.getIntExtra(TelephonyManager.EXTRA_APN_TYPE, -1));
+        if (!ApnSetting.TYPE_IMS_STRING.equals(apn)) {
+            return;
+        }
+
+        if (PCO_TARGET_ID != intent.getIntExtra(TelephonyManager.EXTRA_PCO_ID, 0)) {
+            return;
+        }
+
+        sendRequest(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                getPcoValue(intent.getByteArrayExtra(TelephonyManager.EXTRA_PCO_VALUE)));
+    }
+
+    private int getPcoValue(byte[] values) {
+        int value = PCO_NONE_VALUE;
+        if (values == null) {
+            ImsLog.d("PCO Values are null");
+            return value;
+        }
+        ImsLog.d("PCO values : " + Arrays.toString(values));
+        switch (values.length) {
+            case 1:
+                value = values[0];
+                break;
+            case 4:
+                value = values[3];
+                break;
+            default:
+                ImsLog.i("Invalid PCO values length : " + values.length);
+                break;
+        }
+        ImsLog.d("Returns PCO value : " + value);
+        return value;
     }
 
     private void notifyImsServiceChanged() {

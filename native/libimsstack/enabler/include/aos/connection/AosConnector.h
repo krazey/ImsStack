@@ -19,15 +19,21 @@
 #include "ImsTypeDef.h"
 #include "ITimer.h"
 
+#include "IAosService.h"
 #include "interface/IAosPcscf.h"
 #include "interface/IAosConnectionListener.h"
+#include "interface/IAosServicePhoneListener.h"
 
 class IAosAppContext;
 class IAosConnection;
 class IAosConnectorListener;
 class AosUtil;
 
-class AosConnector : public IAosConnectionListener, public IAosPcscfListener, public ITimerListener
+class AosConnector :
+        public IAosConnectionListener,
+        public IAosPcscfListener,
+        public ITimerListener,
+        public AosServicePhoneListener
 {
 public:
     explicit AosConnector(IN IAosAppContext* piAppContext);
@@ -56,6 +62,7 @@ public:
         REASON_FAILED,
         REASON_PCSCF_DISCOVERY_FAILED,
         REASON_PERMANENTLY_FAILED,
+        REASON_LIMITED_SERVICE_PCO,
 
         // Connection_Updated
         REASON_IP_CHANGED,
@@ -69,14 +76,16 @@ public:
     {
         TIMER_IPV6 = 0,
         TIMER_STOP_DELAY,
-        TIMER_READY_RECOVERY
+        TIMER_READY_RECOVERY,
+        TIMER_PCO_WAITING
     };
 
     enum
     {
         PENDING_NONE = 0x0,
         PENDING_IPV6_DELAY = 0x1,
-        PENDING_PCSCF_CONFIG_READY = 0x2
+        PENDING_PCSCF_CONFIG_READY = 0x2,
+        PENDING_PCO_WAITING = 0x4
     };
 
     enum
@@ -96,12 +105,15 @@ protected:
 
     IMS_BOOL IsDataConnected() const;
     IMS_BOOL IsEmergencyType() const;
-    IMS_BOOL IsIpv6DelayRequired();
-    IMS_BOOL IsPcscfChangeAvailable();
+    IMS_BOOL IsIpv6DelayRequired() const;
+    IMS_BOOL IsPcscfChangeAvailable() const;
     IMS_BOOL IsPcscfConfigured() const;
+    IMS_BOOL IsPcoWaitingRequired() const;
+    IMS_BOOL IsCarrierSignalPcoEnabled() const;
     IMS_BOOL IsPending() const;
     IMS_BOOL IsTerminating() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
+    IMS_BOOL IsDataConnectedWithoutPending() const;
 
     void CheckReadyRecoveryAndSetTimer();
     IMS_BOOL CheckIpChangedForEmergency();
@@ -117,6 +129,8 @@ protected:
     virtual void ProcessIpv6TimerExpired();
     virtual void ProcessStopDelayTimerExpired();
     virtual void ProcessReadyRecoveryTimerExpired();
+    virtual void ProcessPcoWaitingTimerExpired();
+    virtual void ProcessCheckingPcscfAndIpa();
 
     // Timer
     virtual void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
@@ -133,6 +147,9 @@ protected:
     // IAosPcscfListener
     void Pcscf_NotifyResult(IN IMS_BOOL bResult) override;
 
+    // AosServicePhoneListener
+    void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue) override;
+
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
@@ -143,10 +160,12 @@ protected:
 protected:
     IAosAppContext* m_piAppContext;
     IAosConnection* m_piConnection;
+    IAosService* m_piService;
     IAosPcscf* m_piPcscf;
     ITimer* m_piIpv6Timer;
     ITimer* m_piStopDelayTimer;
     ITimer* m_piReadyRecoveryTimer;
+    ITimer* m_piPcoWaitingTimer;
     IAosConnectorListener* m_piListener;
     AosUtil* m_pUtil;
 
@@ -162,11 +181,13 @@ protected:
 
     AString strTag;
 
+    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
     static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20;  // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;     // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;    // 1800 Sec.
-    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;    // 4 Sec.
+    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20;         // 20 Sec.
+    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;            // 20 Sec.
+    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;           // 1800 Sec.
+    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;           // 4 Sec.
+    static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;  // 2 Sec.
 
 protected:
     friend class AosApplication;

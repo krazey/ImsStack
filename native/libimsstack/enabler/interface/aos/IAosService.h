@@ -89,6 +89,7 @@ public:
     virtual void NotifyPlmnChanged() = 0;
     virtual void NotifyPowerOff() = 0;
     virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) = 0;
+    virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;
 
     /**
      * Notify the application that the device is connected to the IMS network.

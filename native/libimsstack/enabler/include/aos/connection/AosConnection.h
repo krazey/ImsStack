@@ -48,6 +48,9 @@ public:
     const AString& GetIfaceName() override;
     IMS_BOOL IsEpdgEnabled() override;
     IMS_SINT32 GetIpcanCategory() override;
+    IMS_BOOL IsLimitedServicePcoValue() override;
+    IMS_SINT32 GetCarrierSignalPcoValue() override;
+    void SetCarrierSignalPcoValue(IN IMS_SINT32 nValue) override;
 
     // Log
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
@@ -98,6 +101,10 @@ protected:
     ImsList<IAosConnectionListener*> m_objListeners;
 
     AString m_strTag;
+
+    IMS_SINT32 m_nPcoValue;
+    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
+    static const IMS_SINT32 PCO_LIMITED_SERVICE_VALUE = 5;
 
 protected:
     friend class AosConnectionTest;

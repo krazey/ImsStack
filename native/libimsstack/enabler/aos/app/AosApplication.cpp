@@ -1659,6 +1659,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnecting(IN IMS_U
             ProcessPdnBlock();
             break;
 
+        case IAosRegistration::REASON_FAILURE_PCO_LIMITED_SERVICE:
+            ProcessPlmnBlockWithTimeout();
+            break;
+
         default:
             ProcessRegFailed_Start(nReason);
             break;
