@@ -414,17 +414,18 @@ IMS_RESULT SessionEx::SendPrack()
         return IMS_SUCCESS;
     }
 
-    // If the UAC receives a reliable provisional response with an offer
-    // (this would occur if the UAC sent an INVITE without an offer,
-    // in which case the first reliable provisional response will contain the offer),
-    // it MUST generate an answer in the PRACK.
-    IMS_BOOL bHasSdpAnswer = IMS_FALSE;
+    // Case1) If the UAC receives a reliable provisional response with an offer
+    //        (this would occur if the UAC sent an INVITE without an offer,
+    //        in which case the first reliable provisional response will contain the offer),
+    //        it MUST generate an answer in the PRACK.
+    // Case2) PRACK can be used to send a SDP re-offer for session update.
+    IMS_BOOL bMayIncludeSdp = IMS_FALSE;
     IMS_SINT32 nOaState = GetOfferAnswerState();
 
     if ((nOaState == SdpOaState::STATE_OFFER_RECEIVED) ||
             (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
-        bHasSdpAnswer = IMS_TRUE;
+        bMayIncludeSdp = IMS_TRUE;
 
         // Checks if the early UPDATE is already received when sending PRACK request
         IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
@@ -439,14 +440,18 @@ IMS_RESULT SessionEx::SendPrack()
                 if (piSipMsgUpdate->GetSdpBodyPart() != IMS_NULL)
                 {
                     // New SDP offer is made by the UPDATE request
-                    bHasSdpAnswer = IMS_FALSE;
+                    bMayIncludeSdp = IMS_FALSE;
                 }
             }
         }
     }
+    else if (nOaState == SdpOaState::STATE_ESTABLISHED)
+    {
+        bMayIncludeSdp = IMS_TRUE;
+    }
 
     // Set SDP message if any offer ;; According to the configuration options
-    if (bHasSdpAnswer)
+    if (bMayIncludeSdp)
     {
         CheckNSetSdpBodyPart(piSipMsg);
     }
@@ -459,7 +464,7 @@ IMS_RESULT SessionEx::SendPrack()
     }
 
     // Update the media information
-    if (bHasSdpAnswer)
+    if (bMayIncludeSdp)
     {
         // Update the Offer/Answer state
         UpdateOfferAnswerStateOnMessageSent(piScc->GetMessage());
