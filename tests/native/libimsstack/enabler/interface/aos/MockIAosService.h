@@ -67,6 +67,7 @@ public:
     MOCK_METHOD(void, NotifyPlmnChanged, (), (override));
     MOCK_METHOD(void, NotifyPowerOff, (), (override));
     MOCK_METHOD(void, NotifyPreciseCallState, (IN IMS_SINT32 nState), (override));
+    MOCK_METHOD(void, NotifyCarrierSignalPcoValueChanged, (IN IMS_SINT32 nValue), (override));
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
             (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
                     IN const ImsList<AString>& objFeatureTags),

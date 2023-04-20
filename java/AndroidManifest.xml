@@ -112,6 +112,14 @@
                 <action android:name="android.telephony.ims.ImsService"/>
             </intent-filter>
         </service>
+        <!-- Receiver -->
+        <receiver
+            android:name=".enabler.aos.CarrierSignalReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telephony.action.CARRIER_SIGNAL_PCO_VALUE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
     <uses-sdk android:minSdkVersion="31" />

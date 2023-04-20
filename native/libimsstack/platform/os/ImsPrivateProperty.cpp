@@ -33,6 +33,8 @@ PUBLIC GLOBAL const IMS_CHAR
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SHOW_CODEC_INFO[] =
         "show_codec_info";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_WIFI_TEST[] = "wifi_test";
+PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST[] =
+        "carrier_signal_pco_test";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SIP_DEVICE_ID[] =
         "sip_device_id";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SIM_OPERATOR[] = "sim_operator";

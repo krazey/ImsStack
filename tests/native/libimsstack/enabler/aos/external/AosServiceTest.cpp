@@ -662,6 +662,23 @@ TEST_F(AosServiceTest, NotifyPreciseCallState)
     m_pAosService->NotifyPreciseCallState(1);
 }
 
+TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
+{
+    MockIAosServicePhoneListener objMockListener1;
+    MockIAosServicePhoneListener objMockListener2;
+    MockIAosServicePhoneListener objMockListener3;
+
+    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener1));
+    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener2));
+    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener3));
+
+    EXPECT_CALL(objMockListener1, ServicePhone_PcoValueChanged(_)).Times(1);
+    EXPECT_CALL(objMockListener2, ServicePhone_PcoValueChanged(_)).Times(1);
+    EXPECT_CALL(objMockListener3, ServicePhone_PcoValueChanged(_)).Times(1);
+
+    m_pAosService->NotifyCarrierSignalPcoValueChanged(5);
+}
+
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;

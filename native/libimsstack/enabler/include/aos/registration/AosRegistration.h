@@ -233,6 +233,7 @@ protected:
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
     virtual IMS_BOOL ProcessPendingPlmnBlockOnUpdateFailure();
+    virtual IMS_BOOL ProcessPlmnBlockWithPcoLimitedModeOnStartFailure();
     virtual IMS_BOOL ProcessPlmnBlockOnUpdateFailure();
     virtual void ProcessSetIpsec(IN IMS_UINT32 nReason);
     virtual void ProcessRefreshRegInfo();
@@ -386,6 +387,7 @@ private:
     IMS_BOOL IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
+    IMS_BOOL IsNeedToSetLimitedMode();
 
 protected:
     enum

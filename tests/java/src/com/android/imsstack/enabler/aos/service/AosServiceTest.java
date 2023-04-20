@@ -27,8 +27,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
@@ -75,6 +79,9 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 public class AosServiceTest extends ImsStackTest {
     private static final int SLOT_0 = 0;
+    public static final int PCO_TARGET_ID = 0xff00;
+    public static final int PCO_NONE_VALUE = 0;
+    public static final int PCO_LIMITED_SERVICE_VALUE = 5;
 
     private AosService mAosService;
     private final long mNativeObject = 1000;
@@ -473,6 +480,109 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.notifyPreciseCallState(PreciseCallState.ACTIVE);
 
         verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void notifyCarrierSignalPcoValueChanged_pcoDataLengthIsFour() {
+        byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                PCO_LIMITED_SERVICE_VALUE);
+
+        // pcoData length is 4
+        byte[] pcoData = {1, 2, 3, 5};
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
+
+        mAosService.notifyCarrierSignalPcoValueChanged(intent);
+        processAllMessages();
+
+        verify(mMockJniIms).sendData(mNativeObject, value);
+    }
+
+    @Test
+    public void notifyCarrierSignalPcoValueChanged_pcoDataLengthIsOne() {
+        byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                PCO_LIMITED_SERVICE_VALUE);
+
+        // pcoData length is 1
+        byte[] pcoData = {5};
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
+
+        mAosService.notifyCarrierSignalPcoValueChanged(intent);
+        processAllMessages();
+
+        verify(mMockJniIms).sendData(mNativeObject, value);
+    }
+
+    @Test
+    public void notifyCarrierSignalPcoValueChanged_pcoDataLengthIsInvalid() {
+        byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                PCO_NONE_VALUE);
+
+        // Expected lengths of pcoData are 1 and 4.
+        byte[] pcoData = {5, 5, 5};
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
+
+        mAosService.notifyCarrierSignalPcoValueChanged(intent);
+        processAllMessages();
+
+        verify(mMockJniIms).sendData(mNativeObject, value);
+    }
+
+    @Test
+    public void notifyCarrierSignalPcoValueChanged_unexpectedApn() {
+        byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                PCO_LIMITED_SERVICE_VALUE);
+        byte[] pcoData = {1, 2, 3, 5};
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        // Set unexpected Apn
+        intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_MMS);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
+
+        mAosService.notifyCarrierSignalPcoValueChanged(intent);
+        processAllMessages();
+
+        verify(mMockJniIms, times(0)).sendData(mNativeObject, value);
+    }
+
+    @Test
+    public void notifyCarrierSignalPcoValueChanged_unexpectedTargetId() {
+        byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
+                PCO_LIMITED_SERVICE_VALUE);
+        byte[] pcoData = {1, 2, 3, 5};
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+        intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
+        // Set unexpected Target Id
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, 0xff01);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
+
+        mAosService.notifyCarrierSignalPcoValueChanged(intent);
+        processAllMessages();
+
+        verify(mMockJniIms, times(0)).sendData(mNativeObject, value);
     }
 
     @Test
