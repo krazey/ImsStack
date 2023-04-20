@@ -69,6 +69,7 @@ public:
     void NotifyPlmnChanged() override;
     void NotifyPowerOff() override;
     void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
+    void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,

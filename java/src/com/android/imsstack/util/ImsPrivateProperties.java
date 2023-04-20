@@ -187,6 +187,11 @@ public final class ImsPrivateProperties {
          * Value: int (1 / 0)
          */
         public static final String KEY_IMS_HAL_TEST = "ims_hal_test";
+        /**
+         * Carrier signal PCO test configuration.
+         * Value: int (1 / 0)
+         */
+        public static final String KEY_CARRIER_SIGNAL_PCO_TEST = "carrier_signal_pco_test";
 
         // Release properties
         /**
@@ -347,6 +352,7 @@ public final class ImsPrivateProperties {
                 KEY_PREF_KR_ENABLER,
                 KEY_WIFI_TEST,
                 KEY_IMS_HAL_TEST,
+                KEY_CARRIER_SIGNAL_PCO_TEST,
                 KEY_TEST_IMS_DISABLED,
                 KEY_TEST_DEBUG_ENABLED,
                 KEY_TEST_TESTMODE_ENABLED,

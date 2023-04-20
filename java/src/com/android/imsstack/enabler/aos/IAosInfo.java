@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import android.content.Intent;
+
 /**
  * This class provides the interworking interface between Java and native layer
  * for AoS(Always On Service) functionalities.
@@ -26,14 +28,14 @@ public interface IAosInfo {
      *
      * @param listener {@link IAosInfoListener} to listen to the events of this object.
      */
-    public void addListener(IAosInfoListener listener);
+    void addListener(IAosInfoListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosInfoListener)}.
      *
      * @param listener {@link IAosInfoListener} previously registered.
      */
-    public void removeListener(IAosInfoListener listener);
+    void removeListener(IAosInfoListener listener);
 
     /**
      * Called to notify the change of airplane setting.
@@ -41,7 +43,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyAirplaneSetting(boolean isOn);
+    void notifyAirplaneSetting(boolean isOn);
 
     /**
      * Called to notify the change of data roaming setting.
@@ -49,7 +51,7 @@ public interface IAosInfo {
      *
      * @param isAllowed {@code isAllowed} is {@code true} if allowed, {@code false} if not allowed.
      */
-    public void notifyDataRoamingSetting(boolean isAllowed);
+    void notifyDataRoamingSetting(boolean isAllowed);
 
     /**
      * Called to notify the change of mobile data setting.
@@ -57,7 +59,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyMobileDataSetting(boolean isOn);
+    void notifyMobileDataSetting(boolean isOn);
 
     /**
      * Called to notify the change of roaming preferred voice network.
@@ -65,7 +67,7 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link RoamingPreferredVoiceNetwork}.
      */
-    public void notifyRoamingPreferredVoiceNetwork(int state);
+    void notifyRoamingPreferredVoiceNetwork(int state);
 
     /**
      * Called to notify the change of service setting.
@@ -76,7 +78,7 @@ public interface IAosInfo {
      *          Valid values are the following : M_APP_UC(0x00000001), M_APP_SMS(0x00000002),
      *          M_APP_VT(0x00000004), M_SERVICE_ALL(0xFFFFFFFF)
      */
-    public void notifyServiceSetting(int state, int serviceBits);
+    void notifyServiceSetting(int state, int serviceBits);
 
     /**
      * Called to notify the change of TTY setting.
@@ -84,7 +86,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyTtySetting(boolean isOn);
+    void notifyTtySetting(boolean isOn);
 
     /**
      * Called to notify the change of video setting.
@@ -92,7 +94,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyVideoSetting(boolean isOn);
+    void notifyVideoSetting(boolean isOn);
 
     /**
      * Called to notify the change of VoLTE setting.
@@ -100,7 +102,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyVolteSetting(boolean isOn);
+    void notifyVolteSetting(boolean isOn);
 
     /**
      * Called to notify the change of WFC setting.
@@ -108,14 +110,14 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyWfcSetting(boolean isOn);
+    void notifyWfcSetting(boolean isOn);
 
 
     /**
      * Called to notify the start of AoS Service.
      * Native Listener : IAosServicePhoneListener.
      */
-    public void notifyAosStart();
+    void notifyAosStart();
 
     /**
      * Called to notify the failure of IPCAN Handover.
@@ -125,7 +127,7 @@ public interface IAosInfo {
      * to. One of {@link com.android.imsstack.core.agents.dcmif.IApn#IPCAN_CATEGORY_XXX}.
      * @param causeCode handover failure cause code. one of {@link android.telephony.DataFailCause}.
      */
-    public void notifyIpcanHandoverFailure(int targetNetwork, int causeCode);
+    void notifyIpcanHandoverFailure(int targetNetwork, int causeCode);
 
     /**
      * Called to notify the change of ISIM state.
@@ -133,7 +135,7 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link IsimState}.
      */
-    public void notifyIsimState(int state);
+    void notifyIsimState(int state);
 
     /**
      * Called to notify the change of location information.
@@ -141,7 +143,7 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link LocationInfo}.
      */
-    public void notifyLocationInfo(int state);
+    void notifyLocationInfo(int state);
 
     /**
      * Called to notify the change of mobile data limit.
@@ -149,7 +151,7 @@ public interface IAosInfo {
      *
      * @param isLimited {@code isLimited} is {@code true} if limited, {@code false} if not limited.
      */
-    public void notifyMobileDataLimit(boolean isLimited);
+    void notifyMobileDataLimit(boolean isLimited);
 
     /**
      * Called to notify the change of network capability.
@@ -157,7 +159,7 @@ public interface IAosInfo {
      *
      * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
-    public void notifyNetworkVideoCapability(boolean isOn);
+    void notifyNetworkVideoCapability(boolean isOn);
 
     /**
      * Called to notify the change of phone number state.
@@ -167,21 +169,21 @@ public interface IAosInfo {
      * action.
      * @param state {@code state} is type of {@link PhoneNumberState}
      */
-    public void notifyPhoneNumberState(boolean isRefresh, int state);
+    void notifyPhoneNumberState(boolean isRefresh, int state);
 
     /**
      * Called to notify the change of PLMN.
      * Native Listener : IAosServicePhoneListener.
      *
      */
-    public void notifyPlmnChanged();
+    void notifyPlmnChanged();
 
     /**
      * Called to notify the power off.
      * Native Listener : IAosServicePhoneListener.
      *
      */
-    public void notifyPowerOff();
+    void notifyPowerOff();
 
     /**
      * Called to notify the change of precise call state.
@@ -189,7 +191,15 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link PreciseCallState}.
      */
-    public void notifyPreciseCallState(int state);
+    void notifyPreciseCallState(int state);
+
+    /**
+     * Called to notify the change of carrier signal PCO value.
+     * Native Listener : IAosServicePhoneListener.
+     *
+     * @param intent Intent for Carrier signal pco value.
+     */
+    void notifyCarrierSignalPcoValueChanged(Intent intent);
 
     /**
      * Called to notify the change of CrossSim connection status.

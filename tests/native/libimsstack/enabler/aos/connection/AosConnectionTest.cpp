@@ -20,9 +20,11 @@
 #include "ServiceNetworkPolicy.h"
 #include "connection/AosConnection.h"
 #include "network/OsNetworkConnection.h"
+#include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConnectionListener.h"
+#include "interface/MockIAosNConfiguration.h"
 #include "../../../platform/interface/MockINetworkConnection.h"
 
 using ::testing::_;
@@ -37,7 +39,7 @@ class AosConnectionTest : public ::testing::Test
 public:
     AosConnection* m_pAosConnection;
     AosStaticProfile* m_pAosStaticProfile;
-
+    IAosNConfiguration* m_piOriginConfiguration;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosConnectionListener m_objMockIAosConnectionListener;
     MockINetworkConnection m_objMockINetworkConnection;
@@ -60,10 +62,14 @@ protected:
         m_pAosConnection =
                 new AosConnection(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
         ASSERT_TRUE(m_pAosConnection != nullptr);
+
+        m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     }
 
     virtual void TearDown() override
     {
+        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
+
         if (m_pAosConnection)
         {
             delete m_pAosConnection;
@@ -334,6 +340,50 @@ TEST_F(AosConnectionTest, GetIpcanCategory)
 
     EXPECT_EQ(m_pAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_WLAN);
     EXPECT_EQ(m_pAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_MOBILE);
+}
+
+TEST_F(AosConnectionTest, IsLimitedServicePcoValue_SupportLimitedAdminSmsMode)
+{
+    // Set IAosNConfiguration
+    MockIAosNConfiguration objMockIAosNConfiguration;
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    m_pAosConnection->SetCarrierSignalPcoValue(-1); /*PCO_INVALID_VALUE*/
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), -1);
+    EXPECT_FALSE(m_pAosConnection->IsLimitedServicePcoValue());
+
+    m_pAosConnection->SetCarrierSignalPcoValue(5); /*PCO_LIMITED_SERVICE_VALUE*/
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), 5);
+    EXPECT_TRUE(m_pAosConnection->IsLimitedServicePcoValue());
+
+    m_pAosConnection->SetCarrierSignalPcoValue(0);
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), 0);
+    EXPECT_FALSE(m_pAosConnection->IsLimitedServicePcoValue());
+}
+
+TEST_F(AosConnectionTest, IsLimitedServicePcoValue_NotSupportLimitedAdminSmsMode)
+{
+    // Set IAosNConfiguration
+    MockIAosNConfiguration objMockIAosNConfiguration;
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosConnection->SetCarrierSignalPcoValue(-1); /*PCO_INVALID_VALUE*/
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), -1);
+    EXPECT_FALSE(m_pAosConnection->IsLimitedServicePcoValue());
+
+    m_pAosConnection->SetCarrierSignalPcoValue(5); /*PCO_LIMITED_SERVICE_VALUE*/
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), -1);
+    EXPECT_FALSE(m_pAosConnection->IsLimitedServicePcoValue());
+
+    m_pAosConnection->SetCarrierSignalPcoValue(0);
+    EXPECT_EQ(m_pAosConnection->GetCarrierSignalPcoValue(), -1);
+    EXPECT_FALSE(m_pAosConnection->IsLimitedServicePcoValue());
 }
 
 TEST_F(AosConnectionTest, StateToString)

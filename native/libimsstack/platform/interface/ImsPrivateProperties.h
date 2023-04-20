@@ -42,6 +42,7 @@ public:
     public:
         static const IMS_CHAR KEY_SHOW_CODEC_INFO[];
         static const IMS_CHAR KEY_WIFI_TEST[];
+        static const IMS_CHAR KEY_CARRIER_SIGNAL_PCO_TEST[];
         static const IMS_CHAR KEY_SIP_DEVICE_ID[];
         // SIM operator / country / operator-sub
         static const IMS_CHAR KEY_SIM_OPERATOR[];

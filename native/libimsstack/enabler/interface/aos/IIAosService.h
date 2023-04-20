@@ -61,6 +61,7 @@ public:
     static const IMS_SINT32 J2N_NOTIFY_PLMN_CHANGED = EVENT_J2N_INFO + 17;
     static const IMS_SINT32 J2N_NOTIFY_POWER_OFF = EVENT_J2N_INFO + 18;
     static const IMS_SINT32 J2N_NOTIFY_PRECISE_CALL_STATE = EVENT_J2N_INFO + 19;
+    static const IMS_SINT32 J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED = EVENT_J2N_INFO + 20;
 
     /**
      * Messages from native layer to java layer

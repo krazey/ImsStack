@@ -112,6 +112,14 @@ public:
      * @see enum class {@link #PreciseCallState}
      */
     virtual void ServicePhone_PreciseCallStateChanged(IN PreciseCallState eState) = 0;
+
+    /**
+     * Called to notify the change of carrier signal PCO value.
+     * Called by AosService (Java).
+     *
+     * @param nValue is value of carrier signal PCO.
+     */
+    virtual void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue) = 0;
 };
 
 /**
@@ -181,6 +189,7 @@ public:
     inline void ServicePhone_PlmnChanged() override{};
     inline void ServicePhone_PowerOff() override{};
     inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
+    inline void ServicePhone_PcoValueChanged(IN IMS_SINT32 /*nValue*/) override{};
 };
 
 #endif  // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_
