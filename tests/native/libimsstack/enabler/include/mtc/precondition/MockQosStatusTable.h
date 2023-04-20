@@ -49,6 +49,9 @@ public:
             (IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag,
                     IN IMS_SINT32 eStrengthTag),
             (override));
+    MOCK_METHOD(void, SetLocalResourceConfirmed,
+            (IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed), (override));
+    MOCK_METHOD(IMS_BOOL, IsLocalResourceConfirmed, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(void, CreateStatusRecords, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(IMS_BOOL, IsStatusRecordsListEmpty, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(void, RemoveUnusedStatusRecords, (IN IMS_UINT32 eMediaTypes), (override));

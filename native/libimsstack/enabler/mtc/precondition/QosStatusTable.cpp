@@ -255,6 +255,39 @@ void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 e
 }
 
 PUBLIC
+void QosStatusTable::SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed)
+{
+    ImsList<QosStatusRecord*> lstStatusRecords =
+            GetStatusRecords(eSdpMediaType, SdpAttribute::CURR, SdpPrecondition::STATUS_LOCAL);
+    if (lstStatusRecords.GetSize() <= 0)
+    {
+        return;
+    }
+
+    QosStatusRecord* pRecord = lstStatusRecords.GetAt(0);
+    pRecord->bLocalResourceConfirmed = bConfirmed;
+}
+
+PUBLIC
+IMS_BOOL QosStatusTable::IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType)
+{
+    ImsList<QosStatusRecord*> lstStatusRecords =
+            GetStatusRecords(eSdpMediaType, SdpAttribute::CURR, SdpPrecondition::STATUS_LOCAL);
+
+    if (lstStatusRecords.GetSize() <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    QosStatusRecord* pRecord = lstStatusRecords.GetAt(0);
+    IMS_BOOL bResult = pRecord->bLocalResourceConfirmed;
+    IMS_TRACE_D("IsLocalResourceConfirmed : (%s) %s", PS_SdpMediaType(eSdpMediaType),
+            _TRACE_B_(bResult), 0);
+
+    return bResult;
+}
+
+PUBLIC
 void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
 {
     ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
