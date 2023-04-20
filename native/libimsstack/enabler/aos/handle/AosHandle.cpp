@@ -103,7 +103,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_nVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
         m_nRoamingState(IMS_ROAMING_STATE_OFF),
         m_bVopsIgnoredForVolteEnabled(IMS_TRUE),
-        m_bCombinedAttach(IMS_FALSE),
+        m_bCsVoiceAvailable(IMS_FALSE),
         m_bEpdgEnabled(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
         m_bNetSrvIn(IMS_FALSE),
@@ -1204,8 +1204,8 @@ PROTECTED VIRTUAL void AosHandle::ProcessNetworkEvent(
     if (nType == IMS_EVENT_LTE_INFO)
     {
         A_IMS_TRACE_I(APPPROFILE, "ProcessNetworkEvent :: type(%d), state(%d)", nType, nState, 0);
-        m_bCombinedAttach = (nState == IMS_LTE_INFO_COMBINED_ATTACHED &&
-                ((nExtraInfo & IMS_LTE_INFO_EXTRA_SMS_ONLY) == 0));
+        m_bCsVoiceAvailable = (nState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+                (nExtraInfo == IMS_LTE_INFO_EXTRA_NONE));
     }
 }
 

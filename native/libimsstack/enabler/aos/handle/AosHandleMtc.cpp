@@ -781,7 +781,7 @@ IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
         return IMS_FALSE;
     }
 
-    if (IsRoaming() && m_bCombinedAttach)
+    if ((m_nNetworkType == NW_REPORT_RADIO_LTE) && m_bCsVoiceAvailable)
     {
         return IMS_FALSE;
     }
