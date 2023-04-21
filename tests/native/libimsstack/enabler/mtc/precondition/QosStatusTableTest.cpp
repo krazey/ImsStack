@@ -15,17 +15,37 @@
  */
 
 #include "precondition/QosStatusTable.h"
+#include "sdp/SdpMedia.h"
 #include <gtest/gtest.h>
-
-namespace android
-{
 
 class QosStatusTableTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    inline QosStatusTableTest() :
+            pQosStatusTable(IMS_NULL)
+    {
+    }
 
-    virtual void TearDown() override {}
+public:
+    QosStatusTable* pQosStatusTable;
+
+protected:
+    virtual void SetUp() override { pQosStatusTable = new QosStatusTable(); }
+
+    virtual void TearDown() override { delete pQosStatusTable; }
 };
 
-}  // namespace android
+TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsFalseIfNoQosStatusRecord)
+{
+    pQosStatusTable->SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE);
+    EXPECT_FALSE(pQosStatusTable->IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO));
+}
+
+TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsTheSetValue)
+{
+    pQosStatusTable->CreateStatusRecords(SdpMedia::TYPE_AUDIO);
+    EXPECT_FALSE(pQosStatusTable->IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO));
+
+    pQosStatusTable->SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE);
+    EXPECT_TRUE(pQosStatusTable->IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO));
+}
