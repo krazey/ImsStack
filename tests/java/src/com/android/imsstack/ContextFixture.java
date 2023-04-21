@@ -43,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -65,9 +66,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
 import android.os.PersistableBundle;
+import android.os.PowerManager;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
@@ -242,8 +245,9 @@ public class ContextFixture implements TestFixture<Context> {
         @Override
         public Object getSystemService(String name) {
             synchronized (mSystemServices) {
-                Object service = mSystemServices.get(name);
-                if (service != null) return service;
+                if (mSystemServices.containsKey(name)) {
+                    return mSystemServices.get(name);
+                }
             }
             switch (name) {
                 case Context.TELEPHONY_SERVICE:
@@ -339,6 +343,10 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.NETWORK_POLICY_SERVICE;
             } else if (serviceClass == WifiManager.class) {
                 return Context.WIFI_SERVICE;
+            } else if (serviceClass == AlarmManager.class) {
+                return Context.ALARM_SERVICE;
+            } else if (serviceClass == PowerManager.class) {
+                return Context.POWER_SERVICE;
             }
             return super.getSystemServiceName(serviceClass);
         }
@@ -370,7 +378,7 @@ public class ContextFixture implements TestFixture<Context> {
 
         @Override
         public String getOpPackageName() {
-            return "com.android.internal.telephony";
+            return "com.android.imsstack.tests";
         }
 
         @Override
@@ -634,14 +642,14 @@ public class ContextFixture implements TestFixture<Context> {
             return checkCallingOrSelfPermission(permission);
         }
 
-        /*@Override
+        @Override
         public SharedPreferences getSharedPreferences(String name, int mode) {
             return mSharedPreferences;
-        }*/
+        }
 
         @Override
         public String getPackageName() {
-            return "com.android.internal.telephony";
+            return "com.android.imsstack.tests";
         }
 
         @Override
@@ -714,8 +722,8 @@ public class ContextFixture implements TestFixture<Context> {
     private final ImsManager mImsManager = mock(ImsManager.class);
     private final Configuration mConfiguration = new Configuration();
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-    //private final SharedPreferences mSharedPreferences = PreferenceManager
-    //        .getDefaultSharedPreferences(TestApplication.getAppContext());
+    private final SharedPreferences mSharedPreferences = PreferenceManager
+            .getDefaultSharedPreferences(TestApplication.getAppContext());
     private final MockContentResolver mContentResolver = new MockContentResolver();
     private final PersistableBundle mBundle = new PersistableBundle();
 

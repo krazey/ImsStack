@@ -137,11 +137,11 @@ TEST_F(SystemTest, NotifyData)
 
     EXPECT_EQ(1, out.readInt32());
 
-    /* Call Notify Data for CATEGORY_ALARM*/
+    /* Call Notify Data for CATEGORY_TIMER*/
     in.setDataPosition(0);
     out.setDataPosition(0);
     in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_ALARM_EXPIRED);
+    in.writeInt32(SystemConstants::NOTIFY_TIMER_EXPIRED);
     in.writeInt64(154536453574651);
     in.setDataPosition(0);
 
@@ -413,13 +413,13 @@ TEST_F(SystemTest, AddAndRemoveListener)
     EXPECT_EQ(1, out.readInt32());
     EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(AnyNumber());
 
-    /* Call CATEGORY_ALARM listener*/
-    m_pSystem->AddListener(SystemConstants::CATEGORY_ALARM, &m_objMockISystemListener, 0);
+    /* Call CATEGORY_TIMER listener*/
+    m_pSystem->AddListener(SystemConstants::CATEGORY_TIMER, &m_objMockISystemListener, 0);
 
     in.setDataPosition(0);
     out.setDataPosition(0);
     in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_ALARM_EXPIRED);
+    in.writeInt32(SystemConstants::NOTIFY_TIMER_EXPIRED);
     in.writeInt64(154536453574651);
     in.setDataPosition(0);
 
@@ -565,13 +565,13 @@ TEST_F(SystemTest, AddAndRemoveListener)
     EXPECT_EQ(1, out.readInt32());
     EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(0);
 
-    /* Call CATEGORY_ALARM listener*/
-    m_pSystem->RemoveListener(SystemConstants::CATEGORY_ALARM, &m_objMockISystemListener, 0);
+    /* Call CATEGORY_TIMER listener*/
+    m_pSystem->RemoveListener(SystemConstants::CATEGORY_TIMER, &m_objMockISystemListener, 0);
 
     in.setDataPosition(0);
     out.setDataPosition(0);
     in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_ALARM_EXPIRED);
+    in.writeInt32(SystemConstants::NOTIFY_TIMER_EXPIRED);
     in.writeInt64(154536453574651);
     in.setDataPosition(0);
 
@@ -1523,42 +1523,42 @@ TEST_F(SystemTest, GetWifiSsId)
     EXPECT_EQ(m_pSystem->GetWifiSsId(), strValue);
 }
 
-TEST_F(SystemTest, SetAlarm)
+TEST_F(SystemTest, SetTimer)
 {
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->SetAlarm(1000, INT64_TO_UINTP(232432423)), 0);
+    EXPECT_EQ(m_pSystem->SetTimer(1000, INT64_TO_UINTP(232432423)), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->SetAlarm(2000, INT64_TO_UINTP(232432423334)), 0);
+    EXPECT_EQ(m_pSystem->SetTimer(2000, INT64_TO_UINTP(232432423334)), 0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->SetAlarm(2000, INT64_TO_UINTP(232432423334)), 0);
+    EXPECT_EQ(m_pSystem->SetTimer(2000, INT64_TO_UINTP(232432423334)), 0);
 }
 
-TEST_F(SystemTest, KillAlarm)
+TEST_F(SystemTest, KillTimer)
 {
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->KillAlarm(INT64_TO_UINTP(232432423)), 0);
+    EXPECT_EQ(m_pSystem->KillTimer(INT64_TO_UINTP(232432423)), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->KillAlarm(INT64_TO_UINTP(232432423334)), 0);
+    EXPECT_EQ(m_pSystem->KillTimer(INT64_TO_UINTP(232432423334)), 0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->KillAlarm(INT64_TO_UINTP(232432423334)), 0);
+    EXPECT_EQ(m_pSystem->KillTimer(INT64_TO_UINTP(232432423334)), 0);
 }
 
 TEST_F(SystemTest, GetPreference)

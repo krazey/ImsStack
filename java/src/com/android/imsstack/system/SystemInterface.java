@@ -53,7 +53,6 @@ public class SystemInterface implements JniSystemListener {
             new ThreadMessageExecutor(SystemInterface.class.getSimpleName() + "_DEFAULT");
 
     private DefaultSystemCallInterface mDefaultSystemCall;
-    private ISystemAPIAlarm mISystemAPIAlarm;
     private ISystemAPIBattery mISystemAPIBattery;
     private ISystemAPIDevice mISystemAPIDevice;
     private ISystemAPIPreference mISystemAPIPreference;
@@ -133,10 +132,6 @@ public class SystemInterface implements JniSystemListener {
         mDefaultSystemCall = systemCall;
     }
 
-    public void setISystemAPIAlarm(ISystemAPIAlarm api) {
-        mISystemAPIAlarm = api;
-    }
-
     public void setISystemAPIBattery(ISystemAPIBattery api) {
         mISystemAPIBattery = api;
     }
@@ -154,11 +149,11 @@ public class SystemInterface implements JniSystemListener {
     }
 
     /**
-     * Notifies the expiration of the alarm timer.
+     * Notifies the expiration of the timer.
      *
-     * @param id the timer id which is provisioned to start an alarm timer
+     * @param tid The timer id that was specified to start a timer.
      */
-    public void notifyAlarmExpired(final long id) {
+    public void notifyTimerExpired(long tid) {
         mDefaultExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -170,8 +165,8 @@ public class SystemInterface implements JniSystemListener {
                 }
 
                 parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
-                parcel.writeInt(SystemConstants.NOTIFY_ALARM_EXPIRED);
-                parcel.writeLong(id);
+                parcel.writeInt(SystemConstants.NOTIFY_TIMER_EXPIRED);
+                parcel.writeLong(tid);
 
                 sendData2Native(mNativeObject, parcel);
             }
@@ -261,9 +256,9 @@ public class SystemInterface implements JniSystemListener {
         Parcel result = null;
 
         switch (method) {
-            case SystemConstants.SET_ALARM: //FALL-THROUGH
-            case SystemConstants.KILL_ALARM:
-                result = handleSystemAPIAlarm(method, parcel);
+            case SystemConstants.SET_TIMER: //FALL-THROUGH
+            case SystemConstants.KILL_TIMER:
+                result = handleSystemCallForTimer(method, parcel);
                 break;
             case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
             case SystemConstants.SET_PREFERENCE:
@@ -443,24 +438,29 @@ public class SystemInterface implements JniSystemListener {
         return null;
     }
 
-    private Parcel handleSystemAPIAlarm(int method, Parcel parcel) {
-        if (mISystemAPIAlarm == null) {
+    private Parcel handleSystemCallForTimer(int method, Parcel parcel) {
+        if (mDefaultSystemCall == null) {
             return null;
         }
 
         Parcel result = Parcel.obtain();
 
         switch (method) {
-        case SystemConstants.SET_ALARM:
-            result.writeInt(mISystemAPIAlarm.startAlarm4Sys(parcel.readInt(),
-                parcel.readLong()));
-            break;
-        case SystemConstants.KILL_ALARM:
-            result.writeInt(mISystemAPIAlarm.killAlarm4Sys(parcel.readLong()));
-            break;
-        default:
-            result.recycle();
-            return null;
+            case SystemConstants.SET_TIMER: {
+                int duration = parcel.readInt();
+                long tid = parcel.readLong();
+                result.writeInt(mDefaultSystemCall.startTimer(tid, duration) ? 1 : 0);
+                break;
+            }
+            case SystemConstants.KILL_TIMER: {
+                long tid = parcel.readLong();
+                mDefaultSystemCall.stopTimer(tid);
+                result.writeInt(1);
+                break;
+            }
+            default:
+                result.recycle();
+                return null;
         }
 
         return result;
@@ -628,8 +628,8 @@ public class SystemInterface implements JniSystemListener {
         }
 
         switch (method) {
-            case SystemConstants.SET_ALARM: //FALL-THROUGH
-            case SystemConstants.KILL_ALARM: //FALL-THROUGH
+            case SystemConstants.SET_TIMER: //FALL-THROUGH
+            case SystemConstants.KILL_TIMER: //FALL-THROUGH
             case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
             case SystemConstants.SET_PREFERENCE: //FALL-THROUGH
             case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
@@ -650,10 +650,10 @@ public class SystemInterface implements JniSystemListener {
     }
 
     private void initForDebugLog() {
-        sMethodToString.put(SystemConstants.SET_ALARM,
-                "SET_ALARM");
-        sMethodToString.put(SystemConstants.KILL_ALARM,
-                "KILL_ALARM");
+        sMethodToString.put(SystemConstants.SET_TIMER,
+                "SET_TIMER");
+        sMethodToString.put(SystemConstants.KILL_TIMER,
+                "KILL_TIMER");
         sMethodToString.put(SystemConstants.GET_BATTERY_LEVEL,
                 "GET_BATTERY_LEVEL");
         sMethodToString.put(SystemConstants.IS_EMERGENCY_NUMBER,

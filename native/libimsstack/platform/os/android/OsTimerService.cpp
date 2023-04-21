@@ -26,30 +26,30 @@ LOCAL
 void osTimerService_AddListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
-    piSystem->AddListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    piSystem->AddListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
 LOCAL
 void osTimerService_RemoveListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
-    piSystem->RemoveListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    piSystem->RemoveListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
 LOCAL
-IMS_BOOL osTimerService_KillAlarm(IN IMS_UINTP nTimerId)
+IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
-    IMS_SINT32 nResult = piSystem->KillAlarm(nTimerId);
+    IMS_SINT32 nResult = piSystem->KillTimer(nTimerId);
 
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
 
 LOCAL
-IMS_BOOL osTimerService_SetAlarm(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
+IMS_BOOL osTimerService_SetTimer(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
-    IMS_SINT32 nResult = piSystem->SetAlarm(nDuration, nTimerId);
+    IMS_SINT32 nResult = piSystem->SetTimer(nDuration, nTimerId);
 
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
@@ -91,7 +91,7 @@ PUBLIC VIRTUAL OsTimerService::~OsTimerService()
 
         if (pTimerWrapper != IMS_NULL)
         {
-            osTimerService_KillAlarm(pTimerWrapper->GetTimerId());
+            osTimerService_KillTimer(pTimerWrapper->GetTimerId());
             delete pTimerWrapper;
         }
     }
@@ -140,7 +140,7 @@ void OsTimerService::KillTimer(IN OsTimer* pTimer)
 
     if ((nTimerId != 0) && !bTimerExpired)
     {
-        osTimerService_KillAlarm(nTimerId);
+        osTimerService_KillTimer(nTimerId);
     }
 
     if (m_objTimers.IsEmpty())
@@ -167,7 +167,7 @@ IMS_BOOL OsTimerService::SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer)
 
     m_objLockTimer.Lock();
 
-    osTimerService_SetAlarm(pTimerWrapper->GetTimerId(), nDuration);
+    osTimerService_SetTimer(pTimerWrapper->GetTimerId(), nDuration);
 
     IMS_BOOL bResult = m_objTimers.Append(pTimerWrapper);
 
@@ -175,7 +175,7 @@ IMS_BOOL OsTimerService::SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer)
 
     if (!bResult)
     {
-        osTimerService_KillAlarm(pTimerWrapper->GetTimerId());
+        osTimerService_KillTimer(pTimerWrapper->GetTimerId());
 
         delete pTimerWrapper;
     }

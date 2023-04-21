@@ -19,6 +19,8 @@ package com.android.imsstack.imsservice.mmtel;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,7 +35,7 @@ import android.util.Log;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
@@ -54,11 +56,11 @@ import java.util.concurrent.TimeUnit;
 public class ImsLocationHelperTest {
     private static final String TAG = ImsLocationHelperTest.class.getName();
     private static final int VALIDITY_PERIOD = 10000;
-    private static final int WAITING_TIME = 2000;
+    private static final long WAITING_TIME = 2000L;
     private static final int LOCATION_UPDATE_GUARD_TIMEOUT = 3000;
     private static final int MAX_LATCH_TIME = 3000;
     private static final int EVENT_RELEASE_LATCH = 20;
-    private static final int ALARM_TIMER = 2;
+    private static final long ALARM_TIMER = 2L;
 
     private ContextFixture mContextFixture;
     private ImsLocationHelper mLocHelper = null;
@@ -69,7 +71,7 @@ public class ImsLocationHelperTest {
     //Mocked classes
     @Mock ICallContext mICallContext;
     @Mock Location mMockLocation;
-    @Mock IAlarmTimer mMockTimer;
+    @Mock TimerInterface mMockTimer;
     @Mock ImsLocationHelper.Listener mMockListener;
 
     private class LocationBasedCallTest implements ImsLocationHelper.Listener {
@@ -174,27 +176,30 @@ public class ImsLocationHelperTest {
 
     @Test
     public void testStartWaitingTimer() {
-        //startWaitingTimer() return false, alarmTimer as null
-        AgentFactory.getInstance().setDefaultAgent(ALARM_TIMER, mMockTimer);
+        //startWaitingTimer() return false, TimerInterface as null
         mLocHelper.startLocationUpdates(WAITING_TIME);
-        verify(mMockTimer, never()).startTimer(ALARM_TIMER, WAITING_TIME);
+        verify(mMockTimer, never())
+                .startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class));
         verify(mMockTimer, never()).stopTimer(ALARM_TIMER);
         clearInvocations(mMockTimer);
 
-        //startWaitingTimer() return false, timerId = 0
-        when(mMockTimer.getTimerId()).thenReturn(ALARM_TIMER);
+        //startWaitingTimer() return false, Invalid timer id.
+        AgentFactory.getInstance().setAgent(TimerInterface.class, mMockTimer);
+        when(mMockTimer.startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class)))
+                .thenReturn(TimerInterface.INVALID_TID);
         mLocHelper.startLocationUpdates(WAITING_TIME);
-        verify(mMockTimer).startTimer(ALARM_TIMER, WAITING_TIME);
+        verify(mMockTimer).startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class));
         verify(mMockTimer, never()).stopTimer(ALARM_TIMER);
         clearInvocations(mMockTimer);
 
-        //startWaitingTimer() return false, alarmTimer.startTimer(timerId, interval) as false
-        when(mMockTimer.startTimer(ALARM_TIMER, WAITING_TIME)).thenReturn(true);
+        //startWaitingTimer() return false, startTimer(interval, listener) as false
+        when(mMockTimer.startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class)))
+                .thenReturn(ALARM_TIMER);
         mLocHelper.startLocationUpdates(WAITING_TIME);
-        verify(mMockTimer).startTimer(ALARM_TIMER, WAITING_TIME);
+        verify(mMockTimer).startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class));
         clearInvocations(mMockTimer);
 
-        AgentFactory.getInstance().setDefaultAgent(ALARM_TIMER, null);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
     }
 
     @Test
@@ -203,14 +208,14 @@ public class ImsLocationHelperTest {
         verify(mMockTimer, never()).stopTimer(ALARM_TIMER);
         clearInvocations(mMockTimer);
 
-        AgentFactory.getInstance().setDefaultAgent(ALARM_TIMER, mMockTimer);
-        when(mMockTimer.getTimerId()).thenReturn(ALARM_TIMER);
-        when(mMockTimer.startTimer(ALARM_TIMER, WAITING_TIME)).thenReturn(true);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, mMockTimer);
+        when(mMockTimer.startTimer(eq(WAITING_TIME), any(TimerInterface.Listener.class)))
+                .thenReturn(ALARM_TIMER);
         //set mWaitingTimer other than 0
         mLocHelper.startLocationUpdates(WAITING_TIME);
         mLocHelper.stopLocationUpdates();
         verify(mMockTimer).stopTimer(ALARM_TIMER);
 
-        AgentFactory.getInstance().setDefaultAgent(ALARM_TIMER, null);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
     }
 }

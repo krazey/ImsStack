@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,11 +52,11 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcm.DcNetWatcher;
@@ -76,6 +77,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -94,13 +96,13 @@ public class SscServiceStateTest {
 
     private SscServiceState mSscServiceState;
 
-    private final int mTimerId = 1;
+    private final long mTimerId = 1L;
     private final int mBlockTimer = 1;
     private TestableLooper mLooper;
 
     private TelephonyManager mMockTelephonyManager;
     private ConnectivityManager mMockConnectivityManager;
-    @Mock private AlarmTimerAgent mMockAlarmTimer;
+    @Mock private TimerInterface mMockTimerInterface;
     @Mock private AosService mMockAosService;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
@@ -136,8 +138,8 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT)).thenReturn(mBlockTimer);
 
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
-        when(mMockAlarmTimer.startTimer(anyLong(), anyLong())).thenReturn(true);
+        when(mMockTimerInterface.startTimer(anyLong(), any(TimerInterface.Listener.class)))
+                .thenReturn(mTimerId);
         when(mMockWifiInterface.isWifiConnected()).thenReturn(false);
         when(mMockDcNetWatcher.isRoaming()).thenReturn(false);
         when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_IN_SERVICE);
@@ -154,7 +156,7 @@ public class SscServiceStateTest {
 
         mMockConnectivityManager = context.getSystemService(ConnectivityManager.class);
 
-        AgentFactory.setDefaultAgent(AgentFactory.ALARM_TIMER, mMockAlarmTimer);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, mMockTimerInterface);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_0);
@@ -181,8 +183,8 @@ public class SscServiceStateTest {
 
         mLooper.destroy();
 
-        AgentFactory.setDefaultAgent(AgentFactory.ALARM_TIMER, null);
         AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
@@ -532,7 +534,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setErrorResponseCode(errorCode);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 60 * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 60 * 1000L), any(TimerInterface.Listener.class));
         assertEquals(false, mSscServiceState.isUtAvailable());
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
@@ -550,7 +553,7 @@ public class SscServiceStateTest {
         mSscServiceState.setErrorResponseCode(errorCode);
 
         assertEquals(false, mSscServiceState.isUtAvailable());
-        verifyNoMoreInteractions(mMockAlarmTimer);
+        verifyNoMoreInteractions(mMockTimerInterface);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
@@ -566,7 +569,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setPdnConnectionFailed(smCause);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 60 * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 60 * 1000L), any(TimerInterface.Listener.class));
         assertEquals(false, mSscServiceState.isUtAvailable());
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
@@ -584,7 +588,7 @@ public class SscServiceStateTest {
         mSscServiceState.setPdnConnectionFailed(smCause);
 
         assertEquals(false, mSscServiceState.isUtAvailable());
-        verifyNoMoreInteractions(mMockAlarmTimer);
+        verifyNoMoreInteractions(mMockTimerInterface);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
@@ -595,7 +599,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setDnsQueryFailed(true);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 1000L), any(TimerInterface.Listener.class));
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
         assertEquals(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE, mSscServiceState.mUtBlockReason);
@@ -614,7 +619,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setGbaRequestFailed(true);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 1000L), any(TimerInterface.Listener.class));
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
         assertEquals(SscConstant.BLOCK_REASON_GBA_FAILURE, mSscServiceState.mUtBlockReason);
@@ -633,7 +639,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setPdnConnectionTimeout(true);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 1000L), any(TimerInterface.Listener.class));
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
         assertEquals(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT,
@@ -653,7 +660,8 @@ public class SscServiceStateTest {
 
         mSscServiceState.setSocketConnectionExpired(true);
 
-        verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
+        verify(mMockTimerInterface)
+                .startTimer(eq(mBlockTimer * 1000L), any(TimerInterface.Listener.class));
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
         assertEquals(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT,
@@ -668,7 +676,12 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_utBlockTimerExpired() {
+        int[] tempBlockErrorCodes = {480};
+        int errorCode = 480;
+        when(mMockCarrierConfig.getIntArray(Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
+                .thenReturn(tempBlockErrorCodes);
         mSscServiceState = createAndInitSscServiceState();
+        mSscServiceState.setErrorResponseCode(errorCode);
         mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT
                 | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT
@@ -677,10 +690,16 @@ public class SscServiceStateTest {
                 | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP;
         mSscServiceState.mUtAvailability = false;
 
-        sendMessage(SscServiceState.EVENT_UT_BLOCK_TIMER_EXPIRED);
+        ArgumentCaptor<TimerInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(TimerInterface.Listener.class);
+        verify(mMockTimerInterface).startTimer(anyLong(), listenerCaptor.capture());
+
+        TimerInterface.Listener listener = listenerCaptor.getValue();
+        listener.onTimerExpired(mTimerId);
+        processDelayedMessage();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
-        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        verify(mMockUtInterface, times(3)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
     }
 

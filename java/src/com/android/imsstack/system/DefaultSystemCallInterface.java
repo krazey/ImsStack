@@ -23,12 +23,26 @@ import com.android.imsstack.core.agents.WifiInterface;
  * regardless of the SIM slot.
  */
 public interface DefaultSystemCallInterface {
-    //// WifiInterface {
+    /**
+     * Starts a timer with the specified duration for the native service.
+     *
+     * @param tid The timer id to be started.
+     * @param duration The timer duration as milli-seconds.
+     * @return {@code true} if a timer is successfully started, {@code false} otherwise.
+     */
+    boolean startTimer(long tid, long duration);
+
+    /**
+     * Stops the specified timer for the native service.
+     *
+     * @param tid The timer id to be stopped.
+     */
+    void stopTimer(long tid);
+
     /**
      * Returns the Wi-Fi interface.
      *
      * @return A WifiInterface object.
      */
     WifiInterface getWifiInterface();
-    ////}
 }

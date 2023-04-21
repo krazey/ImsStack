@@ -140,10 +140,10 @@ public:
     AString GetWifiSsId() override;
 
     ////
-    // Alarm timer control
+    // Timer APIs
     ////
-    IMS_SINT32 SetAlarm(IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId) override;
-    IMS_SINT32 KillAlarm(IN IMS_UINTP nAlarmId) override;
+    IMS_SINT32 SetTimer(IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId) override;
+    IMS_SINT32 KillTimer(IN IMS_UINTP nTimerId) override;
 
     ////
     // Configuration-related information
@@ -227,7 +227,7 @@ private:
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyPowerCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyAlarmCategory(
+    void NotifyTimerCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyConfigCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);

@@ -127,10 +127,10 @@ public:
     virtual AString GetWifiSsId() = 0;
 
     ////
-    // Alarm timer control
+    // Timer APIs
     ////
-    virtual IMS_SINT32 SetAlarm(IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId) = 0;
-    virtual IMS_SINT32 KillAlarm(IN IMS_UINTP nAlarmId) = 0;
+    virtual IMS_SINT32 SetTimer(IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId) = 0;
+    virtual IMS_SINT32 KillTimer(IN IMS_UINTP nTimerId) = 0;
 
     ////
     // Configuration-related information
