@@ -322,7 +322,7 @@ protected:
     IMS_UINT32 m_nVopsState;
     IMS_UINT32 m_nRoamingState;
     IMS_BOOL m_bVopsIgnoredForVolteEnabled;
-    IMS_BOOL m_bCombinedAttach;
+    IMS_BOOL m_bCsVoiceAvailable;
 
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
     ImsList<IMS_UINT32> m_objHoldingBlocksPolicyForMobile;
