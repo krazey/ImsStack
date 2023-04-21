@@ -29,7 +29,7 @@ public class SystemConstants {
     public static final int CATEGORY_WIFI = 0x00020000;
     public static final int CATEGORY_CALL = 0x00040000;
     public static final int CATEGORY_POWER = 0x00080000;
-    public static final int CATEGORY_ALARM = 0x00100000;
+    public static final int CATEGORY_TIMER = 0x00100000;
     public static final int CATEGORY_CONFIG = 0x00200000;
     public static final int CATEGORY_EVENT = 0x00400000;
     public static final int CATEGORY_ISIM_EVENT = 0x00800000;
@@ -40,7 +40,7 @@ public class SystemConstants {
      * Methods for the system information's notification (Java to Native)
      */
     public static final int NOTIFY_AIRPLANE_MODE_CHANGED = CATEGORY_NETWORK + 1;
-    public static final int NOTIFY_ALARM_EXPIRED = CATEGORY_ALARM + 2;
+    public static final int NOTIFY_TIMER_EXPIRED = CATEGORY_TIMER + 2;
     public static final int NOTIFY_BATTERY_LEVEL_CHANGED = CATEGORY_POWER + 3;
     public static final int NOTIFY_DATA_CONNECTION_FAILED = CATEGORY_NETWORK + 4;
     public static final int NOTIFY_DATA_CONNECTION_STATE_CHANGED = CATEGORY_NETWORK + 5;
@@ -143,10 +143,10 @@ public class SystemConstants {
     public static final int GET_WIFI_SSID = CATEGORY_BASE + 504;
 
     /**
-     * Alarm timer control
+     * Timer APIs
      */
-    public static final int SET_ALARM = CATEGORY_BASE + 601;
-    public static final int KILL_ALARM = CATEGORY_BASE + 602;
+    public static final int SET_TIMER = CATEGORY_BASE + 601;
+    public static final int KILL_TIMER = CATEGORY_BASE + 602;
 
     /**
      * Configuration-related information

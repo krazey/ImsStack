@@ -33,7 +33,6 @@ import java.util.Map;
 public final class AgentFactory {
     // agents without slot id
     public static final int SUBSCRIPTION = 1;
-    public static final int ALARM_TIMER = 2;
     public static final int BATTERY_STATE = 3;
     public static final int PREFERENCE = 4;
     public static final int WAKE_LOCK = 5;
@@ -219,7 +218,6 @@ public final class AgentFactory {
 
     public static synchronized void createDefaultAgents() {
         sAgents.put(SUBSCRIPTION, SubscriptionAgent.getInstance());
-        sAgents.put(ALARM_TIMER, AlarmTimerAgent.getInstance());
         sAgents.put(BATTERY_STATE, BatteryStateAgent.getInstance());
         sAgents.put(PREFERENCE, PreferenceAgent.getInstance());
         sAgents.put(WAKE_LOCK, WakeLockAgent.getInstance());
@@ -253,7 +251,6 @@ public final class AgentFactory {
 
     public static void initDefaultAgents(Context context) {
         SubscriptionAgent.getInstance().init(context);
-        AlarmTimerAgent.getInstance().init(context);
         BatteryStateAgent.getInstance().init(context);
         PreferenceAgent.getInstance().init(context);
         WakeLockAgent.getInstance().init(context);
@@ -279,6 +276,7 @@ public final class AgentFactory {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
         }
 
+        mAgents.put(TimerInterface.class, new TimerAgent());
         mAgents.put(WifiInterface.class, new WifiAgent());
     }
 

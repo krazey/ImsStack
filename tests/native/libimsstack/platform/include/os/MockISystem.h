@@ -150,10 +150,10 @@ public:
     MOCK_METHOD(AString, GetWifiSsId, (), (override));
 
     ////
-    // Alarm timer control
+    // Timer APIs
     ////
-    MOCK_METHOD(IMS_SINT32, SetAlarm, (IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId), (override));
-    MOCK_METHOD(IMS_SINT32, KillAlarm, (IN IMS_UINTP nAlarmId), (override));
+    MOCK_METHOD(IMS_SINT32, SetTimer, (IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId), (override));
+    MOCK_METHOD(IMS_SINT32, KillTimer, (IN IMS_UINTP nTimerId), (override));
 
     ////
     // Configuration-related information

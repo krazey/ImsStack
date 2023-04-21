@@ -25,8 +25,6 @@ import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.SystemClock;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
@@ -55,11 +53,6 @@ import java.util.Locale;
  * This information will be used to form PIDF-LO XML body.
  */
 public class LocationAgent implements LocationInterface {
-    /** Intenal events */
-    private static final int EVENT_ASYNC_START = 1001;
-    private static final int EVENT_UPDATE_INTERVAL_TIMER_EXPIRED = 1002;
-    private static final int EVENT_SEARCH_DURATION_EXPIRED = 1003;
-
     enum ETimerType {
         TIMER_ASYNC_START,
         TIMER_LOCATION_UPDATE_INTERVAL,
@@ -74,7 +67,7 @@ public class LocationAgent implements LocationInterface {
     private final Object mLock = new Object();
     private final int mSlotId;
     private final LocationApi mLocationApi;
-    private final LocationHandler mLocationHandler;
+    private final Handler mHandler;
     private final GeocoderProxy mGeocoderProxy;
     private final AddressResolver mAddressResolver;
     private final LocationPolicy mPolicy = new LocationPolicy();
@@ -98,9 +91,9 @@ public class LocationAgent implements LocationInterface {
     private boolean mIsAleadyUpdatedFromNetwork = false;
     private Address mResolvedAddress = null;
 
-    private int mTimerIdAsyncStart = (-1);
-    private int mTimerIdUpdateInterval = (-1);
-    private int mTimerIdSearchDuration = (-1);
+    private long mTimerIdAsyncStart = TimerInterface.INVALID_TID;
+    private long mTimerIdUpdateInterval = TimerInterface.INVALID_TID;
+    private long mTimerIdSearchDuration = TimerInterface.INVALID_TID;
 
     // default update interval is 10 mins
     private int mUpdateInterval = LocationPolicy.LOCATION_UPDATE_INTERVAL;
@@ -199,13 +192,51 @@ public class LocationAgent implements LocationInterface {
         }
     };
 
+    private final TimerInterface.Listener mTimerListener = new TimerInterface.Listener() {
+        @Override
+        public void onTimerExpired(long tid) {
+            mHandler.post(() -> {
+                if (tid == mTimerIdAsyncStart) {
+                    stopTimer(ETimerType.TIMER_ASYNC_START);
+
+                    if (mLocationInfoStarted || mInstantLocationInfoRequested) {
+                        if (mInstantLocationInfoRequested) {
+                            mLocationRequestState = EReqState.STATE_IDLE;
+                        }
+
+                        requestLocationUpdates();
+                    }
+                } else if (tid == mTimerIdUpdateInterval) {
+                    stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
+
+                    mLocationRequestState = EReqState.STATE_IDLE;
+
+                    if (mLocationInfoStarted) {
+                        requestLocationUpdates();
+                    } else {
+                        ImsLog.d(mSlotId, "Location is not required, so stop location update.");
+                    }
+                } else if (tid == mTimerIdSearchDuration) {
+                    stopTimer(ETimerType.TIMER_SEARCH_DURATION);
+
+                    removeLocationUpdates();
+
+                    // Only if location is updated after motion detection, request SMD
+                    if (mIsLocationUpdatedAfterMotionDetected) {
+                        requestSmd();
+                    }
+                }
+            });
+        }
+    };
+
     public LocationAgent(int slotId) {
         ImsLog.d("LocationAgent" + slotId);
 
         mSlotId = slotId;
         mLocationApi = LocationApi.getInstance();
-        mLocationHandler = new LocationHandler(AppContext.getInstance().getMainLooper());
-        mGeocoderProxy = new GeocoderProxy(AppContext.getInstance(), mLocationHandler);
+        mHandler = new Handler(AppContext.getInstance().getMainLooper());
+        mGeocoderProxy = new GeocoderProxy(AppContext.getInstance(), mHandler);
         // Instantiate AddressResolver to update location details
         // when location is fixed by LocationManager.
         mAddressResolver = new AddressResolver();
@@ -225,7 +256,7 @@ public class LocationAgent implements LocationInterface {
         mLocationApi.stop();
         stopListeningForLocation();
         removeLocationUpdates();
-        mLocationHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
 
         stopTimer(ETimerType.TIMER_SEARCH_DURATION);
         stopTimer(ETimerType.TIMER_ASYNC_START);
@@ -443,7 +474,7 @@ public class LocationAgent implements LocationInterface {
                     .setLocationSettingsIgnored(true)
                     .build();
             mLocationApi.requestLocationUpdates(LocationApi.FUSED_PROVIDER,
-                    request, mLocationListener, mLocationHandler::post);
+                    request, mLocationListener, mHandler::post);
 
             searchTime = mPolicy.getSearchDurationForFlp();
         } else {
@@ -453,7 +484,7 @@ public class LocationAgent implements LocationInterface {
                         .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
                         .build();
                 mLocationApi.requestLocationUpdates(LocationApi.GPS_PROVIDER,
-                        request, mLocationListener, mLocationHandler::post);
+                        request, mLocationListener, mHandler::post);
                 mGpsLocationRequested = true;
             }
 
@@ -463,7 +494,7 @@ public class LocationAgent implements LocationInterface {
                         .setQuality(LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
                         .build();
                 mLocationApi.requestLocationUpdates(LocationApi.NETWORK_PROVIDER,
-                        request, mLocationListener, mLocationHandler::post);
+                        request, mLocationListener, mHandler::post);
             }
 
             searchTime = Math.max(
@@ -827,98 +858,69 @@ public class LocationAgent implements LocationInterface {
         return mUpdateInterval;
     }
 
-    private void startTimer(ETimerType eType, int nDuration) {
-        if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
-            if (mTimerIdUpdateInterval != (-1)) {
+    private void startTimer(ETimerType timerType, int duration) {
+        if (timerType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
+            if (mTimerIdUpdateInterval != TimerInterface.INVALID_TID) {
                 ImsLog.w(mSlotId, "LocationUpdate timer already running");
                 return;
             }
-        }
-
-        if (eType == ETimerType.TIMER_SEARCH_DURATION) {
-            if (mTimerIdSearchDuration != (-1)) {
+        } else if (timerType == ETimerType.TIMER_SEARCH_DURATION) {
+            if (mTimerIdSearchDuration != TimerInterface.INVALID_TID) {
                 ImsLog.w(mSlotId, "Search timer already running");
                 return;
             }
-        }
-
-        if (eType == ETimerType.TIMER_ASYNC_START) {
-            if (mTimerIdAsyncStart != (-1)) {
+        } else if (timerType == ETimerType.TIMER_ASYNC_START) {
+            if (mTimerIdAsyncStart != TimerInterface.INVALID_TID) {
                 ImsLog.w(mSlotId, "AsyncStart timer already running");
                 return;
             }
         }
 
-        IAlarmTimer ata = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
 
-        if (ata == null) {
+        if (timer == null) {
             return;
         }
 
-        int timerId = ata.getTimerId();
+        long timerId = timer.startTimer(duration, mTimerListener);
 
-        if (timerId <= 0) {
-            ImsLog.e(mSlotId, "failed to allocate a timer");
+        if (timerId == TimerInterface.INVALID_TID) {
+            ImsLog.e(mSlotId, "Starting a timer failed.");
             return;
         }
 
-        if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
-            ata.registerForTimerExpired(timerId,
-                    mLocationHandler, EVENT_UPDATE_INTERVAL_TIMER_EXPIRED, null);
+        if (timerType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
             mTimerIdUpdateInterval = timerId;
-        } else if (eType == ETimerType.TIMER_SEARCH_DURATION) {
-            ata.registerForTimerExpired(timerId,
-                    mLocationHandler, EVENT_SEARCH_DURATION_EXPIRED, null);
+        } else if (timerType == ETimerType.TIMER_SEARCH_DURATION) {
             mTimerIdSearchDuration = timerId;
-        } else if (eType == ETimerType.TIMER_ASYNC_START) {
-            ata.registerForTimerExpired(timerId, mLocationHandler, EVENT_ASYNC_START, null);
+        } else if (timerType == ETimerType.TIMER_ASYNC_START) {
             mTimerIdAsyncStart = timerId;
         }
 
-        if (!ata.startTimer(timerId, nDuration)) {
-            ata.unregisterForTimerExpired(timerId, mLocationHandler);
-            ImsLog.e(mSlotId, "starting timer failed");
-
-            if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
-                mTimerIdUpdateInterval = (-1);
-            }
-
-            if (eType == ETimerType.TIMER_SEARCH_DURATION) {
-                mTimerIdSearchDuration = (-1);
-            }
-
-            if (eType == ETimerType.TIMER_ASYNC_START) {
-                mTimerIdAsyncStart = (-1);
-            }
-
-            return;
-        }
-
-        ImsLog.i(mSlotId, "timer started :: tid=" + timerId + ", duration=" + nDuration);
+        ImsLog.i(mSlotId, "LocationAgent#startTimer: tid=" + timerId + ", duration=" + duration);
     }
 
-    private void stopTimer(ETimerType eType) {
-        int timerId = (-1);
+    private void stopTimer(ETimerType timerType) {
+        long timerId = TimerInterface.INVALID_TID;
 
-        if (eType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
+        if (timerType == ETimerType.TIMER_LOCATION_UPDATE_INTERVAL) {
             timerId = mTimerIdUpdateInterval;
-            mTimerIdUpdateInterval = (-1);
-        } else if (eType == ETimerType.TIMER_SEARCH_DURATION) {
+            mTimerIdUpdateInterval = TimerInterface.INVALID_TID;
+        } else if (timerType == ETimerType.TIMER_SEARCH_DURATION) {
             timerId = mTimerIdSearchDuration;
-            mTimerIdSearchDuration = (-1);
-        } else if (eType == ETimerType.TIMER_ASYNC_START) {
+            mTimerIdSearchDuration = TimerInterface.INVALID_TID;
+        } else if (timerType == ETimerType.TIMER_ASYNC_START) {
             timerId = mTimerIdAsyncStart;
-            mTimerIdAsyncStart = (-1);
+            mTimerIdAsyncStart = TimerInterface.INVALID_TID;
         }
 
-        if (timerId == (-1)) {
+        if (timerId == TimerInterface.INVALID_TID) {
             return;
         }
 
-        IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
-        if (atm != null) {
-            atm.stopTimer(timerId);
-            atm.unregisterForTimerExpired(timerId, mLocationHandler);
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
+        if (timer != null) {
+            timer.stopTimer(timerId);
         }
     }
 
@@ -1247,54 +1249,6 @@ public class LocationAgent implements LocationInterface {
         sb.append(java.util.Arrays.toString(locationInfo));
 
         return sb.toString();
-    }
-
-    private final class LocationHandler extends Handler {
-        LocationHandler(Looper looper) {
-            super(looper);
-        }
-
-        public void handleMessage(Message msg) {
-            ImsLog.d(mSlotId, "LocationHandler :: what=" + msg.what);
-
-            switch (msg.what) {
-                case EVENT_ASYNC_START: {
-                    stopTimer(ETimerType.TIMER_ASYNC_START);
-
-                    if (mLocationInfoStarted || mInstantLocationInfoRequested) {
-                        if (mInstantLocationInfoRequested) {
-                            mLocationRequestState = EReqState.STATE_IDLE;
-                        }
-
-                        requestLocationUpdates();
-                    }
-                    break;
-                }
-                case EVENT_UPDATE_INTERVAL_TIMER_EXPIRED: {
-                    stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
-
-                    mLocationRequestState = EReqState.STATE_IDLE;
-
-                    if (mLocationInfoStarted) {
-                        requestLocationUpdates();
-                    } else {
-                        ImsLog.d(mSlotId, "Location is not required, so stop location update.");
-                    }
-                    break;
-                }
-                case EVENT_SEARCH_DURATION_EXPIRED: {
-                    removeLocationUpdates();
-
-                    // Only if location is updated after motion detection, request SMD
-                    if (mIsLocationUpdatedAfterMotionDetected) {
-                        requestSmd();
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
     }
 
     private class AddressResolver {
