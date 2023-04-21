@@ -36,6 +36,35 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
     }
 
     /**
+     * Starts a timer with the specified duration for the native service.
+     *
+     * @param tid The timer id to be started.
+     * @param duration The timer duration as milli-seconds.
+     * @return {@code true} if a timer is successfully started, {@code false} otherwise.
+     */
+    @Override
+    public boolean startTimer(long tid, long duration) {
+        TimerAgent ta = (TimerAgent) AgentFactory.getInstance().getAgent(TimerInterface.class);
+        if (ta != null) {
+            return ta.startNativeTimer(tid, duration);
+        }
+        return false;
+    }
+
+    /**
+     * Stops the specified timer for the native service.
+     *
+     * @param tid The timer id to be stopped.
+     */
+    @Override
+    public void stopTimer(long tid) {
+        TimerAgent ta = (TimerAgent) AgentFactory.getInstance().getAgent(TimerInterface.class);
+        if (ta != null) {
+            ta.stopNativeTimer(tid);
+        }
+    }
+
+    /**
      * Returns the Wi-Fi interface.
      *
      * @return A WifiInterface object.

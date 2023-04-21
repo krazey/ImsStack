@@ -35,9 +35,9 @@ import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -58,8 +58,6 @@ public class SscServiceState {
     // internal events
     @VisibleForTesting
     protected static final int EVENT_UT_CAPABILITY_CHANGED = 1000;
-    @VisibleForTesting
-    protected static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
 
     // external events
     @VisibleForTesting
@@ -81,6 +79,7 @@ public class SscServiceState {
     final SscSimStateListener mSimStateListener;
     @VisibleForTesting
     final SscCarrierConfigListener mCarrierConfigListener;
+    final SscTimerListener mTimerListener;
     @VisibleForTesting
     SscWifiListener mWifiListener;
     @VisibleForTesting
@@ -97,7 +96,7 @@ public class SscServiceState {
     boolean mIsCrossSimFeatureEnabled = false;
     @VisibleForTesting
     boolean mUtAvailability = false;
-    private int mUtBlockTimerId = -1;
+    private long mUtBlockTimerId = TimerInterface.INVALID_TID;
     @VisibleForTesting
     int mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
@@ -106,6 +105,7 @@ public class SscServiceState {
         mHandler = new SscServiceStateHandler(looper);
         mSimStateListener = new SscSimStateListener();
         mCarrierConfigListener = new SscCarrierConfigListener();
+        mTimerListener = new SscTimerListener();
     }
 
     protected void init() {
@@ -279,7 +279,7 @@ public class SscServiceState {
         authAgent.setIsCredentialInfoUpdated(false);
         authAgent.setETag("");
 
-        stopUtBlockTimer(true);
+        stopUtBlockTimer();
     }
 
     private boolean getCurrentUtAvailability() {
@@ -435,56 +435,38 @@ public class SscServiceState {
     }
 
     private void startUtBlockTimer(long duration) {
-        IAlarmTimer alarmTimer = getTimerAgent();
-        if (alarmTimer == null) {
-            ImsLog.e(mSlotId, "alarmTimer is null");
+        TimerInterface timer = getTimerInterface();
+        if (timer == null) {
+            ImsLog.e(mSlotId, "TimerInterface is null");
             return;
         }
 
-        if (mUtBlockTimerId != -1) {
-            stopUtBlockTimer(false);
-        }
+        stopUtBlockTimer();
 
-        mUtBlockTimerId = alarmTimer.getTimerId();
-        if (mUtBlockTimerId <= 0) {
-            ImsLog.e(mSlotId, "Retry timer id is invalid");
+        mUtBlockTimerId = timer.startTimer(duration, mTimerListener);
+        if (mUtBlockTimerId == TimerInterface.INVALID_TID) {
+            ImsLog.e(mSlotId, "Starting Ut block timer failed");
             return;
         }
 
-        alarmTimer.registerForTimerExpired(mUtBlockTimerId, mHandler, EVENT_UT_BLOCK_TIMER_EXPIRED,
-                null);
-
-        if (!alarmTimer.startTimer(mUtBlockTimerId, duration)) {
-            stopUtBlockTimer(false);
-            ImsLog.e(mSlotId, "Starting a validity timer failed");
-            return;
-        }
-
-        ImsLog.i(mSlotId, EVENT_UT_BLOCK_TIMER_EXPIRED + " timer is started :: "
+        ImsLog.i(mSlotId, "Ut block timer is started :: "
                 + "tid[" + mUtBlockTimerId + "], duration[" + duration + "]");
     }
 
-    private void stopUtBlockTimer(boolean stopRequired) {
-        if (mUtBlockTimerId <= 0) {
+    private void stopUtBlockTimer() {
+        if (mUtBlockTimerId == TimerInterface.INVALID_TID) {
             return;
         }
 
-        IAlarmTimer alarmTimer = getTimerAgent();
-        if (alarmTimer == null) {
-            ImsLog.e(mSlotId, "alarmTimer is null");
-            return;
+        TimerInterface timer = getTimerInterface();
+        if (timer != null) {
+            timer.stopTimer(mUtBlockTimerId);
         }
-
-        if (stopRequired) {
-            alarmTimer.stopTimer(mUtBlockTimerId);
-        }
-
-        alarmTimer.unregisterForTimerExpired(mUtBlockTimerId, mHandler);
-        mUtBlockTimerId = (-1);
+        mUtBlockTimerId = TimerInterface.INVALID_TID;
     }
 
-    private IAlarmTimer getTimerAgent() {
-        return (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
+    private TimerInterface getTimerInterface() {
+        return AgentFactory.getInstance().getAgent(TimerInterface.class);
     }
 
     private WifiInterface getWifiInterface() {
@@ -695,9 +677,6 @@ public class SscServiceState {
                 case EVENT_UT_CAPABILITY_CHANGED:
                     notifyUtFeatureCapabilityChanged();
                     break;
-                case EVENT_UT_BLOCK_TIMER_EXPIRED:
-                    handleBlockTimerExpired();
-                    break;
                 case EVENT_AIRPLANE_MODE_CHANGED:
                     handleAirplaneModeChanged();
                     break;
@@ -713,16 +692,6 @@ public class SscServiceState {
             }
         }
 
-        private void handleBlockTimerExpired() {
-            int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
-                    | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT
-                    | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT
-                    | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
-                    | SscConstant.BLOCK_REASON_GBA_FAILURE
-                    | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP;
-            resetUtBlockReason(allTempBlockReasons);
-        }
-
         private void handleAirplaneModeChanged() {
             IDcNetWatcher dnw = getDcNetWatcher();
             if (dnw != null) {
@@ -735,6 +704,23 @@ public class SscServiceState {
                     handleUtFeatureCapabilityChanged();
                 }
             }
+        }
+    }
+
+    private final class SscTimerListener implements TimerInterface.Listener {
+        @Override
+        public void onTimerExpired(long tid) {
+            mHandler.post(() -> {
+                if (tid == mUtBlockTimerId) {
+                    int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
+                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT
+                            | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT
+                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
+                            | SscConstant.BLOCK_REASON_GBA_FAILURE
+                            | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP;
+                    resetUtBlockReason(allTempBlockReasons);
+                }
+            });
         }
     }
 

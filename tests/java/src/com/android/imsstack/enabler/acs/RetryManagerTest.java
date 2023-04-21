@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.acs;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.enabler.acs.impl.RetryManager;
 
 import org.junit.After;
@@ -43,12 +44,13 @@ public class RetryManagerTest {
     private static final int MESSAGE_RETRY = 12345;
     private static final int MESSAGE_VALIDITY = 67890;
     private static final int SLOT_ID = 0;
+    private static final long TIMER_ID = 1L;
 
     private static class TestRetryManager extends RetryManager {
         private long mCurrentTimeMillis = 0;
 
-        TestRetryManager(int slotId, Handler handler, IAlarmTimer iAlarmTimer) {
-            super(slotId, handler, iAlarmTimer);
+        TestRetryManager(int slotId, Handler handler, TimerInterface timer) {
+            super(slotId, handler, timer);
         }
 
         public void setCurrentTimeMillis(long time) {
@@ -60,9 +62,8 @@ public class RetryManagerTest {
         }
     }
 
-    @Mock IAlarmTimer mIAlarmTimer;
+    @Mock TimerInterface mTimerInterface;
     @Mock Handler mHandler;
-    private int mTimerId;
 
     private TestRetryManager mRetryManager;
 
@@ -70,12 +71,11 @@ public class RetryManagerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mIAlarmTimer.startTimer(anyLong(), anyLong())).thenReturn(true);
-        doNothing().when(mIAlarmTimer).stopTimer(anyLong());
-        mTimerId = 1;
-        when(mIAlarmTimer.getTimerId()).thenReturn(mTimerId++);
+        when(mTimerInterface.startTimer(anyLong(), any(TimerInterface.Listener.class)))
+                .thenReturn(TIMER_ID);
+        doNothing().when(mTimerInterface).stopTimer(anyLong());
 
-        mRetryManager = new TestRetryManager(SLOT_ID, mHandler, mIAlarmTimer);
+        mRetryManager = new TestRetryManager(SLOT_ID, mHandler, mTimerInterface);
     }
 
     @After
@@ -94,21 +94,22 @@ public class RetryManagerTest {
         long retryTimerId = mRetryManager.getRetryTimerId();
 
         // verify to start new alarm
-        verify(mIAlarmTimer, times(1)).startTimer(eq(retryTimerId), eq(60 * 20L));
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(60 * 20L), any(TimerInterface.Listener.class));
         // verify to start new alarm
-        verify(mIAlarmTimer, never()).stopTimer(eq(retryTimerId));
+        verify(mTimerInterface, never()).stopTimer(eq(retryTimerId));
 
-        clearInvocations(mIAlarmTimer);
+        clearInvocations(mTimerInterface);
 
         mRetryManager.stopRetryTimer();
 
         // verify to stop alarm
-        verify(mIAlarmTimer, times(1)).stopTimer(eq(retryTimerId));
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, times(1)).stopTimer(eq(retryTimerId));
+        clearInvocations(mTimerInterface);
 
         // after timer expired, verify never try to stop alarm
         mRetryManager.stopRetryTimer();
-        verify(mIAlarmTimer, never()).stopTimer(anyLong());
+        verify(mTimerInterface, never()).stopTimer(anyLong());
     }
 
     @Test
@@ -116,15 +117,16 @@ public class RetryManagerTest {
     public void startRetryTimerAgain_withoutCallingExpired() throws Exception {
         assertTrue(mRetryManager.startRetryTimer(MESSAGE_RETRY, null));
         long retryTimerId = mRetryManager.getRetryTimerId();
-        verify(mIAlarmTimer, times(1)).startTimer(eq(retryTimerId), eq(60 * 20L));
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(60 * 20L), any(TimerInterface.Listener.class));
+        clearInvocations(mTimerInterface);
 
         assertTrue(mRetryManager.startRetryTimer(MESSAGE_RETRY, null));
         // verify to stop exist alarm first
-        verify(mIAlarmTimer, times(1)).stopTimer(eq(retryTimerId));
-        retryTimerId = mRetryManager.getRetryTimerId();
+        verify(mTimerInterface, times(1)).stopTimer(eq(retryTimerId));
         // verify to start new alarm
-        verify(mIAlarmTimer, times(1)).startTimer(eq(retryTimerId), eq(60 * 60L));
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(60 * 60L), any(TimerInterface.Listener.class));
     }
 
     @Test
@@ -141,10 +143,11 @@ public class RetryManagerTest {
         long retryTimerId = mRetryManager.getRetryTimerId();
 
         // verify to start new alarm
-        verify(mIAlarmTimer, times(1)).startTimer(eq(retryTimerId), eq(times[0]));
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(times[0]), any(TimerInterface.Listener.class));
         // verify to start new alarm
-        verify(mIAlarmTimer, never()).stopTimer(eq(retryTimerId));
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, never()).stopTimer(eq(retryTimerId));
+        clearInvocations(mTimerInterface);
 
         mRetryManager.expiredRetryTimer();
 
@@ -161,21 +164,19 @@ public class RetryManagerTest {
         mRetryManager.setRetryTimer(times, maxRetry);
 
         boolean retValue;
-        long retryTimerId;
         int index = 0;
         for (int i = 0; i < maxRetry; i++) {
             retValue = mRetryManager.startRetryTimer(MESSAGE_RETRY, null);
             assertTrue(retValue);
-
-            retryTimerId = mRetryManager.getRetryTimerId();
 
             if (i < times.length) {
                 index = i;
             }
 
             // verify to start new alarm
-            verify(mIAlarmTimer, times(1)).startTimer(eq(retryTimerId), eq(times[index]));
-            clearInvocations(mIAlarmTimer);
+            verify(mTimerInterface, times(1))
+                    .startTimer(eq(times[index]), any(TimerInterface.Listener.class));
+            clearInvocations(mTimerInterface);
 
             mRetryManager.expiredRetryTimer();
         }
@@ -199,19 +200,20 @@ public class RetryManagerTest {
         long validityTimerId = mRetryManager.getValidityTimerId();
 
         // verify to start new alarm
-        verify(mIAlarmTimer, times(1)).startTimer(eq(validityTimerId), eq(validityTime));
-        verify(mIAlarmTimer, never()).stopTimer(anyLong());
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(validityTime), any(TimerInterface.Listener.class));
+        verify(mTimerInterface, never()).stopTimer(anyLong());
+        clearInvocations(mTimerInterface);
 
         mRetryManager.stopValidityTimer();
 
         // verify to stop alarm
-        verify(mIAlarmTimer, times(1)).stopTimer(eq(validityTimerId));
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, times(1)).stopTimer(eq(validityTimerId));
+        clearInvocations(mTimerInterface);
 
         // after timer expired, verify never try to stop alarm
         mRetryManager.stopValidityTimer();
-        verify(mIAlarmTimer, never()).stopTimer(anyLong());
+        verify(mTimerInterface, never()).stopTimer(anyLong());
     }
 
     @Test
@@ -225,17 +227,18 @@ public class RetryManagerTest {
         assertTrue(mRetryManager.startValidityTimer(validityTime + currentTimeMillis,
                 MESSAGE_VALIDITY, null));
         long validityTimerId = mRetryManager.getValidityTimerId();
-        verify(mIAlarmTimer, times(1)).startTimer(eq(validityTimerId), eq(validityTime));
-        clearInvocations(mIAlarmTimer);
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(validityTime), any(TimerInterface.Listener.class));
+        clearInvocations(mTimerInterface);
 
         validityTime = 78912345L;
         assertTrue(mRetryManager.startValidityTimer(validityTime + currentTimeMillis,
                 MESSAGE_VALIDITY, null));
 
         // verify to stop exist alarm first
-        verify(mIAlarmTimer, times(1)).stopTimer(eq(validityTimerId));
-        validityTimerId = mRetryManager.getValidityTimerId();
+        verify(mTimerInterface, times(1)).stopTimer(eq(validityTimerId));
         // verify to start new alarm
-        verify(mIAlarmTimer, times(1)).startTimer(eq(validityTimerId), eq(validityTime));
+        verify(mTimerInterface, times(1))
+                .startTimer(eq(validityTime), any(TimerInterface.Listener.class));
     }
 }

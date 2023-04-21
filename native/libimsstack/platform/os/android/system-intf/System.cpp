@@ -66,7 +66,7 @@ SystemListenerHolder::SystemListenerHolder() :
             SystemConstants::CATEGORY_WIFI,
             SystemConstants::CATEGORY_CALL,
             SystemConstants::CATEGORY_POWER,
-            SystemConstants::CATEGORY_ALARM,
+            SystemConstants::CATEGORY_TIMER,
             SystemConstants::CATEGORY_CONFIG,
             SystemConstants::CATEGORY_EVENT,
             SystemConstants::CATEGORY_ISIM,
@@ -208,8 +208,8 @@ PRIVATE GLOBAL const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UIN
             return "CATEGORY_CALL";
         case SystemConstants::CATEGORY_POWER:
             return "CATEGORY_POWER";
-        case SystemConstants::CATEGORY_ALARM:
-            return "CATEGORY_ALARM";
+        case SystemConstants::CATEGORY_TIMER:
+            return "CATEGORY_TIMER";
         case SystemConstants::CATEGORY_CONFIG:
             return "CATEGORY_CONFIG";
         case SystemConstants::CATEGORY_EVENT:
@@ -351,9 +351,9 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     {
         NotifyPowerCategory(nSlotId, nCmd, in);
     }
-    else if ((nCmd & SystemConstants::CATEGORY_ALARM) == SystemConstants::CATEGORY_ALARM)
+    else if ((nCmd & SystemConstants::CATEGORY_TIMER) == SystemConstants::CATEGORY_TIMER)
     {
-        NotifyAlarmCategory(nSlotId, nCmd, in);
+        NotifyTimerCategory(nSlotId, nCmd, in);
     }
     else if ((nCmd & SystemConstants::CATEGORY_CONFIG) == SystemConstants::CATEGORY_CONFIG)
     {
@@ -400,7 +400,7 @@ void System::AddListener(
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CALL, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_TIMER, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
@@ -427,7 +427,7 @@ void System::RemoveListener(
     RemoveListenerIfCategoryMatched(
             nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(
-            nCategory, SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
+            nCategory, SystemConstants::CATEGORY_TIMER, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(
             nCategory, SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(
@@ -1116,7 +1116,7 @@ AString System::GetWifiSsId()
 }
 
 PUBLIC
-IMS_SINT32 System::SetAlarm(IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId)
+IMS_SINT32 System::SetTimer(IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1127,10 +1127,10 @@ IMS_SINT32 System::SetAlarm(IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId)
     android::Parcel out;
 
     in.writeInt32(IMS_SLOT_0);
-    in.writeInt32(SystemConstants::SET_ALARM);
+    in.writeInt32(SystemConstants::SET_TIMER);
 
     in.writeInt32(nDuration);
-    in.writeInt64(nAlarmId);
+    in.writeInt64(nTimerId);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
@@ -1141,7 +1141,7 @@ IMS_SINT32 System::SetAlarm(IN IMS_UINT32 nDuration, IN IMS_UINTP nAlarmId)
 }
 
 PUBLIC
-IMS_SINT32 System::KillAlarm(IN IMS_UINTP nAlarmId)
+IMS_SINT32 System::KillTimer(IN IMS_UINTP nTimerId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1152,9 +1152,9 @@ IMS_SINT32 System::KillAlarm(IN IMS_UINTP nAlarmId)
     android::Parcel out;
 
     in.writeInt32(IMS_SLOT_0);
-    in.writeInt32(SystemConstants::KILL_ALARM);
+    in.writeInt32(SystemConstants::KILL_TIMER);
 
-    in.writeInt64(nAlarmId);
+    in.writeInt64(nTimerId);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
@@ -1935,13 +1935,13 @@ void System::NotifyPowerCategory(
 }
 
 PRIVATE
-void System::NotifyAlarmCategory(
+void System::NotifyTimerCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_ALARM);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_TIMER);
 
     if (pListeners == IMS_NULL)
     {
@@ -1952,14 +1952,14 @@ void System::NotifyAlarmCategory(
     IMS_UINTP nWParam = 0;
     IMS_UINTP nLParam = 0;
 
-    if (nCmd == SystemConstants::NOTIFY_ALARM_EXPIRED)
+    if (nCmd == SystemConstants::NOTIFY_TIMER_EXPIRED)
     {
         nEvent = IMS_SYSTEM_TIMER_EXPIRED;
         nWParam = INT64_TO_UINTP(in.readInt64());
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_ALARM ::  Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_TIMER ::  Cmd (%u) is not handled", nCmd, 0, 0);
         return;
     }
 
