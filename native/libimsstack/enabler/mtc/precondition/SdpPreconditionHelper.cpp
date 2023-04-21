@@ -318,6 +318,9 @@ void SdpPreconditionHelper::FormCurrentAttribute(
 
     objCurrent.AddStatus(SdpPrecondition::STATUS_LOCAL, eDirTag);
 
+    pStatusTable->SetLocalResourceConfirmed(eSdpMediaType,
+            pStatusTable->IsCurrentStatusEnabled(eSdpMediaType, SdpPrecondition::STATUS_LOCAL));
+
     eDirTag = pStatusTable->GetDirectionTag(
             eSdpMediaType, SdpAttribute::CURR, SdpPrecondition::STATUS_REMOTE);
     objCurrent.AddStatus(SdpPrecondition::STATUS_REMOTE, eDirTag);
