@@ -28,7 +28,6 @@ import android.util.SparseArray;
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ConfigLoader;
 import com.android.imsstack.core.NativeCommands;
-import com.android.imsstack.core.agents.PhoneNumberAgent;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
@@ -344,15 +343,12 @@ public class ImsStackApp extends Application {
         if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
             ImsTestHelper.getInstance();
         }
-        PhoneNumberAgent.getInstance().start(slotId);
 
         CommonStarter.getInstance().notifyVoltePackageReady(slotId);
     }
 
     private void stopVoLteService(int slotId) {
         Log.i(TAG, "stopVoLteService(" + slotId + ")");
-
-        PhoneNumberAgent.getInstance().stop(slotId);
 
         if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
             ImsTestHelper.getInstance().cleanup();
