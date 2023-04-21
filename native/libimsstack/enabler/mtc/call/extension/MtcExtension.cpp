@@ -21,13 +21,18 @@
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "utility/IMessageUtils.h"
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcExtension::MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag) :
+MtcExtension::MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag,
+        IN const std::vector<RequestType> lstSupportedRequestType,
+        IN const std::vector<ResponseType> lstSupportedResponseType) :
         m_objContext(objContext),
         m_strOptionTag(strOptionTag),
+        m_lstSupportedRequestType(lstSupportedRequestType),
+        m_lstSupportedResponseType(lstSupportedResponseType),
         m_bRequiredOnRemote(IMS_FALSE),
         m_bSupportedOnRemote(IMS_FALSE)
 {
@@ -37,6 +42,8 @@ PUBLIC
 MtcExtension::MtcExtension(IN const MtcExtension& objRhs) :
         m_objContext(objRhs.m_objContext),
         m_strOptionTag(objRhs.m_strOptionTag),
+        m_lstSupportedRequestType(objRhs.m_lstSupportedRequestType),
+        m_lstSupportedResponseType(objRhs.m_lstSupportedResponseType),
         m_bRequiredOnRemote(objRhs.m_bRequiredOnRemote),
         m_bSupportedOnRemote(objRhs.m_bSupportedOnRemote)
 {
@@ -64,25 +71,52 @@ PUBLIC VIRTUAL const AString& MtcExtension::GetOptionTag() const
     return m_strOptionTag;
 }
 
-PUBLIC VIRTUAL void MtcExtension::FormatRequest(
-        IN RequestType /* eType */, IN_OUT IMessage& /* objRequest */)
+PUBLIC VIRTUAL void MtcExtension::FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest)
 {
+    if (!IsSupportedType(eType))
+    {
+        return;
+    }
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            &objRequest, GetOptionTag(), ISipHeader::SUPPORTED);
 }
 
 PUBLIC VIRTUAL void MtcExtension::FormatResponse(
-        IN ResponseType /* eType */, IN_OUT IMessage& /* objResponse */)
+        IN ResponseType eType, IN_OUT IMessage& objResponse)
 {
+    if (!IsSupportedType(eType))
+    {
+        return;
+    }
+
+    if (!IsAvailableOnRemote())
+    {
+        return;
+    }
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            &objResponse, GetOptionTag(), ISipHeader::SUPPORTED);
 }
 
-PUBLIC VIRTUAL void MtcExtension::HandleRequest(
-        IN RequestType /* eType */, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void MtcExtension::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)
 {
+    if (!IsSupportedType(eType))
+    {
+        return;
+    }
+
     UpdateFromRequireAndSupportedHeader(objRequest);
 }
 
 PUBLIC VIRTUAL void MtcExtension::HandleResponse(
-        IN ResponseType /* eType */, IN const IMessage& objResponse)
+        IN ResponseType eType, IN const IMessage& objResponse)
 {
+    if (!IsSupportedType(eType))
+    {
+        return;
+    }
+
     UpdateFromRequireAndSupportedHeader(objResponse);
 }
 

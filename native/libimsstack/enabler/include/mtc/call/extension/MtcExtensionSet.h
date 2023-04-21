@@ -43,7 +43,7 @@ public:
 
     explicit MtcExtensionSet(
             IN IMtcCallContext& objContext, IN const ImsList<IMtcExtension*>& lstExtensions);
-    explicit MtcExtensionSet(IN const MtcExtensionSet& objRhs);
+    MtcExtensionSet(IN const MtcExtensionSet& objRhs);
     virtual ~MtcExtensionSet();
     MtcExtensionSet& operator=(IN const MtcExtensionSet& objRhs);
 
@@ -74,7 +74,8 @@ public:
     /**
      * Checks if the all required extensions in the message are available on the local.
      *
-     * @param pMessage Message containing required extensions.
+     * @param objMessage Message containing required extensions.
+     * @param strNotSupportedExtension Option tag of the extension that's not supported.
      * @return True if all extensions are available.
      */
     IMS_BOOL IsSupportRequiredExtensions(
@@ -88,7 +89,6 @@ public:
 private:
     void CopyFrom(IN const MtcExtensionSet& objRhs);
     void Clear();
-    IMtcExtension* CreateExtension(IN const AString& strOptionTag) const;
 
     IMtcCallContext& m_objContext;
     ImsMap<AString, IMtcExtension*> m_objExtensions;

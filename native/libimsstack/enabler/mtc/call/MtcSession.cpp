@@ -26,11 +26,8 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
-#include "call/extension/EarlyDialogTerminatedExtension.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/PreconditionExtension.h"
-#include "call/extension/RprExtension.h"
-#include "call/extension/SessionTimerExtension.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -337,13 +334,20 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 {
     ImsList<IMtcExtension*> lstExtensions;
 
-    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_FROM_CHANGE));
-    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_HISTORY_INFO));
-    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES));
-    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
-    lstExtensions.Append(new EarlyDialogTerminatedExtension(m_objContext));
-    lstExtensions.Append(new RprExtension(m_objContext));
-    lstExtensions.Append(new SessionTimerExtension(m_objContext));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_FROM_CHANGE,
+            {RequestType::START}, {ResponseType::PROVISIONAL_RESPONSE, ResponseType::ACCEPT}));
+    lstExtensions.Append(new MtcExtension(
+            m_objContext, MtcExtensionSet::OPTION_TAG_HISTORY_INFO, {RequestType::START}, {}));
+    lstExtensions.Append(
+            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES, {}, {}));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG,
+            {RequestType::START}, {ResponseType::ACCEPT}));
+    lstExtensions.Append(new MtcExtension(m_objContext,
+            MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED, {RequestType::START}, {}));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_RPR,
+            {RequestType::START, RequestType::UPDATE}, {ResponseType::PROVISIONAL_RESPONSE}));
+    lstExtensions.Append(
+            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_SESSION_TIMER, {}, {}));
 
     // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&

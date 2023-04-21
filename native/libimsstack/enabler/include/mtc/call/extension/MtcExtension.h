@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "call/extension/IMtcExtension.h"
+#include <vector>
 
 class IMessage;
 class IMtcCallContext;
@@ -30,8 +31,10 @@ class IMtcCallContext;
 class MtcExtension : public IMtcExtension
 {
 public:
-    explicit MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag);
-    explicit MtcExtension(IN const MtcExtension& objRhs);
+    MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag,
+            IN const std::vector<RequestType> lstSupportedRequestType,
+            IN const std::vector<ResponseType> lstSupportedResponseType);
+    MtcExtension(IN const MtcExtension& objRhs);
     virtual ~MtcExtension();
     MtcExtension& operator=(IN const MtcExtension&) = delete;
 
@@ -49,11 +52,26 @@ protected:
     IMtcCallContext& m_objContext;
 
 private:
-    void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);
+    const AString m_strOptionTag;
+    const std::vector<RequestType> m_lstSupportedRequestType;
+    const std::vector<ResponseType> m_lstSupportedResponseType;
 
-    AString m_strOptionTag;
     IMS_BOOL m_bRequiredOnRemote;
     IMS_BOOL m_bSupportedOnRemote;
+
+    void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);
+
+    inline IMS_BOOL IsSupportedType(IN RequestType eType) const
+    {
+        return std::find(m_lstSupportedRequestType.begin(), m_lstSupportedRequestType.end(),
+                       eType) != m_lstSupportedRequestType.end();
+    }
+
+    inline IMS_BOOL IsSupportedType(IN ResponseType eType) const
+    {
+        return std::find(m_lstSupportedResponseType.begin(), m_lstSupportedResponseType.end(),
+                       eType) != m_lstSupportedResponseType.end();
+    }
 };
 
 #endif
