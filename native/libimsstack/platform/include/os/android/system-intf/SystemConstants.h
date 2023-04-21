@@ -69,7 +69,7 @@ public:
     static const IMS_UINT32 CATEGORY_WIFI = 0x00020000;
     static const IMS_UINT32 CATEGORY_CALL = 0x00040000;
     static const IMS_UINT32 CATEGORY_POWER = 0x00080000;
-    static const IMS_UINT32 CATEGORY_ALARM = 0x00100000;
+    static const IMS_UINT32 CATEGORY_TIMER = 0x00100000;
     static const IMS_UINT32 CATEGORY_CONFIG = 0x00200000;
     static const IMS_UINT32 CATEGORY_EVENT = 0x00400000;
     static const IMS_UINT32 CATEGORY_ISIM = 0x00800000;
@@ -79,7 +79,7 @@ public:
     // Methods for the system information's notification (Java to Native)
     ////
     static const IMS_UINT32 NOTIFY_AIRPLANE_MODE_CHANGED = CATEGORY_NETWORK + 1;
-    static const IMS_UINT32 NOTIFY_ALARM_EXPIRED = CATEGORY_ALARM + 2;
+    static const IMS_UINT32 NOTIFY_TIMER_EXPIRED = CATEGORY_TIMER + 2;
     static const IMS_UINT32 NOTIFY_BATTERY_LEVEL_CHANGED = CATEGORY_POWER + 3;
     static const IMS_UINT32 NOTIFY_DATA_CONNECTION_FAILED = CATEGORY_NETWORK + 4;
     static const IMS_UINT32 NOTIFY_DATA_CONNECTION_STATE_CHANGED = CATEGORY_NETWORK + 5;
@@ -181,10 +181,10 @@ public:
     static const IMS_UINT32 GET_WIFI_SSID = CATEGORY_BASE + 504;
 
     ////
-    // Alarm timer control
+    // Timer APIs
     ////
-    static const IMS_UINT32 SET_ALARM = CATEGORY_BASE + 601;
-    static const IMS_UINT32 KILL_ALARM = CATEGORY_BASE + 602;
+    static const IMS_UINT32 SET_TIMER = CATEGORY_BASE + 601;
+    static const IMS_UINT32 KILL_TIMER = CATEGORY_BASE + 602;
 
     ////
     // Configuration-related information

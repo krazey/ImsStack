@@ -17,10 +17,11 @@
 package com.android.imsstack.enabler.acs.impl;
 
 import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -29,25 +30,55 @@ import com.android.internal.annotations.VisibleForTesting;
  * timer. If the request failure is repeated the timer value increased exponentially.
  */
 public class RetryManager {
-    private final IAlarmTimer mIAlarmTimer;
+    private static final class TimerObject {
+        public long timerId = TimerInterface.INVALID_TID;
+        public int message = 0;
+        public Object userObj = null;
+
+        TimerObject() {
+        }
+
+        void clear() {
+            timerId = TimerInterface.INVALID_TID;
+            message = 0;
+            userObj = null;
+        }
+    }
+
+    private final TimerInterface mTimer;
     private final int mSlotId;
 
     // default retry time value and count
     private long[] mRetryTimes = {60 * 20L, 60 * 60L, 60 * 60 * 2L, 60 * 60 * 4L, 60 * 60 * 8L};
     private int mMaxRetry = 5;
     private int mRetryCount = 0;
-    private int mRetryTimerId = 0;
-
+    private final TimerObject mRetryTimer = new TimerObject();
     // Provisioning validity timer
-    private int mValidityTimerId = 0;
-
+    private final TimerObject mValidityTimer = new TimerObject();
     private Handler mHandler;
 
+    private final TimerInterface.Listener mTimerListener = new TimerInterface.Listener() {
+        @Override
+        public void onTimerExpired(long tid) {
+            if (mHandler != null) {
+                mHandler.post(() -> {
+                    if (tid == mRetryTimer.timerId) {
+                        Message.obtain(mHandler,
+                                mRetryTimer.message, mRetryTimer.userObj).sendToTarget();
+                    } else if (tid == mValidityTimer.timerId) {
+                        Message.obtain(mHandler,
+                                mValidityTimer.message, mValidityTimer.userObj).sendToTarget();
+                    }
+                });
+            }
+        }
+    };
+
     @VisibleForTesting
-    public RetryManager(int slotId, Handler handler, IAlarmTimer iAlarmTimer) {
+    public RetryManager(int slotId, Handler handler, TimerInterface timer) {
         mSlotId = slotId;
         mHandler = handler;
-        mIAlarmTimer = iAlarmTimer;
+        mTimer = timer;
     }
 
     /**
@@ -56,8 +87,7 @@ public class RetryManager {
      * @param handler Handler object
      */
     public RetryManager(int slotId, Handler handler) {
-        this(slotId, handler,
-                (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, slotId));
+        this(slotId, handler, AgentFactory.getInstance().getAgent(TimerInterface.class));
     }
 
     /**
@@ -93,8 +123,8 @@ public class RetryManager {
      * false will be return
      */
     public boolean startRetryTimer(int message, Object obj) {
-        if (mRetryTimerId != 0) {
-            mIAlarmTimer.stopTimer(mRetryTimerId);
+        if (mRetryTimer.timerId != TimerInterface.INVALID_TID) {
+            mTimer.stopTimer(mRetryTimer.timerId);
         }
 
         long duration = mRetryTimes[mRetryTimes.length - 1];
@@ -109,32 +139,31 @@ public class RetryManager {
         }
 
         mRetryCount++;
+        mRetryTimer.timerId = mTimer.startTimer(duration, mTimerListener);
 
-        mRetryTimerId = mIAlarmTimer.getTimerId();
-        mIAlarmTimer.registerForTimerExpired(mRetryTimerId, mHandler, message, obj);
-        boolean retValue = mIAlarmTimer.startTimer(mRetryTimerId, duration);
-
-        ImsLog.d(mSlotId, "retry count : " + mRetryCount + " tid : " + mRetryTimerId
-                + " duration : " + duration + " return : " + retValue);
-        if (!retValue) {
-            mIAlarmTimer.unregisterForTimerExpired(mRetryTimerId, mHandler);
-            mRetryTimerId = 0;
+        ImsLog.d(mSlotId, "retry count : " + mRetryCount + " tid : " + mRetryTimer.timerId
+                + " duration : " + duration);
+        if (mRetryTimer.timerId == TimerInterface.INVALID_TID) {
+            mRetryTimer.clear();
             mRetryCount = 0;
+            return false;
         }
 
-        return retValue;
+        mRetryTimer.message = message;
+        mRetryTimer.userObj = obj;
+        return true;
     }
 
     /**
      * stop retry timer.
      */
     public void stopRetryTimer() {
-        if (mRetryTimerId == 0) {
+        if (mRetryTimer.timerId == TimerInterface.INVALID_TID) {
             return;
         }
 
-        mIAlarmTimer.stopTimer(mRetryTimerId);
-        mRetryTimerId = 0;
+        mTimer.stopTimer(mRetryTimer.timerId);
+        mRetryTimer.clear();
         mRetryCount = 0;
     }
 
@@ -142,7 +171,7 @@ public class RetryManager {
      * notified retry timer expired
      */
     public void expiredRetryTimer() {
-        mRetryTimerId = 0;
+        mRetryTimer.clear();
     }
 
     /**
@@ -153,44 +182,42 @@ public class RetryManager {
      * @return true will be return if the operation is success, but reach the max retry count
      */
     public boolean startValidityTimer(long time, int message, Object obj) {
-        if (mValidityTimerId != 0) {
-            mIAlarmTimer.stopTimer(mValidityTimerId);
+        if (mValidityTimer.timerId != TimerInterface.INVALID_TID) {
+            mTimer.stopTimer(mValidityTimer.timerId);
         }
 
         long duration = time - getCurrentTimeMillis();
+        mValidityTimer.timerId = mTimer.startTimer(duration, mTimerListener);
 
-        mValidityTimerId = mIAlarmTimer.getTimerId();
-        mIAlarmTimer.registerForTimerExpired(mRetryTimerId, mHandler, message, obj);
-        boolean retValue = mIAlarmTimer.startTimer(mValidityTimerId, duration);
+        ImsLog.d(mSlotId, " tid : " + mValidityTimer.timerId + " duration : " + duration);
 
-        ImsLog.d(mSlotId, " tid : " + mValidityTimerId
-                + " duration : " + duration + " return : " + retValue);
-
-        if (!retValue) {
-            mIAlarmTimer.unregisterForTimerExpired(mValidityTimerId, mHandler);
-            mValidityTimerId = 0;
+        if (mValidityTimer.timerId == TimerInterface.INVALID_TID) {
+            mValidityTimer.clear();
+            return false;
         }
 
-        return retValue;
+        mValidityTimer.message = message;
+        mValidityTimer.userObj = obj;
+        return true;
     }
 
     /**
      * stop validity timer.
      */
     public void stopValidityTimer() {
-        if (mValidityTimerId == 0) {
+        if (mValidityTimer.timerId == TimerInterface.INVALID_TID) {
             return;
         }
 
-        mIAlarmTimer.stopTimer(mValidityTimerId);
-        mValidityTimerId = 0;
+        mTimer.stopTimer(mValidityTimer.timerId);
+        mValidityTimer.clear();
     }
 
     /**
      * notified validity timer expired
      */
     public void expiredValidaityTimer() {
-        mValidityTimerId = 0;
+        mValidityTimer.clear();
     }
 
     /**
@@ -198,7 +225,7 @@ public class RetryManager {
      */
     @VisibleForTesting
     public long getRetryTimerId() {
-        return mRetryTimerId;
+        return mRetryTimer.timerId;
     }
 
     /**
@@ -206,7 +233,7 @@ public class RetryManager {
      */
     @VisibleForTesting
     public long getValidityTimerId() {
-        return mValidityTimerId;
+        return mValidityTimer.timerId;
     }
 
     protected long getCurrentTimeMillis() {

@@ -24,9 +24,9 @@ import android.os.Message;
 import android.os.SystemClock;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.LocationApi;
 import com.android.imsstack.core.agents.LocationInterface;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
@@ -48,7 +48,7 @@ public class ImsLocationHelper {
     private LocationApi mLocationApi = LocationApi.getInstance();
     private Listener mListener;
     private LocationHandler mHandler;
-    private int mWaitingTimer = 0;
+    private long mWaitingTimer = TimerInterface.INVALID_TID;
     private boolean mPositionInfoRequired = false;
     private long mValidityPeriod = 0;
     private boolean mLocationUpdateStarted = false;
@@ -56,6 +56,13 @@ public class ImsLocationHelper {
     private LocationListenerProxy[] mLocationListeners = new LocationListenerProxy[] {
             new LocationListenerProxy(LocationApi.GPS_PROVIDER),
             new LocationListenerProxy(LocationApi.NETWORK_PROVIDER)
+    };
+
+    private final TimerInterface.Listener mTimerListener = new TimerInterface.Listener() {
+        @Override
+        public void onTimerExpired(long tid) {
+            Message.obtain(mHandler, EVENT_LOCATION_UPDATES_WAITING_TIMER_EXPIRED).sendToTarget();
+        }
     };
 
     public ImsLocationHelper(ICallContext callContext, Listener listener, Looper looper) {
@@ -70,6 +77,7 @@ public class ImsLocationHelper {
 
     public void dispose() {
         stopLocationUpdates();
+        mHandler.removeCallbacksAndMessages(null);
         mListener = null;
         mLocationUpdateStarted = false;
     }
@@ -189,46 +197,36 @@ public class ImsLocationHelper {
     }
 
     private boolean startWaitingTimer(long interval) {
-        IAlarmTimer alarmTimer = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
 
-        if (alarmTimer == null) {
+        if (timer == null) {
             return false;
         }
 
-        int timerId = alarmTimer.getTimerId();
+        mWaitingTimer = timer.startTimer(interval, mTimerListener);
 
-        if (timerId <= 0) {
-            return false;
-        }
-
-        if (!alarmTimer.startTimer(timerId, interval)) {
+        if (mWaitingTimer == TimerInterface.INVALID_TID) {
             log("WaitingTimer :: start failed");
             return false;
         }
 
         log("WaitingTimer :: started");
-
-        mWaitingTimer = timerId;
-        alarmTimer.registerForTimerExpired(timerId, mHandler,
-                EVENT_LOCATION_UPDATES_WAITING_TIMER_EXPIRED, null);
-
         return true;
     }
 
     private void stopWaitingTimer() {
-        if (mWaitingTimer == 0) {
+        if (mWaitingTimer == TimerInterface.INVALID_TID) {
             return;
         }
 
-        IAlarmTimer alarmTimer = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
 
-        if (alarmTimer != null) {
+        if (timer != null) {
             log("WaitingTimer :: stopped");
-            alarmTimer.stopTimer(mWaitingTimer);
-            alarmTimer.unregisterForTimerExpired(mWaitingTimer, mHandler);
+            timer.stopTimer(mWaitingTimer);
         }
 
-        mWaitingTimer = 0;
+        mWaitingTimer = TimerInterface.INVALID_TID;
     }
 
     private boolean checkValidity(Location l) {

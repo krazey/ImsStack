@@ -33,11 +33,11 @@ public abstract class SystemNotifier {
     public abstract void notifyAirplaneModeChanged(final int airplaneMode);
 
     /**
-     * Notifies the expiration of the alarm timer.
+     * Notifies the expiration of the timer.
      *
-     * @param id the timer id which is provisioned to start an alarm timer
+     * @param tid The timer id that was specified to start a timer.
      */
-    public abstract void notifyAlarmExpired(final long id);
+    public abstract void notifyTimerExpired(long tid);
 
     /**
      * Notifies the changes of the battery level.

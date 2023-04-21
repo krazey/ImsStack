@@ -16,9 +16,13 @@
 package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -30,12 +34,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
     @Mock SystemInterface mSystemInterface;
+    @Mock WifiInterface mWifiInterface;
+    @Mock TimerAgent mTimerAgent;
 
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
@@ -44,6 +49,8 @@ public class DefaultSystemCallAgentTest {
         MockitoAnnotations.initMocks(this);
 
         SystemInterface.setSystemInterface(mSystemInterface);
+        AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
+        AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
 
         mDefaultSystemCallAgent = new DefaultSystemCallAgent();
     }
@@ -54,7 +61,13 @@ public class DefaultSystemCallAgentTest {
             mDefaultSystemCallAgent.destroy();
             mDefaultSystemCallAgent = null;
         }
+
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
+        AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         SystemInterface.setSystemInterface(null);
+
+        mTimerAgent = null;
+        mWifiInterface = null;
         mSystemInterface = null;
     }
 
@@ -71,12 +84,42 @@ public class DefaultSystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testStartTimer() {
+        long tid = 1L;
+        long duration = 1000L;
+        when(mTimerAgent.startNativeTimer(eq(tid), eq(duration))).thenReturn(true);
+        boolean result = mDefaultSystemCallAgent.startTimer(tid, duration);
+
+        assertTrue(result);
+        verify(mTimerAgent).startNativeTimer(eq(tid), eq(duration));
+
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
+        result = mDefaultSystemCallAgent.startTimer(tid, duration);
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mTimerAgent);
+    }
+
+    @Test
+    @SmallTest
+    public void testStopTimer() {
+        long tid = 1L;
+        mDefaultSystemCallAgent.stopTimer(tid);
+
+        verify(mTimerAgent).stopNativeTimer(eq(tid));
+
+        AgentFactory.getInstance().setAgent(TimerInterface.class, null);
+        mDefaultSystemCallAgent.stopTimer(tid);
+
+        verifyNoMoreInteractions(mTimerAgent);
+    }
+
+    @Test
+    @SmallTest
     public void testGetWifiInterface() {
-        WifiInterface wifiInterface = Mockito.mock(WifiInterface.class);
-        AgentFactory.getInstance().setAgent(WifiInterface.class, wifiInterface);
         WifiInterface wifi = mDefaultSystemCallAgent.getWifiInterface();
 
-        assertEquals(wifiInterface, wifi);
+        assertEquals(mWifiInterface, wifi);
 
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         wifi = mDefaultSystemCallAgent.getWifiInterface();

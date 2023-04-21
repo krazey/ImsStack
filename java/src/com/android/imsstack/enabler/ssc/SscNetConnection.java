@@ -24,7 +24,7 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -62,7 +62,21 @@ public class SscNetConnection implements ISscNetConnection {
     private final ApnStateListener mApnStateListener = new ApnStateListenerImpl();
 
     @VisibleForTesting
-    protected LinkedHashMap<Integer, Integer> mTimerIdTable = new LinkedHashMap<Integer, Integer>();
+    protected LinkedHashMap<Integer, Long> mTimerIdTable = new LinkedHashMap<Integer, Long>();
+    private final TimerInterface.Listener mTimerListener = new TimerInterface.Listener() {
+        @Override
+        public void onTimerExpired(long tid) {
+            if (mSscNetConnectionHandler != null) {
+                mSscNetConnectionHandler.post(() -> {
+                    mTimerIdTable.forEach((event, timerId) -> {
+                        if (tid == timerId) {
+                            mSscNetConnectionHandler.sendEmptyMessage(event);
+                        }
+                    });
+                });
+            }
+        }
+    };
 
     protected SscNetConnection(int slotId) {
         mSlotId = slotId;
@@ -227,22 +241,23 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @VisibleForTesting
-    protected IAlarmTimer getAlarmTimer() {
-        return (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
+    protected TimerInterface getTimerInterface() {
+        return AgentFactory.getInstance().getAgent(TimerInterface.class);
     }
 
     private void startTimer(int eventNum, long duration) {
         ImsLog.d("EventNumber : " + eventNum + ", Time : " + duration);
 
-        IAlarmTimer alarmTimer = getAlarmTimer();
-        if (alarmTimer == null) {
-            ImsLog.e("alarmTimer is null");
+        TimerInterface timer = getTimerInterface();
+        if (timer == null) {
+            ImsLog.e("TimerInterface is null");
             return;
         }
 
-        int timerId = alarmTimer.getTimerId();
-        if (timerId <= 0) {
-            ImsLog.e("Retry timer id is invalid");
+        long timerId = timer.startTimer(duration, mTimerListener);
+
+        if (timerId == TimerInterface.INVALID_TID) {
+            ImsLog.e("Starting a timer failed");
             return;
         }
 
@@ -250,14 +265,6 @@ public class SscNetConnection implements ISscNetConnection {
             ImsLog.d("Restart Timer with Event " + eventNum);
             stopTimer(eventNum);
             mTimerIdTable.remove(eventNum);
-        }
-
-        alarmTimer.registerForTimerExpired(timerId, mSscNetConnectionHandler, eventNum, null);
-
-        if (!alarmTimer.startTimer(timerId, duration)) {
-            alarmTimer.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
-            ImsLog.e("Starting a timer failed");
-            return;
         }
 
         mTimerIdTable.put(eventNum, timerId);
@@ -268,19 +275,15 @@ public class SscNetConnection implements ISscNetConnection {
     private void stopTimer(int eventNum) {
         ImsLog.d("EventNumber : " + eventNum);
 
-        Integer timerId = mTimerIdTable.get(eventNum);
+        Long timerId = mTimerIdTable.get(eventNum);
         if (timerId == null) {
             return;
         }
 
-        IAlarmTimer alarmTimer = getAlarmTimer();
-        if (alarmTimer == null) {
-            ImsLog.e(" alarmTimer is null");
-            return;
+        TimerInterface timer = getTimerInterface();
+        if (timer != null) {
+            timer.stopTimer(timerId);
         }
-
-        alarmTimer.stopTimer(timerId);
-        alarmTimer.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
         mTimerIdTable.remove(eventNum);
     }
 

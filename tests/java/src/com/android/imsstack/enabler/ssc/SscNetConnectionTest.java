@@ -31,7 +31,7 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -59,12 +59,12 @@ public class SscNetConnectionTest {
     private static final int SLOT_0 = 0;
     private static final EApnType APN_TYPE = EApnType.XCAP;
     private static final int INACTIVITY_TIME_SEC = 100;
-    private static final int TIMER_ID = 1;
+    private static final long TIMER_ID = 1L;
 
     private SscNetConnection mSscNetConnection = null;
     private Handler mSscNetConnectionHandler = null;
 
-    @Mock private IAlarmTimer mMockAlarmTimer;
+    @Mock private TimerInterface mMockTimerInterface;
     @Mock private IApn mMockApn;
     @Mock private IDcApn mMockDcApn;
     @Mock private IDcNetWatcher mMockDcNetWatcher;
@@ -208,17 +208,17 @@ public class SscNetConnectionTest {
         when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
         when(mMockDcApn.connect(eq(APN_TYPE.getType()))).thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
-        when(mMockAlarmTimer.startTimer(TIMER_ID, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER))
-                .thenReturn(true);
+        when(mMockTimerInterface.startTimer(
+                eq(SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER),
+                any(TimerInterface.Listener.class))).thenReturn(TIMER_ID);
 
         boolean result = mSscNetConnection.connect();
 
-        verify(mMockAlarmTimer).registerForTimerExpired(TIMER_ID, mSscNetConnectionHandler,
-                SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, null);
-        verify(mMockAlarmTimer).startTimer(TIMER_ID, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER);
+        verify(mMockTimerInterface).startTimer(
+                eq(SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER),
+                any(TimerInterface.Listener.class));
 
-        assertEquals(Integer.valueOf(TIMER_ID),
+        assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
         assertEquals(true, result);
     }
@@ -243,8 +243,8 @@ public class SscNetConnectionTest {
 
     @Test
     public void disconnect_requestDisconnection() {
-        int timerIdForRequestTimeout = 2;
-        int timerIdForConnectionExpired = 3;
+        long timerIdForRequestTimeout = 2L;
+        long timerIdForConnectionExpired = 3L;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
@@ -252,12 +252,8 @@ public class SscNetConnectionTest {
 
         mSscNetConnection.disconnect();
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
-        verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForRequestTimeout,
-                mSscNetConnectionHandler);
-        verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
-        verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForConnectionExpired,
-                mSscNetConnectionHandler);
+        verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
+        verify(mMockTimerInterface).stopTimer(timerIdForConnectionExpired);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
@@ -288,18 +284,20 @@ public class SscNetConnectionTest {
 
     @Test
     public void refreshConnectionTimer_stopPreviousTimer() {
-        int timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
+        long timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
-        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
-        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
+        when(mMockTimerInterface.startTimer(
+                eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class)))
+                .thenReturn(TIMER_ID);
 
         mSscNetConnection.refreshConnectionTimer();
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
-        verify(mMockAlarmTimer).startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000);
-        assertEquals(Integer.valueOf(TIMER_ID),
+        verify(mMockTimerInterface).stopTimer(timerIdForConnectionExpired);
+        verify(mMockTimerInterface).startTimer(
+                eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class));
+        assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
     }
 
@@ -319,21 +317,23 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionConnected() {
-        int timerIdForRequestTimeout = TIMER_ID + 1;
+        long timerIdForRequestTimeout = TIMER_ID + 1;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
-        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
+        when(mMockTimerInterface.startTimer(
+                eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class)))
+                .thenReturn(TIMER_ID);
 
         IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
                 EDataState.DATA_STATE_CONNECTED, -1);
         AsyncResult ar = new AsyncResult(null, notiObj, null);
         triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
-        verify(mMockAlarmTimer).startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000);
-        assertEquals(Integer.valueOf(TIMER_ID),
+        verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
+        verify(mMockTimerInterface).startTimer(
+                eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class));
+        assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
         verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
         Message msg = mMessageCaptor.getValue();
@@ -343,21 +343,22 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionDisconnected() {
-        int timerIdForRequestTimeout = TIMER_ID + 1;
+        long timerIdForRequestTimeout = TIMER_ID + 1;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
-        when(mMockAlarmTimer.startTimer(TIMER_ID, SscNetConnection.DISCONNECTION_DELAY))
-                .thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
+        when(mMockTimerInterface.startTimer(
+                eq(SscNetConnection.DISCONNECTION_DELAY), any(TimerInterface.Listener.class)))
+                .thenReturn(TIMER_ID);
 
         IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
                 EDataState.DATA_STATE_DISCONNECTED, -1);
         AsyncResult ar = new AsyncResult(null, notiObj, null);
         triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
 
-        verify(mMockAlarmTimer).startTimer(TIMER_ID, SscNetConnection.DISCONNECTION_DELAY);
-        assertEquals(Integer.valueOf(TIMER_ID),
+        verify(mMockTimerInterface).startTimer(
+                eq(SscNetConnection.DISCONNECTION_DELAY), any(TimerInterface.Listener.class));
+        assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
         verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
         Message msg = mMessageCaptor.getValue();
@@ -368,7 +369,7 @@ public class SscNetConnectionTest {
     @Test
     public void handleMessage_connectionFailed() {
         int smCause = 33;
-        int timerIdForRequestTimeout = 2;
+        long timerIdForRequestTimeout = 2L;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
         SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mMockSscServiceState);
@@ -384,9 +385,7 @@ public class SscNetConnectionTest {
         assertNotNull(msg);
         assertEquals(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, msg.what);
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
-        verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForRequestTimeout,
-                mSscNetConnectionHandler);
+        verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
@@ -394,7 +393,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionRequestTimeout() {
-        int timerIdForRequestTimeout = 2;
+        long timerIdForRequestTimeout = 2L;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
@@ -405,9 +404,7 @@ public class SscNetConnectionTest {
         assertNotNull(msg);
         assertEquals(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, msg.what);
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
-        verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForRequestTimeout,
-                mSscNetConnectionHandler);
+        verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
@@ -415,15 +412,13 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionTimerExpired() {
-        int timerIdForConnectionExpired = 3;
+        long timerIdForConnectionExpired = 3L;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
         triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED, null);
 
-        verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
-        verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForConnectionExpired,
-                mSscNetConnectionHandler);
+        verify(mMockTimerInterface).stopTimer(timerIdForConnectionExpired);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
@@ -431,12 +426,13 @@ public class SscNetConnectionTest {
 
     @Test
     public void startTimer_invalidTimerId() {
-        int timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
+        long timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
-        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
-        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
+        when(mMockTimerInterface.startTimer(
+                eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class)))
+                .thenReturn(TIMER_ID);
 
         mSscNetConnection.refreshConnectionTimer();
     }
@@ -452,8 +448,8 @@ public class SscNetConnectionTest {
         }
 
         @Override
-        protected IAlarmTimer getAlarmTimer() {
-            return mMockAlarmTimer;
+        protected TimerInterface getTimerInterface() {
+            return mMockTimerInterface;
         }
     }
 }
