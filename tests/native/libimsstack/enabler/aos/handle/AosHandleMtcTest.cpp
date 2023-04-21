@@ -401,9 +401,9 @@ protected:
 
     void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandleMtc->m_nRoamingState = nState; }
 
-    void SetCombinedAttach(IN IMS_BOOL bIsCombinedAttach)
+    void SetCsVoiceAvailable(IN IMS_BOOL bIsCsVoiceAvailable)
     {
-        m_pAosHandleMtc->m_bCombinedAttach = bIsCombinedAttach;
+        m_pAosHandleMtc->m_bCsVoiceAvailable = bIsCsVoiceAvailable;
     }
 
     void SetSsacBarred(IN IMS_BOOL bIsSsacBarred)
@@ -557,7 +557,7 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test4)
     SetSsacBarred(IMS_FALSE);
     SetSsacHeld(IMS_TRUE);
     SetRoamingState(IMS_ROAMING_STATE_ON);
-    SetCombinedAttach(IMS_TRUE);
+    SetCsVoiceAvailable(IMS_TRUE);
 
     m_pAosHandleMtc->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
 
@@ -3076,8 +3076,8 @@ TEST_F(AosHandleMtcTest, IsPlmnBlockCondition_Test1)
 
 TEST_F(AosHandleMtcTest, IsPlmnBlockCondition_Test2)
 {
-    // Test2: IsPlmnBlockWithTimeoutOnVoiceCallUnavailable is true, network type is valid
-    // Expectation: return false if roaming && combined attach. else return true.
+    // Test2: IsPlmnBlockWithTimeoutOnVoiceCallUnavailable is true, network type is LTE
+    // Expectation: return false if cs voice is available else return true.
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
             .Times(AnyNumber())
@@ -3085,15 +3085,29 @@ TEST_F(AosHandleMtcTest, IsPlmnBlockCondition_Test2)
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    SetRoamingState(IMS_ROAMING_STATE_OFF);
-    SetCombinedAttach(IMS_FALSE);
+    SetCsVoiceAvailable(IMS_FALSE);
     EXPECT_TRUE(IsPlmnBlockCondition());
 
-    SetRoamingState(IMS_ROAMING_STATE_ON);
-    EXPECT_TRUE(IsPlmnBlockCondition());
-
-    SetCombinedAttach(IMS_TRUE);
+    SetCsVoiceAvailable(IMS_TRUE);
     EXPECT_FALSE(IsPlmnBlockCondition());
+}
+
+TEST_F(AosHandleMtcTest, IsPlmnBlockCondition_Nr)
+{
+    // Test2: IsPlmnBlockWithTimeoutOnVoiceCallUnavailable is true, network type is NR
+    // Expectation: return true regardless of cs voice availability
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    SetNetworkType(NW_REPORT_RADIO_NR);
+
+    SetCsVoiceAvailable(IMS_FALSE);
+    EXPECT_TRUE(IsPlmnBlockCondition());
+
+    SetCsVoiceAvailable(IMS_TRUE);
+    EXPECT_TRUE(IsPlmnBlockCondition());
 }
 
 TEST_F(AosHandleMtcTest, ProcessHoldingVopsState_Test)

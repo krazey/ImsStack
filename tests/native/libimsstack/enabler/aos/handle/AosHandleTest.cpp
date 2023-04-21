@@ -548,7 +548,7 @@ protected:
         return m_pAosHandle->StateDisconnecting(objMSG);
     }
 
-    IMS_BOOL IsCombinedAttach() { return m_pAosHandle->m_bCombinedAttach; }
+    IMS_BOOL IsCsVoiceAvailable() { return m_pAosHandle->m_bCsVoiceAvailable; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -4634,19 +4634,19 @@ TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
-    EXPECT_FALSE(IsCombinedAttach());
+    EXPECT_FALSE(IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
-    EXPECT_TRUE(IsCombinedAttach());
+    EXPECT_TRUE(IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
             IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED);
-    EXPECT_TRUE(IsCombinedAttach());
+    EXPECT_FALSE(IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_SMS_ONLY);
-    EXPECT_FALSE(IsCombinedAttach());
+    EXPECT_FALSE(IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
-            (IMS_LTE_INFO_COMBINED_ATTACHED | IMS_LTE_INFO_EXTRA_SMS_ONLY));
-    EXPECT_FALSE(IsCombinedAttach());
+            (IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED | IMS_LTE_INFO_EXTRA_SMS_ONLY));
+    EXPECT_FALSE(IsCsVoiceAvailable());
 }
 
 TEST_F(AosHandleTest, Event_NotifyEvent_InvalidEvent)
