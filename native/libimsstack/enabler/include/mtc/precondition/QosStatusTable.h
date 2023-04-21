@@ -34,7 +34,8 @@ public:
             eStatusType(SdpPrecondition::STATUS_INVALID),
             eDirTag(SdpPrecondition::DIRECTION_NONE),
             eStrengthTag(SdpPrecondition::STRENGTH_NOTUSED),
-            bDesiredCheck(IMS_FALSE)
+            bDesiredCheck(IMS_FALSE),
+            bLocalResourceConfirmed(IMS_FALSE)
     {
     }
 
@@ -45,7 +46,8 @@ public:
             eStatusType(_eStatusType),
             eDirTag(_eDirTag),
             eStrengthTag(_eStrengthTag),
-            bDesiredCheck(IMS_FALSE)
+            bDesiredCheck(IMS_FALSE),
+            bLocalResourceConfirmed(IMS_FALSE)
     {
     }
 
@@ -62,6 +64,7 @@ public:
             eDirTag = objRHS.eDirTag;
             eStrengthTag = objRHS.eStrengthTag;
             bDesiredCheck = objRHS.bDesiredCheck;
+            bLocalResourceConfirmed = objRHS.bLocalResourceConfirmed;
         }
         return (*this);
     }
@@ -107,6 +110,7 @@ public:
     IMS_SINT32 eStrengthTag;
     // whether if Desired Status is checked by remote view or not.
     IMS_BOOL bDesiredCheck;
+    IMS_BOOL bLocalResourceConfirmed;
 };
 
 class QosStatusTable
@@ -133,6 +137,8 @@ public:
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
     virtual void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
             IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
+    virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
+    virtual IMS_BOOL IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType);
     virtual void CreateStatusRecords(IN IMS_SINT32 eSdpMediaType);
     virtual IMS_BOOL IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType);
     virtual void RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes);
