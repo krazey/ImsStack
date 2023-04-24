@@ -2118,7 +2118,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 
     if (objImpu.GetCount() > 1)
     {
-        if (IsNeedToSetLimitedMode())
+        if (IsNeedToSetLimitedMode() && m_piContext->GetConnection()->IsLimitedServicePcoValue())
         {
             m_strPuid = objImpu.GetElementAt(1);
             SetMode(MODE_LIMITED);
@@ -2135,7 +2135,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
     else
     {
         m_strPuid = objImpu.GetElementAt(0);
-        if (m_eRegType == AosRegistrationType::NORMAL && !IsFakeRegistration())
+        if (IsNeedToSetLimitedMode())
         {
             SetMode(MODE_LIMITED);
         }
@@ -5900,8 +5900,10 @@ PRIVATE
 IMS_BOOL AosRegistration::IsNeedToSetLimitedMode()
 {
     IMS_BOOL bResult = IMS_FALSE;
-    if (m_eRegType == AosRegistrationType::NORMAL && !IsFakeRegistration() &&
-            m_piContext->GetConnection()->IsLimitedServicePcoValue())
+
+    if (GET_N_CONFIG(m_nSlotId) != IMS_NULL &&
+            GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode() &&
+            m_eRegType == AosRegistrationType::NORMAL && !IsFakeRegistration())
     {
         bResult = IMS_TRUE;
     }
