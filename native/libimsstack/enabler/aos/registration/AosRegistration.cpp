@@ -4512,11 +4512,15 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
             bResultOfSA = IMS_TRUE;
         }
 
+        SetContactAddressConfiguration(IMS_FALSE);
+
         if (!AddOperation_OnNotifyAkaResponse())
         {
             bResultOfSA = IMS_FALSE;
             return;
         }
+
+        SetContactAddressConfiguration(IMS_TRUE);
     }
 }
 
