@@ -4761,8 +4761,15 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Removed()
 {
     A_IMS_TRACE_I(REGID, "Registration_Removed", 0, 0, 0);
 
+    IMS_BOOL bDeregisteringState = (GetState() == STATE_DEREGISTERING) ? IMS_TRUE : IMS_FALSE;
+
     Destroy();
     ReportStateChanged(RESULT_SUCCESS);
+
+    if (bDeregisteringState)
+    {
+        SipFactory::GetTransportHelper(m_piContext->GetSlotId())->DestroyAllSockets(0, m_objIpa);
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::Registration_Terminated(IN IMS_SINT32 nReason)
