@@ -3951,7 +3951,7 @@ TEST_F(AosRegistrationTest, Registration_Removed)
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_SUCCESS, IAosRegistration::REASON_NONE));
-    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
     m_pTestAosRegistration->Registration_Removed();
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
