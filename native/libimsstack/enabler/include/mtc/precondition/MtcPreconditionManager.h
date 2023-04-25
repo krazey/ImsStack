@@ -92,8 +92,9 @@ public:
             IN ISession* piSession, IN IMS_UINT32 eMediaType) const override;
     virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser() const override;
     virtual IMS_BOOL IsAvailableToAlertUser(IN ISession* piSession) const override;
-    virtual IMS_BOOL IsEarlyUpdateRequired(IN ISession* piSession) const override;
-    virtual IMS_BOOL IsAvailableToSendEarlyUpdate(IN ISession* piSession) const override;
+    virtual IMS_BOOL IsLocalResourceConfirmationRequired(IN ISession* piSession) const override;
+    virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(
+            IN ISession* piSession) const override;
     virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) override;
     virtual void HandleQosOnIpcanChanged() override;
     virtual void OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage) override;

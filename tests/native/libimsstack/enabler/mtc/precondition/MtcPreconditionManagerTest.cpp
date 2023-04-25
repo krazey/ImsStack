@@ -557,71 +557,55 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_TRUE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsEarlyUpdateRequiredReturnsFalseIfPreconditionIsNotSupported)
+TEST_F(MtcPreconditionManagerTest,
+        IsLocalResourceConfirmationRequiredReturnsFalseIfPreconditionIsNotSupported)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
-    EXPECT_FALSE(pPreconditionManager->IsEarlyUpdateRequired(&objISession));
-}
-
-TEST_F(MtcPreconditionManagerTest, IsEarlyUpdateRequiredReturnsFalseIfLocalResourceIsReservedInSdp)
-{
-    SetUpMockQosInfo();
-    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper,
-            IsLocalResourceReservedInSdp(&objISession, IMessage::SESSION_START))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_FALSE(pPreconditionManager->IsEarlyUpdateRequired(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
-        IsEarlyUpdateRequiredReturnsFalseIfLocalResourceIsReservedInEarlyUpdate)
+        IsLocalResourceConfirmationRequiredReturnsFalseIfLocalResourceIsAlreadyConfirmed)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper,
-            IsLocalResourceReservedInSdp(&objISession, IMessage::SESSION_START))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
-            .WillByDefault(Return(&objIMessage));
-    ON_CALL(*pSdpPreconditionHelper,
-            IsLocalResourceReservedInSdp(&objISession, IMessage::SESSION_EARLY_UPDATE))
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_FALSE(pPreconditionManager->IsEarlyUpdateRequired(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsEarlyUpdateRequiredReturnsTrue)
+TEST_F(MtcPreconditionManagerTest, IsLocalResourceConfirmationRequiredReturnsTrue)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pSdpPreconditionHelper,
-            IsLocalResourceReservedInSdp(&objISession, IMessage::SESSION_START))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pSdpPreconditionHelper,
-            IsLocalResourceReservedInSdp(&objISession, IMessage::SESSION_EARLY_UPDATE))
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objStatusTable, IsLocalResourceConfirmed(SdpMedia::TYPE_VIDEO))
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
-            .Times(2)
-            .WillOnce(Return(&objIMessage))
-            .WillOnce(Return(nullptr));
-    EXPECT_TRUE(pPreconditionManager->IsEarlyUpdateRequired(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsEarlyUpdateRequired(&objISession));
+    ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    SetUpNothingOnDefaultBearerSupported();
+
+    EXPECT_TRUE(pPreconditionManager->IsLocalResourceConfirmationRequired(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
-        IsAvailableToSendEarlyUpdateReturnsFalseIfGuardAvailableTimerIsActivated)
+        IsAvailableToSendLocalResourceConfirmationReturnsFalseIfGuardAvailableTimerIsActivated)
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest,
-        IsAvailableToSendEarlyUpdateReturnsFalseIfLocalResourceIsNotReserved)
+        IsAvailableToSendLocalResourceConfirmationReturnsFalseIfLocalResourceIsNotReserved)
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(_)).WillByDefault(Return(IMS_FALSE));
@@ -635,11 +619,12 @@ TEST_F(MtcPreconditionManagerTest,
             .Times(2)
             .WillOnce(Return(CallType::UNKNOWN))
             .WillOnce(Return(CallType::VIDEO_RTT));
-    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfLocalResourceIsReserved)
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToSendLocalResourceConfirmationReturnsTrueIfLocalResourceIsReserved)
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(_)).WillByDefault(Return(IMS_FALSE));
@@ -657,12 +642,13 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfLoca
             .WillOnce(Return(QosStatus::AVAILABLE))
             .WillOnce(Return(QosStatus::IDLE));
     EXPECT_CALL(*pInfo, GetTextStatus()).Times(1).WillOnce(Return(QosStatus::AVAILABLE));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfDefaultBearerIsUsed)
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToSendLocalResourceConfirmationReturnsTrueIfDefaultBearerIsUsed)
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(_)).WillByDefault(Return(IMS_FALSE));
@@ -688,10 +674,10 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfDefa
     EXPECT_CALL(*pConfigurationManager, IsTextOnDefaultBearerSupported())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
-    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToSendLocalResourceConfirmation(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest, RemovePreconditionSdpWhenQosInfoDoesNotExist)

@@ -37,9 +37,10 @@ public:
             (IN ISession* piSession, IN IMS_UINT32 eMediaType), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCheckingResourcesRequiredToAlertUser, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsAvailableToAlertUser, (IN ISession* piSession), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsEarlyUpdateRequired, (IN ISession* piSession), (const, override));
-    MOCK_METHOD(
-            IMS_BOOL, IsAvailableToSendEarlyUpdate, (IN ISession* piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsLocalResourceConfirmationRequired, (IN ISession * piSession),
+            (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAvailableToSendLocalResourceConfirmation, (IN ISession * piSession),
+            (const, override));
     MOCK_METHOD(
             void, FormPreconditionSdp, (IN ISession* piSession, IN IMS_BOOL bFailure), (override));
     MOCK_METHOD(void, HandleQosOnIpcanChanged, (), (override));

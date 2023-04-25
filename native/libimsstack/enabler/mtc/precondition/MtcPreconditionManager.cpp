@@ -177,43 +177,52 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
     return bLocalReserved && IsRemoteResourceReserved(piSession);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsEarlyUpdateRequired(IN ISession* piSession) const
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequired(
+        IN ISession* piSession) const
 {
-    IMS_TRACE_D("IsEarlyUpdateRequired", 0, 0, 0);
     if (!IsPreconditionSupported(piSession))
     {
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nMethod =
-            IsConfirmedDialog(piSession) ? IMessage::SESSION_UPDATE : IMessage::SESSION_START;
-    if (m_pSdpPreconditionHelper->IsLocalResourceReservedInSdp(piSession, nMethod))
+    QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
+    if (!pStatusTable)
     {
         return IMS_FALSE;
     }
 
-    // TODO: Can all UPDATE be skipped in UPGRADE case?
-    if (nMethod == IMessage::SESSION_START &&
-            piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
-            m_pSdpPreconditionHelper->IsLocalResourceReservedInSdp(
-                    piSession, IMessage::SESSION_EARLY_UPDATE))
+    IMS_BOOL bResult = IMS_FALSE;
+    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
     {
-        return IMS_FALSE;
+        if (!pStatusTable->IsLocalResourceConfirmed(GetSdpMediaType(eMediaType)) &&
+                IsLocalResourceReservedByMediaType(piSession, eMediaType))
+        {
+            bResult = IMS_TRUE;
+            break;
+        }
     }
 
-    return IMS_TRUE;
+    // TODO: This log trace will be removed after verification.
+    IMS_TRACE_D("IsLocalResourceConfirmationRequired (%s)", _TRACE_B_(bResult), 0, 0);
+    return bResult;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToSendEarlyUpdate(
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToSendLocalResourceConfirmation(
         IN ISession* piSession) const
 {
-    IMS_TRACE_D("IsAvailableToSendEarlyUpdate", 0, 0, 0);
+    IMS_BOOL bResult;
     if (GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
     {
-        return IMS_FALSE;
+        bResult = IMS_FALSE;
+    }
+    else
+    {
+        bResult = IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession));
     }
 
-    return IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession));
+    // TODO: This log trace will be removed after verification.
+    IMS_TRACE_D("IsAvailableToSendLocalResourceConfirmation (%s)", _TRACE_B_(bResult), 0, 0);
+    return bResult;
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(

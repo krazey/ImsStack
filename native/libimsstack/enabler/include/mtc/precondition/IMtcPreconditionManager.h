@@ -89,7 +89,7 @@ public:
      * @param piSession
      * @return IMS_BOOL
      */
-    virtual IMS_BOOL IsEarlyUpdateRequired(IN ISession* piSession) const = 0;
+    virtual IMS_BOOL IsLocalResourceConfirmationRequired(IN ISession* piSession) const = 0;
 
     /**
      * @brief Checks
@@ -97,7 +97,7 @@ public:
      * @param piSession
      * @return IMS_BOOL
      */
-    virtual IMS_BOOL IsAvailableToSendEarlyUpdate(IN ISession* piSession) const = 0;
+    virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(IN ISession* piSession) const = 0;
 
     /**
      * @brief To form the precondition attributes of SDP.

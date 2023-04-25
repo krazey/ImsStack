@@ -453,7 +453,7 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotRequiredToSendEarl
             .WillByDefault(Return(&objPrackResponseMessage));
     ON_CALL(objPrackResponseMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
@@ -465,9 +465,9 @@ TEST_F(OutgoingStateTest, QosReservedReturnsOutgoingStateIfNotAvailableToSendEar
             .WillByDefault(Return(&objPrackResponseMessage));
     ON_CALL(objPrackResponseMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->QosReserved(&objSession, 0));
 }
@@ -479,9 +479,9 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
             .WillByDefault(Return(&objPrackResponseMessage));
     ON_CALL(objPrackResponseMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
@@ -1040,7 +1040,7 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredReturnsOutgoingIfNoPreconditionSu
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, HandleResponse(_, _)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPRAckDelivered(&objSession));
@@ -1052,9 +1052,9 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredReturnsOutgoingIfNotAvailableToSe
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMessageUtils, GetResponseStatusCode(_, _, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPRAckDelivered(&objSession));
@@ -1066,9 +1066,9 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredReturnsOutgoingIfCodeIs183ButNotN
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_183));
@@ -1084,9 +1084,9 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredSendsEarlyUpdateIfAvailable)
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_183));
@@ -1104,9 +1104,9 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredTerminatesCallIfSendingUpdateFail
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_183));
@@ -1127,9 +1127,9 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredReturnsOutgoingIf200OkIsAlreadyRe
     ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(SipStatusCode::SC_200));

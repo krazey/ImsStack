@@ -586,9 +586,9 @@ TEST_F(UpdatingStateTest, SessionPRAckDeliveredInvokesSendEarlyUpdate)
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PRACK_RESPONSE, Ref(objMessage)));
 
-    ON_CALL(objMtcPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
@@ -604,9 +604,9 @@ TEST_F(UpdatingStateTest, SessionPRAckDeliveredReturnsEstablishedStateIfEarlyUpd
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PRACK_RESPONSE, Ref(objMessage)));
 
-    ON_CALL(objMtcPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
@@ -706,9 +706,9 @@ TEST_F(UpdatingStateTest, QosReservedInvokesSendEarlyUpdateIfPreconditionReady)
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_200));
 
     pUpdatingInfo->SetModifier();
-    ON_CALL(objMtcPreconditionManager, IsEarlyUpdateRequired(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMtcPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
