@@ -29,6 +29,7 @@
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosTimer.h"
 #include "precondition/SdpPreconditionHelper.h"
+#include <vector>
 
 class QosInfo
 {
@@ -145,6 +146,8 @@ private:
             IN ISession* piSession, IN IMessage* piMessage) const;
     IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) const;
     IMS_UINT32 GetMediaTypesFromCallType() const;
+    std::vector<IMS_UINT32> GetMediaTypeListFromCallType() const;
+    std::vector<IMS_UINT32> GetUnusedMediaTypeListFromCallType() const;
     IMS_SINT32 GetQosTime(IN QosTimerType eType) const;
     static IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
     ISession* GetISessionWithTimer(IN const QosTimer* pTimer) const;
