@@ -578,32 +578,10 @@ void MessageFormatter::SetCallerIdHeader()
 // PRIVATE
 // void MessageFormatter::SetTipHeader()
 // {
-//     IMS_BOOL bTip = IMS_FALSE;  // TODO, SESSION_SP_TIP
-//     if (!bTip)
+//     if (!m_objContext.GetSession()->GetExtensionSet()
+//                 .IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_FROM_CHANGE))
 //     {
 //         return;
-//     }
-
-//     IMS_BOOL bAddTagToSupported = IMS_FALSE;
-//     if (m_eFormType == FormType::START)
-//     {
-//         bAddTagToSupported = IMS_TRUE;
-//     }
-//     else if ((m_eFormType == FormType::PROVISIONAL_RESPONSE) ||
-//             (m_eFormType == FormType::ACCEPT))
-//     {
-//         IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
-//         if (m_objContext.GetMessageUtils().HasValue(piPreviousMessage, Sip::STR_FROM_CHANGE,
-//                 ISipHeader::SUPPORTED))
-//         {
-//             bAddTagToSupported = IMS_TRUE;
-//         }
-//     }
-
-//     if (bAddTagToSupported)
-//     {
-//         m_objContext.GetMessageUtils().AddValueIfNotExists(
-//                 m_piNextMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED);
 //     }
 
 //     if (m_eFormType != FormType::PROVISIONAL_RESPONSE)

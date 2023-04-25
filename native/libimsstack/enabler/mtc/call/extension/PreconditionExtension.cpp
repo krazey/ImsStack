@@ -28,7 +28,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 PreconditionExtension::PreconditionExtension(IN IMtcCallContext& objContext) :
-        MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_PRECONDITION)
+        MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_PRECONDITION,
+                {RequestType::START, RequestType::EARLY_UPDATE, RequestType::PRACK},
+                {ResponseType::PROVISIONAL_RESPONSE})
 {
 }
 
@@ -97,12 +99,6 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
 PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
         IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eType != RequestType::START && eType != RequestType::EARLY_UPDATE &&
-            eType != RequestType::PRACK)
-    {
-        return;
-    }
-
     if (eType != RequestType::START && !m_objContext.GetMessageUtils().HasSdp(&objRequest))
     {
         IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
@@ -115,11 +111,6 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
 PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (eType != ResponseType::PROVISIONAL_RESPONSE)
-    {
-        return;
-    }
-
     if (!m_objContext.GetMessageUtils().HasSdp(&objResponse))
     {
         IMS_TRACE_D("HandleResponse : Don't check precondition feature without SDP.", 0, 0, 0);

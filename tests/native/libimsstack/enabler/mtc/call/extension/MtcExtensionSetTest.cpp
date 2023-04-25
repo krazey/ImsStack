@@ -22,7 +22,6 @@
 #include "call/extension/MockIMtcExtension.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "call/extension/RprExtension.h"
 #include "core/MockIMessage.h"
 #include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
@@ -40,7 +39,7 @@ const AString strSomeOptionTag("some_tag");
 MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
-    lstExtensions.Append(new RprExtension(objContext));
+    lstExtensions.Append(new MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_RPR, {}, {}));
 
     return MtcExtensionSet(objContext, lstExtensions);
 }
@@ -48,7 +47,8 @@ MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext
 MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
-    lstExtensions.Append(new MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
+    lstExtensions.Append(
+            new MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG, {}, {}));
 
     return MtcExtensionSet(objContext, lstExtensions);
 }

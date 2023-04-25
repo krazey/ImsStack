@@ -47,7 +47,8 @@ protected:
     {
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pExtension = new MtcExtension(objContext, strSomeOptionTag);
+        pExtension = new MtcExtension(objContext, strSomeOptionTag, {RequestType::START},
+                {ResponseType::PROVISIONAL_RESPONSE});
 
         InitMessageRequiresOptionTag(strSomeOptionTag);
         InitMessageSupportsOptionTag(strSomeOptionTag);
@@ -137,30 +138,46 @@ TEST_F(MtcExtensionTest, FormatResponseDoesNothing)
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST_F(MtcExtensionTest, HandleRequestForRequiringMessageUpdatesAvailability)
+TEST_F(MtcExtensionTest, HandleRequestForSupportedRequiringMessageUpdatesAvailability)
 {
     pExtension->HandleRequest(RequestType::START, objMessageRequiresSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
-TEST_F(MtcExtensionTest, HandleRequestForSupportingMessageUpdatesAvailability)
+TEST_F(MtcExtensionTest, HandleRequestForSupportedSupportingMessageUpdatesAvailability)
 {
     pExtension->HandleRequest(RequestType::START, objMessageSupportsSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
-TEST_F(MtcExtensionTest, HandleResponseForRequiringMessageUpdatesAvailability)
+TEST_F(MtcExtensionTest, HandleResponseForSupportedRequiringMessageUpdatesAvailability)
 {
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
-TEST_F(MtcExtensionTest, HandleResponseForSupportingMessageUpdatesAvailability)
+TEST_F(MtcExtensionTest, HandleResponseForSupportedSupportingMessageUpdatesAvailability)
 {
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsSomeOptionTag);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(MtcExtensionTest, HandleRequestForNotSupportedMessageUpdatesAvailability)
+{
+    pExtension->HandleRequest(RequestType::TERMINATE, objMessageRequiresSomeOptionTag);
+    pExtension->HandleRequest(RequestType::TERMINATE, objMessageSupportsSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(MtcExtensionTest, HandleResponseForNotSupportedMessageUpdatesAvailability)
+{
+    pExtension->HandleResponse(ResponseType::REJECT, objMessageRequiresSomeOptionTag);
+    pExtension->HandleResponse(ResponseType::REJECT, objMessageSupportsSomeOptionTag);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
