@@ -168,6 +168,9 @@ TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithVideoInvokesDowngrade
             .Times(2)
             .WillOnce(Return(IMS_SUCCESS))
             .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
+            .Times(2)
+            .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(2);
 
     ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
@@ -184,6 +187,8 @@ TEST_F(EstablishedStateTest, OnVideoLowestBitRateInvokesDowngradeIfCallTypeIsVt)
     EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VOIP));
     EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
             .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
+            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(1);
 
     pEstablishedState->OnVideoLowestBitRate();
@@ -196,6 +201,8 @@ TEST_F(EstablishedStateTest, OnVideoLowestBitRateInvokesDowngradeIfCallTypeIsVid
     EXPECT_CALL(objMockMtcSession, SetCallType(CallType::RTT));
     EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
             .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
+            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(1);
 
     pEstablishedState->OnVideoLowestBitRate();
@@ -236,6 +243,8 @@ TEST_F(EstablishedStateTest, OnIpcanChangedDoesNotPushPendingOperationIfNoSessio
 
     EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
     EXPECT_CALL(objMockMtcSession, Update(_, _, _));
+    EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
+            .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _));
 
     IMS_UINT32 eIpcan = 1;
@@ -377,6 +386,23 @@ TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHe
     EXPECT_CALL(objUiNotifier, SendHeldBy(&objCallInfo, objMediaInfo, _)).Times(2);
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneStarted());
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneFailed());
+}
+
+TEST_F(EstablishedStateTest, UpdateDoesNotRefreshConvertRemoteResponseTimer)
+{
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
+            .Times(3)
+            .WillRepeatedly(Return(IMS_SUCCESS));
+    EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
+            .Times(3)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(1);
+
+    pEstablishedState->Update(CallType::VT, objMediaInfo);
+    pEstablishedState->Update(CallType::VT, objMediaInfo);
+    pEstablishedState->Update(CallType::VT, objMediaInfo);
 }
 
 }  // namespace android

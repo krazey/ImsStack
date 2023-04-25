@@ -292,8 +292,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
 {
     IMS_TRACE_D("SessionUpdateFailed", 0, 0, 0);
 
-    StopTimer();
-
     IMessage* piResponse =
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
@@ -314,6 +312,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
         return GetStateName();
     }
 
+    StopTimer();
     RecoverModificationFailure();
     NotifyFailure();
     return CallStateName::ESTABLISHED;

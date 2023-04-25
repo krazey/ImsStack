@@ -508,8 +508,12 @@ IMS_RESULT EstablishedState::HandleUpdate(
         // TODO: reset the CallType
     }
 
-    m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
+    if (!m_objContext.GetTimer().IsActive(TIMER_CONVERT_REMOTE_RESPONSE))
+    {
+        m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
+                m_objContext.GetConfigurationProxy().GetInt(
+                        Feature::CONVERT_REMOTE_RESPONSE_TIMER));
+    }
 
     return IMS_SUCCESS;
 }
