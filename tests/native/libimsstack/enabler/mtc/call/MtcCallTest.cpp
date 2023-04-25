@@ -1023,8 +1023,7 @@ TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    EXPECT_CALL(objContext, GetSlotId)
-            .Times(2);  // MtcMediaManager::DestroyMediaSession also calls it when it's destroyed
+    EXPECT_CALL(objContext, GetSlotId).Times(1);
     objCall.GetSlotId();
 }
 

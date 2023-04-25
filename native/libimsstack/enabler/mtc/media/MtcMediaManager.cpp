@@ -17,7 +17,7 @@
 #include "CallReasonInfo.h"
 #include "ICoreService.h"
 #include "ISipHeader.h"
-#include "MediaManager.h"
+#include "IMediaManager.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -37,7 +37,9 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
+MtcMediaManager::MtcMediaManager(
+        IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager) :
+        m_objMediaManager(objMediaManager),
         m_pMediaReportListener(IMS_NULL),
         m_pQosListener(IMS_NULL),
         m_pProfileManager(new MtcMediaProfileManager()),
@@ -70,7 +72,7 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
         delete m_pOldMediaInfo;
     }
 
-    MediaManager::GetInstance(m_objContext.GetSlotId())->DestroySession(m_piMediaSession);
+    m_objMediaManager.DestroySession(m_piMediaSession);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
@@ -201,8 +203,8 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
     MEDIA_SERVICE_TYPE eMediaServiceType = MtcMediaUtil::GetMediaServiceType(eServiceType);
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
-    m_piMediaSession = MediaManager::GetInstance(m_objContext.GetSlotId())
-                               ->CreateSession(eMediaServiceType, m_objContext.GetCallKey());
+    m_piMediaSession =
+            m_objMediaManager.CreateSession(eMediaServiceType, m_objContext.GetCallKey());
 
     if (m_piMediaSession == IMS_NULL)
     {
@@ -234,7 +236,7 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
 {
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
 
-    MediaManager::GetInstance(m_objContext.GetSlotId())->DestroySession(m_piMediaSession);
+    m_objMediaManager.DestroySession(m_piMediaSession);
     m_piMediaSession = IMS_NULL;
 }
 

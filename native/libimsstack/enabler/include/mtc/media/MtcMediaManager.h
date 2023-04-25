@@ -31,10 +31,12 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaProfileManager.h"
 
+class IMediaManager;
+
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
-    explicit MtcMediaManager(IN IMtcCallContext& objContext);
+    explicit MtcMediaManager(IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager);
     virtual ~MtcMediaManager();
     MtcMediaManager(IN const MtcMediaManager&) = delete;
     MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;
@@ -126,6 +128,7 @@ private:
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
 
 protected:
+    IMediaManager& m_objMediaManager;
     IMediaReportEventListener* m_pMediaReportListener;
     IMediaQosEventListener* m_pQosListener;
     MtcMediaProfileManager* m_pProfileManager;

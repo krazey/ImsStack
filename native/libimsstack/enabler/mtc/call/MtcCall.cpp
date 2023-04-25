@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IMediaManager.h"
 #include "IMessage.h"
 #include "IReference.h"
 #include "ISession.h"
@@ -63,7 +64,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPendingOperationHolder(),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier(*this)),
-        m_objMediaManager(MtcMediaManager(*this)),
+        m_objMediaManager(MtcMediaManager(*this, *IMediaManager::GetInstance(GetSlotId()))),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(
                 MtcSupplementaryService(*this, objContext.GetConfigurationProxy())),

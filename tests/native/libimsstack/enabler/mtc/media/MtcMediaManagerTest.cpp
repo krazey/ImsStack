@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IMediaManager.h"
 #include "../../include/media/MockIMediaSession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -43,8 +44,9 @@ LOCAL IMS_UINTP NEGO_ID = 100;
 class TestMtcMediaManager : public MtcMediaManager
 {
 public:
-    inline explicit TestMtcMediaManager(IN IMtcCallContext& objContext) :
-            MtcMediaManager(objContext)
+    inline explicit TestMtcMediaManager(
+            IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager) :
+            MtcMediaManager(objContext, objMediaManager)
     {
     }
 
@@ -79,6 +81,7 @@ public:
 
 public:
     MockIMtcCallContext objContext;
+    IMediaManager* piMediaManager;  // TODO: Use mock
     MtcMediaManager* pMediaManager;
     MockIMediaReportEventListener* pListener;
     MockIMediaSession* piMediaSession;
@@ -96,7 +99,8 @@ protected:
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetMessageUtils()).WillByDefault(ReturnRef(objMessageUtils));
 
-        pMediaManager = CreateMtcMediaManager(objContext);
+        piMediaManager = IMediaManager::GetInstance();
+        pMediaManager = CreateMtcMediaManager();
 
         pMediaManager->SetMediaReportEventListener(pListener);
     }
@@ -108,9 +112,10 @@ protected:
         delete pConfigurationProxy;
     }
 
-    MtcMediaManager* CreateMtcMediaManager(IN IMtcCallContext& objContext)
+    MtcMediaManager* CreateMtcMediaManager()
     {
-        TestMtcMediaManager* pTestMediaManager = new TestMtcMediaManager(objContext);
+        TestMtcMediaManager* pTestMediaManager =
+                new TestMtcMediaManager(objContext, *piMediaManager);
 
         piMediaSession = new MockIMediaSession();
         pTestMediaManager->ReplaceMediaSession(piMediaSession);
@@ -890,7 +895,7 @@ TEST_F(MtcMediaManagerTest, SetConferenceCallInvokesMediaSessionSetOptions)
 
 TEST_F(MtcMediaManagerTest, GetNegotiationStateReturnsIdleIfMediaSessionIsNull)
 {
-    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext, *piMediaManager);
     EXPECT_EQ(pTestMediaManager->GetNegotiationState(&objISession), NegotiationState::STATE_IDLE);
     delete pTestMediaManager;
 }
@@ -914,7 +919,7 @@ TEST_F(MtcMediaManagerTest, GetNegotiatedDirectionReturnsInvalidIfMediaSessionIs
 {
     IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
 
-    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext, *piMediaManager);
     EXPECT_EQ(pTestMediaManager->GetNegotiatedDirection(&objISession, eMediaType),
             MEDIA_DIRECTION::MEDIA_DIRECTION_INVALID);
     delete pTestMediaManager;
@@ -941,7 +946,7 @@ TEST_F(MtcMediaManagerTest, GetNegotiatedDirectionReturnsValueFromMediaSession)
 
 TEST_F(MtcMediaManagerTest, GetNegotiatedCallTypeReturnsUnknownIfMediaSessionIsNull)
 {
-    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext, *piMediaManager);
     EXPECT_EQ(pTestMediaManager->GetNegotiatedCallType(&objISession), CallType::UNKNOWN);
     delete pTestMediaManager;
 }
@@ -956,7 +961,7 @@ TEST_F(MtcMediaManagerTest, GetNegotiatedCallTypeReturnsValueBasedOnMediaTypeFro
 
 TEST_F(MtcMediaManagerTest, SetSrvccStateDoesNohtingIfMediaSessionIsNull)
 {
-    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext, *piMediaManager);
     pTestMediaManager->SetSrvccState(SrvccState::IDLE);
     delete pTestMediaManager;
 }
