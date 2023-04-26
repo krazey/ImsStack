@@ -27,8 +27,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcExtension::MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag,
-        IN const std::vector<RequestType> lstSupportedRequestType,
-        IN const std::vector<ResponseType> lstSupportedResponseType) :
+        IN const std::vector<RequestType>& lstSupportedRequestType,
+        IN const std::vector<ResponseType>& lstSupportedResponseType) :
         m_objContext(objContext),
         m_strOptionTag(strOptionTag),
         m_lstSupportedRequestType(lstSupportedRequestType),
