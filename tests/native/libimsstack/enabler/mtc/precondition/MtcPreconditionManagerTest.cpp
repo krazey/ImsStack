@@ -643,6 +643,7 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfLoca
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
     ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
     SetUpNothingOnDefaultBearerSupported();
@@ -652,15 +653,10 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfLoca
             .WillOnce(Return(QosStatus::AVAILABLE))
             .WillRepeatedly(Return(QosStatus::IDLE));
     EXPECT_CALL(*pInfo, GetVideoStatus())
-            .Times(3)
-            .WillOnce(Return(QosStatus::IDLE))
+            .Times(2)
             .WillOnce(Return(QosStatus::AVAILABLE))
             .WillOnce(Return(QosStatus::IDLE));
-    EXPECT_CALL(*pInfo, GetTextStatus())
-            .Times(3)
-            .WillOnce(Return(QosStatus::IDLE))
-            .WillOnce(Return(QosStatus::IDLE))
-            .WillOnce(Return(QosStatus::AVAILABLE));
+    EXPECT_CALL(*pInfo, GetTextStatus()).Times(1).WillOnce(Return(QosStatus::AVAILABLE));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
@@ -670,6 +666,7 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfDefa
 {
     SetUpMockQosInfo();
     ON_CALL(objTimer, IsQosTimerActivated(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
     ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
@@ -685,16 +682,11 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToSendEarlyUpdateReturnsTrueIfDefa
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(*pConfigurationManager, IsVideoOnDefaultBearerSupported())
-            .Times(4)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE))
+            .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(*pConfigurationManager, IsTextOnDefaultBearerSupported())
-            .Times(4)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE))
+            .Times(1)
             .WillOnce(Return(IMS_TRUE));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
     EXPECT_TRUE(pPreconditionManager->IsAvailableToSendEarlyUpdate(&objISession));
