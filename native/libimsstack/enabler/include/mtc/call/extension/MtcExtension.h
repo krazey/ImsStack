@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "call/extension/IMtcExtension.h"
+#include <algorithm>
 #include <vector>
 
 class IMessage;
@@ -32,8 +33,8 @@ class MtcExtension : public IMtcExtension
 {
 public:
     MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag,
-            IN const std::vector<RequestType> lstSupportedRequestType,
-            IN const std::vector<ResponseType> lstSupportedResponseType);
+            IN const std::vector<RequestType>& lstSupportedRequestType,
+            IN const std::vector<ResponseType>& lstSupportedResponseType);
     MtcExtension(IN const MtcExtension& objRhs);
     virtual ~MtcExtension();
     MtcExtension& operator=(IN const MtcExtension&) = delete;
