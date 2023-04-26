@@ -54,7 +54,6 @@ public class SystemInterface implements JniSystemListener {
 
     private DefaultSystemCallInterface mDefaultSystemCall;
     private ISystemAPIBattery mISystemAPIBattery;
-    private ISystemAPIDevice mISystemAPIDevice;
     private ISystemAPIPreference mISystemAPIPreference;
     private ISystemAPIWakeLock mWakeLock;
 
@@ -134,10 +133,6 @@ public class SystemInterface implements JniSystemListener {
 
     public void setISystemAPIBattery(ISystemAPIBattery api) {
         mISystemAPIBattery = api;
-    }
-
-    public void setISystemAPIDevice(ISystemAPIDevice api) {
-        mISystemAPIDevice = api;
     }
 
     public void setISystemAPIPreference(ISystemAPIPreference api) {
@@ -275,7 +270,7 @@ public class SystemInterface implements JniSystemListener {
                 break;
             case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
             case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
-                result = handleSystemAPIDevice(method);
+                result = handleSystemCallForDevice(method);
                 break;
             case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
             case SystemConstants.SET_PRIVATE_PROPERTY:
@@ -485,23 +480,23 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private Parcel handleSystemAPIDevice(int method) {
-        if (mISystemAPIDevice == null) {
+    private Parcel handleSystemCallForDevice(int method) {
+        if (mDefaultSystemCall == null) {
             return null;
         }
 
         Parcel result = Parcel.obtain();
 
         switch (method) {
-        case SystemConstants.GET_DEVICE_NAME:
-            result.writeString(mISystemAPIDevice.getDeviceName4Sys());
-            break;
-        case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
-            result.writeString(mISystemAPIDevice.getExternalStoragePath4Sys());
-            break;
-        default:
-            result.recycle();
-            return null;
+            case SystemConstants.GET_DEVICE_NAME:
+                result.writeString(mDefaultSystemCall.getDeviceName());
+                break;
+            case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
+                result.writeString(mDefaultSystemCall.getExternalStoragePath());
+                break;
+            default:
+                result.recycle();
+                return null;
         }
 
         return result;

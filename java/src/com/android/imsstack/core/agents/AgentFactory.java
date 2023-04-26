@@ -36,7 +36,6 @@ public final class AgentFactory {
     public static final int BATTERY_STATE = 3;
     public static final int PREFERENCE = 4;
     public static final int WAKE_LOCK = 5;
-    public static final int DEVICE = 6;
 
     // agents with slot id
     public static final int PHONE_STATE = 13;
@@ -221,7 +220,6 @@ public final class AgentFactory {
         sAgents.put(BATTERY_STATE, BatteryStateAgent.getInstance());
         sAgents.put(PREFERENCE, PreferenceAgent.getInstance());
         sAgents.put(WAKE_LOCK, WakeLockAgent.getInstance());
-        sAgents.put(DEVICE, DeviceAgent.getInstance());
 
         getInstance().createAgents();
     }
@@ -254,7 +252,6 @@ public final class AgentFactory {
         BatteryStateAgent.getInstance().init(context);
         PreferenceAgent.getInstance().init(context);
         WakeLockAgent.getInstance().init(context);
-        DeviceAgent.getInstance().init(context);
 
         getInstance().initAgents(context);
     }
