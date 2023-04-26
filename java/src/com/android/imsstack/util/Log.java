@@ -237,4 +237,6 @@ public final class Log {
             return s.substring(start, end);
         }
     }
+
+    private Log() {}
 }

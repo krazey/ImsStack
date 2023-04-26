@@ -165,4 +165,6 @@ public final class SimUtils {
 
         return true;
     }
+
+    private SimUtils() {}
 }

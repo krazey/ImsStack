@@ -53,4 +53,6 @@ public final class DeviceUtils {
 
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
+
+    private DeviceUtils() {}
 }

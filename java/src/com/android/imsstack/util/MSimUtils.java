@@ -15,8 +15,11 @@
  */
 package com.android.imsstack.util;
 
+import android.annotation.NonNull;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * This class provides the utility APIs to control the multi-sim.
@@ -32,9 +35,36 @@ public final class MSimUtils {
     // Intent extra: Hidden menu
     public static final String EXTRA_KEY_SLOT_ID = "SLOT_ID";
 
+    /**
+     * An interface for accessing the {@link SubscriptionManager} for testing.
+     */
+    @VisibleForTesting
+    public interface SubscriptionManagerProxy {
+        /**
+         * Returns a default data subscription id.
+         */
+        int getDefaultDataSubscriptionId();
+
+        /**
+         * Returns the slot index for the given subscription id.
+         *
+         * @param subId The subscription id.
+         */
+        int getSlotIndex(int subId);
+    }
+
+    private static SubscriptionManagerProxy sSubscriptionManagerProxy = null;
+
+    /** Sets the {@link SubscriptionManagerProxy} instance for testing. */
+    @VisibleForTesting
+    /* package */ static void setSubscriptionManagerProxy(
+            SubscriptionManagerProxy subscriptionManagerProxy) {
+        sSubscriptionManagerProxy = subscriptionManagerProxy;
+    }
+
     /** Returns the default data subscription id. */
     public static int getDefaultDataSubId() {
-        return SubscriptionManager.getDefaultDataSubscriptionId();
+        return getSubscriptionManagerProxy().getDefaultDataSubscriptionId();
     }
 
     /** Returns the default subscription id that can be used by ImsStack. */
@@ -73,7 +103,7 @@ public final class MSimUtils {
 
     /** Returns the phone id from the specified subscription id. */
     public static int getPhoneId(int subId, int defaultPhoneId) {
-        int slotId = SubscriptionManager.getSlotIndex(subId);
+        int slotId = getSubscriptionManagerProxy().getSlotIndex(subId);
 
         if (slotId < DEFAULT_PHONE_ID || slotId >= getActiveSimCount()) {
             // Set the phoneId as a default
@@ -131,7 +161,7 @@ public final class MSimUtils {
 
     /** Returns the slot id from the specified subscription id. */
     public static int getSlotId(int subId) {
-        return SubscriptionManager.getSlotIndex(subId);
+        return getSubscriptionManagerProxy().getSlotIndex(subId);
     }
 
     /** Returns the subscription id from the specified phone id. */
@@ -166,4 +196,24 @@ public final class MSimUtils {
     public static boolean isValidSubId(int subId) {
         return SubscriptionManager.isUsableSubscriptionId(subId);
     }
+
+    @NonNull
+    private static SubscriptionManagerProxy getSubscriptionManagerProxy() {
+        if (sSubscriptionManagerProxy == null) {
+            sSubscriptionManagerProxy = new SubscriptionManagerProxy() {
+                @Override
+                public int getDefaultDataSubscriptionId() {
+                    return SubscriptionManager.getDefaultDataSubscriptionId();
+                }
+
+                @Override
+                public int getSlotIndex(int subId) {
+                    return SubscriptionManager.getSlotIndex(subId);
+                }
+            };
+        }
+        return sSubscriptionManagerProxy;
+    }
+
+    private MSimUtils() {}
 }

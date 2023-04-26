@@ -112,4 +112,6 @@ public final class SystemUtils {
 
         return output;
     }
+
+    private SystemUtils() {}
 }

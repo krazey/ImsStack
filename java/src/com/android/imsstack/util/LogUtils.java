@@ -49,4 +49,6 @@ public final class LogUtils {
         return ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, slotId);
     }
+
+    private LogUtils() {}
 }

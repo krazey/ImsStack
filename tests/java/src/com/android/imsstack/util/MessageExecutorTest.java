@@ -22,6 +22,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
+import android.os.Message;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.After;
@@ -36,8 +37,8 @@ import org.mockito.MockitoAnnotations;
 public class MessageExecutorTest {
     private static final int CALLBACK_WAIT_TIME = 100;
 
-    @Mock Runnable mCallback;
-    @Mock Runnable mExceptionCallback;
+    @Mock private Runnable mCallback;
+    @Mock private Runnable mExceptionCallback;
 
     @Before
     public void setUp() throws Exception {
@@ -50,8 +51,9 @@ public class MessageExecutorTest {
 
     @Test
     @SmallTest
-    public void constructor() {
+    public void testInit() {
         MessageExecutor executor = new MessageExecutor(MessageExecutorTest.class.getSimpleName());
+
         assertNotEquals(Looper.getMainLooper(), executor.getLooper());
         assertEquals(MessageExecutorTest.class.getSimpleName(),
                 executor.getLooper().getThread().getName());
@@ -59,16 +61,28 @@ public class MessageExecutorTest {
 
     @Test
     @SmallTest
-    public void execute() throws Exception {
+    public void testExecute() throws Exception {
         MessageExecutor executor =
                 new MessageExecutor(MessageExecutorTest.class.getSimpleName() + ":execute");
-
         executor.execute(mCallback);
+
         verify(mCallback, timeout(CALLBACK_WAIT_TIME)).run();
 
-        doThrow(new RuntimeException("MessageExecutorTest!!!")).when(mExceptionCallback).run();
+        doThrow(new RuntimeException("MessageExecutorTest failed.")).when(mExceptionCallback).run();
         executor.execute(mExceptionCallback);
 
+        verify(mExceptionCallback, timeout(CALLBACK_WAIT_TIME)).run();
+
         // Expected: Any exception should not be thrown when calling execute(...).
+    }
+
+    @Test
+    @SmallTest
+    public void testHandleMessageWithNonRunnable() {
+        MessageExecutor executor =
+                new MessageExecutor(MessageExecutorTest.class.getSimpleName() + ":handleMessage");
+        executor.handleMessage(Message.obtain());
+
+        // Expected: Message should be ignored.
     }
 }

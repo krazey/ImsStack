@@ -158,6 +158,8 @@ public final class ImsPrivateProperties {
             String name = String.format(Locale.US, "%s_%d", NAME, slotId);
             return AppContext.getInstance().getSharedPreferences(name, Context.MODE_PRIVATE);
         }
+
+        private Ephemeral() {}
     }
 
     public static class Persistent {
@@ -432,5 +434,9 @@ public final class ImsPrivateProperties {
             String name = String.format(Locale.US, "%s_%d", NAME, slotId);
             return c.getSharedPreferences(name, Context.MODE_PRIVATE);
         }
+
+        private Persistent() {}
     }
+
+    private ImsPrivateProperties() {}
 }

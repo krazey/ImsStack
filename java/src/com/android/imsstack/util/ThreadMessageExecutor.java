@@ -26,11 +26,7 @@ import java.util.concurrent.Executor;
  * Executes the tasks in the other thread rather than the calling thread.
  */
 public class ThreadMessageExecutor extends Thread implements Executor {
-    private MyHandler mHandler = null;
-
-    public ThreadMessageExecutor() {
-        super(ThreadMessageExecutor.class.getSimpleName());
-    }
+    private MyHandler mHandler;
 
     public ThreadMessageExecutor(String name) {
         super(name);
@@ -53,7 +49,8 @@ public class ThreadMessageExecutor extends Thread implements Executor {
     public void run() {
         Looper.prepare();
 
-        log(getName() + " is started; tid=" + Process.myTid());
+        Log.d(Log.TAG, "[ThreadMessageExecutor] run: " + getName()
+                + " is started; tid=" + Process.myTid());
 
         synchronized (this) {
             mHandler = new MyHandler(Looper.myLooper());
@@ -66,22 +63,13 @@ public class ThreadMessageExecutor extends Thread implements Executor {
         try {
             r.run();
         } catch (Throwable t) {
-            loge("run task=" + r);
+            Log.e(Log.TAG, "[ThreadMessageExecutor] executeInternal: " + r);
             t.printStackTrace();
-        } finally {
         }
     }
 
     private void executeInternalThread(Runnable r) {
         new Thread(r, "ThreadExecutor").start();
-    }
-
-    private static void log(String s) {
-        Log.d(Log.TAG, "[ThreadMessageExecutor] " + s);
-    }
-
-    private static void loge(String s) {
-        Log.e(Log.TAG, "[ThreadMessageExecutor] " + s);
     }
 
     private class MyHandler extends Handler {
@@ -91,11 +79,7 @@ public class ThreadMessageExecutor extends Thread implements Executor {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.obj instanceof Runnable) {
-                executeInternal((Runnable)msg.obj);
-            } else {
-                log("Not runnable object; ignore the msg=" + msg);
-            }
+            executeInternal((Runnable) msg.obj);
         }
     }
 }

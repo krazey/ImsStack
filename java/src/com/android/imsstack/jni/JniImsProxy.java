@@ -101,4 +101,6 @@ public final class JniImsProxy {
     public static int removeSystemListener(long nativeObject) {
         return sJniIms.removeSystemListener(nativeObject);
     }
+
+    private JniImsProxy() {}
 }

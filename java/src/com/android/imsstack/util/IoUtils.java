@@ -30,4 +30,6 @@ public final class IoUtils {
             }
         }
     }
+
+    private IoUtils() {}
 }

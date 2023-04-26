@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.util;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
@@ -28,10 +30,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 @RunWith(JUnit4.class)
 public class IoUtilsTest {
-    @Mock FileOutputStream mFileOutputStream;
+    @Mock private FileOutputStream mFileOutputStream;
 
     @Before
     public void setUp() throws Exception {
@@ -45,10 +48,30 @@ public class IoUtilsTest {
 
     @Test
     @SmallTest
-    public void closeQuietly() throws Exception {
+    public void testCloseQuietly() throws Exception {
         IoUtils.closeQuietly(null);
         IoUtils.closeQuietly(mFileOutputStream);
 
+        verify(mFileOutputStream).close();
+    }
+
+    @Test
+    @SmallTest
+    public void testCloseQuietlyWithRuntimeException() throws Exception {
+        doThrow(new RuntimeException("close failed.")).when(mFileOutputStream).close();
+
+        assertThrows(RuntimeException.class, () -> {
+            IoUtils.closeQuietly(mFileOutputStream);
+        });
+    }
+
+    @Test
+    @SmallTest
+    public void testCloseQuietlyWithIOException() throws Exception {
+        doThrow(new IOException("close failed.")).when(mFileOutputStream).close();
+        IoUtils.closeQuietly(mFileOutputStream);
+
+        // Expected: exception is ignored.
         verify(mFileOutputStream).close();
     }
 }

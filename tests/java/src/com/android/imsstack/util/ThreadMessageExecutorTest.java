@@ -21,6 +21,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import android.os.Looper;
+import android.os.SystemClock;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.After;
@@ -35,12 +37,16 @@ import org.mockito.MockitoAnnotations;
 public class ThreadMessageExecutorTest {
     private static final int CALLBACK_WAIT_TIME = 100;
 
-    @Mock Runnable mCallback;
-    @Mock Runnable mExceptionCallback;
+    @Mock private Runnable mCallback;
+    @Mock private Runnable mExceptionCallback;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
     }
 
     @After
@@ -49,7 +55,7 @@ public class ThreadMessageExecutorTest {
 
     @Test
     @SmallTest
-    public void execute_threadNotStarted() {
+    public void testExecuteWhenThreadNotStarted() {
         ThreadMessageExecutor executor = new ThreadMessageExecutor(
                 ThreadMessageExecutorTest.class.getSimpleName() + ":NotStarted");
 
@@ -61,11 +67,13 @@ public class ThreadMessageExecutorTest {
 
     @Test
     @SmallTest
-    public void execute_threadStarted() throws Exception {
+    public void testExecuteWhenThreadStarted() throws Exception {
         ThreadMessageExecutor executor = new ThreadMessageExecutor(
                 ThreadMessageExecutorTest.class.getSimpleName() + ":Started");
 
         executor.start();
+        SystemClock.sleep(CALLBACK_WAIT_TIME / 2);
+
         assertTrue(executor.isAlive());
 
         executor.execute(mCallback);
@@ -74,6 +82,8 @@ public class ThreadMessageExecutorTest {
         doThrow(new RuntimeException("ThreadMessageExecutorTest!!!"))
                 .when(mExceptionCallback).run();
         executor.execute(mExceptionCallback);
+
+        verify(mExceptionCallback, timeout(CALLBACK_WAIT_TIME)).run();
 
         // Expected: Any exception should not be thrown when calling execute(...).
     }

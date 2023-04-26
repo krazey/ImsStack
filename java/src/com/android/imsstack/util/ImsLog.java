@@ -272,4 +272,6 @@ public final class ImsLog {
             + ", I=" + isOptionEnabled(LogUtils.TRACE_OPTION_I)
             + ", HidePrivacy=" + isOptionEnabled(OPT_HIDE_PRIVACY));
     }
+
+    private ImsLog() {}
 }
