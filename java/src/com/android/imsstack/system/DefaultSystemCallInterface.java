@@ -45,4 +45,18 @@ public interface DefaultSystemCallInterface {
      * @return A WifiInterface object.
      */
     WifiInterface getWifiInterface();
+
+    /**
+     * Returns the current device name.
+     *
+     * @return A device name.
+     */
+    String getDeviceName();
+
+    /**
+     * Returns the external storage path.
+     *
+     * @return An external storage path.
+     */
+    String getExternalStoragePath();
 }

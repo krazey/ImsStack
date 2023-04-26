@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents;
 
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.DeviceUtils;
 
 /**
  * An agent class to handle the default system calls.
@@ -72,5 +73,25 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
     @Override
     public WifiInterface getWifiInterface() {
         return AgentFactory.getInstance().getAgent(WifiInterface.class);
+    }
+
+    /**
+     * Returns the current device name.
+     *
+     * @return A device name.
+     */
+    @Override
+    public String getDeviceName() {
+        return DeviceUtils.getDeviceName();
+    }
+
+    /**
+     * Returns the external storage path.
+     *
+     * @return An external storage path.
+     */
+    @Override
+    public String getExternalStoragePath() {
+        return DeviceUtils.getExternalStoragePath();
     }
 }

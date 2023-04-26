@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,9 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.provider.Settings;
+import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.AppContext;
+import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +44,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
+    @Mock Context mContext;
     @Mock SystemInterface mSystemInterface;
     @Mock WifiInterface mWifiInterface;
     @Mock TimerAgent mTimerAgent;
@@ -48,6 +55,7 @@ public class DefaultSystemCallAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        AppContext.init(mContext);
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
@@ -69,6 +77,8 @@ public class DefaultSystemCallAgentTest {
         mTimerAgent = null;
         mWifiInterface = null;
         mSystemInterface = null;
+        mContext = null;
+        AppContext.deinit();
     }
 
     @Test
@@ -125,5 +135,24 @@ public class DefaultSystemCallAgentTest {
         wifi = mDefaultSystemCallAgent.getWifiInterface();
 
         assertNull(wifi);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDeviceName() {
+        String testDeviceName = "Device-A";
+        MockContentResolver contentResolver = new MockContentResolver();
+        FakeSettingsProvider settingsProvider = new FakeSettingsProvider();
+        contentResolver.addProvider(Settings.AUTHORITY, settingsProvider);
+        Settings.Global.putString(contentResolver, Settings.Global.DEVICE_NAME, testDeviceName);
+        when(mContext.getContentResolver()).thenReturn(contentResolver);
+
+        assertEquals(testDeviceName, mDefaultSystemCallAgent.getDeviceName());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetExternalStoragePath() {
+        assertNotNull(mDefaultSystemCallAgent.getExternalStoragePath());
     }
 }
