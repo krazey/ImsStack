@@ -20,6 +20,7 @@
 #include "ServiceImsRadio.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/IMtcBlockRule.h"
 #include "call/block/SsacBlockRule.h"
@@ -40,6 +41,12 @@ PUBLIC VIRTUAL SsacBlockRule::~SsacBlockRule() {}
 PUBLIC VIRTUAL SsacBlockRule::Result SsacBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
+    if (m_objContext.GetEpsFallbackTrigger().IsVoNr())
+    {
+        // AC barring on NR is checked by RadioBlockRule
+        return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
+    }
+
     if (m_pImsRadio == IMS_NULL)
     {
         IMS_TRACE_E(0, "SsacBlockRule : IImsRadio is null", 0, 0, 0);

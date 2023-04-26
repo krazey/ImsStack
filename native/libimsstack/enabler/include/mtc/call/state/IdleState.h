@@ -60,16 +60,21 @@ public:
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
 
+protected:
+    CallStateName HandleAosConnected() override;
+
 private:
     CallStateName ContinueStart();
     CallStateName ContinueConference(IN const ImsList<ConfUser*>& lstUsers);
     CallStateName ContinueHandleIncoming();
     CallStateName ContinueStartUssi();
 
+    IMS_BOOL IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const;
     void SetResourceListForConference(
             IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
+    ImsList<IMtcBlockRule*> GetBlockRulesAfterEpsFallback();
     IMS_BOOL IsCallPull() const;
     IMS_RESULT HandleCallPull(IN const AString& strTarget);
 

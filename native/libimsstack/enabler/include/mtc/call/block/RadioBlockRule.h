@@ -42,7 +42,7 @@ private:
     IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
     CallType m_eCallType;
 
-    IMS_BOOL IsEpsFallbackRequired(
+    CallReasonInfo CovertConnectionFailureToCallReasonInfo(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 };
 

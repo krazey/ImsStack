@@ -129,6 +129,7 @@ enum
     // used by ImsStackNative only internally.
     CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED = 10001,
     CODE_INTERNAL_REDIAL = 10002,
+    CODE_INTERNAL_RRC_REJECT = 10003,
 };
 
 // CODE_LOCAL_CALL_CS_RETRY_REQUIRED
@@ -264,6 +265,22 @@ public:
         strOut.Sprintf("Code[%d] Extra[%d][%s]", nCode, nExtraCode, strExtraMessage.GetStr());
 
         return strOut;
+    }
+
+    CallReasonInfo ConvertFromInternal() const
+    {
+        switch (nCode)
+        {
+            case CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED:
+            case CODE_INTERNAL_REDIAL:
+                // No scenario to be notified to the Java
+                return CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE);
+            case CODE_INTERNAL_RRC_REJECT:
+                return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+            default:
+                break;
+        }
+        return *this;
     }
 
     IMS_SINT32 nCode;

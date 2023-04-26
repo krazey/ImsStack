@@ -515,8 +515,8 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
         return GetStateName();
     }
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse() ||
+            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
     {
         IMS_TRACE_I("HandleAosDisconnected ignore during EPS Fallback", 0, 0, 0);
         return GetStateName();

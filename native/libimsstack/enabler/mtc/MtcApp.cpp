@@ -67,7 +67,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objMessageUtils(MessageUtils()),
         m_objPassiveTimerHolder(PassiveTimerHolder()),
         m_pMultiEndpointManager(nullptr),
-        m_objMtcRadioChecker(*this, m_objCallController),
+        m_objMtcRadioChecker(*this),
         m_pLastComeFirstServedHelper(nullptr),
         m_objCallConnectionIdManager(CallConnectionIdManager(*this)),
         m_bWifiTestMode(IMS_FALSE)

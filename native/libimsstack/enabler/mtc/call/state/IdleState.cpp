@@ -16,6 +16,7 @@
 
 #include "AString.h"
 #include "ICoreService.h"
+#include "IImsAosInfo.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -27,6 +28,7 @@
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
@@ -49,6 +51,7 @@
 #include "core/IMessage.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialogevent/IMultiEndpointManager.h"
+#include "helper/IMtcAosConnector.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
@@ -224,11 +227,19 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
 
         case IMtcBlockChecker::Result::Status::BLOCKED:
             m_pBlockChecker.reset();
+
+            if (IsEpsFallbackRequired(objResult.objReason))
+            {
+                m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                        EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE);
+                return GetStateName();
+            }
+
             if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
             {
                 m_objContext.GetSession()->Reject(objResult.objReason);
             }
-            m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason);
+            m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason.ConvertFromInternal());
             return CallStateName::TERMINATING;
 
         default:  // IMtcBlockChecker::Result::Status::PENDING:
@@ -266,6 +277,22 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     StartEpsFallbackWatchdogIfNeeded(*piSession->GetPreviousResponse(IMessage::SESSION_START));
     return CallStateName::INCOMING;
+}
+
+PROTECTED VIRTUAL CallStateName IdleState::HandleAosConnected()
+{
+    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
+
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
+    {
+        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+
+        m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
+                m_objContext.CreateBlockChecker(GetBlockRulesAfterEpsFallback()));
+        return OnBlockChecked(m_pBlockChecker->Check());
+    }
+
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSession)
@@ -435,6 +462,32 @@ CallStateName IdleState::ContinueStartUssi()
     return CallStateName::OUTGOING;
 }
 
+IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const
+{
+    if (m_objContext.GetCallInfo().ePeerType == PeerType::MT ||
+            !EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) ||
+            !m_objContext.GetEpsFallbackTrigger().IsVoNr())
+
+    {
+        return IMS_FALSE;
+    }
+
+    if (objReason.nCode == CODE_ACCESS_CLASS_BLOCKED)
+    {
+        return IMS_TRUE;
+    }
+
+    const IMS_UINT32 nWaitTimeMillis = objReason.nExtraCode;
+    const IMS_UINT32 nTimerVzw =
+            m_objContext.GetConfigurationProxy().GetInt(Feature::MO_CALL_REQUEST_TIMEOUT);
+    if (objReason.nCode == CODE_INTERNAL_RRC_REJECT && nWaitTimeMillis >= nTimerVzw)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 PRIVATE
 void IdleState::SetResourceListForConference(
         IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers)
@@ -480,6 +533,16 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new TimerBlockRule(
             m_objContext.GetPassiveTimerHolder(), m_objContext.GetCallInfo().bEmergency));
+
+    return lstRules;
+}
+
+PRIVATE
+ImsList<IMtcBlockRule*> IdleState::GetBlockRulesAfterEpsFallback()
+{
+    ImsList<IMtcBlockRule*> lstRules;
+
+    lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
 
     return lstRules;
 }

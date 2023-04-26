@@ -276,9 +276,3 @@ void MtcCallController::ReleaseRedialHelper()
     delete m_pRedialHelper;
     m_pRedialHelper = IMS_NULL;
 }
-
-void MtcCallController::OnConnectionFailed(IN CallKey nCallKey)
-{
-    Key nKey = {nCallKey};
-    TerminateCalls(KeyType::CALL_KEY, nKey, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
-}
