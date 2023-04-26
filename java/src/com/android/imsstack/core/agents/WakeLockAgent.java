@@ -16,161 +16,67 @@
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 
-import com.android.imsstack.system.ISystemAPIWakeLock;
-import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
-public class WakeLockAgent implements IWakeLock {
-    private static final int DEFAULT_TIMEOUT = 5000;
-    private static final int EVENT_ACQUIRE = 101;
+/**
+ * A class for providing the timed WakeLock while processing SIP signalling.
+ */
+public class WakeLockAgent implements WakeLockInterface {
+    private static final String WAKE_LOCK_TAG = "ImsStack";
+    private static final int DEFAULT_TIMEOUT = 5000; // 5 seconds
 
-    private static IWakeLock sWakeLockAgent = null;
-    private WakeLockHandler mHandler = null;
-    private PowerManager.WakeLock mWakeLock = null;
+    private PowerManager.WakeLock mWakeLock;
 
+    /**
+     * A default constructor.
+     */
     public WakeLockAgent() {
-    }
-
-    public static IWakeLock getInstance() {
-        if (sWakeLockAgent == null) {
-            sWakeLockAgent = new WakeLockAgent();
-        }
-
-        return sWakeLockAgent;
     }
 
     @Override
     public void init(Context context) {
-        mHandler = new WakeLockHandler(Looper.myLooper());
-        SystemInterface.getInstance().setWakeLock(mSystemAPI);
     }
 
     @Override
     public void cleanup() {
-        if (mHandler != null) {
-            mHandler.removeCallbacksAndMessages(null);
-            mHandler = null;
-        }
-
-        SystemInterface.getInstance().setWakeLock(null);
     }
 
-    // timeout : milli-seconds
     @Override
-    public void acquire(int timeout) {
-        if (timeout == 0) {
-            // Set a default timeout value
-            timeout = DEFAULT_TIMEOUT;
-        }
-
-        PowerManager.WakeLock wakeLock = getWakeLock();
-
-        if (wakeLock == null) {
-            ImsLog.w("WakeLock is null :: timeout=" + timeout);
-            return;
-        }
-
-        ImsLog.i("WakeLock :: timeout=" + timeout);
-
-        wakeLock.acquire(timeout);
+    public void acquire(int timeoutMillis) {
+        acquire(timeoutMillis, "acquire");
     }
 
-    // timeout : milli-seconds
     @Override
-    public void acquire(int timeout, boolean screenOffOnly) {
-        if (timeout == 0) {
-            // Set a default timeout value
-            timeout = DEFAULT_TIMEOUT;
-        }
-
-        PowerManager.WakeLock wakeLock = getWakeLock();
-
-        if (wakeLock == null) {
-            ImsLog.w("WakeLock is null :: timeout=" + timeout);
-            return;
-        }
-
-        // Even though USB or charger is connected, the AP goes to sleep when screen is off
-        // So, do not check the charging case.
-
-        //        BatteryStateTracker bst = BatteryStateTracker.getInstance();
-        //
-        //        if ((bst != null) && bst.isPowerPlugged(false)) {
-        //            ImsLog.d("WakeLock :: power plugged; no action; timeout=" + timeout);
-        //            return;
-        //        }
-
-        if (screenOffOnly) {
-            PowerManager pm = getPowerManager();
-
-            if (pm != null) {
-                // isScreenOn method was deprecated in API level 20.
-                // And this method has been replaced by isInteractive()
-                if (pm.isInteractive()) {
-                    ImsLog.d("WakeLock :: screen on; no action; timeout=" + timeout);
-                    return;
-                }
-            }
-
-            //4 SCREEN_OFF intent
-        }
-
-        ImsLog.i("WakeLock :: timeout=" + timeout);
-
-        wakeLock.acquire(timeout);
+    public void acquireForNative(int timeoutMillis) {
+        AppContext.runTask(() -> {
+            acquire(timeoutMillis, "acquireForNative");
+        }, 0);
     }
 
-    // Private/Protected methods ---------------------------------
-    private synchronized PowerManager.WakeLock getWakeLock() {
+    @VisibleForTesting
+    protected synchronized PowerManager.WakeLock getWakeLock() {
         if (mWakeLock == null) {
-            PowerManager pm = getPowerManager();
-
-            if (pm == null) {
-                return null;
-            }
-
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ImsStack");
+            PowerManager pm = AppContext.getInstance().getSystemService(PowerManager.class);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);
             mWakeLock.setReferenceCounted(true);
         }
 
         return mWakeLock;
     }
 
-    private PowerManager getPowerManager() {
-        return AppContext.getInstance().getSystemService(PowerManager.class);
+    private void acquire(int timeoutMillis, String tag) {
+        if (timeoutMillis == 0) {
+            timeoutMillis = DEFAULT_TIMEOUT;
+        }
+
+        PowerManager.WakeLock wakeLock = getWakeLock();
+
+        ImsLog.i("WakeLock#" + tag + ": " + timeoutMillis);
+
+        wakeLock.acquire(timeoutMillis);
     }
-
-    private class WakeLockHandler extends Handler {
-        WakeLockHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case EVENT_ACQUIRE:
-                    acquire(msg.arg1);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    private ISystemAPIWakeLock mSystemAPI = new ISystemAPIWakeLock() {
-        @Override
-        public void acquire(int timeout) {
-            if (mHandler == null) {
-                WakeLockAgent.this.acquire(timeout);
-            } else {
-                Message.obtain(mHandler, EVENT_ACQUIRE, timeout, 0).sendToTarget();
-            }
-        }
-    };
 }

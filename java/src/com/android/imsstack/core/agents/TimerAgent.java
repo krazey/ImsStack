@@ -32,6 +32,7 @@ import android.util.ArrayMap;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsWakeLock;
 import com.android.imsstack.util.MapIntLong;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -369,10 +370,10 @@ public class TimerAgent implements TimerInterface {
         stopImsAlarm(tid, requestCode, true);
 
         boolean isLongTimer = checkAndRemoveLongTimer(tid);
-        IWakeLock wl = (IWakeLock) AgentFactory.getAgent(AgentFactory.WAKE_LOCK);
+        WakeLockInterface wakeLock = AgentFactory.getInstance().getAgent(WakeLockInterface.class);
 
-        if (wl != null) {
-            wl.acquire(isLongTimer ? WAKE_LOCK_TIMEOUT_FOR_LONG_TIMER : WAKE_LOCK_TIMEOUT);
+        if (wakeLock != null) {
+            wakeLock.acquire(isLongTimer ? WAKE_LOCK_TIMEOUT_FOR_LONG_TIMER : WAKE_LOCK_TIMEOUT);
         }
 
         SystemInterface.getInstance().notifyTimerExpired(tid);
@@ -385,9 +386,10 @@ public class TimerAgent implements TimerInterface {
         stopImsAlarm(tid, requestCode, false);
 
         if (isActiveTimer(tid)) {
-            IWakeLock wl = (IWakeLock) AgentFactory.getAgent(AgentFactory.WAKE_LOCK);
-            if (wl != null) {
-                wl.acquire(WAKE_LOCK_TIMEOUT);
+            WakeLockInterface wakeLock =
+                    AgentFactory.getInstance().getAgent(WakeLockInterface.class);
+            if (wakeLock != null) {
+                wakeLock.acquire(WAKE_LOCK_TIMEOUT);
             }
 
             AppContext.runTask(() -> {

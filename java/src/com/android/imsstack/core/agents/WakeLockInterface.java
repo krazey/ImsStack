@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 package com.android.imsstack.core.agents;
 
 /**
- * This provides an interface to control the wake lock while processing SIP signalling.
+ * An interface for providing the timed WakeLock while processing SIP signalling.
  */
-public interface IWakeLock extends IAgent {
+public interface WakeLockInterface extends IAgent {
     /**
      * Sets the device stay on until timer expired.
+     *
+     * @param timeoutMillis The timeout value in milli-seconds.
      */
-    void acquire(int timeout);
+    void acquire(int timeoutMillis);
 
     /**
-     * Sets the device stay on until timer expired when screen is off.
+     * Sets the device stay on until timer expired when the native logic requests.
+     *
+     * @param timeoutMillis The timeout value in milli-seconds.
      */
-    void acquire(int timeout, boolean screenOffOnly);
+    void acquireForNative(int timeoutMillis);
 }

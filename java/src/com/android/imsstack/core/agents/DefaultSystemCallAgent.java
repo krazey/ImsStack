@@ -37,6 +37,19 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
     }
 
     /**
+     * Sets the device stay on until timer expired.
+     *
+     * @param timeoutMillis The timeout value in milli-seconds.
+     */
+    @Override
+    public void acquireWakeLock(int timeoutMillis) {
+        WakeLockInterface wakeLock = AgentFactory.getInstance().getAgent(WakeLockInterface.class);
+        if (wakeLock != null) {
+            wakeLock.acquireForNative(timeoutMillis);
+        }
+    }
+
+    /**
      * Starts a timer with the specified duration for the native service.
      *
      * @param tid The timer id to be started.

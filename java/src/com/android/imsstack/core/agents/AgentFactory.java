@@ -35,7 +35,6 @@ public final class AgentFactory {
     public static final int SUBSCRIPTION = 1;
     public static final int BATTERY_STATE = 3;
     public static final int PREFERENCE = 4;
-    public static final int WAKE_LOCK = 5;
 
     // agents with slot id
     public static final int PHONE_STATE = 13;
@@ -219,7 +218,6 @@ public final class AgentFactory {
         sAgents.put(SUBSCRIPTION, SubscriptionAgent.getInstance());
         sAgents.put(BATTERY_STATE, BatteryStateAgent.getInstance());
         sAgents.put(PREFERENCE, PreferenceAgent.getInstance());
-        sAgents.put(WAKE_LOCK, WakeLockAgent.getInstance());
 
         getInstance().createAgents();
     }
@@ -251,7 +249,6 @@ public final class AgentFactory {
         SubscriptionAgent.getInstance().init(context);
         BatteryStateAgent.getInstance().init(context);
         PreferenceAgent.getInstance().init(context);
-        WakeLockAgent.getInstance().init(context);
 
         getInstance().initAgents(context);
     }
@@ -273,6 +270,7 @@ public final class AgentFactory {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
         }
 
+        mAgents.put(WakeLockInterface.class, new WakeLockAgent());
         mAgents.put(TimerInterface.class, new TimerAgent());
         mAgents.put(WifiInterface.class, new WifiAgent());
     }

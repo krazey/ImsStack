@@ -24,7 +24,6 @@ import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.SrvccCall;
 
-import com.android.imsstack.core.agents.ImsWakeLock;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
@@ -39,6 +38,7 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsWakeLock;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;

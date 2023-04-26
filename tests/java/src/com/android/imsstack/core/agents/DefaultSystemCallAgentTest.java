@@ -44,10 +44,11 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
-    @Mock Context mContext;
-    @Mock SystemInterface mSystemInterface;
-    @Mock WifiInterface mWifiInterface;
-    @Mock TimerAgent mTimerAgent;
+    @Mock private Context mContext;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private WakeLockInterface mWakeLockInterface;
+    @Mock private WifiInterface mWifiInterface;
+    @Mock private TimerAgent mTimerAgent;
 
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
@@ -57,6 +58,7 @@ public class DefaultSystemCallAgentTest {
 
         AppContext.init(mContext);
         SystemInterface.setSystemInterface(mSystemInterface);
+        AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLockInterface);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
 
@@ -72,6 +74,7 @@ public class DefaultSystemCallAgentTest {
 
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
+        AgentFactory.getInstance().setAgent(WakeLockInterface.class, null);
         SystemInterface.setSystemInterface(null);
 
         mTimerAgent = null;
@@ -90,6 +93,15 @@ public class DefaultSystemCallAgentTest {
         mDefaultSystemCallAgent = null;
 
         verify(mSystemInterface).setSystemCallInterface(eq(null));
+    }
+
+    @Test
+    @SmallTest
+    public void testAcquireWakeLock() {
+        int timeout = 1000; // 1 second
+        mDefaultSystemCallAgent.acquireWakeLock(timeout);
+
+        verify(mWakeLockInterface).acquireForNative(eq(timeout));
     }
 
     @Test
