@@ -55,7 +55,6 @@ public class SystemInterface implements JniSystemListener {
     private DefaultSystemCallInterface mDefaultSystemCall;
     private ISystemAPIBattery mISystemAPIBattery;
     private ISystemAPIPreference mISystemAPIPreference;
-    private ISystemAPIWakeLock mWakeLock;
 
     /**
      * Returns a singleton System interface.
@@ -137,10 +136,6 @@ public class SystemInterface implements JniSystemListener {
 
     public void setISystemAPIPreference(ISystemAPIPreference api) {
         mISystemAPIPreference = api;
-    }
-
-    public void setWakeLock(ISystemAPIWakeLock wakeLock) {
-        mWakeLock = wakeLock;
     }
 
     /**
@@ -301,8 +296,8 @@ public class SystemInterface implements JniSystemListener {
 
         switch (event) {
             case ImsEventDef.IMS_EVENT_WAKE_LOCK:
-                if (mWakeLock != null) {
-                    mWakeLock.acquire(lParam);
+                if (mDefaultSystemCall != null) {
+                    mDefaultSystemCall.acquireWakeLock(lParam);
                 }
                 break;
 

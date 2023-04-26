@@ -13,29 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core.agents;
+package com.android.imsstack.util;
 
 import android.os.PowerManager;
+import android.text.TextUtils;
+import android.util.ArraySet;
 
-import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * A wrapper class for acquiring or releasing the wake lock.
+ */
 public class ImsWakeLock {
-    private String mTag = ImsWakeLock.class.getSimpleName();
-    private PowerManager mPM;
+    private final String mTag;
+    private final PowerManager mPowerManager;
+    private final Set<Object> mHolders = new ArraySet<>();
     private PowerManager.WakeLock mWakeLock;
-    private HashSet<Object> mHolders = new HashSet<Object>();
-
-    public ImsWakeLock(PowerManager pm) {
-        mPM = pm;
-    }
 
     public ImsWakeLock(PowerManager pm, String tag) {
-        mPM = pm;
-        mTag = tag;
+        mPowerManager = pm;
+        mTag = TextUtils.isEmpty(tag) ? ImsWakeLock.class.getSimpleName() : tag;
     }
 
+    /**
+     * Clears the wake lock and removes all the holder objects.
+     */
     public synchronized void clear() {
         ImsLog.i(mTag + " - clear :: refCount=" + mHolders.size());
 
@@ -43,16 +47,21 @@ public class ImsWakeLock {
         release(null);
     }
 
+    /**
+     * Acquires the wake lock.
+     *
+     * @param holder The holder object that owns this wake lock.
+     */
     public synchronized void acquire(Object holder) {
         mHolders.add(holder);
 
         if (mWakeLock == null) {
-            mWakeLock = mPM.newWakeLock(
+            mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK,
                     mTag);
         }
 
-        if (!mWakeLock.isHeld()) {
+        if (!isHeld()) {
             mWakeLock.acquire();
         }
 
@@ -61,15 +70,25 @@ public class ImsWakeLock {
         }
     }
 
+    /**
+     * Releases the wake lock.
+     *
+     * @param holder The holder object that owns this wake lock.
+     */
     public synchronized void release(Object holder) {
         mHolders.remove(holder);
 
-        if ((mWakeLock != null) && mHolders.isEmpty() && mWakeLock.isHeld()) {
+        if (mHolders.isEmpty() && isHeld()) {
             mWakeLock.release();
         }
 
         if (ImsLog.isDebuggable()) {
             ImsLog.d(mTag + " - release :: refCount=" + mHolders.size());
         }
+    }
+
+    @VisibleForTesting
+    protected boolean isHeld() {
+        return mWakeLock != null && mWakeLock.isHeld();
     }
 }

@@ -24,6 +24,13 @@ import com.android.imsstack.core.agents.WifiInterface;
  */
 public interface DefaultSystemCallInterface {
     /**
+     * Sets the device stay on until timer expired.
+     *
+     * @param timeoutMillis The timeout value in milli-seconds.
+     */
+    void acquireWakeLock(int timeoutMillis);
+
+    /**
      * Starts a timer with the specified duration for the native service.
      *
      * @param tid The timer id to be started.

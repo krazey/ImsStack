@@ -56,7 +56,7 @@ public class TimerAgentTest {
     private static final long LONG_DURATION = 10000L; // 1 second
 
     @Mock SystemInterface mSystemInterface;
-    @Mock IWakeLock mWakeLock;
+    @Mock WakeLockInterface mWakeLock;
     @Mock TimerInterface.Listener mTimerListener;
 
     private AlarmManager mAlarmManager;
@@ -76,7 +76,7 @@ public class TimerAgentTest {
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         AppContext.init(mContext);
         SystemInterface.setSystemInterface(mSystemInterface);
-        AgentFactory.setDefaultAgent(AgentFactory.WAKE_LOCK, mWakeLock);
+        AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLock);
         mMainLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mTimerAgent = new TimerAgent();
@@ -108,7 +108,7 @@ public class TimerAgentTest {
             mTimerLooper = null;
         }
 
-        AgentFactory.setDefaultAgent(AgentFactory.WAKE_LOCK, null);
+        AgentFactory.getInstance().setAgent(WakeLockInterface.class, null);
         SystemInterface.setSystemInterface(null);
         mAlarmManager = null;
         mWakeLock = null;
