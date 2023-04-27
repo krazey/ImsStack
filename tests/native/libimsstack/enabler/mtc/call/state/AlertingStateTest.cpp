@@ -251,7 +251,7 @@ TEST_F(AlertingStateTest, SessionStartedTransitsStateToEstablished)
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
 
-    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendStarted).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
 }
@@ -447,7 +447,7 @@ TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
             .WillByDefault(ReturnRef(objSupplementaryService));
     SetUpForUssi();
 
-    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendStarted).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
 }

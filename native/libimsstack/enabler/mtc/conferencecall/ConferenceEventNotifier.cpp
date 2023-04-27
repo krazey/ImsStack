@@ -51,10 +51,7 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 
     objParticipantList.Login();
 
-    ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
-    m_objConfCallContext.GetUiNotifier().SendMerged(IMS_NULL,
-            m_objConfCallContext.GetMediaManager().GetMediaInfo(),
-            m_objConfCallContext.GetSupplementaryService().GetServices(), objUsers);
+    m_objConfCallContext.GetUiNotifier().SendMerged(objParticipantList.GetConfUsers());
 }
 
 PUBLIC
@@ -99,7 +96,7 @@ void ConferenceEventNotifier::NotifyDropped(
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_TRUE, objReason);
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_SUCCESS, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -110,7 +107,7 @@ void ConferenceEventNotifier::NotifyDropFailed(
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FALSE, objReason);
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FAILURE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -121,7 +118,7 @@ void ConferenceEventNotifier::NotifyJoined(
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_TRUE, objReason);
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_SUCCESS, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -132,7 +129,7 @@ void ConferenceEventNotifier::NotifyJoinFailed(
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FALSE, objReason);
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FAILURE, objReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -144,7 +141,7 @@ void ConferenceEventNotifier::NotifyConferenceInfo(IN ConferenceParticipantList&
             0, 0);
 
     m_objConfCallContext.GetUiNotifier().SendNotifyConfInfo(
-            "", "", objParticipantList.GetMaxUserCount(), objParticipantList.GetSize(), "");
+            "", "", objParticipantList.GetSize(), objParticipantList.GetMaxUserCount(), "");
 }
 
 PUBLIC

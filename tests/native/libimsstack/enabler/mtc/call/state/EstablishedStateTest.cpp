@@ -317,7 +317,7 @@ TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
@@ -338,7 +338,7 @@ TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSup
     ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
     ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
 
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
     EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
@@ -375,7 +375,7 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
     ON_CALL(*pMockConfigurationManager, IsCheckUiConditionForIncomingResume)
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objUiNotifier, SendIncomingResume(_, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendIncomingResume).Times(1);
     EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
@@ -383,7 +383,7 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
 
 TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)
 {
-    EXPECT_CALL(objUiNotifier, SendHeldBy(&objCallInfo, objMediaInfo, _)).Times(2);
+    EXPECT_CALL(objUiNotifier, SendHeldBy).Times(2);
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneStarted());
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneFailed());
 }

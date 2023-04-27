@@ -17,93 +17,63 @@
 #ifndef MTC_UI_NOTIFIER_H_
 #define MTC_UI_NOTIFIER_H_
 
-#include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcUiNotifier.h"
 
+class AString;
 class IMtcCallContext;
-class ParticipantInfo;
 class IJniMtcCallThread;
-class SuppService;
-struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
-struct MediaInfo;
-
-// TODO: remove unused parameter
-// TODO: get SuppService from the context
-// TODO: make all apis to return a result and let MtcCall logic handle the result.
 
 class MtcUiNotifier final : public IMtcUiNotifier
 {
 public:
     explicit MtcUiNotifier(IN IMtcCallContext& objContext);
-    ~MtcUiNotifier();
+    virtual ~MtcUiNotifier();
     MtcUiNotifier(IN const MtcUiNotifier&) = delete;
     MtcUiNotifier& operator=(IN const MtcUiNotifier&) = delete;
 
-    void SendPreIncomingCallReceived(IN CallKey nKey) override;
-    void SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN ParticipantInfo& objParticipantInfo) override;
-    void SendStarted(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendPreIncomingCallReceived() override;
+    void SendIncomingCallReceived() override;
+    void SendStarted() override;
     void SendStartFailed(IN const CallReasonInfo& objReason) override;
-    void SendProgressing(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN IMS_BOOL bAlerted = IMS_FALSE) override;
-    void SendHeld(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendProgressing(IN IMS_BOOL bRemoteAlerted) override;
+    void SendHeld() override;
     void SendHoldFailed(IN const CallReasonInfo& objReason) override;
-    void SendResumed(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendResumed() override;
     void SendResumeFailed(IN const CallReasonInfo& objReason) override;
-    void SendHeldBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendResumedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendHeldBy() override;
+    void SendResumedBy() override;
     void SendTerminated(IN const CallReasonInfo& objReason) override;
-    void SendIncomingResume(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* pCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendUpdated(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendIncomingResume() override;
+    void SendIncomingUpdate(IN CallType eCallTypeToUpdate) override;
+    void SendUpdated() override;
     void SendUpdateFailed(IN const CallReasonInfo& objReason) override;
-    void SendUpdatedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue, IN IMS_SINT32 nValue = -1,
-            IN IMS_BOOL bValue = IMS_FALSE) override;
-    void SendExpanded(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void SendUpdatedBy() override;
+    void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue, IN IMS_SINT32 nValue,
+            IN IMS_BOOL bValue) override;
+    void SendExpanded() override;
     void SendExpandFailed(IN const CallReasonInfo& objReason) override;
-    void SendExpandedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN IMS_SINTP nReplaceKey = 0) override;
-    void SendMerged(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN ImsList<ConfUser*>& lstConfUser) override;
+    void SendExpandedBy(IN IMS_SINTP nReplaceKey) override;
+    void SendMerged(IN const ImsList<ConfUser*>& lstConfUser) override;
     void SendMergeFailed(IN const CallReasonInfo& objReason) override;
-    void SendJoined(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason) override;
-    void SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason) override;
-    void SendNotifyUsersInfo(IN ImsList<ConfUser*>& lstConfUser) override;
-    void SendNotifyConfInfo(IN AString strDisplayText, IN AString strSubject,
-            IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount,
-            IN AString strHostEntity) override;
-    void SendReplacedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nKey = 0,
-            IN IMS_UINTP nType = 0) override;
+    void SendJoined(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
+    void SendDropped(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
+    void SendNotifyUsersInfo(IN const ImsList<ConfUser*>& lstConfUser) override;
+    void SendNotifyConfInfo(IN const AString& strDisplayText, IN const AString& strSubject,
+            IN IMS_SINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
+            IN const AString& strHostEntity) override;
+    void SendReplacedBy(IN IMS_SINTP nKey, IN IMS_UINTP nType) override;
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
-    void SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason) override;
+    void SendCallPushCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
 
 private:
-    IJniMtcCallThread* GetCallThread();
     IMtcCallContext& m_objContext;
+
+    IJniMtcCallThread* GetCallThread() const;
 };
 
 #endif

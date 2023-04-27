@@ -750,7 +750,7 @@ TEST_F(IdleStateTest, HandleIncomingInvokesSendPreIncomingCallReceived)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
-    EXPECT_CALL(objUiNotifier, SendPreIncomingCallReceived(_));
+    EXPECT_CALL(objUiNotifier, SendPreIncomingCallReceived);
 
     EXPECT_EQ(CallStateName::IDLE, pIdleState->HandleIncoming(&objSession));
 
@@ -902,7 +902,7 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRprNotSupported
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strNoRprTag)));
 
-    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
 
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
 }
@@ -1060,7 +1060,7 @@ TEST_F(IdleStateTest, OnUssiAttachedTransitsAlertingState)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
 
-    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnUssiAttached());
 
     delete pMessage;

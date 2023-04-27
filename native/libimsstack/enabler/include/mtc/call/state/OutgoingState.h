@@ -76,7 +76,6 @@ private:
             IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason);
     CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
-    void SendProgressing();
     void OnStarted(IN ISession* piSession);
     void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void OnSessionForked(IN ISession* piOriginSession);

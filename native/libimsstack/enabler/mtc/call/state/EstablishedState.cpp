@@ -90,8 +90,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
     if (objOldMediaInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         m_objContext.SetHeldByMe(IMS_TRUE);
-        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), objOldMediaInfo,
-                m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendHeld();
         return GetStateName();
     }
 
@@ -396,9 +395,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
 PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingNetworkToneStarted()
 {
     IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
-    m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()),
-            m_objContext.GetMediaManager().GetMediaInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
+    m_objContext.GetUiNotifier().SendHeldBy();
 
     return GetStateName();
 }
@@ -406,9 +403,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingNetworkToneStarted()
 PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingNetworkToneFailed()
 {
     IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
-    m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()),
-            m_objContext.GetMediaManager().GetMediaInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
+    m_objContext.GetUiNotifier().SendHeldBy();
 
     return GetStateName();
 }
@@ -555,7 +550,8 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         }
         else
         {
-            SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));
+            SendIncomingUpdateToUi(
+                    m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));
         }
 
         return IMS_SUCCESS;
@@ -565,7 +561,9 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
             m_objContext.GetConfigurationProxy().Is(
                     Feature::CHECK_UI_CONDITION_FOR_INCOMING_RESUME))
     {
-        SendIncomingResume();
+        m_objContext.GetUiNotifier().SendIncomingResume();
+        m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
+                m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
 
         return IMS_SUCCESS;
     }
@@ -694,19 +692,6 @@ IMS_BOOL EstablishedState::IsRefreshInProgress() const
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
     return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
-}
-
-PRIVATE
-void EstablishedState::SendIncomingResume()
-{
-    IMS_TRACE_D("SendIncomingResume", 0, 0, 0);
-
-    m_objContext.GetUiNotifier().SendIncomingResume(&m_objContext.GetCallInfo(),
-            m_objContext.GetUpdatingInfo().GetAlertingInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
-
-    m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
 }
 
 PRIVATE

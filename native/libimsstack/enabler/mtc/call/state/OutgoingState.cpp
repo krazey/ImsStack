@@ -257,7 +257,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     RunMedia(piSession, piMessage);
 
-    SendProgressing();
+    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
     return GetStateName();
 }
 
@@ -317,7 +317,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     RunMedia(piSession, piMessage);
-    SendProgressing();  // TODO: enforce remote alert to false?
+    m_objContext.GetUiNotifier().SendProgressing(
+            m_bRemoteAlerted);  // TODO: enforce remote alert to false?
     return GetStateName();
 }
 
@@ -481,7 +482,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     RunMedia(piSession, piMessage);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
-    SendProgressing();
+    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
     return GetStateName();
 }
 
@@ -574,7 +575,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);
-    SendProgressing();
+    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
     return GetStateName();
 }
 
@@ -597,14 +598,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()
 {
     IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
-    SendProgressing();
+    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
 {
     IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
-    SendProgressing();
+    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
     return GetStateName();
 }
 
@@ -825,28 +826,13 @@ void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
 }
 
 PRIVATE
-void OutgoingState::SendProgressing()
-{
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-
-    MediaInfo objMediaInfo = objMediaManager.GetMediaInfo();
-    if (objMediaManager.IsLocalTone())
-    {
-        objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
-    }
-
-    m_objContext.GetUiNotifier().SendProgressing(&m_objContext.GetCallInfo(), objMediaInfo,
-            m_objContext.GetSupplementaryService().GetServices(), m_bRemoteAlerted);
-}
-
-PRIVATE
 void OutgoingState::OnStarted(IN ISession* piSession)
 {
     m_objContext.RemoveInactiveSessions(piSession);
 
     // TODO: stop call init timers
 
-    SendStarted();
+    m_objContext.GetUiNotifier().SendStarted();
 }
 
 PRIVATE

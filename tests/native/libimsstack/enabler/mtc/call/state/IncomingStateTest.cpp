@@ -179,7 +179,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
     ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
             .WillByDefault(Return(IMS_TRUE));
     SetParamsForIncomingCallReceived();
-    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
 }
 
@@ -237,7 +237,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedSendsIncomingCallReceiv
             .WillByDefault(Return(IMS_TRUE));
 
     SetParamsForIncomingCallReceived();
-    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(
             CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
@@ -427,7 +427,7 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
 
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     SetParamsForIncomingCallReceived();
-    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallReceived);
     EXPECT_EQ(CallStateName::ALERTING,
             pIncomingState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
 }

@@ -110,7 +110,7 @@ TEST_F(ConferenceEventNotifierTest, NotifyMerged)
     MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
-    EXPECT_CALL(objUiNotifier, SendMerged(_, _, _, objUsers));
+    EXPECT_CALL(objUiNotifier, SendMerged(objUsers));
     pNotifier->NotifyMerged(*pParticipantList);
 }
 
@@ -142,28 +142,28 @@ TEST_F(ConferenceEventNotifierTest, NotifyExpandFailed)
 
 TEST_F(ConferenceEventNotifierTest, NotifyDropped)
 {
-    EXPECT_CALL(objUiNotifier, SendDropped(IMS_TRUE, *pAnyReason));
+    EXPECT_CALL(objUiNotifier, SendDropped(IMS_SUCCESS, *pAnyReason));
     EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
     pNotifier->NotifyDropped(*pAnyReason, *pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyDropFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendDropped(IMS_FALSE, *pAnyReason));
+    EXPECT_CALL(objUiNotifier, SendDropped(IMS_FAILURE, *pAnyReason));
     EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
     pNotifier->NotifyDropFailed(*pAnyReason, *pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyJoined)
 {
-    EXPECT_CALL(objUiNotifier, SendJoined(IMS_TRUE, *pAnyReason));
+    EXPECT_CALL(objUiNotifier, SendJoined(IMS_SUCCESS, *pAnyReason));
     EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
     pNotifier->NotifyJoined(*pAnyReason, *pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyJoinFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendJoined(IMS_FALSE, *pAnyReason));
+    EXPECT_CALL(objUiNotifier, SendJoined(IMS_FAILURE, *pAnyReason));
     EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
     pNotifier->NotifyJoinFailed(*pAnyReason, *pParticipantList);
 }
@@ -172,7 +172,7 @@ TEST_F(ConferenceEventNotifierTest, NotifyConferenceInfo)
 {
     AString strEmpty("");
     EXPECT_CALL(
-            objUiNotifier, SendNotifyConfInfo(strEmpty, strEmpty, MAX_COUNT, CONF_SIZE, strEmpty));
+            objUiNotifier, SendNotifyConfInfo(strEmpty, strEmpty, CONF_SIZE, MAX_COUNT, strEmpty));
     pNotifier->NotifyConferenceInfo(*pParticipantList);
 }
 
