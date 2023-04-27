@@ -1014,6 +1014,9 @@ TEST_F(AosApplicationTest, ProcessMessage)
 
     // MSG_PLMN_BLOCK_WITH_TIMEOUT
     // TEST_F : ProcessPlmnBlockWithTimeout
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
     m_pTestAosApplication->SetNetTrackerListener();
     objMessage.nMSG = MSG_PLMN_BLOCK_WITH_TIMEOUT;
     EXPECT_CALL(m_objMockIAosService,

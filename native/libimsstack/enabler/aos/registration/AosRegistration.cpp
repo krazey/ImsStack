@@ -3570,12 +3570,27 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
             nAwt = GetActualWaitTime();
         }
 
-        m_piContext->GetPcscf()->SetCurrentPcscfTried();
+        IAosPcscf* piPcscf = m_piContext->GetPcscf();
+
+        piPcscf->SetCurrentPcscfTried();
         if (SetNextPcscf())
         {
             StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
             SetState(STATE_REGSTOP);
-            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
+                    piPcscf->GetPcscfCount() > 1 && piPcscf->IsAllPcscfTried() &&
+                    piPcscf->IsFirstPcscf() &&
+                    GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0)
+            {
+                A_IMS_TRACE_I(
+                        REGID, "StartWithSpecifiedIntervalPolicy :: all pcscfs are tried", 0, 0, 0);
+                piPcscf->ResetAllPcscfTried();
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT);
+            }
+            else
+            {
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            }
         }
         else
         {

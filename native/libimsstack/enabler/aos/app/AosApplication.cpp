@@ -565,11 +565,9 @@ IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 PROTECTED
 IMS_BOOL AosApplication::IsPlmnBlockWithTimeoutRequired() const
 {
-    IMS_BOOL bLteInfoSmsOnly = (m_nLteExtraInfo & IMS_LTE_INFO_EXTRA_SMS_ONLY) > 0;
-
     if (m_piNetTracker->GetMobileNetworkType() == NW_REPORT_RADIO_LTE &&
-            m_piNetTracker->IsRoaming() && m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
-            !bLteInfoSmsOnly)
+            m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+            m_nLteExtraInfo == IMS_LTE_INFO_EXTRA_NONE)
     {
         return IMS_FALSE;
     }
@@ -1663,6 +1661,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnecting(IN IMS_U
             ProcessPlmnBlockWithTimeout();
             break;
 
+        case IAosRegistration::REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT:
+            ProcessPlmnBlockWithTimeout();
+            ProcessRegFailed_Start(nReason);
+            break;
+
         default:
             ProcessRegFailed_Start(nReason);
             break;
@@ -2377,6 +2380,16 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlockWithTimeout()
 {
+    if (!GET_N_CONFIG(m_nSlotId)->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+    {
+        return;
+    }
+
+    if (!IsRegTypeNormal() || m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        return;
+    }
+
     if (!IsPlmnBlockWithTimeoutRequired())
     {
         return;
