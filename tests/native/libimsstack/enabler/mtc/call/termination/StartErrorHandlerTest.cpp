@@ -293,7 +293,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
     MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
     ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
-    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
@@ -315,7 +315,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
-    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
 }

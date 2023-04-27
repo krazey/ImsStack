@@ -288,7 +288,7 @@ PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
 
     if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
             m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
-            !m_objContext.GetEpsFallbackTrigger().IsVoNr())
+            !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
         SendIncomingCallReceived();

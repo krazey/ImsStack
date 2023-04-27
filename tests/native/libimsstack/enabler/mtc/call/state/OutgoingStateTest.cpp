@@ -194,7 +194,7 @@ protected:
         }
         ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
                 .WillByDefault(Return(bEpsFallbackRequired ? 2000 : -1));
-        ON_CALL(*pEpsFbTrigger, IsVoNr).WillByDefault(Return(bEpsFallbackRequired));
+        ON_CALL(objService, IsNr).WillByDefault(Return(bEpsFallbackRequired));
     }
 
     MtcExtensionSet* GetTestExtensionSet(IN const AString& strOptionTag)
@@ -581,7 +581,7 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesStartWatchdogIfSupportedAndSdpAns
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
-    ON_CALL(*pEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
 
@@ -1514,7 +1514,7 @@ TEST_F(OutgoingStateTest, SessionRPRReceivedInvokesStartWatchdogIfSupportedAndSd
     SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
 
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
-    ON_CALL(*pEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
 

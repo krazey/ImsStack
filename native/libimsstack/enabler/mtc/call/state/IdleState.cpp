@@ -466,7 +466,7 @@ IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) co
 {
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT ||
             !EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) ||
-            !m_objContext.GetEpsFallbackTrigger().IsVoNr())
+            !m_objContext.GetService().IsNr())
 
     {
         return IMS_FALSE;

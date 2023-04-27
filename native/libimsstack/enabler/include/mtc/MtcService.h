@@ -56,6 +56,7 @@ public:
 
     inline IMS_BOOL IsActive() const override { return m_eStatus == ServiceStatus::SERVICE_ACTIVE; }
     inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }
+    IMS_BOOL IsNr() const override;
     IMS_BOOL IsWlanIpCanType() const override;
     inline ServiceStatus GetOldStatus() const override { return m_eOldStatus; }
     inline ServiceStatus GetStatus() const override { return m_eStatus; }

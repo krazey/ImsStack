@@ -418,9 +418,12 @@ TEST_F(IncomingStateTest, OnAosConnectedReturnsAlertingStateIfWaitingEpsFallback
 {
     IMS_UINT32 nAnyAosReason = 1;
 
+    MockIMtcService objService;
+    ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
+
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pEpsFbTrigger, OnEpsFallbackCompleted);
     SetParamsForIncomingCallReceived();

@@ -17,7 +17,6 @@
 #include "CallReasonInfo.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -79,7 +78,7 @@ PUBLIC VIRTUAL void LastComeFirstServedHelper::OnCallReceived(IN CallKey nIncomi
                 CallReasonInfo(GetRejectReasonCode(piPreExistingIncomingCall->GetCallContext())));
     }
 
-    IMS_BOOL bOnNr = IsVoNr(nIncomingCallKey);
+    IMS_BOOL bOnNr = GetCallContext(nIncomingCallKey).GetService().IsNr();
     SetNetworkInfoOfIncomingCall(bOnNr);
     if (bOnNr)
     {
@@ -92,19 +91,6 @@ IMS_BOOL LastComeFirstServedHelper::IsNormalCall(IN CallKey nKey) const
 {
     CallInfo& objCallInfo = GetCallContext(nKey).GetCallInfo();
     return (!objCallInfo.bEmergency && !objCallInfo.bUssi);
-}
-
-PRIVATE
-IMS_BOOL LastComeFirstServedHelper::IsVoNr(IN CallKey nKey) const
-{
-    if (GetCallContext(nKey).GetService().IsWlanIpCanType())
-    {
-        return IMS_FALSE;
-    }
-
-    return PhoneInfoService::GetPhoneInfoService()
-                   ->GetNetworkWatcher(m_objContext.GetSlotId())
-                   ->GetNetRadioTechType() == NW_REPORT_RADIO_NR;
 }
 
 PRIVATE

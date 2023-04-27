@@ -32,6 +32,7 @@
 #include "MtcService.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/radio/MockIMtcRadioChecker.h"
@@ -116,6 +117,7 @@ public:
     MockIJniMtcServiceThread objMockServiceThread;
     JniEnablerConnector* pConnector;
     TestConfigService objConfigService;
+    TestPhoneInfoService objPhoneInfoService;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -149,6 +151,8 @@ protected:
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         // to make Connector::Open() return valid IConnector even though MtcApp is not created
         // during the test.
@@ -162,6 +166,7 @@ protected:
     virtual void TearDown() override
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pMockEmergencyManager;
         delete pNormalMtcService;
@@ -320,6 +325,28 @@ TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
 
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
     EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_FALSE(pNormalMtcService->IsNr());
+}
+
+TEST_F(MtcServiceTest, IsNrChecksRadioInfo)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    EXPECT_FALSE(pNormalMtcService->IsNr());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(pNormalMtcService->IsNr());
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedNormalServiceInvokesSetReady)

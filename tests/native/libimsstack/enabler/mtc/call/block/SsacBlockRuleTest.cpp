@@ -21,7 +21,6 @@
 #include "TestImsRadioService.h"
 #include "TestSystemTimeService.h"
 #include "call/IMtcCall.h"
-#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/SsacBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
@@ -45,7 +44,6 @@ public:
     MockIMtcService objService;
     MockIMtcBlockRuleCheckListener objBlockRuleCheckListener;
     SsacInfo objSsacInfo;
-    MockEpsFallbackTrigger* pEpsFbTrigger;
 
 protected:
     virtual void SetUp() override
@@ -54,8 +52,6 @@ protected:
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_SYSTEM_TIME, &objSystemTimeService);
-
-        pEpsFbTrigger = new MockEpsFallbackTrigger(objContext);
 
         objSsacInfo.nBarringFactorForVoice = 100;
         objSsacInfo.nBarringTimeSecForVoice = 0;
@@ -68,15 +64,12 @@ protected:
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimerHolder));
-        ON_CALL(objContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     }
 
     virtual void TearDown() override
     {
-        delete pEpsFbTrigger;
-
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_SYSTEM_TIME, IMS_NULL);
     }
@@ -95,7 +88,7 @@ TEST_F(SsacBlockRuleTest, CheckNotChecksSsacWhenNr)
     SetSsacBarred(IMS_TRUE, IMS_TRUE);
     objCallInfo.ePeerType = PeerType::MT;
 
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     SsacBlockRule objRule(objContext, CallType::VOIP);
     EXPECT_EQ(Result(Result::Status::UNBLOCKED), objRule.Check(objBlockRuleCheckListener));

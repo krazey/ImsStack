@@ -1066,7 +1066,7 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
         return;
     }
 
-    if (m_objContext.GetEpsFallbackTrigger().IsVoNr() == IMS_FALSE)
+    if (m_objContext.GetService().IsNr() == IMS_FALSE)
     {
         return;
     }

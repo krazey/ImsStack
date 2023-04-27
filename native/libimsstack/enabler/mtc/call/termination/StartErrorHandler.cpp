@@ -543,7 +543,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
 {
     if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetEpsFallbackTrigger().IsVoNr())
+            m_objContext.GetService().IsNr())
     {
         return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
     }

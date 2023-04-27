@@ -1077,7 +1077,7 @@ TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfMt)
 
     objCallInfo.ePeerType = PeerType::MT;
     SetEpsFallbackRequiredByConfig(IMS_TRUE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
 }
 
@@ -1092,7 +1092,7 @@ TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfConfigOff)
 
     objCallInfo.ePeerType = PeerType::MO;
     SetEpsFallbackRequiredByConfig(IMS_FALSE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
 }
 
@@ -1107,7 +1107,7 @@ TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfNotInVoNr)
 
     objCallInfo.ePeerType = PeerType::MO;
     SetEpsFallbackRequiredByConfig(IMS_TRUE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
 }
 
@@ -1123,7 +1123,7 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForAcBlocked)
 
     objCallInfo.ePeerType = PeerType::MO;
     SetEpsFallbackRequiredByConfig(IMS_TRUE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
 }
 
@@ -1146,7 +1146,7 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForRrcReject)
 
     objCallInfo.ePeerType = PeerType::MO;
     SetEpsFallbackRequiredByConfig(IMS_TRUE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
 }
 
@@ -1168,7 +1168,7 @@ TEST_F(IdleStateTest, OnBlockCheckedDoesNotTriggerEpsFbForRrcRejectIfRejectTimeI
 
     objCallInfo.ePeerType = PeerType::MO;
     SetEpsFallbackRequiredByConfig(IMS_TRUE);
-    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
 }
 

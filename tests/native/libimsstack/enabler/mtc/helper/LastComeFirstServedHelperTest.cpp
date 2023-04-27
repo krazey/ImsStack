@@ -19,7 +19,6 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
-#include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -63,7 +62,6 @@ public:
             objPreconditionManager(),
             objSession(),
             objISession(),
-            objPhoneInfoService(),
             objIncomingCalls()
     {
     }
@@ -82,7 +80,6 @@ protected:
     MockIMtcPreconditionManager objPreconditionManager;
     MockIMtcSession objSession;
     MockISession objISession;
-    TestPhoneInfoService objPhoneInfoService;
 
     ImsList<IMtcCall*> objIncomingCalls;
 
@@ -110,21 +107,14 @@ protected:
                 .WillByDefault(ReturnRef(objPreconditionManager));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objSession));
         ON_CALL(objSession, GetISession()).WillByDefault(ReturnRef(objISession));
-
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
     }
 
-    virtual void TearDown() override
-    {
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
-    }
+    virtual void TearDown() override {}
 
     void SetUpForNetworkInfo(IN IMS_BOOL bNr, IN IMS_BOOL bWlan = IMS_FALSE)
     {
+        ON_CALL(objService, IsNr()).WillByDefault(Return(bNr));
         ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(bWlan));
-        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-                .WillByDefault(Return(bNr ? NW_REPORT_RADIO_NR : NW_REPORT_RADIO_LTE));
     }
 };
 

@@ -37,7 +37,6 @@ public:
 
 private:
     IMS_BOOL IsNormalCall(IN CallKey nKey) const;
-    IMS_BOOL IsVoNr(IN CallKey nKey) const;
     IMtcCallContext& GetCallContext(IN CallKey nKey) const;
     IMtcCall* GetPreExistingIncomingCall() const;
     IMS_SINT32 GetRejectReasonCode(IN IMtcCallContext& objCallContext) const;

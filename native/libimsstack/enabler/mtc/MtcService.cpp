@@ -132,6 +132,18 @@ PUBLIC VIRTUAL void MtcService::RemoveSrvccStateListener(IN ISrvccStateListener*
     m_pSrvccStateManager->RemoveListener(piListener);
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcService::IsNr() const
+{
+    if (IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    return PhoneInfoService::GetPhoneInfoService()
+                   ->GetNetworkWatcher(m_objContext.GetSlotId())
+                   ->GetNetRadioTechType() == NW_REPORT_RADIO_NR;
+}
+
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
 {
     if (m_pAosConnector == IMS_NULL)

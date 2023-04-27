@@ -87,9 +87,19 @@ public:
     virtual IMS_BOOL IsEmergency() const = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the UE is currently in NR.
      *
-     * @return
+     * It reads the device's current radio state. So it could be different from the RAT which this
+     * service is in.
+     *
+     * @return True if it's in NR.
+     */
+    virtual IMS_BOOL IsNr() const = 0;
+
+    /**
+     * @brief Checks if the UE is currently registered through an ePDG.
+     *
+     * @return True if it's in ePDG.
      */
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
 

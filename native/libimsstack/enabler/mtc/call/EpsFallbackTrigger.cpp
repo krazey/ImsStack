@@ -19,7 +19,6 @@
 #include "INetworkWatcher.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/EpsFallbackTrigger.h"
@@ -71,19 +70,6 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(
 {
     // without Watchdog timer, EPS fallback due to network no response isn't supported, either.
     return objConfigProxy.GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME) > 0;
-}
-
-PUBLIC
-IMS_BOOL EpsFallbackTrigger::IsVoNr() const
-{
-    if (m_objContext.GetService().IsWlanIpCanType())
-    {
-        return IMS_FALSE;
-    }
-
-    return PhoneInfoService::GetPhoneInfoService()
-                   ->GetNetworkWatcher(m_objContext.GetSlotId())
-                   ->GetNetRadioTechType() == NW_REPORT_RADIO_NR;
 }
 
 PUBLIC
@@ -192,7 +178,7 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason, IN IMS
 PRIVATE
 IMS_BOOL EpsFallbackTrigger::IsEpsFallbackTriggeredByNetwork() const
 {
-    return !IsVoNr() ||
+    return !m_objContext.GetService().IsNr() ||
             m_objContext.GetPreconditionManager().IsDedicatedBearerAllocated(
                     &m_objContext.GetSession()->GetISession(), MEDIATYPE_AUDIO);
 }

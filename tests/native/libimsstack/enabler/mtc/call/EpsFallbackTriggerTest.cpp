@@ -20,7 +20,6 @@
 #include "MtcDef.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
-#include "TestPhoneInfoService.h"
 #include "TestTimerService.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
@@ -56,7 +55,6 @@ public:
     MockIMtcAosConnector objAosConnector;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
-    TestPhoneInfoService objPhoneInfoService;
     TestImsRadioService objImsRadioService;
     TestTimerService objTimerService;
     MockITimer& objTimer;
@@ -68,13 +66,9 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &objTimerService);
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
-        PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
 
-        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-                .WillByDefault(Return(NW_REPORT_RADIO_NR));
-
+        ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
@@ -91,7 +85,6 @@ protected:
         delete pEpsFbTrigger;
 
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
     }
 };
@@ -106,25 +99,6 @@ TEST_F(EpsFallbackTriggerTest, IsRequiredChecksWatchdogTimeConfiguration)
 
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
     EXPECT_TRUE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
-}
-
-TEST_F(EpsFallbackTriggerTest, IsVoNrChecksWifiFirst)
-{
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
-    EXPECT_FALSE(pEpsFbTrigger->IsVoNr());
-}
-
-TEST_F(EpsFallbackTriggerTest, IsVoNrChecksRadioInfo)
-{
-    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-    EXPECT_FALSE(pEpsFbTrigger->IsVoNr());
-
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(pEpsFbTrigger->IsVoNr());
 }
 
 TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
@@ -154,8 +128,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 
     ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
@@ -178,8 +151,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 
     ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
@@ -202,8 +174,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
 
     ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
@@ -226,8 +197,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIf
 
     ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))

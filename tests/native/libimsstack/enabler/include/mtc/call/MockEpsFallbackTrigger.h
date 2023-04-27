@@ -31,7 +31,6 @@ public:
     }
     ~MockEpsFallbackTrigger() {}
 
-    MOCK_METHOD(IMS_BOOL, IsVoNr, (), (const, override));
     MOCK_METHOD(void, StartWatchdog, (), (override));
     MOCK_METHOD(void, OnEpsFallbackCompleted, (), (override));
     MOCK_METHOD(void, TriggerEpsFallback, (IN EpsFallbackReason, IN IMS_BOOL), (override));

@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(void, RemoveSrvccStateListener, (IN ISrvccStateListener* piListener), (override));
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsNr, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetOldStatus, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetStatus, (), (const, override));
