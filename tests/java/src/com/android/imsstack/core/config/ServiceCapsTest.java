@@ -48,7 +48,7 @@ public class ServiceCapsTest {
     private PersistableBundle mConfigBundle;
 
     @Before
-    public void setup() {
+    public void setUp() {
         mContextFixture = new ContextFixture();
         mContext = mContextFixture.getTestDouble();
         when(mContext.getResources().getBoolean(anyInt())).thenReturn(true);
