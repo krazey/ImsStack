@@ -25,7 +25,14 @@ import java.io.IOException;
 import java.util.Collection;
 
 public final class ConfigXmlUtils {
-
+    /**
+     * Parses the XML configuration and returns the structured format as {@link PersistableBundle}.
+     *
+     * @param parser A {@link XmlPullParser} containing XML configuration.
+     * @return A {@link PersistableBundle} instance.
+     * @throws XmlPullParserException If there was an XML parsing error.
+     * @throws IOException If there was an I/O error.
+     */
     public static PersistableBundle readConfig(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         PersistableBundle config = new PersistableBundle();
@@ -48,6 +55,14 @@ public final class ConfigXmlUtils {
                 "Document ended before " + tagName + " end tag");
     }
 
+    /**
+     * Reads the configuration keys from the given XML configuration.
+     *
+     * @param parser A {@link XmlPullParser} containing XML configuration.
+     * @param configKeys All the configuration keys of XML.
+     * @throws XmlPullParserException If there was an XML parsing error.
+     * @throws IOException If there was an I/O error.
+     */
     public static void readConfigKeys(XmlPullParser parser, Collection<String> configKeys)
             throws XmlPullParserException, IOException {
         String rootName = parser.getName();
@@ -274,4 +289,6 @@ public final class ConfigXmlUtils {
         throw new XmlPullParserException(
                 "Document ended before " + endTag + " end tag");
     }
+
+    private ConfigXmlUtils() {}
 }

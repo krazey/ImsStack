@@ -18,8 +18,7 @@ package com.android.imsstack.core.config;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -29,59 +28,55 @@ import android.telephony.SubscriptionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class FeatureConfigTest {
-    private static final int SLOT_ID = 0;
-    private static final int[] SUB_ID = { 0 };
-    private Context mContext;
+    private static final int SLOT0 = 0;
+    private static final int[] SUB_ID = { 1 };
+
+    private ContextFixture mContextFixture;
+
     @Before
     public void setUp() throws Exception {
-        mContext = new ContextFixture().getTestDouble();
-        SubscriptionManager mockSubscriptionManager = mContext.getSystemService(
-                SubscriptionManager.class);
-        when(mockSubscriptionManager.getSubscriptionIds(anyInt()))
-                .thenReturn(SUB_ID);
-        AppContext.init(mContext);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
     }
 
     @After
     public void tearDown() throws Exception {
-        mContext = null;
+        mContextFixture = null;
         AppContext.deinit();
     }
 
     @Test
     @SmallTest
-    public void isEnableTest() {
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, null));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, ""));
+    public void testInitialValue() {
+        assertFalse(FeatureConfig.isEnabled(SLOT0, ""));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOLTE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.SMS));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.UCE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOWIFI));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VT));
 
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOLTE));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.SMS));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.UCE));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOWIFI));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VT));
+        // When feature does not exist.
+        assertFalse(FeatureConfig.isEnabled(MSimUtils.INVALID_SLOT_ID, FeatureConfig.VOLTE));
     }
 
     @Test
     @SmallTest
-    public void initTest() {
-        ConfigAgent mockConfigAgent = Mockito.mock(ConfigAgent.class);
-        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
-        CarrierConfigManager mockCarrierConfigManager = mContext.getSystemService(
-                CarrierConfigManager.class);
+    public void testInit() {
+        Context context = mContextFixture.getTestDouble();
+        SubscriptionManager sm = context.getSystemService(SubscriptionManager.class);
+        when(sm.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
+
         PersistableBundle bundle = new PersistableBundle();
         bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, true);
         bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
@@ -89,28 +84,32 @@ public class FeatureConfigTest {
         bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
         bundle.putBoolean(CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_PUBLISH_BOOL, true);
         bundle.putBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL, true);
+        CarrierConfigManager ccm = context.getSystemService(CarrierConfigManager.class);
+        when(ccm.getConfigForSubId(SUB_ID[0])).thenReturn(bundle);
 
-        doReturn(bundle).when(mockCarrierConfigManager).getConfigForSubId(SUB_ID[0]);
-        when(mockCarrierConfig.getConfig()).thenReturn(bundle);
-        when(mockConfigAgent.getCarrierConfig()).thenReturn(mockCarrierConfig);
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, mockConfigAgent, SLOT_ID);
-        FeatureConfig.init(SLOT_ID);
-        assertTrue(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOLTE));
-        assertTrue(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.SMS));
-        assertTrue(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.UCE));
-        assertTrue(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOWIFI));
-        assertTrue(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VT));
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
-    }
+        FeatureConfig.init(SLOT0);
+        assertTrue(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOLTE));
+        assertTrue(FeatureConfig.isEnabled(SLOT0, FeatureConfig.SMS));
+        assertTrue(FeatureConfig.isEnabled(SLOT0, FeatureConfig.UCE));
+        assertTrue(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOWIFI));
+        assertTrue(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VT));
 
-    @Test
-    @SmallTest
-    public void initUnavailableTest() {
-        FeatureConfig.init(SLOT_ID);
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOLTE));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.SMS));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.UCE));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VOWIFI));
-        assertFalse(FeatureConfig.isEnabled(SLOT_ID, FeatureConfig.VT));
+        bundle.clear();
+        FeatureConfig.init(SLOT0);
+
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOLTE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.SMS));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.UCE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOWIFI));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VT));
+
+        mContextFixture.setSystemService(Context.CARRIER_CONFIG_SERVICE, null);
+        FeatureConfig.init(SLOT0);
+
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOLTE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.SMS));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.UCE));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VOWIFI));
+        assertFalse(FeatureConfig.isEnabled(SLOT0, FeatureConfig.VT));
     }
 }

@@ -51,6 +51,8 @@ public final class FeatureTable {
         return sServiceFeatureList;
     }
 
+    private FeatureTable() {}
+
     static {
         /** Service feature list */
         sServiceFeatureList = new ArrayList<Feature>();

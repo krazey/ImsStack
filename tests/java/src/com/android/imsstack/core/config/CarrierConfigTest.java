@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
@@ -82,7 +83,7 @@ public class CarrierConfigTest {
 
     @Test
     @SmallTest
-    public void getDefaultValues() {
+    public void testGetDefaultValues() {
         assertNotNull(mCarrierConfig.getConfig());
         assertFalse(mCarrierConfig.isVoLteProvisioningRequired());
         assertFalse(mCarrierConfig.getBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
@@ -103,7 +104,7 @@ public class CarrierConfigTest {
 
     @Test
     @SmallTest
-    public void setConfig() {
+    public void testSetConfig() {
         mCarrierConfig.setConfig(createBundle(), SLOT0);
 
         assertNotNull(mCarrierConfig.getConfig());
@@ -127,18 +128,21 @@ public class CarrierConfigTest {
 
     @Test
     @SmallTest
-    public void setConfigForUserAgent() {
+    public void testSetConfigForUserAgent() {
         ContextFixture contextFixture = new ContextFixture();
         AppContext.init(contextFixture.getTestDouble());
         TelephonyManager telephonyManager =
                 contextFixture.getTestDouble().getSystemService(TelephonyManager.class);
-        when(telephonyManager.getImei(eq(SLOT0))).thenReturn("000000000000001");
-        when(telephonyManager.getDeviceSoftwareVersion(eq(SLOT0))).thenReturn("01");
+        when(telephonyManager.getImei(eq(SLOT0)))
+                .thenReturn("000000000000001", "000000000000001", null, null, null, null);
+        when(telephonyManager.getDeviceSoftwareVersion(eq(SLOT0))).thenReturn("01", null, "1");
 
         try {
             PersistableBundle b = new PersistableBundle();
             b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING,
                     "#MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#_#IMEI#_#IMEISV#_#TEST#");
+
+            // IMEI: not empty, SV: not empty
             mCarrierConfig.setConfig(b, SLOT0);
 
             String userAgent = mCarrierConfig.getString(
@@ -146,8 +150,62 @@ public class CarrierConfigTest {
             assertNotNull(userAgent);
             assertFalse(userAgent.contains("#"));
             assertTrue(userAgent.endsWith("TEST"));
-            verify(telephonyManager, times(2)).getImei(anyInt());
-            verify(telephonyManager).getDeviceSoftwareVersion(anyInt());
+
+            // IMEI: empty, SV: empty
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("TEST"));
+
+            // IMEI: empty, SV: not empty (1 character)
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("TEST"));
+
+            contextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
+
+            // IMEI: empty, SV: empty when TelephonyManager is null
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNotNull(userAgent);
+            assertFalse(userAgent.contains("#"));
+            assertTrue(userAgent.endsWith("TEST"));
+
+            verify(telephonyManager, times(6)).getImei(anyInt());
+            verify(telephonyManager, times(3)).getDeviceSoftwareVersion(anyInt());
+
+            // Use a default UA string
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, "IMS-client");
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertEquals("IMS-client", userAgent);
+
+            // Empty UA string
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, "");
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertEquals("", userAgent);
+
+            // Null UA string
+            b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, null);
+            mCarrierConfig.setConfig(b, SLOT0);
+
+            userAgent = mCarrierConfig.getString(
+                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
+            assertNull(userAgent);
         } finally {
             AppContext.deinit();
             contextFixture = null;
@@ -157,50 +215,58 @@ public class CarrierConfigTest {
     @Test
     @SmallTest
     public void getValue() {
-        assertEquals("false", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        PersistableBundle config = new PersistableBundle();
+
+        assertEquals("false", CarrierConfig.getValue(config, "test_config_boolean"));
+        assertEquals("false", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_BOOL_ARRAY));
-        assertEquals("-1", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
+        assertEquals("-1", CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY));
-        assertEquals(null, CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertEquals(null, CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
-        assertEquals("-1", CarrierConfig.getValue(mCarrierConfig.getConfig(), KEY_TEST_LONG));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_LONG_ARRAY));
-        assertEquals("0.0", CarrierConfig.getValue(mCarrierConfig.getConfig(), KEY_TEST_DOUBLE));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_DOUBLE_ARRAY));
-        assertEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertEquals("-1", CarrierConfig.getValue(config, KEY_TEST_LONG));
+        assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_LONG_ARRAY));
+        assertEquals("0.0", CarrierConfig.getValue(config, KEY_TEST_DOUBLE));
+        assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_DOUBLE_ARRAY));
+        assertEquals("null", CarrierConfig.getValue(config,
                 CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE));
 
-        mCarrierConfig.setConfig(createBundle(), SLOT0);
+        config = createBundle();
 
-        assertNotEquals("false", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals("false", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_BOOL_ARRAY));
-        assertNotEquals("-1", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
+        assertNotEquals("-1", CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_SIP_18X_TIMER_MILLIS_INT));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY));
-        assertNotEquals(null, CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals(null, CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals("null", CarrierConfig.getValue(config,
                 CarrierConfig.Assets.KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY));
-        assertNotEquals("-1", CarrierConfig.getValue(mCarrierConfig.getConfig(), KEY_TEST_LONG));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_LONG_ARRAY));
-        assertNotEquals("0.0", CarrierConfig.getValue(mCarrierConfig.getConfig(), KEY_TEST_DOUBLE));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
-                KEY_TEST_DOUBLE_ARRAY));
-        assertNotEquals("null", CarrierConfig.getValue(mCarrierConfig.getConfig(),
+        assertNotEquals("-1", CarrierConfig.getValue(config, KEY_TEST_LONG));
+        assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_LONG_ARRAY));
+        assertNotEquals("0.0", CarrierConfig.getValue(config, KEY_TEST_DOUBLE));
+        assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_DOUBLE_ARRAY));
+        assertNotEquals("null", CarrierConfig.getValue(config,
                 CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE));
-        assertNotNull(CarrierConfig.getValue(mCarrierConfig.getConfig(), "test"));
+        assertNotNull(CarrierConfig.getValue(config, "test"));
+        assertNotEquals("null", CarrierConfig.getValue(config,
+                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS));
+
+        // Digit keys
+        PersistableBundle codecConfig = createNestedBundle(
+                AMRWB_PAYLOAD_TYPE_LIST, AMR_CODEC_ATTRIBUTE_MODESET_LIST);
+        PersistableBundle amrWbDescConfig = codecConfig.getPersistableBundle(
+                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
+
+        assertNotEquals("null", CarrierConfig.getValue(amrWbDescConfig,
+                String.valueOf(AMRWB_PAYLOAD_TYPE_LIST[1])));
     }
 
     @Test

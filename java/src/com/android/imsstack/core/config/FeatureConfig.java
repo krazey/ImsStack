@@ -58,13 +58,9 @@ public final class FeatureConfig {
         CarrierConfigManager ccm = AppContext.getInstance().getSystemService(
                 CarrierConfigManager.class);
 
-        if (ccm == null) {
-            initUnavailable(slotId);
-            return;
-        }
-
         // If an invalid subId is used, this bundle will contain default values.
-        PersistableBundle config = ccm.getConfigForSubId(MSimUtils.getSubId(slotId));
+        PersistableBundle config = (ccm != null)
+                ? ccm.getConfigForSubId(MSimUtils.getSubId(slotId)) : null;
 
         if (config == null) {
             initUnavailable(slotId);
@@ -116,4 +112,6 @@ public final class FeatureConfig {
 
         sFeatures.put(slotId, features);
     }
+
+    private FeatureConfig() {}
 }

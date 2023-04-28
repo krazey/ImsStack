@@ -130,6 +130,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
+
+        private Ims() {}
     }
 
     public static class ImsAcs {
@@ -152,6 +154,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "always_working_bool";
         public static final String KEY_USE_PRE_PROVISIONING_BOOL =
                 KEY_PREFIX + "use_pre_provisioning_bool";
+
+        private ImsAcs() {}
     }
 
     public static class ImsEmergency {
@@ -182,6 +186,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_18x_timer_millis_int";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT =
                 KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
+
+        private ImsEmergency() {}
     }
 
     public static class ImsRtt {
@@ -190,12 +196,16 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_on_text_qos_deactivation_int";
         public static final String KEY_TEXT_RTCP_INTERVAL_INT_ARRAY =
                 KEY_PREFIX + "text_rtcp_interval_int_array";
+
+        private ImsRtt() {}
     }
 
     public static class ImsSms {
         public static final String KEY_PREFIX = "imssms.";
         public static final String KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL =
                 KEY_PREFIX + "support_limited_admin_sms_mode_bool";
+
+        private ImsSms() {}
     }
 
     public static class ImsSs {
@@ -210,6 +220,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "terminal_based_call_wait_sync_int";
         public static final String KEY_TERMINAL_BASED_CALL_WAIT_DEFAULT_ACTIVATED_BOOL =
                 KEY_PREFIX + "terminal_based_call_wait_default_activated_bool";
+
+        private ImsSs() {}
     }
 
     public static class ImsUce {
@@ -260,6 +272,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reattempt_registration_publish_response_int_array";
         public static final String KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY =
                 KEY_PREFIX + "reattempt_registration_subscribe_response_int_array";
+
+        private ImsUce() {}
     }
 
     public static class ImsVoice {
@@ -366,6 +380,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_rtcp_interval_int_array";
         public static final String KEY_EVS_AMRWB_IO_MODE_SET_INT =
                 KEY_PREFIX + "evs_amrwb_io_mode_set_int";
+
+        private ImsVoice() {}
     }
 
     public static class ImsVt {
@@ -400,6 +416,8 @@ public class CarrierConfig {
         public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING =
                 KEY_PREFIX + "h264_video_codec_attribute_profile_level_id_string";
                 // TODO Media - item in Bundle - added to change the internal xml for test
+
+        private ImsVt() {}
     }
 
     public static class ImsWfc {
@@ -408,6 +426,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_private_header_int";
         public static final String KEY_COUNTRY_CODE_INT =
                 KEY_PREFIX + "country_code_int";
+
+        private ImsWfc() {}
     }
 
     public static class Assets {
@@ -921,6 +941,8 @@ public class CarrierConfig {
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;
         public static final int IPV6_PREFERRED = 1;
+
+        private Assets() {}
     }
 
     // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
@@ -1136,9 +1158,6 @@ public class CarrierConfig {
                 sb.append("{ ");
                 for (String k : keys) {
                     sb.append(k).append("=").append(getValue(b, k)).append(",");
-                }
-                if (sb.length() > 2) {
-                    sb.deleteCharAt(sb.length() - 1);
                 }
                 sb.append(" }");
                 return sb.toString();
