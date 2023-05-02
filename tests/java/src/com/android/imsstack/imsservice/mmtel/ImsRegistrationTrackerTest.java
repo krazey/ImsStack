@@ -413,7 +413,8 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testchangeCapabilities_VoWifiBasedOnMode() {
         ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
-        ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
+        ImsServiceManager serviceManager = new ImsServiceManager(mContext, mExecutor);
+        ImsServiceManager.setDefault(serviceManager);
 
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
 
@@ -462,6 +463,7 @@ public class ImsRegistrationTrackerTest {
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
 
+        serviceManager.dispose();
         ImsServiceManager.setDefault(oldServiceManager);
     }
 
@@ -538,7 +540,8 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testcreateCapabilities_OnRoaming() {
         ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
-        ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
+        ImsServiceManager serviceManager = new ImsServiceManager(mContext, mExecutor);
+        ImsServiceManager.setDefault(serviceManager);
 
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(false);
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(false);
@@ -576,6 +579,7 @@ public class ImsRegistrationTrackerTest {
                 Message.obtain(mRegTracker.getMessageHandler(), eventVoiceRoaming));
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
 
+        serviceManager.dispose();
         ImsServiceManager.setDefault(oldServiceManager);
     }
 
@@ -756,7 +760,8 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testConfigListener() {
         ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
-        ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
+        ImsServiceManager serviceManager = new ImsServiceManager(mContext, mExecutor);
+        ImsServiceManager.setDefault(serviceManager);
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
@@ -794,6 +799,7 @@ public class ImsRegistrationTrackerTest {
 
         assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
 
+        serviceManager.dispose();
         ImsServiceManager.setDefault(oldServiceManager);
     }
 

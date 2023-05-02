@@ -132,6 +132,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMmTelFeature = null;
         mServiceManager.getServiceRecordMap().clear();
         ImsServiceManager.setDefault(null);
+        mServiceManager.dispose();
         mServiceManager = null;
         mContextFixture = null;
         mContentResolver = null;
@@ -390,6 +391,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMockImsCallApp = null;
         mMmTelFeature.onFeatureReady();
         assertNotNull(mMockImsCallApp);
+        serviceManager.dispose();
         ImsServiceManager.setDefault(null);
     }
 

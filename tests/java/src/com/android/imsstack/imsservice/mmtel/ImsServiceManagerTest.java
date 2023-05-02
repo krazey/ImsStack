@@ -98,6 +98,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         mServiceRecordMap.clear();
         mCallAppMap.clear();
         mServiceManager.setDefault(null);
+        mServiceManager.dispose();
         mServiceManager = null;
         mCallAppMap = null;
         mServiceRecordMap = null;
@@ -243,6 +244,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
     public void testgetDefaultPhoneId() {
         assertEquals(MSimUtils.DEFAULT_PHONE_ID, mServiceManager.getDefaultPhoneId());
         when(mMockISubscription.getPhoneId()).thenReturn(MSimUtils.INVALID_PHONE_ID);
+        mServiceManager.dispose();
         mServiceManager = new TestImsServiceManager(mMockContext, mExecutor);
         assertEquals(MSimUtils.INVALID_PHONE_ID, mServiceManager.getDefaultPhoneId());
     }
@@ -293,6 +295,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         verify(mockServiceRecord1).broadcastServiceUp();
         verify(mockImsCallApp1).bindCallApp();
 
+        mServiceManager.dispose();
         mServiceManager = new TestImsServiceManager(mMockContext, mExecutor);
         setUpOnDefaultDataSubscriptionChanged(newPhoneId, mockServiceRecord1);
         when(mMockServiceRecord.isServiceUp()).thenReturn(true);

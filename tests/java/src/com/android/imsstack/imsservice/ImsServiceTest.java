@@ -16,7 +16,12 @@
 
 package com.android.imsstack.imsservice;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,27 +39,32 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
-public class ImsServiceTest {
+public class ImsServiceTest extends ImsStackTest {
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack";
     private static final String CLASS_NAME = "com.android.imsstack.imsservice.ImsService";
     private static final int SLOT1 = 1;
     private static final int SUB_ID = 1;
 
+    @Mock private ImsMmTelService mMmTelService;
+    @Mock private RcsFeature mRcsFeature;
+    @Mock private ImsServiceController mServiceController;
     private IImsServiceController mImsServiceBinder;
     private TestImsService mImsService;
     private Context mContext;
@@ -71,11 +81,18 @@ public class ImsServiceTest {
     };
 
     @Before
-    public void setUp() throws InterruptedException {
+    public void setUp() throws Exception {
+        super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
         mContext = spy(ApplicationProvider.getApplicationContext());
         mContextFixture = new ContextFixture();
         AppContext.init(mContextFixture.getTestDouble());
+        when(mServiceController.getMmTelService(eq(MSimUtils.DEFAULT_SLOT_ID)))
+                .thenReturn(mMmTelService);
+        when(mServiceController.getRcsFeature(eq(MSimUtils.DEFAULT_SLOT_ID)))
+                .thenReturn(mRcsFeature);
+        replaceInstance(ImsServiceController.class,
+                "sImsServiceController", null, mServiceController);
 
         Intent intent = new Intent(ImsService.SERVICE_INTERFACE);
         intent.setClassName(IMS_PACKAGE_NAME, CLASS_NAME);
@@ -88,7 +105,11 @@ public class ImsServiceTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        super.tearDown();
+        mMmTelService = null;
+        mRcsFeature = null;
+        mServiceController = null;
         mImsServiceBinder = null;
         mContext = null;
         mConnection = null;
@@ -99,9 +120,9 @@ public class ImsServiceTest {
     @Test
     @Ignore // TODO(b/263768170): Binder should not return null
     public void querySupportedImsFeaturesTest() throws Exception {
-        Assert.assertNotNull(mImsServiceBinder);
+        assertNotNull(mImsServiceBinder);
         ImsFeatureConfiguration resultConfig = mImsServiceBinder.querySupportedImsFeatures();
-        Assert.assertNotNull(resultConfig);
+        assertNotNull(resultConfig);
     }
 
     @Test
@@ -109,33 +130,30 @@ public class ImsServiceTest {
         //set ImsController ready state false
         mImsService.setImsControllerReady(false);
         ImsFeatureConfiguration result = mImsService.querySupportedImsFeatures();
-        Assert.assertEquals(0, result.getServiceFeatures().size());
+        assertEquals(0, result.getServiceFeatures().size());
 
-        ImsServiceController.create(mContext);
         mImsService.setImsControllerReady(true);
         ImsFeatureConfiguration resultConfig = mImsService.querySupportedImsFeatures();
-        Assert.assertTrue(ImsServiceController.isReady());
-        Assert.assertNotNull(resultConfig);
+        assertNotNull(resultConfig);
     }
 
     @Test
     @Ignore // TODO(b/263768170): Binder should not return null
     public void createRcsFeatureTest() throws RemoteException, InterruptedException {
-        Assert.assertNotNull(mImsServiceBinder);
+        assertNotNull(mImsServiceBinder);
         //verify for invalid slot id
         IImsRcsFeature result = mImsServiceBinder
                 .createRcsFeature(MSimUtils.INVALID_SLOT_ID, SUB_ID);
-        Assert.assertNull(result);
+        assertNull(result);
 
         result = mImsServiceBinder.createRcsFeature(MSimUtils.DEFAULT_SLOT_ID, SUB_ID);
-        Assert.assertNotNull(result);
+        assertNotNull(result);
     }
 
     @Test
     public void createRcsFeatureWithoutBinderTest() {
-        ImsServiceController.create(mContext);
         RcsFeature rcs = mImsService.createRcsFeature(MSimUtils.DEFAULT_SLOT_ID);
-        Assert.assertNotNull(rcs);
+        assertEquals(mRcsFeature, rcs);
     }
 
     private static class TestImsService extends ImsService {
@@ -159,19 +177,18 @@ public class ImsServiceTest {
     @Test
     @Ignore // TODO(b/263768170): Binder should not return null
     public void createMmTelFeatureTest() throws RemoteException {
-        Assert.assertNotNull(mImsServiceBinder);
+        assertNotNull(mImsServiceBinder);
         IImsMmTelFeature iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
                 MSimUtils.INVALID_SLOT_ID, SUB_ID);
-        Assert.assertNull(iImsMMTelFeature);
+        assertNull(iImsMMTelFeature);
 
         iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(MSimUtils.DEFAULT_SLOT_ID, SUB_ID);
-        Assert.assertNotNull(iImsMMTelFeature);
+        assertNotNull(iImsMMTelFeature);
     }
 
     @Test
     public void createMmTelFeatureWithOutBinderTest() throws RemoteException {
-        ImsServiceController.create(mContext);
-        MmTelFeature iImsMMTelFeature = mImsService.createMmTelFeature(MSimUtils.DEFAULT_SLOT_ID);
-        Assert.assertNotNull(iImsMMTelFeature);
+        MmTelFeature mmTelFeature = mImsService.createMmTelFeature(MSimUtils.DEFAULT_SLOT_ID);
+        assertEquals(mMmTelService, mmTelFeature);
     }
 }

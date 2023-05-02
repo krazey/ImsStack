@@ -216,6 +216,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertFalse(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
 
+        ImsServiceManager.getDefault().dispose();
         ImsServiceManager.setDefault(null);
     }
 
@@ -232,8 +233,12 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
                 IAosRegistrationListener.NetworkType.IWLAN);
         when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
 
-        ImsServiceManager serviceManager = new ImsServiceManager(mockContext, executor);
-        serviceManager.setDefault(serviceManager);
+        ImsServiceManager serviceManager = ImsServiceManager.getDefault();
+        if (serviceManager != null) {
+            serviceManager.dispose();
+        }
+        serviceManager = new ImsServiceManager(mockContext, executor);
+        ImsServiceManager.setDefault(serviceManager);
         ConcurrentHashMap<Integer, ImsServiceRecord> serviceMap =
                 serviceManager.getServiceRecordMap();
         serviceMap.put(MSimUtils.DEFAULT_SLOT_ID, mockServiceRecord);
