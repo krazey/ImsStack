@@ -33,7 +33,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports VoLTE or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports VoLTE, false otherwise.
+     * @return {@code true} if the carrier supports VoLTE, {@code false} otherwise.
      */
     public static boolean isVoLteEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -49,7 +49,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports VT or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports VT, false otherwise.
+     * @return {@code true} if the carrier supports VT, {@code false} otherwise.
      */
     public static boolean isVtEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -65,7 +65,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports WFC (Wi-Fi calling) or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports WFC (Wi-Fi calling), false otherwise.
+     * @return {@code true} if the carrier supports WFC (Wi-Fi calling), {@code false} otherwise.
      */
     public static boolean isWfcEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -81,7 +81,8 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports UCE (User Capability Exchange) or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports UCE (User Capability Exchange), false otherwise.
+     * @return {@code true} if the carrier supports UCE (User Capability Exchange),
+     *         {@code false} otherwise.
      */
     public static boolean isUceEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -99,7 +100,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports RTT feature or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports RTT, false otherwise.
+     * @return {@code true} if the carrier supports RTT, {@code false} otherwise.
      */
     public static boolean isRttEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -115,7 +116,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports VoNR or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports VoNR, false otherwise.
+     * @return {@code true} if the carrier supports VoNR, {@code false} otherwise.
      */
     public static boolean isVoNrEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -139,7 +140,7 @@ public final class CapabilityConfigs {
      * Checks if the carrier supports VoLTE roaming or not.
      *
      * @param slotId The slot-id to be checked.
-     * @return true if the carrier supports VoLTE roaming, false otherwise.
+     * @return {@code true} if the carrier supports VoLTE roaming, {@code false} otherwise.
      */
     public static boolean isVoLteRoamingEnabled(int slotId) {
         CarrierConfig cc = getCarrierConfig(slotId);
@@ -164,4 +165,6 @@ public final class CapabilityConfigs {
                 ConfigInterface.class, slotId);
         return (config != null) ? config.getCarrierConfig() : null;
     }
+
+    private CapabilityConfigs() {}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core;
+package com.android.imsstack.jni;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,8 +25,6 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.jni.JniIms;
-import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;

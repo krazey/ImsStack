@@ -79,6 +79,18 @@ public final class AgentFactory {
     }
 
     /**
+     * Clears all the resources.
+     */
+    @VisibleForTesting
+    public void clear() {
+        mAgents.clear();
+        mSystemCallAgents.clear();
+        mAgentsForSlot.clear();
+        sAgents.clear();
+        sAgentSlots.clear();
+    }
+
+    /**
      * Returns the specific agent corresponding to the given class.
      *
      * @param clazz The requested class name
@@ -114,10 +126,10 @@ public final class AgentFactory {
             return null;
         }
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         synchronized(mLock) {
-            return (T) agents.get(clazz);
+            return (agents != null) ? (T) agents.get(clazz) : null;
         }
     }
 
@@ -311,7 +323,7 @@ public final class AgentFactory {
     public void createAgentsForSlot(int slotId) {
         mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
             synchronized(mLock) {
@@ -328,7 +340,7 @@ public final class AgentFactory {
     }
 
     public void destroyAgentsForSlot(int slotId) {
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
             synchronized(mLock) {
@@ -358,7 +370,7 @@ public final class AgentFactory {
             mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
         }
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
             synchronized(mLock) {

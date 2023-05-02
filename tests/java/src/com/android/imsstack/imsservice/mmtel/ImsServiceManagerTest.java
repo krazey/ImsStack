@@ -40,6 +40,7 @@ import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
@@ -111,7 +112,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         verify(mMockISubscription).addListener(mServiceManager.getSubscriptionListenerProxy());
         assertEquals(1, mServiceRecordMap.size());
         assertNotNull(mServiceManager.getSubscriptionListenerProxy());
-        assertNotNull(mServiceManager.getCommonPackageListener());
+        assertNotNull(mServiceManager.getImsServiceListener());
     }
 
     @Test
@@ -338,8 +339,8 @@ public class ImsServiceManagerTest extends ImsStackTest {
             return mSubscriptionListener;
         }
 
-        public CommonPackageListener getCommonPackageListener() {
-            return mCommonPackageListener;
+        public ImsStackRegistry.ImsServiceListener getImsServiceListener() {
+            return mImsServiceListener;
         }
 
         @Override

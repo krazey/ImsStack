@@ -18,7 +18,6 @@ package com.android.imsstack.enabler;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
@@ -26,6 +25,7 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.system.ISystem;
 
 public interface IBaseContext extends IContext {
@@ -68,7 +68,24 @@ public interface IBaseContext extends IContext {
     /** Returns the USAT interface. */
     UsatInterface getUsatInterface();
 
-    public boolean isCommonPackageReady();
-    public void addCommonPackageListener(ICommonPackageListener listener);
-    public void removeCommonPackageListener(ICommonPackageListener listener);
+    /**
+     * Checks whether the IMS service is started or not.
+     *
+     * @return {@code true} if the IMS service is started, {@code false} otherwise.
+     */
+    boolean isImsServiceStarted();
+
+    /**
+     * Adds the {@link ImsStackRegistry#ImsServiceListener} to monitor the IMS service state.
+     *
+     * @param listener The listener to be added.
+     */
+    void addImsServiceListener(ImsStackRegistry.ImsServiceListener listener);
+
+    /**
+     * Removes the {@link ImsStackRegistry#ImsServiceListener} that was previously set.
+     *
+     * @param listener The listener to be removed.
+     */
+    void removeImsServiceListener(ImsStackRegistry.ImsServiceListener listener);
 }

@@ -34,7 +34,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
-import com.android.imsstack.core.ConfigLoader;
+import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -283,7 +283,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         storeTestConfig();
 
         if (isConfigChanged) {
-            ConfigLoader.notifyCarrierConfigChanged(mSlotId);
+            ServiceLoader.notifyCarrierConfigChanged(mSlotId);
         }
     }
 

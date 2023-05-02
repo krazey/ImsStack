@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.core;
+package com.android.imsstack.jni;
 
 import android.content.Context;
 import android.os.Parcel;
 
 import com.android.imsstack.core.config.ServiceCaps;
-import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.MSimUtils;
 
 /**
@@ -74,4 +73,6 @@ public class NativeCommands {
     public static void stopEnabler(int slotId) {
         JniImsProxy.sendCommand(CMD_STOP_ENABLER, slotId, null);
     }
+
+    private NativeCommands() {}
 }

@@ -25,9 +25,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.ConfigLoader;
-import com.android.imsstack.core.NativeCommands;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
@@ -48,9 +45,10 @@ import com.android.imsstack.util.MSimUtils;
 public class ImsStackApp extends Application {
     private static final String TAG = ImsStackApp.class.getSimpleName();
 
+    private final ServiceLoader mServiceLoader = new ServiceLoader();
+    private final SparseArray<SlotState> mSlotState = new SparseArray<>(2);
     private IntentReceiver mIntentReceiver;
     private int mActiveSimCount = 1;
-    private SparseArray<SlotState> mSlotState = new SparseArray<>(2);
 
     @Override
     public void onCreate() {
@@ -77,7 +75,7 @@ public class ImsStackApp extends Application {
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
 
-        Log.i(TAG, "onTrimMemory :: level=" + level);
+        Log.i(TAG, "onTrimMemory: level=" + level);
 
         Runtime.getRuntime().gc();
     }
@@ -213,7 +211,7 @@ public class ImsStackApp extends Application {
                 if (slotState.isCarrierConfigChanged()) {
                     Log.d(TAG, "SimState: carrier-config is changed while running.");
                     ServiceCaps.updateServiceCapabilities(this, slotId, subId);
-                    ConfigLoader.updateCarrierConfig(slotId);
+                    ServiceLoader.updateCarrierConfig(slotId);
                 }
             } else {
                 ServiceCaps.updateServiceCapabilities(this, slotId, subId);
@@ -307,30 +305,27 @@ public class ImsStackApp extends Application {
     }
 
     private void loadConfigAndStartServices(int slotId) {
-        CommonStarter cs = CommonStarter.getInstance();
-
-        if (!cs.isCommonAgentReady()) {
-            cs.createJNI();
-            cs.createAgents();
-            cs.startAgents(slotId);
-            cs.setCommonAgentCompleted();
+        if (!mServiceLoader.isInitialized()) {
+            mServiceLoader.initJni();
+            mServiceLoader.init();
+            mServiceLoader.start(slotId);
             startVoLteService(slotId);
-            NativeCommands.startEnabler(slotId);
+            mServiceLoader.startNativeEnabler(slotId);
         } else {
             startServices(slotId);
         }
     }
 
     private void startServices(int slotId) {
-        CommonStarter.getInstance().startAgents(slotId);
+        mServiceLoader.start(slotId);
         startVoLteService(slotId);
-        NativeCommands.startEnabler(slotId);
+        mServiceLoader.startNativeEnabler(slotId);
     }
 
     private void stopServices(int slotId) {
         stopVoLteService(slotId);
-        CommonStarter.getInstance().stopAgents(slotId);
-        NativeCommands.stopEnabler(slotId);
+        mServiceLoader.stop(slotId);
+        mServiceLoader.stopNativeEnabler(slotId);
     }
 
     private void startVoLteService(int slotId) {
@@ -341,8 +336,6 @@ public class ImsStackApp extends Application {
         if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
             ImsTestHelper.getInstance();
         }
-
-        CommonStarter.getInstance().notifyVoltePackageReady(slotId);
     }
 
     private void stopVoLteService(int slotId) {

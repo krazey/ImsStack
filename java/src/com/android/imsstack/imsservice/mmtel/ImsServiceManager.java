@@ -18,8 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.SubscriptionListener;
@@ -29,6 +27,7 @@ import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -45,7 +44,7 @@ public class ImsServiceManager {
     private final Context mContext;
     private final MessageExecutor mExecutor;
     protected final SubscriptionListenerProxy mSubscriptionListener;
-    protected final CommonPackageListener mCommonPackageListener;
+    protected final ImsServiceListener mImsServiceListener;
     // PhoneId -> ImsServiceRecord
     private ConcurrentHashMap<Integer, ImsServiceRecord> mServiceRecords
             = new ConcurrentHashMap<Integer, ImsServiceRecord>(4, 0.9f, 1);
@@ -87,8 +86,8 @@ public class ImsServiceManager {
             subs.addListener(mSubscriptionListener);
         }
 
-        mCommonPackageListener = new CommonPackageListener();
-        CommonStarter.getInstance().addListener(mCommonPackageListener);
+        mImsServiceListener = new ImsServiceListener();
+        ImsStackRegistry.addImsServiceListener(mImsServiceListener);
     }
 
     public static ImsServiceManager getDefault() {
@@ -113,8 +112,8 @@ public class ImsServiceManager {
             }
         }
 
-        if (mCommonPackageListener != null) {
-            CommonStarter.getInstance().removeListener(mCommonPackageListener);
+        if (mImsServiceListener != null) {
+            ImsStackRegistry.removeImsServiceListener(mImsServiceListener);
         }
 
         destroyAllCallApps();
@@ -672,13 +671,13 @@ public class ImsServiceManager {
         }
     }
 
-    protected class CommonPackageListener implements ICommonPackageListener {
-        public CommonPackageListener() {
+    protected class ImsServiceListener implements ImsStackRegistry.ImsServiceListener {
+        ImsServiceListener() {
         }
 
         @Override
-        public void onCommonPackageReady(int slotId) {
-            logi("onCommonPackageReady :: slotId=" + slotId);
+        public void onImsServiceStarted(int slotId) {
+            logi("onImsServiceStarted: slotId=" + slotId);
 
             mExecutor.execute(() -> {
                 checkOperatorAndRebindCallApp(slotId);
@@ -686,8 +685,8 @@ public class ImsServiceManager {
         }
 
         @Override
-        public void onCommonPackageStop(int slotId) {
-            logi("onCommonPackageStop :: slotId=" + slotId);
+        public void onImsServiceStopped(int slotId) {
+            logi("onImsServiceStopped: slotId=" + slotId);
 
             if (slotId < MSimUtils.DEFAULT_PHONE_ID || slotId >= MSimUtils.getSupportedSimCount()) {
                 return;
