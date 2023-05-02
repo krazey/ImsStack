@@ -22,12 +22,12 @@ import android.os.Message;
 import android.os.Parcel;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
@@ -80,7 +80,7 @@ public class MtcApp implements Closeable {
         }
     }
 
-    private static final int MSG_COMMON_PACKAGE_READY = 1;
+    private static final int MSG_IMS_SERVICE_STARTED = 1;
     private static final int MSG_SEND_NOTIFICATION = 2;
 
     private final IBaseContext mContext;
@@ -124,7 +124,7 @@ public class MtcApp implements Closeable {
         initializeState();
 
         mCM.init();
-        mContext.addCommonPackageListener(mHandler);
+        mContext.addImsServiceListener(mHandler);
         mEmergencyServiceManager.init();
 
         MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
@@ -144,7 +144,7 @@ public class MtcApp implements Closeable {
         unbindJNIService();
 
         mEmergencyServiceManager.clear();
-        mContext.removeCommonPackageListener(mHandler);
+        mContext.removeImsServiceListener(mHandler);
         mCM.clear();
 
         initializeState();
@@ -265,7 +265,7 @@ public class MtcApp implements Closeable {
 
         unbindJNIService();
 
-        mContext.removeCommonPackageListener(mHandler);
+        mContext.removeImsServiceListener(mHandler);
 
         mCM.dispose();
 
@@ -358,8 +358,8 @@ public class MtcApp implements Closeable {
             return;
         }
 
-        if (!mContext.isCommonPackageReady()) {
-            log("bindJNIService :: Wait for common package ready...");
+        if (!mContext.isImsServiceStarted()) {
+            log("bindJNIService :: Wait for IMS service start.");
             return;
         }
 
@@ -554,7 +554,7 @@ public class MtcApp implements Closeable {
         }
     }
 
-    private class MtcAppHandler extends Handler implements ICommonPackageListener {
+    private class MtcAppHandler extends Handler implements ImsStackRegistry.ImsServiceListener {
         public MtcAppHandler(Looper looper) {
             super(looper);
         }
@@ -562,8 +562,8 @@ public class MtcApp implements Closeable {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_COMMON_PACKAGE_READY: {
-                    log("bindJNIService :: onCommonPackageReady");
+                case MSG_IMS_SERVICE_STARTED: {
+                    log("bindJNIService :: onImsServiceStarted");
                     bindJNIService();
                     break;
                 }
@@ -583,20 +583,19 @@ public class MtcApp implements Closeable {
         }
 
         @Override
-        public void onCommonPackageReady(int slotId) {
-            logi("onCommonPackageReady :: slotId=" + slotId
-                    + ", mySlotId=" + mContext.getSlotId());
+        public void onImsServiceStarted(int slotId) {
+            logi("onImsServiceStarted: slotId=" + slotId + ", mySlotId=" + mContext.getSlotId());
 
             if (slotId != mContext.getSlotId()) {
                 return;
             }
 
-            sendEmptyMessage(MSG_COMMON_PACKAGE_READY);
+            sendEmptyMessage(MSG_IMS_SERVICE_STARTED);
         }
 
         @Override
-        public void onCommonPackageStop(int slotId) {
-            logi("onCommonPackageStop :: slotId=" + slotId);
+        public void onImsServiceStopped(int slotId) {
+            logi("onImsServiceStopped: slotId=" + slotId);
         }
     }
 }

@@ -34,8 +34,6 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -48,6 +46,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -300,7 +299,7 @@ public class ImsRegistrationTracker {
     }
 
     @VisibleForTesting
-    protected ICommonPackageListener getICommonPackageListener() {
+    protected ImsStackRegistry.ImsServiceListener getImsServiceListener() {
         return mRegTracker;
     }
 
@@ -512,7 +511,8 @@ public class ImsRegistrationTracker {
         }
     }
 
-    private class RegTracker implements IAosRegistrationListener, ICommonPackageListener {
+    private class RegTracker implements IAosRegistrationListener,
+            ImsStackRegistry.ImsServiceListener {
         private SparseArray<String> mFeatureTags;
         private int mNetworkType;
         private CapabilityUpdateListener mListener = null;
@@ -528,13 +528,13 @@ public class ImsRegistrationTracker {
             if (mAosReg != null) {
                 mAosReg.removeListener(this);
             }
-            CommonStarter.getInstance().removeListener(this);
+            ImsStackRegistry.removeImsServiceListener(this);
         }
 
         public void init() {
             mNetworkType = IAosRegistrationListener.NetworkType.LTE;
             mAosReg = getIAosRegistration(mContext.getSlotId());
-            CommonStarter.getInstance().addListener(this);
+            ImsStackRegistry.addImsServiceListener(this);
 
             initFeatureTags();
 
@@ -680,9 +680,8 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void onCommonPackageReady(int slotId) {
-            logi("onCommonPackageReady :: slotId=" + slotId
-                        + ", mySlotId=" + mContext.getSlotId());
+        public void onImsServiceStarted(int slotId) {
+            logi("onImsServiceStarted: slotId=" + slotId + ", mySlotId=" + mContext.getSlotId());
 
             if (slotId != mContext.getSlotId()) {
                 return;
@@ -728,8 +727,8 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void onCommonPackageStop(int slotId) {
-            logi("onCommonPackageStop :: slotId=" + slotId);
+        public void onImsServiceStopped(int slotId) {
+            logi("onImsServiceStopped: slotId=" + slotId);
 
             if (slotId != mContext.getSlotId()) {
                 return;

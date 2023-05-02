@@ -33,7 +33,6 @@ import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -43,6 +42,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -723,21 +723,21 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
-    public void testOnCommonPackageReady() {
-        ICommonPackageListener listener = mRegTracker.getICommonPackageListener();
+    public void testOnImsServiceStarted() {
+        ImsStackRegistry.ImsServiceListener listener = mRegTracker.getImsServiceListener();
         assertNotNull(listener);
 
-        listener.onCommonPackageReady(0);
+        listener.onImsServiceStarted(0);
         verify(mMockIDcNetWatcher, times(1)).registerForRoamingStateChanged(
                 mRegTracker.getMessageHandler(), 1, null);
     }
 
     @Test
-    public void testOnCommonPackageStop() {
-        ICommonPackageListener listener = mRegTracker.getICommonPackageListener();
+    public void testOnImsServiceStopped() {
+        ImsStackRegistry.ImsServiceListener listener = mRegTracker.getImsServiceListener();
         assertNotNull(listener);
 
-        listener.onCommonPackageStop(0);
+        listener.onImsServiceStopped(0);
         verify(mMockIDcNetWatcher).unregisterForRoamingStateChanged(
                 mRegTracker.getMessageHandler());
     }

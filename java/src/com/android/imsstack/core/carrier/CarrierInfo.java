@@ -31,7 +31,7 @@ public final class CarrierInfo {
     private static CarrierInfo sCarrierInfo = null;
     private final SparseArray<SimCarrierId> mSimCarrierIds;
 
-    private CarrierInfo() {
+    CarrierInfo() {
         int supportedSimCount = MSimUtils.getSupportedSimCount();
 
         mSimCarrierIds = new SparseArray<>(supportedSimCount);

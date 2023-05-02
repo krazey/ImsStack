@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -39,9 +40,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -70,29 +69,21 @@ public class CarrierInfoTest {
     private static final String TEST_OPERATOR_SUB = "TEST-SUB";
     private static final String TEST_COUNTRY = "COM";
 
-    static ContextFixture sContext;
-
-    @Mock SharedPreferences mSp;
+    @Mock private SharedPreferences mSp;
+    private ContextFixture mContextFixture;
     private TelephonyManager mTelephonyManager;
     private CarrierInfo mCi;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        doReturn(mSp).when(sContext.getTestDouble()).getSharedPreferences(anyString(), anyInt());
-
-        SubscriptionManager sm =
-                sContext.getTestDouble().getSystemService(SubscriptionManager.class);
+        mContextFixture = new ContextFixture();
+        Context context = mContextFixture.getTestDouble();
+        doReturn(mSp).when(context).getSharedPreferences(anyString(), anyInt());
+        SubscriptionManager sm = context.getSystemService(SubscriptionManager.class);
         when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-
-        mTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        mTelephonyManager = context.getSystemService(TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
@@ -104,22 +95,21 @@ public class CarrierInfoTest {
         when(mTelephonyManager.getGroupIdLevel1()).thenReturn(SIM_GID1);
         when(mTelephonyManager.getSimOperatorName()).thenReturn(SIM_OPERATOR_NAME);
 
-        mCi = CarrierInfo.getInstance();
+        AppContext.init(context);
+
+        mCi = new CarrierInfo();
     }
 
     @After
     public void tearDown() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mCi = null;
+        mContextFixture = null;
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test
     @SmallTest
-    public void getCarrierId() throws Exception {
+    public void testGetCarrierId() {
         for (int i = 0; i < MAX_SIM_SLOT; ++i) {
             assertNotNull(mCi.getCarrierId(i));
         }
@@ -129,7 +119,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void updateCarrierId_simAbsent() throws Exception {
+    public void testUpdateCarrierIdWhenSimAbsent() {
         initCarrierIdsFor(TelephonyManager.SIM_STATE_ABSENT);
 
         for (int i = 0; i < MAX_SIM_SLOT; ++i) {
@@ -155,7 +145,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void updateCarrierId_simLocked() throws Exception {
+    public void testUpdateCarrierIdWhenSimLocked() {
         initCarrierIdsFor(TelephonyManager.SIM_STATE_PIN_REQUIRED);
 
         for (int i = 0; i < MAX_SIM_SLOT; ++i) {
@@ -181,7 +171,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void updateCarrierId_simLoaded() throws Exception {
+    public void testUpdateCarrierIdWhenSimLoaded() {
         when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID), anyString()))
                 .thenReturn("0");
 
@@ -210,7 +200,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void setSimOperatorCountry_nullString() throws Exception {
+    public void testSetSimOperatorCountryWhenNullString() {
         SharedPreferences.Editor editor = mock(SharedPreferences.Editor.class);
         ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -228,7 +218,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void setSimOperatorCountry_emptyString() throws Exception {
+    public void testSetSimOperatorCountryWhenEmptyString() {
         SharedPreferences.Editor editor = mock(SharedPreferences.Editor.class);
         ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -246,7 +236,7 @@ public class CarrierInfoTest {
 
     @Test
     @SmallTest
-    public void setSimOperatorCountry_nonEmptyOrNullString() throws Exception {
+    public void testSetSimOperatorCountryWhenNonEmptyOrNullString() {
         SharedPreferences.Editor editor = mock(SharedPreferences.Editor.class);
         ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
 

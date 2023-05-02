@@ -193,8 +193,8 @@ public class ImsCallContextTest extends ImsStackTest {
     }
 
     @Test
-    public void isCommonPackageReadyTest() {
-        Assert.assertFalse(mImsCallContext.isCommonPackageReady());
+    public void isImsServiceStartedTest() {
+        Assert.assertFalse(mImsCallContext.isImsServiceStarted());
     }
 
     @Test

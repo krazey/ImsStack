@@ -21,8 +21,6 @@ import android.os.Looper;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.LocationInterface;
@@ -45,6 +43,7 @@ import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.imsservice.mmtel.internal.WfcSettingTracker;
 import com.android.imsstack.imsservice.mmtel.videocall.base.VideoCallUtils;
+import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
@@ -240,18 +239,18 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public boolean isCommonPackageReady() {
-        return CommonStarter.getInstance().getState(getSlotId()) == CommonStarter.STATE_READY;
+    public boolean isImsServiceStarted() {
+        return ImsStackRegistry.isImsServiceStarted(getSlotId());
     }
 
     @Override
-    public void addCommonPackageListener(ICommonPackageListener listener) {
-        CommonStarter.getInstance().addListener(listener);
+    public void addImsServiceListener(ImsStackRegistry.ImsServiceListener listener) {
+        ImsStackRegistry.addImsServiceListener(listener);
     }
 
     @Override
-    public void removeCommonPackageListener(ICommonPackageListener listener) {
-        CommonStarter.getInstance().removeListener(listener);
+    public void removeImsServiceListener(ImsStackRegistry.ImsServiceListener listener) {
+        ImsStackRegistry.removeImsServiceListener(listener);
     }
 
     @Override

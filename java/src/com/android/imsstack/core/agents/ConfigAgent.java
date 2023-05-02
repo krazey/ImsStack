@@ -108,7 +108,7 @@ public class ConfigAgent implements ConfigInterface {
         } catch (FileNotFoundException e) {
             ImsLog.d(mSlotId, "readTestConfig: not found");
             mTestConfig = new PersistableBundle();
-        } catch (IOException e) {
+        } catch (Exception e) {
             ImsLog.d(mSlotId, "readTestConfig: " + e.toString());
             mTestConfig = new PersistableBundle();
         } finally {
