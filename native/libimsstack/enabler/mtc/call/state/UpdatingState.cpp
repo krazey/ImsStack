@@ -103,9 +103,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     ISession& objSession = pSession->GetISession();
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-                m_objContext.GetMediaManager().GetMediaInfo(),
-                m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendUpdated();
         return CallStateName::ESTABLISHED;
     }
     m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
@@ -124,9 +122,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-                m_objContext.GetUpdatingInfo().GetModifiedInfo(),
-                m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendUpdated();
         return CallStateName::ESTABLISHED;
     }
 
@@ -213,9 +209,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
-        m_objContext.GetUiNotifier().SendResumedBy(&(m_objContext.GetCallInfo()),
-                m_objContext.GetUpdatingInfo().GetModifiedInfo(),
-                m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendResumedBy();
         return CallStateName::ESTABLISHED;
     }
 
@@ -794,7 +788,7 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
     if (m_objContext.GetUpdatingInfo().IsRequestedModifying() == IMS_FALSE &&
             m_objContext.GetUpdatingInfo().IsModified())
     {
-        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
+        SendIncomingUpdateToUi(m_objContext.GetMediaManager().GetNegotiatedCallType(
                 &m_objContext.GetSession()->GetISession()));
         return CallStateName::UPDATING;
     }
@@ -805,10 +799,7 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
     }
 
     UpdateCallType();
-
-    m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-            m_objContext.GetMediaManager().GetMediaInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
+    m_objContext.GetUiNotifier().SendUpdated();
 
     return CallStateName::ESTABLISHED;
 }
@@ -822,16 +813,14 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
     {
         UpdateCallType();
 
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-                m_objContext.GetMediaManager().GetMediaInfo(),
-                m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendUpdated();
 
         return CallStateName::ESTABLISHED;
     }
 
     if (m_objContext.GetUpdatingInfo().IsModified())
     {
-        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
+        SendIncomingUpdateToUi(m_objContext.GetMediaManager().GetNegotiatedCallType(
                 &m_objContext.GetSession()->GetISession()));
         return CallStateName::UPDATING;
     }
@@ -841,9 +830,7 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
         return CallStateName::ESTABLISHED;
     }
 
-    m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
+    m_objContext.GetUiNotifier().SendUpdatedBy();
 
     return CallStateName::ESTABLISHED;
 }
@@ -972,6 +959,6 @@ void UpdatingState::CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSess
     if (!m_objContext.GetUpdatingInfo().IsAlerted() &&
             m_objContext.GetPreconditionManager().IsAvailableToAlertUser(piSession))
     {
-        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(piSession));
+        SendIncomingUpdateToUi(m_objContext.GetMediaManager().GetNegotiatedCallType(piSession));
     }
 }

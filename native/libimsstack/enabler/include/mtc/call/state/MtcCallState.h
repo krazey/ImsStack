@@ -186,10 +186,7 @@ protected:
     IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
 
-    void SendPreIncomingCallReceived();
-    void SendIncomingCallReceived();
-    void SendStarted();
-    void SendIncomingUpdate(IN CallType eCallType);
+    void SendIncomingUpdateToUi(IN CallType eCallType);
 
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;

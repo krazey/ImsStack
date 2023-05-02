@@ -179,8 +179,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstabli
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
-    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
@@ -195,12 +194,11 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::UPDATE);
     EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
-    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
@@ -213,7 +211,6 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::INVITE);
     EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
-    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
 }
@@ -275,12 +272,11 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::UPDATE);
     EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
-    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
     const CallReasonInfo objInfo(CODE_UNSPECIFIED);
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->RejectUpdate(objInfo));
@@ -297,12 +293,11 @@ TEST_F(UpdatingStateTest, AcceptResumeReturnsEstablishedWhenPreviousRequestIsUpd
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::UPDATE);
     EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
-    EXPECT_CALL(objUiNotifier, SendResumedBy(_, _, _)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendResumedBy).Times(1);
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptResume(CallType::VOIP, objMediaInfo));
@@ -546,7 +541,7 @@ TEST_F(UpdatingStateTest, SessionEarlyMediaUpdateReceivedNotifiesIncomingUpdateI
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_200))
             .WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate);
 
     EXPECT_EQ(
             CallStateName::UPDATING, pUpdatingState->SessionEarlyMediaUpdateReceived(&objSession));
@@ -559,7 +554,7 @@ TEST_F(UpdatingStateTest,
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_200))
             .WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate).Times(0);
 
     EXPECT_EQ(
             CallStateName::UPDATING, pUpdatingState->SessionEarlyMediaUpdateReceived(&objSession));
@@ -636,7 +631,7 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedNotifiesIncomingUpdateIfPreconditi
     ON_CALL(objMtcPreconditionManager, IsAvailableToAlertUser(&objSession))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200)).WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionPrackReceived(&objSession));
 }
@@ -646,7 +641,7 @@ TEST_F(UpdatingStateTest, SessionPrackReceivedDoesNotNotifyIncomingUpdateIfPreco
     ON_CALL(objMtcPreconditionManager, IsAvailableToAlertUser(&objSession))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200)).WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionPrackReceived(&objSession));
 }
@@ -724,7 +719,7 @@ TEST_F(UpdatingStateTest, QosReservedInvokesSendInconmingUpdateIfPreconditionRea
 
     ON_CALL(objMtcPreconditionManager, IsAvailableToAlertUser(&objSession))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _));
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->QosReserved(&objSession, 0));
 }

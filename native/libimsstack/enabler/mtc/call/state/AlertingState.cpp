@@ -158,7 +158,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
     UssiResult objResult = m_objContext.GetUssiController()->ParseUssiBodyAndCheckResult(
             piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
-    SendStarted();
+    m_objContext.GetUiNotifier().SendStarted();
 
     if (objResult.eAction != UssiNextAction::NOTHING)
     {
@@ -188,7 +188,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
     }
 
     RunMedia(piSession, piMessage);
-    SendStarted();
+    m_objContext.GetUiNotifier().SendStarted();
     m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
 
     return CallStateName::ESTABLISHED;

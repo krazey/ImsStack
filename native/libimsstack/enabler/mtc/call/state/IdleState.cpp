@@ -271,7 +271,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     }
     else
     {
-        SendIncomingCallReceived();
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
         return CallStateName::ALERTING;
     }
 
@@ -354,7 +354,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    SendIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -422,7 +422,7 @@ CallStateName IdleState::ContinueHandleIncoming()
 {
     IMS_TRACE_D("ContinueHandleIncoming", 0, 0, 0);
 
-    SendPreIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendPreIncomingCallReceived();
 
     return GetStateName();
 }

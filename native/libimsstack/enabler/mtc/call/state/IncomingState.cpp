@@ -99,7 +99,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
         }
     }
 
-    SendIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -149,7 +149,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
         }
     }
 
-    SendIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -183,7 +183,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
         }
     }
 
-    SendIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -244,7 +244,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
         return GetStateName();
     }
 
-    SendIncomingCallReceived();
+    m_objContext.GetUiNotifier().SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -291,7 +291,7 @@ PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        SendIncomingCallReceived();
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
         return CallStateName::ALERTING;
     }
 
