@@ -56,9 +56,10 @@ public:
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-private:
-    IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+protected:
+    IMS_BOOL OnMessage(IN ImsMessage& objMsg);
 
+private:
     void DestroyMtsMessage();
     void Add(IN IMtsMessage* piMtsMessage);
     void Remove(IN const IMtsMessage* piMtsMessage);

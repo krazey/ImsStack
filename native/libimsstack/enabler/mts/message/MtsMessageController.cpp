@@ -71,14 +71,9 @@ PUBLIC MtsMessageController::~MtsMessageController()
     IMS_TRACE_I("~MtsMessageController [slot_%d]", m_nSlotId, 0, 0);
 
     DestroyMtsMessage();
-    delete m_piMtsErrorHandler;
-
-    if (m_piRetryAfterTimer != IMS_NULL)
-    {
-        m_piRetryAfterTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piRetryAfterTimer);
-    }
+    StopRetryAfterTimer();
     m_objRetryFunction = {};
+    delete m_piMtsErrorHandler;
 }
 
 PUBLIC
@@ -120,15 +115,6 @@ void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
 
     // remove this MtsMessage, so that MtsService send any following sms messages.
     CleanMtsMessage(piMtsMessage);
-    if (m_piRetryAfterTimer != IMS_NULL)
-    {
-        StopRetryAfterTimer();
-        m_piMtsErrorHandler->ResetRetryAfterStatus();
-        if (m_objRetryFunction != nullptr)
-        {
-            m_objRetryFunction = {};
-        }
-    }
     CleanRetryContent();
     return;
 }
@@ -240,7 +226,7 @@ void MtsMessageController::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-PRIVATE IMS_BOOL MtsMessageController::OnMessage(IN IMSMSG& /*objMSG*/)
+PROTECTED IMS_BOOL MtsMessageController::OnMessage(IN ImsMessage& /*objMsg*/)
 {
     IMS_TRACE_I("OnMessage", 0, 0, 0);
 
@@ -302,7 +288,6 @@ PRIVATE void MtsMessageController::Remove(IN const IMtsMessage* piMtsMessage)
     for (IMS_UINT32 i = 0; i < m_objMsgList.GetSize(); i++)
     {
         IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
-
         if (piTmpMtsMessage == piMtsMessage)
         {
             m_objMsgList.RemoveAt(i);
