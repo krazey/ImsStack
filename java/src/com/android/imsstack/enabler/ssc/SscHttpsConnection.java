@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.ssc;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -32,7 +33,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class SscHttpsConnection extends SscHttpConnection {
-    private final SscSslSocketFactory mSscSocketFactory;
+    @VisibleForTesting
+    final SscSslSocketFactory mSscSocketFactory;
 
     public SscHttpsConnection(int slotId, EApnType apnType) {
         super(slotId, apnType);
@@ -47,7 +49,7 @@ public class SscHttpsConnection extends SscHttpConnection {
 
     @Override
     protected void setHostnameVerifier() {
-        ((HttpsURLConnection) mConnection).setHostnameVerifier((DO_NOT_VERIFY));
+        ((HttpsURLConnection) mConnection).setHostnameVerifier(DO_NOT_VERIFY);
     }
 
     @Override
@@ -58,10 +60,13 @@ public class SscHttpsConnection extends SscHttpConnection {
         return cipherSuite;
     }
 
-    private static final HostnameVerifier DO_NOT_VERIFY = (hostname, session) -> true;
+    @VisibleForTesting
+    static final HostnameVerifier DO_NOT_VERIFY = (hostname, session) -> true;
 
-    private static final class SscSslSocketFactory extends SSLSocketFactory {
-        private SSLSocketFactory mSocketFactory = null;
+    @VisibleForTesting
+    static final class SscSslSocketFactory extends SSLSocketFactory {
+        @VisibleForTesting
+        SSLSocketFactory mSocketFactory = null;
 
         private SscSslSocketFactory() {
             init();
@@ -85,26 +90,26 @@ public class SscHttpsConnection extends SscHttpConnection {
         }
 
         @Override
-        public Socket createSocket(InetAddress host, int port) throws IOException {
-            SSLSocket sslSocket = (SSLSocket) mSocketFactory.createSocket(host, port);
+        public Socket createSocket(InetAddress address, int port) throws IOException {
+            SSLSocket sslSocket = (SSLSocket) mSocketFactory.createSocket(address, port);
 
             return configureSocket(sslSocket);
         }
 
         @Override
-        public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
-                int localPort) throws IOException {
-            SSLSocket sslSocket =
-                    (SSLSocket) mSocketFactory.createSocket(address, port, localAddress, localPort);
-
-            return configureSocket(sslSocket);
-        }
-
-        @Override
-        public Socket createSocket(String host, int port, InetAddress localHost, int localPort)
+        public Socket createSocket(String host, int port, InetAddress clientAddress, int clientPort)
                 throws IOException {
             SSLSocket sslSocket =
-                    (SSLSocket) mSocketFactory.createSocket(host, port, localHost, localPort);
+                    (SSLSocket) mSocketFactory.createSocket(host, port, clientAddress, clientPort);
+
+            return configureSocket(sslSocket);
+        }
+
+        @Override
+        public Socket createSocket(InetAddress address, int port, InetAddress clientAddress,
+                int clientPort) throws IOException {
+            SSLSocket sslSocket = (SSLSocket) mSocketFactory
+                    .createSocket(address, port, clientAddress, clientPort);
 
             return configureSocket(sslSocket);
         }
@@ -119,19 +124,19 @@ public class SscHttpsConnection extends SscHttpConnection {
 
         private void init() {
             TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[] {};
-                    }
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[] {};
+                        }
 
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                            String authType) throws java.security.cert.CertificateException {
-                    }
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
+                                String authType) throws java.security.cert.CertificateException {
+                        }
 
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                            String authType) throws java.security.cert.CertificateException {
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
+                                String authType) throws java.security.cert.CertificateException {
+                        }
                     }
-                }
             };
 
             try {
