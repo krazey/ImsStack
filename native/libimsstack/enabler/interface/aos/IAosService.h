@@ -23,6 +23,7 @@
 class IAosRegistrationControlListener;
 class IAosServicePhoneListener;
 class IAosServiceSettingListener;
+class IAosEmergencyListener;
 
 enum class AosReasonCode;
 enum class AosNetworkType;
@@ -46,6 +47,9 @@ public:
 
     virtual IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) = 0;
     virtual IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
+
+    virtual IMS_BOOL AddListener(IN IAosEmergencyListener* piListener) = 0;
+    virtual IMS_BOOL RemoveListener(IN IAosEmergencyListener* piListener) = 0;
 
     /**
      * AosService(Java) -> IAosRegistrationControlListener(Native)
@@ -90,6 +94,17 @@ public:
     virtual void NotifyPowerOff() = 0;
     virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;
+
+    /**
+     * Notify an emergency callback mode changed information by AosService (Java)
+     * AosService(Java) -> IAosEmergencyListener (Native)
+     *
+     * @param nType The emergency callback mode type.
+     * @param nState The emergency callback mode state.
+     * @param nDuration The timer duration(seconds) of emergency callback mode for call or sms.
+     */
+    virtual void NotifyEmcCallbackModeChanged(
+            IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) = 0;
 
     /**
      * Notify the application that the device is connected to the IMS network.

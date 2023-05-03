@@ -66,6 +66,7 @@ private:
     void NotifyPowerOff(IN const android::Parcel& objParcel);
     void NotifyPreciseCallState(IN const android::Parcel& objParcel);
     void NotifyCarrierSignalPcoValueChanged(IN const android::Parcel& objParcel);
+    void NotifyEmcCallbackModeChanged(IN const android::Parcel& objParcel);
 
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 

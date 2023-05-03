@@ -22,6 +22,7 @@
 class IAosRegistrationControlListener;
 class IAosServiceSettingListener;
 class IAosServicePhoneListener;
+class IAosEmergencyListener;
 class IJniAosServiceThread;
 
 class AosService : public IAosService, public ITimerListener
@@ -29,6 +30,9 @@ class AosService : public IAosService, public ITimerListener
 public:
     explicit AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
+
+    IMS_BOOL AddListener(IN IAosEmergencyListener* piListener) override;
+    IMS_BOOL RemoveListener(IN IAosEmergencyListener* piListener) override;
 
     IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) override;
     IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) override;
@@ -40,6 +44,8 @@ public:
     IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) override;
 
     /// Java -> Native
+    void NotifyEmcCallbackModeChanged(
+            IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) override;
     void UpdateSipDelegateRegistration() override;
     void TriggerSipDelegateDeregistration() override;
     void TriggerFullNetworkRegistration(
@@ -131,6 +137,7 @@ private:
     AString m_strTag;
     ITimer* m_piPlmnChangeDelayTimer;
 
+    ImsList<IAosEmergencyListener*> m_objAosEmergencyListeners;
     ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
     ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
     ImsList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
