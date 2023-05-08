@@ -819,6 +819,11 @@ public class MergeProxy extends ConferenceProxy {
                 notifySessionMergeStarted(callInfo, mediaInfo, suppInfo);
             }
             notifySessionMerged(callInfo, mediaInfo, suppInfo, usersInfo);
+
+            if (CallFeature.isCallMergeableOnConferenceOnHold(getCallContext().getSlotId())
+                    && mBackgroundCall.isConference()) {
+                executeUnhold(mBackgroundCall);
+            }
         }
 
         @Override
