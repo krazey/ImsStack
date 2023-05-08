@@ -75,6 +75,11 @@ public final class ImsUtImpl extends ImsUtImplBase {
         mUt = null;
     }
 
+    public void dispose() {
+        clear();
+        UtFactory.getInstance().releaseUtInterface(mContext.getSlotId());
+    }
+
     public IUtInterface getUtInterface() {
         return mUt;
     }
@@ -91,8 +96,11 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
     @Override
     public void close() {
-        clear();
-        UtFactory.getInstance().releaseUtInterface(mContext.getSlotId());
+        if (DBG) {
+            log("close");
+        }
+
+        // do nothing. all start/stop for ImsUtImpl will be handled ImsStack internally
     }
 
     @Override

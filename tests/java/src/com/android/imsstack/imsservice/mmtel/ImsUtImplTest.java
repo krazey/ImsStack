@@ -87,7 +87,7 @@ public class ImsUtImplTest  {
     @After
     public void tearDown() {
         if (mImsUtImpl != null) {
-            mImsUtImpl.close();
+            mImsUtImpl.dispose();
         }
 
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, null);
@@ -118,6 +118,16 @@ public class ImsUtImplTest  {
         assertNull(mImsUtImpl.getUtInterface());
 
         mImsUtImpl.clear();
+        verify(mMockUtInterface, never()).close();
+        verify(mMockUtInterface, never()).setListener(null);
+    }
+
+    @Test
+    public void close() {
+        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
+
+        mImsUtImpl.close();
+
         verify(mMockUtInterface, never()).close();
         verify(mMockUtInterface, never()).setListener(null);
     }
