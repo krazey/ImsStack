@@ -29,7 +29,7 @@ import com.android.imsstack.util.MSimUtils;
 
 public class TelephonyStateAgent implements ITelephonyState,ISystemAPITelephonyState {
     private final int mSlotId;
-    private IPhoneState mPhoneState = null;
+    private PhoneStateInterface mPhoneState;
 
     public TelephonyStateAgent(int slotId) {
         mSlotId = slotId;
@@ -39,7 +39,7 @@ public class TelephonyStateAgent implements ITelephonyState,ISystemAPITelephonyS
     public void init(Context context) {
         ImsLog.d(mSlotId, "");
 
-        mPhoneState = (IPhoneState)AgentFactory.getAgent(AgentFactory.PHONE_STATE, mSlotId);
+        mPhoneState = AgentFactory.getInstance().getAgent(PhoneStateInterface.class, mSlotId);
 
         ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
         if (system != null) {
@@ -170,7 +170,7 @@ public class TelephonyStateAgent implements ITelephonyState,ISystemAPITelephonyS
     }
 
     private int getCellularNetworkType() {
-        return (mPhoneState != null) ? mPhoneState.getCellularDataRAT() :
+        return (mPhoneState != null) ? mPhoneState.getCellularDataNetworkType() :
                 TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 

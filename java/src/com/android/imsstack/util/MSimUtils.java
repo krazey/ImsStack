@@ -57,7 +57,7 @@ public final class MSimUtils {
 
     /** Sets the {@link SubscriptionManagerProxy} instance for testing. */
     @VisibleForTesting
-    /* package */ static void setSubscriptionManagerProxy(
+    public static void setSubscriptionManagerProxy(
             SubscriptionManagerProxy subscriptionManagerProxy) {
         sSubscriptionManagerProxy = subscriptionManagerProxy;
     }

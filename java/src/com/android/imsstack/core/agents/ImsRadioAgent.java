@@ -508,17 +508,17 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         });
     }
 
-    private final class ImsRadioPhoneStateListener extends ImsPhoneStateListener {
-        private IPhoneStateNotifier mNotifier = null;
-        private IPhoneState mIps = null;
+    private final class ImsRadioPhoneStateListener implements ImsPhoneStateListener {
+        private IPhoneStateNotifier mNotifier;
+        private PhoneStateInterface mPhoneState;
 
         ImsRadioPhoneStateListener() {
         }
 
         public void dispose() {
             if (mNotifier != null) {
-                if (mIps != null) {
-                    mIps.removeNotifier(mNotifier);
+                if (mPhoneState != null) {
+                    mPhoneState.removeNotifier(mNotifier);
                 }
 
                 mNotifier.setListener(null);
@@ -527,14 +527,13 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         }
 
         public void setListener() {
-            mIps = (IPhoneState) AgentFactory.getAgent(
-                    AgentFactory.PHONE_STATE, mSlotId);
+            mPhoneState = AgentFactory.getInstance().getAgent(PhoneStateInterface.class, mSlotId);
 
-            if (mIps != null) {
-                mNotifier = mIps.createNotifier(this, Looper.myLooper());
+            if (mPhoneState != null) {
+                mNotifier = mPhoneState.createNotifier(this, Looper.myLooper());
                 mNotifier.setEvents(LISTEN_BARRING_INFO);
 
-                mIps.addNotifier(mNotifier);
+                mPhoneState.addNotifier(mNotifier);
             }
         }
 

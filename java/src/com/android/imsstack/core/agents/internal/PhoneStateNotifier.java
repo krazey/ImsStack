@@ -15,9 +15,12 @@
  */
 package com.android.imsstack.core.agents.internal;
 
+import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.SrvccState;
 import android.telephony.BarringInfo;
 import android.telephony.CellInfo;
 import android.telephony.PreciseCallState;
@@ -30,25 +33,33 @@ import com.android.imsstack.core.agents.ImsPhoneStateListener;
 
 import java.util.List;
 
+/**
+ * A class for notifying the phone state event to the interested components.
+ */
 public class PhoneStateNotifier implements IPhoneStateNotifier {
-    public static interface EventObserver {
-        public void onPhoneStateEventChanged(IPhoneStateNotifier notifier,
-                int events, int newEvents);
+    /**
+     * An interface to notify the phone state event change.
+     */
+    public interface EventObserver {
+        /**
+         * Notifies that the phone state event is changed.
+         *
+         * @param notifier The {@link IPhoneStateNotifier} instance that requests
+         *                 the phone state events.
+         * @param events The total events.
+         * @param newEvents The newly added events.
+         */
+        void onPhoneStateEventChanged(IPhoneStateNotifier notifier, int events, int newEvents);
     }
 
     private final Object mLock = new Object();
     private final PhoneStateHandler mHandler;
     private final EventObserver mEventObserver;
-    private ImsPhoneStateListener mListener = null;
-    private int mEvents = 0;
+    private ImsPhoneStateListener mListener;
+    private int mEvents = ImsPhoneStateListener.LISTEN_NONE;
 
-    public PhoneStateNotifier(EventObserver observer) {
-        mHandler = null;
-        mEventObserver = observer;
-    }
-
-    public PhoneStateNotifier(Looper looper, EventObserver observer) {
-        mHandler = new PhoneStateHandler((looper != null) ? looper : Looper.myLooper());
+    public PhoneStateNotifier(Looper looper, @NonNull EventObserver observer) {
+        mHandler = (looper != null) ? new PhoneStateHandler(looper) : null;
         mEventObserver = observer;
     }
 
@@ -61,13 +72,14 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
 
     @Override
     public void setEvents(int events) {
-        int oldEvents = getEvents();
+        int oldEvents;
 
         synchronized (mLock) {
+            oldEvents = mEvents;
             mEvents = events;
         }
 
-        if ((mEventObserver != null) && (oldEvents != events)) {
+        if (mEventObserver != null && oldEvents != events) {
             int newEvents = (oldEvents ^ events) & events;
             mEventObserver.onPhoneStateEventChanged(this, getEvents(), newEvents);
         }
@@ -80,17 +92,27 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
         }
     }
 
-    public void notifyCallState(int state, String incomingNumber) {
+    /**
+     * Notifies that the call state is changed.
+     *
+     * @param state The call state.
+     */
+    public void notifyCallState(@CallState int state) {
         if (mHandler == null) {
-            onCallStateChanged(state, incomingNumber);
+            onCallStateChanged(state);
             return;
         }
 
         Message.obtain(mHandler, ImsPhoneStateListener.LISTEN_CALL_STATE,
-                state, 0, incomingNumber).sendToTarget();
+                state, 0).sendToTarget();
     }
 
-    public void notifyCellInfo(List<CellInfo> cellInfo) {
+    /**
+     * Notifies that the {@link CellInfo} is changed.
+     *
+     * @param cellInfo The list of {@link CellInfo} to report.
+     */
+    public void notifyCellInfo(@NonNull List<CellInfo> cellInfo) {
         if (mHandler == null) {
             onCellInfoChanged(cellInfo);
             return;
@@ -100,7 +122,12 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 cellInfo).sendToTarget();
     }
 
-    public void notifyPreciseCallState(PreciseCallState callState) {
+    /**
+     * Notifies that the {@link PreciseCallState} is changed.
+     *
+     * @param callState The {@link PreciseCallState} to report.
+     */
+    public void notifyPreciseCallState(@NonNull PreciseCallState callState) {
         if (mHandler == null) {
             onPreciseCallStateChanged(callState);
             return;
@@ -110,7 +137,12 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 callState).sendToTarget();
     }
 
-    public void notifyServiceState(ServiceState serviceState) {
+    /**
+     * Notifies that the {@link ServiceState} is changed.
+     *
+     * @param serviceState The {@link ServiceState} to report.
+     */
+    public void notifyServiceState(@NonNull ServiceState serviceState) {
         if (mHandler == null) {
             onServiceStateChanged(serviceState);
             return;
@@ -120,7 +152,12 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 serviceState).sendToTarget();
     }
 
-    public void notifySignalStrengths(SignalStrength signalStrength) {
+    /**
+     * Notifies that the {@link SignalStrength} is changed.
+     *
+     * @param signalStrength The {@link SignalStrength} to report.
+     */
+    public void notifySignalStrengths(@NonNull SignalStrength signalStrength) {
         if (mHandler == null) {
             onSignalStrengthsChanged(signalStrength);
             return;
@@ -130,7 +167,12 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 signalStrength).sendToTarget();
     }
 
-    public void notifySrvccState(int state) {
+    /**
+     * Notifies that the SRVCC state is changed.
+     *
+     * @param state The SRVCC state to report.
+     */
+    public void notifySrvccState(@SrvccState int state) {
         if (mHandler == null) {
             onSrvccStateChanged(state);
             return;
@@ -140,7 +182,13 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 state, 0).sendToTarget();
     }
 
-    public void notifyPreciseDataConnectionState(PreciseDataConnectionState dataConnectionState) {
+    /**
+     * Notifies that the {@link PreciseDataConnectionState} is changed.
+     *
+     * @param dataConnectionState The {@link PreciseDataConnectionState} to report.
+     */
+    public void notifyPreciseDataConnectionState(
+            @NonNull PreciseDataConnectionState dataConnectionState) {
         if (mHandler == null) {
             onPreciseDataConnectionStateChanged(dataConnectionState);
             return;
@@ -151,9 +199,11 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     }
 
     /**
-     * Posts barringInfo message to handler.
+     * Notifies that the {@link BarringInfo} is changed.
+     *
+     * @param barringInfo The {@link BarringInfo} to report.
      */
-    public void notifyBarringInfo(BarringInfo barringInfo) {
+    public void notifyBarringInfo(@NonNull BarringInfo barringInfo) {
         if (mHandler == null) {
             onBarringInfoChanged(barringInfo);
             return;
@@ -172,7 +222,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when call state is changed.
      */
-    protected void onCallStateChanged(int state, String incomingNumber) {
+    protected void onCallStateChanged(@CallState int state) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_CALL_STATE)) {
             return;
         }
@@ -184,14 +234,14 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
         }
 
         if (listener != null) {
-            listener.onCallStateChanged(state, incomingNumber);
+            listener.onCallStateChanged(state);
         }
     }
 
     /**
      * Invokes when cell info. is changed.
      */
-    protected void onCellInfoChanged(List<CellInfo> cellInfo) {
+    protected void onCellInfoChanged(@NonNull List<CellInfo> cellInfo) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_CELL_INFO)) {
             return;
         }
@@ -210,7 +260,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when precise call state is changed.
      */
-    protected void onPreciseCallStateChanged(PreciseCallState callState) {
+    protected void onPreciseCallStateChanged(@NonNull PreciseCallState callState) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE)) {
             return;
         }
@@ -229,7 +279,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when service state is changed.
      */
-    protected void onServiceStateChanged(ServiceState serviceState) {
+    protected void onServiceStateChanged(@NonNull ServiceState serviceState) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_SERVICE_STATE)) {
             return;
         }
@@ -248,7 +298,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when signal strengths is changed.
      */
-    protected void onSignalStrengthsChanged(SignalStrength signalStrength) {
+    protected void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS)) {
             return;
         }
@@ -267,7 +317,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when SRVCC state is changed.
      */
-    protected void onSrvccStateChanged(int state) {
+    protected void onSrvccStateChanged(@SrvccState int state) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_SRVCC_STATE)) {
             return;
         }
@@ -287,7 +337,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
      * Invokes when precise data connection state is changed.
      */
     protected void onPreciseDataConnectionStateChanged(
-            PreciseDataConnectionState dataConnectionState) {
+            @NonNull PreciseDataConnectionState dataConnectionState) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
             return;
         }
@@ -306,7 +356,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     /**
      * Invokes when barring information is changed.
      */
-    protected void onBarringInfoChanged(BarringInfo barringInfo) {
+    protected void onBarringInfoChanged(@NonNull BarringInfo barringInfo) {
         if (!isEventSet(ImsPhoneStateListener.LISTEN_BARRING_INFO)) {
             return;
         }
@@ -336,7 +386,7 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                     break;
                 }
                 case ImsPhoneStateListener.LISTEN_CALL_STATE: {
-                    onCallStateChanged(msg.arg1, (String) msg.obj);
+                    onCallStateChanged(msg.arg1);
                     break;
                 }
                 case ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE: {
