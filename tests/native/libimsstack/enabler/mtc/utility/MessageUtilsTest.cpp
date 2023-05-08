@@ -507,21 +507,6 @@ TEST_F(MessageUtilsTest, GetUri)
     EXPECT_STREQ(strUri.GetStr(), "");
 }
 
-TEST_F(MessageUtilsTest, GetFeatures)
-{
-    ImsList<AString> objHeaders;
-    objHeaders.Append("timer");
-    objHeaders.Append("100rel");
-    objHeaders.Append("precondition");
-    IMS_SINT32 nFeature = FEATURE_TIMER | FEATURE_100REL | FEATURE_PRECONDITION;
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SUPPORTED, _)).WillByDefault(Return(objHeaders));
-
-    EXPECT_EQ(objMessageUtils.GetFeatures(piMessage, ISipHeader::SUPPORTED), nFeature);
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.GetFeatures(piMessage, ISipHeader::SUPPORTED), FEATURE_NONE);
-}
-
 TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
 {
     ImsList<AString> objHeaders;
@@ -646,36 +631,6 @@ TEST_F(MessageUtilsTest, GetCauseAndTextFromReasonHeader)
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, -1);
     EXPECT_STREQ(objValue.strText.GetStr(), "");
-}
-
-TEST_F(MessageUtilsTest, GetSupportedFeatures)
-{
-    ImsList<AString> objHeaders;
-    objHeaders.Append("timer");
-    objHeaders.Append("100rel");
-    objHeaders.Append("precondition");
-    IMS_SINT32 nFeature = FEATURE_TIMER | FEATURE_100REL | FEATURE_PRECONDITION;
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SUPPORTED, _)).WillByDefault(Return(objHeaders));
-
-    EXPECT_EQ(objMessageUtils.GetSupportedFeatures(piMessage), nFeature);
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.GetSupportedFeatures(piMessage), FEATURE_NONE);
-}
-
-TEST_F(MessageUtilsTest, GetRequireFeatures)
-{
-    ImsList<AString> objHeaders;
-    objHeaders.Append("timer");
-    objHeaders.Append("100rel");
-    objHeaders.Append("precondition");
-    IMS_SINT32 nFeature = FEATURE_TIMER | FEATURE_100REL | FEATURE_PRECONDITION;
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REQUIRE, _)).WillByDefault(Return(objHeaders));
-
-    EXPECT_EQ(objMessageUtils.GetRequireFeatures(piMessage), nFeature);
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.GetRequireFeatures(piMessage), FEATURE_NONE);
 }
 
 TEST_F(MessageUtilsTest, GetIms3gppFromBody)

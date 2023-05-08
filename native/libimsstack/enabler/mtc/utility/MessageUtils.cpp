@@ -598,41 +598,6 @@ PUBLIC AString MessageUtils::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithPar
     return AString::ConstNull();
 }
 
-PUBLIC IMS_SINT32 MessageUtils::GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
-    if (lstHeaders.IsEmpty())
-    {
-        return FEATURE_NONE;
-    }
-
-    IMS_SINT32 eFeatures = FEATURE_NONE;
-
-    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
-    {
-        if (lstHeaders.GetAt(i).Equals(MessageUtil::STR_TIMER))
-        {
-            eFeatures |= FEATURE_TIMER;
-            continue;
-        }
-
-        if (lstHeaders.GetAt(i).Equals(Sip::STR_100REL))
-        {
-            eFeatures |= FEATURE_100REL;
-            continue;
-        }
-
-        if (lstHeaders.GetAt(i).Equals(MessageUtil::STR_PRECONDITION))
-        {
-            eFeatures |= FEATURE_PRECONDITION;
-            continue;
-        }
-    }
-
-    return eFeatures;
-}
-
 PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -738,16 +703,6 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
     }
 
     return objValue;
-}
-
-PUBLIC IMS_SINT32 MessageUtils::GetSupportedFeatures(IN IMessage* piMessage)
-{
-    return GetFeatures(piMessage, ISipHeader::SUPPORTED);
-}
-
-PUBLIC IMS_SINT32 MessageUtils::GetRequireFeatures(IN IMessage* piMessage)
-{
-    return GetFeatures(piMessage, ISipHeader::REQUIRE);
 }
 
 PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(

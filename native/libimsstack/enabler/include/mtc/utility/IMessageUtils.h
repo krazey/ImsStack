@@ -286,17 +286,6 @@ public:
      * @param strHeaderName
      * @return
      */
-    virtual IMS_SINT32 GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param piMessage
-     * @param eHeaderType
-     * @param strHeaderName
-     * @return
-     */
     virtual IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
 
@@ -319,22 +308,6 @@ public:
      */
     virtual ReasonHeaderValue GetCauseAndTextFromReasonHeader(
             IN const IMessage* piMessage, IN const AString& strProtocol = AString::ConstNull()) = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param piMessage
-     * @return
-     */
-    virtual IMS_SINT32 GetSupportedFeatures(IN IMessage* piMessage) = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param piMessage
-     * @return
-     */
-    virtual IMS_SINT32 GetRequireFeatures(IN IMessage* piMessage) = 0;
 
     /**
      * @brief Gets

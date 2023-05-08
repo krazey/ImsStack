@@ -90,16 +90,12 @@ public:
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    IMS_SINT32 GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_SINT32 GetCauseFromReasonHeader(IN const IMessage* piMessage,
             IN const AString& strProtocol = AString::ConstNull()) override;
     ReasonHeaderValue GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
             IN const AString& strProtocol = AString::ConstNull()) override;
-    IMS_SINT32 GetSupportedFeatures(IN IMessage* piMessage) override;
-    IMS_SINT32 GetRequireFeatures(IN IMessage* piMessage) override;
     Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) override;
     Ims3gppData GetIms3gppData(IN const IMessage* piMessage) override;
     IMS_SINT32 GetStatusCodeInNotify(IN IMessage* piMessage) override;
