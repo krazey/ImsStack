@@ -24,11 +24,9 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 
-class CallContext;
 class ISession;
 class SuppService;
 class IMtcCallContext;
-enum class UpdateType;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;

@@ -75,16 +75,12 @@ public:
             (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetUri, (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&),
             (override));
-    MOCK_METHOD(
-            IMS_SINT32, GetFeatures, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetSosTypeFromServiceUrn,
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetCauseFromReasonHeader, (IN const IMessage*, IN const AString&),
             (override));
     MOCK_METHOD(ReasonHeaderValue, GetCauseAndTextFromReasonHeader,
             (IN const IMessage*, IN const AString&), (override));
-    MOCK_METHOD(IMS_SINT32, GetSupportedFeatures, (IN IMessage*), (override));
-    MOCK_METHOD(IMS_SINT32, GetRequireFeatures, (IN IMessage*), (override));
     MOCK_METHOD(Ims3gpp&, GetIms3gppFromBody, (IN const IMessage*, OUT Ims3gpp&), (override));
     MOCK_METHOD(Ims3gppData, GetIms3gppData, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_SINT32, GetStatusCodeInNotify, (IN IMessage*), (override));
