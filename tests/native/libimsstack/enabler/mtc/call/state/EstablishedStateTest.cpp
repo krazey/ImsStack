@@ -23,7 +23,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "call/MockMtcPendingOperationHolder.h"
+#include "call/TestMtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/MockIMtcBlockChecker.h"
@@ -221,11 +221,11 @@ TEST_F(EstablishedStateTest, OnIpcanChangedNotHandledIfConfigurationIsOff)
     ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
             .WillByDefault(Return(IMS_FALSE));
 
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     ON_CALL(objMockCallContext, GetPendingOperationHolder)
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(_)).Times(0);
 
     IMS_UINT32 eIpcan = 1;
     pEstablishedState->OnIpcanChanged(eIpcan);
@@ -237,11 +237,11 @@ TEST_F(EstablishedStateTest, OnIpcanChangedDoesNotPushPendingOperationIfNoSessio
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
 
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     ON_CALL(objMockCallContext, GetPendingOperationHolder)
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(_)).Times(0);
     EXPECT_CALL(objMockMtcSession, Update(_, _, _));
     EXPECT_CALL(objTimerWrapper, IsActive(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE))
             .WillRepeatedly(Return(IMS_FALSE));
@@ -257,13 +257,13 @@ TEST_F(EstablishedStateTest, OnIpcanChangedPushesPendingOperation)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
 
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     ON_CALL(objMockCallContext, GetPendingOperationHolder)
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    const IMS_UINT32 eIpcan = 1;
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(eIpcan));
 
-    IMS_UINT32 eIpcan = 1;
     pEstablishedState->OnIpcanChanged(eIpcan);
 }
 

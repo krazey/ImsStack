@@ -20,7 +20,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "call/MockMtcPendingOperationHolder.h"
+#include "call/TestMtcPendingOperationHolder.h"
 #include "call/ParticipantInfo.h"
 #include "call/state/IncomingState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -369,12 +369,12 @@ TEST_F(IncomingStateTest, OnMediaFailed)
 
 TEST_F(IncomingStateTest, OnIpcanChangedPushesPendingOperation)
 {
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     ON_CALL(objCallContext, GetPendingOperationHolder)
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-    IMS_UINT32 eIpcan = 1;
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    const IMS_UINT32 eIpcan = 1;
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(eIpcan));
 
     pIncomingState->OnIpcanChanged(eIpcan);
 }

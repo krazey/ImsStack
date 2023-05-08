@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except compliance with the License.
@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MTC_PENDING_OPERATION_HOLDER_H_
-#define MOCK_MTC_PENDING_OPERATION_HOLDER_H_
+#ifndef TEST_MTC_PENDING_OPERATION_HOLDER_H_
+#define TEST_MTC_PENDING_OPERATION_HOLDER_H_
 
 #include "ImsTypeDef.h"
 #include "call/MtcPendingOperationHolder.h"
-#include <gmock/gmock.h>
+#include "call/state/MockIMtcCallState.h"
 #include <functional>
 
-class MockMtcPendingOperationHolder : public MtcPendingOperationHolder
+class TestMtcPendingOperationHolder : public MtcPendingOperationHolder
 {
 public:
-    explicit MockMtcPendingOperationHolder() {}
-    ~MockMtcPendingOperationHolder() {}
+    virtual ~TestMtcPendingOperationHolder() {}
 
-    MOCK_METHOD(void, PushPendingOperation,
-            (IN const std::function<IMtcCall::State(IMtcCallState*)>&), (override));
+    virtual void PushPendingOperation(
+            IN const std::function<IMtcCall::State(IMtcCallState*)>& objPendingOperation)
+    {
+        objPendingOperation(&objState);
+    }
+
+    MockIMtcCallState& GetMock() { return objState; }
+
+private:
+    MockIMtcCallState objState;
 };
 
 #endif

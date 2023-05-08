@@ -22,7 +22,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "call/MockMtcPendingOperationHolder.h"
+#include "call/TestMtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/UpdatingState.h"
@@ -63,7 +63,7 @@ public:
     MockIMtcPreconditionManager objMtcPreconditionManager;
     MockIMessage objMessage;
     MockMtcTimerWrapper objTimer;
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     MockIMessageUtils objMessageUtils;
     TestConfigService objConfigService;
     MediaInfo objMediaInfo;
@@ -154,22 +154,22 @@ TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
 
 TEST_F(UpdatingStateTest, HoldPushesPendingOperation)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Hold(objMediaInfo));
 
     pUpdatingState->Hold(objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, ResumePushesPendingOperation)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Resume(objMediaInfo));
 
     pUpdatingState->Resume(objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
 {
-    CallType eAnyType = CallType::VT;
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    const CallType eAnyType = CallType::VT;
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Update(eAnyType, objMediaInfo));
 
     pUpdatingState->Update(eAnyType, objMediaInfo);
 }
@@ -353,7 +353,8 @@ TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 
 TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithVideoPushesPendingOperation)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    EXPECT_CALL(objPendingOperationHolder.GetMock(),
+            OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP));
 
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
     pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP);
@@ -361,7 +362,7 @@ TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithVideoPushesPendingOperat
 
 TEST_F(UpdatingStateTest, OnVideoLowestBitRatePushesPendingOperation)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(1);
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnVideoLowestBitRate());
     pUpdatingState->OnVideoLowestBitRate();
 }
 
@@ -376,7 +377,7 @@ TEST_F(UpdatingStateTest, OnMediaFailed)
 TEST_F(UpdatingStateTest, OnIpcanChangedPushesPendingOperation)
 {
     IMS_UINT32 eIpcan = 1;
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(eIpcan));
 
     pUpdatingState->OnIpcanChanged(eIpcan);
 }
@@ -418,27 +419,31 @@ TEST_F(UpdatingStateTest, OnRequestPendingErrorStartsGlareConditionTimer)
 
 TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredRetriesUpdate)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(5);
-
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Hold(pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
 
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Resume(pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::RESUME);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
 
+    EXPECT_CALL(objPendingOperationHolder.GetMock(),
+            Update(pUpdatingInfo->GetTargetCallType(), pUpdatingInfo->GetModifyingInfo()));
     pUpdatingInfo->SetRequestingType(UpdateType::SESSION);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
 
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnSrvccStateUpdated(SrvccState::CANCELED));
     pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_CANCEL);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
 
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnSrvccStateUpdated(SrvccState::FAILED));
     pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_FAILURE);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
 }
 
 TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredDoesNotRetryUpdateIfInvalidUpdateType)
 {
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnTimerExpired(_)).Times(0);
 
     pUpdatingInfo->SetRequestingType(UpdateType::NORMAL);
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
@@ -454,7 +459,7 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerAct
 {
     ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(3);
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), SessionUpdateReceived(&objSession)).Times(3);
 
     // No Held / Resumed case.
     EXPECT_CALL(objUiNotifier, SendUpdateFailed(_));

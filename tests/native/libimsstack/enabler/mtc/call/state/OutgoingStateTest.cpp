@@ -28,7 +28,7 @@
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "call/MockISilentRedialHelper.h"
-#include "call/MockMtcPendingOperationHolder.h"
+#include "call/TestMtcPendingOperationHolder.h"
 #include "call/extension/MockIMtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/MtcCallState.h"
@@ -343,12 +343,12 @@ TEST_F(OutgoingStateTest, OnMediaFailedReturnsOutgoingStateIfSessionIsNull)
 
 TEST_F(OutgoingStateTest, OnIpcanChangedPushesPendingOperation)
 {
-    MockMtcPendingOperationHolder objPendingOperationHolder;
+    TestMtcPendingOperationHolder objPendingOperationHolder;
     ON_CALL(objCallContext, GetPendingOperationHolder)
             .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-    IMS_UINT32 eIpcan = 1;
-    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+    const IMS_UINT32 eIpcan = 1;
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), OnIpcanChanged(eIpcan));
 
     pOutgoingState->OnIpcanChanged(eIpcan);
 }
