@@ -51,6 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
@@ -61,7 +62,6 @@ public class ServiceLoaderTest {
     @Mock private JniIms mJniIms;
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
-    @Mock private ConfigAgent mConfigAgent;
     private ContextFixture mContextFixture;
     private FakeSettingsProvider mSettingsProvider;
     private ServiceLoader mServiceLoader;
@@ -91,7 +91,6 @@ public class ServiceLoaderTest {
         ImsStackRegistry.setImsServiceState(SLOT0, false);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         SystemInterface.setSystemInterface(mSystemInterface);
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigAgent, SLOT0);
 
         mServiceLoader = new ServiceLoader();
     }
@@ -160,15 +159,17 @@ public class ServiceLoaderTest {
     @Test
     @SmallTest
     public void testUpdateCarrierConfig() {
+        ConfigAgent configAgent = Mockito.mock(ConfigAgent.class);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, configAgent, SLOT0);
         ServiceLoader.updateCarrierConfig(SLOT0);
 
-        verify(mConfigAgent).updateCarrierConfig(eq(SUB_ID[0]), any(SimCarrierId.class));
+        verify(configAgent).updateCarrierConfig(eq(SUB_ID[0]), any(SimCarrierId.class));
         verify(mSystem).notifyConfigurationChanged(anyInt());
 
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         ServiceLoader.updateCarrierConfig(SLOT0);
 
-        verifyNoMoreInteractions(mConfigAgent);
+        verifyNoMoreInteractions(configAgent);
         verifyNoMoreInteractions(mSystem);
     }
 }

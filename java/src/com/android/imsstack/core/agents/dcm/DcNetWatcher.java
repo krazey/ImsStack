@@ -27,6 +27,7 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.Annotation.CallState;
 import android.telephony.DataSpecificRegistrationInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PreciseCallState;
@@ -37,11 +38,11 @@ import android.telephony.VopsSupportInfo;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -1199,34 +1200,33 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
     }
 
-    private class DcNetWatcherPhoneStateListener extends ImsPhoneStateListener {
-        private IPhoneStateNotifier mNotifier = null;
-        private IPhoneState mIps = null;
+    private class DcNetWatcherPhoneStateListener implements ImsPhoneStateListener {
+        private IPhoneStateNotifier mNotifier;
+        private PhoneStateInterface mPhoneState;
 
         DcNetWatcherPhoneStateListener() {}
 
         public void dispose() {
             if (mNotifier != null) {
-                if (mIps != null) {
-                    mIps.removeNotifier(mNotifier);
+                if (mPhoneState != null) {
+                    mPhoneState.removeNotifier(mNotifier);
                 }
 
                 mNotifier.setListener(null);
                 mNotifier = null;
-
-                mIps = null;
+                mPhoneState = null;
             }
         }
 
         public void setListener() {
-            mIps = (IPhoneState) AgentFactory.getAgent(AgentFactory.PHONE_STATE, mSlotId);
+            mPhoneState = AgentFactory.getInstance().getAgent(PhoneStateInterface.class, mSlotId);
 
-            if (mIps != null) {
-                mNotifier = mIps.createNotifier(this, null);
+            if (mPhoneState != null) {
+                mNotifier = mPhoneState.createNotifier(this, mDcNetWatcherHandler.getLooper());
                 mNotifier.setEvents(
                         LISTEN_CALL_STATE | LISTEN_SERVICE_STATE | LISTEN_PRECISE_CALL_STATE);
 
-                mIps.addNotifier(mNotifier);
+                mPhoneState.addNotifier(mNotifier);
             }
         }
 
@@ -1300,7 +1300,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         /** Invokes when call state is changed. */
         @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
+        public void onCallStateChanged(@CallState int state) {
             ITelephonyState ts =
                     (ITelephonyState) AgentFactory.getAgent(AgentFactory.TELEPHONY_STATE, mSlotId);
 

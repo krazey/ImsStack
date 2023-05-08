@@ -37,7 +37,6 @@ public final class AgentFactory {
     public static final int PREFERENCE = 4;
 
     // agents with slot id
-    public static final int PHONE_STATE = 13;
     public static final int TELEPHONY_STATE = 14;
     public static final int TELEPHONY_SUBSCRIBER = 15;
     public static final int CELL_INFO = 17;
@@ -190,7 +189,6 @@ public final class AgentFactory {
 
         agents = new HashMap<Integer, IAgent>(AGENT_MAX);
 
-        agents.put(PHONE_STATE, new PhoneStateAgent(slotId));
         agents.put(TELEPHONY_STATE, new TelephonyStateAgent(slotId));
         agents.put(TELEPHONY_SUBSCRIBER, new TelephonySubscriberAgent(slotId));
         agents.put(PHONE_CALL_DB, new PhoneCallDBAgent(slotId));
@@ -211,7 +209,6 @@ public final class AgentFactory {
         }
 
         List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(PHONE_STATE));
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
@@ -242,7 +239,6 @@ public final class AgentFactory {
         }
 
         List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(PHONE_STATE));
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
@@ -330,6 +326,7 @@ public final class AgentFactory {
                 agents.put(NativeStateInterface.class, new NativeStateAgent(slotId));
                 agents.put(SimInterface.class, new SimAgent(slotId));
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
+                agents.put(PhoneStateInterface.class, new PhoneStateAgent(slotId));
                 agents.put(LocationInterface.class, new LocationAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));

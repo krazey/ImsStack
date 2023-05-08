@@ -52,10 +52,10 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDc;
@@ -90,7 +90,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock DcSettings mMockDcSetting;
     @Mock ISystem mMockSystem;
     @Mock IAosInfo mMockAosInfo;
-    @Mock IPhoneState mMockPhoneState;
+    @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
     @Mock ITelephonyState mMockTelephonyState;
     @Mock SystemInterface mMockSystemInterface;
@@ -114,14 +114,16 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(AosFactory.class, "sFactory", null, mMockAosFactory);
 
         AgentFactory.getInstance().setAgent(
+                PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
 
-        when(mMockPhoneState.createNotifier(any(), eq(null))).thenReturn(mMockPhoneStateNotifier);
+        when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
+                .thenReturn(mMockPhoneStateNotifier);
 
         Map<Integer, HashMap<Integer, IAgent>> agentMaps =
                 new HashMap<Integer, HashMap<Integer, IAgent>>(NUM_OF_SLOT);
-        HashMap<Integer, IAgent> agents = new HashMap<>(3);
-        agents.put(AgentFactory.PHONE_STATE, mMockPhoneState);
+        HashMap<Integer, IAgent> agents = new HashMap<>(1);
         agents.put(AgentFactory.TELEPHONY_STATE, mMockTelephonyState);
         agentMaps.put(SLOT_0, agents);
         replaceInstance(AgentFactory.class, "sAgentSlots", null, agentMaps);
@@ -144,6 +146,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         mDcNetWatcher.cleanup();
         super.tearDown();
 
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
         DcFactory.setObjects(SLOT_0, null);
     }
@@ -155,18 +158,18 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockAosFactory).getAosInfo(SLOT_0);
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mContext).registerReceiver(any(), any(), eq(Context.RECEIVER_EXPORTED));
-        verify(mMockPhoneState).createNotifier(any(), eq(null));
+        verify(mMockPhoneStateInterface).createNotifier(any(), any(Looper.class));
         verify(mMockPhoneStateNotifier).setEvents(ImsPhoneStateListener.LISTEN_CALL_STATE
                 | ImsPhoneStateListener.LISTEN_SERVICE_STATE
                 | ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE);
-        verify(mMockPhoneState).addNotifier(mMockPhoneStateNotifier);
+        verify(mMockPhoneStateInterface).addNotifier(mMockPhoneStateNotifier);
     }
 
     @Test
     public void testCleanup() {
         mDcNetWatcher.cleanup();
 
-        verify(mMockPhoneState).removeNotifier(mMockPhoneStateNotifier);
+        verify(mMockPhoneStateInterface).removeNotifier(mMockPhoneStateNotifier);
         verify(mMockPhoneStateNotifier).setListener(null);
         verify(mContext).unregisterReceiver(any());
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
@@ -972,8 +975,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         when(mMockTelephonyState.getCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class, String.class},
-                new Object[] {TelephonyManager.CALL_STATE_OFFHOOK, "1234567890"});
+                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
         verify(mRegistrantList, never()).notifyResult(anyInt());
         verify(mMockSystem, never()).notifyVoiceCallStateChanged(anyInt());
@@ -990,8 +992,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 .thenReturn(TelephonyManager.CALL_STATE_IDLE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class, String.class},
-                new Object[] {TelephonyManager.CALL_STATE_OFFHOOK, "1234567890"});
+                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
         verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_OFFHOOK);
         verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
@@ -1000,8 +1001,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mDcNetWatcher.getCallState());
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class, String.class},
-                new Object[] {TelephonyManager.CALL_STATE_OFFHOOK, "1234567890"});
+                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
         verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_IDLE);
         verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_IDLE);

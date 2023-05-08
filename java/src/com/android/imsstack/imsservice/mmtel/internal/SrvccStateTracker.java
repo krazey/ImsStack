@@ -15,12 +15,13 @@
  */
 package com.android.imsstack.imsservice.mmtel.internal;
 
+import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.mmtel.base.ISrvccStateListener;
 import com.android.imsstack.imsservice.mmtel.base.ISrvccStateTracker;
@@ -165,7 +166,7 @@ public final class SrvccStateTracker implements ISrvccStateTracker {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private final class VoLteServiceStateListener extends ImsPhoneStateListener {
+    private final class VoLteServiceStateListener implements ImsPhoneStateListener {
         private IPhoneStateNotifier mNotifier = null;
 
         public VoLteServiceStateListener() {
@@ -173,11 +174,11 @@ public final class SrvccStateTracker implements ISrvccStateTracker {
 
         public void dispose() {
             if (mNotifier != null) {
-                IPhoneState ips = (IPhoneState)AgentFactory.getAgent(
-                        AgentFactory.PHONE_STATE, mContext.getSlotId());
+                PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                        PhoneStateInterface.class, mContext.getSlotId());
 
-                if (ips != null) {
-                    ips.removeNotifier(mNotifier);
+                if (phoneState != null) {
+                    phoneState.removeNotifier(mNotifier);
                 }
 
                 mNotifier.setListener(null);
@@ -186,21 +187,21 @@ public final class SrvccStateTracker implements ISrvccStateTracker {
         }
 
         public void setListener() {
-            IPhoneState ips = (IPhoneState)AgentFactory.getAgent(
-                    AgentFactory.PHONE_STATE, mContext.getSlotId());
+            PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                    PhoneStateInterface.class, mContext.getSlotId());
 
-            if (ips != null) {
-                mNotifier = ips.createNotifier(this, mContext.getDefaultLooper());
+            if (phoneState != null) {
+                mNotifier = phoneState.createNotifier(this, mContext.getDefaultLooper());
                 mNotifier.setEvents(LISTEN_SRVCC_STATE);
 
-                ips.addNotifier(mNotifier);
+                phoneState.addNotifier(mNotifier);
             }
         }
 
         /**
          * Invokes when SRVCC state is changed.
          */
-        public void onSrvccStateChanged(int state) {
+        public void onSrvccStateChanged(@SrvccState int state) {
             logi("onSrvccStateChanged :: slotId=" + mContext.getSlotId() + ", state=" + state);
 
             switch (state) {

@@ -23,30 +23,26 @@ import com.android.imsstack.core.agents.ImsPhoneStateListener;
 
 import java.util.List;
 
+/**
+ * A class that manages the registered phone state events and a map of its event and
+ * {@link IPhoneStateNotifier} object.
+ */
 public final class PhoneStateEvents {
-    public static final int LISTEN_NONE = 0;
-    public static final int LISTEN_SERVICE_STATE = 0x00000001;
-    public static final int LISTEN_CALL_STATE = 0x00000020;
-    public static final int LISTEN_SIGNAL_STRENGTHS = 0x00000100;
-    public static final int LISTEN_CELL_INFO = 0x00000400;
-    public static final int LISTEN_PRECISE_CALL_STATE = 0x00000800;
-    public static final int LISTEN_SRVCC_STATE_CHANGED = 0x00004000;
-    public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 0x00001000;
-    public static final int LISTEN_BARRING_INFO = 0x00002000;
-
-    public static final int DEFAULT_EVENTS = (LISTEN_SERVICE_STATE | LISTEN_CALL_STATE
-            | LISTEN_BARRING_INFO);
+    /** A default event set for ImsStack. */
+    public static final int DEFAULT_EVENTS =
+            ImsPhoneStateListener.LISTEN_SERVICE_STATE
+            | ImsPhoneStateListener.LISTEN_CALL_STATE
+            | ImsPhoneStateListener.LISTEN_BARRING_INFO;
 
     private static final List<Integer> PS_EVENTS = List.of(
-            LISTEN_SERVICE_STATE,
-            LISTEN_CALL_STATE,
-            LISTEN_PRECISE_CALL_STATE,
-            LISTEN_SRVCC_STATE_CHANGED,
-            LISTEN_CELL_INFO,
-            LISTEN_SIGNAL_STRENGTHS,
-            LISTEN_PRECISE_DATA_CONNECTION_STATE,
-            LISTEN_BARRING_INFO);
-    private final Object mLock = new Object();
+            ImsPhoneStateListener.LISTEN_SERVICE_STATE,
+            ImsPhoneStateListener.LISTEN_CALL_STATE,
+            ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE,
+            ImsPhoneStateListener.LISTEN_SRVCC_STATE,
+            ImsPhoneStateListener.LISTEN_CELL_INFO,
+            ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS,
+            ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE,
+            ImsPhoneStateListener.LISTEN_BARRING_INFO);
     private final SparseArray<ArraySet<IPhoneStateNotifier>> mEventRefs = new SparseArray<>(8);
     private int mEvents = DEFAULT_EVENTS;
 
@@ -60,18 +56,30 @@ public final class PhoneStateEvents {
         }
     }
 
+    /**
+     * Returns the current phone state events that are registered.
+     */
     public int getEvents() {
-        synchronized (mLock) {
+        synchronized (mEventRefs) {
             return mEvents;
         }
     }
 
+    /**
+     * Updates the phone state events for the specified notifier.
+     *
+     * @param events The phone state events to be updated.
+     * @param notifier The target notifier.
+     * @return {@code true} if the events are updated, {@code false} otherwise.
+     */
     public boolean updateEvents(int events, IPhoneStateNotifier notifier) {
         if (notifier == null) {
             return false;
         }
 
-        synchronized (mLock) {
+        boolean updated;
+
+        synchronized (mEventRefs) {
             for (int i = 0; i < PS_EVENTS.size(); ++i) {
                 Integer event = PS_EVENTS.get(i);
 
@@ -79,56 +87,27 @@ public final class PhoneStateEvents {
                     setOrRemoveEvent(mEventRefs, events, event.intValue(), notifier);
                 }
             }
-        }
 
-        int oldEvents = getEvents();
-
-        synchronized (mLock) {
+            int oldEvents = mEvents;
             mEvents = calculateEvents(PS_EVENTS, mEventRefs);
-
             // Default events are always included
             mEvents |= DEFAULT_EVENTS;
+
+            updated = (oldEvents != mEvents);
         }
 
-        return oldEvents != getEvents();
+        return updated;
     }
 
-    public static int getEventsFromImsPhoneState(int events) {
-        int pslEvents = LISTEN_NONE;
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_SERVICE_STATE)) {
-            pslEvents |= LISTEN_SERVICE_STATE;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_CALL_STATE)) {
-            pslEvents |= LISTEN_CALL_STATE;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE)) {
-            pslEvents |= LISTEN_PRECISE_CALL_STATE;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_SRVCC_STATE)) {
-            pslEvents |= LISTEN_SRVCC_STATE_CHANGED;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_CELL_INFO)) {
-            pslEvents |= LISTEN_CELL_INFO;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS)) {
-            pslEvents |= LISTEN_SIGNAL_STRENGTHS;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE)) {
-            pslEvents |= LISTEN_PRECISE_DATA_CONNECTION_STATE;
-        }
-
-        if (isSet(events, ImsPhoneStateListener.LISTEN_BARRING_INFO)) {
-            pslEvents |= LISTEN_BARRING_INFO;
-        }
-
-        return pslEvents;
+    /**
+     * Checks whether the specified event is set or not.
+     *
+     * @param events The total events to be checked.
+     * @param event The event to be checked.
+     * @return {@code true} if the event is set, {@code false} otherwise.
+     */
+    public static boolean isEventSet(int events, int event) {
+        return (events & event) != 0;
     }
 
     private static int calculateEvents(List<Integer> eventList,
@@ -177,14 +156,10 @@ public final class PhoneStateEvents {
 
     private static void setOrRemoveEvent(SparseArray<ArraySet<IPhoneStateNotifier>> eventRefs,
                 int events, int event, IPhoneStateNotifier notifier) {
-        if (isSet(events, event)) {
+        if (isEventSet(events, event)) {
             setEvent(eventRefs, event, notifier);
         } else {
             removeEvent(eventRefs, event, notifier);
         }
-    }
-
-    private static boolean isSet(int events, int event) {
-        return (events & event) != 0;
     }
 }
