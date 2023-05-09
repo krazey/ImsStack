@@ -28,9 +28,7 @@ public:
     MOCK_METHOD(ICoreService*, GetICoreService, (IN IMS_BOOL bEmergency), (const, override));
     MOCK_METHOD(IMtsServiceState*, GetIMtsServiceState, (), (override));
     MOCK_METHOD(void, ReportMoStatus,
-            (IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_UINT8 nRetryAfter,
-                    IN IMS_SINT32 nSeqId),
-            (override));
+            (IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId), (override));
     MOCK_METHOD(IMS_UINT32, ReportMtSms,
             (IN SmsFormatType eSmsFormat, IN const ByteArray& objContent), (override));
     MOCK_METHOD(void, SetListener, (IN IMtsServiceListener * piMtsServiceListener), (override));

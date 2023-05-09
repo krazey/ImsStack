@@ -27,8 +27,8 @@ public:
     JniMtsServiceThread();
     virtual ~JniMtsServiceThread();
 
-    void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
-            IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId) override;
+    void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId,
+            IN IMS_SINT32 nSlotId) override;
     void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN IMS_SINT32 nSlotId) override;
 

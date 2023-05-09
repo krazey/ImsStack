@@ -71,8 +71,8 @@ private:
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
     IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
-    IMS_RESULT ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
-            IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
+    IMS_RESULT ReportMoStatus(
+            IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength,
             IN const IMS_BYTE* pbyContent);
 

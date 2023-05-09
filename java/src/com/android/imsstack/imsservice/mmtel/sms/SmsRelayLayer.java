@@ -300,11 +300,10 @@ public class SmsRelayLayer {
     class MtsControllerListenerProxy extends MtsController.Listener {
         @Override
         public void notifyStatusForOutgoingMessage(
-                int statusResult, int format, int retryAfter, int messageReference) {
+                int statusResult, int format, int messageReference) {
             try {
                 log("notifyStatusForOutgoingMessage :: statusResult = " + statusResult
-                        + " format = " + format + " retryAfter = " + retryAfter
-                        + " messageReference = " + messageReference);
+                        + " format = " + format + " messageReference = " + messageReference);
                 int token = -1;
                 int result = SmsUtils.RESULT_SUCCESS;
                 Listener listener = mListener;

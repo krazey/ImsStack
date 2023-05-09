@@ -592,9 +592,8 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     return IMS_SUCCESS;
 }
 
-PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_SINT32 nReason,
-        IN SmsFormatType eSmsFormat, IN IMS_UINT8 nRetryAfter /* = 0 */,
-        IN IMS_SINT32 nSeqId /* = -1 */)
+PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(
+        IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId /* = -1 */)
 {
     IMS_CHAR acLog[128 + 1] = {
             0,
@@ -604,7 +603,7 @@ PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(IN IMS_SINT32 nReason,
 
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
-    m_piMtsService->ReportMoStatus(nReason, eSmsFormat, nRetryAfter, nSeqId);
+    m_piMtsService->ReportMoStatus(nReason, eSmsFormat, nSeqId);
 
     return IMS_SUCCESS;
 }
@@ -832,7 +831,7 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
             break;
     }
 
-    ReportMoStatus(nResultCode, eSmsFormat, 0, nSeqId);
+    ReportMoStatus(nResultCode, eSmsFormat, nSeqId);
 }
 
 PRIVATE

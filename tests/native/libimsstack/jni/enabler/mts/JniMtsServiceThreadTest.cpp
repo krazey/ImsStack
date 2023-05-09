@@ -79,7 +79,7 @@ TEST_F(JniMtsServiceThreadTest, ReportMoStatus)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniServiceThread->ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, 0, 1, IMS_SLOT_0);
+    pJniServiceThread->ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, 1, IMS_SLOT_0);
 }
 
 TEST_F(JniMtsServiceThreadTest, ReportMtSms)
