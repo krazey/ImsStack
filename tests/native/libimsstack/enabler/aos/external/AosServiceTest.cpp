@@ -30,6 +30,23 @@ using ::testing::_;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+enum
+{
+    TIMER_PLMN_CHANGE_DELAY = 0
+};
+
+class TestAosService : public AosService
+{
+    inline TestAosService(IN IMS_SINT32 nSlotId) :
+            AosService(nSlotId)
+    {
+    }
+
+    friend class AosServiceTest;
+
+    FRIEND_TEST(AosServiceTest, NotifyPlmnChanged);
+};
+
 class AosServiceTest : public ::testing::Test
 {
 public:
@@ -613,19 +630,23 @@ TEST_F(AosServiceTest, NotifyPhoneNumberState)
 
 TEST_F(AosServiceTest, NotifyPlmnChanged)
 {
+    TestAosService* pTestAosService = new TestAosService(SLOT_ID);
+
     MockIAosServicePhoneListener objMockListener1;
     MockIAosServicePhoneListener objMockListener2;
     MockIAosServicePhoneListener objMockListener3;
 
-    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener1));
-    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener2));
-    m_pAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener3));
+    pTestAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener1));
+    pTestAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener2));
+    pTestAosService->AddListener(static_cast<IAosServicePhoneListener*>(&objMockListener3));
 
     EXPECT_CALL(objMockListener1, ServicePhone_PlmnChanged()).Times(1);
     EXPECT_CALL(objMockListener2, ServicePhone_PlmnChanged()).Times(1);
     EXPECT_CALL(objMockListener3, ServicePhone_PlmnChanged()).Times(1);
 
-    m_pAosService->NotifyPlmnChanged();
+    pTestAosService->NotifyPlmnChanged();
+    EXPECT_TRUE(pTestAosService->IsTimerRunning(TIMER_PLMN_CHANGE_DELAY));
+    pTestAosService->ProcessPlmnChangeDelayTimerExpired();
 }
 
 TEST_F(AosServiceTest, NotifyPowerOff)
