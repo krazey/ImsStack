@@ -106,7 +106,7 @@ public class ImsCallApp extends ImsApp {
 
         if (mUt != null) {
             try {
-                mUt.close();
+                mUt.dispose();
             } catch (Throwable t) {
                 ImsLog.e("UtInterface Exception: " + t.toString());
             }
