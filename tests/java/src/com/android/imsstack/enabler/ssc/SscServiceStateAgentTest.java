@@ -20,7 +20,7 @@ import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPa
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
@@ -89,6 +89,16 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
+    public void testIsUtAvailable_whenServiceStateIsNull() {
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        boolean isAvailable = mSscServiceStateAgent.isUtAvailable(SLOT_0);
+
+        assertEquals(false, isAvailable);
+        verify(mockSscServiceState, never()).isUtAvailable();
+    }
+
+    @Test
     public void testChangeCapabilities() {
         ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
         ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
@@ -99,49 +109,124 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
+    public void testChangeCapabilities_whenServiceStateIsNull() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.changeCapabilities(SLOT_0, enabledCaps, disabledCaps);
+
+        verify(mockSscServiceState, never()).changeCapabilities(enabledCaps, disabledCaps);
+    }
+
+    @Test
     public void testSetErrorResponseCode() {
         mSscServiceStateAgent.setErrorResponseCode(SLOT_0, SscConstant.HTTP_CONFLICT);
 
-        verify(mockSscServiceState).setErrorResponseCode(eq(SscConstant.HTTP_CONFLICT));
+        verify(mockSscServiceState).setErrorResponseCode(SscConstant.HTTP_CONFLICT);
+    }
+
+    @Test
+    public void testSetErrorResponseCode_whenServiceStateIsNull() {
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setErrorResponseCode(SLOT_0, SscConstant.HTTP_CONFLICT);
+
+        verify(mockSscServiceState, never()).setErrorResponseCode(SscConstant.HTTP_CONFLICT);
     }
 
     @Test
     public void testSetPdnConnectionFailed() {
         final int smCause = 27;
+
         mSscServiceStateAgent.setPdnConnectionFailed(SLOT_0, smCause);
 
         verify(mockSscServiceState).setPdnConnectionFailed(smCause);
     }
 
     @Test
+    public void testSetPdnConnectionFailed_whenServiceStateIsNull() {
+        final int smCause = 27;
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setPdnConnectionFailed(SLOT_0, smCause);
+
+        verify(mockSscServiceState, never()).setPdnConnectionFailed(smCause);
+    }
+
+    @Test
     public void testSetDnsQueryFailed() {
         final boolean input = true;
+
         mSscServiceStateAgent.setDnsQueryFailed(SLOT_0, input);
 
-        verify(mockSscServiceState).setDnsQueryFailed(eq(input));
+        verify(mockSscServiceState).setDnsQueryFailed(input);
+    }
+
+    @Test
+    public void testSetDnsQueryFailed_whenServiceStateIsNull() {
+        final boolean input = true;
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setDnsQueryFailed(SLOT_0, input);
+
+        verify(mockSscServiceState, never()).setDnsQueryFailed(input);
     }
 
     @Test
     public void testSetGbaRequestFailed() {
         final boolean input = true;
+
         mSscServiceStateAgent.setGbaRequestFailed(SLOT_0, input);
 
-        verify(mockSscServiceState).setGbaRequestFailed(eq(input));
+        verify(mockSscServiceState).setGbaRequestFailed(input);
+    }
+
+    @Test
+    public void testSetGbaRequestFailed_whenServiceStateIsNull() {
+        final boolean input = true;
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setGbaRequestFailed(SLOT_0, input);
+
+        verify(mockSscServiceState, never()).setGbaRequestFailed(input);
     }
 
     @Test
     public void testSetPdnConnectionTimeout() {
         final boolean input = false;
+
         mSscServiceStateAgent.setPdnConnectionTimeout(SLOT_0, input);
 
-        verify(mockSscServiceState).setPdnConnectionTimeout(eq(input));
+        verify(mockSscServiceState).setPdnConnectionTimeout(input);
+    }
+
+    @Test
+    public void testSetPdnConnectionTimeout_whenServiceStateIsNull() {
+        final boolean input = false;
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setPdnConnectionTimeout(SLOT_0, input);
+
+        verify(mockSscServiceState, never()).setPdnConnectionTimeout(input);
     }
 
     @Test
     public void testSetSocketConnectionExpired() {
         final boolean input = true;
+
         mSscServiceStateAgent.setSocketConnectionExpired(SLOT_0, input);
 
-        verify(mockSscServiceState).setSocketConnectionExpired(eq(input));
+        verify(mockSscServiceState).setSocketConnectionExpired(input);
+    }
+
+    @Test
+    public void testSetSocketConnectionExpired_whenServiceStateIsNull() {
+        final boolean input = true;
+        mSscServiceStateAgent.removeSscServiceState(SLOT_0);
+
+        mSscServiceStateAgent.setSocketConnectionExpired(SLOT_0, input);
+
+        verify(mockSscServiceState, never()).setSocketConnectionExpired(input);
     }
 }

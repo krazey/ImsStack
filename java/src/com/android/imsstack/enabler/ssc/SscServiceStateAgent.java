@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.ssc;
 
 import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 
+import android.annotation.NonNull;
 import android.os.Looper;
 
 import com.android.imsstack.util.ImsLog;
@@ -56,13 +57,14 @@ public class SscServiceStateAgent {
     }
 
     @VisibleForTesting
-    public void setSscServiceState(int slotId, SscServiceState sscServiceState) {
+    public void setSscServiceState(int slotId, @NonNull SscServiceState sscServiceState) {
         deInit(slotId);
         sscServiceState.init();
         mSscServiceState.put(slotId, sscServiceState);
     }
 
-    private void removeSscServiceState(int slotId) {
+    @VisibleForTesting
+    void removeSscServiceState(int slotId) {
         mSscServiceState.remove(slotId);
     }
 
