@@ -561,7 +561,8 @@ PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 
 PUBLIC VIRTUAL void MtcCall::RunPendingOperationIfPossible()
 {
-    if (m_objPendingOperationHolder.HasPendingOperation())
+    while (m_objPendingOperationHolder.HasPendingOperation() &&
+            GetState() == CallStateName::ESTABLISHED)
     {
         IMS_TRACE_I("RunPendingOperationIfPossible : key[%d]", m_nKey, 0, 0);
         m_objStateMachine.RunStateOperation(m_objPendingOperationHolder.PopPendingOperation());

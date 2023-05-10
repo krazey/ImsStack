@@ -999,6 +999,52 @@ TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)
     EXPECT_NE(eChangedCallType, objCall.GetUpdatingInfo().GetTargetCallType());
 }
 
+TEST_F(MtcCallTest, RunPendingOperationIfPossibledRunsAllPendingOperationIfAllReturnEstablished)
+{
+    std::function<IMtcCall::State(IMtcCallState*)> objPendingOperationReturnEstablished =
+            [](IMtcCallState* /* pState */)
+    {
+        return CallStateName::ESTABLISHED;
+    };
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_CALL(*pState, GetStateName).WillRepeatedly(Return(CallStateName::ESTABLISHED));
+
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+
+    objCall.RunPendingOperationIfPossible();
+    EXPECT_FALSE(objCall.GetPendingOperationHolder().HasPendingOperation());
+}
+
+TEST_F(MtcCallTest, RunPendingOperationIfPossibledNotRunsAllPendingOperationIfReturnUpdating)
+{
+    std::function<IMtcCall::State(IMtcCallState*)> objPendingOperationReturnEstablished =
+            [](IMtcCallState* /* pState */)
+    {
+        return CallStateName::ESTABLISHED;
+    };
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_CALL(*pState, GetStateName)
+            .Times(3)
+            .WillOnce(Return(CallStateName::ESTABLISHED))
+            .WillOnce(Return(CallStateName::ESTABLISHED))
+            .WillOnce(Return(CallStateName::UPDATING));
+
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+    objCall.GetPendingOperationHolder().PushPendingOperation(objPendingOperationReturnEstablished);
+
+    objCall.RunPendingOperationIfPossible();
+    EXPECT_TRUE(objCall.GetPendingOperationHolder().HasPendingOperation());
+}
+
 TEST_F(MtcCallTest, GetTimerReturnsMember)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
