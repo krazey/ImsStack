@@ -722,8 +722,8 @@ public class SystemInterface implements JniSystemListener {
                 "GET_NETWORK_TYPE");
         sMethodToString.put(SystemConstants.GET_VOICE_NETWORK_TYPE,
                 "GET_VOICE_NETWORK_TYPE");
-        sMethodToString.put(SystemConstants.GET_CALL_STATE,
-                "GET_CALL_STATE");
+        sMethodToString.put(SystemConstants.GET_CS_CALL_STATE,
+                "GET_CS_CALL_STATE");
         sMethodToString.put(SystemConstants.GET_DEVICE_ID,
                 "GET_DEVICE_ID");
         sMethodToString.put(SystemConstants.GET_DEVICE_NAME,
@@ -736,22 +736,14 @@ public class SystemInterface implements JniSystemListener {
                 "GET_PHONE_NUMBER");
         sMethodToString.put(SystemConstants.GET_SUBSCRIBER_ID,
                 "GET_SUBSCRIBER_ID");
-        sMethodToString.put(SystemConstants.GET_MCC,
-                "GET_MCC");
-        sMethodToString.put(SystemConstants.GET_MNC,
-                "GET_MNC");
-        sMethodToString.put(SystemConstants.GET_OPERATOR,
-                "GET_OPERATOR");
-        sMethodToString.put(SystemConstants.GET_COUNTRY,
-                "GET_COUNTRY");
-        sMethodToString.put(SystemConstants.GET_NETWORK_COUNTRY,
-                "GET_NETWORK_COUNTRY");
-        sMethodToString.put(SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM,
-                "GET_EMERGENCY_NUM_LIST_FROM_SIM");
-        sMethodToString.put(SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM,
-                "GET_EMERGENCY_PRIORITY_FROM_MODEM");
-        sMethodToString.put(SystemConstants.GET_UICC_GBA_SUPPORT,
-                "GET_UICC_GBA_SUPPORT");
+        sMethodToString.put(SystemConstants.GET_SIM_MCC,
+                "GET_SIM_MCC");
+        sMethodToString.put(SystemConstants.GET_SIM_MNC,
+                "GET_SIM_MNC");
+        sMethodToString.put(SystemConstants.GET_SIM_COUNTRY_ISO,
+                "GET_SIM_COUNTRY_ISO");
+        sMethodToString.put(SystemConstants.GET_NETWORK_COUNTRY_ISO,
+                "GET_NETWORK_COUNTRY_ISO");
         sMethodToString.put(SystemConstants.GET_WIFI_STATE,
                 "GET_WIFI_STATE");
         sMethodToString.put(SystemConstants.GET_WIFI_CONNECTION_STATE,
@@ -780,8 +772,8 @@ public class SystemInterface implements JniSystemListener {
                 "SET_EVENT");
         sMethodToString.put(SystemConstants.RESET_EVENT,
                 "RESET_EVENT");
-        sMethodToString.put(SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT,
-                "GET_CALL_STATE_IN_OTHER_SLOT");
+        sMethodToString.put(SystemConstants.GET_CS_CALL_STATE_IN_OTHER_SLOT,
+                "GET_CS_CALL_STATE_IN_OTHER_SLOT");
         sMethodToString.put(SystemConstants.ADD_IPSEC_SA_PARAMETER,
                 "ADD_IPSEC_SA_PARAMETER");
         sMethodToString.put(SystemConstants.REMOVE_IPSEC_SA_PARAMETER,
@@ -824,8 +816,6 @@ public class SystemInterface implements JniSystemListener {
     private class ImsSystem implements ISystem, MmTelFeatureRegistry.Listener {
         private ISystemAPICallInfo mISystemAPICallInfo;
         private ISystemAPINetwork mISystemAPINetwork;
-        private ISystemAPITelephonyState mISystemAPITelephonyState;
-        private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
 
         private ThreadMessageExecutor mExecutor =
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
@@ -883,21 +873,6 @@ public class SystemInterface implements JniSystemListener {
             }
         }
 
-        @Override
-        public void setISystemAPITelephonyState(ISystemAPITelephonyState api) {
-            synchronized (mLock) {
-                mISystemAPITelephonyState = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api) {
-            synchronized (mLock) {
-                mISystemAPITelephonySubscriber = api;
-            }
-        }
-
-        // Interface implementation methods --------------------------
         /**
          * Notifies the changes of airplane mode in the phone settings.
          *
@@ -1450,12 +1425,9 @@ public class SystemInterface implements JniSystemListener {
 
             synchronized (mLock) {
                 switch (method) {
-                    //mISystemAPICallInfo
-                    case SystemConstants.IS_EMERGENCY_NUMBER: //FALL-THROUGH
                     case SystemConstants.GET_TTY_MODE: //FALL-THROUGH
-                    case SystemConstants.GET_RTT_MODE: //FALL-THROUGH
-                    case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
-                        result = handleSystemAPICallInfo(method, parcel);
+                    case SystemConstants.GET_RTT_MODE:
+                        result = handleSystemCallForCallSettings(method);
                         break;
                     //mISystemAPINetwork 1 ~ 10
                     case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
@@ -1491,49 +1463,43 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.REQUEST_USIM_AUTH:
                         result = handleSystemCallForSim(method, parcel);
                         break;
-                    //mISystemAPITelephonyState
-                    case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
-                    case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
-                    case SystemConstants.GET_CALL_STATE:
-                        result = handleSystemAPITelephonyState(method);
-                        break;
-                    //mISystemAPITelephonySubscriber
                     case SystemConstants.GET_DEVICE_ID: //FALL-THROUGH
                     case SystemConstants.GET_DEVICE_SOFTWARE_VERSION: //FALL-THROUGH
                     case SystemConstants.GET_PHONE_NUMBER: //FALL-THROUGH
                     case SystemConstants.GET_SUBSCRIBER_ID: //FALL-THROUGH
-                    case SystemConstants.GET_MCC: //FALL-THROUGH
-                    case SystemConstants.GET_MNC: //FALL-THROUGH
-                    case SystemConstants.GET_OPERATOR: //FALL-THROUGH
-                    case SystemConstants.GET_COUNTRY: //FALL-THROUGH
-                    case SystemConstants.GET_NETWORK_COUNTRY: //FALL-THROUGH
-                    case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM: //FALL-THROUGH
-                    case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM: //FALL-THROUGH
-                    case SystemConstants.GET_UICC_GBA_SUPPORT:
-                        result = handleSystemAPITelephonySubscriber(method);
+                    case SystemConstants.GET_SIM_MCC: //FALL-THROUGH
+                    case SystemConstants.GET_SIM_MNC: //FALL-THROUGH
+                    case SystemConstants.GET_SIM_COUNTRY_ISO: //FALL-THROUGH
+                    case SystemConstants.GET_NETWORK_COUNTRY_ISO: //FALL-THROUGH
+                    case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_CS_CALL_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_CS_CALL_STATE_IN_OTHER_SLOT: //FALL-THROUGH
+                    case SystemConstants.IS_EMERGENCY_NUMBER:
+                        result = handleSystemCallForTelephony(method, parcel);
                         break;
                     case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
                     case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
                     case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
                     case SystemConstants.GET_WFC_ADDRESS_ID:
-                        result = handleSystemAPIWifiCalling(method);
+                        result = handleSystemCallForWifiCalling(method);
                         break;
                     case SystemConstants.START_LISTENING_FOR_LOCATION: //FALL-THROUGH
                     case SystemConstants.STOP_LISTENING_FOR_LOCATION: //FALL-THROUGH
                     case SystemConstants.GET_LAST_KNOWN_LOCATION: //FALL-THROUGH
                     case SystemConstants.START_INSTANT_LOCATION_UPDATE:
-                        result = handleSystemApiLocation(method, parcel);
+                        result = handleSystemCallForLocation(method, parcel);
                         break;
                     case SystemConstants.START_IMS_TRAFFIC: //FALL-THROUGH
                     case SystemConstants.STOP_IMS_TRAFFIC: //FALL-THROUGH
                     case SystemConstants.TRIGGER_EPS_FALLBACK:
-                        result = handleSystemApiRadio(method, parcel);
+                        result = handleSystemCallForRadio(method, parcel);
                         break;
                     case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
                     case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
                     case SystemConstants.APPLY_IPSEC_SA: // FALL-THROUGH
                     case SystemConstants.REMOVE_IPSEC_SA:
-                        result = handleSystemApiIpSec(method, parcel, fd);
+                        result = handleSystemCallForIpSec(method, parcel, fd);
                         break;
                     default:
                         result = handleSystemCall(method);
@@ -1563,17 +1529,10 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPICallInfo(int method, Parcel parcel) {
-            if (mISystemAPICallInfo == null) {
-                return null;
-            }
-
+        private Parcel handleSystemCallForCallSettings(int method) {
             Parcel result = Parcel.obtain();
 
             switch (method) {
-                case SystemConstants.IS_EMERGENCY_NUMBER:
-                    result.writeInt(mISystemAPICallInfo.isEmergencyNumber(parcel.readString()));
-                    break;
                 case SystemConstants.GET_TTY_MODE: {
                     MmTelFeatureRegistry mtfr =
                             ImsServiceRegistry.getInstance(mSlotId).getMmTelFeatureRegistry();
@@ -1586,9 +1545,6 @@ public class SystemInterface implements JniSystemListener {
                     result.writeInt(mtfr.getRttMode());
                     break;
                 }
-                case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
-                    result.writeInt(mISystemAPICallInfo.getCallStateInOtherSlot());
-                    break;
                 default:
                     result.recycle();
                     return null;
@@ -1915,84 +1871,63 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPITelephonyState(int method) {
-            if (mISystemAPITelephonyState == null) {
+        private Parcel handleSystemCallForTelephony(int method, Parcel parcel) {
+            if (mSystemCall == null) {
                 return null;
             }
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.GET_NETWORK_TYPE:
-                result.writeInt(mISystemAPITelephonyState.getNetworkType4Sys());
-                break;
-            case SystemConstants.GET_VOICE_NETWORK_TYPE:
-                result.writeInt(mISystemAPITelephonyState.getVoiceNetworkType4Sys());
-                break;
-            case SystemConstants.GET_CALL_STATE:
-                result.writeInt(mISystemAPITelephonyState.getCallState4Sys());
-                break;
-            default:
-                result.recycle();
-                return null;
+                case SystemConstants.GET_DEVICE_ID:
+                    result.writeString(mSystemCall.getImei());
+                    break;
+                case SystemConstants.GET_DEVICE_SOFTWARE_VERSION:
+                    result.writeString(mSystemCall.getDeviceSoftwareVersion());
+                    break;
+                case SystemConstants.GET_PHONE_NUMBER:
+                    result.writeString(mSystemCall.getPhoneNumber());
+                    break;
+                case SystemConstants.GET_SUBSCRIBER_ID:
+                    result.writeString(mSystemCall.getSubscriberId());
+                    break;
+                case SystemConstants.GET_SIM_MCC:
+                    result.writeString(mSystemCall.getSimMcc());
+                    break;
+                case SystemConstants.GET_SIM_MNC:
+                    result.writeString(mSystemCall.getSimMnc());
+                    break;
+                case SystemConstants.GET_SIM_COUNTRY_ISO:
+                    result.writeString(mSystemCall.getSimCountryIso());
+                    break;
+                case SystemConstants.GET_NETWORK_COUNTRY_ISO:
+                    result.writeString(mSystemCall.getNetworkCountryIso());
+                    break;
+                case SystemConstants.GET_NETWORK_TYPE:
+                    result.writeInt(mSystemCall.getNetworkType());
+                    break;
+                case SystemConstants.GET_VOICE_NETWORK_TYPE:
+                    result.writeInt(mSystemCall.getVoiceNetworkType());
+                    break;
+                case SystemConstants.GET_CS_CALL_STATE:
+                    result.writeInt(mSystemCall.getCsCallState());
+                    break;
+                case SystemConstants.GET_CS_CALL_STATE_IN_OTHER_SLOT:
+                    result.writeInt(mSystemCall.getCsCallStateInOtherSlot());
+                    break;
+                case SystemConstants.IS_EMERGENCY_NUMBER: {
+                    boolean isEmergencyNumber = mSystemCall.isEmergencyNumber(parcel.readString());
+                    result.writeInt(isEmergencyNumber ? 1 : 0);
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;
         }
 
-        private Parcel handleSystemAPITelephonySubscriber(int method) {
-            if (mISystemAPITelephonySubscriber == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-            switch (method) {
-            case SystemConstants.GET_DEVICE_ID:
-                result.writeString(mISystemAPITelephonySubscriber.getDeviceId4Sys());
-                break;
-            case SystemConstants.GET_DEVICE_SOFTWARE_VERSION:
-                result.writeString(mISystemAPITelephonySubscriber.getDeviceSoftwareVersion4Sys());
-                break;
-            case SystemConstants.GET_PHONE_NUMBER:
-                result.writeString(
-                    mISystemAPITelephonySubscriber.getPhoneNUmberExcludingNationalPrefix4Sys());
-                break;
-            case SystemConstants.GET_SUBSCRIBER_ID:
-                result.writeString(mISystemAPITelephonySubscriber.getSubscriberId4Sys());
-                break;
-            case SystemConstants.GET_MCC:
-                result.writeString(mISystemAPITelephonySubscriber.getMcc4Sys(true));
-                break;
-            case SystemConstants.GET_MNC:
-                result.writeString(mISystemAPITelephonySubscriber.getMnc4Sys(true));
-                break;
-            case SystemConstants.GET_OPERATOR:
-                result.writeString(mISystemAPITelephonySubscriber.getOperator4Sys());
-                break;
-            case SystemConstants.GET_COUNTRY:
-                result.writeString(mISystemAPITelephonySubscriber.getCountry4Sys());
-                break;
-            case SystemConstants.GET_NETWORK_COUNTRY:
-                result.writeString(mISystemAPITelephonySubscriber.getNetworkCountry4Sys());
-                break;
-            case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM:
-                result.writeString(
-                    mISystemAPITelephonySubscriber.getEmergencyNumberListFromSIM4Sys());
-                break;
-            case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM:
-                result.writeInt(mISystemAPITelephonySubscriber.getEmergencyPriorityFromModem4Sys());
-                break;
-            case SystemConstants.GET_UICC_GBA_SUPPORT:
-                result.writeInt(mISystemAPITelephonySubscriber.isUiccGbaSupported4Sys() ? 1 : 0);
-                break;
-            default:
-                result.recycle();
-                return null;
-            }
-
-            return result;
-        }
-
-        private Parcel handleSystemAPIWifiCalling(int method) {
+        private Parcel handleSystemCallForWifiCalling(int method) {
             Parcel result = Parcel.obtain();
             switch (method) {
                 case SystemConstants.IS_WFC_ENABLED: {
@@ -2025,7 +1960,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemApiLocation(int method, Parcel parcel) {
+        private Parcel handleSystemCallForLocation(int method, Parcel parcel) {
             if (mSystemCall == null) {
                 return null;
             }
@@ -2066,7 +2001,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemApiRadio(int method, Parcel parcel) {
+        private Parcel handleSystemCallForRadio(int method, Parcel parcel) {
             if (mSystemRadio == null) {
                 return null;
             }
@@ -2105,7 +2040,7 @@ public class SystemInterface implements JniSystemListener {
         }
 
         // IpSec
-        private Parcel handleSystemApiIpSec(int method, Parcel parcel, FileDescriptor fd) {
+        private Parcel handleSystemCallForIpSec(int method, Parcel parcel, FileDescriptor fd) {
             if (mSystemCall == null) {
                 return null;
             }

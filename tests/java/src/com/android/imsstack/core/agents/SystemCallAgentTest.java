@@ -15,6 +15,9 @@
  */
 package com.android.imsstack.core.agents;
 
+import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -53,6 +56,7 @@ public class SystemCallAgentTest {
     @Mock ConfigInterface mConfigInterface;
     @Mock LocationInterface mLocationInterface;
     @Mock IpSecInterface mIpSecInterface;
+    @Mock TelephonyInterface mTelephonyInterface;
     @Mock IDcNetWatcher mDcNetWatcher;
     @Mock SimAgent mSimAgent;
     @Mock NativeStateAgent mNativeStateAgent;
@@ -68,6 +72,7 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, SLOT0);
         AgentFactory.getInstance().setAgent(LocationInterface.class, mLocationInterface, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, mIpSecInterface, SLOT0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, mTelephonyInterface, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimAgent, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, mNativeStateAgent, SLOT0);
         replaceDcNetWatcher(mDcNetWatcher);
@@ -86,6 +91,7 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
         SystemInterface.setSystemInterface(null);
@@ -249,6 +255,189 @@ public class SystemCallAgentTest {
 
         assertEquals(SystemCallInterface.RESULT_FAIL, result);
         verifyNoMoreInteractions(mSimAgent);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetCsCallState() {
+        mSystemCallAgent.getCsCallState();
+
+        verify(mTelephonyInterface).getCsCallState();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        int callState = mSystemCallAgent.getCsCallState();
+
+        assertEquals(CALL_STATE_IDLE, callState);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetCsCallStateInOtherSlot() {
+        mSystemCallAgent.getCsCallStateInOtherSlot();
+
+        verify(mTelephonyInterface).getCsCallStateInOtherSlot();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        int callState = mSystemCallAgent.getCsCallStateInOtherSlot();
+
+        assertEquals(CALL_STATE_IDLE, callState);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetNetworkType() {
+        mSystemCallAgent.getNetworkType();
+
+        verify(mTelephonyInterface).getNetworkType();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        int networkType = mSystemCallAgent.getNetworkType();
+
+        assertEquals(NETWORK_TYPE_UNKNOWN, networkType);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetVoiceNetworkType() {
+        mSystemCallAgent.getVoiceNetworkType();
+
+        verify(mTelephonyInterface).getVoiceNetworkType();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        int networkType = mSystemCallAgent.getVoiceNetworkType();
+
+        assertEquals(NETWORK_TYPE_UNKNOWN, networkType);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetImei() {
+        mSystemCallAgent.getImei();
+
+        verify(mTelephonyInterface).getImei();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String imei = mSystemCallAgent.getImei();
+
+        assertNull(imei);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDeviceSoftwareVersion() {
+        mSystemCallAgent.getDeviceSoftwareVersion();
+
+        verify(mTelephonyInterface).getDeviceSoftwareVersion();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String svn = mSystemCallAgent.getDeviceSoftwareVersion();
+
+        assertNull(svn);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetPhoneNumber() {
+        mSystemCallAgent.getPhoneNumber();
+
+        verify(mTelephonyInterface).getPhoneNumber();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String phoneNumber = mSystemCallAgent.getPhoneNumber();
+
+        assertEquals("", phoneNumber);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetSubscriberId() {
+        mSystemCallAgent.getSubscriberId();
+
+        verify(mTelephonyInterface).getSubscriberId();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String imsi = mSystemCallAgent.getSubscriberId();
+
+        assertNull(imsi);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetSimMcc() {
+        mSystemCallAgent.getSimMcc();
+
+        verify(mTelephonyInterface).getSimMcc();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String mcc = mSystemCallAgent.getSimMcc();
+
+        assertNull(mcc);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetSimMnc() {
+        mSystemCallAgent.getSimMnc();
+
+        verify(mTelephonyInterface).getSimMnc();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String mnc = mSystemCallAgent.getSimMnc();
+
+        assertNull(mnc);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetSimCountryIso() {
+        mSystemCallAgent.getSimCountryIso();
+
+        verify(mTelephonyInterface).getSimCountryIso();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String countryIso = mSystemCallAgent.getSimCountryIso();
+
+        assertEquals("", countryIso);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetNetworkCountryIso() {
+        mSystemCallAgent.getNetworkCountryIso();
+
+        verify(mTelephonyInterface).getNetworkCountryIso();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String countryIso = mSystemCallAgent.getNetworkCountryIso();
+
+        assertEquals("", countryIso);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsEmergencyNumber() {
+        String number = "911";
+        mSystemCallAgent.isEmergencyNumber(number);
+
+        verify(mTelephonyInterface).isEmergencyNumber(eq(number));
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        boolean result = mSystemCallAgent.isEmergencyNumber(number);
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mTelephonyInterface);
     }
 
     @Test

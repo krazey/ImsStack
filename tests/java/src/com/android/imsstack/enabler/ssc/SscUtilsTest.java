@@ -25,10 +25,10 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.ITelephonySubscriber;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
@@ -51,7 +51,7 @@ public class SscUtilsTest {
     @Mock private ConfigAgent mMockConfigAgent;
     @Mock private SimInterface mMockSimInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
-    @Mock private ITelephonySubscriber mMockTelephonySubscriber;
+    @Mock private TelephonyInterface mMockTelephonyInterface;
 
     @Before
     public void setup() {
@@ -167,8 +167,8 @@ public class SscUtilsTest {
     public void getDomain_fromIsimWhenImpiIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn(null);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("01");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("001");
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn("01");
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn("001");
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
 
@@ -177,7 +177,7 @@ public class SscUtilsTest {
 
     @Test
     public void getDomain_fromUsimWhenTelephonySubscriberIsNull() {
-        mMockTelephonySubscriber = null;
+        mMockTelephonyInterface = null;
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
@@ -188,8 +188,8 @@ public class SscUtilsTest {
     @Test
     public void getDomain_fromUsimWhenMncIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn(null);
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("001");
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn(null);
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn("001");
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
 
@@ -199,8 +199,8 @@ public class SscUtilsTest {
     @Test
     public void getDomain_fromUsimWhenMccIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("001");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn(null);
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn("001");
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn(null);
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
 
@@ -210,8 +210,8 @@ public class SscUtilsTest {
     @Test
     public void getDomain_fromUsimWhenNumberFormatException() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("abc");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("def");
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn("abc");
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn("def");
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
 
@@ -251,8 +251,8 @@ public class SscUtilsTest {
     @Test
     public void getDomain_fromUsim() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("01");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("01");
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn("01");
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn("01");
 
         String domain = mSscUtils.getDomain(SLOT_0, false);
 
@@ -262,8 +262,8 @@ public class SscUtilsTest {
     @Test
     public void getDomain_fromUsimForXcapRootUri() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
-        when(mMockTelephonySubscriber.getMnc(true)).thenReturn("02");
-        when(mMockTelephonySubscriber.getMcc(true)).thenReturn("02");
+        when(mMockTelephonyInterface.getSimMnc()).thenReturn("02");
+        when(mMockTelephonyInterface.getSimMcc()).thenReturn("02");
 
         String domain = mSscUtils.getDomain(SLOT_0, true);
 
@@ -591,9 +591,9 @@ public class SscUtilsTest {
         }
 
         @Override
-        protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
-            super.getTelephonySubscriber(slotId);
-            return mMockTelephonySubscriber;
+        protected TelephonyInterface getTelephonyInterface(int slotId) {
+            super.getTelephonyInterface(slotId);
+            return mMockTelephonyInterface;
         }
     }
 }

@@ -69,20 +69,16 @@ public class SystemConstants {
     /**
      * Device & UICC-related information
      */
-    public static final int GET_DEVICE_ID = CATEGORY_BASE + 103;
-    public static final int GET_DEVICE_SOFTWARE_VERSION = CATEGORY_BASE + 104;
-    public static final int GET_EXTERNAL_STORAGE_PATH = CATEGORY_BASE + 105;
-    public static final int GET_PHONE_NUMBER = CATEGORY_BASE + 106;
-    public static final int GET_SUBSCRIBER_ID = CATEGORY_BASE + 107;
-    public static final int GET_MCC = CATEGORY_BASE + 108;
-    public static final int GET_MNC = CATEGORY_BASE + 109;
-    public static final int GET_OPERATOR = CATEGORY_BASE + 110;
-    public static final int GET_COUNTRY = CATEGORY_BASE + 111;
-    public static final int GET_DEVICE_NAME = CATEGORY_BASE + 112;
-    public static final int GET_NETWORK_COUNTRY = CATEGORY_BASE + 113;
-    public static final int GET_EMERGENCY_NUM_LIST_FROM_SIM = CATEGORY_BASE + 114;
-    public static final int GET_EMERGENCY_PRIORITY_FROM_MODEM = CATEGORY_BASE + 115;
-    public static final int GET_UICC_GBA_SUPPORT = CATEGORY_BASE + 116;
+    public static final int GET_DEVICE_ID = CATEGORY_BASE + 101;
+    public static final int GET_DEVICE_NAME = CATEGORY_BASE + 102;
+    public static final int GET_DEVICE_SOFTWARE_VERSION = CATEGORY_BASE + 103;
+    public static final int GET_EXTERNAL_STORAGE_PATH = CATEGORY_BASE + 104;
+    public static final int GET_PHONE_NUMBER = CATEGORY_BASE + 105;
+    public static final int GET_SUBSCRIBER_ID = CATEGORY_BASE + 106;
+    public static final int GET_SIM_MCC = CATEGORY_BASE + 107;
+    public static final int GET_SIM_MNC = CATEGORY_BASE + 108;
+    public static final int GET_SIM_COUNTRY_ISO = CATEGORY_BASE + 109;
+    public static final int GET_NETWORK_COUNTRY_ISO = CATEGORY_BASE + 110;
 
     // For UICC (ISIM)
     public static final int GET_ISIM_STATE = CATEGORY_BASE + 151;
@@ -95,11 +91,11 @@ public class SystemConstants {
     /**
      * Call-related information
      */
-    public static final int GET_CALL_STATE = CATEGORY_BASE + 201;
+    public static final int GET_CS_CALL_STATE = CATEGORY_BASE + 201;
     public static final int IS_EMERGENCY_NUMBER = CATEGORY_BASE + 202;
     public static final int GET_TTY_MODE = CATEGORY_BASE + 203;
     public static final int GET_RTT_MODE = CATEGORY_BASE + 204;
-    public static final int GET_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
+    public static final int GET_CS_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
 
     public static final int GET_DIGEST_SHA1 = CATEGORY_BASE + 303;
 

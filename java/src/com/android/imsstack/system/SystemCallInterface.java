@@ -16,6 +16,9 @@
 
 package com.android.imsstack.system;
 
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.NetworkType;
+
 import com.android.imsstack.core.config.CarrierConfig;
 
 import java.io.FileDescriptor;
@@ -117,6 +120,87 @@ public interface SystemCallInterface {
      * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
      */
     int requestUsimAuthentication(String nonce, long owner);
+    ////}
+
+    //// Telephony interface {
+    /**
+     * Returns the Telephony call state for CS calls.
+     *
+     * @return The Telephony call state.
+     */
+    @CallState int getCsCallState();
+
+    /**
+     * Returns the Telephony call state for CS calls of other slots.
+     *
+     * @return The Telephony call state of other slot.
+     */
+    @CallState int getCsCallStateInOtherSlot();
+
+    /**
+     * Returns the current data network type.
+     *
+     * @return The network type.
+     */
+    @NetworkType int getNetworkType();
+
+    /**
+     * Returns the current voice network type.
+     *
+     * @return The voice network type.
+     */
+    @NetworkType int getVoiceNetworkType();
+
+    /**
+     * Returns the IMEI (International Mobile Equipment Identity).
+     * Returns null if IMEI is not available.
+     */
+    String getImei();
+
+    /**
+     * Returns the software version number for the device, for example, the IMEI/SV for GSM phones.
+     * Returns null if the software version is not available.
+     */
+    String getDeviceSoftwareVersion();
+
+    /**
+     * Returns the phone number, or an empty string if not available.
+     */
+    String getPhoneNumber();
+
+    /**
+     * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
+     * Returns null if it is unavailable.
+     */
+    String getSubscriberId();
+
+    /**
+     * Returns the MCC (Mobile Country Code) of the provider of the SIM.
+     */
+    String getSimMcc();
+
+    /**
+     * Returns the MNC (Mobile Network Code) of the provider of the SIM.
+     */
+    String getSimMnc();
+
+    /**
+     * Returns the ISO-3166-1 alpha-2 country code equivalent for the SIM provider's country code.
+     */
+    String getSimCountryIso();
+
+    /**
+     * Returns the ISO-3166-1 alpha-2 country code equivalent of the MCC (Mobile Country Code) of
+     * the current registered operator or the cell nearby, if available.
+     */
+    String getNetworkCountryIso();
+
+    /**
+     * Checks whether the specified number is an emergency number or not.
+     *
+     * @return {@code true} if the number is an emergency number, {@code false} otherwise.
+     */
+    boolean isEmergencyNumber(String number);
     ////}
 
     /**

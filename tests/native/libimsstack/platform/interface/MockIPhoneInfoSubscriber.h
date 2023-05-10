@@ -28,16 +28,11 @@ public:
     inline virtual ~MockISubscriberInfo() {}
 
     MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString& strPhoneNumber), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetMcc, (OUT AString& strMcc), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetMnc, (OUT AString& strMnc), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetOperator, (OUT AString& strOperator), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetCountry, (OUT AString& strCountry), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetNetworkCountry, (OUT AString& strCountry), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetSubscriberId, (OUT AString& strImsi), (const, override));
-    MOCK_METHOD(IMS_BOOL, GetEmergencyNumberListFromSim, (OUT AString& strEnlFromSim),
-            (const, override));
-    MOCK_METHOD(IMS_SINT32, GetEmergencyPriorityFromModem, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsUiccGbaSupported, (), (override));
+    MOCK_METHOD(IMS_BOOL, GetSimMcc, (OUT AString & strMcc), (const, override));
+    MOCK_METHOD(IMS_BOOL, GetSimMnc, (OUT AString & strMnc), (const, override));
+    MOCK_METHOD(IMS_BOOL, GetSimCountryIso, (OUT AString & strCountry), (const, override));
+    MOCK_METHOD(IMS_BOOL, GetNetworkCountryIso, (OUT AString & strCountry), (const, override));
+    MOCK_METHOD(IMS_BOOL, GetSubscriberId, (OUT AString & strImsi), (const, override));
     MOCK_METHOD(IMS_BOOL, GetPreference,
             (IN const AString& strFileName, IN const AString& strKey, OUT AString& strValue,
                     IN PREFERENCE_VALUE_ENTYPE enValueType),

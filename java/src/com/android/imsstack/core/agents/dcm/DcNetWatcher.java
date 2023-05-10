@@ -39,10 +39,10 @@ import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
-import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -1301,14 +1301,14 @@ public class DcNetWatcher implements IDcNetWatcher {
         /** Invokes when call state is changed. */
         @Override
         public void onCallStateChanged(@CallState int state) {
-            ITelephonyState ts =
-                    (ITelephonyState) AgentFactory.getAgent(AgentFactory.TELEPHONY_STATE, mSlotId);
+            TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                    TelephonyInterface.class, mSlotId);
 
-            if (ts == null) {
+            if (telephony == null) {
                 return;
             }
 
-            int csStateFromPhone = ts.getCallState();
+            int csStateFromPhone = telephony.getCsCallState();
 
             if (csStateFromPhone != state) {
                 ImsLog.i(mSlotId, "call state is not CS");
@@ -1372,10 +1372,12 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
 
         private int getCellularDataRAT() {
-            ITelephonyState ts =
-                    (ITelephonyState) AgentFactory.getAgent(AgentFactory.TELEPHONY_STATE, mSlotId);
+            TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                    TelephonyInterface.class, mSlotId);
 
-            return (ts != null) ? ts.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            return (telephony != null)
+                    ? telephony.getNetworkType()
+                    : TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 

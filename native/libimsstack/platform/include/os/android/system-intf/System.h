@@ -61,15 +61,10 @@ public:
     IMS_SINT32 GetExternalStoragePath(OUT AString& strExternalStoragePath) override;
     IMS_SINT32 GetPhoneNumber(OUT AString& strPhoneNumber, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetSubscriberId(OUT AString& strImsi, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetMcc(OUT AString& strMcc, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetNetworkCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetEmergencyNumberListFromSim(
-            OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetEmergencyPriorityFromModem(IN IMS_SINT32 nSlotId) override;
-    IMS_BOOL IsUiccGbaSupported(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetSimMcc(OUT AString& strMcc, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
 
     // For UICC (ISIM)
     AString GetIsimState(IN IMS_SINT32 nSlotId) override;
@@ -85,11 +80,11 @@ public:
     ////
     // Call-related information
     ////
-    IMS_SINT32 GetCallState(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetCsCallState(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 IsEmergencyNumber(IN const AString& strNumber, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetCallStateInOtherSlot(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) override;
 
     IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) override;
     IMS_SINT32 GetDigestSha1(IN const AString& strIn, OUT AString& strOut) override;

@@ -161,7 +161,7 @@ PRIVATE
 AString MtcDialingPlan::GetMcc() const
 {
     AString strMcc;
-    m_objSubscriberInfo.GetMcc(strMcc);
+    m_objSubscriberInfo.GetSimMcc(strMcc);
     return strMcc;
 }
 
@@ -169,7 +169,7 @@ PRIVATE
 AString MtcDialingPlan::GetMnc(IN IMS_UINT32 nLength) const
 {
     AString strMnc;
-    m_objSubscriberInfo.GetMnc(strMnc);
+    m_objSubscriberInfo.GetSimMnc(strMnc);
     if (nLength == 3 && strMnc.GetLength() == 2)
     {
         strMnc.Prepend("0");

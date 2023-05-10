@@ -20,10 +20,10 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ITelephonySubscriber;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.enabler.ssc.SscConfig.CarrierConfigServiceType;
 import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
 import com.android.imsstack.util.ImsLog;
@@ -88,13 +88,13 @@ public class SscUtils {
         if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) { // ISIM
             domain = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
         } else { // USIM
-            ITelephonySubscriber ts = getTelephonySubscriber(slotId);
-            if (ts == null) {
+            TelephonyInterface telephony = getTelephonyInterface(slotId);
+            if (telephony == null) {
                 return null;
             }
 
-            String strMnc = ts.getMnc(true);
-            String strMcc = ts.getMcc(true);
+            String strMnc = telephony.getSimMnc();
+            String strMcc = telephony.getSimMcc();
             if (TextUtils.isEmpty(strMnc) || TextUtils.isEmpty(strMcc)) {
                 ImsLog.e("Wrong MNC : " + strMnc + " or MCC : " + strMcc);
                 return null;
@@ -368,8 +368,7 @@ public class SscUtils {
     }
 
     @VisibleForTesting
-    protected ITelephonySubscriber getTelephonySubscriber(int slotId) {
-        return (ITelephonySubscriber) AgentFactory.getAgent(AgentFactory.TELEPHONY_SUBSCRIBER,
-                slotId);
+    protected TelephonyInterface getTelephonyInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(TelephonyInterface.class, slotId);
     }
 }

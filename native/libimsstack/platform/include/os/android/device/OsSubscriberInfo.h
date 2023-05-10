@@ -32,18 +32,13 @@ public:
 public:
     IMS_BOOL GetPhoneNumber(OUT AString& strPhoneNumber) const override;
 
-    IMS_BOOL GetMcc(OUT AString& strMcc) const override;
-    IMS_BOOL GetMnc(OUT AString& strMnc) const override;
+    IMS_BOOL GetSimMcc(OUT AString& strMcc) const override;
+    IMS_BOOL GetSimMnc(OUT AString& strMnc) const override;
 
-    IMS_BOOL GetOperator(OUT AString& strOperator) const override;
-    IMS_BOOL GetCountry(OUT AString& strCountry) const override;
-    IMS_BOOL GetNetworkCountry(OUT AString& strCountry) const override;
+    IMS_BOOL GetSimCountryIso(OUT AString& strCountry) const override;
+    IMS_BOOL GetNetworkCountryIso(OUT AString& strCountry) const override;
 
     IMS_BOOL GetSubscriberId(OUT AString& strImsi) const override;
-
-    IMS_BOOL GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim) const override;
-    IMS_SINT32 GetEmergencyPriorityFromModem() override;
-    IMS_BOOL IsUiccGbaSupported() override;
 
     IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
             OUT AString& strValue,
