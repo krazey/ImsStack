@@ -19,6 +19,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ImsAosParameter.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
@@ -34,9 +35,12 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
+#include <algorithm>
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -52,7 +56,8 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
-        m_eOngoingUpdateType(UpdateType::NONE)
+        m_eOngoingUpdateType(UpdateType::NONE),
+        m_objCallTypeHistory({})
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
     IMS_ASSERT(m_pMessageSender != IMS_NULL);
@@ -274,16 +279,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 
     if (eType == RequestType::START || eType == RequestType::UPDATE)
     {
-        UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
-        if (m_eCallType == CallType::UNKNOWN)
-        {
-            // UE must send full media list for the incoming INVITE w/o SDP
-            // TODO: but, let us optimize.
-            SetCallType(CallType::VOIP);
-            m_objContext.GetMediaManager().UpdateMediaDirection(
-                    MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
-        }
-
+        UpdateCallType(objRequest);
         UpdateCapabilityFromMessage(objRequest);
         SetInConference(objRequest);
     }
@@ -327,6 +323,7 @@ PUBLIC VIRTUAL void MtcSession::SetCallType(IN CallType eNewCallType)
     IMS_TRACE_D("SetCallType [%d] -> [%d]", m_eCallType, eNewCallType, 0);
     m_ePreviousCallType = m_eCallType;
     m_eCallType = eNewCallType;
+    SaveCallTypeHistory(m_eCallType);
 }
 
 PRIVATE
@@ -376,28 +373,55 @@ void MtcSession::UpdateSessionProperty()
 }
 
 PRIVATE
-void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType)
+void MtcSession::UpdateCallType(IN const IMessage& objMessage)
 {
-    CallType eNewCallType =
-            m_objContext.GetMessageUtils().GetCallType(&objMessage, &m_objSession, IMS_TRUE);
-
-    if (bSkipSameType && eNewCallType == m_eCallType)
+    if (UpdateCallTypeFromMessage(objMessage, IMS_FALSE) == IMS_SUCCESS)
     {
         return;
     }
 
-    if (eNewCallType != CallType::UNKNOWN)
+    CallType eNewCallType;
+    if (m_objCallTypeHistory.empty())
     {
-        SetCallType(eNewCallType);
+        eNewCallType = GetCallTypeByRegisteredFeature();
     }
     else
     {
-        // To update the m_ePreviousCallType.
-        SetCallType(m_eCallType);
+        eNewCallType = GetCallTypeByHistory();
     }
 
-    CheckCallTypeWithRegisteredFeature();
-    IMS_TRACE_D("UpdateCallTypeFromMessage : CallType[%d]", m_eCallType, 0, 0);
+    SetCallType(eNewCallType);
+
+    IMS_UINT32 eMediaTypes = MtcMediaUtil::GetMediaTypesFromCallType(m_eCallType);
+    std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+    for (IMS_UINT32 eMediaType : objMediaTypes)
+    {
+        if (eMediaType & eMediaTypes)
+        {
+            m_objContext.GetMediaManager().UpdateMediaDirection(eMediaType, DIRECTION_SEND_RECEIVE);
+        }
+    }
+}
+
+PRIVATE
+IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
+        IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType)
+{
+    CallType eCallTypeOfMessage =
+            m_objContext.GetMessageUtils().GetCallType(&objMessage, &m_objSession, IMS_TRUE);
+
+    if (bSkipSameType && eCallTypeOfMessage == m_eCallType)
+    {
+        return IMS_SUCCESS;
+    }
+
+    if (eCallTypeOfMessage != CallType::UNKNOWN)
+    {
+        SetCallType(RestrictCallTypeByRegisteredFeature(eCallTypeOfMessage));
+        return IMS_SUCCESS;
+    }
+
+    return IMS_FAILURE;
 }
 
 PRIVATE
@@ -439,16 +463,68 @@ void MtcSession::SetInConference(IN const IMessage& objMessage)
 }
 
 PRIVATE
-void MtcSession::CheckCallTypeWithRegisteredFeature()
+CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
     IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
 
-    if ((m_eCallType == CallType::VT && !bVideoFeature) ||
-            (m_eCallType == CallType::RTT && !bTextFeature))
+    if ((eCallType == CallType::VT && !bVideoFeature) ||
+            (eCallType == CallType::RTT && !bTextFeature))
     {
-        SetCallType(CallType::VOIP);
+        return CallType::VOIP;
     }
+
+    return eCallType;
+}
+
+PRIVATE
+CallType MtcSession::GetCallTypeByRegisteredFeature()
+{
+    IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
+    IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
+
+    if (bVideoFeature && !bTextFeature)
+    {
+        return CallType::VT;
+    }
+    else if (!bVideoFeature && bTextFeature)
+    {
+        return CallType::RTT;
+    }
+    else if (bVideoFeature && bTextFeature)
+    {
+        // Video && RTT
+        IMS_SINT32 nPolicyForTextAndVideo =
+                m_objContext.GetConfigurationProxy().GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
+        if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED ||
+                nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
+        {
+            return CallType::VT;
+        }
+        else
+        {
+            // TEXT_VIDEO_ALLOWED
+            return CallType::VIDEO_RTT;
+        }
+    }
+
+    return CallType::VOIP;
+}
+
+PRIVATE
+CallType MtcSession::GetCallTypeByHistory()
+{
+    std::vector<CallType> objCallTypesInPriority{
+            CallType::VIDEO_RTT, CallType::VT, CallType::RTT, CallType::VOIP};
+    for (CallType eType : objCallTypesInPriority)
+    {
+        if (IsInHistory(eType))
+        {
+            return eType;
+        }
+    }
+
+    return CallType::UNKNOWN;
 }
 
 PRIVATE
@@ -546,4 +622,21 @@ IMS_BOOL MtcSession::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MtcSession::IsInHistory(IN CallType eCallType)
+{
+    return std::find(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(), eCallType) !=
+            m_objCallTypeHistory.end();
+}
+
+PRIVATE
+void MtcSession::SaveCallTypeHistory(IN CallType eCallType)
+{
+    if (!IsInHistory(eCallType))
+    {
+        IMS_TRACE_D("SaveCallTypeHistory [%d]", eCallType, 0, 0);
+        m_objCallTypeHistory.push_back(eCallType);
+    }
 }

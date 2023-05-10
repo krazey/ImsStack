@@ -29,6 +29,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
+#include "call/UpdatingInfo.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/IMtcMediaManager.h"
 
@@ -215,7 +216,7 @@ void MtcUiNotifier::SendResumedBy()
     }
 
     piThread->OnResumedBy(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetUpdatingInfo().GetModifiedInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -263,7 +264,10 @@ void MtcUiNotifier::SendIncomingUpdate(IN CallType eCallTypeToUpdate)
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.eCallType = eCallTypeToUpdate;
 
-    piThread->OnIncomingUpdate(objJniCallInfo, m_objContext.GetMediaManager().GetMediaInfo(),
+    piThread->OnIncomingUpdate(objJniCallInfo,
+            m_objContext.GetUpdatingInfo().GetTargetCallType() == CallType::UNKNOWN
+                    ? m_objContext.GetUpdatingInfo().GetModifiedInfo()
+                    : m_objContext.GetUpdatingInfo().GetAlertingInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 }
 

@@ -24,9 +24,11 @@
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
 #include "MockIJniMtcServiceThread.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
+#include "call/UpdatingInfo.h"
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -60,6 +62,7 @@ public:
 
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
+    UpdatingInfo* pUpdatingInfo;
     ParticipantInfo* pParticipantInfo;
     CallReasonInfo* pReason;
 
@@ -72,6 +75,7 @@ protected:
         pReason = new CallReasonInfo(CODE_UNSPECIFIED);
         pParticipantInfo = new ParticipantInfo(objContext);
         pNotifier = new MtcUiNotifier(objContext);
+        pUpdatingInfo = new UpdatingInfo(objContext);
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
@@ -86,6 +90,7 @@ protected:
         ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
+        ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
@@ -100,6 +105,7 @@ protected:
         delete pConfigurationProxy;
         delete pConnector;
         delete pNotifier;
+        delete pUpdatingInfo;
         delete pParticipantInfo;
         delete pReason;
     }
@@ -230,12 +236,16 @@ TEST_F(MtcUiNotifierTest, SendHeldBy)
 
 TEST_F(MtcUiNotifierTest, SendResumedBy)
 {
-    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(1);
+    EXPECT_CALL(
+            objMockCallThread, OnResumedBy(_, objContext.GetUpdatingInfo().GetModifiedInfo(), _))
+            .Times(1);
 
     pNotifier->SendResumedBy();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(0);
+    EXPECT_CALL(
+            objMockCallThread, OnResumedBy(_, objContext.GetUpdatingInfo().GetModifiedInfo(), _))
+            .Times(0);
 
     pNotifier->SendResumedBy();
 }
@@ -266,7 +276,19 @@ TEST_F(MtcUiNotifierTest, SendIncomingResume)
 
 TEST_F(MtcUiNotifierTest, SendIncomingUpdate)
 {
-    EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _)).Times(1);
+    objContext.GetUpdatingInfo().SetTargetCallType(CallType::UNKNOWN);
+
+    EXPECT_CALL(objMockCallThread,
+            OnIncomingUpdate(_, objContext.GetUpdatingInfo().GetModifiedInfo(), _))
+            .Times(1);
+
+    pNotifier->SendIncomingUpdate(CallType::VOIP);
+
+    objContext.GetUpdatingInfo().SetTargetCallType(CallType::VOIP);
+
+    EXPECT_CALL(objMockCallThread,
+            OnIncomingUpdate(_, objContext.GetUpdatingInfo().GetAlertingInfo(), _))
+            .Times(1);
 
     pNotifier->SendIncomingUpdate(CallType::VOIP);
 

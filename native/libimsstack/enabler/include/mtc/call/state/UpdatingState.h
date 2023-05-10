@@ -87,7 +87,7 @@ protected:
 private:
     IMS_RESULT HandleSdpAnswer();
     IMS_RESULT SendAck();
-    IMS_RESULT SendUpdate();
+    IMS_RESULT SendRecoverUpdate();
     CallStateName HandleModificationSucceeded();
     CallStateName HandleRequestedModificationSucceeded();
     CallStateName HandleReceivedModificationSucceeded();

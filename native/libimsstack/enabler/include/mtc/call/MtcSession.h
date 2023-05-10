@@ -23,6 +23,7 @@
 #include "call/IMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/message/IMessageSender.h"
+#include <vector>
 
 class IMessage;
 class IConferenceManager;
@@ -86,17 +87,21 @@ private:
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
-    void UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
+    void UpdateCallType(IN const IMessage& objMessage);
+    IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
-    void CheckCallTypeWithRegisteredFeature();
+    CallType RestrictCallTypeByRegisteredFeature(IN CallType& eCallType);
+    CallType GetCallTypeByRegisteredFeature();
+    CallType GetCallTypeByHistory();
     ResultSetSdp SetSdpToSend(
             IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE);
 
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
-    IMS_BOOL IsNeedToRemoveSdpInPr() const;
+    IMS_BOOL IsInHistory(IN CallType eCallType);
+    void SaveCallTypeHistory(IN CallType eCallType);
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
@@ -110,6 +115,8 @@ private:
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
     UpdateType m_eOngoingUpdateType;
+
+    std::vector<CallType> m_objCallTypeHistory;
 };
 
 #endif

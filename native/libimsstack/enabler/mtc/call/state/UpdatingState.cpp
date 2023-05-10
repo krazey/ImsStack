@@ -101,16 +101,16 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 
     IMtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
+    pSession->SetCallType(eCallType);
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
         m_objContext.GetUiNotifier().SendUpdated();
         return CallStateName::ESTABLISHED;
     }
+
     m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
-
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
-    pSession->SetCallType(eCallType);
-
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
@@ -155,7 +155,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
 
     if (m_objContext.GetSession()->GetISession().GetState() == ISession::STATE_ESTABLISHED)
     {
-        if (SendUpdate() == IMS_FAILURE)
+        if (SendRecoverUpdate() == IMS_FAILURE)
         {
             // TODO
         }
@@ -691,6 +691,17 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
+        if (m_objContext.GetUpdatingInfo().GetTargetCallType() == CallType::UNKNOWN)
+        {
+            IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+            NegotiationState eState =
+                    objMediaManager.GetNegotiationState(&m_objContext.GetSession()->GetISession());
+            if (eState == NegotiationState::STATE_OFFER_SENT)
+            {
+                return IMS_FAILURE;
+            }
+        }
+
         return IMS_SUCCESS;
     }
 
@@ -720,7 +731,7 @@ IMS_RESULT UpdatingState::SendAck()
 }
 
 PRIVATE
-IMS_RESULT UpdatingState::SendUpdate()
+IMS_RESULT UpdatingState::SendRecoverUpdate()
 {
     IMS_TRACE_D("SendUpdate", 0, 0, 0);
 
@@ -735,6 +746,7 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
     IMtcSession* pSession = m_objContext.GetSession();
+    pSession->SetCallType(pSession->GetPreviousCallType());
 
     if (pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
@@ -825,7 +837,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
         return CallStateName::UPDATING;
     }
 
-    if (m_objContext.GetUpdatingInfo().IsHeldBy() || m_objContext.GetUpdatingInfo().IsResumedBy())
+    if (m_objContext.GetUpdatingInfo().IsHeldBy() || m_objContext.GetUpdatingInfo().IsResumedBy() ||
+            m_objContext.GetUpdatingInfo().GetTargetCallType() == CallType::UNKNOWN)
     {
         return CallStateName::ESTABLISHED;
     }

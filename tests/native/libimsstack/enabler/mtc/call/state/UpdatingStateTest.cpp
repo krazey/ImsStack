@@ -176,13 +176,16 @@ TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
 {
+    MediaInfo objChangedMediaInfo;
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    EXPECT_CALL(objMtcSession, SetCallType(CallType::VIDEO_RTT)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(objChangedMediaInfo)).Times(1);
     EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
-    EXPECT_EQ(
-            CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
+    EXPECT_EQ(CallStateName::ESTABLISHED,
+            pUpdatingState->AcceptUpdate(CallType::VIDEO_RTT, objChangedMediaInfo));
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate)
@@ -234,6 +237,8 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionUpdateIfSessionAlreadyEst
     ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_CALL(objMtcSession, GetPreviousCallType());
+    EXPECT_CALL(objMtcSession, SetCallType(_));
     EXPECT_CALL(objMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE));
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->RejectUpdate(objInfo));
 }
@@ -497,6 +502,17 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesOnMessageReceivedIfMofied)
             .WillByDefault(Return(&objMessage));
 
     EXPECT_CALL(objMtcPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedIfTargetCallTypeIsUnknown)
+{
+    pUpdatingInfo->SetTargetCallType(CallType::UNKNOWN);
+
+    EXPECT_CALL(objMtcPreconditionManager, OnMessageReceived(&objSession, &objMessage)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendUpdated).Times(0);
+    EXPECT_CALL(objUiNotifier, SendUpdatedBy).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
 }
 
