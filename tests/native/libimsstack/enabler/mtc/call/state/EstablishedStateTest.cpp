@@ -357,6 +357,7 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedRejectsIfBlocked)
     EXPECT_CALL(objMockMtcSession, GetPreviousCallType()).WillOnce(Return(eAnyCallType));
     EXPECT_CALL(objMockMtcSession, SetCallType(eAnyCallType));
     EXPECT_CALL(objMockMtcSession, Reject(objAnyReason));
+    EXPECT_CALL(objMockMediaManager, FinalizeSdp(&objMockISession));
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));

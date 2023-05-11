@@ -205,6 +205,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
             // Restore the CallType that was changed by MtcSession#HandleRequest.
             pSession->SetCallType(pSession->GetPreviousCallType());
             pSession->Reject(objResult.objReason);
+            m_objContext.GetMediaManager().FinalizeSdp(piSession);
             eStateName = CallStateName::ESTABLISHED;
         }
     }
