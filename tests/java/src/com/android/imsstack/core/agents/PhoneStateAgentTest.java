@@ -288,14 +288,20 @@ public class PhoneStateAgentTest {
         verify(tm, times(eventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
 
-        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(MSimUtils.INVALID_SUB_ID);
-
         // Invalid subscription
+        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(MSimUtils.INVALID_SUB_ID);
         listener.onDefaultSubscriptionChanged(MSimUtils.INVALID_SUB_ID);
 
         verify(defaultTelephonyManager, times(eventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
         verify(tm1, times(eventCount))
+                .unregisterTelephonyCallback(any(TelephonyCallback.class));
+
+        // When TelephonyManager is null
+        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
+        listener.onDefaultSubscriptionChanged(SUB_ID[0]);
+
+        verify(defaultTelephonyManager, never())
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
     }
 

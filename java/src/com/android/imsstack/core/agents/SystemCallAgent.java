@@ -16,6 +16,12 @@
 
 package com.android.imsstack.core.agents;
 
+import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.NetworkType;
+
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -210,6 +216,150 @@ public class SystemCallAgent implements SystemCallInterface {
         }
 
         return RESULT_FAIL;
+    }
+
+    /**
+     * Returns the Telephony call state for CS calls.
+     *
+     * @return The Telephony call state.
+     */
+    @Override
+    public @CallState int getCsCallState() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getCsCallState() : CALL_STATE_IDLE;
+    }
+
+    /**
+     * Returns the Telephony call state for CS calls of other slots.
+     *
+     * @return The Telephony call state of other slot.
+     */
+    @Override
+    public @CallState int getCsCallStateInOtherSlot() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getCsCallStateInOtherSlot() : CALL_STATE_IDLE;
+    }
+
+    /**
+     * Returns the current data network type.
+     *
+     * @return The network type.
+     */
+    @Override
+    public @NetworkType int getNetworkType() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getNetworkType() : NETWORK_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Returns the current voice network type.
+     *
+     * @return The voice network type.
+     */
+    @Override
+    public @NetworkType int getVoiceNetworkType() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getVoiceNetworkType() : NETWORK_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Returns the IMEI (International Mobile Equipment Identity).
+     * Returns null if IMEI is not available.
+     */
+    @Override
+    public String getImei() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getImei() : null;
+    }
+
+    /**
+     * Returns the software version number for the device, for example, the IMEI/SV for GSM phones.
+     * Returns null if the software version is not available.
+     */
+    @Override
+    public String getDeviceSoftwareVersion() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getDeviceSoftwareVersion() : null;
+    }
+
+    /**
+     * Returns the phone number, or an empty string if not available.
+     */
+    @Override
+    public String getPhoneNumber() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getPhoneNumber() : "";
+    }
+
+    /**
+     * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
+     * Returns null if it is unavailable.
+     */
+    @Override
+    public String getSubscriberId() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getSubscriberId() : null;
+    }
+
+    /**
+     * Returns the MCC (Mobile Country Code) of the provider of the SIM.
+     */
+    @Override
+    public String getSimMcc() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getSimMcc() : null;
+    }
+
+    /**
+     * Returns the MNC (Mobile Network Code) of the provider of the SIM.
+     */
+    @Override
+    public String getSimMnc() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getSimMnc() : null;
+    }
+
+    /**
+     * Returns the ISO-3166-1 alpha-2 country code equivalent for the SIM provider's country code.
+     */
+    @Override
+    public String getSimCountryIso() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getSimCountryIso() : "";
+    }
+
+    /**
+     * Returns the ISO-3166-1 alpha-2 country code equivalent of the MCC (Mobile Country Code) of
+     * the current registered operator or the cell nearby, if available.
+     */
+    @Override
+    public String getNetworkCountryIso() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getNetworkCountryIso() : "";
+    }
+
+    /**
+     * Checks whether the specified number is an emergency number or not.
+     *
+     * @return {@code true} if the number is an emergency number, {@code false} otherwise.
+     */
+    @Override
+    public boolean isEmergencyNumber(String number) {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.isEmergencyNumber(number) : false;
     }
 
     /**

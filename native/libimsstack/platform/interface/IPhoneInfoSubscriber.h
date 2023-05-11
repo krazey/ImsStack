@@ -35,15 +35,11 @@ protected:
 public:
     // CDMA: MDN, WCDMA: MSISDN(?)
     virtual IMS_BOOL GetPhoneNumber(OUT AString& strPhoneNumber) const = 0;
-    virtual IMS_BOOL GetMcc(OUT AString& strMcc) const = 0;
-    virtual IMS_BOOL GetMnc(OUT AString& strMnc) const = 0;
-    virtual IMS_BOOL GetOperator(OUT AString& strOperator) const = 0;
-    virtual IMS_BOOL GetCountry(OUT AString& strCountry) const = 0;
-    virtual IMS_BOOL GetNetworkCountry(OUT AString& strCountry) const = 0;
+    virtual IMS_BOOL GetSimMcc(OUT AString& strMcc) const = 0;
+    virtual IMS_BOOL GetSimMnc(OUT AString& strMnc) const = 0;
+    virtual IMS_BOOL GetSimCountryIso(OUT AString& strCountry) const = 0;
+    virtual IMS_BOOL GetNetworkCountryIso(OUT AString& strCountry) const = 0;
     virtual IMS_BOOL GetSubscriberId(OUT AString& strImsi) const = 0;
-    virtual IMS_BOOL GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim) const = 0;
-    virtual IMS_SINT32 GetEmergencyPriorityFromModem() = 0;
-    virtual IMS_BOOL IsUiccGbaSupported() = 0;
     virtual IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
             OUT AString& strValue,
             IN PREFERENCE_VALUE_ENTYPE enValueType = PREFERENCE_VALUE_STRING) = 0;

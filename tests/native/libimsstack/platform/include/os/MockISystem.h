@@ -57,18 +57,12 @@ public:
             (override));
     MOCK_METHOD(IMS_SINT32, GetSubscriberId, (OUT AString & strImsi, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(IMS_SINT32, GetMcc, (OUT AString & strMcc, IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetMnc, (OUT AString & strMnc, IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetOperator, (OUT AString & strOperator, IN IMS_SINT32 nSlotId),
+    MOCK_METHOD(IMS_SINT32, GetSimMcc, (OUT AString & strMcc, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetSimMnc, (OUT AString & strMnc, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetSimCountryIso, (OUT AString & strCountry, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(
-            IMS_SINT32, GetCountry, (OUT AString & strCountry, IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetNetworkCountry, (OUT AString & strCountry, IN IMS_SINT32 nSlotId),
+    MOCK_METHOD(IMS_SINT32, GetNetworkCountryIso, (OUT AString & strCountry, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(IMS_SINT32, GetEmergencyNumberListFromSim,
-            (OUT AString & strEnlFromSim, IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetEmergencyPriorityFromModem, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_BOOL, IsUiccGbaSupported, (IN IMS_SINT32 nSlotId), (override));
     // For UICC (ISIM)
     MOCK_METHOD(AString, GetIsimState, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, ReadIsimFileAttributes, (IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId),
@@ -84,12 +78,12 @@ public:
     ////
     // Call-related information
     ////
-    MOCK_METHOD(IMS_SINT32, GetCallState, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetCsCallState, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, IsEmergencyNumber, (IN const AString& strNumber, IN IMS_SINT32 nSlotId),
             (override));
     MOCK_METHOD(IMS_SINT32, GetTtyMode, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, GetRttMode, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, GetCallStateInOtherSlot, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, GetCsCallStateInOtherSlot, (IN IMS_SINT32 nSlotId), (override));
 
     MOCK_METHOD(IMS_SINT32, GetDeviceName, (OUT AString & strDeviceName), (override));
     MOCK_METHOD(

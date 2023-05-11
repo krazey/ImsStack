@@ -221,8 +221,8 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryHomeDomainName(IN IMS_SINT32 n
     AString strMcc;
     AString strMnc;
 
-    piSubsInfo->GetMcc(strMcc);
-    piSubsInfo->GetMnc(strMnc);
+    piSubsInfo->GetSimMcc(strMcc);
+    piSubsInfo->GetSimMnc(strMnc);
 
     if ((strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
@@ -270,8 +270,8 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPrivateUserId(IN IMS_SINT32 nS
     AString strMnc;
 
     piSubsInfo->GetSubscriberId(strImsi);
-    piSubsInfo->GetMcc(strMcc);
-    piSubsInfo->GetMnc(strMnc);
+    piSubsInfo->GetSimMcc(strMcc);
+    piSubsInfo->GetSimMnc(strMnc);
 
     if ((strImsi.GetLength() == 0) || (strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
@@ -308,8 +308,8 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPublicUserId(IN IMS_SINT32 nSl
     AString strMnc;
 
     piSubsInfo->GetSubscriberId(strImsi);
-    piSubsInfo->GetMcc(strMcc);
-    piSubsInfo->GetMnc(strMnc);
+    piSubsInfo->GetSimMcc(strMcc);
+    piSubsInfo->GetSimMnc(strMnc);
 
     if ((strImsi.GetLength() == 0) || (strMcc.GetLength() == 0) || (strMnc.GetLength() == 0))
     {
@@ -374,8 +374,8 @@ PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPlmn, IN IMS_
             return IMS_FALSE;
         }
 
-        piSubsInfo->GetMcc(strMcc);
-        piSubsInfo->GetMnc(strMnc);
+        piSubsInfo->GetSimMcc(strMcc);
+        piSubsInfo->GetSimMnc(strMnc);
     }
     else
     {

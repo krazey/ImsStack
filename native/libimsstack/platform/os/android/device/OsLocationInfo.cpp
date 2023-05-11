@@ -240,12 +240,12 @@ AString OsLocationInfo::GetCountryIso(IN IMS_BOOL bFromUicc /*= IMS_FALSE*/) con
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId());
     AString strCountry;
 
-    piSubsInfo->GetNetworkCountry(strCountry);
+    piSubsInfo->GetNetworkCountryIso(strCountry);
 
     if (bFromUicc && (strCountry.GetLength() == 0))
     {
         // If country ISO from the attached network is null, get it from UICC.
-        piSubsInfo->GetCountry(strCountry);
+        piSubsInfo->GetSimCountryIso(strCountry);
     }
 
     return strCountry;

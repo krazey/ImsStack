@@ -51,11 +51,10 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IAgent;
-import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDc;
@@ -77,7 +76,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -92,7 +90,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock IAosInfo mMockAosInfo;
     @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
-    @Mock ITelephonyState mMockTelephonyState;
+    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock SystemInterface mMockSystemInterface;
     @Mock AosFactory mMockAosFactory;
     @Mock NativeStateInterface mMockNativeStateInterface;
@@ -117,17 +115,11 @@ public class DcNetWatcherTest extends ImsStackTest {
                 PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
-
-        Map<Integer, HashMap<Integer, IAgent>> agentMaps =
-                new HashMap<Integer, HashMap<Integer, IAgent>>(NUM_OF_SLOT);
-        HashMap<Integer, IAgent> agents = new HashMap<>(1);
-        agents.put(AgentFactory.TELEPHONY_STATE, mMockTelephonyState);
-        agentMaps.put(SLOT_0, agents);
-        replaceInstance(AgentFactory.class, "sAgentSlots", null, agentMaps);
-
         when(mMockDcSetting.getImsSupportedRats())
                 .thenReturn(new int[] {AccessNetworkConstants.AccessNetworkType.EUTRAN,
                         AccessNetworkConstants.AccessNetworkType.IWLAN,
@@ -148,6 +140,7 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
         DcFactory.setObjects(SLOT_0, null);
     }
 
@@ -844,7 +837,8 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testOnServiceStateChanged_handleRadioTechChangedWithLte() throws Exception {
         replaceInstance(DcNetWatcher.class, "mRatChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        when(mMockTelephonyState.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockTelephonyInterface.getNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
@@ -915,7 +909,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(DcNetWatcher.class, "mImsVopsChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
         replaceInstance(DcNetWatcher.class, "mImsVops", mDcNetWatcher, true);
-        when(mMockTelephonyState.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockTelephonyInterface.getNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
@@ -972,7 +967,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testOnCallStateChanged_psCallStateChanged() throws Exception {
         replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        when(mMockTelephonyState.getCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
+        when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
                 new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
@@ -988,7 +983,8 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testOnCallStateChanged_csCallStateChangedOffhookToIdle() throws Exception {
         replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        when(mMockTelephonyState.getCallState()).thenReturn(TelephonyManager.CALL_STATE_OFFHOOK)
+        when(mMockTelephonyInterface.getCsCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK)
                 .thenReturn(TelephonyManager.CALL_STATE_IDLE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",

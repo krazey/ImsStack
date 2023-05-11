@@ -105,14 +105,14 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs2Digit)
     const AString strMcc3("123");
     const AString strMnc2("56");
     const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetMcc)
+    ON_CALL(objSubscriberInfo, GetSimMcc)
             .WillByDefault(Invoke(
                     [strMcc3](AString& strMcc)
                     {
                         strMcc = strMcc3;
                         return IMS_TRUE;
                     }));
-    ON_CALL(objSubscriberInfo, GetMnc)
+    ON_CALL(objSubscriberInfo, GetSimMnc)
             .WillByDefault(Invoke(
                     [strMnc2](AString& strMnc)
                     {
@@ -135,14 +135,14 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs3Digit)
     const AString strMcc3("123");
     const AString strMnc2("56");
     const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetMcc)
+    ON_CALL(objSubscriberInfo, GetSimMcc)
             .WillByDefault(Invoke(
                     [strMcc3](AString& strMcc)
                     {
                         strMcc = strMcc3;
                         return IMS_TRUE;
                     }));
-    ON_CALL(objSubscriberInfo, GetMnc)
+    ON_CALL(objSubscriberInfo, GetSimMnc)
             .WillByDefault(Invoke(
                     [strMnc3](AString& strMnc)
                     {

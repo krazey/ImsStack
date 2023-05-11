@@ -741,116 +741,64 @@ TEST_F(SystemTest, GetSubscriberId)
     EXPECT_EQ(m_pSystem->GetSubscriberId(strImsi, 0), 0);
 }
 
-TEST_F(SystemTest, GetMcc)
+TEST_F(SystemTest, GetSimMcc)
 {
     AString strMcc;
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetMcc(strMcc, 0), 1);
+    EXPECT_EQ(m_pSystem->GetSimMcc(strMcc, 0), 1);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetMcc(strMcc, 0), 0);
+    EXPECT_EQ(m_pSystem->GetSimMcc(strMcc, 0), 0);
 }
 
-TEST_F(SystemTest, GetMnc)
+TEST_F(SystemTest, GetSimMnc)
 {
     AString strMnc;
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetMnc(strMnc, 0), 1);
+    EXPECT_EQ(m_pSystem->GetSimMnc(strMnc, 0), 1);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetMnc(strMnc, 0), 0);
+    EXPECT_EQ(m_pSystem->GetSimMnc(strMnc, 0), 0);
 }
 
-TEST_F(SystemTest, GetOperator)
-{
-    AString strOperator;
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetOperator(strOperator, 0), 1);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetOperator(strOperator, 0), 0);
-}
-
-TEST_F(SystemTest, GetCountry)
+TEST_F(SystemTest, GetSimCountryIso)
 {
     AString strCountry;
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetCountry(strCountry, 0), 1);
+    EXPECT_EQ(m_pSystem->GetSimCountryIso(strCountry, 0), 1);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetCountry(strCountry, 0), 0);
+    EXPECT_EQ(m_pSystem->GetSimCountryIso(strCountry, 0), 0);
 }
 
-TEST_F(SystemTest, GetNetworkCountry)
+TEST_F(SystemTest, GetNetworkCountryIso)
 {
     AString strCountry;
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetNetworkCountry(strCountry, 0), 1);
+    EXPECT_EQ(m_pSystem->GetNetworkCountryIso(strCountry, 0), 1);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetNetworkCountry(strCountry, 0), 0);
-}
-
-TEST_F(SystemTest, GetEmergencyNumberListFromSim)
-{
-    AString strEnlFromSim;
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetEmergencyNumberListFromSim(strEnlFromSim, 0), 1);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetEmergencyNumberListFromSim(strEnlFromSim, 0), 0);
-}
-
-TEST_F(SystemTest, GetEmergencyPriorityFromModem)
-{
-    m_pSystem->SetCallback(IMS_NULL);
-
-    EXPECT_EQ(m_pSystem->GetEmergencyPriorityFromModem(0), 1);
-
-    m_pSystem->SetCallback(&m_objMockSystemCallback);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetEmergencyPriorityFromModem(0), 0);
-}
-
-TEST_F(SystemTest, IsUiccGbaSupported)
-{
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->IsUiccGbaSupported(0), 0);
+    EXPECT_EQ(m_pSystem->GetNetworkCountryIso(strCountry, 0), 0);
 }
 
 TEST_F(SystemTest, GetIsimState)
@@ -952,12 +900,12 @@ TEST_F(SystemTest, RequestUsimAuthentication)
     EXPECT_EQ(m_pSystem->RequestUsimAuthentication(strNonce, 1, 0), IMS_FAILURE);
 }
 
-TEST_F(SystemTest, GetCallState)
+TEST_F(SystemTest, GetCsCallState)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetCallState(0), 0);
+    EXPECT_EQ(m_pSystem->GetCsCallState(0), 0);
 }
 
 TEST_F(SystemTest, IsEmergencyNumber)
@@ -991,12 +939,12 @@ TEST_F(SystemTest, GetRttMode)
     EXPECT_EQ(m_pSystem->GetRttMode(0), 0);
 }
 
-TEST_F(SystemTest, GetCallStateInOtherSlot)
+TEST_F(SystemTest, GetCsCallStateInOtherSlot)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetCallStateInOtherSlot(0), 0);
+    EXPECT_EQ(m_pSystem->GetCsCallStateInOtherSlot(0), 0);
 }
 
 TEST_F(SystemTest, GetDeviceName)

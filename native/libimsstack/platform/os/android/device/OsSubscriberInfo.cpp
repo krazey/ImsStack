@@ -39,33 +39,27 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPhoneNumber(OUT AString& strPhoneNu
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetMcc(OUT AString& strMcc) const
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSimMcc(OUT AString& strMcc) const
 {
-    PlatformContext::GetInstance()->GetSystem()->GetMcc(strMcc, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetSimMcc(strMcc, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetMnc(OUT AString& strMnc) const
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSimMnc(OUT AString& strMnc) const
 {
-    PlatformContext::GetInstance()->GetSystem()->GetMnc(strMnc, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetSimMnc(strMnc, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetOperator(OUT AString& strOperator) const
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSimCountryIso(OUT AString& strCountry) const
 {
-    PlatformContext::GetInstance()->GetSystem()->GetOperator(strOperator, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetSimCountryIso(strCountry, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetCountry(OUT AString& strCountry) const
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetNetworkCountryIso(OUT AString& strCountry) const
 {
-    PlatformContext::GetInstance()->GetSystem()->GetCountry(strCountry, GetSlotId());
-    return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetNetworkCountry(OUT AString& strCountry) const
-{
-    PlatformContext::GetInstance()->GetSystem()->GetNetworkCountry(strCountry, GetSlotId());
+    PlatformContext::GetInstance()->GetSystem()->GetNetworkCountryIso(strCountry, GetSlotId());
 
     IMS_TRACE_D("SubsInfo :: networkCountry=%s", strCountry.GetStr(), 0, 0);
 
@@ -80,24 +74,6 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) 
             IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strImsi.GetStr() : "xxx", 0, 0);
 
     return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetEmergencyNumberListFromSim(
-        OUT AString& strEnlFromSim) const
-{
-    PlatformContext::GetInstance()->GetSystem()->GetEmergencyNumberListFromSim(
-            strEnlFromSim, GetSlotId());
-    return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 OsSubscriberInfo::GetEmergencyPriorityFromModem()
-{
-    return PlatformContext::GetInstance()->GetSystem()->GetEmergencyPriorityFromModem(GetSlotId());
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::IsUiccGbaSupported()
-{
-    return PlatformContext::GetInstance()->GetSystem()->IsUiccGbaSupported(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPreference(IN const AString& strFileName,

@@ -475,51 +475,27 @@ IMS_SINT32 System::GetSubscriberId(OUT AString& strImsi, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::GetMcc(OUT AString& strMcc, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetSimMcc(OUT AString& strMcc, IN IMS_SINT32 nSlotId)
 {
-    return GetString(SystemConstants::GET_MCC, strMcc, nSlotId);
+    return GetString(SystemConstants::GET_SIM_MCC, strMcc, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId)
 {
-    return GetString(SystemConstants::GET_MNC, strMnc, nSlotId);
+    return GetString(SystemConstants::GET_SIM_MNC, strMnc, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId)
 {
-    return GetString(SystemConstants::GET_OPERATOR, strOperator, nSlotId);
+    return GetString(SystemConstants::GET_SIM_COUNTRY_ISO, strCountry, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId)
 {
-    return GetString(SystemConstants::GET_COUNTRY, strCountry, nSlotId);
-}
-
-PUBLIC
-IMS_SINT32 System::GetNetworkCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId)
-{
-    return GetString(SystemConstants::GET_NETWORK_COUNTRY, strCountry, nSlotId);
-}
-
-PUBLIC
-IMS_SINT32 System::GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId)
-{
-    return GetString(SystemConstants::GET_EMERGENCY_NUM_LIST_FROM_SIM, strEnlFromSim, nSlotId);
-}
-
-PUBLIC
-IMS_SINT32 System::GetEmergencyPriorityFromModem(IN IMS_SINT32 nSlotId)
-{
-    return GetInt(SystemConstants::GET_EMERGENCY_PRIORITY_FROM_MODEM, 1, nSlotId);
-}
-
-PUBLIC
-IMS_BOOL System::IsUiccGbaSupported(IN IMS_SINT32 nSlotId)
-{
-    return (GetInt(SystemConstants::GET_UICC_GBA_SUPPORT, 0, nSlotId) == 1);
+    return GetString(SystemConstants::GET_NETWORK_COUNTRY_ISO, strCountry, nSlotId);
 }
 
 PUBLIC
@@ -599,9 +575,9 @@ IMS_SINT32 System::RequestUsimAuthentication(
 }
 
 PUBLIC
-IMS_SINT32 System::GetCallState(IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetCsCallState(IN IMS_SINT32 nSlotId)
 {
-    return GetInt(SystemConstants::GET_CALL_STATE, 0, nSlotId);
+    return GetInt(SystemConstants::GET_CS_CALL_STATE, 0, nSlotId);
 }
 
 PUBLIC
@@ -642,9 +618,9 @@ IMS_SINT32 System::GetRttMode(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::GetCallStateInOtherSlot(IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId)
 {
-    return GetInt(SystemConstants::GET_CALL_STATE_IN_OTHER_SLOT, 0, nSlotId);
+    return GetInt(SystemConstants::GET_CS_CALL_STATE_IN_OTHER_SLOT, 0, nSlotId);
 }
 
 PUBLIC

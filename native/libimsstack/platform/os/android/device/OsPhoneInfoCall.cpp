@@ -65,5 +65,5 @@ PUBLIC VIRTUAL AString OsPhoneInfoCall::GetWifiCallingAddressId()
 
 PUBLIC VIRTUAL IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
-    return PlatformContext::GetInstance()->GetSystem()->GetCallStateInOtherSlot(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetCsCallStateInOtherSlot(GetSlotId());
 }

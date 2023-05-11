@@ -46,7 +46,7 @@ protected:
                             strPhoneNumber = "6587323423";
                             return IMS_TRUE;
                         }));
-        EXPECT_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetMcc)
+        EXPECT_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetSimMcc)
                 .Times(AnyNumber())
                 .WillRepeatedly(Invoke(
                         [&](AString& strMcc)
@@ -54,7 +54,7 @@ protected:
                             strMcc = "414";
                             return IMS_TRUE;
                         }));
-        EXPECT_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetMnc)
+        EXPECT_CALL(m_objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc)
                 .Times(AnyNumber())
                 .WillRepeatedly(Invoke(
                         [&](AString& strMnc)

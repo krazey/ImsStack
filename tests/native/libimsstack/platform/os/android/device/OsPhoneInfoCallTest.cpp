@@ -125,7 +125,7 @@ TEST_F(OsPhoneInfoCallTest, GetCsCallStateInOtherSlot)
 {
     OsPhoneInfoCall objOsPhoneInfoCall(IMS_SLOT_0);
 
-    EXPECT_CALL(m_objSystem, GetCallStateInOtherSlot(_))
+    EXPECT_CALL(m_objSystem, GetCsCallStateInOtherSlot(_))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
 

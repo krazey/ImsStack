@@ -84,10 +84,10 @@ TEST_F(OsSubscriberInfoTest, GetPhoneNumber)
     EXPECT_EQ(strValue, strOut);
 }
 
-TEST_F(OsSubscriberInfoTest, GetMcc)
+TEST_F(OsSubscriberInfoTest, GetSimMcc)
 {
     AString strValue("404");
-    EXPECT_CALL(m_objMockSystem, GetMcc(_, _))
+    EXPECT_CALL(m_objMockSystem, GetSimMcc(_, _))
             .Times(1)
             .WillOnce(Invoke(
                     [strValue](AString& strMcc, Unused)
@@ -97,14 +97,14 @@ TEST_F(OsSubscriberInfoTest, GetMcc)
                     }));
 
     AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetMcc(strOut));
+    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetSimMcc(strOut));
     EXPECT_EQ(strValue, strOut);
 }
 
-TEST_F(OsSubscriberInfoTest, GetMnc)
+TEST_F(OsSubscriberInfoTest, GetSimMnc)
 {
     AString strValue("03");
-    EXPECT_CALL(m_objMockSystem, GetMnc(_, _))
+    EXPECT_CALL(m_objMockSystem, GetSimMnc(_, _))
             .Times(1)
             .WillOnce(Invoke(
                     [strValue](AString& strMnc, Unused)
@@ -114,31 +114,14 @@ TEST_F(OsSubscriberInfoTest, GetMnc)
                     }));
 
     AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetMnc(strOut));
+    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetSimMnc(strOut));
     EXPECT_EQ(strValue, strOut);
 }
 
-TEST_F(OsSubscriberInfoTest, GetOperator)
-{
-    AString strValue("Airtel");
-    EXPECT_CALL(m_objMockSystem, GetOperator(_, _))
-            .Times(1)
-            .WillOnce(Invoke(
-                    [strValue](AString& strOperator, Unused)
-                    {
-                        strOperator = strValue;
-                        return 1;
-                    }));
-
-    AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetOperator(strOut));
-    EXPECT_EQ(strValue, strOut);
-}
-
-TEST_F(OsSubscriberInfoTest, GetCountry)
+TEST_F(OsSubscriberInfoTest, GetSimCountryIso)
 {
     AString strValue("India");
-    EXPECT_CALL(m_objMockSystem, GetCountry(_, _))
+    EXPECT_CALL(m_objMockSystem, GetSimCountryIso(_, _))
             .Times(1)
             .WillOnce(Invoke(
                     [strValue](AString& strCountry, Unused)
@@ -148,14 +131,14 @@ TEST_F(OsSubscriberInfoTest, GetCountry)
                     }));
 
     AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetCountry(strOut));
+    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetSimCountryIso(strOut));
     EXPECT_EQ(strValue, strOut);
 }
 
-TEST_F(OsSubscriberInfoTest, GetNetworkCountry)
+TEST_F(OsSubscriberInfoTest, GetNetworkCountryIso)
 {
     AString strValue("IN");
-    EXPECT_CALL(m_objMockSystem, GetNetworkCountry(_, _))
+    EXPECT_CALL(m_objMockSystem, GetNetworkCountryIso(_, _))
             .Times(1)
             .WillOnce(Invoke(
                     [strValue](AString& strCountry, Unused)
@@ -165,7 +148,7 @@ TEST_F(OsSubscriberInfoTest, GetNetworkCountry)
                     }));
 
     AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetNetworkCountry(strOut));
+    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetNetworkCountryIso(strOut));
     EXPECT_EQ(strValue, strOut);
 }
 
@@ -184,37 +167,6 @@ TEST_F(OsSubscriberInfoTest, GetSubscriberId)
     AString strOut;
     EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetSubscriberId(strOut));
     EXPECT_EQ(strValue, strOut);
-}
-
-TEST_F(OsSubscriberInfoTest, GetEmergencyNumberListFromSim)
-{
-    AString strValue("112");
-    EXPECT_CALL(m_objMockSystem, GetEmergencyNumberListFromSim(_, _))
-            .Times(1)
-            .WillOnce(Invoke(
-                    [strValue](AString& strEnlFromSim, Unused)
-                    {
-                        strEnlFromSim = strValue;
-                        return 1;
-                    }));
-
-    AString strOut;
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->GetEmergencyNumberListFromSim(strOut));
-    EXPECT_EQ(strValue, strOut);
-}
-
-TEST_F(OsSubscriberInfoTest, GetEmergencyPriorityFromModem)
-{
-    EXPECT_CALL(m_objMockSystem, GetEmergencyPriorityFromModem(_)).Times(1).WillOnce(Return(1));
-
-    EXPECT_EQ(1, m_pOsSubscriberInfo->GetEmergencyPriorityFromModem());
-}
-
-TEST_F(OsSubscriberInfoTest, IsUiccGbaSupported)
-{
-    EXPECT_CALL(m_objMockSystem, IsUiccGbaSupported(_)).Times(1).WillOnce(Return(IMS_TRUE));
-
-    EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->IsUiccGbaSupported());
 }
 
 TEST_F(OsSubscriberInfoTest, SetAndGetPreference)

@@ -49,7 +49,7 @@ protected:
                 PlatformContext::SERVICE_PHONE_INFO, m_pPhoneInfoService);
         m_pOldSystem = PlatformContext::GetInstance()->SetSystem(&m_objSystem);
 
-        ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountry(_))
+        ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
                 .WillByDefault(Invoke(
                         [&](AString& strCountry)
                         {
@@ -151,11 +151,11 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
                         return 1;
                     }));
 
-    EXPECT_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountry(_))
+    EXPECT_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
             .Times(AnyNumber());
-    EXPECT_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetCountry(_)).Times(0);
+    EXPECT_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetSimCountryIso(_)).Times(0);
 
-    // 2. Get default network country from GetNetworkCountry() if country not present in
+    // 2. Get default network country from GetNetworkCountryIso() if country not present in
     // location information received from GetLastKnownLocation()
     ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
 
@@ -176,7 +176,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     AString strNetworkCountry("");
 
-    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountry(_))
+    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
             .WillByDefault(Invoke(
                     [strNetworkCountry](AString& strCountry)
                     {
@@ -191,7 +191,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
     EXPECT_TRUE(piLocationProperties != nullptr);
 
     // 4. Get network country UNKNOWN if location information from GetLastKnownLocation()
-    // and GetNetworkCountry() does not provide country.
+    // and GetNetworkCountryIso() does not provide country.
     EXPECT_EQ(
             objOsLocationInfo.GetLastKnownCountry(), AString(OsLocationInfo::COUNTRY_ISO_UNKNOWN));
 }
@@ -211,14 +211,14 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
 {
     OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
 
-    // 1. Default country set returned by GetNetworkCountry()
+    // 1. Default country set returned by GetNetworkCountryIso()
     objOsLocationInfo.SetDefaultLocationProperties();
 
     EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), m_strNetworkCountry);
 
     AString strNetworkCountry("");
 
-    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountry(_))
+    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
             .WillByDefault(Invoke(
                     [strNetworkCountry](AString& strCountry)
                     {
@@ -226,7 +226,7 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
                         return IMS_TRUE;
                     }));
 
-    // 2. UNKNOWN country set if GetNetworkCountry() does not provide country
+    // 2. UNKNOWN country set if GetNetworkCountryIso() does not provide country
     objOsLocationInfo.SetDefaultLocationProperties();
 
     EXPECT_EQ(
@@ -234,7 +234,7 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
 
     AString strUiccCountry("UK");
 
-    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetCountry(_))
+    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetSimCountryIso(_))
             .WillByDefault(Invoke(
                     [strUiccCountry](AString& strCountry)
                     {
@@ -242,7 +242,7 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
                         return IMS_TRUE;
                     }));
 
-    // 3. Set country from UICC - GetCountry()
+    // 3. Set country from UICC - GetSimCountryIso()
     objOsLocationInfo.SetDefaultLocationProperties(IMS_TRUE);  // Get from UICC
 
     EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), strUiccCountry);

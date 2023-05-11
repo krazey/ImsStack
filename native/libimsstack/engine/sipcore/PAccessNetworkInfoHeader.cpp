@@ -245,7 +245,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
             {
                 // location information from mcc/mnc in uicc.
                 // it could be different from user's location.
-                piSubsInfo->GetCountry(strCountry);
+                piSubsInfo->GetSimCountryIso(strCountry);
             }
         }
     }

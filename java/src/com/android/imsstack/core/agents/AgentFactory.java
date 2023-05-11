@@ -37,10 +37,8 @@ public final class AgentFactory {
     public static final int PREFERENCE = 4;
 
     // agents with slot id
-    public static final int TELEPHONY_STATE = 14;
-    public static final int TELEPHONY_SUBSCRIBER = 15;
-    public static final int CELL_INFO = 17;
-    public static final int PHONE_CALL_DB = 18;
+    public static final int CELL_INFO = 11;
+    public static final int PHONE_CALL_DB = 12;
 
     private static final int AGENT_END = (PHONE_CALL_DB + 1);
     private static final int AGENT_MAX = AGENT_END;
@@ -189,8 +187,6 @@ public final class AgentFactory {
 
         agents = new HashMap<Integer, IAgent>(AGENT_MAX);
 
-        agents.put(TELEPHONY_STATE, new TelephonyStateAgent(slotId));
-        agents.put(TELEPHONY_SUBSCRIBER, new TelephonySubscriberAgent(slotId));
         agents.put(PHONE_CALL_DB, new PhoneCallDBAgent(slotId));
 
         // below types should be initialized and cleaned up from VoLTE package
@@ -209,8 +205,6 @@ public final class AgentFactory {
         }
 
         List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(TELEPHONY_STATE));
-        agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
 
         for (int i = 0; i < agentList.size(); i++) {
@@ -239,8 +233,6 @@ public final class AgentFactory {
         }
 
         List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(TELEPHONY_STATE));
-        agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
         agentList.add(agents.get(PHONE_CALL_DB));
 
         for (int i = 0; i < agentList.size(); i++) {
@@ -327,6 +319,7 @@ public final class AgentFactory {
                 agents.put(SimInterface.class, new SimAgent(slotId));
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
                 agents.put(PhoneStateInterface.class, new PhoneStateAgent(slotId));
+                agents.put(TelephonyInterface.class, new TelephonyAgent(slotId));
                 agents.put(LocationInterface.class, new LocationAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
