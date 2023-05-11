@@ -36,6 +36,7 @@ public:
     void OnImsSuspended(IN IMS_UINT32 nReason) override;
     void OnImsResumed() override;
     void SetImsRegConnected(IN IMS_BOOL bConnected) override;
+    inline IMS_BOOL GetImsRegConnected() override { return m_bImsConnected; }
 
     IMS_BOOL IsMoServiceBlocked() const override;
     IMS_BOOL IsMtServiceBlocked() const override;

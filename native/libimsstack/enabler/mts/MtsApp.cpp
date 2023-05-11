@@ -95,11 +95,6 @@ PRIVATE void MtsApp::CreateMtsService()
 {
     IMS_TRACE_I("CreateMtsService [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_pMtsDynamicLoader == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "can't make CreateMtsService", 0, 0, 0);
-    }
-
     m_piMtsService = new MtsService(m_nSlotId);
 }
 

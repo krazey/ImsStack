@@ -26,7 +26,6 @@ class IMtsServiceState
 public:
     virtual ~IMtsServiceState() {}
 
-    // MtsService
     virtual void Init(IN IImsAos* piImsAos) = 0;
     virtual IMS_SINT32 GetState() const = 0;
     virtual void OnImsConnected() = 0;
@@ -35,8 +34,8 @@ public:
     virtual void OnImsSuspended(IN IMS_UINT32 nReason) = 0;
     virtual void OnImsResumed() = 0;
     virtual void SetImsRegConnected(IN IMS_BOOL bConnected) = 0;
+    virtual IMS_BOOL GetImsRegConnected() = 0;
 
-    // MtsMessageController
     virtual IMS_BOOL IsMoServiceBlocked() const = 0;
     virtual IMS_BOOL IsMtServiceBlocked() const = 0;
 };

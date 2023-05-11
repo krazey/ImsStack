@@ -15,7 +15,11 @@
  */
 
 #include <gtest/gtest.h>
+#include "IMtsService.h"
+#include "IMtsServiceState.h"
 #include "MtsApp.h"
+#include "message/MtsMessageController.h"
+#include "utility/MtsDynamicLoader.h"
 
 namespace android
 {
@@ -38,22 +42,15 @@ TEST_F(MtsAppTest, Constructor)
     ASSERT_NE(pMtsApp, nullptr);
 }
 
-TEST_F(MtsAppTest, CreateServiceAfterStart)
+TEST_F(MtsAppTest, StartAndStop)
 {
     pMtsApp->Start();
     ASSERT_NE(pMtsApp->GetMtsService(), nullptr);
-}
-
-TEST_F(MtsAppTest, CreateUtilsAfterStart)
-{
-    pMtsApp->Start();
     ASSERT_NE(pMtsApp->GetMtsDynamicLoader(), nullptr);
-}
-
-TEST_F(MtsAppTest, CreateMtsMessageControllerAfterStart)
-{
-    pMtsApp->Start();
     ASSERT_NE(pMtsApp->GetMtsMessageController(), nullptr);
+
+    pMtsApp->Stop();
+    EXPECT_EQ(pMtsApp->GetMtsService()->GetIMtsServiceState()->GetImsRegConnected(), IMS_FALSE);
 }
 
 }  // namespace android
