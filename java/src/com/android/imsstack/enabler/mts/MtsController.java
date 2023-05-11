@@ -59,7 +59,6 @@ public class MtsController {
     /* REQUEST_REPORT_MO_STATUS param(bundle) name */
     public static final String REPORTMOSTATUS_REASON = "ReportMOStatus_reason";
     public static final String REPORTMOSTATUS_SMSFORMAT = "ReportMOStatus_smsFormat";
-    public static final String REPORTMOSTATUS_RETRYAFTER = "ReportMOStatus_retryAfter";
     public static final String REPORTMOSTATUS_SEQID = "ReportMOStatus_seqId";
 
     public static class Listener {
@@ -78,13 +77,10 @@ public class MtsController {
          * @param format
          *     {@link MtsController#SMS_FORMAT_3GPP}
          *     {@link MtsController#SMS_FORMAT_3GPP2}
-         * TODO(Mts): Consider to implement in AP SMS Stack or delete retry-after parameter here
-         * @param retryAfter
          * @param messageReference the message reference, which may be 1 byte if it is in 3GPP
          *     format (see TS.123.040) or 2 bytes if it is in 3GPP2 format (see 3GPP2 C.S0015-B).
          */
-        public void notifyStatusForOutgoingMessage(int reason, int format, int retryAfter,
-                int messageReference) {
+        public void notifyStatusForOutgoingMessage(int reason, int format, int messageReference) {
             // no-op
         }
         /**
@@ -241,7 +237,6 @@ public class MtsController {
         Bundle bundle = new Bundle();
         bundle.putInt(REPORTMOSTATUS_REASON, MO_ERROR_RETRY);
         bundle.putInt(REPORTMOSTATUS_SMSFORMAT, smsFormat);
-        bundle.putInt(REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(REPORTMOSTATUS_SEQID, seqId);
 
         Message msg = Message.obtain();
@@ -282,9 +277,8 @@ public class MtsController {
                     Bundle bundle = (Bundle)msg.obj;
                     int reason = bundle.getInt(REPORTMOSTATUS_REASON, 0);
                     int format = bundle.getInt(REPORTMOSTATUS_SMSFORMAT, 0);
-                    int retryAfter = bundle.getInt(REPORTMOSTATUS_RETRYAFTER, 0);
                     int seqId = bundle.getInt(REPORTMOSTATUS_SEQID, -1);
-                    mListener.notifyStatusForOutgoingMessage(reason, format, retryAfter, seqId);
+                    mListener.notifyStatusForOutgoingMessage(reason, format, seqId);
                     break;
 
                 case REQUEST_REPORT_MT_SMS:

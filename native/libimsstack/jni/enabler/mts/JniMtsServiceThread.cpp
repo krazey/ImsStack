@@ -40,7 +40,7 @@ PUBLIC VIRTUAL JniMtsServiceThread::~JniMtsServiceThread()
 
 PUBLIC
 void JniMtsServiceThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
-        IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId)
+        IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMoStatus", 0, 0, 0);
 
@@ -48,7 +48,6 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MO_STATUS);
     objParcel.writeInt32(nReason);
     objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
-    objParcel.writeInt32(nRetryAfter);
     objParcel.writeInt32(nSeqId);
     objParcel.writeInt32(nSlotId);
 

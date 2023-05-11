@@ -131,7 +131,6 @@ public class MtsControllerTest {
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_SUCCESS);
         bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, 1);
-        bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, 1);
 
         Message msg = Message.obtain();
@@ -143,9 +142,9 @@ public class MtsControllerTest {
 
         waitForHandlerActionDelayed(handler, 1000, 0);
 
-        // reason, smsFormat, retryafter, seqid
+        // reason, smsFormat, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
-                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
+                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(mSeqId));
         assertEquals(result, true);
     }
 
@@ -158,7 +157,6 @@ public class MtsControllerTest {
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_SUCCESS);
         bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, 1);
-        bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, 1);
 
         Message msg = Message.obtain();
@@ -172,7 +170,7 @@ public class MtsControllerTest {
 
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
-                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
+                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(mSeqId));
         assertEquals(result, true);
     }
 
@@ -186,7 +184,6 @@ public class MtsControllerTest {
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_ERROR_RETRY);
         bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, 1);
-        bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, 1);
 
         Message msg = Message.obtain();
@@ -200,7 +197,7 @@ public class MtsControllerTest {
 
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
-                eq(MtsController.MO_ERROR_RETRY), eq(mSmsFormat), eq(0), eq(mSeqId));
+                eq(MtsController.MO_ERROR_RETRY), eq(mSmsFormat), eq(mSeqId));
         assertEquals(result, true);
     }
 

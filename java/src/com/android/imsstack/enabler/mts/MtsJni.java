@@ -119,7 +119,6 @@ public class MtsJni {
                     Bundle bundle = new Bundle();
                     bundle.putInt(MtsController.REPORTMOSTATUS_REASON, parcel.readInt());
                     bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, parcel.readInt());
-                    bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, parcel.readInt());
                     bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, parcel.readInt());
 
                     Message msg = Message.obtain();

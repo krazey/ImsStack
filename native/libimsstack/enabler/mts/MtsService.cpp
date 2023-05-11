@@ -129,15 +129,15 @@ PUBLIC VIRTUAL void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
 }
 
 PUBLIC
-void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
-        IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId)
+void MtsService::ReportMoStatus(
+        IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId)
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
 
     IJniMtsServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->ReportMoStatus(nReason, eSmsFormat, nRetryAfter, nSeqId, m_nSlotId);
+        piJniThread->ReportMoStatus(nReason, eSmsFormat, nSeqId, m_nSlotId);
     }
 }
 
@@ -640,7 +640,7 @@ void MtsService::StartRadioTraffic(IN IMtsTraffic* piMtsTraffic)
     else
     {
         IMS_TRACE_E(0, "RadioTraffic was not allowed", 0, 0, 0);
-        ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
+        ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat, m_pSmsInfo->nSeqId);
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }

@@ -177,7 +177,7 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     if (piMtsService == IMS_NULL)
     {
         IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
-        m_pJniMtsServiceThread->ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, 0, nSeqId, GetSlotId());
+        m_pJniMtsServiceThread->ReportMoStatus(MO_ERROR_RETRY, eSmsFormat, nSeqId, GetSlotId());
         return;
     }
 
