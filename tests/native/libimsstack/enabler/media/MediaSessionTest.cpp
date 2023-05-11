@@ -15,18 +15,17 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include <IJniMedia.h>
-#include <MediaEnvironment.h>
-#include <MediaNego.h>
-#include <MediaSession.h>
-#include <MockICoreService.h>
-#include <MockIMediaSessionClientListener.h>
-#include <MockISession.h>
-#include <config/MediaSessionConfigFactory.h>
-
+#include "IJniMedia.h"
+#include "MediaEnvironment.h"
+#include "MediaNego.h"
+#include "MediaSession.h"
 #include "MockICarrierConfig.h"
+#include "MockICoreService.h"
+#include "MockIMediaSessionClientListener.h"
+#include "MockISession.h"
+#include "MockMediaNego.h"
+#include "config/MediaSessionConfig.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -34,6 +33,7 @@ using ::testing::ReturnRef;
 const AString LOCAL_IP = "127.0.0.1";
 const AString REMOTE_IP = "127.0.0.1";
 const IMS_UINT32 REMOTE_PORT = 40000;
+const IMS_UINT32 BRING_MOCKMEDIANEGO = 1234567;
 
 class FakeMediaSessionConfig : public MediaSessionConfig
 {
@@ -73,13 +73,21 @@ class FakeMediaSession : public MediaSession
 {
 public:
     FakeMediaSessionConfig* m_pMediaSessionConfig;
+    MockMediaNego* m_pMediaNego;
 
     FakeMediaSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey, IN IMS_UINT32 nSlotId) :
             MediaSession(nService, nCallKey, nSlotId)
     {
         CreateMediaConfig(nService);
+        m_pMediaNego = new MockMediaNego(nSlotId);
     }
-    virtual ~FakeMediaSession() { delete m_pMediaSessionConfig; }
+
+    virtual ~FakeMediaSession()
+    {
+        delete m_pMediaSessionConfig;
+        delete m_pMediaNego;
+    }
+
     IMS_BOOL ModifySession(IN IMS_UINTP nNegoId)
     {
         return m_objAudioController.ModifySession(nNegoId);
@@ -90,6 +98,31 @@ public:
     {
         (void)nNegoId;
         return new QosRequestParam(eMediaType, IpAddress(REMOTE_IP), REMOTE_PORT);
+    }
+
+    virtual MediaNego* FindMediaNego(IN IMS_UINTP nNegoId) override
+    {
+        if (nNegoId == BRING_MOCKMEDIANEGO)
+        {
+            return m_pMediaNego;
+        }
+
+        MediaNego* pMediaNego = IMS_NULL;
+        IMS_SLONG nIndex = m_objMapMediaNego.GetIndexOfKey(nNegoId);
+
+        if (nIndex < 0)
+        {
+            return IMS_NULL;
+        }
+
+        pMediaNego = m_objMapMediaNego.GetValueAt(nIndex);
+
+        if (pMediaNego == IMS_NULL)
+        {
+            return IMS_NULL;
+        }
+
+        return pMediaNego;
     }
 
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
@@ -246,6 +279,28 @@ protected:
         delete m_pIsession;
     }
 };
+
+TEST_F(MediaSessionTest, testGetSupportedMediaTypesFromSdp)
+{
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
+    EXPECT_NE(negoId, 0);
+
+    negoId = BRING_MOCKMEDIANEGO;
+
+    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(0, m_pIsession), MEDIA_TYPE_INVALID);
+
+    ON_CALL(*m_pSession->m_pMediaNego, GetSupportedMediaTypesFromSdp(m_pIsession))
+            .WillByDefault(Return(MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(negoId, m_pIsession), MEDIA_TYPE_AUDIO);
+
+    ON_CALL(*m_pSession->m_pMediaNego, GetSupportedMediaTypesFromSdp(m_pIsession))
+            .WillByDefault(Return(MEDIA_TYPE_VIDEO));
+    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(negoId, m_pIsession), MEDIA_TYPE_VIDEO);
+
+    ON_CALL(*m_pSession->m_pMediaNego, GetSupportedMediaTypesFromSdp(m_pIsession))
+            .WillByDefault(Return(MEDIA_TYPE_TEXT));
+    EXPECT_EQ(m_pSession->GetSupportedMediaTypesFromSdp(negoId, m_pIsession), MEDIA_TYPE_TEXT);
+}
 
 TEST_F(MediaSessionTest, testQosRequestAndCallbackUnmatch)
 {

@@ -239,6 +239,24 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession
     return IMS_TRUE;
 }
 
+PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetSupportedMediaTypesFromSdp(
+        IN IMS_UINTP nNegoId, IN ISession* pSession)
+{
+    IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]",
+            nNegoId, pSession, 0);
+
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetSupportedMediaTypesFromSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId,
+                0, 0);
+        return MEDIA_TYPE_INVALID;
+    }
+
+    return pMediaNego->GetSupportedMediaTypesFromSdp(pSession);
+}
+
 PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
         OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
         OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)

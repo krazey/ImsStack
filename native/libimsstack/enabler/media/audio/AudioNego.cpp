@@ -138,6 +138,43 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
+        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
+{
+    // Handling exception case
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+
+    IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
+
+    OaModel objOaModel;
+    objOaModel.pLocalProfile = new AudioProfile(m_objBaseProfile);
+
+    // Make a destination profile from SDP
+    objOaModel.pPeerProfile = new AudioProfile();
+
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, objOaModel.pPeerProfile) != IMS_TRUE)
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+
+    // Make a negotiated profile from the local and peer profile
+    objOaModel.pNegotiatedProfile = new AudioProfile();
+
+    if (MakeNegotiatedProfile(objOaModel.pLocalProfile, objOaModel.pPeerProfile, IMS_TRUE,
+                objOaModel.pNegotiatedProfile) != IMS_TRUE)
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+
+    return (objOaModel.pNegotiatedProfile->lstPayload.GetSize() > 0 &&
+                   objOaModel.pNegotiatedProfile->nDataPort != 0)
+            ? IMS_TRUE
+            : IMS_FALSE;
+}
+
 PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)

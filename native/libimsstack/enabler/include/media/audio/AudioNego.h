@@ -111,7 +111,7 @@ public:
      * @param eNegoState The negotiation state which decide how to use the profile from the OA model
      * list
      * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
-     * @param pDescriptor The SDP descriptor instance to form the m=audio level SDP
+     * @param pDescriptor The SDP descriptor instance to form the media level SDP
      * @param eDir The media direction of the SDP
      * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
@@ -122,12 +122,23 @@ public:
             IN IMS_BOOL bEnforceReofferMode);
 
     /**
+     * @brief Check if audio codec from SDP is supported
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
+     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
+     * @return IMS_BOOL Returns IMS_TRUE when audio codec from SDP is supported and the remote audio
+     * port is not 0, otherwise returns IMS_FALSE
+     */
+    virtual IMS_BOOL IsMediaCodecFromSdpSupported(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
+
+    /**
      * @brief Negotiate the SDP and make the negotiate profile based on the nego state
      *
      * @param eNegoState The negotiation state which decide how to use the profile from the OA model
      * list
      * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
-     * @param pDescriptor The SDP descriptor instance to negotiate the m=audio level SDP
+     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
      * @param eDir The media direction of the SDP
      */
     virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
