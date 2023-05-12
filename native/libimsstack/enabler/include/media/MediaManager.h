@@ -23,7 +23,7 @@
 #include "ImsMap.h"
 #include "IJniMediaManager.h"
 #include "IMediaManager.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "MediaDef.h"
 
 class IMediaSession;
@@ -99,7 +99,7 @@ public:
     /**
      * @brief Sends a request message from native to java layer
      *
-     * @param eEvent enum of message event. It is define in IMMedia.h
+     * @param eEvent enum of message event. It is define in IJniMedia.h
      * @param nCallKey The key to identify the call session
      * @param param additional message parameters
      * @return IMS_BOOL

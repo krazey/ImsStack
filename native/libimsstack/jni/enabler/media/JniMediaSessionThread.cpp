@@ -21,7 +21,7 @@
 #include "JniMediaSessionThread.h"
 #include "JniMtcUtils.h"
 #include "ServiceTrace.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 
 using namespace android;
 using namespace android::telephony::imsmedia;
@@ -51,7 +51,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pPa
     IMS_TRACE_D("OnOpenSession type[%d]", pParam->m_eMediaType, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_OPEN_SESSION);
+    objParcel.writeInt32(IJniMedia::REQUEST_OPEN_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeString16(android::String16(pParam->m_objLocalAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nLocalPort);
@@ -77,7 +77,7 @@ IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgConfigParam* pPara
     IMS_TRACE_D("OnModifySession type[%d]", pParam->m_eMediaType, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_MODIFY_SESSION);
+    objParcel.writeInt32(IJniMedia::REQUEST_MODIFY_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel);
@@ -96,7 +96,7 @@ IMS_BOOL JniMediaSessionThread::OnCloseSession(IN ImsMediaMsgParamBase* pParam)
     IMS_TRACE_D("OnCloseSession type[%d]", pParam->m_eMediaType, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_CLOSE_SESSION);
+    objParcel.writeInt32(IJniMedia::REQUEST_CLOSE_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     SendData2Java(objParcel);
     delete pParam;
@@ -114,7 +114,7 @@ IMS_BOOL JniMediaSessionThread::OnAddConfig(IN ImsMediaMsgConfigParam* pParam)
     IMS_TRACE_D("OnAddConfig", 0, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_ADD_CONFIG);
+    objParcel.writeInt32(IJniMedia::REQUEST_ADD_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel);
@@ -133,7 +133,7 @@ IMS_BOOL JniMediaSessionThread::OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam
     IMS_TRACE_D("OnDeleteConfig", 0, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_DELETE_CONFIG);
+    objParcel.writeInt32(IJniMedia::REQUEST_DELETE_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel);
@@ -151,7 +151,7 @@ IMS_BOOL JniMediaSessionThread::OnConfirmConfig(IN ImsMediaMsgConfigParam* pPara
 
     IMS_TRACE_D("OnConfirmConfig", 0, 0, 0);
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_CONFIRM_CONFIG);
+    objParcel.writeInt32(IJniMedia::REQUEST_CONFIRM_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel);
@@ -169,7 +169,7 @@ IMS_BOOL JniMediaSessionThread::OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam)
 
     IMS_TRACE_D("OnSendDtmf", 0, 0, 0);
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_SEND_DTMF);
+    objParcel.writeInt32(IJniMedia::REQUEST_SEND_DTMF);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeByte(pParam->m_dtmfCode);
     objParcel.writeInt32(pParam->m_nDuration);
@@ -189,7 +189,7 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
 
     IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d]", pParam->m_eMediaType, 0, 0);
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_SET_MEDIA_QUALITY);
+    objParcel.writeInt32(IJniMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
     SendData2Java(objParcel);
@@ -208,7 +208,7 @@ IMS_BOOL JniMediaSessionThread::OnRequestQos(IN ImsMediaMsgQosParam* pParam)
     IMS_TRACE_D("OnRequestQos() - type[%d]", pParam->m_eMediaType, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_QOS);
+    objParcel.writeInt32(IJniMedia::REQUEST_QOS);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeString16(android::String16(pParam->m_objIpAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nPort);
@@ -222,7 +222,7 @@ void JniMediaSessionThread::OnSetPreviewSurface()
 {
     IMS_TRACE_D("OnSetPreviewSurface", 0, 0, 0);
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_SET_PREVIEW_SURFACE);
+    objParcel.writeInt32(IJniMedia::REQUEST_SET_PREVIEW_SURFACE);
     objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
     SendData2Java(objParcel);
 }
@@ -232,7 +232,7 @@ void JniMediaSessionThread::OnSetDisplaySurface()
 {
     IMS_TRACE_D("OnSetDisplaySurface", 0, 0, 0);
     Parcel objParcel;
-    objParcel.writeInt32(IMMedia::REQUEST_SET_DISPLAY_SURFACE);
+    objParcel.writeInt32(IJniMedia::REQUEST_SET_DISPLAY_SURFACE);
     objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
     SendData2Java(objParcel);
 }

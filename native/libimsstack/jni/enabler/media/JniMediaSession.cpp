@@ -123,7 +123,8 @@ IJniEnablerThread* JniMediaSession::GetJniThread() const
 
 PUBLIC GLOBAL IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
 {
-    if (nMsg >= IMMedia::MEDIA_MESSAGE_IND_IDX_START && nMsg <= IMMedia::MEDIA_MESSAGE_IND_IDX_END)
+    if (nMsg >= IJniMedia::MEDIA_MESSAGE_IND_IDX_START &&
+            nMsg <= IJniMedia::MEDIA_MESSAGE_IND_IDX_END)
     {
         return IMS_TRUE;
     }
@@ -154,44 +155,44 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 
     switch (nMsg)
     {
-        case IMMedia::RESPONSE_OPEN_SESSION:
+        case IJniMedia::RESPONSE_OPEN_SESSION:
             OnResponses(nMsg, IMS_FALSE, objParcel);
             break;
-        case IMMedia::RESPONSE_MODIFY_SESSION:
-        case IMMedia::RESPONSE_ADD_CONFIG:
-        case IMMedia::RESPONSE_CONFIRM_CONFIG:
-        case IMMedia::NOTIFY_FIRST_PACKET:
+        case IJniMedia::RESPONSE_MODIFY_SESSION:
+        case IJniMedia::RESPONSE_ADD_CONFIG:
+        case IJniMedia::RESPONSE_CONFIRM_CONFIG:
+        case IJniMedia::NOTIFY_FIRST_PACKET:
             OnResponses(nMsg, IMS_TRUE, objParcel);
             break;
-        case IMMedia::NOTIFY_MEDIA_INACTIVITY:
+        case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
             OnNofityMediaInactitivy(nMsg, objParcel);
             break;
-        case IMMedia::NOTIFY_PACKET_LOSS:
+        case IJniMedia::NOTIFY_PACKET_LOSS:
             OnNofityPacketLosses(nMsg, objParcel);
             break;
-        case IMMedia::NOTIFY_JITTER:
+        case IJniMedia::NOTIFY_JITTER:
             // TODO : implementation
             break;
-        case IMMedia::NOTIFY_CALL_QUALITY_CHANGE:
+        case IJniMedia::NOTIFY_CALL_QUALITY_CHANGE:
             OnNofityCallQualityChange(nMsg, objParcel);
             break;
-        case IMMedia::NOTIFY_HEADER_EXTENSION:
+        case IJniMedia::NOTIFY_HEADER_EXTENSION:
             OnNofityHeaderExtension(nMsg, objParcel);
             break;
-        case IMMedia::NOTIFY_MEDIA_DETACH:
+        case IJniMedia::NOTIFY_MEDIA_DETACH:
             OnNotifyMediaDetach(nMsg);
             break;
-        case IMMedia::NOTIFY_QOS_INFO:
+        case IJniMedia::NOTIFY_QOS_INFO:
             OnNotifyQosInfo(nMsg, objParcel);
             break;
-        case IMMedia::SEND_DTMF:
+        case IJniMedia::SEND_DTMF:
             OnSendDtmf(nMsg, objParcel);
             break;
-        case IMMedia::SETSURFACE_CMD:
-        case IMMedia::SELECT_CAMERA_CMD:
-        case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
-        case IMMedia::CHANGE_ORIENTATION_CMD:
-        case IMMedia::NOTIFY_VIDEO_BITRATE:
+        case IJniMedia::SETSURFACE_CMD:
+        case IJniMedia::SELECT_CAMERA_CMD:
+        case IJniMedia::CHANGE_CAMERA_ZOOM_CMD:
+        case IJniMedia::CHANGE_ORIENTATION_CMD:
+        case IJniMedia::NOTIFY_VIDEO_BITRATE:
             OnVideoMessage(nMsg, objParcel);
             break;
         default:
@@ -257,7 +258,7 @@ void JniMediaSession::OnResponses(
         }
     }
 
-    if (nMsg != IMMedia::NOTIFY_FIRST_PACKET)
+    if (nMsg != IJniMedia::NOTIFY_FIRST_PACKET)
     {
         pParam->m_eResult = objParcel.readInt32();
     }

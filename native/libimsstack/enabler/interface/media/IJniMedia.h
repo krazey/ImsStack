@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_IMMEDIA_H_
-#define INTERFACE_IMMEDIA_H_
+#ifndef INTERFACE_JNI_MEDIA_H_
+#define INTERFACE_JNI_MEDIA_H_
 
 #include <AudioConfig.h>
 #include <VideoConfig.h>
@@ -25,15 +25,15 @@
 #include "IpAddress.h"
 #include "MediaDef.h"
 
-#define IMMEDIA     IMS_MSG_BASE_STREAMEDMEDIA
-#define IMMEDIA_IND (IMMEDIA + 100)
+#define IJNIMEDIA     IMS_MSG_BASE_STREAMEDMEDIA
+#define IJNIMEDIA_IND (IJNIMEDIA + 100)
 
 using namespace android::telephony::imsmedia;
 
-class IMMedia
+class IJniMedia
 {
-#define IMMEDIA_CASE_ENUM(name) \
-    case name:                  \
+#define IJNIMEDIA_CASE_ENUM(name) \
+    case name:                    \
         return #name
 
 public:
@@ -41,40 +41,40 @@ public:
     {
         switch (nMsg)
         {
-            IMMEDIA_CASE_ENUM(REQUEST_OPEN_SESSION);
-            IMMEDIA_CASE_ENUM(REQUEST_CLOSE_SESSION);
-            IMMEDIA_CASE_ENUM(REQUEST_MODIFY_SESSION);
-            IMMEDIA_CASE_ENUM(REQUEST_ADD_CONFIG);
-            IMMEDIA_CASE_ENUM(REQUEST_DELETE_CONFIG);
-            IMMEDIA_CASE_ENUM(REQUEST_CONFIRM_CONFIG);
-            IMMEDIA_CASE_ENUM(REQUEST_SEND_DTMF);
-            IMMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
-            IMMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
-            IMMEDIA_CASE_ENUM(REQUEST_QOS);
-            IMMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
-            IMMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
-            IMMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
-            IMMEDIA_CASE_ENUM(RESPONSE_OPEN_SESSION);
-            IMMEDIA_CASE_ENUM(RESPONSE_MODIFY_SESSION);
-            IMMEDIA_CASE_ENUM(RESPONSE_ADD_CONFIG);
-            IMMEDIA_CASE_ENUM(RESPONSE_CONFIRM_CONFIG);
-            IMMEDIA_CASE_ENUM(NOTIFY_FIRST_PACKET);
-            IMMEDIA_CASE_ENUM(NOTIFY_HEADER_EXTENSION);
-            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_INACTIVITY);
-            IMMEDIA_CASE_ENUM(NOTIFY_PACKET_LOSS);
-            IMMEDIA_CASE_ENUM(NOTIFY_JITTER);
-            IMMEDIA_CASE_ENUM(NOTIFY_CALL_QUALITY_CHANGE);
-            IMMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
-            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_DETACH);
-            IMMEDIA_CASE_ENUM(SEND_DTMF);
-            IMMEDIA_CASE_ENUM(SETSURFACE_CMD);
-            IMMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
-            IMMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
-            IMMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
-            IMMEDIA_CASE_ENUM(CHANGE_ORIENTATION_CMD);
-            IMMEDIA_CASE_ENUM(NOTIFY_VIDEO_BITRATE);
-            IMMEDIA_CASE_ENUM(CHANGE_NETWORK_CONNECTION);
-            IMMEDIA_CASE_ENUM(CHANGE_MTU);
+            IJNIMEDIA_CASE_ENUM(REQUEST_OPEN_SESSION);
+            IJNIMEDIA_CASE_ENUM(REQUEST_CLOSE_SESSION);
+            IJNIMEDIA_CASE_ENUM(REQUEST_MODIFY_SESSION);
+            IJNIMEDIA_CASE_ENUM(REQUEST_ADD_CONFIG);
+            IJNIMEDIA_CASE_ENUM(REQUEST_DELETE_CONFIG);
+            IJNIMEDIA_CASE_ENUM(REQUEST_CONFIRM_CONFIG);
+            IJNIMEDIA_CASE_ENUM(REQUEST_SEND_DTMF);
+            IJNIMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
+            IJNIMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
+            IJNIMEDIA_CASE_ENUM(REQUEST_QOS);
+            IJNIMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
+            IJNIMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
+            IJNIMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
+            IJNIMEDIA_CASE_ENUM(RESPONSE_OPEN_SESSION);
+            IJNIMEDIA_CASE_ENUM(RESPONSE_MODIFY_SESSION);
+            IJNIMEDIA_CASE_ENUM(RESPONSE_ADD_CONFIG);
+            IJNIMEDIA_CASE_ENUM(RESPONSE_CONFIRM_CONFIG);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_FIRST_PACKET);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_HEADER_EXTENSION);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_MEDIA_INACTIVITY);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_PACKET_LOSS);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_JITTER);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_CALL_QUALITY_CHANGE);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_MEDIA_DETACH);
+            IJNIMEDIA_CASE_ENUM(SEND_DTMF);
+            IJNIMEDIA_CASE_ENUM(SETSURFACE_CMD);
+            IJNIMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
+            IJNIMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
+            IJNIMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
+            IJNIMEDIA_CASE_ENUM(CHANGE_ORIENTATION_CMD);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_VIDEO_BITRATE);
+            IJNIMEDIA_CASE_ENUM(CHANGE_NETWORK_CONNECTION);
+            IJNIMEDIA_CASE_ENUM(CHANGE_MTU);
         }
         return "Unrecognized Msg";
     }
@@ -83,98 +83,98 @@ public:
     {
         switch (eMediaType)
         {
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_INVALID);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIO);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEO);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEO);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_TEXT);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOTEXT);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEOTEXT);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEOTEXT);
-            IMMEDIA_CASE_ENUM(MEDIA_TYPE_NOTUSED);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_INVALID);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIO);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEO);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEO);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_TEXT);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOTEXT);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEOTEXT);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEOTEXT);
+            IJNIMEDIA_CASE_ENUM(MEDIA_TYPE_NOTUSED);
         }
         return "Unrecognized Type";
     }
 
 public:
-    static const IMS_SINT32 MEDIA_MESSAGE_IDX_START = IMMEDIA + 0;
+    static const IMS_SINT32 MEDIA_MESSAGE_IDX_START = IJNIMEDIA + 0;
 
     // Requests to ImsMedia
-    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_START = IMMEDIA + 0;
+    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_START = IJNIMEDIA + 0;
     /** create a new session */
-    static const IMS_SINT32 REQUEST_OPEN_SESSION = IMMEDIA + 1;
+    static const IMS_SINT32 REQUEST_OPEN_SESSION = IJNIMEDIA + 1;
     /** close session */
-    static const IMS_SINT32 REQUEST_CLOSE_SESSION = IMMEDIA + 2;
+    static const IMS_SINT32 REQUEST_CLOSE_SESSION = IJNIMEDIA + 2;
     /** update the existing session */
-    static const IMS_SINT32 REQUEST_MODIFY_SESSION = IMMEDIA + 3;
+    static const IMS_SINT32 REQUEST_MODIFY_SESSION = IJNIMEDIA + 3;
     /** add a stream for forking session */
-    static const IMS_SINT32 REQUEST_ADD_CONFIG = IMMEDIA + 4;
+    static const IMS_SINT32 REQUEST_ADD_CONFIG = IJNIMEDIA + 4;
     /** delete the stream of forking session */
-    static const IMS_SINT32 REQUEST_DELETE_CONFIG = IMMEDIA + 5;
+    static const IMS_SINT32 REQUEST_DELETE_CONFIG = IJNIMEDIA + 5;
     /** remain only one stream in the session */
-    static const IMS_SINT32 REQUEST_CONFIRM_CONFIG = IMMEDIA + 6;
+    static const IMS_SINT32 REQUEST_CONFIRM_CONFIG = IJNIMEDIA + 6;
     /** send dtmf digit to audio session */
-    static const IMS_SINT32 REQUEST_SEND_DTMF = IMMEDIA + 7;
+    static const IMS_SINT32 REQUEST_SEND_DTMF = IJNIMEDIA + 7;
     /** set media quality theshold to check the packet inacitivty, packet loss and jitter */
-    static const IMS_SINT32 REQUEST_SET_MEDIA_QUALITY = IMMEDIA + 8;
+    static const IMS_SINT32 REQUEST_SET_MEDIA_QUALITY = IJNIMEDIA + 8;
     /** send header extension payload to rtp header */
-    static const IMS_SINT32 REQUEST_HEADER_EXTENSION = IMMEDIA + 9;
+    static const IMS_SINT32 REQUEST_HEADER_EXTENSION = IJNIMEDIA + 9;
     /** send request qos callback */
-    static const IMS_SINT32 REQUEST_QOS = IMMEDIA + 10;
-    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_END = IMMEDIA + 49;
+    static const IMS_SINT32 REQUEST_QOS = IJNIMEDIA + 10;
+    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_END = IJNIMEDIA + 49;
 
     // Requests to ImsMedia VideoSession
-    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IDX_START = IMMEDIA + 50;
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IDX_START = IJNIMEDIA + 50;
     /** set the preview surface */
     static const IMS_SINT32 REQUEST_SET_PREVIEW_SURFACE = MEDIA_MESSAGE_VIDEO_IDX_START + 1;
     /** set the display surface */
     static const IMS_SINT32 REQUEST_SET_DISPLAY_SURFACE = MEDIA_MESSAGE_VIDEO_IDX_START + 2;
     /** request to notify the amount of data used in video session  */
     static const IMS_SINT32 REQUEST_VIDEO_DATA_USAGE = MEDIA_MESSAGE_VIDEO_IDX_START + 3;
-    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IDX_END = IMMEDIA + 79;
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IDX_END = IJNIMEDIA + 79;
 
     // Requests for text
-    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IDX_START = IMMEDIA + 80;
-    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IDX_END = IMMEDIA + 99;
+    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IDX_START = IJNIMEDIA + 80;
+    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IDX_END = IJNIMEDIA + 99;
 
     static const IMS_SINT32 MEDIA_MESSAGE_IDX_END = MEDIA_MESSAGE_TEXT_IDX_END;
 
     // Response & Notification
-    static const IMS_SINT32 MEDIA_MESSAGE_IND_IDX_START = IMMEDIA_IND + 0;
+    static const IMS_SINT32 MEDIA_MESSAGE_IND_IDX_START = IJNIMEDIA_IND + 0;
 
-    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_START = IMMEDIA_IND + 0;
+    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_START = IJNIMEDIA_IND + 0;
     /** response of openSession request  */
-    static const IMS_SINT32 RESPONSE_OPEN_SESSION = IMMEDIA_IND + 1;
+    static const IMS_SINT32 RESPONSE_OPEN_SESSION = IJNIMEDIA_IND + 1;
     /** response of modifySession request  */
-    static const IMS_SINT32 RESPONSE_MODIFY_SESSION = IMMEDIA_IND + 2;
+    static const IMS_SINT32 RESPONSE_MODIFY_SESSION = IJNIMEDIA_IND + 2;
     /** response of addConfig request  */
-    static const IMS_SINT32 RESPONSE_ADD_CONFIG = IMMEDIA_IND + 3;
+    static const IMS_SINT32 RESPONSE_ADD_CONFIG = IJNIMEDIA_IND + 3;
     /** response of confirmConfig request  */
-    static const IMS_SINT32 RESPONSE_CONFIRM_CONFIG = IMMEDIA_IND + 4;
+    static const IMS_SINT32 RESPONSE_CONFIRM_CONFIG = IJNIMEDIA_IND + 4;
     /** response of closeSession request  */
-    static const IMS_SINT32 RESPONSE_SESSION_CLOSED = IMMEDIA_IND + 5;
+    static const IMS_SINT32 RESPONSE_SESSION_CLOSED = IJNIMEDIA_IND + 5;
     /** notification of first packet received in the target session during the streaming */
-    static const IMS_SINT32 NOTIFY_FIRST_PACKET = IMMEDIA_IND + 11;
+    static const IMS_SINT32 NOTIFY_FIRST_PACKET = IJNIMEDIA_IND + 11;
     /** notification of rtp extended header received */
-    static const IMS_SINT32 NOTIFY_HEADER_EXTENSION = IMMEDIA_IND + 12;
+    static const IMS_SINT32 NOTIFY_HEADER_EXTENSION = IJNIMEDIA_IND + 12;
     /** notification of rtp/rtcp packet inacitivity detected */
-    static const IMS_SINT32 NOTIFY_MEDIA_INACTIVITY = IMMEDIA_IND + 13;
+    static const IMS_SINT32 NOTIFY_MEDIA_INACTIVITY = IJNIMEDIA_IND + 13;
     /** notification of packet loss detected */
-    static const IMS_SINT32 NOTIFY_PACKET_LOSS = IMMEDIA_IND + 14;
+    static const IMS_SINT32 NOTIFY_PACKET_LOSS = IJNIMEDIA_IND + 14;
     /** notification of jitter over threshold detected */
-    static const IMS_SINT32 NOTIFY_JITTER = IMMEDIA_IND + 15;
+    static const IMS_SINT32 NOTIFY_JITTER = IJNIMEDIA_IND + 15;
     /** notification of media call quality changed */
-    static const IMS_SINT32 NOTIFY_CALL_QUALITY_CHANGE = IMMEDIA_IND + 16;
+    static const IMS_SINT32 NOTIFY_CALL_QUALITY_CHANGE = IJNIMEDIA_IND + 16;
     /** notification of the ImsMedia process disconnected  */
-    static const IMS_SINT32 NOTIFY_MEDIA_DETACH = IMMEDIA_IND + 17;
+    static const IMS_SINT32 NOTIFY_MEDIA_DETACH = IJNIMEDIA_IND + 17;
     /** notification of session qos callback */
-    static const IMS_SINT32 NOTIFY_QOS_INFO = IMMEDIA_IND + 18;
+    static const IMS_SINT32 NOTIFY_QOS_INFO = IJNIMEDIA_IND + 18;
     /** request from the Ui to send a dtmf digit to the audio session */
-    static const IMS_SINT32 SEND_DTMF = IMMEDIA_IND + 19;
-    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_END = IMMEDIA_IND + 49;
+    static const IMS_SINT32 SEND_DTMF = IJNIMEDIA_IND + 19;
+    static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_END = IJNIMEDIA_IND + 49;
 
     // Notifications for video
-    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_START = IMMEDIA_IND + 50;
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_START = IJNIMEDIA_IND + 50;
     /** request from the Ui to update a surface buffer */
     static const IMS_SINT32 SETSURFACE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 1;
     /** request from the Ui to update the camera id */
@@ -187,13 +187,13 @@ public:
     static const IMS_SINT32 CHANGE_ORIENTATION_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 5;
     /** notification of the video bitrate is decreased under the threshold */
     static const IMS_SINT32 NOTIFY_VIDEO_BITRATE = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 11;
-    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_END = IMMEDIA_IND + 79;
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_END = IJNIMEDIA_IND + 79;
 
-    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IND_IDX_START = IMMEDIA_IND + 80;
-    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IND_IDX_END = IMMEDIA_IND + 99;
+    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IND_IDX_START = IJNIMEDIA_IND + 80;
+    static const IMS_SINT32 MEDIA_MESSAGE_TEXT_IND_IDX_END = IJNIMEDIA_IND + 99;
 
-    static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_START = IMMEDIA_IND + 120;
-    static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_END = IMMEDIA_IND + 129;
+    static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_START = IJNIMEDIA_IND + 120;
+    static const IMS_SINT32 MEDIA_MESSAGE_INTERNAL_IND_IDX_END = IJNIMEDIA_IND + 129;
 
     static const IMS_SINT32 CHANGE_NETWORK_CONNECTION = MEDIA_MESSAGE_INTERNAL_IND_IDX_START + 0;
     static const IMS_SINT32 CHANGE_MTU = MEDIA_MESSAGE_INTERNAL_IND_IDX_START + 1;

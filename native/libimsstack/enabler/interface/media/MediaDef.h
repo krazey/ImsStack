@@ -113,7 +113,7 @@ typedef enum _REPORT_TYPE
 {
     REPORT_INVALID = -1,
     REPORT_SUCCESS = 0,
-    // Failures, based on IMMedia.h - RtpError
+    // Failures, based on IJniMedia.h - RtpError
     REPORT_FAILURE,
     // No received RTP or RTCP packets
     REPORT_DATA_RECEIVE_FAILED,

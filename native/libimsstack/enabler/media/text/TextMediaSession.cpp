@@ -25,7 +25,7 @@
 #include "ServiceUtil.h"
 
 #include "IMediaSessionListener.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "MediaManager.h"
 #include "text/TextMediaSession.h"
 #include "text/TextProfileUtil.h"
@@ -252,7 +252,7 @@ IMS_BOOL TextMediaSession::Open()
         pParam->m_pConfig = new TextConfig(REINTERPRET_CAST(TextConfig*, m_pRtpConfig));
 
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                    IMMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
+                    IJniMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
         {
             m_nState = STATE_IDLE;
             return IMS_TRUE;
@@ -273,7 +273,7 @@ IMS_BOOL TextMediaSession::Modify()
         pParam->m_pConfig = new TextConfig(REINTERPRET_CAST(TextConfig*, m_pRtpConfig));
 
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                    IMMedia::REQUEST_MODIFY_SESSION, pParam) == IMS_TRUE)
+                    IJniMedia::REQUEST_MODIFY_SESSION, pParam) == IMS_TRUE)
         {
             m_nState = STATE_LIVE;
             return IMS_TRUE;
@@ -292,7 +292,7 @@ IMS_BOOL TextMediaSession::Close()
     {
         ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase(MEDIA_TYPE_TEXT);
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                    IMMedia::REQUEST_CLOSE_SESSION, pParam) == IMS_TRUE)
+                    IJniMedia::REQUEST_CLOSE_SESSION, pParam) == IMS_TRUE)
         {
             m_nState = STATE_NONE;
             return IMS_TRUE;
@@ -314,7 +314,7 @@ IMS_BOOL TextMediaSession::SetMediaQuality()
         pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
 
         return m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
+                IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
 
     return IMS_FALSE;

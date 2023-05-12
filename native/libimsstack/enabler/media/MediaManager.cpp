@@ -18,7 +18,7 @@
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "IMediaSession.h"
 #include "MediaManager.h"
 #include "MediaSession.h"
@@ -187,7 +187,7 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I(
-            "SendMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
+            "SendMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IJniMedia::PrintMsg(nMsg), nCallKey);
 
     if (nCallKey == CALL_KEY_BROADCAST)  // broadcast message to the all sessions
     {
@@ -200,7 +200,7 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
                 if (pSessionNode->pMediaSession->SendMessage(nMsg, pParam) == IMS_FALSE)
                 {
                     IMS_TRACE_E(0, "SendMessage() failed MSG[%d, %s], CallKey[%d]", nMsg,
-                            IMMedia::PrintMsg(nMsg), pSessionNode->nCallKey);
+                            IJniMedia::PrintMsg(nMsg), pSessionNode->nCallKey);
                 }
             }
         }
@@ -220,7 +220,7 @@ IMS_BOOL MediaManager::handleRequestMsg(
         IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param)
 {
     IMS_TRACE_I("handleRequestMsg() - MediaType[%s], MSG[%s], CallKey[%d]",
-            IMMedia::PrintMediaType(param->m_eMediaType), IMMedia::PrintMsg(eEvent), nCallKey);
+            IJniMedia::PrintMediaType(param->m_eMediaType), IJniMedia::PrintMsg(eEvent), nCallKey);
 
     MediaSessionNode* pNode = FindSessionNode(nCallKey);
 

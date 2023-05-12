@@ -18,7 +18,7 @@
 #include "ServiceSystemTime.h"
 #include "ServiceNetworkPolicy.h"
 
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "MediaManager.h"
 #include "MediaNetworkConnectionWatcher.h"
 #include "MediaResourceManager.h"
@@ -213,7 +213,7 @@ void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32 nRatTy
     m_nNetworkType = nRatType;
 
     MediaManager::GetInstance(m_nSlotId)->SendMessage(
-            IMMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
+            IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
 }
 
 void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
@@ -221,5 +221,5 @@ void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
     IMS_TRACE_D("OnMediaMtuChanged() - Mtu[%d]", nMtu, 0, 0);
     m_nMtu = nMtu;
 
-    MediaManager::GetInstance(m_nSlotId)->SendMessage(IMMedia::CHANGE_MTU, 0, nMtu);
+    MediaManager::GetInstance(m_nSlotId)->SendMessage(IJniMedia::CHANGE_MTU, 0, nMtu);
 }

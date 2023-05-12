@@ -19,7 +19,6 @@
 
 #include "IMediaSession.h"
 #include "IMessage.h"
-#include "IUMedia.h"
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MtcDef.h"

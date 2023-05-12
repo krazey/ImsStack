@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <IMMedia.h>
+#include <IJniMedia.h>
 #include <audio/AudioMediaSession.h>
 
 class AudioMediaSessionTest : public ::testing::Test

@@ -22,7 +22,7 @@
 #include "ServiceEvent.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "IMediaSessionListener.h"
 #include "MediaManager.h"
 #include "audio/AudioMediaSession.h"
@@ -463,7 +463,7 @@ IMS_BOOL AudioMediaSession::Open()
         pParam->m_nLocalPort = m_nLocalPort;
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_OPEN_SESSION, pParam);
+                IJniMedia::REQUEST_OPEN_SESSION, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -485,7 +485,7 @@ IMS_BOOL AudioMediaSession::Modify()
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_MODIFY_SESSION, pParam);
+                IJniMedia::REQUEST_MODIFY_SESSION, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -514,7 +514,7 @@ IMS_BOOL AudioMediaSession::Add()
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_ADD_CONFIG, pParam);
+                IJniMedia::REQUEST_ADD_CONFIG, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -536,7 +536,7 @@ IMS_BOOL AudioMediaSession::Delete()
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_DELETE_CONFIG, pParam);
+                IJniMedia::REQUEST_DELETE_CONFIG, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -558,7 +558,7 @@ IMS_BOOL AudioMediaSession::Confirm()
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_CONFIRM_CONFIG, pParam);
+                IJniMedia::REQUEST_CONFIRM_CONFIG, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -579,7 +579,7 @@ IMS_BOOL AudioMediaSession::Close()
     {
         ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase(MEDIA_TYPE_AUDIO);
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_CLOSE_SESSION, pParam);
+                IJniMedia::REQUEST_CLOSE_SESSION, pParam);
 
         if (bResult == IMS_TRUE)
         {
@@ -608,7 +608,7 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
         pParam->m_dtmfCode = cDtmfCode;
         pParam->m_nDuration = m_pConfig->GetDTMFDuration();
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_SEND_DTMF, pParam);
+                IJniMedia::REQUEST_SEND_DTMF, pParam);
     }
 
     return bResult;
@@ -626,7 +626,7 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
                 new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_AUDIO);
         pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
+                IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
 }

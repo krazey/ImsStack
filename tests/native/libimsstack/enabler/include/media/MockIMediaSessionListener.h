@@ -38,24 +38,24 @@ public:
 
         switch (eEvent)
         {
-            case IMMedia::REQUEST_OPEN_SESSION:
+            case IJniMedia::REQUEST_OPEN_SESSION:
                 delete static_cast<ImsMediaMsgOpenConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_MODIFY_SESSION:
+            case IJniMedia::REQUEST_MODIFY_SESSION:
                 delete static_cast<ImsMediaMsgConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_CLOSE_SESSION:
+            case IJniMedia::REQUEST_CLOSE_SESSION:
                 delete pParam;
                 break;
-            case IMMedia::REQUEST_ADD_CONFIG:
-            case IMMedia::REQUEST_DELETE_CONFIG:
-            case IMMedia::REQUEST_CONFIRM_CONFIG:
+            case IJniMedia::REQUEST_ADD_CONFIG:
+            case IJniMedia::REQUEST_DELETE_CONFIG:
+            case IJniMedia::REQUEST_CONFIRM_CONFIG:
                 delete static_cast<ImsMediaMsgConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_SEND_DTMF:
+            case IJniMedia::REQUEST_SEND_DTMF:
                 delete static_cast<ImsMediaMsgDtmfParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_SET_MEDIA_QUALITY:
+            case IJniMedia::REQUEST_SET_MEDIA_QUALITY:
                 delete static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam);
                 break;
             default:

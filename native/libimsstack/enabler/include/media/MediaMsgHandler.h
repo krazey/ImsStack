@@ -17,7 +17,7 @@
 #ifndef MEDIA_MSG_HANDLER_H_
 #define MEDIA_MSG_HANDLER_H_
 
-#include "IMMedia.h"
+#include "IJniMedia.h"
 
 class MediaMsgHandler
 {

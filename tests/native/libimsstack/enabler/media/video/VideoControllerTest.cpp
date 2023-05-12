@@ -109,7 +109,7 @@ TEST_F(VideoControllerTest, testModifySession)
     ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
     pSetSurfaceParam->nValue = SURFACE_FAR;
     EXPECT_EQ(m_pController->SendMessage(
-                      IMMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
@@ -117,7 +117,7 @@ TEST_F(VideoControllerTest, testModifySession)
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = 0;
     EXPECT_EQ(m_pController->SendMessage(
-                      IMMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(pParam)),
+                      IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_TRUE);

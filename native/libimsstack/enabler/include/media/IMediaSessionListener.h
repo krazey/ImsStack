@@ -18,7 +18,7 @@
 #define INTERFACE_MEDIA_SESSION_LISTENER_H_
 
 #include "MediaDef.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 
 class IMediaSessionListener
 {
@@ -31,7 +31,7 @@ public:
     /**
      * @brief Send request message to java
      *
-     * @param eEvent The event defined in IMMedia.h
+     * @param eEvent The event defined in IJniMedia.h
      * @param pParam The parameter of the event
      * @return IMS_BOOL Return IMS_TRUE if the event sent without error
      */

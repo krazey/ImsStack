@@ -20,7 +20,7 @@
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfile.h"
 #include "config/AudioConfiguration.h"

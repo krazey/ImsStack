@@ -17,8 +17,7 @@
 #ifndef INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
 #define INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
 
-#include "IUMedia.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "MediaDef.h"
 
 class IMediaSessionClientListener

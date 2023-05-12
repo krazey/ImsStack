@@ -24,7 +24,7 @@
 #include "ServiceUtil.h"
 
 #include "IMediaSessionListener.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 #include "MediaManager.h"
 #include "MediaResourceManager.h"
 #include "video/VideoMediaSession.h"
@@ -348,25 +348,25 @@ void VideoMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN
 PUBLIC
 IMS_BOOL VideoMediaSession::OnMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 {
-    IMS_TRACE_I("OnMessages() - Msg[%d, %s]", nMsg, IMMedia::PrintMsg(nMsg), 0);
+    IMS_TRACE_I("OnMessages() - Msg[%d, %s]", nMsg, IJniMedia::PrintMsg(nMsg), 0);
 
     IMS_BOOL bRet = IMS_TRUE;
 
     switch (nMsg)
     {
-        case IMMedia::SETSURFACE_CMD:
+        case IJniMedia::SETSURFACE_CMD:
             bRet = OnSetSurfaceCmd(pParam);
             break;
-        case IMMedia::SELECT_CAMERA_CMD:
+        case IJniMedia::SELECT_CAMERA_CMD:
             bRet = OnSelectCameraCmd(pParam);
             break;
-        case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
+        case IJniMedia::CHANGE_CAMERA_ZOOM_CMD:
             bRet = OnChangeCameraZoomCmd(pParam);
             break;
-        case IMMedia::SET_PAUSE_IMAGE_CMD:
+        case IJniMedia::SET_PAUSE_IMAGE_CMD:
             bRet = OnSetPauseImageCmd(pParam);
             break;
-        case IMMedia::CHANGE_ORIENTATION_CMD:
+        case IJniMedia::CHANGE_ORIENTATION_CMD:
             bRet = OnChangeOrientation(pParam);
             break;
         default:
@@ -388,7 +388,7 @@ IMS_BOOL VideoMediaSession::Open()
         pParam->m_pConfig = NULL;
 
         if (m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                    IMMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
+                    IJniMedia::REQUEST_OPEN_SESSION, pParam) == IMS_TRUE)
         {
             m_nState = STATE_OPENED;
             return IMS_TRUE;
@@ -414,7 +414,7 @@ IMS_BOOL VideoMediaSession::Modify()
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_VIDEO);
         pParam->m_pConfig = new VideoConfig(REINTERPRET_CAST(VideoConfig*, m_pRtpConfig));
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_MODIFY_SESSION, pParam);
+                IJniMedia::REQUEST_MODIFY_SESSION, pParam);
 
         if (m_bPreviewSurfaceSet)
         {
@@ -471,7 +471,7 @@ IMS_BOOL VideoMediaSession::Close()
     {
         ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO);
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_CLOSE_SESSION, pParam);
+                IJniMedia::REQUEST_CLOSE_SESSION, pParam);
 
         m_nState = STATE_IDLE;
     }
@@ -492,7 +492,7 @@ IMS_BOOL VideoMediaSession::SetMediaQuality()
         pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
 
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
+                IJniMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
 }
@@ -541,7 +541,7 @@ IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
                 }
 
                 m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                        IMMedia::REQUEST_SET_DISPLAY_SURFACE, &newParam);
+                        IJniMedia::REQUEST_SET_DISPLAY_SURFACE, &newParam);
             }
             else if (param->nValue == SURFACE_NEAR)
             {
@@ -556,7 +556,7 @@ IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
                 }
 
                 m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                        IMMedia::REQUEST_SET_PREVIEW_SURFACE, &newParam);
+                        IJniMedia::REQUEST_SET_PREVIEW_SURFACE, &newParam);
             }
         }
 

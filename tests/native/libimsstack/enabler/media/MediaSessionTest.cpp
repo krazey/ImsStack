@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <IMMedia.h>
+#include <IJniMedia.h>
 #include <MediaEnvironment.h>
 #include <MediaNego.h>
 #include <MediaSession.h>
@@ -102,27 +102,27 @@ public:
 
         switch (eEvent)
         {
-            case IMMedia::REQUEST_OPEN_SESSION:
+            case IJniMedia::REQUEST_OPEN_SESSION:
                 delete static_cast<ImsMediaMsgOpenConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_MODIFY_SESSION:
+            case IJniMedia::REQUEST_MODIFY_SESSION:
                 delete static_cast<ImsMediaMsgConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_CLOSE_SESSION:
+            case IJniMedia::REQUEST_CLOSE_SESSION:
                 delete pParam;
                 break;
-            case IMMedia::REQUEST_ADD_CONFIG:
-            case IMMedia::REQUEST_DELETE_CONFIG:
-            case IMMedia::REQUEST_CONFIRM_CONFIG:
+            case IJniMedia::REQUEST_ADD_CONFIG:
+            case IJniMedia::REQUEST_DELETE_CONFIG:
+            case IJniMedia::REQUEST_CONFIRM_CONFIG:
                 delete static_cast<ImsMediaMsgConfigParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_SEND_DTMF:
+            case IJniMedia::REQUEST_SEND_DTMF:
                 delete static_cast<ImsMediaMsgDtmfParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_SET_MEDIA_QUALITY:
+            case IJniMedia::REQUEST_SET_MEDIA_QUALITY:
                 delete static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam);
                 break;
-            case IMMedia::REQUEST_QOS:
+            case IJniMedia::REQUEST_QOS:
                 delete static_cast<ImsMediaMsgQosParam*>(pParam);
                 break;
             default:
@@ -260,8 +260,8 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackUnmatch)
     EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_AUDIO))
             .Times(0);
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -281,8 +281,8 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackAudio)
             new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
     pParam->m_bResult = IMS_TRUE;
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_FALSE, MEDIA_TYPE_AUDIO))
@@ -291,8 +291,8 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackAudio)
     pParam = new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
     pParam->m_bResult = IMS_FALSE;
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -311,8 +311,8 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackVideo)
     EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_VIDEO))
             .Times(1);
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -331,8 +331,8 @@ TEST_F(MediaSessionTest, testQosRequestAndCallbackText)
     EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_TEXT))
             .Times(1);
 
-    EXPECT_EQ(
-            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IJniMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -394,7 +394,7 @@ TEST_F(MediaSessionTest, testNotifyFirstPacket)
     ImsMediaResponseConfigParam* pParam = new ImsMediaResponseConfigParam();
 
     EXPECT_EQ(m_pSession->SendMessage(
-                      IMMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(pParam)),
+                      IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -408,13 +408,13 @@ TEST_F(MediaSessionTest, testNotifyMediaInactivity)
     ImsMediaNotifyQualityStatusParam* pParam = new ImsMediaNotifyQualityStatusParam();
     pParam->m_eMediaType = MEDIA_TYPE_AUDIO;
     EXPECT_EQ(m_pSession->SendMessage(
-                      IMMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam)),
+                      IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     ImsMediaNotifyInactivityParam* pParam1 = new ImsMediaNotifyInactivityParam();
     pParam1->m_eMediaType = MEDIA_TYPE_VIDEO;
     EXPECT_EQ(m_pSession->SendMessage(
-                      IMMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam1)),
+                      IJniMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam1)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
@@ -442,13 +442,13 @@ TEST_F(MediaSessionTest, testNotifyVideoBitrate)
     pParam->nValue = 100000;
 
     EXPECT_EQ(m_pSession->SendMessage(
-                      IMMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
+                      IJniMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
     pParam = IMS_NULL;
 
     EXPECT_EQ(m_pSession->SendMessage(
-                      IMMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
+                      IJniMedia::NOTIFY_VIDEO_BITRATE, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_FALSE);
 
     destroyAudioSession();

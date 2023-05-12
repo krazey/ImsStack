@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <ServiceConfig.h>
-#include <IMMedia.h>
+#include <IJniMedia.h>
 #include <audio/AudioController.h>
 #include <audio/MockAudioNego.h>
 #include <MediaNetworkConnectionWatcher.h>

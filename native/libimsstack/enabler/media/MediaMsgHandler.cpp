@@ -69,29 +69,29 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
 
     switch (eEvent)
     {
-        case IMMedia::REQUEST_OPEN_SESSION:
+        case IJniMedia::REQUEST_OPEN_SESSION:
             return piThread->OnOpenSession(static_cast<ImsMediaMsgOpenConfigParam*>(pParam));
-        case IMMedia::REQUEST_MODIFY_SESSION:
+        case IJniMedia::REQUEST_MODIFY_SESSION:
             return piThread->OnModifySession(static_cast<ImsMediaMsgConfigParam*>(pParam));
-        case IMMedia::REQUEST_CLOSE_SESSION:
+        case IJniMedia::REQUEST_CLOSE_SESSION:
             return piThread->OnCloseSession(pParam);
-        case IMMedia::REQUEST_ADD_CONFIG:
+        case IJniMedia::REQUEST_ADD_CONFIG:
             return piThread->OnAddConfig(static_cast<ImsMediaMsgConfigParam*>(pParam));
-        case IMMedia::REQUEST_DELETE_CONFIG:
+        case IJniMedia::REQUEST_DELETE_CONFIG:
             return piThread->OnDeleteConfig(static_cast<ImsMediaMsgConfigParam*>(pParam));
-        case IMMedia::REQUEST_CONFIRM_CONFIG:
+        case IJniMedia::REQUEST_CONFIRM_CONFIG:
             return piThread->OnConfirmConfig(static_cast<ImsMediaMsgConfigParam*>(pParam));
-        case IMMedia::REQUEST_SEND_DTMF:
+        case IJniMedia::REQUEST_SEND_DTMF:
             return piThread->OnSendDtmf(static_cast<ImsMediaMsgDtmfParam*>(pParam));
-        case IMMedia::REQUEST_SET_MEDIA_QUALITY:
+        case IJniMedia::REQUEST_SET_MEDIA_QUALITY:
             return piThread->OnSetMediaQualityThreshold(
                     static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam));
-        case IMMedia::REQUEST_QOS:
+        case IJniMedia::REQUEST_QOS:
             return piThread->OnRequestQos(static_cast<ImsMediaMsgQosParam*>(pParam));
-        case IMMedia::REQUEST_SET_PREVIEW_SURFACE:
+        case IJniMedia::REQUEST_SET_PREVIEW_SURFACE:
             piThread->OnSetPreviewSurface();
             break;
-        case IMMedia::REQUEST_SET_DISPLAY_SURFACE:
+        case IJniMedia::REQUEST_SET_DISPLAY_SURFACE:
             piThread->OnSetDisplaySurface();
             break;
         default:

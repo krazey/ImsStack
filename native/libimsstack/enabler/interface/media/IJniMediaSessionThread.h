@@ -18,7 +18,7 @@
 
 #include "BaseServiceThread.h"
 #include "IJniEnablerThread.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 
 class IJniMediaSessionThread : public IJniEnablerThread
 {

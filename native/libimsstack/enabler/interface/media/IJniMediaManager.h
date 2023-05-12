@@ -29,9 +29,9 @@ public:
     /**
      * @brief Sends a message from java layer through jni interface
      *
-     * @param nMsg Enum of message defined in IMMedia.h
+     * @param nMsg Enum of message defined in IJniMedia.h
      * @param nCallKey The key to identify the media session instance
-     * @param pParam The message parameter, it is defined in IMMedia.h
+     * @param pParam The message parameter, it is defined in IJniMedia.h
      */
     virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) = 0;
 };

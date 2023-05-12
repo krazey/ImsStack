@@ -21,7 +21,7 @@
 #include "ImsTypeDef.h"
 #include "IJniEnabler.h"
 #include "IJniMediaManager.h"
-#include "IMMedia.h"
+#include "IJniMedia.h"
 
 using namespace android;
 

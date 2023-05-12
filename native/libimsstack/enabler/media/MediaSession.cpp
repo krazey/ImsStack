@@ -332,7 +332,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
         }
         else  // request again
         {
-            MediaSession_SendMsgToMediaManager(IMMedia::REQUEST_QOS,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
                     new ImsMediaMsgQosParam(
                             pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
         }
@@ -342,7 +342,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
     else  // new request
     {
         pParam->AddNegoId(nNegoId);
-        MediaSession_SendMsgToMediaManager(IMMedia::REQUEST_QOS,
+        MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS,
                 new ImsMediaMsgQosParam(
                         pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
         m_objListQosParams.Append(pParam);
@@ -959,7 +959,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
         IN IMS_SINT32 nEvent, IN ImsMediaMsgParamBase* param)
 {
     IMS_TRACE_D("MediaSession_SendMsgToMediaManager() : MediaType[%s], CallKey[%d] nEvent[%d]",
-            IMMedia::PrintMediaType(param->m_eMediaType), m_nCallKey, nEvent);
+            IJniMedia::PrintMediaType(param->m_eMediaType), m_nCallKey, nEvent);
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)
@@ -996,7 +996,7 @@ PROTECTED
 IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I(
-            "OnMessage() - CallKey[%d], nMsg[%d, %s]", m_nCallKey, nMsg, IMMedia::PrintMsg(nMsg));
+            "OnMessage() - CallKey[%d], nMsg[%d, %s]", m_nCallKey, nMsg, IJniMedia::PrintMsg(nMsg));
 
     if (m_pClientListener == IMS_NULL)
     {
@@ -1008,39 +1008,39 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
 
     switch (nMsg)
     {
-        case IMMedia::RESPONSE_OPEN_SESSION:
-        case IMMedia::RESPONSE_MODIFY_SESSION:
-        case IMMedia::RESPONSE_ADD_CONFIG:
-        case IMMedia::RESPONSE_CONFIRM_CONFIG:
+        case IJniMedia::RESPONSE_OPEN_SESSION:
+        case IJniMedia::RESPONSE_MODIFY_SESSION:
+        case IJniMedia::RESPONSE_ADD_CONFIG:
+        case IJniMedia::RESPONSE_CONFIRM_CONFIG:
             bRet = OnResponse(pParam);
             break;
-        case IMMedia::NOTIFY_FIRST_PACKET:
-        case IMMedia::NOTIFY_MEDIA_INACTIVITY:
-        case IMMedia::NOTIFY_PACKET_LOSS:
-        case IMMedia::NOTIFY_JITTER:
-        case IMMedia::NOTIFY_MEDIA_DETACH:
-        case IMMedia::NOTIFY_QOS_INFO:
-        case IMMedia::NOTIFY_VIDEO_BITRATE:
+        case IJniMedia::NOTIFY_FIRST_PACKET:
+        case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
+        case IJniMedia::NOTIFY_PACKET_LOSS:
+        case IJniMedia::NOTIFY_JITTER:
+        case IJniMedia::NOTIFY_MEDIA_DETACH:
+        case IJniMedia::NOTIFY_QOS_INFO:
+        case IJniMedia::NOTIFY_VIDEO_BITRATE:
             bRet = OnNotify(nMsg, pParam);
             break;
-        case IMMedia::SEND_DTMF:
+        case IJniMedia::SEND_DTMF:
             bRet = OnSendDtmf(pParam);
             break;
-        case IMMedia::NOTIFY_CALL_QUALITY_CHANGE:
-        case IMMedia::NOTIFY_HEADER_EXTENSION:
+        case IJniMedia::NOTIFY_CALL_QUALITY_CHANGE:
+        case IJniMedia::NOTIFY_HEADER_EXTENSION:
             // TODO: add implementation
             break;
-        case IMMedia::SETSURFACE_CMD:
-        case IMMedia::SELECT_CAMERA_CMD:
-        case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
-        case IMMedia::SET_PAUSE_IMAGE_CMD:
-        case IMMedia::CHANGE_ORIENTATION_CMD:
+        case IJniMedia::SETSURFACE_CMD:
+        case IJniMedia::SELECT_CAMERA_CMD:
+        case IJniMedia::CHANGE_CAMERA_ZOOM_CMD:
+        case IJniMedia::SET_PAUSE_IMAGE_CMD:
+        case IJniMedia::CHANGE_ORIENTATION_CMD:
             bRet = m_objVideoController.SendMessage(nMsg, pParam);
             break;
-        case IMMedia::CHANGE_NETWORK_CONNECTION:
+        case IJniMedia::CHANGE_NETWORK_CONNECTION:
             bRet = OnChangeNetworkConnection(pParam);
             break;
-        case IMMedia::CHANGE_MTU:
+        case IJniMedia::CHANGE_MTU:
             /** TODO: add implementation */
         default:
             break;
@@ -1075,7 +1075,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
     switch (nMsg)
     {
-        case IMMedia::NOTIFY_FIRST_PACKET:
+        case IJniMedia::NOTIFY_FIRST_PACKET:
         {
             ImsMediaResponseConfigParam* pParam =
                     reinterpret_cast<ImsMediaResponseConfigParam*>(nParam);
@@ -1102,7 +1102,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             }
         }
         break;
-        case IMMedia::NOTIFY_MEDIA_INACTIVITY:
+        case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
         {
             ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(nParam);
 
@@ -1163,14 +1163,14 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             }
         }
         break;
-        case IMMedia::NOTIFY_PACKET_LOSS:
-        case IMMedia::NOTIFY_JITTER:
+        case IJniMedia::NOTIFY_PACKET_LOSS:
+        case IJniMedia::NOTIFY_JITTER:
             /** TODO: add implementation */
             break;
-        case IMMedia::NOTIFY_MEDIA_DETACH:
+        case IJniMedia::NOTIFY_MEDIA_DETACH:
             m_pClientListener->MediaSession_Notify(REPORT_MEDIA_DETACH);
             break;
-        case IMMedia::NOTIFY_QOS_INFO:
+        case IJniMedia::NOTIFY_QOS_INFO:
         {
             ImsMediaMsgQosParam* pParam = reinterpret_cast<ImsMediaMsgQosParam*>(nParam);
 
@@ -1202,7 +1202,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             }
         }
         break;
-        case IMMedia::NOTIFY_VIDEO_BITRATE:
+        case IJniMedia::NOTIFY_VIDEO_BITRATE:
         {
             ImsMediaVideoParam* pParam = reinterpret_cast<ImsMediaVideoParam*>(nParam);
 

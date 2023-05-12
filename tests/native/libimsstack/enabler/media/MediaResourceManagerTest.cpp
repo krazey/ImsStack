@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <IMMedia.h>
+#include <IJniMedia.h>
 #include <MediaResourceManager.h>
 #include <config/MockMediaConfiguration.h>
 
