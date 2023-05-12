@@ -114,10 +114,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
-    if (pSession->AcceptUpdate() == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    pSession->AcceptUpdate();
 
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
@@ -163,10 +161,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         return CallStateName::UPDATING;
     }
 
-    if (m_objContext.GetSession()->Reject(objReason) == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    m_objContext.GetSession()->Reject(objReason);
 
     return CallStateName::UPDATING;
 }
@@ -177,10 +173,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::CancelUpdate(IN const CallReasonInfo
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
 
-    if (m_objContext.GetSession()->CancelUpdate(objReason) == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    m_objContext.GetSession()->CancelUpdate(objReason);
 
     return CallStateName::UPDATING;
 }
@@ -201,10 +195,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptResume(
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
-    if (pSession->AcceptUpdate() == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    pSession->AcceptUpdate();
 
     IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
@@ -222,10 +214,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectResume(IN const CallReasonInfo
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
-    if (m_objContext.GetSession()->Reject(objReason) == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    m_objContext.GetSession()->Reject(objReason);
 
     return CallStateName::UPDATING;
 }
@@ -262,15 +252,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
 
     StopTimer();
 
-    if (HandleSdpAnswer() == IMS_FAILURE)
-    {
-        // TODO
-    }
-
-    if (SendAck() == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    HandleSdpAnswer();
+    SendAck();
 
     if (m_objContext.GetUpdatingInfo().IsModifier() && m_objContext.GetUpdatingInfo().IsModified())
     {
@@ -748,10 +732,8 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->SetCallType(pSession->GetPreviousCallType());
 
-    if (pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
-    {
-        // TODO
-    }
+    // TODO: Internal error handling
+    pSession->Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE);
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
             m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
@@ -963,7 +945,6 @@ void UpdatingState::UpdateCallType()
     }
 
     pSession->SetCallType(eNewCallType);
-    IMS_TRACE_D("UpdateCallType : [%d] -> [%d]", eOldCallType, eNewCallType, 0);
 }
 
 PRIVATE
