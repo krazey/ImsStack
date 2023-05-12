@@ -17,13 +17,14 @@
 #define AOS_SERVICE_H_
 
 #include "IAosService.h"
+#include "ServiceTimer.h"
 
 class IAosRegistrationControlListener;
 class IAosServiceSettingListener;
 class IAosServicePhoneListener;
 class IJniAosServiceThread;
 
-class AosService : public IAosService
+class AosService : public IAosService, public ITimerListener
 {
 public:
     explicit AosService(IN IMS_SINT32 nSlotId);
@@ -101,6 +102,18 @@ public:
     static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
     static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
 
+protected:
+    void ProcessPlmnChangeDelayTimerExpired();
+    IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
+    const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
+
+    // Timer
+    void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
+    void StopTimer(IN IMS_UINT32 nType);
+
+    // ITimerListener
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
 private:
     void Init();
     void CleanUp();
@@ -108,8 +121,15 @@ private:
     IJniAosServiceThread* GetJniThread();
 
 private:
+    enum
+    {
+        TIMER_PLMN_CHANGE_DELAY = 0
+    };
+
+private:
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
+    ITimer* m_piPlmnChangeDelayTimer;
 
     ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
     ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
@@ -117,6 +137,8 @@ private:
 
     // <AosNetworkType, AosCapability>
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
+
+    static const IMS_UINT32 PLMN_CHANGE_DELAY_TIME_MS = 100;
 };
 
 #endif  // AOS_SERVICE_H_
