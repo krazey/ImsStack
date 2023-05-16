@@ -30,17 +30,10 @@ class IuMtsService
 public:
     // Event : Java to IMS
     static const IMS_SINT32 NOTI_MTSENABLER_SEND_MO_SMS     = JAVA2MTSENABLER + 1;
-    static const IMS_SINT32 NOTI_MTSENABLER_SEND_MT_RESULT  = JAVA2MTSENABLER + 2;
-
-    static const IMS_SINT32 NOTI_MTS_RAT_SELECTION          = JAVA2MTSENABLER + 10;
-
 
     // Event : IMS to Java
     static const IMS_UINT32 REPORT_MTS_MO_STATUS            = MTSENABLER2JAVA + 1;
     static const IMS_UINT32 REPORT_MTS_MT_SMS               = MTSENABLER2JAVA + 2;
-
-    static const IMS_UINT32 REQUEST_MTS_RAT_SELECTION       = MTSENABLER2JAVA + 10;
-    static const IMS_UINT32 REQUEST_MTS_EXIT_RAT_SELECTION  = MTSENABLER2JAVA + 11;
 };
 
 enum
@@ -50,15 +43,6 @@ enum
     MO_ERROR_GENERIC = 2,
     MO_ERROR_RETRY = 3,
     MO_ERROR_BY_RETRY_AFTER = 4,
-};
-
-enum
-{
-    MT_INVALID = 0,
-    MT_SUCCESS = 1,
-    MT_FAILURE = 2,
-    MT_SMS_FORMAT_FAILURE = 3,
-    MT_SMS_NODATA_FAILURE = 4,
 };
 
 enum

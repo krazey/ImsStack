@@ -91,10 +91,6 @@ void JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel
             TriggerSendMoSms(objParcel);
             break;
 
-        case IuMtsService::NOTI_MTSENABLER_SEND_MT_RESULT:
-            NotifyMtResult(objParcel);
-            break;
-
         default:
             break;
     }
@@ -182,21 +178,4 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     }
 
     piMtsService->SendMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
-}
-
-PRIVATE
-void JniMtsService::NotifyMtResult(IN const Parcel& objParcel)
-{
-    IMS_SINT32 nMtResult = objParcel.readInt32();
-    IMS_TRACE_I("MT result = (%d)", nMtResult, 0, 0);
-
-    IMtsService* piMtsService = GetNativeService();
-    if (piMtsService == IMS_NULL)
-    {
-        // TODO: error handling is needed when call back is added
-        IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
-        return;
-    }
-
-    piMtsService->SendMtResult(nMtResult);
 }

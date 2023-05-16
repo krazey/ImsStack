@@ -96,14 +96,4 @@ TEST_F(JniMtsServiceTest, SendDataMoSms3gpp2)
     pJniService->SendData(objParcel);
 }
 
-TEST_F(JniMtsServiceTest, SendDataMtResult)
-{
-    objParcel.writeInt32(IuMtsService::NOTI_MTSENABLER_SEND_MT_RESULT);
-    objParcel.setDataPosition(0);
-
-    EXPECT_CALL(objMockService, SendMtResult(_)).Times(1);
-
-    pJniService->SendData(objParcel);
-}
-
 }  // namespace android
