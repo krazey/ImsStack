@@ -873,14 +873,14 @@ IMS_BOOL SdpOaState::InitiateOffer(IN IMS_SINT32 nType)
         (*pOffer) = (*m_pCurrentView);
 
         // Increase the session version information
-        pOffer->GetSessionParameterNc().IncreaseSessionVersion();
+        pOffer->IncreaseSessionVersion();
 
         // (Operator-Specific)
         // Even though the session modification is rejected by the peer,
         // the device needs to upgrade of SDP version field.
         if (m_bAlwaysIncreaseSdpVersion)
         {
-            m_pCurrentView->GetSessionParameterNc().IncreaseSessionVersion();
+            IncreaseSessionVersion();
         }
     }
 
@@ -1437,6 +1437,23 @@ void SdpOaState::DestroyRefusedView()
 // }
 
 /**
+ * @brief Increases the local session version for the current view, the capabilities,
+ *        and the last offer made view if present.
+ */
+PUBLIC
+void SdpOaState::IncreaseSessionVersion()
+{
+    m_pCurrentView->IncreaseSessionVersion();
+    // Increase the session version of the capabilities
+    m_pCapabilities->GetCapabilities().IncreaseSessionVersion();
+    // Increase the session verion of the last offered session parameter
+    if (m_pLastOfferMade != IMS_NULL)
+    {
+        m_pLastOfferMade->IncreaseSessionVersion();
+    }
+}
+
+/**
  * @brief Returns the session parameter for the current capabilities.
  */
 PRIVATE
@@ -1544,8 +1561,11 @@ IMS_SINT32 SdpOaState::HandleAnswer(IN const SdpParser& objParser)
 
     SessionParameter* pCurrentCapabilities = GetCurrentCapabilities();
 
-    IMS_TRACE_D("Current SDP version=%s",
-            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(), 0,
+    IMS_TRACE_D("Current SDP version=%s, lastSdpProvidedWithNegotiatedSdp=%s",
+            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(),
+            _TRACE_B_((m_pCurrentView != IMS_NULL)
+                            ? m_pCurrentView->IsLastSdpProvidedWithNegotiatedSdp()
+                            : IMS_FALSE),
             0);
 
     if (pAnswer->GetMediaCount() != pCurrentCapabilities->GetMediaCount())
@@ -1625,8 +1645,11 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
 
     IMS_SINT32 nOaResult;
 
-    IMS_TRACE_D("Current SDP version=%s",
-            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(), 0,
+    IMS_TRACE_D("Current SDP version=%s, lastSdpProvidedWithNegotiatedSdp=%s",
+            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(),
+            _TRACE_B_((m_pCurrentView != IMS_NULL)
+                            ? m_pCurrentView->IsLastSdpProvidedWithNegotiatedSdp()
+                            : IMS_FALSE),
             0);
 
     if ((GetNewProposalView() == IMS_NULL) || (GetNewPeerView() == IMS_NULL))
@@ -1641,6 +1664,8 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
     if ((m_nState == STATE_OFFER_RECEIVED) && (pCurrentCapabilities->GetMediaCount() == 0))
     {
         nOaResult = pCurrentCapabilities->GenerateAnswer(pOffer, m_pProposalView, m_pPeerView);
+
+        m_pProposalView->SetLastSdpProvidedWithNegotiatedSdp(IMS_TRUE);
     }
     else
     {
@@ -1666,11 +1691,15 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
         if ((m_nState == STATE_OFFER_CHANGE_RECEIVED) &&
                 (m_bSdpVersionCheck && pCurrentCapabilities->IsSameVersion(pOffer)))
         {
+            if (!m_pCurrentView->IsLastSdpProvidedWithNegotiatedSdp())
+            {
+                m_pCurrentView->SetLastSdpProvidedWithNegotiatedSdp(IMS_TRUE);
+                IncreaseSessionVersion();
+            }
+
             (*m_pProposalView) = (*m_pCurrentView);
             (*m_pPeerView) = (*pOffer);
-
             delete pOffer;
-
             return SdpOfferAnswer::RESULT_NOT_CHANGED;
         }
 
@@ -1688,15 +1717,13 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
             (m_nState == STATE_OFFER_CHANGE_RECEIVED))
     {
         // Increase the session version of the negotiated session
-        m_pProposalView->GetSessionParameterNc().IncreaseSessionVersion();
-
+        m_pProposalView->IncreaseSessionVersion();
         // Increase the session version of the capabilities session
-        m_pCapabilities->GetCapabilities().GetSessionParameterNc().IncreaseSessionVersion();
-
+        m_pCapabilities->GetCapabilities().IncreaseSessionVersion();
         // Increase the session verion of the last offered session parameter
         if (m_pLastOfferMade != IMS_NULL)
         {
-            m_pLastOfferMade->GetSessionParameterNc().IncreaseSessionVersion();
+            m_pLastOfferMade->IncreaseSessionVersion();
         }
     }
 

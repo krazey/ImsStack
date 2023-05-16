@@ -101,6 +101,11 @@ public:
      */
     inline SessionParameter* GetRefusedView() const { return m_pRefusedView; }
     // }
+    /**
+     * @brief Increases the local session version for the current view, the capabilities,
+     *        and the last offer made view if present.
+     */
+    void IncreaseSessionVersion();
 
 private:
     SessionParameter* GetCurrentCapabilities();
