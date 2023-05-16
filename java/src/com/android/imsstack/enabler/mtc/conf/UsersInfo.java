@@ -26,61 +26,58 @@ import java.util.ArrayList;
 public class UsersInfo implements Parcelable {
 
     public static class User{
-        public long         callID = 0;
-        public String       target = "";
+        public long callID = 0;
+        public String target = "";
 
-        public String       userEntity = "";
-        public String       epEntity = "";
-        public String       displayName = "";
+        public String userEntity = "";
+        public String epEntity = "";
+        public String displayName = "";
 
-        public int          status = USER_STATUS_IDLE;
-        public int          statusCode = 0;
+        public int status = USER_STATUS_IDLE;
+        public int statusCode = 0;
 
-        public int          ccType = CCTYPE_TO;
-        public boolean      anonymize = false;
+        public int ccType = CCTYPE_TO;
+        public boolean anonymize = false;
     };
 
-    public ArrayList<User>    Users = new ArrayList<User>();
+    public ArrayList<User> Users = new ArrayList<User>();
 
     // status
-    public static final int USER_STATUS_IDLE                = 0;
+    public static final int USER_STATUS_IDLE = 0;
 
-    public static final int USER_STATUS_PROGRESSING         = 1;
-    public static final int USER_STATUS_CONNECTED           = 2;
-    public static final int USER_STATUS_DISCONNECTED        = 3;
-    public static final int USER_STATUS_ONHOLD              = 4;
-    public static final int USER_STATUS_MUTEDVIAFOCUS       = 5;
-    public static final int USER_STATUS_PENDING             = 6;
-    public static final int USER_STATUS_ALERTING            = 7;
-    public static final int USER_STATUS_DIALING_IN          = 8;
-    public static final int USER_STATUS_DIALING_OUT         = 9;
-    public static final int USER_STATUS_DISCONNECTING       = 10;
+    public static final int USER_STATUS_PROGRESSING = 1;
+    public static final int USER_STATUS_CONNECTED = 2;
+    public static final int USER_STATUS_DISCONNECTED = 3;
+    public static final int USER_STATUS_ONHOLD = 4;
+    public static final int USER_STATUS_MUTEDVIAFOCUS = 5;
+    public static final int USER_STATUS_PENDING = 6;
+    public static final int USER_STATUS_ALERTING = 7;
+    public static final int USER_STATUS_DIALING_IN = 8;
+    public static final int USER_STATUS_DIALING_OUT = 9;
+    public static final int USER_STATUS_DISCONNECTING = 10;
 
-    public static final int USER_STATUS_FAIL                = 20;
-    public static final int USER_STATUS_REJECT              = 21;
-    public static final int USER_STATUS_BUSY                = 22;
-    public static final int USER_STATUS_SERVERERROR         = 23;
-    public static final int USER_STATUS_NOTSUPPORTED        = 24;
-    public static final int USER_STATUS_NOTACCEPTABLE       = 25;
-    public static final int USER_STATUS_NOANSWER            = 26;
-    public static final int USER_STATUS_NOTREACHABLE        = 27;
-    public static final int USER_STATUS_LOWBATTERY          = 28;
-    public static final int USER_STATUS_FORBIDDEN           = 29;
-    public static final int USER_STATUS_INTSERVERERROR      = 30;
-
+    public static final int USER_STATUS_FAIL = 20;
+    public static final int USER_STATUS_REJECT = 21;
+    public static final int USER_STATUS_BUSY = 22;
+    public static final int USER_STATUS_SERVERERROR = 23;
+    public static final int USER_STATUS_NOTSUPPORTED = 24;
+    public static final int USER_STATUS_NOTACCEPTABLE = 25;
+    public static final int USER_STATUS_NOANSWER = 26;
+    public static final int USER_STATUS_NOTREACHABLE = 27;
+    public static final int USER_STATUS_LOWBATTERY = 28;
+    public static final int USER_STATUS_FORBIDDEN = 29;
+    public static final int USER_STATUS_INTSERVERERROR = 30;
 
     // ccType
-    public static final int CCTYPE_TO       = 0;
-    public static final int CCTYPE_CC       = 1;
-    public static final int CCTYPE_BCC      = 2;
+    public static final int CCTYPE_TO = 0;
+    public static final int CCTYPE_CC = 1;
+    public static final int CCTYPE_BCC = 2;
 
-    //------------------------------------------------------------------------------------------//
     public UsersInfo() {
         ImsLog.i("");
     }
 
     public UsersInfo(UsersInfo userInfo) {
-
         int users_num = userInfo.Users.size();
         ImsLog.i("Users[" + users_num + "]");
 
@@ -88,7 +85,6 @@ public class UsersInfo implements Parcelable {
             User user = userInfo.Users.get(index);
             addUser(user);
         }
-
     }
 
     public UsersInfo(Parcel source) {
@@ -96,11 +92,9 @@ public class UsersInfo implements Parcelable {
     }
 
     public void logIn(String tag) {
-
         ImsLog.i(tag + " - User : size[" + Users.size() + "]");
 
         for (int index = 0; index < Users.size(); index++) {
-
             User user = Users.get(index);
             ImsLog.i("[" + index + "]"
                     + " callID : " + user.callID
@@ -114,97 +108,71 @@ public class UsersInfo implements Parcelable {
                     + " anonymize : " + user.anonymize
                      );
         }
-
     }
 
     public int getSize() {
-
         ImsLog.i("getSize : [" + Users.size() + "]");
         return Users.size();
     }
 
     public User getUser(int index) {
-
         ImsLog.i("getUser : [" + index + "]");
         return Users.get(index);
     }
 
-    public void addUser(User _user) {
-
-        if (ImsLog.isDebuggable()) {
-            ImsLog.d("addUser [" + Users.size() + "]"
-                        + " callID : " + _user.callID
-                        + " target : " + _user.target
-                        + " userEntity : " + _user.userEntity
-                        + " epEntity : " + _user.epEntity
-                        + " displayName : " + _user.displayName
-                        + " status : " + _user.status
-                        + " statusCode : " + _user.statusCode
-                        + " ccType : " + _user.ccType
-                        + " anonymize : " + _user.anonymize
-                        );
-        }
-
+    /**
+     * Adds user based on received {@link User} instance.
+     */
+    public void addUser(User userIn) {
         User user = new User();
-        user.callID = _user.callID;
-        user.target = _user.target;
-        user.userEntity = _user.userEntity;
-        user.epEntity = _user.epEntity;
-        user.displayName = _user.displayName;
-        user.status = _user.status;
-        user.statusCode = _user.statusCode;
-        user.ccType = _user.ccType;
-        user.anonymize = _user.anonymize;
+        user.callID = userIn.callID;
+        user.target = userIn.target;
+        user.userEntity = userIn.userEntity;
+        user.epEntity = userIn.epEntity;
+        user.displayName = userIn.displayName;
+        user.status = userIn.status;
+        user.statusCode = userIn.statusCode;
+        user.ccType = userIn.ccType;
+        user.anonymize = userIn.anonymize;
 
         Users.add(user);
         logIn("addUser");
     }
 
-    public void addUser(long _callID, String _target, String _userEntity, String _epEntity, String _displayName, int _status, int _ccType, boolean _anonymize) {
-
-        if (ImsLog.isDebuggable()) {
-            ImsLog.d("addUser [" + Users.size() + "]"
-                        + " callID : " + _callID
-                        + " target : " + _target
-                        + " userEntity : " + _userEntity
-                        + " epEntity : " + _epEntity
-                        + " displayName : " + _displayName
-                        + " status : " + _status
-                        + " ccType : " + _ccType
-                        + " anonymize : " + _anonymize
-                        );
-        }
-
+    /**
+     * Adds user based on received information.
+     */
+    public void addUser(long callIdIn, String targetIn, String userEntityIn, String epEntityIn,
+            String displayNameIn, int statusIn, int ccTypeIn, boolean anonymizeIn) {
         User user = new User();
-        user.callID = _callID;
-        user.target = _target;
-        user.userEntity = _userEntity;
-        user.epEntity = _epEntity;
-        user.displayName = _displayName;
-        user.status = _status;
+        user.callID = callIdIn;
+        user.target = targetIn;
+        user.userEntity = userEntityIn;
+        user.epEntity = epEntityIn;
+        user.displayName = displayNameIn;
+        user.status = statusIn;
         user.statusCode = -1;
-        user.ccType = _ccType;
-        user.anonymize = _anonymize;
+        user.ccType = ccTypeIn;
+        user.anonymize = anonymizeIn;
 
         Users.add(user);
         logIn("addUser");
     }
 
     public void readFromParcel(Parcel source) {
-
         int users_num = source.readInt();
         ImsLog.i("users[" + users_num + "]");
 
         for (int index = 0; index < users_num; index++) {
-            long        callID = source.readLong();
-            String      target = source.readString();
-            String      userEntity = source.readString();
-            String      epEntity = source.readString();
-            String      displayName = source.readString();
-            int         status = source.readInt();
-            int         statusCode = source.readInt();
-            int         ccType = source.readInt();
-            boolean     anonymize;
+            long callID = source.readLong();
+            String target = source.readString();
+            String userEntity = source.readString();
+            String epEntity = source.readString();
+            String displayName = source.readString();
+            int status = source.readInt();
+            int statusCode = source.readInt();
+            int ccType = source.readInt();
+            boolean anonymize;
             if (source.readInt() == 1) {
                 anonymize = true;
             }
@@ -224,10 +192,8 @@ public class UsersInfo implements Parcelable {
             user.anonymize = anonymize;
 
             Users.add(user);
-
         }
         logIn("read");
-
     }
 
     public void writeToParcel(Parcel dest, int flags) {
