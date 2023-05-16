@@ -83,10 +83,10 @@ public class SscUtils {
             return null;
         }
 
-        String domain = null;
+        String domain;
         String impi = getImpi(slotId);
-        if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) { // ISIM
-            domain = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
+        if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi) && impi.contains("@")) { // ISIM
+            domain = impi.substring(impi.lastIndexOf("@") + 1);
         } else { // USIM
             TelephonyInterface telephony = getTelephonyInterface(slotId);
             if (telephony == null) {
@@ -136,41 +136,24 @@ public class SscUtils {
             return null;
         }
 
-        String number = "";
-        if (uri.startsWith("tel:")) {
-            // tel:+4477009900123 -> +4477009900123
-            // tel:004477009900123;phone-context=exampl.com -> 004477009900123
-            int beginIndex = 4;
-            int endIndex = uri.indexOf(";phone-context");
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= uri.length()) {
-                number = uri.substring(beginIndex);
-            } else {
-                number = uri.substring(beginIndex, endIndex);
-            }
-        } else if (uri.startsWith("sip:")) {
-            // sip:+4477009900123@example.com;user=phone -> +4477009900123
-            // sip:004477009900123;phone-context=example.com@example.com;user=phone
-            // -> 004477009900123
-            int beginIndex = 4;
-            int endIndex = uri.indexOf(";phone-context");
-            if (endIndex == -1) {
-                endIndex = uri.indexOf("@");
+        String number;
+        if (uri.startsWith("tel:") || uri.startsWith("sip:") || uri.startsWith("sips:")) {
+            number = uri.substring(uri.indexOf(":") + 1);
+
+            if (number.contains(";")) {
+                number = number.substring(0, number.indexOf(";"));
             }
 
-            if (endIndex == -1 || beginIndex > endIndex || beginIndex >= uri.length()) {
-                number = uri.substring(beginIndex);
-            } else {
-                number = uri.substring(beginIndex, endIndex);
+            if (number.contains("@")) {
+                number = number.substring(0, number.indexOf("@"));
             }
         } else {
             number = uri;
         }
 
         final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
-        if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
-            if (number.startsWith("0")) {
-                number = ccToAdd + number.substring(1);
-            }
+        if (!TextUtils.isEmpty(ccToAdd) && number.startsWith("0")) {
+            number = ccToAdd + number.substring(1);
         }
 
         final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);
@@ -187,7 +170,7 @@ public class SscUtils {
             return "";
         }
 
-        String domain = null;
+        final String domain;
         String phoneContext = SscConfig.getPhoneContextForTargetAddress(slotId);
         if (!TextUtils.isEmpty(phoneContext)) {
             domain = phoneContext;
@@ -201,10 +184,8 @@ public class SscUtils {
         }
 
         final String ccToAdd = SscConfig.getCountryCodeToReplaceZeroWithCountryCode(slotId);
-        if (!TextUtils.isEmpty(ccToAdd) && !number.startsWith("+")) {
-            if (number.startsWith("0")) {
-                number = ccToAdd + number.substring(1);
-            }
+        if (!TextUtils.isEmpty(ccToAdd) && number.startsWith("0")) {
+            number = ccToAdd + number.substring(1);
         }
 
         final String ccToRemove = SscConfig.getCountryCodeToReplaceCountryCodeWithZero(slotId);
@@ -216,7 +197,7 @@ public class SscUtils {
         ImsLog.d("number : " + number + ", format : " + format + ", domain : " + domain);
 
         // IR92 2.2.3 Addressing
-        String uri = null;
+        String uri;
         if ("sip".equalsIgnoreCase(format)) {
             uri = "sip:" + number;
             // local numbering

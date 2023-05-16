@@ -327,6 +327,14 @@ public class SscUtilsTest {
     }
 
     @Test
+    public void getNumberFromUri_fromSipsUri() {
+        String number = mSscUtils.getNumberFromUri(SLOT_0,
+                "sips:+1234567890;postd=pp22@operator.com;user=phone");
+
+        assertEquals("+1234567890", number);
+    }
+
+    @Test
     public void getNumberFromUri_fromSipUriWithoutDomain() {
         // this is a wrong URI, just used for testing
         String number = mSscUtils.getNumberFromUri(SLOT_0, "sip:+1234567890");

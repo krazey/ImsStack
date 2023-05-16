@@ -951,37 +951,6 @@ public class SscXmlParser {
         return noReplyTimer;
     }
 
-    // KDDI - If the number begins with “+81”, the device shall translate it to “0”.
-    // TODO_JS: Will be removed or modified according to base operation.
-    /*
-    protected String getNumberInTargetTo(String targetNumber) {
-        String result = null;
-        if (targetNumber == null || targetNumber.isEmpty()) {
-            ImsLog.d("targetNumber is null");
-            return result;
-        }
-
-        if (targetNumber.startsWith("sip:")
-            || targetNumber.startsWith("tel:")) {
-            result = targetNumber.substring(4);
-            if (result.startsWith("+81")) {
-                result = "0" + result.substring(3);
-            }
-            if (result.contains("@")) {
-                result = result.substring(0, result.indexOf("@"));
-            }
-            if (result.contains(";")) {
-                result = result.substring(0, result.indexOf(";"));
-            }
-        } else {
-            result = targetNumber;
-        }
-
-        ImsLog.d("number: " + result );
-        return result;
-    }
-     */
-
     // KDDI - getting preferred URI format(SIP) from one element.
     // TODO_JS: Adding carrier configuration or just remove
     /*
