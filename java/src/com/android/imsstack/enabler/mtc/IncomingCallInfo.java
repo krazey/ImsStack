@@ -64,6 +64,7 @@ public class IncomingCallInfo implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mServiceType);
         dest.writeInt(mCallType);
+        dest.writeInt(mOIR);
         dest.writeInt(mCNAP);
         dest.writeString(mOI);
         dest.writeString(mCNA);
