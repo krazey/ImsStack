@@ -58,7 +58,6 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
-        m_bRemoteAlerted(IMS_FALSE),
         m_bTimer100WaitExpired(IMS_FALSE),
         m_bWaitingRedialEmergency(IMS_FALSE)
 {
@@ -257,7 +256,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     RunMedia(piSession, piMessage);
 
-    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 
@@ -317,8 +316,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     RunMedia(piSession, piMessage);
-    m_objContext.GetUiNotifier().SendProgressing(
-            m_bRemoteAlerted);  // TODO: enforce remote alert to false?
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 
@@ -457,10 +455,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
     // TODO: move to SessionAlerting
-    if (nStatusCode == SipStatusCode::SC_180)
-    {
-        m_bRemoteAlerted = IMS_TRUE;
-    }
     if (nStatusCode == SipStatusCode::SC_199)
     {
         return GetStateName();
@@ -482,7 +476,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     RunMedia(piSession, piMessage);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
-    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 
@@ -527,10 +521,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START, nIndex);
     // TODO: move to SessionAlerting
-    if (nStatusCode == SipStatusCode::SC_180)
-    {
-        m_bRemoteAlerted = IMS_TRUE;
-    }
     if (nStatusCode == SipStatusCode::SC_199)
     {
         return GetStateName();
@@ -575,7 +565,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);
-    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 
@@ -598,14 +588,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()
 {
     IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
-    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
 {
     IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
-    m_objContext.GetUiNotifier().SendProgressing(m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
 }
 

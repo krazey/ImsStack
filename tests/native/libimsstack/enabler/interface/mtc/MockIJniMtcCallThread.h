@@ -41,8 +41,8 @@ public:
             (override));
     MOCK_METHOD(void, OnStartFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, OnProgressing,
-            (IN const JniCallInfo&, IN const MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&),
-                    IN IMS_BOOL),
+            (IN const JniCallInfo&, IN const MediaInfo&,
+                    (IN const ImsMap<SuppType, SuppService*>&)),
             (override));
     MOCK_METHOD(void, OnHeld,
             (IN const JniCallInfo&, IN const MediaInfo&,

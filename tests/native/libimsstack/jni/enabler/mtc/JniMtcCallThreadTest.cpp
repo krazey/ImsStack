@@ -119,7 +119,7 @@ TEST_F(JniMtcCallThreadTest, OnProgressing)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnProgressing(objCallInfo, objMediaInfo, objSuppServices, IMS_TRUE);
+    pJniCallThread->OnProgressing(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnHeld)

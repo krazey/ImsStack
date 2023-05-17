@@ -421,7 +421,7 @@ TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
 TEST_F(OutgoingStateTest, OnReceivingNetworkToneStartedInvokesSendProgressing)
 {
     ON_CALL(objMediaManager, IsLocalTone()).WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_FALSE)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendProgressing()).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnReceivingNetworkToneStarted());
 }
 
@@ -429,7 +429,7 @@ TEST_F(OutgoingStateTest, OnReceivingNetworkToneFailedInvokesSendProgressingWith
 {
     ON_CALL(objMediaManager, IsLocalTone()).WillByDefault(Return(IMS_TRUE));
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_FALSE)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendProgressing()).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnReceivingNetworkToneFailed());
 }
 
@@ -863,7 +863,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendProgressing)
     MediaInfo objMediaInfo;
     objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
@@ -964,7 +964,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedInvokesSendProgressing)
     ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
 
     EXPECT_EQ(
             CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateReceived(&objSession));
@@ -1301,7 +1301,7 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_TRUE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
@@ -1491,7 +1491,7 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendProgressing(IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }

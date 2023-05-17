@@ -60,10 +60,8 @@ public:
 
     /**
      * @brief Notifies that the call setup is progressing.
-     *
-     * @param bRemoteAlerted True if the remote is alerting.
      */
-    virtual void SendProgressing(IN IMS_BOOL bRemoteAlerted = IMS_FALSE) = 0;
+    virtual void SendProgressing() = 0;
 
     /**
      * @brief Notifies that the call is held by the user.

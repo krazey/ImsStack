@@ -737,12 +737,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppInfo.addService_bool(SuppInfo.TYPE_CW, false);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.getCallListenerProxy().onCallProgressing(mockMtcCall, mMockCallInfo,
-                mMockMediaInfo, suppInfo, false);
+                mMockMediaInfo, suppInfo);
         assertFalse(mImsCallSession.getState() == ImsCallSessionImplBase.State.ESTABLISHING);
 
         mImsCallSession = createImsCallSession("1");
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
-                mMockMediaInfo, suppInfo, false);
+                mMockMediaInfo, suppInfo);
         ImsCallProfile remoteProfile = mImsCallSession.getRemoteCallProfile();
         assertEquals(ImsCallSessionImplBase.State.ESTABLISHING, mImsCallSession.getState());
         assertEquals(ImsCallProfile.CALL_RESTRICT_CAUSE_HD, remoteProfile.getRestrictCause());
@@ -759,7 +759,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppInfo.updateService(suppService);
         mImsCallSession = createImsCallSession("2");
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
-                mediaInfo, suppInfo, false);
+                mediaInfo, suppInfo);
         remoteProfile = mImsCallSession.getRemoteCallProfile();
         assertEquals(ImsCallSessionImplBase.State.ESTABLISHING, mImsCallSession.getState());
         assertEquals(ImsCallProfile.CALL_RESTRICT_CAUSE_NONE, remoteProfile.getRestrictCause());

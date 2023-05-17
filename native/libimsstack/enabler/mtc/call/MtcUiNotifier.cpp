@@ -108,9 +108,9 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendProgressing(IN IMS_BOOL bRemoteAlerted)
+void MtcUiNotifier::SendProgressing()
 {
-    IMS_TRACE_I("SendProgressing : %s", _TRACE_B_(bRemoteAlerted), 0, 0);
+    IMS_TRACE_I("SendProgressing", 0, 0, 0);
 
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
@@ -125,7 +125,7 @@ void MtcUiNotifier::SendProgressing(IN IMS_BOOL bRemoteAlerted)
     }
 
     piThread->OnProgressing(m_objContext.CreateJniCallInfo(), objRefinedMediaInfo,
-            m_objContext.GetSupplementaryService().GetServices(), bRemoteAlerted);
+            m_objContext.GetSupplementaryService().GetServices());
 }
 
 PUBLIC
