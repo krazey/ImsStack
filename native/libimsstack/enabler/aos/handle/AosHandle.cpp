@@ -479,6 +479,8 @@ PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
         }
 
         m_bDataConnected = bCurrDataConnected;
+
+        ProcessDataConnectionChanged();
     }
     else
     {
@@ -1178,6 +1180,11 @@ PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN
 
 PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         IN const ImsMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
+{
+    // Implemented in child
+}
+
+PROTECTED VIRTUAL void AosHandle::ProcessDataConnectionChanged()
 {
     // Implemented in child
 }

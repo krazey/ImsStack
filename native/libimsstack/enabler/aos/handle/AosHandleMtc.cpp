@@ -511,6 +511,21 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     }
 }
 
+PROTECTED VIRTUAL void AosHandleMtc::ProcessDataConnectionChanged()
+{
+    if (IsVolteHysTimerRunning())  // VZ_REQ_LTEDATA_39857
+    {
+        if (!m_bDataConnected && !IsSupportedNetworkType(m_nNetworkType) &&
+                m_nNetworkType != NW_REPORT_RADIO_NOSRV)
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "ProcessDataConnectionChanged :: Stop Volte_Hys timer due to PDN disconnection",
+                    0, 0, 0);
+            ProcessVolteHysTimerExpired();
+        }
+    }
+}
+
 PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 {
     if (IsSupportedNetworkType(m_nNetworkType))
@@ -556,15 +571,29 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             }
         }
     }
-    else if (Is3G(m_nNetworkType))
+    else
     {
-        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+        if (Is3G(m_nNetworkType))
         {
-            ReevaluateUnavailableFeature();
+            if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+            {
+                ReevaluateUnavailableFeature();
+            }
+            else
+            {
+                ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+            }
         }
-        else
+
+        if (IsVolteHysTimerRunning())  // VZ_REQ_LTEDATA_39857
         {
-            ProcessBlock(BLOCK_NETWORK, IMS_TRUE);
+            if (m_nNetworkType != NW_REPORT_RADIO_NOSRV && !m_bDataConnected)
+            {
+                A_IMS_TRACE_D(APPPROFILE,
+                        "ProcessNetworkChanged :: Stop Volte_Hys timer due to PDN disconnection", 0,
+                        0, 0);
+                ProcessVolteHysTimerExpired();
+            }
         }
     }
 }
@@ -855,13 +884,17 @@ void AosHandleMtc::ProcessVolteHysTimerExpired()
 
     StopVolteHysTimer();
 
-    if (m_nVopsState == IMS_VOICE_OVER_PS_SUPPORTED && AosHandle::IsHandleBlocked(BLOCK_VOPS))
+    if (m_nVopsState == IMS_VOICE_OVER_PS_SUPPORTED &&
+            (AosHandle::IsHandleBlocked(BLOCK_VOPS) ||
+                    AosHandle::IsHandleBlocked(m_nHoldingBlocksForMobile, BLOCK_VOPS)))
     {
         ProcessBlock(BLOCK_VOPS, IMS_FALSE);
         return;
     }
 
-    if (!m_bSsacBarred && AosHandle::IsHandleBlocked(BLOCK_SSAC))
+    if (!m_bSsacBarred &&
+            (AosHandle::IsHandleBlocked(BLOCK_SSAC) ||
+                    AosHandle::IsHandleBlocked(m_nHoldingBlocksForMobile, BLOCK_SSAC)))
     {
         ProcessBlock(BLOCK_SSAC, IMS_FALSE);
     }

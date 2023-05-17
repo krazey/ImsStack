@@ -65,6 +65,7 @@ protected:
     void ProcessBlockChanged() override;
     void ProcessCapabilitiesChanged(
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
+    void ProcessDataConnectionChanged() override;
     void ProcessNetworkChanged() override;
     void ProcessVopsStateChanged(
             IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;

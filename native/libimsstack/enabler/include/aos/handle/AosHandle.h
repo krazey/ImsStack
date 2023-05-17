@@ -231,6 +231,7 @@ protected:
     virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     virtual void ProcessCapabilitiesChanged(
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
+    virtual void ProcessDataConnectionChanged();
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);

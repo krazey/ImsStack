@@ -339,6 +339,8 @@ protected:
         m_pAosHandleMtc->m_bDataConnected = bConnected;
     }
 
+    IMS_BOOL IsDataConnected() { return m_pAosHandleMtc->m_bDataConnected; }
+
     void ReevaluateUnavailableFeature() { m_pAosHandleMtc->ReevaluateUnavailableFeature(); }
 
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
@@ -3472,10 +3474,20 @@ TEST_F(AosHandleMtcTest, ProcessVolteHysTimerExpired_Test)
     ProcessVolteHysTimerExpired();
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VOPS);
+    StartVolteHysTimer(60);
+    ProcessVolteHysTimerExpired();
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
     AddBlock(AosHandle::BLOCK_SSAC);
     StartVolteHysTimer(60);
     ProcessVolteHysTimerExpired();
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_SSAC));
+
+    AddHoldingBlockForMobile(AosHandle::BLOCK_SSAC);
+    StartVolteHysTimer(60);
+    ProcessVolteHysTimerExpired();
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_SSAC));
 
     SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     SetSsacBarred(IMS_TRUE);
@@ -3893,4 +3905,99 @@ TEST_F(AosHandleMtcTest, Timer_TimerExpired_Test)
     EXPECT_FALSE(IsVolteHysTimerRunning());
 
     AosUtil::GetInstance()->StopTimer(piTestTimer, "AosHandleMtcTest_Timer");
+}
+
+TEST_F(AosHandleMtcTest, StopVolteHysTimer_PdnLost_Then_UmtsGsm)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(60));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_IDLE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_SSAC);
+    StartVolteHysTimer(60);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Data changed
+    EXPECT_FALSE(IsDataConnected());
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_LTE);
+    EXPECT_TRUE(IsVolteHysTimerRunning());
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Moves to unsupported RAT(=GSM)
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_GSM);
+    EXPECT_FALSE(IsVolteHysTimerRunning());
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_SSAC));
+}
+
+TEST_F(AosHandleMtcTest, StopVolteHysTimer_UmtsGsm_Then_PdnLost)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(60));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    SetDataConnected(IMS_TRUE);
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_SSAC);
+    StartVolteHysTimer(60);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Moves to unsupported RAT(=WCDMA)
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_WCDMA);
+    EXPECT_TRUE(IsDataConnected());
+    EXPECT_TRUE(IsVolteHysTimerRunning());
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_IDLE));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();  // Data changed
+    EXPECT_FALSE(IsDataConnected());
+    EXPECT_EQ(GetNetworkType(), NW_REPORT_RADIO_WCDMA);
+    EXPECT_FALSE(IsVolteHysTimerRunning());
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_SSAC));
 }
