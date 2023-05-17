@@ -502,6 +502,15 @@ TEST_F(MtcSessionTest, TerminateWithReasonVccDoesNotInvokeTerminate)
     pMtcSession->Terminate(IMS_TRUE, objReason);
 }
 
+TEST_F(MtcSessionTest, TerminateWithReasonLocalServiceUnavailableInvokesTerminate)
+{
+    CreateMtcSession();
+    const CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
+
+    EXPECT_CALL(*pMessageSender, Terminate(IMS_TRUE, objReason)).Times(1);
+    pMtcSession->Terminate(IMS_TRUE, objReason);
+}
+
 TEST_F(MtcSessionTest, TerminateWithReasonUserTerminatedInvokesTerminate)
 {
     CreateMtcSession();
@@ -515,7 +524,7 @@ TEST_F(MtcSessionTest, SecondTerminateReturnsFailure)
 {
     CreateMtcSession();
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    // ON_CALL(*pMessageSender, Terminate(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(1);
 
     EXPECT_EQ(IMS_SUCCESS, pMtcSession->Terminate(IMS_TRUE, objReason));
     EXPECT_EQ(IMS_FAILURE, pMtcSession->Terminate(IMS_TRUE, objReason));

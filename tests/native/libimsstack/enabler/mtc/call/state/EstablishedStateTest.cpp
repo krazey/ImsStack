@@ -19,7 +19,9 @@
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
+#include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
+#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
@@ -404,6 +406,31 @@ TEST_F(EstablishedStateTest, UpdateDoesNotRefreshConvertRemoteResponseTimer)
     pEstablishedState->Update(CallType::VT, objMediaInfo);
     pEstablishedState->Update(CallType::VT, objMediaInfo);
     pEstablishedState->Update(CallType::VT, objMediaInfo);
+}
+
+TEST_F(EstablishedStateTest,
+        HandleAosDisconnectedWithRegTerminatingInvokesTerminateWithLocalServiceUnavailable)
+{
+    IMS_UINT32 nAosReason = ImsAosReason::REG_TERMINATING;
+
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    MockEpsFallbackTrigger* pEpsFbTrigger = new MockEpsFallbackTrigger(objMockCallContext);
+    ON_CALL(objMockCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockConfigurationManager,
+            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAosReason))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const CallReasonInfo objReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE);
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendTerminated(objReasonInfo)).Times(1);
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAosReason));
+
+    delete pEpsFbTrigger;
 }
 
 }  // namespace android

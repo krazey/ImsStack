@@ -1052,6 +1052,7 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
             return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
         case ImsAosReason::SERVICE_POLICY:
         case ImsAosReason::SERVICE_BLOCKED:
+        case ImsAosReason::REG_TERMINATING:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::DATA_DISCONNECTED:
             return CODE_LOCAL_NETWORK_NO_SERVICE;

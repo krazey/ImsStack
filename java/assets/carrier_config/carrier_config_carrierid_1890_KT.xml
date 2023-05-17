@@ -65,6 +65,11 @@
         </int-array>
     </pbundle>
 
+    <!-- Mtc -->
+    <int-array name="registration_disconnect_reason_to_terminate_ongoing_call_int_array" num="1">
+        <item value="999"/> <!-- All cases -->
+    </int-array>
+
     <!-- Media -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
