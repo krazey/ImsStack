@@ -46,44 +46,6 @@ PUBLIC VIRTUAL MtcCallController::~MtcCallController()
 }
 
 PUBLIC
-void MtcCallController::TerminateCalls(
-        IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason)
-{
-    ImsList<IMtcCall*> lstCalls;
-    switch (eKeyType)
-    {
-        case KeyType::NONE:
-            lstCalls = m_objCallManager.GetCalls();
-            break;
-
-        case KeyType::CALL_KEY:
-            lstCalls.Append(m_objCallManager.GetCallByCallKey(nKey.nCallKey));
-            break;
-
-        case KeyType::CALL_TYPE:
-            lstCalls = m_objCallManager.GetCallsByType(nKey.eCallType);
-            break;
-
-        case KeyType::SERVICE_TYPE:
-            lstCalls = m_objCallManager.GetCallsByServiceType(nKey.eServiceType);
-            break;
-
-        default:
-            return;
-    }
-
-    for (IMS_UINT32 i = 0; i < lstCalls.GetSize(); i++)
-    {
-        IMtcCall* piCall = lstCalls.GetAt(i);
-
-        if (piCall != IMS_NULL)
-        {
-            piCall->Terminate(objReason);
-        }
-    }
-}
-
-PUBLIC
 CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo)
 {
     return m_objCallManager.CreateCall(eServiceType, objCallInfo)->GetKey();

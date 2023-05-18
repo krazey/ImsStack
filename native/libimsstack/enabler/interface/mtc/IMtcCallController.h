@@ -42,16 +42,6 @@ public:
     virtual ~IMtcCallController() {}
 
     /**
-     * Terminates the calls that matches the given key.
-     *
-     * @param eKeyType All existing calls are affected if `NONE`.
-     * @param nKey Key to find the calls.
-     * @param objReason The calls can use this information for terminating.
-     */
-    virtual void TerminateCalls(
-            IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason) = 0;
-
-    /**
      * Creates a new outgoing call.
      *
      * @param eServiceType Service type of the new call.
@@ -304,21 +294,6 @@ public:
      *
      */
     virtual void ReleaseRedialHelper() = 0;
-};
-
-enum class KeyType
-{
-    NONE,
-    CALL_KEY,
-    CALL_TYPE,
-    SERVICE_TYPE
-};
-
-union Key
-{
-    CallKey nCallKey;
-    CallType eCallType;
-    ServiceType eServiceType;
 };
 
 #endif

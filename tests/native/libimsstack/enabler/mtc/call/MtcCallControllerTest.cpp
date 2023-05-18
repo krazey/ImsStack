@@ -85,74 +85,6 @@ TEST_F(MtcCallControllerTest, NotifyJniEnablerSetDoesNothing)
     pCallController->NotifyJniEnablerSet();
 }
 
-TEST_F(MtcCallControllerTest, TerminateCallsByNoneKeyTerminatesTargetCalls)
-{
-    CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
-
-    MockIMtcCall objCall1;
-    MockIMtcCall objCall2;
-    EXPECT_CALL(objCall1, Terminate(objReason)).Times(1);
-    EXPECT_CALL(objCall2, Terminate(objReason)).Times(1);
-
-    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
-
-    Key nKey;
-    pCallController->TerminateCalls(KeyType::NONE, nKey, CallReasonInfo(objReason));
-}
-
-TEST_F(MtcCallControllerTest, TerminateCallsByCallKeyTerminatesTargetCalls)
-{
-    CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
-    CallKey nCallKey = 1;
-
-    MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Terminate(objReason)).Times(1);
-
-    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
-
-    Key nKey;
-    nKey.nCallKey = nCallKey;
-    pCallController->TerminateCalls(KeyType::CALL_KEY, nKey, CallReasonInfo(objReason));
-}
-
-TEST_F(MtcCallControllerTest, TerminateCallsByCallTypeTerminatesTargetCalls)
-{
-    CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
-    CallType eCallType = CallType::VOIP;
-
-    MockIMtcCall objCall1;
-    MockIMtcCall objCall2;
-    EXPECT_CALL(objCall1, Terminate(objReason)).Times(1);
-    EXPECT_CALL(objCall2, Terminate(objReason)).Times(1);
-
-    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
-    ON_CALL(objCallManager, GetCallsByType(eCallType)).WillByDefault(Return(lstCalls));
-
-    Key nKey;
-    nKey.eCallType = eCallType;
-    pCallController->TerminateCalls(KeyType::CALL_TYPE, nKey, CallReasonInfo(objReason));
-}
-
-TEST_F(MtcCallControllerTest, TerminateCallsByServiceTypeTerminatesTargetCalls)
-{
-    CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
-
-    MockIMtcCall objCall1;
-    MockIMtcCall objCall2;
-    EXPECT_CALL(objCall1, Terminate(objReason)).Times(1);
-    EXPECT_CALL(objCall2, Terminate(objReason)).Times(1);
-
-    ServiceType eServiceType = ServiceType::NORMAL;
-
-    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
-    ON_CALL(objCallManager, GetCallsByServiceType(eServiceType)).WillByDefault(Return(lstCalls));
-
-    Key nKey;
-    nKey.eServiceType = eServiceType;
-    pCallController->TerminateCalls(KeyType::SERVICE_TYPE, nKey, CallReasonInfo(objReason));
-}
-
 TEST_F(MtcCallControllerTest, OpenCreatesCall)
 {
     ServiceType eServiceType = ServiceType::NORMAL;
@@ -303,6 +235,33 @@ TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
     pCallController->Resume(nCallKey, objMediaInfo);
+}
+
+TEST_F(MtcCallControllerTest, AcceptResumeCallsTargetCall)
+{
+    CallKey nCallKey = 1;
+    CallType eCallType = CallType::VOIP;
+    MediaInfo objMediaInfo;
+
+    MockIMtcCall objCall;
+    EXPECT_CALL(objCall, AcceptResume(eCallType, objMediaInfo)).Times(1);
+
+    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
+
+    pCallController->AcceptResume(nCallKey, eCallType, objMediaInfo);
+}
+
+TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
+{
+    CallKey nCallKey = 1;
+    CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
+
+    MockIMtcCall objCall;
+    EXPECT_CALL(objCall, RejectResume(objReason)).Times(1);
+
+    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
+
+    pCallController->RejectResume(nCallKey, objReason);
 }
 
 TEST_F(MtcCallControllerTest, TerminateCallsAsyncRunner)
