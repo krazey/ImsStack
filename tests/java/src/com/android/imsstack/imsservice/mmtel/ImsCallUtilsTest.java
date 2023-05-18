@@ -677,7 +677,7 @@ public class ImsCallUtilsTest {
         Assert.assertEquals(ImsCallProfile.CALL_TYPE_VOICE, profile.getCallType());
 
         ci.callType = IUMtcCall.CALLTYPE_VT;
-        suppInfo.addService_int_str(SuppInfo.TYPE_VRBT, SuppInfo.TIP_IDENTITY,
+        suppInfo.addService(SuppInfo.TYPE_VRBT, false, SuppInfo.TIP_IDENTITY,
                 "Testing Demo,sip:+12345678902");
         ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo);
         assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.getCallType());
@@ -744,7 +744,7 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = new ImsCallProfile();
         SuppInfo suppInfo = new SuppInfo();
         // added api for setting all the values for junit
-        suppInfo.addService_int_str(SuppInfo.TYPE_TIP, SuppInfo.TIP_IDENTITY,
+        suppInfo.addService(SuppInfo.TYPE_TIP, false, SuppInfo.TIP_IDENTITY,
                 "Testing Demo,sip:+12345678902");
 
         ImsCallUtils.updateCallProfileOnSessionStarted(profile, suppInfo);
