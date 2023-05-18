@@ -206,6 +206,8 @@ public:
 
     IMS_BOOL IsePDGEnabled() const override { return IMS_TRUE; }
 
+    IMS_BOOL IsIpv6Preferred() const override { return IMS_FALSE; }
+
     IMS_BOOL IsMobileDataEnabled() const override { return IMS_TRUE; }
 
     IMS_SINT32 GetMtu() const override { return 0; }

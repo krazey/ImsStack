@@ -230,11 +230,20 @@ public class ApnTest {
     public void testGetIpVersion_ImsApn() throws Exception {
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
         when(mMockIDcSettings.getPreferredIpVersion())
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED);
 
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
         assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IP;
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV6;
         assertEquals(EIpVersion.IPV6V4.getInt(), mApn.getIpVersion());
+
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
     }
 
     @Test
@@ -242,11 +251,20 @@ public class ApnTest {
         mApn.mType = EApnType.EMERGENCY;
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
         when(mMockIDcSettings.getEmergencyPreferredIpVersion())
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED);
 
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
         assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IP;
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
+
+        mApn.mApnProtocol = ApnSetting.PROTOCOL_IPV6;
         assertEquals(EIpVersion.IPV6V4.getInt(), mApn.getIpVersion());
+
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
+        assertEquals(EIpVersion.IPV4V6.getInt(), mApn.getIpVersion());
     }
 
     @Test
@@ -693,6 +711,9 @@ public class ApnTest {
 
     @Test
     public void testHandlePreciseDataConnectionStateChanged_initialConnect() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
+        when(mMockIDcNetWatcher.isDataNetworkRoaming()).thenReturn(true);
+
         // initially connected
         mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
@@ -1074,6 +1095,7 @@ public class ApnTest {
                         .setApnName("TestApn")
                         .setEntryName("Test")
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
+                        .setRoamingProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .setFailCause(causeCode)
                 .build();

@@ -406,6 +406,11 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
     return IsConnected(IIpcan::CATEGORY_WLAN);
 }
 
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsIpv6Preferred() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->IsIpv6Preferred(GetApnType(), GetSlotId());
+}
+
 PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsMobileDataEnabled() const
 {
     return PlatformContext::GetInstance()->GetSystem()->IsMobileDataEnabled(GetSlotId());

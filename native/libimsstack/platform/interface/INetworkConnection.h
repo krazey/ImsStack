@@ -88,6 +88,7 @@ public:
     virtual STATE_ENTYPE GetState() const = 0;
     virtual IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const = 0;
     virtual IMS_BOOL IsePDGEnabled() const = 0;
+    virtual IMS_BOOL IsIpv6Preferred() const = 0;
     virtual IMS_BOOL IsMobileDataEnabled() const = 0;
     virtual IMS_SINT32 GetMtu() const = 0;
     virtual void SetListener(IN INetworkConnectionListener* piListener) = 0;

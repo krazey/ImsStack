@@ -810,6 +810,12 @@ IMS_SINT32 System::BindSocket(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN 
 }
 
 PUBLIC
+IMS_BOOL System::IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
+{
+    return (GetInt2(SystemConstants::IS_IPV6_PREFERRED, nApnType, 0, nSlotId) == 1);
+}
+
+PUBLIC
 IMS_BOOL System::IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId)
 {
     return (GetInt(SystemConstants::IS_IMS_EMERGENCY_CALL_SUPPORTED, 0, nSlotId) == 1);

@@ -105,7 +105,6 @@ protected:
 
     IMS_BOOL IsDataConnected() const;
     IMS_BOOL IsEmergencyType() const;
-    IMS_BOOL IsIpv6DelayRequired() const;
     IMS_BOOL IsPcscfChangeAvailable() const;
     IMS_BOOL IsPcscfConfigured() const;
     IMS_BOOL IsPcoWaitingRequired() const;

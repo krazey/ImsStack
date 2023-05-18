@@ -111,8 +111,6 @@ protected:
 
     IMS_BOOL IsPcscfConfigured() { return m_pAosConnector->IsPcscfConfigured(); }
 
-    IMS_BOOL IsIpv6DelayRequired() { return m_pAosConnector->IsIpv6DelayRequired(); }
-
     IMS_BOOL IsPcoWaitingRequired() { return m_pAosConnector->IsPcoWaitingRequired(); }
 
     IMS_BOOL IsIpChangedForEmergency() { return m_pAosConnector->CheckIpChangedForEmergency(); }
@@ -288,47 +286,6 @@ TEST_F(AosConnectorTest, IsReady)
     StopTimer(AosConnector::TIMER_STOP_DELAY);
 }
 
-TEST_F(AosConnectorTest, IsIpv6DelayRequired_EmergencyType)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyPreferredIpType())
-            .Times(3)
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4))
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_6))
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_6));
-    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
-            .Times(2)
-            .WillOnce(Return(IIpcan::CATEGORY_WLAN))
-            .WillOnce(Return(IIpcan::CATEGORY_MOBILE));
-
-    SetEmergencyType(IMS_TRUE);
-
-    // Delay is required only when the preferred ip type is IPv6 and mobile IPCAN
-    EXPECT_FALSE(IsIpv6DelayRequired());
-    EXPECT_FALSE(IsIpv6DelayRequired());
-    EXPECT_TRUE(IsIpv6DelayRequired());
-}
-
-TEST_F(AosConnectorTest, IsIpv6DelayRequired_ImsType)
-{
-    EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .Times(3)
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4))
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_6))
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_6));
-    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
-            .Times(2)
-            .WillOnce(Return(IIpcan::CATEGORY_WLAN))
-            .WillOnce(Return(IIpcan::CATEGORY_MOBILE));
-
-    // Delay is required only when the preferred ip type is IPv6 and mobile IPCAN
-    EXPECT_FALSE(IsIpv6DelayRequired());
-    EXPECT_FALSE(IsIpv6DelayRequired());
-    EXPECT_TRUE(IsIpv6DelayRequired());
-}
-
 TEST_F(AosConnectorTest, IsPcoWaitingRequired_NotSupportLimitedAdminSmsMode)
 {
     IMS_SINT32 nOriginValue = GetIntFromProperty(
@@ -386,18 +343,37 @@ TEST_F(AosConnectorTest, StateChanged_Active_AlreadyReadyState)
     EXPECT_FALSE(IsDataConnected());
 }
 
+TEST_F(AosConnectorTest, StateChanged_Active_Ipv6DelayNotRequired)
+{
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .Times(AnyNumber())
+            .WillOnce(Return(IIpcan::CATEGORY_MOBILE))
+            .WillOnce(Return(IIpcan::CATEGORY_WLAN));
+
+    // delay for IPv6 is not necessary because not preferred IPv6
+    SetFeature(AosConnector::PENDING_PCSCF_CONFIG_READY);
+    NotifyStateChanged(IAosConnection::STATE_ACTIVE);
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_IPV6));
+
+    // delay for IPv6 is not necessary because IPCAN is WLAN
+    SetDataConnected(IMS_FALSE);
+    NotifyStateChanged(IAosConnection::STATE_ACTIVE);
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_IPV6));
+}
+
 TEST_F(AosConnectorTest, StateChanged_Active_Ipv6DelayRequired)
 {
     // it does not handle state change because need to wait IPv6 address
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_)).Times(0);
-    EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
-            .WillOnce(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_6));
-    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
-            .WillOnce(Return(IIpcan::CATEGORY_MOBILE));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillOnce(ReturnRef(IpAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillOnce(Return(IIpcan::CATEGORY_MOBILE));
 
     NotifyStateChanged(IAosConnection::STATE_ACTIVE);
     EXPECT_TRUE(IsDataConnected());
@@ -409,10 +385,7 @@ TEST_F(AosConnectorTest, StateChanged_Active_Pending)
 {
     // it does not handle state change because there is pending feature
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_)).Times(0);
-    EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
-            .WillOnce(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_FALSE));
 
     SetFeature(AosConnector::PENDING_PCSCF_CONFIG_READY);
 
@@ -427,8 +400,7 @@ TEST_F(AosConnectorTest, StateChanged_Active_FailToConfigurePcscf)
     EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_FALSE));
 
@@ -443,8 +415,7 @@ TEST_F(AosConnectorTest, StateChanged_Active_EmergencyTypeFailure)
     // it notify Deactivated when the connection request for emergency type is failed.
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_FAILED))
             .Times(1);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_FALSE));
 
@@ -464,8 +435,7 @@ TEST_F(AosConnectorTest, StateChanged_Active_InvalidIpAddress)
     EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_TRUE));
     m_objPcscfs.AddElement(AString("::1"));
@@ -487,8 +457,7 @@ TEST_F(AosConnectorTest, StateChanged_Active)
     EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredIpType())
-            .WillOnce(Return(CarrierConfig::Assets::IP_VERSION_4));
+    EXPECT_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_TRUE));
     m_objPcscfs.AddElement(AString("1.1.1.1"));

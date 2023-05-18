@@ -267,4 +267,14 @@ public interface IDcApn extends IDc {
      *         Network object
      */
     Network getNetworkByCapability(int apnType);
+
+    /**
+     * get IP version preference for specified APN.
+     *
+     * @param apnType The APN type to check IP version preference
+     *         EApnType#IMS#getType()
+     *         EApnType#EMERGENCY#getType()
+     * @return Returns true if specified APN prefers IPv6 address. Otherwise, returns false.
+     */
+    boolean isIpv6Preferred(int apnType);
 }
