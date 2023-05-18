@@ -42,7 +42,7 @@ private:
     IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
     CallType m_eCallType;
 
-    CallReasonInfo CovertConnectionFailureToCallReasonInfo(
+    CallReasonInfo ConvertConnectionFailureToCallReasonInfo(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 };
 

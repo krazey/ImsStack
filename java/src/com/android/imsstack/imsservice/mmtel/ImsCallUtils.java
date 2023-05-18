@@ -1129,6 +1129,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REMOTE_CALL_DECLINE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
                 ImsReasonInfo.CODE_WIFI_LOST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_RADIO_INTERNAL_ERROR,
+                ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
