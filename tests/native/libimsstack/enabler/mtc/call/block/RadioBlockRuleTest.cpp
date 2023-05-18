@@ -154,4 +154,22 @@ TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesRrcRejectWhenRrcReject)
     pRadioBlockRule->OnConnectionFailed(nFailureReason, nRejectWaitTimeMillis);
 }
 
+TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesRadioInternalErrorWhenInternalError)
+{
+    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
+            .WillByDefault(Return(CheckResult::PENDING));
+    pRadioBlockRule->Check(BlockRuleCheckListener);
+
+    const IMS_UINT32 nRejectWaitTimeMillis = 2;
+    const IMS_UINT32 nFailureReason = IImsRadio::REASON_INTERNAL_ERROR;
+
+    EXPECT_CALL(BlockRuleCheckListener,
+            OnBlockRuleChecked(
+                    Result(Result::Status::BLOCKED, CallReasonInfo(CODE_RADIO_INTERNAL_ERROR))))
+            .Times(1);
+    pRadioBlockRule->OnConnectionFailed(nFailureReason, nRejectWaitTimeMillis);
+}
+
 }  // namespace android

@@ -68,11 +68,11 @@ PUBLIC VIRTUAL void RadioBlockRule::OnConnectionFailed(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis)
 {
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::BLOCKED,
-            CovertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)));
+            ConvertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)));
 }
 
 PRIVATE
-CallReasonInfo RadioBlockRule::CovertConnectionFailureToCallReasonInfo(
+CallReasonInfo RadioBlockRule::ConvertConnectionFailureToCallReasonInfo(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const
 {
     switch (nFailureReason)
@@ -81,6 +81,8 @@ CallReasonInfo RadioBlockRule::CovertConnectionFailureToCallReasonInfo(
             return CallReasonInfo(CODE_INTERNAL_RRC_REJECT, nWaitTimeMillis);
         case IImsRadio::REASON_ACCESS_DENIED:
             return CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED);
+        case IImsRadio::REASON_INTERNAL_ERROR:
+            return CallReasonInfo(CODE_RADIO_INTERNAL_ERROR);
         default:
             return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
     }
