@@ -3335,7 +3335,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         @Override
         public void onCallProgressing(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo, boolean alerting) {
+                CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
             if (!call.equals(mCall)) {
                 return;
             }

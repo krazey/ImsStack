@@ -719,7 +719,7 @@ public class MtcCallTest extends ImsStackTest {
 
         assertEquals(CallTracker.CALL_STATE_RINGBACK, mTestMtcCallWithMockJniProxy.getCallState());
         verify(mListener, times(1)).onCallProgressing(
-                eq(mTestMtcCallWithMockJniProxy), any(), any(), any(), anyBoolean());
+                eq(mTestMtcCallWithMockJniProxy), any(), any(), any());
     }
 
     @Test

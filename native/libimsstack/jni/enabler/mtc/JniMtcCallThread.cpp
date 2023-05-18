@@ -60,13 +60,11 @@ void JniMtcCallThread::OnStartFailed(IN const CallReasonInfo& objReason)
 
 PUBLIC
 void JniMtcCallThread::OnProgressing(IN const JniCallInfo& objCallInfo,
-        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-        IN IMS_BOOL bAlerted /* = IMS_FALSE*/)
+        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::PROGRESSING);
     SetCallDetails(objParcel, objCallInfo, objMediaInfo, objSuppServices);
-    objParcel.writeInt32(bAlerted ? 1 : 0);
     SendData2Java(objParcel);
 }
 

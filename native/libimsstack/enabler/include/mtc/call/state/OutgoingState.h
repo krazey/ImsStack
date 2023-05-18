@@ -80,7 +80,6 @@ private:
     void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void OnSessionForked(IN ISession* piOriginSession);
 
-    IMS_BOOL m_bRemoteAlerted;
     IMS_BOOL m_bTimer100WaitExpired;
     IMS_BOOL m_bWaitingRedialEmergency;
 };

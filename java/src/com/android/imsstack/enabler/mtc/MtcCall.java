@@ -80,7 +80,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         public void onCallProgressing(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo, boolean alerting) {
+                CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
             // no-op
         }
 
@@ -1742,9 +1742,8 @@ public class MtcCall extends Call implements ConferenceTracker {
                     CallInfo callInfo = new CallInfo(parcel);
                     MediaInfo mediaInfo = new MediaInfo(parcel);
                     SuppInfo suppInfo = new SuppInfo(parcel);
-                    int alerting = parcel.readInt();
 
-                    onProgressing(callInfo, mediaInfo, suppInfo, (alerting == 1) ? true : false);
+                    onProgressing(callInfo, mediaInfo, suppInfo);
                     break;
                 }
                 case IUMtcCall.STARTED: {
@@ -1934,12 +1933,10 @@ public class MtcCall extends Call implements ConferenceTracker {
             closeInternal(MtcCall.this);
         }
 
-        private void onProgressing(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo,
-                boolean alerting) {
+        private void onProgressing(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
             logi("PROGRESSING :: " + MtcCallUtils.toString(callInfo)
                     + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo)
-                    + ", alerting=" + alerting);
+                    + ", " + MtcCallUtils.toString(suppInfo));
 
             // Update the call/media info.
             updateCallParameters(callInfo, mediaInfo, suppInfo);
@@ -1948,7 +1945,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             if (mListener != null) {
                 mListener.onCallProgressing(
-                        MtcCall.this, callInfo, mediaInfo, suppInfo, alerting);
+                        MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
         }
 

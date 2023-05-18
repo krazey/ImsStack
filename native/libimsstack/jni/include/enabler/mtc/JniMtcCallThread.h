@@ -41,8 +41,7 @@ public:
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void OnStartFailed(IN const CallReasonInfo& objReason) override;
     void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN IMS_BOOL bAlerted = IMS_FALSE) override;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void OnHoldFailed(IN const CallReasonInfo& objReason) override;

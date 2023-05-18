@@ -54,11 +54,9 @@ public:
      * @param objCallInfo
      * @param objMediaInfo
      * @param objSuppServices
-     * @param bAlerted
      */
     virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN IMS_BOOL bAlerted = IMS_FALSE) = 0;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies

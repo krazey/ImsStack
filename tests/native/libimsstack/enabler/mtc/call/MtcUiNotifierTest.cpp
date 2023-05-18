@@ -164,14 +164,14 @@ TEST_F(MtcUiNotifierTest, SendStartFailed)
 
 TEST_F(MtcUiNotifierTest, SendProgressing)
 {
-    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(1);
 
-    pNotifier->SendProgressing(IMS_TRUE);
+    pNotifier->SendProgressing();
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _)).Times(0);
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _)).Times(0);
 
-    pNotifier->SendProgressing(IMS_TRUE);
+    pNotifier->SendProgressing();
 }
 
 TEST_F(MtcUiNotifierTest, SendHeld)

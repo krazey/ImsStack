@@ -40,7 +40,7 @@ public:
     void SendIncomingCallReceived() override;
     void SendStarted() override;
     void SendStartFailed(IN const CallReasonInfo& objReason) override;
-    void SendProgressing(IN IMS_BOOL bRemoteAlerted) override;
+    void SendProgressing() override;
     void SendHeld() override;
     void SendHoldFailed(IN const CallReasonInfo& objReason) override;
     void SendResumed() override;
