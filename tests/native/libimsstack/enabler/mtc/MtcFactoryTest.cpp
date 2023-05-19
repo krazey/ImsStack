@@ -20,6 +20,12 @@
 namespace android
 {
 
+class TestMtcFactory : public MtcFactory
+{
+public:
+    IMS_BOOL Has(IN IMS_SINT32 nSlotId) { return m_objMtcApps.GetIndexOfKey(nSlotId) >= 0; }
+};
+
 class MtcFactoryTest : public ::testing::Test
 {
 protected:
@@ -27,5 +33,56 @@ protected:
 
     virtual void TearDown() override {}
 };
+
+TEST_F(MtcFactoryTest, GetInstanceReturnsSameInstance)
+{
+    EXPECT_EQ(MtcFactory::GetInstance(), MtcFactory::GetInstance());
+}
+
+TEST_F(MtcFactoryTest, StartCreatesNewApp)
+{
+    TestMtcFactory objFactory;
+
+    EXPECT_FALSE(objFactory.Has(0));
+    EXPECT_FALSE(objFactory.Has(1));
+
+    objFactory.Start(1);
+
+    EXPECT_FALSE(objFactory.Has(0));
+    EXPECT_TRUE(objFactory.Has(1));
+}
+
+TEST_F(MtcFactoryTest, StartTwiceDoesNothing)
+{
+    TestMtcFactory objFactory;
+
+    objFactory.Start(0);
+    objFactory.Start(0);
+
+    EXPECT_TRUE(objFactory.Has(0));
+}
+
+TEST_F(MtcFactoryTest, StopDestroysApp)
+{
+    TestMtcFactory objFactory;
+    objFactory.Start(0);
+    objFactory.Start(1);
+
+    objFactory.Stop(1);
+
+    EXPECT_TRUE(objFactory.Has(0));
+    EXPECT_FALSE(objFactory.Has(1));
+}
+
+TEST_F(MtcFactoryTest, StopTwiceDoesNothing)
+{
+    TestMtcFactory objFactory;
+    objFactory.Start(0);
+
+    objFactory.Stop(0);
+    objFactory.Stop(0);
+
+    EXPECT_FALSE(objFactory.Has(0));
+}
 
 }  // namespace android

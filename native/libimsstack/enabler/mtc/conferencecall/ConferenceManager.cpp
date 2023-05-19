@@ -84,12 +84,6 @@ IConferenceController& ConferenceManager::CreateController(
             pController = new ExpandController(
                     nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
             break;
-
-        default:
-            IMS_TRACE_E(0, "invalid conference manager type. Create MergeController", 0, 0, 0);
-            pController = new MergeController(
-                    nCallKey, m_objContext, m_objCallConnectionIdManager, m_objConferenceFactory);
-            break;
     }
 
     pController->SetListener(this);

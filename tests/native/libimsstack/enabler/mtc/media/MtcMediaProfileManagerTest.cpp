@@ -299,6 +299,7 @@ TEST_F(MtcMediaProfileManagerTest, GetSessionWithNegoIdReturnsMatchingSession)
     IMS_UINTP nNegoId1 = 100;
     IMS_UINTP nNegoId2 = 200;
     IMS_UINTP nNegoId3 = 300;
+    IMS_UINTP nInvalidNegoId = 0;
 
     ON_CALL(objMediaSession1, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(nNegoId1));
     objProfileManager.CreateMediaProfile(
@@ -315,6 +316,7 @@ TEST_F(MtcMediaProfileManagerTest, GetSessionWithNegoIdReturnsMatchingSession)
     EXPECT_EQ(objProfileManager.GetSessionWithNegoId(nNegoId1), &objSession1);
     EXPECT_EQ(objProfileManager.GetSessionWithNegoId(nNegoId2), &objSession2);
     EXPECT_EQ(objProfileManager.GetSessionWithNegoId(nNegoId3), &objSession3);
+    EXPECT_EQ(objProfileManager.GetSessionWithNegoId(nInvalidNegoId), nullptr);
 }
 
 TEST_F(MtcMediaProfileManagerTest, GetActiveSession)

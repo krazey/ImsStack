@@ -15,85 +15,118 @@
  */
 
 #include "ImsEventDef.h"
+#include "MockIMtcImsEventReceiver.h"
 #include "MtcImsEventReceiver.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-// From MtcImsEventReceiver::RegisterSupportedEvents()
-const ImsEvent SUPPORTED_EVENT = IMS_EVENT_IMS_VOICE_OVER_PS_STATE;
-const IMS_SINT32 SLOT_ID = 0;
+using ::testing::_;
 
-class TestImsEventListener : public IMtcImsEventListener
+// From MtcImsEventReceiver::RegisterSupportedEvents()
+const LOCAL ImsEvent SUPPORTED_EVENT = IMS_EVENT_IMS_VOICE_OVER_PS_STATE;
+const LOCAL ImsEvent INVALID_EVENT = -1;
+const LOCAL IMS_SINT32 SLOT_ID = 0;
+
+class MtcImsEventReceiverTest : public ::testing::Test
 {
 public:
-    virtual ~TestImsEventListener() {}
+    MtcImsEventReceiver* pEventReceiver;
 
-    inline void OnImsEventNotified(
-            IN ImsEvent nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override
-    {
-        m_nNotifyCount += 1;
-        m_nEvent = nEvent;
-        m_nWParam = nWParam;
-        m_nLParam = nLParam;
-    }
+protected:
+    virtual void SetUp() override { pEventReceiver = new MtcImsEventReceiver(SLOT_ID); }
 
-    int m_nNotifyCount = 0;
-    ImsEvent m_nEvent = 0;
-    IMS_UINT32 m_nWParam = 0;
-    IMS_UINT32 m_nLParam = 0;
+    virtual void TearDown() override { delete pEventReceiver; }
 };
 
-TEST(MtcImsEventReceiverTest, GetParamInitiallyReturnsUnknownValue)
+TEST_F(MtcImsEventReceiverTest, GetParamWithInvalidEventReturnsUnknownValue)
 {
-    MtcImsEventReceiver objEventReceiver(SLOT_ID);
-
-    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, objEventReceiver.GetWParam(SUPPORTED_EVENT));
-    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, objEventReceiver.GetLParam(SUPPORTED_EVENT));
+    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, pEventReceiver->GetWParam(INVALID_EVENT));
+    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, pEventReceiver->GetLParam(INVALID_EVENT));
 }
 
-TEST(MtcImsEventReceiverTest, GetParamReturnsNewValueAfterNotify)
+TEST_F(MtcImsEventReceiverTest, GetParamInitiallyReturnsUnknownValue)
 {
-    MtcImsEventReceiver objEventReceiver(SLOT_ID);
-
-    objEventReceiver.Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
-
-    EXPECT_EQ(1, objEventReceiver.GetWParam(SUPPORTED_EVENT));
-    EXPECT_EQ(2, objEventReceiver.GetLParam(SUPPORTED_EVENT));
+    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, pEventReceiver->GetWParam(SUPPORTED_EVENT));
+    EXPECT_EQ(MtcImsEventReceiver::UNKNOWN_VALUE, pEventReceiver->GetLParam(SUPPORTED_EVENT));
 }
 
-TEST(MtcImsEventReceiverTest, AddedListenerNotifiedOnRegisteredEvent)
+TEST_F(MtcImsEventReceiverTest, GetParamReturnsNewValueAfterNotify)
 {
-    MtcImsEventReceiver objEventReceiver(SLOT_ID);
-    TestImsEventListener objEventListener;
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
 
-    objEventReceiver.AddListener(&objEventListener, SUPPORTED_EVENT);
-    objEventReceiver.Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
-
-    EXPECT_EQ(SUPPORTED_EVENT, objEventListener.m_nEvent);
-    EXPECT_EQ(1, objEventListener.m_nWParam);
-    EXPECT_EQ(2, objEventListener.m_nLParam);
+    EXPECT_EQ(1, pEventReceiver->GetWParam(SUPPORTED_EVENT));
+    EXPECT_EQ(2, pEventReceiver->GetLParam(SUPPORTED_EVENT));
 }
 
-TEST(MtcImsEventReceiverTest, RemovedListenerNotNotifiedOnRegisteredEvent)
+TEST_F(MtcImsEventReceiverTest, AddListenerDoesNothingForInvalidEvent)
 {
-    MtcImsEventReceiver objEventReceiver(SLOT_ID);
-    TestImsEventListener objEventListener;
+    MockIMtcImsEventListener objEventListener;
 
-    objEventReceiver.AddListener(&objEventListener, SUPPORTED_EVENT);
-    objEventReceiver.RemoveListener(&objEventListener, SUPPORTED_EVENT);
-    objEventReceiver.Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
-
-    EXPECT_EQ(0, objEventListener.m_nNotifyCount);
+    pEventReceiver->AddListener(&objEventListener, INVALID_EVENT);
 }
 
-TEST(MtcImsEventReceiverTest, DuplicatedListenerNotifiedOnceOnRegisteredEvent)
+TEST_F(MtcImsEventReceiverTest, RemoveListenerDoesNothingForInvalidEvent)
 {
-    MtcImsEventReceiver objEventReceiver(SLOT_ID);
-    TestImsEventListener objEventListener;
+    MockIMtcImsEventListener objEventListener;
 
-    objEventReceiver.AddListener(&objEventListener, SUPPORTED_EVENT);
-    objEventReceiver.AddListener(&objEventListener, SUPPORTED_EVENT);
-    objEventReceiver.Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
+    pEventReceiver->RemoveListener(&objEventListener, INVALID_EVENT);
+}
 
-    EXPECT_EQ(1, objEventListener.m_nNotifyCount);
+TEST_F(MtcImsEventReceiverTest, Event_NotifyEventDoesNothingForInvalidEvent)
+{
+    MockIMtcImsEventListener objEventListener;
+
+    EXPECT_CALL(objEventListener, OnImsEventNotified(_, _, _)).Times(0);
+
+    pEventReceiver->AddListener(&objEventListener, SUPPORTED_EVENT);
+    pEventReceiver->Event_NotifyEvent(INVALID_EVENT, 1, 2);
+}
+
+TEST_F(MtcImsEventReceiverTest, Event_NotifyEventDoesNothingForSameValue)
+{
+    MockIMtcImsEventListener objEventListener;
+
+    EXPECT_CALL(objEventListener, OnImsEventNotified(SUPPORTED_EVENT, 1, 2)).Times(1);
+
+    pEventReceiver->AddListener(&objEventListener, SUPPORTED_EVENT);
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
+}
+
+TEST_F(MtcImsEventReceiverTest, Event_NotifyEventNotifiesAddedListeners)
+{
+    MockIMtcImsEventListener objEventListener1;
+    MockIMtcImsEventListener objEventListener2;
+
+    EXPECT_CALL(objEventListener1, OnImsEventNotified(SUPPORTED_EVENT, 1, 2));
+    EXPECT_CALL(objEventListener2, OnImsEventNotified(SUPPORTED_EVENT, 1, 2));
+
+    pEventReceiver->AddListener(&objEventListener1, SUPPORTED_EVENT);
+    pEventReceiver->AddListener(&objEventListener2, SUPPORTED_EVENT);
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
+}
+
+TEST_F(MtcImsEventReceiverTest, Event_NotifyEventNotNotifiesRemovedListeners)
+{
+    MockIMtcImsEventListener objEventListener1;
+    MockIMtcImsEventListener objEventListener2;
+
+    EXPECT_CALL(objEventListener1, OnImsEventNotified(SUPPORTED_EVENT, 1, 2));
+    EXPECT_CALL(objEventListener2, OnImsEventNotified(_, _, _)).Times(0);
+
+    pEventReceiver->AddListener(&objEventListener1, SUPPORTED_EVENT);
+    pEventReceiver->AddListener(&objEventListener2, SUPPORTED_EVENT);
+    pEventReceiver->RemoveListener(&objEventListener2, SUPPORTED_EVENT);
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
+}
+
+TEST_F(MtcImsEventReceiverTest, Event_NotifyEventNotifiesDuplicatedListenerOnce)
+{
+    MockIMtcImsEventListener objEventListener;
+
+    EXPECT_CALL(objEventListener, OnImsEventNotified(SUPPORTED_EVENT, 1, 2));
+
+    pEventReceiver->AddListener(&objEventListener, SUPPORTED_EVENT);
+    pEventReceiver->AddListener(&objEventListener, SUPPORTED_EVENT);
+    pEventReceiver->Event_NotifyEvent(SUPPORTED_EVENT, 1, 2);
 }

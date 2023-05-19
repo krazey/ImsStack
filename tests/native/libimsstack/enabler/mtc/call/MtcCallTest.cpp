@@ -24,6 +24,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/MockCallConnectionIdManager.h"
 #include "call/MtcCall.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
@@ -45,6 +46,7 @@
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockILastComeFirstServedHelper.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
@@ -1243,6 +1245,25 @@ TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
     objCall.GetMessageUtils();
 }
 
+TEST_F(MtcCallTest, GetPassiveTimerHolderCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MockIPassiveTimerHolder objPassiveTimerHolder;
+    EXPECT_CALL(objContext, GetPassiveTimerHolder)
+            .Times(1)
+            .WillRepeatedly(ReturnRef(objPassiveTimerHolder));
+
+    objCall.GetPassiveTimerHolder();
+}
+
+TEST_F(MtcCallTest, GetMultiEndpointManagerCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    EXPECT_CALL(objContext, GetMultiEndpointManager).Times(1);
+
+    objCall.GetMultiEndpointManager();
+}
+
 TEST_F(MtcCallTest, GetLastComeFirstServedHelperCallsMtcContext)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
@@ -1251,6 +1272,17 @@ TEST_F(MtcCallTest, GetLastComeFirstServedHelperCallsMtcContext)
             .WillOnce(ReturnRef(objLastComeFirstServedHelper));
 
     objCall.GetLastComeFirstServedHelper();
+}
+
+TEST_F(MtcCallTest, GetCallConnectionIdManagerCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MockCallConnectionIdManager objCallConnectionIdManager(objContext);
+    EXPECT_CALL(objContext, GetCallConnectionIdManager)
+            .Times(1)
+            .WillRepeatedly(ReturnRef(objCallConnectionIdManager));
+
+    objCall.GetCallConnectionIdManager();
 }
 
 TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)

@@ -189,6 +189,21 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsLocalUriIfCallPullIsEnabled)
     EXPECT_STREQ("localAddress", pParticipantInfo->GetRemoteUri().GetStr());
 }
 
+TEST_F(ParticipantInfoTest, GetRemoteUriReturnsNullIfCallPullIsEnabledAndCoreServiceIsNull)
+{
+    MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+    MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
+    objSupplementaryService.Add(SuppType::CALL_PULL, IMS_FALSE);
+
+    MockIMtcService objService;
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(nullptr));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
+    EXPECT_EQ(pParticipantInfo->GetRemoteUri(), AString::ConstNull());
+}
+
 TEST_F(ParticipantInfoTest, GetRemoteDisplayNameReturnsFromSupplementaryService)
 {
     const AString strCnap("some_cnap");
