@@ -84,8 +84,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     {
         if (HandleCallPull() == IMS_FAILURE)
         {
-            // TODO: Need to optimize the reason code.
-            return Terminate(CallReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC));
+            return CallStateName::TERMINATING;
         }
     }
     else
@@ -560,7 +559,7 @@ IMS_RESULT IdleState::HandleCallPull()
     IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
     if (!piMultiEndpointManager)
     {
-        // No use case - CODE_MULTIENDPOINT_NOT_SUPPORTED
+        Terminate(CallReasonInfo(CODE_MULTIENDPOINT_NOT_SUPPORTED));
         return IMS_FAILURE;
     }
 
@@ -570,6 +569,7 @@ IMS_RESULT IdleState::HandleCallPull()
     if (objDialogInfo.strCallId.GetLength() <= 0 || objDialogInfo.strLocalTag.GetLength() <= 0 ||
             objDialogInfo.strRemoteTag.GetLength() <= 0)
     {
+        Terminate(CallReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC));
         return IMS_FAILURE;
     }
 

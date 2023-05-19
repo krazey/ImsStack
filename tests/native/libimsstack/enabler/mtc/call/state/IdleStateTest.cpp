@@ -350,7 +350,7 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotS
     SuppService* pSuppService = new SuppService();
     pSuppService->nValue = 12345;
     objInputSuppServices.Add(eSuppType, pSuppService);
-    CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
+    CallReasonInfo objReasonInfo(CODE_MULTIENDPOINT_NOT_SUPPORTED);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
