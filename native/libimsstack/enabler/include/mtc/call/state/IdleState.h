@@ -76,7 +76,7 @@ private:
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     ImsList<IMtcBlockRule*> GetBlockRulesAfterEpsFallback();
     IMS_BOOL IsCallPull() const;
-    IMS_RESULT HandleCallPull(IN const AString& strTarget);
+    IMS_RESULT HandleCallPull();
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;

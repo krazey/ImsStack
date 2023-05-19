@@ -29,7 +29,7 @@ class MockIMultiEndpointManager : public IMultiEndpointManager
 public:
     virtual ~MockIMultiEndpointManager() {}
 
-    MOCK_METHOD(IMultiEndpointManager::PullingDialogInfo, GetDialogInfo, (IN const AString&),
+    MOCK_METHOD(IMultiEndpointManager::PullingDialogInfo, GetDialogInfo, (IN IMS_UINT32),
             (const, override));
 };
 

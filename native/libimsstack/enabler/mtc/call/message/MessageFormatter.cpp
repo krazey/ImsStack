@@ -29,7 +29,6 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-#include "call/ParticipantInfo.h"
 #include "call/message/MessageFormatter.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -744,7 +743,7 @@ void MessageFormatter::SetReplacesHeader()
     }
 
     IMultiEndpointManager::PullingDialogInfo objDialogInfo = piMultiEndpointManager->GetDialogInfo(
-            m_objContext.GetParticipantInfo().GetRemoteNumber());
+            m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL)->nValue);
     Replaces objReplaces(
             objDialogInfo.strCallId, objDialogInfo.strLocalTag, objDialogInfo.strRemoteTag);
     m_objContext.GetMessageUtils().AddValueIfNotExists(

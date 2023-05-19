@@ -21,7 +21,6 @@
 #include "MockIPhoneInfoLocation.h"
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/ParticipantInfo.h"
 #include "call/message/MessageFormatter.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -69,7 +68,6 @@ public:
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MessageUtils objMessageUtils;
-    ParticipantInfo* pParticipantInfo;
 
 protected:
     virtual void SetUp() override
@@ -88,9 +86,6 @@ protected:
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-
-        pParticipantInfo = new ParticipantInfo(objContext);
-        ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
 
         pFormatter = new MessageFormatter(objContext, objSession);
     }

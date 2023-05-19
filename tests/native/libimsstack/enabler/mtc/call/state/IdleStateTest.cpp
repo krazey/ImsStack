@@ -347,8 +347,9 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotS
 
     ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(nullptr));
     SuppType eSuppType = SuppType::CALL_PULL;
-    objInputSuppServices.Add(eSuppType, new SuppService());
-
+    SuppService* pSuppService = new SuppService();
+    pSuppService->nValue = 12345;
+    objInputSuppServices.Add(eSuppType, pSuppService);
     CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
 
@@ -365,7 +366,9 @@ TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
     IMS_BOOL bUssi = IMS_FALSE;
 
     SuppType eSuppType = SuppType::CALL_PULL;
-    objInputSuppServices.Add(eSuppType, new SuppService());
+    SuppService* pSuppService = new SuppService();
+    pSuppService->nValue = 12345;
+    objInputSuppServices.Add(eSuppType, pSuppService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -373,7 +376,7 @@ TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
 
     IMultiEndpointManager::PullingDialogInfo objDialogInfo;
-    EXPECT_CALL(objMepManager, GetDialogInfo(strTarget)).WillOnce(Return(objDialogInfo));
+    EXPECT_CALL(objMepManager, GetDialogInfo(pSuppService->nValue)).WillOnce(Return(objDialogInfo));
 
     CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
@@ -391,7 +394,9 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
     IMS_BOOL bUssi = IMS_FALSE;
 
     SuppType eSuppType = SuppType::CALL_PULL;
-    objInputSuppServices.Add(eSuppType, new SuppService());
+    SuppService* pSuppService = new SuppService();
+    pSuppService->nValue = 12345;
+    objInputSuppServices.Add(eSuppType, pSuppService);
 
     ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
     ON_CALL(*pBlockChecker, Check)
@@ -400,9 +405,11 @@ TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
 
     IMultiEndpointManager::PullingDialogInfo objDialogInfo;
     objDialogInfo.strCallId = "anyCallId";
+    objDialogInfo.strLocalTag = "anyLocalTag";
+    objDialogInfo.strRemoteTag = "anyRemoteTag";
     objDialogInfo.eCallType = CallType::VT;
     objDialogInfo.pMediaInfo = new MediaInfo();
-    EXPECT_CALL(objMepManager, GetDialogInfo(strTarget)).WillOnce(Return(objDialogInfo));
+    EXPECT_CALL(objMepManager, GetDialogInfo(pSuppService->nValue)).WillOnce(Return(objDialogInfo));
     EXPECT_CALL(objMediaManager, SetMediaInfo(*objDialogInfo.pMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);

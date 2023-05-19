@@ -122,13 +122,10 @@ public:
     {
         m_objLocal = MockParticipant(MockNameAddr("", strUri), objTarget);
     }
-    inline void SetDialogInfo(IN const AString& strId, IN const AString& strCallId,
-            IN const AString& strLocalTag, IN const AString& strRemoteTag)
+    inline void SetDialogInfo(IN const AString& strId, IN const AString& strCallId)
     {
         m_strId = strId;
         m_strCallId = strCallId;
-        m_strLocalTag = strLocalTag;
-        m_strRemoteTag = strRemoteTag;
     }
     inline void SetExtraInfo(IN const ExtraInfo& objExtraInfo) { m_objExtraInfo = objExtraInfo; }
     inline void SetState(IN const State& objState) { m_objState = objState; }

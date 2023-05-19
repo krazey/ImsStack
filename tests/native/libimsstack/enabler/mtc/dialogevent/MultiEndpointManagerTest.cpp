@@ -230,7 +230,7 @@ TEST_F(MultiEndpointManagerTest, IsRequiredReturnsConfigurationValue)
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsDefaultInfoIfNotRunning)
 {
     CreateManager(IMS_FALSE);
-    IMultiEndpointManager::PullingDialogInfo objInfo = pMultiEndpointManager->GetDialogInfo("any");
+    IMultiEndpointManager::PullingDialogInfo objInfo = pMultiEndpointManager->GetDialogInfo(0);
     EXPECT_STREQ(objInfo.strCallId.GetStr(), "");
 }
 
@@ -242,20 +242,19 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsDefaultInfoIfDialogListIsEm
     ON_CALL(*(piDialogInfoManager.get()), GetDialogs).WillByDefault(ReturnRef(objDialogs));
 
     CreateManager(IMS_TRUE);
-    IMultiEndpointManager::PullingDialogInfo objInfo = pMultiEndpointManager->GetDialogInfo("any");
+    IMultiEndpointManager::PullingDialogInfo objInfo = pMultiEndpointManager->GetDialogInfo(0);
     EXPECT_STREQ(objInfo.strCallId.GetStr(), "");
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsDefaultInfoIfNoMatchedInfoExists)
 {
-    const AString strSomeRemoteUri("someUri");
-    const AString strOtherUri("otherUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
+    const AString strOtherId("otherId");
     const AString strCallId("callId");
 
     MockDialog objDialog;
-    objDialog.SetRemoteUri(strOtherUri);
-    objDialog.SetDialogInfo(
-            AString::ConstNull(), strCallId, AString::ConstNull(), AString::ConstNull());
+    objDialog.SetDialogInfo(strOtherId, strCallId);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialog);
@@ -266,23 +265,22 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsDefaultInfoIfNoMatchedInfoE
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_STREQ(objInfo.strCallId.GetStr(), "");
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsMatchedInfoIfMatchedInfoExists)
 {
-    const AString strSomeRemoteUri("someUri");
-    const AString strOtherUri("otherUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
+    const AString strOtherId("otherId");
     const AString strCallId("callId");
 
     MockDialog objDialogMatched;
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
-    objDialogMatched.SetDialogInfo(
-            AString::ConstNull(), strCallId, AString::ConstNull(), AString::ConstNull());
+    objDialogMatched.SetDialogInfo(strSomeId, strCallId);
 
     MockDialog objDialogUnMatched;
-    objDialogUnMatched.SetRemoteUri(strOtherUri);
+    objDialogUnMatched.SetDialogInfo(strOtherId, strCallId);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogUnMatched);
@@ -294,13 +292,14 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsMatchedInfoIfMatchedInfoExi
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_STREQ(objInfo.strCallId.GetStr(), strCallId.GetStr());
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
 
     MockDialog objDialogMatched;
@@ -308,7 +307,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
     objParamMap.Add("+sip.rendering", "no");
     MockTarget objTarget(objParamMap, strLocalUri);
 
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
 
     ImsList<Dialog*> objDialogs;
@@ -320,7 +319,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_TRUE(objInfo.bHeld);
 
     // If it's held, it's not pullable.
@@ -329,7 +328,8 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
 
     MockDialog objDialogMatched;
@@ -337,7 +337,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
     objParamMap.Add("+sip.rendering", "yes");
     MockTarget objTarget(objParamMap, strLocalUri);
 
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
 
     ImsList<Dialog*> objDialogs;
@@ -349,15 +349,17 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_FALSE(objInfo.bHeld);
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsPullableDialogIfMatched)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
 
     MockDialog objDialogMatched;
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
 
     MockState objState(0, 0, Dialog::State::STATE_CONFIRMED);
 
@@ -370,7 +372,6 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsPullableDialogIfMatched)
     MockExtraInfo objExtraInfo(strExclusive, objMediaInfo);
     objDialogMatched.SetState(objState);
     objDialogMatched.SetExtraInfo(objExtraInfo);
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -381,15 +382,17 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsPullableDialogIfMatched)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_TRUE(objInfo.bPullable);
 }
 
 TEST_F(MultiEndpointManagerTest, VideoInactiveDialogIsNotPullable)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
 
     MockDialog objDialogMatched;
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
 
     MockState objState(0, 0, Dialog::State::STATE_CONFIRMED);
 
@@ -402,7 +405,6 @@ TEST_F(MultiEndpointManagerTest, VideoInactiveDialogIsNotPullable)
     MockExtraInfo objExtraInfo(strExclusive, objMediaInfo);
     objDialogMatched.SetState(objState);
     objDialogMatched.SetExtraInfo(objExtraInfo);
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -413,15 +415,17 @@ TEST_F(MultiEndpointManagerTest, VideoInactiveDialogIsNotPullable)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_FALSE(objInfo.bPullable);
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVoipCallTypeIfMatched)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
 
     MockDialog objDialogMatched;
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
 
     const AString strExclusive("true");  // to cover IsPullable
     MediaInfo objMediaInfo;
@@ -429,7 +433,6 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVoipCallTypeIfMatched)
     objMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
     MockExtraInfo objExtraInfo(strExclusive, objMediaInfo);
     objDialogMatched.SetExtraInfo(objExtraInfo);
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -440,15 +443,17 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVoipCallTypeIfMatched)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_TRUE(objInfo.eCallType == CallType::VOIP);
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVtCallTypeIfMatched)
 {
-    const AString strSomeRemoteUri("someUri");
+    const AString strSomeId("someId");
+    const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
 
     MockDialog objDialogMatched;
+    objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
 
     const AString strExclusive("true");
     MediaInfo objMediaInfo;
@@ -456,7 +461,6 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVtCallTypeIfMatched)
     objMediaInfo.eVideoQuality = VIDEO_QUALITY_QVGA_PR;
     MockExtraInfo objExtraInfo(strExclusive, objMediaInfo);
     objDialogMatched.SetExtraInfo(objExtraInfo);
-    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -467,7 +471,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVtCallTypeIfMatched)
     CreateManager(IMS_TRUE);
 
     IMultiEndpointManager::PullingDialogInfo objInfo =
-            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+            pMultiEndpointManager->GetDialogInfo(nSomeId);
     EXPECT_TRUE(objInfo.eCallType == CallType::VT);
 }
 

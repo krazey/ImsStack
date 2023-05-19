@@ -82,7 +82,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
 
     if (IsCallPull())
     {
-        if (HandleCallPull(strTarget) == IMS_FAILURE)
+        if (HandleCallPull() == IMS_FAILURE)
         {
             // TODO: Need to optimize the reason code.
             return Terminate(CallReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC));
@@ -550,12 +550,12 @@ ImsList<IMtcBlockRule*> IdleState::GetBlockRulesAfterEpsFallback()
 PRIVATE
 IMS_BOOL IdleState::IsCallPull() const
 {
-    // The value of Supptype::CALL_PULL doesn't have any meaning.
-    return m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL);
+    const SuppService* pSs = m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL);
+    return pSs && pSs->nValue > 0;
 }
 
 PRIVATE
-IMS_RESULT IdleState::HandleCallPull(IN const AString& strTarget)
+IMS_RESULT IdleState::HandleCallPull()
 {
     IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
     if (!piMultiEndpointManager)
@@ -564,9 +564,11 @@ IMS_RESULT IdleState::HandleCallPull(IN const AString& strTarget)
         return IMS_FAILURE;
     }
 
-    IMultiEndpointManager::PullingDialogInfo objDialogInfo =
-            piMultiEndpointManager->GetDialogInfo(strTarget);
-    if (objDialogInfo.strCallId.GetLength() == 0)
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo = piMultiEndpointManager->GetDialogInfo(
+            m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL)->nValue);
+
+    if (objDialogInfo.strCallId.GetLength() <= 0 || objDialogInfo.strLocalTag.GetLength() <= 0 ||
+            objDialogInfo.strRemoteTag.GetLength() <= 0)
     {
         return IMS_FAILURE;
     }

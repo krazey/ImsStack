@@ -68,11 +68,11 @@ public:
     /**
      * Returns PullingDialogInfo if a dialog exists with the address.
      *
-     * @param strTarget The remote address of the dialog to find.
-     * @return The PullingDialogInfo of the dialog with strTarget.
+     * @param nId The Dialog ID to find.
+     * @return The PullingDialogInfo of the dialog ID.
      *         If no matching dialog exists, a PullingDialogInfo with empty value will be returned.
      */
-    virtual PullingDialogInfo GetDialogInfo(IN const AString& strTarget) const = 0;
+    virtual PullingDialogInfo GetDialogInfo(IN IMS_UINT32 nId) const = 0;
 };
 
 #endif

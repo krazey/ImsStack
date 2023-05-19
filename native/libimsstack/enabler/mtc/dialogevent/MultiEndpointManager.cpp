@@ -96,7 +96,7 @@ PUBLIC GLOBAL IMS_BOOL MultiEndpointManager::IsRequired(
 }
 
 VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::GetDialogInfo(
-        IN const AString& strTarget) const
+        IN IMS_UINT32 nId) const
 {
     IMultiEndpointManager::PullingDialogInfo objInfo;
 
@@ -105,16 +105,12 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
         return objInfo;
     }
 
-    IMS_TRACE_I("GetDialogInfo Target[%s]", strTarget.GetStr(), 0, 0);
+    IMS_TRACE_I("GetDialogInfo ID[%d]", nId, 0, 0);
     for (IMS_UINT32 i = 0; i < m_piDialogInfoManager->GetDialogs().GetSize(); ++i)
     {
         const Dialog* pDialog = m_piDialogInfoManager->GetDialogs().GetAt(i);
-
-        AString strRemoteNumber = pDialog->GetRemoteParticipant().GetIdentity().GetUri();
-        IMS_TRACE_I("GetDialogInfo RemoteNumber[%s]", strRemoteNumber.GetStr(), 0, 0);
-        if (strRemoteNumber.Contains(strTarget))
+        if (pDialog->GetId().GetHashCode() == nId)
         {
-            IMS_TRACE_I("GetDialogInfo matched dialog ID[%s]", pDialog->GetId().GetStr(), 0, 0);
             objInfo.strCallId = pDialog->GetCallId();
             objInfo.strLocalTag = pDialog->GetLocalTag();
             objInfo.strRemoteTag = pDialog->GetRemoteTag();
@@ -300,7 +296,7 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
 
         JniExternalCall* pJniExternalCall = new JniExternalCall();
 
-        pJniExternalCall->m_strCallId = objDialog.GetId();
+        pJniExternalCall->m_strCallId.SetNumber(objDialog.GetId().GetHashCode());
         pJniExternalCall->m_strAddress = objDialog.GetRemoteParticipant().GetIdentity().GetUri();
         pJniExternalCall->m_strLocalAddress =
                 objDialog.GetLocalParticipant().GetIdentity().GetUri();

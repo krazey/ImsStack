@@ -48,7 +48,7 @@ public:
 
     static IMS_BOOL IsRequired(IN const MtcConfigurationProxy& objConfigProxy);
 
-    PullingDialogInfo GetDialogInfo(IN const AString& strTarget) const override;
+    PullingDialogInfo GetDialogInfo(IN IMS_UINT32 nId) const override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;
