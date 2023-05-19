@@ -15,13 +15,14 @@
  */
 
 #include "AString.h"
-#include "Configuration.h"
+#include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "IConfigurable.h"
 #include "ImsTypeDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
+#include "common/ISipConfig.h"
 #include "common/ISipConfigV.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/TransactionTimerUpdateHelper.h"
@@ -29,7 +30,9 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(IN IMtcCallContext& objContext) :
+TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(
+        IN IMtcCallContext& objContext, IN const ISipConfig* pSipConfig) :
+        m_pSipConfig(pSipConfig),
         m_nSlotId(objContext.GetSlotId()),
         m_objConfiguration(objContext.GetConfigurationProxy()),
         m_bEmergency(objContext.GetCallInfo().bEmergency),
@@ -62,6 +65,7 @@ PUBLIC VIRTUAL void TransactionTimerUpdateHelper::ResetInviteTransactionTimer()
     {
         return;
     }
+
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     UpdateTimer(IMS_TRUE, piCc->GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT));
 }
@@ -85,13 +89,12 @@ void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, I
         return;
     }
 
-    const ISipConfig* piSipConfig = Configuration::GetInstance()->GetSipConfig(m_nSlotId);
-    if (piSipConfig == IMS_NULL)
+    if (m_pSipConfig == IMS_NULL)
     {
         return;
     }
-    const ISipConfigV* piSipConfigV = piSipConfig->GetSipConfigV();
 
+    const ISipConfigV* piSipConfigV = m_pSipConfig->GetSipConfigV();
     if (piSipConfigV == IMS_NULL)
     {
         return;

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "CarrierConfig.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
+#include "../../../config/interface/common/MockIConfigurable.h"
+#include "../../../config/interface/common/MockISipConfig.h"
+#include "../../../config/interface/common/MockISipConfigV.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "configuration/ConfigDef.h"
@@ -25,8 +29,12 @@
 #include "helper/TransactionTimerUpdateHelper.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+const LOCAL IMS_SINT32 TIMER_VALUE = 12000;
+const LOCAL AString TIMER_VALUE_STR = "12000";
 
 namespace android
 {
@@ -48,6 +56,9 @@ protected:
     MockIMtcCallContext objContext;
     MockIMtcConfigurationManager* pConfigurationManager;
     MockMtcConfigurationProxy objConfigurationProxy;
+    MockISipConfig objSipConfig;
+    MockISipConfigV objSipConfigV;
+    MockIConfigurable objConfigurable;
     MockIMtcService objService;
     CallInfo objCallInfo;
 
@@ -61,6 +72,9 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+        ON_CALL(objSipConfig, GetSipConfigV).WillByDefault(Return(&objSipConfigV));
+        ON_CALL(objSipConfigV, GetConfigurable).WillByDefault(Return(&objConfigurable));
     }
 };
 
@@ -71,21 +85,133 @@ TEST_F(TransactionTimerUpdateHelperTest,
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteEmergencyCall)
             .WillByDefault(Return(
                     CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
-    EXPECT_CALL(*pConfigurationManager, GetEmergencyTCallTimer).Times(0);
 
-    TransactionTimerUpdateHelper(objContext).SetInviteTransactionTimer();
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+    objUpdateHelper.SetInviteTransactionTimer();
+    objUpdateHelper.ResetInviteTransactionTimer();
 }
 
 TEST_F(TransactionTimerUpdateHelperTest,
-        SetInviteTransactionTimerWithEcallUpdateTimerIfEcallTimeoutPolicyIsNotWait)
+        SetInviteTransactionTimerWithEcallUpdatesTimerIfEcallTimeoutPolicyIsNotWait)
 {
     objCallInfo.bEmergency = IMS_TRUE;
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteEmergencyCall)
             .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
-    const IMS_SINT32 ANY_TIME = 12000;
-    EXPECT_CALL(*pConfigurationManager, GetEmergencyTCallTimer).WillOnce(Return(ANY_TIME));
+    ON_CALL(*pConfigurationManager, GetEmergencyTCallTimer).WillByDefault(Return(TIMER_VALUE));
 
-    TransactionTimerUpdateHelper(objContext).SetInviteTransactionTimer();
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, TIMER_VALUE_STR));
+    objUpdateHelper.SetInviteTransactionTimer();
+
+    // EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, 0));
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalCallDoesNothingIfTimeoutPolicyIsWait)
+{
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+    objUpdateHelper.SetInviteTransactionTimer();
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalCallUpdatesTimerIfTimeoutPolicyIsNotWait)
+{
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout).WillByDefault(Return(TIMER_VALUE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, TIMER_VALUE_STR));
+    objUpdateHelper.SetInviteTransactionTimer();
+
+    // EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, 0));
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalWifiCallDoesNothingIfTimeoutPolicyIsWait)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+    objUpdateHelper.SetInviteTransactionTimer();
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalWifiCallUpdatesTimerIfTimeoutPolicyIsNotWait)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout).WillByDefault(Return(TIMER_VALUE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, TIMER_VALUE_STR));
+    objUpdateHelper.SetInviteTransactionTimer();
+
+    // EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_B, 0));
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest, SetNonInviteTransactionTimerUpdatesTimer)
+{
+    ON_CALL(*pConfigurationManager, GetPrackUpdateResponseWaitTimer)
+            .WillByDefault(Return(TIMER_VALUE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_F, TIMER_VALUE_STR));
+    objUpdateHelper.SetNonInviteTransactionTimer();
+
+    // EXPECT_CALL(objConfigurable, Update(IConfigurable::CP_I_TIMER_F, 0));
+    objUpdateHelper.ResetNonInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest, UpdateTimerDoesNothingIfConfigIsNull)
+{
+    ON_CALL(*pConfigurationManager, GetPrackUpdateResponseWaitTimer)
+            .WillByDefault(Return(TIMER_VALUE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+    TransactionTimerUpdateHelper objUpdateHelperWithNullConfig =
+            TransactionTimerUpdateHelper(objContext, IMS_NULL);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+
+    objUpdateHelperWithNullConfig.SetNonInviteTransactionTimer();
+
+    ON_CALL(objSipConfigV, GetConfigurable).WillByDefault(Return(nullptr));
+    objUpdateHelper.SetNonInviteTransactionTimer();
+
+    ON_CALL(objSipConfig, GetSipConfigV).WillByDefault(Return(nullptr));
+    objUpdateHelper.SetNonInviteTransactionTimer();
 }
 
 }  // namespace android
