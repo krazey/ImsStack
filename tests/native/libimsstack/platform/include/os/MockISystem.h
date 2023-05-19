@@ -153,12 +153,12 @@ public:
     // Configuration-related information
     ////
     MOCK_METHOD(IMS_SINT32, GetPreference,
-            (IN const AString& strFileName, IN const AString& strKey, IN IMS_UINT32 nValueType,
-                    IN IMS_SINT32 nSlotId, OUT AString& strValue),
+            (IN const AString& strFileName, IN const AString& strKey, IN IMS_SINT32 nSlotId,
+                    OUT AString& strValue),
             (override));
     MOCK_METHOD(IMS_SINT32, SetPreference,
-            (IN const AString& strFileName, IN const AString& strKey, IN IMS_UINT32 nValueType,
-                    IN const AString& strValue, IN IMS_SINT32 nSlotId),
+            (IN const AString& strFileName, IN const AString& strKey, IN const AString& strValue,
+                    IN IMS_SINT32 nSlotId),
             (override));
     MOCK_METHOD(AString, GetPrivateProperty,
             (IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId), (override));

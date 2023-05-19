@@ -107,4 +107,43 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
     public String getExternalStoragePath() {
         return DeviceUtils.getExternalStoragePath();
     }
+
+    /**
+     * Returns a string value from the specified preference file for a specified slot.
+     * If {@code fileName} is empty, then returns a string value from the default preference file.
+     *
+     * @param fileName The shared preference file name.
+     * @param key The key to retrieve.
+     * @param slotId The slot-id to find a correct file.
+     * @return A string value.
+     */
+    @Override
+    public String getPreference(String fileName, String key, int slotId) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference != null) {
+            return preference.getString(fileName, key, slotId);
+        }
+        return null;
+    }
+
+    /**
+     * Puts a string value to the specified preference file for a specified slot.
+     * If {@code fileName} is empty, then puts a string value to the default preference file.
+     *
+     * @param fileName The shared preference file name.
+     * @param key The key to update.
+     * @param value The string value.
+     * @param slotId The slot-id to find a correct file.
+     * @return {@code true} if the key and value is successfully set, {@code false} otherwise.
+     */
+    @Override
+    public boolean setPreference(String fileName, String key, String value, int slotId) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference != null) {
+            return preference.putString(fileName, key, value, slotId);
+        }
+        return false;
+    }
 }

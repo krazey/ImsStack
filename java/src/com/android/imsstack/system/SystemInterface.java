@@ -54,7 +54,6 @@ public class SystemInterface implements JniSystemListener {
 
     private DefaultSystemCallInterface mDefaultSystemCall;
     private ISystemAPIBattery mISystemAPIBattery;
-    private ISystemAPIPreference mISystemAPIPreference;
 
     /**
      * Returns a singleton System interface.
@@ -132,10 +131,6 @@ public class SystemInterface implements JniSystemListener {
 
     public void setISystemAPIBattery(ISystemAPIBattery api) {
         mISystemAPIBattery = api;
-    }
-
-    public void setISystemAPIPreference(ISystemAPIPreference api) {
-        mISystemAPIPreference = api;
     }
 
     /**
@@ -252,7 +247,7 @@ public class SystemInterface implements JniSystemListener {
                 break;
             case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
             case SystemConstants.SET_PREFERENCE:
-                result = handleSystemAPIPreference(method, parcel);
+                result = handleSystemCallForPreference(method, parcel);
                 break;
             case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
             case SystemConstants.GET_WIFI_CONNECTION_STATE: //FALL-THROUGH
@@ -535,24 +530,32 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private Parcel handleSystemAPIPreference(int method, Parcel parcel) {
-        if (mISystemAPIPreference == null) {
+    private Parcel handleSystemCallForPreference(int method, Parcel parcel) {
+        if (mDefaultSystemCall == null) {
             return null;
         }
 
         Parcel result = Parcel.obtain();
         switch (method) {
-        case SystemConstants.GET_PREFERENCE:
-            result.writeString(mISystemAPIPreference.getPreference4Sys(parcel.readString(),
-                    parcel.readString(), parcel.readInt(), parcel.readInt()));
-            break;
-        case SystemConstants.SET_PREFERENCE:
-            result.writeInt(mISystemAPIPreference.setPreference4Sys(parcel.readString(),
-                    parcel.readString(), parcel.readInt(), parcel.readString(), parcel.readInt()));
-            break;
-        default:
-            result.recycle();
-            return null;
+            case SystemConstants.GET_PREFERENCE: {
+                String fileName = parcel.readString();
+                String key = parcel.readString();
+                int slotId = parcel.readInt();
+                result.writeString(mDefaultSystemCall.getPreference(fileName, key, slotId));
+                break;
+            }
+            case SystemConstants.SET_PREFERENCE: {
+                String fileName = parcel.readString();
+                String key = parcel.readString();
+                String value = parcel.readString();
+                int slotId = parcel.readInt();
+                result.writeInt(
+                        mDefaultSystemCall.setPreference(fileName, key, value, slotId) ? 1 : 0);
+                break;
+            }
+            default:
+                result.recycle();
+                return null;
         }
 
         return result;

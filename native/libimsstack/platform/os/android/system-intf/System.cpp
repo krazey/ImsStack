@@ -1142,7 +1142,7 @@ IMS_SINT32 System::KillTimer(IN IMS_UINTP nTimerId)
 
 PUBLIC
 IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString& strKey,
-        IN IMS_UINT32 nValueType, IN IMS_SINT32 nSlotId, OUT AString& strValue)
+        IN IMS_SINT32 nSlotId, OUT AString& strValue)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1160,7 +1160,6 @@ IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString
 
     in.writeString16(str16FileName);
     in.writeString16(str16Key);
-    in.writeInt32(nValueType);
     in.writeInt32(nSlotId);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
@@ -1178,7 +1177,7 @@ IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString
 
 PUBLIC
 IMS_SINT32 System::SetPreference(IN const AString& strFileName, IN const AString& strKey,
-        IN IMS_UINT32 nValueType, IN const AString& strValue, IN IMS_SINT32 nSlotId)
+        IN const AString& strValue, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1197,7 +1196,6 @@ IMS_SINT32 System::SetPreference(IN const AString& strFileName, IN const AString
 
     in.writeString16(str16FileName);
     in.writeString16(str16Key);
-    in.writeInt32(nValueType);
     in.writeString16(str16Value);
     in.writeInt32(nSlotId);
 

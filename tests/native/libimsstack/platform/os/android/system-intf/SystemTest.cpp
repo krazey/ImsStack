@@ -1517,19 +1517,19 @@ TEST_F(SystemTest, GetPreference)
 
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, 0, strValue), 0);
+    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, 0, strValue), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, 0, strValue), 1);
+    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, 0, strValue), 1);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, 0, strValue), 0);
+    EXPECT_EQ(m_pSystem->GetPreference(strFileName, strKey, 0, strValue), 0);
 }
 
 TEST_F(SystemTest, SetPreference)
@@ -1540,19 +1540,19 @@ TEST_F(SystemTest, SetPreference)
 
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, strValue, 0), 0);
+    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, strValue, 0), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, strValue, 0), 0);
+    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, strValue, 0), 0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, PREFERENCE_VALUE_LONG, strValue, 0), 0);
+    EXPECT_EQ(m_pSystem->SetPreference(strFileName, strKey, strValue, 0), 0);
 }
 
 TEST_F(SystemTest, GetPrivateProperty)

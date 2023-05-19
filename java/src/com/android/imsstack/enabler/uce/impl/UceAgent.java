@@ -24,7 +24,7 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IPreference;
+import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.enabler.uce.impl.configuration.UceConfiguration;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
@@ -73,7 +73,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
     Looper mLoop = null;
 
     private UceJNI mUceJNI;
-    private IPreference mPf;
+    private PreferenceInterface mPf;
 
     public UceAgent(String name, int nSimSlot) {
         this(name, nSimSlot, UceJNI.getInstance());
@@ -288,7 +288,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mImsRegistered = false;
         mConnectedServices = 0;
 
-        mPf = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, mSlotId);
+        mPf = AgentFactory.getInstance().getAgent(PreferenceInterface.class);
         mUceConfiguration = new UceConfiguration(mSlotId);
         mUceConfiguration.init();
         imsRegistrationStatusCheck();
@@ -418,7 +418,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                     }
                     if (!TextUtils.isEmpty(eTag)) {
                         if (mPf != null) {
-                            mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
+                            mPf.putString(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
                         }
                     }
                 } else { // UceMessage.UCE_UNPUBLISHED_IND
@@ -431,7 +431,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
                         ImsLog.e(mSlotId, "Exception:" + e.toString());
                     }
                     if (mPf != null) {
-                        mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, "", mSlotId);
+                        mPf.putString(UceConstant.PREFERENCE_ETAG, "", mSlotId);
                     }
                 }
             }

@@ -18,15 +18,6 @@
 
 #include "AString.h"
 
-enum PREFERENCE_VALUE_ENTYPE
-{
-    PREFERENCE_VALUE_STRING = 0,
-    PREFERENCE_VALUE_BOOL,
-    PREFERENCE_VALUE_INT,
-    PREFERENCE_VALUE_LONG,
-    PREFERENCE_VALUE_FLOAT,
-};
-
 class ISubscriberInfo
 {
 protected:
@@ -40,12 +31,10 @@ public:
     virtual IMS_BOOL GetSimCountryIso(OUT AString& strCountry) const = 0;
     virtual IMS_BOOL GetNetworkCountryIso(OUT AString& strCountry) const = 0;
     virtual IMS_BOOL GetSubscriberId(OUT AString& strImsi) const = 0;
-    virtual IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
-            OUT AString& strValue,
-            IN PREFERENCE_VALUE_ENTYPE enValueType = PREFERENCE_VALUE_STRING) = 0;
+    virtual IMS_BOOL GetPreference(
+            IN const AString& strFileName, IN const AString& strKey, OUT AString& strValue) = 0;
     virtual IMS_BOOL SetPreference(IN const AString& strFileName, IN const AString& strKey,
-            IN const AString& strValue,
-            IN PREFERENCE_VALUE_ENTYPE enValueType = PREFERENCE_VALUE_STRING) = 0;
+            IN const AString& strValue) = 0;
 };
 
 #endif

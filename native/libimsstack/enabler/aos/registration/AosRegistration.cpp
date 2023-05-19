@@ -4389,7 +4389,7 @@ PROTECTED VIRTUAL void AosRegistration::RecordImpu()
     IMS_CHAR strSize[4];
     IMS_Itoa(strSize, objAssociatedUris.GetCount(), 10);
 
-    piSubsInfo->SetPreference("impu_list", "size", AString(strSize), PREFERENCE_VALUE_STRING);
+    piSubsInfo->SetPreference("impu_list", "size", AString(strSize));
     A_IMS_TRACE_I(REGID, "RecordImpu :: size (%d) m_nSlotId(%d)", objAssociatedUris.GetCount(),
             m_nSlotId, 0);
 
@@ -4408,7 +4408,7 @@ PROTECTED VIRTUAL void AosRegistration::RecordImpu()
             continue;
         }
 
-        piSubsInfo->SetPreference("impu_list", AString(strKey), strAor, PREFERENCE_VALUE_STRING);
+        piSubsInfo->SetPreference("impu_list", AString(strKey), strAor);
         objUris.Append(strAor);
 
         A_IMS_TRACE_D(REGID, "RecordImpu :: key(%d) value(%s) m_nSlotId(%d)", i, strAor.GetStr(),

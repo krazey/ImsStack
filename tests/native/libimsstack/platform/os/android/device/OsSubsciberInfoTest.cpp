@@ -177,10 +177,10 @@ TEST_F(OsSubscriberInfoTest, SetAndGetPreference)
 
     AString strOutValue;
 
-    EXPECT_CALL(m_objMockSystem, SetPreference(_, _, _, _, _))
+    EXPECT_CALL(m_objMockSystem, SetPreference(_, _, _, _))
             .Times(1)
             .WillOnce(Invoke(
-                    [&](Unused, Unused, Unused, IN const AString& strValue, Unused)
+                    [&](Unused, Unused, IN const AString& strValue, Unused)
                     {
                         strOutValue = strValue;
                         return 1;
@@ -188,10 +188,10 @@ TEST_F(OsSubscriberInfoTest, SetAndGetPreference)
 
     EXPECT_EQ(IMS_TRUE, m_pOsSubscriberInfo->SetPreference(strFileName, strKey, strValue));
 
-    EXPECT_CALL(m_objMockSystem, GetPreference(_, _, _, _, _))
+    EXPECT_CALL(m_objMockSystem, GetPreference(_, _, _, _))
             .Times(1)
             .WillOnce(Invoke(
-                    [strOutValue](Unused, Unused, Unused, Unused, AString& strValue)
+                    [strOutValue](Unused, Unused, Unused, AString& strValue)
                     {
                         strValue = strOutValue;
                         return 1;

@@ -27,7 +27,7 @@ import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.core.agents.IPreference;
+import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequest;
@@ -51,7 +51,7 @@ public class UcePublishRequestTest {
     private static final boolean NOT_USED_EXPIRED_ETAG = false;
     @Mock PublishResponse publishCb;
     @Mock UceJNI jni;
-    @Mock IPreference mPf;
+    @Mock PreferenceInterface mPf;
 
     private UcePublishRequest mRequest;
     private UcePublishRequest mResponseWithEtag;
@@ -78,7 +78,7 @@ public class UcePublishRequestTest {
         assertEquals(KEY, mResponseWithoutEtag.getKey());
 
         String savedEtag = "savedEtag";
-        doReturn(savedEtag).when(mPf).getPreferenceStrValue(any(), eq(SLOT_ID));
+        doReturn(savedEtag).when(mPf).getString(any(), eq(SLOT_ID));
         mResponseWithEtag = createUcePublishRequestPf(eTag);
         assertEquals(savedEtag, mResponseWithEtag.getEtag());
     }

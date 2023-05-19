@@ -131,9 +131,9 @@ public:
     // Configuration-related information
     ////
     virtual IMS_SINT32 GetPreference(IN const AString& strFileName, IN const AString& strKey,
-            IN IMS_UINT32 nValueType, IN IMS_SINT32 nSlotId, OUT AString& strValue) = 0;
+            IN IMS_SINT32 nSlotId, OUT AString& strValue) = 0;
     virtual IMS_SINT32 SetPreference(IN const AString& strFileName, IN const AString& strKey,
-            IN IMS_UINT32 nValueType, IN const AString& strValue, IN IMS_SINT32 nSlotId) = 0;
+            IN const AString& strValue, IN IMS_SINT32 nSlotId) = 0;
     virtual AString GetPrivateProperty(
             IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 SetPrivateProperty(IN IMS_BOOL bPersistent, IN const AString& strKey,

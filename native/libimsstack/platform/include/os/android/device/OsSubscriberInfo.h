@@ -41,11 +41,9 @@ public:
     IMS_BOOL GetSubscriberId(OUT AString& strImsi) const override;
 
     IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
-            OUT AString& strValue,
-            IN PREFERENCE_VALUE_ENTYPE eValueType = PREFERENCE_VALUE_STRING) override;
+            OUT AString& strValue) override;
     IMS_BOOL SetPreference(IN const AString& strFileName, IN const AString& strKey,
-            IN const AString& strValue,
-            IN PREFERENCE_VALUE_ENTYPE eValueType = PREFERENCE_VALUE_STRING) override;
+            IN const AString& strValue) override;
 };
 
 #endif

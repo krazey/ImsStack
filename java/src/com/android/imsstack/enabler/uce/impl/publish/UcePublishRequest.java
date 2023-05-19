@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IPreference;
+import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
@@ -44,16 +44,16 @@ public class UcePublishRequest {
     private UceJNI mUceJNI;
     private String mEtag;
 
-    private final IPreference mPf;
+    private final PreferenceInterface mPf;
 
     public UcePublishRequest(PublishResponse cb, int slotId, int key, boolean useExpiredEtag) {
         this(cb, slotId, key, useExpiredEtag, UceJNI.getInstance(), "",
-                (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId));
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class));
     }
 
     @VisibleForTesting
     public UcePublishRequest(PublishResponse cb, int slotId, int key, boolean useExpiredEtag,
-            UceJNI jni, String eTag, IPreference pf) {
+            UceJNI jni, String eTag, PreferenceInterface pf) {
         mKey = key;
         callback = cb;
         mSlotId = slotId;
@@ -63,7 +63,7 @@ public class UcePublishRequest {
         mIsUseExpiredEtag = useExpiredEtag;
         if (mIsUseExpiredEtag) {
             if (mPf != null) {
-                mEtag = mPf.getPreferenceStrValue(UceConstant.PREFERENCE_ETAG, slotId);
+                mEtag = mPf.getString(UceConstant.PREFERENCE_ETAG, slotId);
             }
         }
     }
@@ -136,7 +136,7 @@ public class UcePublishRequest {
         }
         if (!TextUtils.isEmpty(eTag)) {
             if (mPf != null) {
-                mPf.setPreferenceStrValue(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
+                mPf.putString(UceConstant.PREFERENCE_ETAG, eTag, mSlotId);
             }
         }
     }

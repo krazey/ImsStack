@@ -34,12 +34,10 @@ public:
     MOCK_METHOD(IMS_BOOL, GetNetworkCountryIso, (OUT AString & strCountry), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSubscriberId, (OUT AString & strImsi), (const, override));
     MOCK_METHOD(IMS_BOOL, GetPreference,
-            (IN const AString& strFileName, IN const AString& strKey, OUT AString& strValue,
-                    IN PREFERENCE_VALUE_ENTYPE enValueType),
+            (IN const AString& strFileName, IN const AString& strKey, OUT AString& strValue),
             (override));
     MOCK_METHOD(IMS_BOOL, SetPreference,
-            (IN const AString& strFileName, IN const AString& strKey, IN const AString& strValue,
-                    IN PREFERENCE_VALUE_ENTYPE enValueType),
+            (IN const AString& strFileName, IN const AString& strKey, IN const AString& strValue),
             (override));
 };
 

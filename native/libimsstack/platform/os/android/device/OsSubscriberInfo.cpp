@@ -76,24 +76,22 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPreference(IN const AString& strFileName,
-        IN const AString& strKey, OUT AString& strValue,
-        IN PREFERENCE_VALUE_ENTYPE eValueType /*= PREFERENCE_VALUE_STRING*/)
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPreference(
+        IN const AString& strFileName, IN const AString& strKey, OUT AString& strValue)
 {
     PlatformContext::GetInstance()->GetSystem()->GetPreference(
-            strFileName, strKey, static_cast<IMS_UINT32>(eValueType), GetSlotId(), strValue);
+            strFileName, strKey, GetSlotId(), strValue);
 
     IMS_TRACE_D("SubsInfo :: preference(get)=%s", strValue.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::SetPreference(IN const AString& strFileName,
-        IN const AString& strKey, IN const AString& strValue,
-        IN PREFERENCE_VALUE_ENTYPE eValueType /*= PREFERENCE_VALUE_STRING*/)
+PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::SetPreference(
+        IN const AString& strFileName, IN const AString& strKey, IN const AString& strValue)
 {
     PlatformContext::GetInstance()->GetSystem()->SetPreference(
-            strFileName, strKey, static_cast<IMS_UINT32>(eValueType), strValue, GetSlotId());
+            strFileName, strKey, strValue, GetSlotId());
 
     return IMS_TRUE;
 }

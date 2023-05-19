@@ -19,7 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IPreference;
+import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -101,12 +101,13 @@ public class SscXui {
     }
 
     private int getPAssociatedUriSize(int slotId) {
-        IPreference pfa = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
-        if (pfa == null) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference == null) {
             return 0;
         }
 
-        String strNumberOfImpu = pfa.getPreferenceStrValue(IMPU_FILE_NAME, IMPU_LIST_SIZE, slotId);
+        String strNumberOfImpu = preference.getString(IMPU_FILE_NAME, IMPU_LIST_SIZE, slotId);
         int numberOfImpu = 0;
         try {
             numberOfImpu = Integer.parseInt(strNumberOfImpu);
@@ -120,12 +121,13 @@ public class SscXui {
     }
 
     private String getPAssociatedUriValue(int slotId, int index) {
-        IPreference pfa = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
-        if (pfa == null) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference == null) {
             return null;
         }
 
-        String impu = pfa.getPreferenceStrValue(IMPU_FILE_NAME, Integer.toString(index), slotId);
+        String impu = preference.getString(IMPU_FILE_NAME, Integer.toString(index), slotId);
         ImsLog.d("SlotId/Index : " + slotId + "/" + index + ", Impu : " + impu);
         return impu;
     }

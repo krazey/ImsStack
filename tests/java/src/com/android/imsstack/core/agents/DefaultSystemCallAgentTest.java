@@ -44,8 +44,14 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
+    private static final String TEST_FILE = "test_prefs";
+    private static final String TEST_KEY = "test-key";
+    private static final String TEST_VALUE = "test-value";
+    private static final int SLOT0 = 0;
+
     @Mock private Context mContext;
     @Mock private SystemInterface mSystemInterface;
+    @Mock private PreferenceInterface mPreferenceInterface;
     @Mock private WakeLockInterface mWakeLockInterface;
     @Mock private WifiInterface mWifiInterface;
     @Mock private TimerAgent mTimerAgent;
@@ -58,6 +64,7 @@ public class DefaultSystemCallAgentTest {
 
         AppContext.init(mContext);
         SystemInterface.setSystemInterface(mSystemInterface);
+        AgentFactory.getInstance().setAgent(PreferenceInterface.class, mPreferenceInterface);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLockInterface);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
@@ -75,6 +82,7 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, null);
+        AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
         SystemInterface.setSystemInterface(null);
 
         mTimerAgent = null;
@@ -166,5 +174,35 @@ public class DefaultSystemCallAgentTest {
     @SmallTest
     public void testGetExternalStoragePath() {
         assertNotNull(mDefaultSystemCallAgent.getExternalStoragePath());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetPreference() {
+        mDefaultSystemCallAgent.getPreference(TEST_FILE, TEST_KEY, SLOT0);
+
+        verify(mPreferenceInterface).getString(eq(TEST_FILE), eq(TEST_KEY), eq(SLOT0));
+
+        AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
+        String value = mDefaultSystemCallAgent.getPreference(TEST_FILE, TEST_KEY, SLOT0);
+
+        assertNull(value);
+        verifyNoMoreInteractions(mPreferenceInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testSetPreference() {
+        mDefaultSystemCallAgent.setPreference(TEST_FILE, TEST_KEY, TEST_VALUE, SLOT0);
+
+        verify(mPreferenceInterface)
+                .putString(eq(TEST_FILE), eq(TEST_KEY), eq(TEST_VALUE), eq(SLOT0));
+
+        AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
+        boolean result = mDefaultSystemCallAgent
+                .setPreference(TEST_FILE, TEST_KEY, TEST_VALUE, SLOT0);
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mPreferenceInterface);
     }
 }
