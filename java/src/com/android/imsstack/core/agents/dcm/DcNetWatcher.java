@@ -122,8 +122,12 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mDataServiceState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
     private String mNetworkOperator = "";
+    // mDataRoaming and mVoiceRoaming refer to the roamingType.
+    // So they could be overridden by the carrier config
     private boolean mDataRoaming = false;
     private boolean mVoiceRoaming = false;
+    // data network roaming state that was not overridden by any carrier config
+    private boolean mDataNetworkRoaming = false;
     private boolean mAirplaneMode = false;
 
     // RAT in TelephonyManager for sync with ServiceState
@@ -257,6 +261,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         mNetworkOperator = "";
         mDataRoaming = false;
         mVoiceRoaming = false;
+        mDataNetworkRoaming = false;
         mAirplaneMode = false;
         mRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
@@ -430,6 +435,11 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public boolean isVoiceRoaming() {
         return mVoiceRoaming;
+    }
+
+    @Override
+    public boolean isDataNetworkRoaming() {
+        return mDataNetworkRoaming;
     }
 
     @Override
@@ -791,6 +801,18 @@ public class DcNetWatcher implements IDcNetWatcher {
         return false;
     }
 
+    private static boolean getDataNetworkRoaming(ServiceState ss) {
+        NetworkRegistrationInfo regState =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (regState != null) {
+            return regState.isNetworkRoaming();
+        }
+
+        return false;
+    }
+
     private static int getAccessNetworkTechnology(ServiceState ss) {
         NetworkRegistrationInfo nri =
                 ss.getNetworkRegistrationInfo(
@@ -815,16 +837,16 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         int nriState = NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
 
-        if (iwlanRegInfo == null || !iwlanRegInfo.isRegistered()) {
+        if (iwlanRegInfo == null || !iwlanRegInfo.isNetworkRegistered()) {
             nriState =
                     (wwanRegInfo != null)
-                            ? wwanRegInfo.getRegistrationState()
+                            ? wwanRegInfo.getNetworkRegistrationState()
                             : NetworkRegistrationInfo
                                     .REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
-        } else if (wwanRegInfo != null && !wwanRegInfo.isRegistered()) {
-            nriState = iwlanRegInfo.getRegistrationState();
+        } else if (wwanRegInfo != null && !wwanRegInfo.isNetworkRegistered()) {
+            nriState = iwlanRegInfo.getNetworkRegistrationState();
         } else if (wwanRegInfo != null) {
-            nriState = wwanRegInfo.getRegistrationState();
+            nriState = wwanRegInfo.getNetworkRegistrationState();
         }
 
         return nriStateToServiceState(nriState, ss, wwanRegInfo);
@@ -1051,6 +1073,8 @@ public class DcNetWatcher implements IDcNetWatcher {
             mDataRoaming = isDataRoaming;
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
         }
+
+        mDataNetworkRoaming = getDataNetworkRoaming(ss);
     }
 
     private void notifyRoamingState(boolean dataRoaming, boolean voiceRoaming) {

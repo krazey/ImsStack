@@ -893,6 +893,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
         assertEquals(true, mDcNetWatcher.isRoaming());
         assertEquals(true, mDcNetWatcher.isVoiceRoaming());
+        assertEquals(true, mDcNetWatcher.isDataNetworkRoaming());
     }
 
     @Test

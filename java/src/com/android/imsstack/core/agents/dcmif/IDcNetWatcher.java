@@ -110,12 +110,18 @@ public interface IDcNetWatcher extends IDc {
     boolean isLteEmergencyOnly();
 
     /**
-     * Returns whether emergency service is supported by the network
+     * Return whether emergency service is supported by the network
      */
     boolean isEmergencyServiceSupported();
 
     /**
-     * Return UE is under roaming state
+     * Return current roaming state
+     * (This roaming state could be overridden by the carrier config)
+     * @see CarrierConfigManager#KEY_FORCE_HOME_NETWORK_BOOL
+     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
      */
     boolean isRoaming();
 
@@ -123,6 +129,12 @@ public interface IDcNetWatcher extends IDc {
      * Return voice roaming state of device
      */
     boolean isVoiceRoaming();
+
+    /**
+     * Return whether mobile data is registered on roaming network
+     * (This value is not affected by any carrier config or resource overlay override)
+     */
+    boolean isDataNetworkRoaming();
 
     /**
      * Return Voice roaming type of device
