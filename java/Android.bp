@@ -66,6 +66,7 @@ android_app {
         "ImsMediaFramework",
     ],
     libs: [
+        "framework-annotations-lib",
         "ims-common",
         "telephony-common",
     ],
@@ -74,11 +75,6 @@ android_app {
         "privapp_permissions_com.android.imsstack",
         "allowlist_com.android.imsstack",
     ],
-    optimize: {
-        proguard_flags_files: [
-            "proguard.flags",
-        ],
-    },
 }
 
 prebuilt_etc {
