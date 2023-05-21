@@ -19,6 +19,7 @@ import android.os.Parcel;
 import android.util.ArrayMap;
 
 import com.android.imsstack.util.Log;
+import com.android.internal.annotations.Keep;
 
 import java.io.FileDescriptor;
 
@@ -26,6 +27,7 @@ import java.io.FileDescriptor;
  * This class provides the interfaces to send/receive the data from native to Java,
  * or vice versa.
  */
+@Keep
 public class JniIms {
     /** Indicates the success result of an operation. */
     public static final int OK = 0;
