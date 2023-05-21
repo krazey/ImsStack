@@ -167,6 +167,7 @@ public:
     static const IMS_UINT32 GET_MTU = CATEGORY_BASE + 425;
     static const IMS_UINT32 IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 426;
     static const IMS_UINT32 BIND_SOCKET = CATEGORY_BASE + 427;
+    static const IMS_UINT32 IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
 
     ////
     // WiFi-related information

@@ -79,6 +79,7 @@ private:
             IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) override;
     STATE_ENTYPE GetState() const override;
     IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override;
+    IMS_BOOL IsIpv6Preferred() const override;
     IMS_BOOL IsePDGEnabled() const override;
     IMS_BOOL IsMobileDataEnabled() const override;
     IMS_SINT32 GetMtu() const override;

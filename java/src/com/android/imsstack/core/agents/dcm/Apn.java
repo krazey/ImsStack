@@ -287,20 +287,28 @@ public abstract class Apn extends Handler implements IApn {
 
     @Override
     public int getIpVersion() {
-        int ipVersion = EIpVersion.IPV6V4.getInt();
-        if (mDcSettings != null) {
-            if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
-                if (mDcSettings.getEmergencyPreferredIpVersion()
-                        == CarrierConfig.Assets.IPV4_PREFERRED) {
-                    ipVersion = EIpVersion.IPV4V6.getInt();
-                }
-            } else if (mType.getType() == DcConstants.TYPE_IMS) {
-                if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Assets.IPV4_PREFERRED) {
-                    ipVersion = EIpVersion.IPV4V6.getInt();
-                }
+        if (isConnected()) {
+            if (mApnProtocol == ApnSetting.PROTOCOL_IP) {
+                return EIpVersion.IPV4V6.getInt();
+            }
+            if (mApnProtocol == ApnSetting.PROTOCOL_IPV6) {
+                return EIpVersion.IPV6V4.getInt();
             }
         }
-        return ipVersion;
+        if (mDcSettings != null) {
+            if (mType.getType() == DcConstants.TYPE_EMERGENCY
+                    && mDcSettings.getEmergencyPreferredIpVersion()
+                            == CarrierConfig.Assets.IPV4_PREFERRED) {
+                return EIpVersion.IPV4V6.getInt();
+            }
+
+            if (mType.getType() == DcConstants.TYPE_IMS
+                    && mDcSettings.getPreferredIpVersion()
+                            == CarrierConfig.Assets.IPV4_PREFERRED) {
+                return EIpVersion.IPV4V6.getInt();
+            }
+        }
+        return EIpVersion.IPV6V4.getInt();
     }
 
     @Override
@@ -1248,10 +1256,9 @@ public abstract class Apn extends Handler implements IApn {
                             mApnString = strApn;
                         }
                         // update APN protocol
-                        if ((mDcNetWatcher != null) && mDcNetWatcher.isRoaming()) {
-                            mApnProtocol = apnSetting.getRoamingProtocol();
-                        } else {
-                            mApnProtocol = apnSetting.getProtocol();
+                        if (mDcNetWatcher != null) {
+                            mApnProtocol = (mDcNetWatcher.isDataNetworkRoaming())
+                                    ? apnSetting.getRoamingProtocol() : apnSetting.getProtocol();
                         }
                     }
                     if (mNetworkType != networkType) {

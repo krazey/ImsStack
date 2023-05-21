@@ -569,6 +569,15 @@ public class DcApnTest {
     }
 
     @Test
+    public void testIsIpv6Preferred() throws Exception {
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV6V4.getInt());
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        assertFalse(mDcApn.isIpv6Preferred(INVALID_APN));
+        assertTrue(mDcApn.isIpv6Preferred(EApnType.IMS.getType()));
+    }
+
+    @Test
     public void testPreciseDataConnectionStateChanged_NullApnSetting() throws Exception {
         PreciseDataConnectionState dataConnectionState = new PreciseDataConnectionState.Builder()
                 .setState(TelephonyManager.DATA_CONNECTED)

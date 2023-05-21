@@ -45,6 +45,7 @@ public:
             IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AString& GetIfaceName() = 0;
     virtual IMS_BOOL IsEpdgEnabled() = 0;
+    virtual IMS_BOOL IsIpv6Preferred() = 0;
     virtual IMS_SINT32 GetIpcanCategory() = 0;
     virtual IMS_BOOL IsLimitedServicePcoValue() = 0;
     virtual IMS_SINT32 GetCarrierSignalPcoValue() = 0;

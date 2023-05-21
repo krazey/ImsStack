@@ -303,6 +303,14 @@ public class DcGovTest {
         verify(mMockIDcApn).bindSocket(APN_TYPE, fd);
     }
 
+    @Test
+    public void testIsIpv6Preferred4Sys() throws Exception {
+        when(mMockIDcApn.isIpv6Preferred(APN_TYPE)).thenReturn(true);
+
+        assertEquals(true, mDcGov.isIpv6Preferred4Sys(APN_TYPE));
+        verify(mMockIDcApn).isIpv6Preferred(APN_TYPE);
+    }
+
     private class FakeDcGov extends DcGov {
         FakeDcGov(int slotId) {
             super(slotId);

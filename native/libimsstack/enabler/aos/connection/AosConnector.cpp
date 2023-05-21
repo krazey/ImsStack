@@ -221,34 +221,6 @@ IMS_BOOL AosConnector::IsEmergencyType() const
 }
 
 PROTECTED
-IMS_BOOL AosConnector::IsIpv6DelayRequired() const
-{
-    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
-    IMS_SINT32 nPreferredType = CarrierConfig::Assets::IP_VERSION_6;
-
-    if (IsEmergencyType())
-    {
-        nPreferredType = GET_N_CONFIG(nSlotId)->GetEmergencyPreferredIpType();
-    }
-    else if (m_piConnection->GetConnectionType() == NetworkPolicy::APN_IMS)
-    {
-        nPreferredType = GET_N_CONFIG(nSlotId)->GetPreferredIpType();
-    }
-
-    if (nPreferredType == CarrierConfig::Assets::IP_VERSION_4)
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_piConnection->GetIpcanCategory() != IIpcan::CATEGORY_MOBILE)
-    {
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
-}
-
-PROTECTED
 IMS_BOOL AosConnector::IsPcscfChangeAvailable() const
 {
     IMS_UINT32 nAppState = m_piAppContext->GetApp()->GetAppState();
@@ -733,7 +705,8 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
             return;
         }
 
-        if (IsIpv6DelayRequired())
+        if ((m_piConnection->GetIpcanCategory() == IIpcan::CATEGORY_MOBILE) &&
+                m_piConnection->IsIpv6Preferred())
         {
             // check the local IP Address version
             IpAddress objIpAddress = m_piConnection->GetLocalAddress();

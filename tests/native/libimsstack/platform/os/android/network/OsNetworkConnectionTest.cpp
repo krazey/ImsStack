@@ -728,6 +728,16 @@ TEST_F(OsNetworkConnectionTest, IsePDGEnabled)
     EXPECT_TRUE(pINetworkConnection->IsePDGEnabled());
 }
 
+TEST_F(OsNetworkConnectionTest, IsIpv6Preferred)
+{
+    OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
+    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+
+    EXPECT_CALL(m_objSystem, IsIpv6Preferred(_, _)).WillOnce(Return(IMS_TRUE));
+
+    EXPECT_TRUE(pINetworkConnection->IsIpv6Preferred());
+}
+
 TEST_F(OsNetworkConnectionTest, IsMobileDataEnabled)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);

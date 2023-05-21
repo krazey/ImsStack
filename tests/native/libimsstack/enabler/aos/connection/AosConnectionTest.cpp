@@ -329,6 +329,13 @@ TEST_F(AosConnectionTest, IsEpdgEnabled)
     EXPECT_EQ(m_pAosConnection->IsEpdgEnabled(), IMS_TRUE);
 }
 
+TEST_F(AosConnectionTest, IsIpv6Preferred)
+{
+    EXPECT_CALL(m_objMockINetworkConnection, IsIpv6Preferred()).Times(1).WillOnce(Return(IMS_TRUE));
+    SetNetworkConnection(&m_objMockINetworkConnection);
+    EXPECT_EQ(m_pAosConnection->IsIpv6Preferred(), IMS_TRUE);
+}
+
 TEST_F(AosConnectionTest, GetIpcanCategory)
 {
     EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled())

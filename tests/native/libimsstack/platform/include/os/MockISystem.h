@@ -134,6 +134,8 @@ public:
     MOCK_METHOD(IMS_SINT32, GetMtu, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, BindSocket,
             (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(
+            IMS_BOOL, IsIpv6Preferred, (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
 
     ////
     // WiFi-related information

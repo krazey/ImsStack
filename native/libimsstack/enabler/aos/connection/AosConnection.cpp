@@ -207,6 +207,11 @@ PUBLIC VIRTUAL IMS_BOOL AosConnection::IsEpdgEnabled()
     return m_piConnection->IsePDGEnabled();
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosConnection::IsIpv6Preferred()
+{
+    return m_piConnection->IsIpv6Preferred();
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetIpcanCategory()
 {
     return IsEpdgEnabled() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE;

@@ -50,6 +50,7 @@ public:
     MOCK_METHOD(STATE_ENTYPE, GetState, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConnected, (IN IMS_SINT32 nCategory), (const, override));
     MOCK_METHOD(IMS_BOOL, IsePDGEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsIpv6Preferred, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMobileDataEnabled, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (const, override));
     MOCK_METHOD(void, SetListener, (IN INetworkConnectionListener * piListener), (override));

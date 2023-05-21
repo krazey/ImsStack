@@ -129,6 +129,7 @@ public class SystemConstants {
     public static final int GET_MTU = CATEGORY_BASE + 425;
     public static final int IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 426;
     public static final int BIND_SOCKET = CATEGORY_BASE + 427;
+    public static final int IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
 
     /**
      * WiFi-related information

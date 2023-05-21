@@ -65,4 +65,14 @@ public interface ISystemAPINetwork {
     boolean isMobileDataEnabled();
     int getMtu4Sys(int apnType);
     int bindSocket(int apnType, FileDescriptor sockFd);
+
+    /**
+     * get IP version preference for specified APN.
+     *
+     * @param apnType The APN type to check IP version preference
+     *         EApnType#IMS#getType()
+     *         EApnType#EMERGENCY#getType()
+     * @return Returns true if specified APN prefers IPv6 address. Otherwise, returns false.
+     */
+    boolean isIpv6Preferred4Sys(int apnType);
 }

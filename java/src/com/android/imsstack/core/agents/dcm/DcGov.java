@@ -243,6 +243,12 @@ public class DcGov implements IDc, ISystemAPINetwork {
         return (dcapn != null) ? dcapn.bindSocket(apnType, sockFd) : 0;
     }
 
+    @Override
+    public boolean isIpv6Preferred4Sys(int apnType) {
+        IDcApn dcapn = getDcApn();
+        return (dcapn != null) ? dcapn.isIpv6Preferred(apnType) : false;
+    }
+
     @VisibleForTesting
     protected IDcApn getDcApn() {
         return (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);

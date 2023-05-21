@@ -42,6 +42,7 @@ public:
             (override));
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsIpv6Preferred, (), (override));
     MOCK_METHOD(IMS_SINT32, GetIpcanCategory, (), (override));
     MOCK_METHOD(IMS_BOOL, IsLimitedServicePcoValue, (), (override));
     MOCK_METHOD(IMS_SINT32, GetCarrierSignalPcoValue, (), (override));

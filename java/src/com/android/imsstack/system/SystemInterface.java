@@ -697,6 +697,8 @@ public class SystemInterface implements JniSystemListener {
                 "IS_EMERGENCY_ATTACH_SUPPORTED");
         sMethodToString.put(SystemConstants.BIND_SOCKET,
                 "BIND_SOCKET");
+        sMethodToString.put(SystemConstants.IS_IPV6_PREFERRED,
+                "IS_IPV6_PREFERRED");
         sMethodToString.put(SystemConstants.GET_PREFERENCE,
                 "GET_PREFERENCE");
         sMethodToString.put(SystemConstants.SET_PREFERENCE,
@@ -1445,7 +1447,7 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_LOCAL_ADDRESS:
                         result = handleSystemAPINetwork1(method, parcel);
                         break;
-                    //mISystemAPINetwork 11 ~ 20
+                    //mISystemAPINetwork 11 ~ 22
                     case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
                     case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
                     case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
@@ -1456,7 +1458,8 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_VOICE_SERVICE_STATE: //FALL-THROUGH
                     case SystemConstants.GET_MTU: //FALL-THROUGH
                     case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // FALL-THROUGH
-                    case SystemConstants.BIND_SOCKET:
+                    case SystemConstants.BIND_SOCKET: // FALL-THROUGH
+                    case SystemConstants.IS_IPV6_PREFERRED:
                         result = handleSystemAPINetwork2(method, parcel, fd);
                         break;
                     case SystemConstants.GET_ISIM_STATE: //FALL-THROUGH
@@ -1824,6 +1827,10 @@ public class SystemInterface implements JniSystemListener {
                     result.writeInt(bindResult);
                     break;
                 }
+                case SystemConstants.IS_IPV6_PREFERRED:
+                    int apnType = parcel.readInt();
+                    result.writeInt(mISystemAPINetwork.isIpv6Preferred4Sys(apnType) ? 1 : 0);
+                    break;
                 default:
                     result.recycle();
                     return null;

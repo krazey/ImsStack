@@ -47,6 +47,7 @@ public:
             IN IMS_SINT32 nIpVersion = 0) override;
     const AString& GetIfaceName() override;
     IMS_BOOL IsEpdgEnabled() override;
+    IMS_BOOL IsIpv6Preferred() override;
     IMS_SINT32 GetIpcanCategory() override;
     IMS_BOOL IsLimitedServicePcoValue() override;
     IMS_SINT32 GetCarrierSignalPcoValue() override;

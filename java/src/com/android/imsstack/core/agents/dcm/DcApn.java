@@ -451,6 +451,17 @@ public class DcApn implements IDcApn {
         return (apn != null) ? apn.getCachedNetwork() : null;
     }
 
+    @Override
+    public boolean isIpv6Preferred(int apnType) {
+        IApn apn = getApnControl(apnType);
+
+        if (apn == null) {
+            return false;
+        }
+
+        return apn.getIpVersion() == EIpVersion.IPV6V4.getInt();
+    }
+
     // Interface implementation methods --------------------------
     // Private/Protected methods ---------------------------------
     private void apnFactory() {
