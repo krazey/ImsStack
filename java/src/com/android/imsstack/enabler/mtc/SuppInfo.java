@@ -175,17 +175,22 @@ public class SuppInfo implements Parcelable {
     /**
      * This method is to set and service values
      *
-     * @param type   service type
-     * @param value  service string value
-     * @param strvar service bool value
+     * @param type service type
+     * @param boolValue service bool value
+     * @param intValue service int value
+     * @param strValue service string value
      */
     @VisibleForTesting
-    public void addService_int_str(int type, int value, String strvar) {
+    public void addService(int type, boolean boolValue, int intValue, String strValue) {
+        ImsLog.d("addService [" + objSuppService.size() + "]"
+                + "[" + type + "]" + "[" + boolValue + "]"
+                + "[" + intValue + "]" + "[" + strValue + "]");
+
         SuppService service = new SuppService();
         service.type = type;
-        service.strValue = strvar;
-        service.intValue = value;
-        service.boolValue = true;
+        service.strValue = strValue;
+        service.intValue = intValue;
+        service.boolValue = boolValue;
         objSuppService.add(service);
     }
 

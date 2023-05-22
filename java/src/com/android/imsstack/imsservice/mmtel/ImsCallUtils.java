@@ -39,6 +39,7 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsPrivateProperties;
+import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -337,7 +338,9 @@ public class ImsCallUtils {
         boolean isCallPull = profile.getCallExtraBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, false);
 
         if (isCallPull) {
-            si.addService_bool(SuppInfo.TYPE_CALL_PULL, isCallPull);
+            int dialogId = profile.getProprietaryCallExtras()
+                    .getInt(ImsExternalCallTracker.EXTRA_IMS_EXTERNAL_CALL_ID, -1);
+            si.addService(SuppInfo.TYPE_CALL_PULL, isCallPull, dialogId, null);
         }
 
         // "sos" URN for IMS emergency call
