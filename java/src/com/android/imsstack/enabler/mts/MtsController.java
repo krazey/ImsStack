@@ -46,12 +46,6 @@ public class MtsController {
     public static final int MO_ERROR_RETRY = 3;
     public static final int MO_ERROR_FALLBACK = 4;
 
-    public static final int MT_INVALID = 0;
-    public static final int MT_SUCCESS = 1;
-    public static final int MT_FAILURE = 2;
-    public static final int MT_SMS_FORMAT_FAILURE = 3;
-    public static final int MT_SMS_NODATA_FAILURE = 4;
-
     public static final int SMS_FORMAT_INVALID = 0;
     public static final int SMS_FORMAT_3GPP = 1;
     public static final int SMS_FORMAT_3GPP2 = 2;
@@ -83,6 +77,7 @@ public class MtsController {
         public void notifyStatusForOutgoingMessage(int reason, int format, int messageReference) {
             // no-op
         }
+
         /**
          * Invokes when SMS enabler receives a SIP MESSAGE(SMS-DELIVERY) from IP-SM-GW.
          *
@@ -90,15 +85,9 @@ public class MtsController {
          *     {@link MtsController#SMS_FORMAT_3GPP}
          *     {@link MtsController#SMS_FORMAT_3GPP2}
          * @param pduData PDU representing the content of the received SIP MESSAGE.
-         * This method returns:
-         * 1 - MT_SUCCESS
-         * 2 - MT_FAILURE
-         * 3 - MT_SMS_FORMAT_FAILURE
-         * 4 - MT_SMS_NODATA_FAILURE
          */
-        public int notifyIncomingMessage(int smsFormat, byte[] pduData) {
+        public void notifyIncomingMessage(int smsFormat, byte[] pduData) {
             // no-op
-            return MT_FAILURE;
         }
     }
 
@@ -245,19 +234,6 @@ public class MtsController {
         mHandler.sendMessage(msg);
     }
 
-    private int notifySendMtResult(int mtResult) {
-        Parcel parcel = Parcel.obtain();
-        if (parcel == null) {
-            ImsLog.e(mSlotId, "parcel is null");
-            return (-1);
-        }
-
-        parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MT_RESULT);
-        parcel.writeInt(mtResult);
-        mMtsJni.sendMessage(parcel, mSlotId);
-        return 0;
-    }
-
     private class MessageHandler extends Handler {
         public MessageHandler(Looper looper) {
             super(looper);
@@ -286,8 +262,7 @@ public class MtsController {
                     String encodedData = (String)msg.obj;
                     encodedData = encodedData.replaceAll("\\s", "");
                     byte[] pduData = Base64.decode(encodedData, Base64.NO_PADDING);
-                    int mtResult = mListener.notifyIncomingMessage(smsFormat, pduData);
-                    notifySendMtResult(mtResult);
+                    mListener.notifyIncomingMessage(smsFormat, pduData);
                     break;
 
                 default :

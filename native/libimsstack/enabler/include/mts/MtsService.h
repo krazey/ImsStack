@@ -66,13 +66,12 @@ public:
     inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
     void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId) override;
-    IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) override;
+    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) override;
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
     inline void NotifyJniEnablerSet() override {}
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
-    void SendMtResult(IN IMS_BOOL bMtResult) override;
 
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,

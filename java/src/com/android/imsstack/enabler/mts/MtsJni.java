@@ -35,15 +35,9 @@ public class MtsJni {
     private static final int MTSENABLER2JAVA = 1050;
 
     public static final int NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
-    public static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 2;
-
-    public static final int NOTI_MTS_RAT_SELECTION = JAVA2MTSENABLER + 10;
 
     private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
     private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
-
-    private static final int REQUEST_MTS_RAT_SELECTION = MTSENABLER2JAVA + 10;
-    private static final int REQUEST_MTS_EXIT_RAT_SELECTION = MTSENABLER2JAVA + 11;
 
     private static MtsJni mMtsJni = null;
     private HashMap<Integer, MtsJniImsListener> mMtsJniImsListenerMap =

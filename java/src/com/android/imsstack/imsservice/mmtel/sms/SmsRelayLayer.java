@@ -285,6 +285,28 @@ public class SmsRelayLayer {
         return (mRPMR.incrementAndGet() % SmsUtils.MAX_RPMR_VALUE);
     }
 
+    private void sendRPError(int deliverStatusResult, SmsRPdu mtData, String targetAddress) {
+        try{
+            int rpCause = mDeliverCause.get(deliverStatusResult);
+            SmsRPdu rpErrorPdu = new SmsRPdu(mtData.getMessageRef(), SmsUtils.RP_ERROR,
+                                               mtData.getOrigAddr(), rpCause,
+                                               null);
+            byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
+            if (DBG) {
+                log("Sending Encoded RP-Error: "
+                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu)));
+            }
+            boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
+                                            encodedPdu,
+                                            targetAddress,
+                                            mtData.getOrigAddr(),
+                                            mtData.getMessageRef());
+            if (!res) loge("Failed to send RP-ERROR");
+        } catch (RuntimeException e) {
+            loge("sendRPError Failed: " + e.getMessage());
+        }
+    }
+
     private static void log(String s) {
         ImsLog.d(TAG + s);
     }
@@ -345,7 +367,7 @@ public class SmsRelayLayer {
         }
 
         @Override
-        public int notifyIncomingMessage(int smsFormat, byte[] pduData) {
+        public void notifyIncomingMessage(int smsFormat, byte[] pduData) {
             try {
                 logi("notifyIncomingMessage");
                 if (DBG) {
@@ -357,20 +379,20 @@ public class SmsRelayLayer {
                 int token = 0;
                 int result;
                 Listener listener = mListener;
-                if (listener == null) {
-                    loge("Listener is null");
-                    return MtsController.MT_FAILURE;
-                }
                 if (smsFormat == SmsUtils.FORMAT_INT_3GPP2) {
                     token = mToken.incrementAndGet();
+                    if(listener == null) {
+                        loge("Listener is null");
+                        return;
+                    }
                     synchronized (mLock) {
                         result = listener.notifyRLDataIndication(token, smsFormat,
                                                                  SmsUtils.RP_DATA, pduData);
                     }
                     if (result != SmsUtils.RESULT_SUCCESS) {
-                        return MtsController.MT_FAILURE;
+                        loge("notifyRLDataIndication Failed");
                     }
-                    return MtsController.MT_SUCCESS;
+                    return;
                 }
                 SmsRPdu mtData = new SmsRPdu(pduData);
                 if (DBG) {
@@ -390,6 +412,11 @@ public class SmsRelayLayer {
                                 + ImsLog.hiddenString(targetAddress));
                     }
                 }
+                if (listener == null) {
+                    loge("Listener is null");
+                    sendRPError(ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC, mtData, targetAddress);
+                    return;
+                }
                 if (mtData.getMessageType() == SmsUtils.RP_ACK) {
                     synchronized (mLock) {
                         if (mMoMRTokenMap.containsKey(messageRef)) {
@@ -398,25 +425,9 @@ public class SmsRelayLayer {
                         } else {
                             //send RP-Error as per TS 24.011, section 9.3.3
                             loge("No Matching RP-Data for Rp-Ack");
-                            int rpCause = mDeliverCause.get(DELIVER_STATUS_ERROR_INVALID_MR_VALUE);
-                            SmsRPdu rpErrorPdu = new SmsRPdu(mtData.getMessageRef(),
-                                                     SmsUtils.RP_ERROR,
-                                                     mtData.getOrigAddr(), rpCause,
-                                                     null);
-                            byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
-                            if (DBG) {
-                                log("ending Encoded RP-Error: "
-                                        + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(encodedPdu)));
-                            }
-                            boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    encodedPdu, targetAddress,
-                                                    mtData.getOrigAddr(), mtData.getMessageRef());
-
-                            if (!res) {
-                                loge("Failed to send RP-Error");
-                            }
-                            return MtsController.MT_FAILURE;
+                            sendRPError(DELIVER_STATUS_ERROR_INVALID_MR_VALUE, mtData,
+                                    targetAddress);
+                            return;
                         }
                         mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
                         mSmsRLStateMachine.mRPduData = mtData;
@@ -434,7 +445,12 @@ public class SmsRelayLayer {
                         mTokenStateTrackerMap.put(token, mSmsRLStateMachine);
                         result = mSmsRLStateMachine.onRPDataFromNetwork(mtData);
                         if (result != SmsUtils.RESULT_SUCCESS) {
-                            return MtsController.MT_FAILURE;
+                            loge("onRPDataFromNetwork Failed");
+                            sendRPError(ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC, mtData,
+                                    targetAddress);
+                            mMTTokenMRMap.remove(token);
+                            mTokenStateTrackerMap.remove(token);
+                            return;
                         }
                     }
                 } else if (mtData.getMessageType() == SmsUtils.RP_ERROR) {
@@ -443,7 +459,7 @@ public class SmsRelayLayer {
                         mMoMRTokenMap.remove(messageRef);
                     } else {
                         loge("No Matching RP-Data for Rp-Error");
-                        return MtsController.MT_FAILURE;
+                        return;
                     }
                     mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
                     mSmsRLStateMachine.mRPduData = mtData;
@@ -451,30 +467,11 @@ public class SmsRelayLayer {
                     mTokenStateTrackerMap.remove(token);
                 } else {
                     //send RP-Error as per TS 24.011, section 9.3.3
-                    int rpCause = mDeliverCause.get(ImsSmsImplBase
-                                               .DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
-                    SmsRPdu rpErrorPdu = new SmsRPdu(mtData.getMessageRef(), SmsUtils.RP_ERROR,
-                                                   mtData.getOrigAddr(), rpCause,
-                                                   null);
-                    byte[] encodedPdu = rpErrorPdu.getRpduByteArray();
-                    if (DBG) {
-                        log("Sending Encoded RP-Error: "
-                                    + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu)));
-                    }
-                    boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
-                                                    encodedPdu,
-                                                    targetAddress,
-                                                    mtData.getOrigAddr(),
-                                                    mtData.getMessageRef());
-
-                    if (!res) loge("Failed to send RP-ERROR");
-
-                    return MtsController.MT_FAILURE;
+                    sendRPError(ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED, mtData,
+                            targetAddress);
                 }
-                return MtsController.MT_SUCCESS;
             } catch (RuntimeException e) {
                 loge("notifyIncomingMessage Failed: " + e.getMessage());
-                return MtsController.MT_FAILURE;
             }
         }
     }

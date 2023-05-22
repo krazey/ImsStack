@@ -456,15 +456,8 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         m_bProcessingMsg = IMS_TRUE;
     }
 
-    IMS_UINT32 nMtResult =
-            ReportMtSms(piMtsMessage->GetSmsFormat(), objContent.GetLength(), objContent.GetData());
-    if (RespondReceivedMessage(piPageMessage, piMtsMessage, nMtResult, IMS_TRUE) != IMS_TRUE)
-    {
-        IMS_TRACE_E(0, "SMS isn't received successfully", 0, 0, 0);
-        m_bProcessingMsg = IMS_FALSE;
-        delete piMtsMessage;
-        return;
-    }
+    ReportMtSms(piMtsMessage->GetSmsFormat(), objContent.GetLength(), objContent.GetData());
+    RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_TRUE);
 
     IMS_TRACE_I("ReceiveMessage : SMS is received successfully", 0, 0, 0);
 }
@@ -592,7 +585,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     return IMS_SUCCESS;
 }
 
-PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(
+PRIVATE void MtsMessageController::ReportMoStatus(
         IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId /* = -1 */)
 {
     IMS_CHAR acLog[128 + 1] = {
@@ -600,15 +593,12 @@ PRIVATE IMS_RESULT MtsMessageController::ReportMoStatus(
     };
     IMS_Sprintf(acLog, 128, "reason (%s, %d) , SMS Format (%s) , nSeqId (%d)",
             PS_MoStatus(nReason), nReason, PS_SmsFormatType(eSmsFormat), nSeqId);
-
     IMS_TRACE_I("ReportMoStatus :  %s", acLog, 0, 0);
 
     m_piMtsService->ReportMoStatus(nReason, eSmsFormat, nSeqId);
-
-    return IMS_SUCCESS;
 }
 
-PRIVATE IMS_UINT32 MtsMessageController::ReportMtSms(
+PRIVATE void MtsMessageController::ReportMtSms(
         IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength, IN const IMS_BYTE* pbyContent)
 {
     IMS_TRACE_I("ReportMtSMS : eSmsFormat[%s], Length[%d]", PS_SmsFormatType(eSmsFormat),
@@ -618,7 +608,7 @@ PRIVATE IMS_UINT32 MtsMessageController::ReportMtSms(
     strContent.Attach(reinterpret_cast<const IMS_CHAR*>(pbyContent), nContentLength);
     ByteArray objContent = strContent.ToBase64();
 
-    return m_piMtsService->ReportMtSms(eSmsFormat, objContent);
+    m_piMtsService->ReportMtSms(eSmsFormat, objContent);
 }
 
 PRIVATE
@@ -835,90 +825,38 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
 }
 
 PRIVATE
-IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMessage,
-        IN IMtsMessage* piMtsMessage, IN IMS_UINT32 nMtResult, IN IMS_BOOL bAdded)
+void MtsMessageController::RespondReceivedMessage(
+        IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, IN IMS_BOOL bAdded)
 {
-    switch (nMtResult)
+    piPageMessage->Accept();
+    if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_N)
     {
-        case MT_SUCCESS:
+        IMS_TRACE_I("RespondReceivedMessage : bAdded[%s]", _TRACE_B_(bAdded), 0, 0);
+        if (bAdded)
         {
-            IMS_TRACE_I("RespondReceivedMessage : It has successfully delivered", 0, 0, 0);
-
-            piPageMessage->Accept();
-
-            if (piMtsMessage->GetMti() == SMS_3GPP_MTI_RP_DATA_FROM_N)
-            {
-                IMS_TRACE_I("RespondReceivedMessage : bAdded[%s]", _TRACE_B_(bAdded), 0, 0);
-                if (bAdded)
-                {
-                    Add(piMtsMessage);
-                }
-            }
-            else
-            {
-                delete piMtsMessage;
-            }
-
-            return IMS_TRUE;
+            Add(piMtsMessage);
         }
-        case MT_SMS_FORMAT_FAILURE:
-        {
-            IMS_TRACE_E(0, "Failed to deliver the received SMS, SMS format mismatch", 0, 0, 0);
-
-            piPageMessage->Reject(415, 0);
-
-            return IMS_FALSE;
-        }
-        case MT_SMS_NODATA_FAILURE:
-        {
-            IMS_TRACE_E(0, "Failed to deliver the received SMS, SMS data invalid", 0, 0, 0);
-
-            piPageMessage->Reject(400, 0);
-
-            return IMS_FALSE;
-        }
-        case MT_FAILURE:
-        {
-            IMS_TRACE_E(0, "Failed to deliver the received SMS, some error", 0, 0, 0);
-
-            piPageMessage->Reject(480);
-
-            return IMS_FALSE;
-        }
-        default:
-        {
-            IMS_TRACE_E(0, "Failed to deliver the received SMS, some error", 0, 0, 0);
-
-            piPageMessage->Reject(500);
-
-            return IMS_FALSE;
-        }
+    }
+    else
+    {
+        delete piMtsMessage;
     }
 }
 
 PRIVATE
 void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage)
 {
-    IMS_UINT32 nMtResult = 0;
-    IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
-    SmsFormatType eSmsFormat = piMtsMessage->GetSmsFormat();
-
     if (m_bProcessingMsg)
     {
         return;
     }
-
     m_bProcessingMsg = IMS_TRUE;
 
+    IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
+    SmsFormatType eSmsFormat = piMtsMessage->GetSmsFormat();
     const ByteArray& objContent = ProcessReceivedMessage(piPageMessage, piMtsMessage);
-
-    nMtResult = ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
-
-    if (RespondReceivedMessage(piPageMessage, piMtsMessage, nMtResult, IMS_FALSE) != IMS_TRUE)
-    {
-        m_bProcessingMsg = IMS_FALSE;
-        CleanMtsMessage(piMtsMessage);
-    }
+    ReportMtSms(eSmsFormat, objContent.GetLength(), objContent.GetData());
+    RespondReceivedMessage(piPageMessage, piMtsMessage, IMS_FALSE);
 }
 
 PRIVATE

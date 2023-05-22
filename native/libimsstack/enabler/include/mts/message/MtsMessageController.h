@@ -71,9 +71,9 @@ private:
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
     IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
-    IMS_RESULT ReportMoStatus(
+    void ReportMoStatus(
             IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength,
+    void ReportMtSms(IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength,
             IN const IMS_BYTE* pbyContent);
 
     IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objContent,
@@ -84,8 +84,8 @@ private:
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage);
     void ReportTransmissionResult(
             IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    IMS_BOOL RespondReceivedMessage(IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage,
-            IN IMS_UINT32 nMtResult, IN IMS_BOOL bAdded);
+    void RespondReceivedMessage(
+            IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, IN IMS_BOOL bAdded);
     void Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage);
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);

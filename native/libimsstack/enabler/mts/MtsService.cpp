@@ -121,13 +121,6 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
     }
 }
 
-PUBLIC VIRTUAL void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
-{
-    IMS_TRACE_I("SendMtResult", 0, 0, 0);
-    // TODO(Mts): Call back is being considered
-    (void)bMtResult;
-}
-
 PUBLIC
 void MtsService::ReportMoStatus(
         IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId)
@@ -142,7 +135,7 @@ void MtsService::ReportMoStatus(
 }
 
 PUBLIC
-IMS_UINT32 MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
+void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
@@ -151,9 +144,6 @@ IMS_UINT32 MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArr
     {
         piJniThread->ReportMtSms(eSmsFormat, objContent, m_nSlotId);
     }
-
-    // TODO: Call back is being considered
-    return MT_SUCCESS;
 }
 
 PUBLIC

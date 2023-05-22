@@ -41,7 +41,6 @@ private:
     IMtsService* GetNativeService();
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
-    void NotifyMtResult(IN const android::Parcel& objParcel);
 
 private:
     JniMtsServiceThread* m_pJniMtsServiceThread;
