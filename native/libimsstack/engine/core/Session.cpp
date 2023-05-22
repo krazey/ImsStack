@@ -4746,6 +4746,12 @@ IMS_BOOL Session::SetSdpBodyPartFromCurrentView(IN_OUT ISipMessage*& piSipMsg)
         return IMS_FALSE;
     }
 
+    if (!pCurrentView->IsLastSdpProvidedWithNegotiatedSdp())
+    {
+        pCurrentView->SetLastSdpProvidedWithNegotiatedSdp(IMS_TRUE);
+        m_pOaState->IncreaseSessionVersion();
+    }
+
     ISipMessageBodyPart* piBodyPart = piSipMsg->CreateSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)

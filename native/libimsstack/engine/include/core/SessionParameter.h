@@ -72,6 +72,15 @@ public:
     {
         m_strRemoteVersion = strRemoteVersion;
     }
+    inline void IncreaseSessionVersion() { m_objSessionParam.IncreaseSessionVersion(); }
+    inline IMS_BOOL IsLastSdpProvidedWithNegotiatedSdp() const
+    {
+        return m_bLastSdpProvidedWithNegotiatedSdp;
+    }
+    inline void SetLastSdpProvidedWithNegotiatedSdp(IN IMS_BOOL bLastSdpProvidedWithNegotiatedSdp)
+    {
+        m_bLastSdpProvidedWithNegotiatedSdp = bLastSdpProvidedWithNegotiatedSdp;
+    }
 
 private:
     void Clear();
@@ -90,6 +99,7 @@ private:
 
 private:
     AString m_strRemoteVersion;
+    IMS_BOOL m_bLastSdpProvidedWithNegotiatedSdp;
     // Session-level description
     SdpSessionParameter m_objSessionParam;
     // Attribute: "group" in the session level; it's related to "mid" attribute in the media-level

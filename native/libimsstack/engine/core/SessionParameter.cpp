@@ -26,6 +26,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PUBLIC
 SessionParameter::SessionParameter() :
         m_strRemoteVersion(AString::ConstNull()),
+        m_bLastSdpProvidedWithNegotiatedSdp(IMS_FALSE),
         m_nMid(0)
 {
 }
@@ -33,6 +34,7 @@ SessionParameter::SessionParameter() :
 PUBLIC
 SessionParameter::SessionParameter(IN const SessionParameter& other) :
         m_strRemoteVersion(other.m_strRemoteVersion),
+        m_bLastSdpProvidedWithNegotiatedSdp(other.m_bLastSdpProvidedWithNegotiatedSdp),
         m_objSessionParam(other.m_objSessionParam),
         m_objMediaGroups(other.m_objMediaGroups),
         m_nMid(other.m_nMid)
@@ -59,6 +61,7 @@ SessionParameter& SessionParameter::operator=(IN const SessionParameter& other)
         Clear();
 
         m_strRemoteVersion = other.m_strRemoteVersion;
+        m_bLastSdpProvidedWithNegotiatedSdp = other.m_bLastSdpProvidedWithNegotiatedSdp;
         m_objSessionParam = other.m_objSessionParam;
         m_objMediaGroups = other.m_objMediaGroups;
         m_nMid = other.m_nMid;
