@@ -107,6 +107,21 @@ TEST_F(UdpKeepAliveSenderTest, ConstructorStartsAndDestructorStopsKeepAlive)
     delete pSender;
 }
 
+TEST_F(UdpKeepAliveSenderTest, StopStopsKeepAlive)
+{
+    IMS_SINT32 nAnyKeepAliveTime = 2000;
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
+            .WillByDefault(Return(nAnyKeepAliveTime));
+
+    pSender = new UdpKeepAliveSender(objContext);
+    pSender->Start();
+
+    EXPECT_CALL(objTimer, KillTimer);
+    pSender->Stop();
+
+    delete pSender;
+}
+
 TEST_F(UdpKeepAliveSenderTest, TimerExpiredInvokesReStart)
 {
     // TODO: add MockISipKeepAliveHelper expectation.

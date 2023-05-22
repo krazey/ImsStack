@@ -34,7 +34,7 @@ using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-const AString strSomeOptionTag("some_tag");
+const LOCAL AString OPTION_TAG("some_tag");
 
 MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
 {
@@ -123,6 +123,42 @@ TEST(MtcExtensionSetTest, IsAvailableOnLocalInitiallyReturnsInitialValue)
     EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
 }
 
+TEST(MtcExtensionSetTest, IsRequiredOnRemoteReturnsFalseIfLocalNotSupported)
+{
+    MockIMtcCallContext objContext;
+    MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);
+
+    EXPECT_FALSE(objExtensionSet.IsRequiredOnRemote(OPTION_TAG));
+}
+
+TEST(MtcExtensionSetTest, IsRequiredOnRemoteReturnsFalseIfRemoteNotRequires)
+{
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
+    ON_CALL(*pExtension, IsRequiredOnRemote).WillByDefault(Return(IMS_FALSE));
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MockIMtcCallContext objContext;
+    MtcExtensionSet objExtensionSet(objContext, lstExtensions);
+
+    EXPECT_FALSE(objExtensionSet.IsRequiredOnRemote(OPTION_TAG));
+}
+
+TEST(MtcExtensionSetTest, IsRequiredOnRemoteReturnsTrueIfRemoteRequires)
+{
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
+    ON_CALL(*pExtension, IsRequiredOnRemote).WillByDefault(Return(IMS_TRUE));
+
+    ImsList<IMtcExtension*> lstExtensions;
+    lstExtensions.Append(pExtension);
+
+    MockIMtcCallContext objContext;
+    MtcExtensionSet objExtensionSet(objContext, lstExtensions);
+
+    EXPECT_TRUE(objExtensionSet.IsRequiredOnRemote(OPTION_TAG));
+}
+
 TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableExtension)
 {
     MockIMtcCallContext objContext;
@@ -176,7 +212,7 @@ TEST(MtcExtensionSetTest, FormatRequestCallsEachExtensions)
     RequestType eType = RequestType::START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
     EXPECT_CALL(*pExtension, FormatRequest(eType, Ref(objMessage))).Times(1);
 
     ImsList<IMtcExtension*> lstExtensions;
@@ -192,7 +228,7 @@ TEST(MtcExtensionSetTest, FormatResponseCallsEachExtensions)
     ResponseType eType = ResponseType::PROVISIONAL_RESPONSE;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
     EXPECT_CALL(*pExtension, FormatResponse(eType, Ref(objMessage))).Times(1);
 
     ImsList<IMtcExtension*> lstExtensions;
@@ -208,7 +244,7 @@ TEST(MtcExtensionSetTest, HandleRequestCallsEachExtensions)
     RequestType eType = RequestType::START;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
     EXPECT_CALL(*pExtension, HandleRequest(eType, Ref(objMessage))).Times(1);
 
     ImsList<IMtcExtension*> lstExtensions;
@@ -224,7 +260,7 @@ TEST(MtcExtensionSetTest, HandleResponseCallsEachExtensions)
     ResponseType eType = ResponseType::PROVISIONAL_RESPONSE;
     MockIMessage objMessage;
 
-    MockIMtcExtension* pExtension = CreateMockIMtcExtension(strSomeOptionTag);
+    MockIMtcExtension* pExtension = CreateMockIMtcExtension(OPTION_TAG);
     EXPECT_CALL(*pExtension, HandleResponse(eType, Ref(objMessage))).Times(1);
 
     ImsList<IMtcExtension*> lstExtensions;

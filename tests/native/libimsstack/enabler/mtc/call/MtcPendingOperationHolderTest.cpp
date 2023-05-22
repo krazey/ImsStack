@@ -61,21 +61,33 @@ protected:
     }
 };
 
-TEST_F(MtcPendingOperationHolderTest, PushPendingOperation_PopPendingOperation)
+TEST_F(MtcPendingOperationHolderTest, HasPendingOperationReturnsFalseIfNoOperation)
 {
     EXPECT_FALSE(pMtcPendingOperationHolder->HasPendingOperation());
+}
 
+TEST_F(MtcPendingOperationHolderTest, HasPendingOperationReturnsTrueIfHasOperation)
+{
     pMtcPendingOperationHolder->PushPendingOperation(objPendingOperation);
 
     EXPECT_TRUE(pMtcPendingOperationHolder->HasPendingOperation());
+}
 
-    std::function<IMtcCall::State(IMtcCallState*)> objPopedPendingOperation =
-            pMtcPendingOperationHolder->PopPendingOperation();
+TEST_F(MtcPendingOperationHolderTest, HasPendingOperationReturnsFalseAfterOperationPopped)
+{
+    pMtcPendingOperationHolder->PushPendingOperation(objPendingOperation);
+    pMtcPendingOperationHolder->PopPendingOperation();
 
     EXPECT_FALSE(pMtcPendingOperationHolder->HasPendingOperation());
+}
+
+TEST_F(MtcPendingOperationHolderTest, PopPendingOperationReturnsOperation)
+{
+    pMtcPendingOperationHolder->PushPendingOperation(objPendingOperation);
+    pMtcPendingOperationHolder->PushPendingOperation(objPendingOperation);
 
     EXPECT_CALL(*pMockIMtcCallState, OnIpcanChanged(nAnyIpcan)).Times(2);
 
-    objPendingOperation(pMockIMtcCallState);
-    objPopedPendingOperation(pMockIMtcCallState);
+    pMtcPendingOperationHolder->PopPendingOperation()(pMockIMtcCallState);
+    pMtcPendingOperationHolder->PopPendingOperation()(pMockIMtcCallState);
 }

@@ -84,7 +84,7 @@ protected:
     }
 };
 
-TEST_F(ConferenceManagerTest, CreateControllerWithDifferentCallKeyNotNull)
+TEST_F(ConferenceManagerTest, CreateControllerWithDifferentCallKeyReturnsNotNull)
 {
     const CallKey CONF_CALL_KEY1 = 1;
     const CallKey CONF_CALL_KEY2 = 2;
@@ -102,6 +102,28 @@ TEST_F(ConferenceManagerTest, CreateControllerWithDifferentCallKeyNotNull)
 
     delete pCall1;
     delete pCall2;
+}
+
+TEST_F(ConferenceManagerTest, CreateControllerWithDifferentConferenceTypeReturnsNotNull)
+{
+    const CallKey CONF_CALL_KEY = 1;
+    MockIMtcCall* pCall = CreateMockIMtcCall(CONF_CALL_KEY);
+
+    IConferenceController* pParticipantController =
+            CreateConferenceController(CONF_CALL_KEY, ConferenceType::PARTICIPANT);
+    IConferenceController* pGroupCallController =
+            CreateConferenceController(CONF_CALL_KEY, ConferenceType::GROUP_CALL);
+    IConferenceController* pMergeCallController =
+            CreateConferenceController(CONF_CALL_KEY, ConferenceType::MERGE_CALL);
+    IConferenceController* pExpandCallController =
+            CreateConferenceController(CONF_CALL_KEY, ConferenceType::EXPAND_CALL);
+
+    ASSERT_NE(pParticipantController, nullptr);
+    ASSERT_NE(pGroupCallController, nullptr);
+    ASSERT_NE(pMergeCallController, nullptr);
+    ASSERT_NE(pExpandCallController, nullptr);
+
+    delete pCall;
 }
 
 TEST_F(ConferenceManagerTest, GetControllerWithDifferentCallKey)
@@ -127,18 +149,22 @@ TEST_F(ConferenceManagerTest, GetControllerWithDifferentCallKey)
 
 TEST_F(ConferenceManagerTest, OnClosedAndGetControllerReturnNull)
 {
-    const CallKey CONF_CALL_KEY = 1;
+    const CallKey CONF_CALL_KEY1 = 1;
+    const CallKey CONF_CALL_KEY2 = 2;
 
-    MockIMtcCall* pCall = CreateMockIMtcCall(CONF_CALL_KEY);
+    MockIMtcCall* pCall1 = CreateMockIMtcCall(CONF_CALL_KEY1);
+    MockIMtcCall* pCall2 = CreateMockIMtcCall(CONF_CALL_KEY2);
 
-    IConferenceController* piController =
-            CreateConferenceController(CONF_CALL_KEY, ConferenceType::MERGE_CALL);
+    CreateConferenceController(CONF_CALL_KEY1, ConferenceType::MERGE_CALL);
+    IConferenceController* piController2 =
+            CreateConferenceController(CONF_CALL_KEY2, ConferenceType::MERGE_CALL);
 
-    ASSERT_TRUE(pConferenceManager->GetController(CONF_CALL_KEY) != nullptr);
-    pConferenceManager->OnClosed(static_cast<ConferenceController*>(piController));
-    ASSERT_TRUE(pConferenceManager->GetController(CONF_CALL_KEY) == nullptr);
+    pConferenceManager->OnClosed(static_cast<ConferenceController*>(piController2));
+    EXPECT_NE(pConferenceManager->GetController(CONF_CALL_KEY1), nullptr);
+    EXPECT_EQ(pConferenceManager->GetController(CONF_CALL_KEY2), nullptr);
 
-    delete pCall;
+    delete pCall1;
+    delete pCall2;
 }
 
 }  // namespace android

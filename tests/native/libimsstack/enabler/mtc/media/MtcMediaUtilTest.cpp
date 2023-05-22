@@ -257,6 +257,9 @@ TEST_F(MtcMediaUtilTest, GetGttModeFromTextQuality)
 
     eTextQuality = TEXT_QUALITY_NOTUSED;
     EXPECT_EQ(MtcMediaUtil::GetGttModeFromTextQuality(eTextQuality), GTT_MODE_INVALID);
+
+    const IMS_UINT32 eInvalidTextQuality = -1;
+    EXPECT_EQ(MtcMediaUtil::GetGttModeFromTextQuality(eInvalidTextQuality), GTT_MODE_INVALID);
 }
 
 }  // namespace android

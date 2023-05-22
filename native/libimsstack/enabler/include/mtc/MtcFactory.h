@@ -34,8 +34,12 @@ public:
     void Start(IN IMS_SINT32 nSlotId);
     void Stop(IN IMS_SINT32 nSlotId);
 
+protected:
+    // Visible for test.
+    ImsMap<IMS_UINT32, IMtcApp*> m_objMtcApps;
+
 private:
     IMutex* m_piLock;
-    ImsMap<IMS_UINT32, IMtcApp*> m_objMtcApps;
 };
-#endif  // MTC_FACTORY_H_
+
+#endif

@@ -19,8 +19,7 @@
 #include "call/extension/MtcExtension.h"
 #include "core/MockIMessage.h"
 #include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "utility/MessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -28,63 +27,27 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-const AString strSomeOptionTag = "some_tag";
+const LOCAL AString OPTION_TAG = "some_tag";
 
 class MtcExtensionTest : public ::testing::Test
 {
 public:
     MtcExtension* pExtension;
 
-    MockISipMessage objSipMessageRequiresSomeOptionTag;
-    MockISipMessage objSipMessageSupportsSomeOptionTag;
-    MockIMessage objMessageRequiresSomeOptionTag;
-    MockIMessage objMessageSupportsSomeOptionTag;
+    MockIMessage objMessage;
     MockIMtcCallContext objContext;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pExtension = new MtcExtension(objContext, strSomeOptionTag, {RequestType::START},
-                {ResponseType::PROVISIONAL_RESPONSE});
-
-        InitMessageRequiresOptionTag(strSomeOptionTag);
-        InitMessageSupportsOptionTag(strSomeOptionTag);
+        pExtension = new MtcExtension(
+                objContext, OPTION_TAG, {RequestType::START}, {ResponseType::PROVISIONAL_RESPONSE});
     }
 
     virtual void TearDown() override { delete pExtension; }
-
-    void InitMessageRequiresOptionTag(IN const AString& strOptionTag)
-    {
-        ImsList<AString> lstEmptyHeaders;
-        ImsList<AString> lstRequiredHeaders;
-        lstRequiredHeaders.Append(strOptionTag);
-
-        ON_CALL(objSipMessageRequiresSomeOptionTag, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
-        ON_CALL(objSipMessageRequiresSomeOptionTag, GetHeaders(ISipHeader::REQUIRE, _))
-                .WillByDefault(Return(lstRequiredHeaders));
-
-        ON_CALL(objMessageRequiresSomeOptionTag, GetMessage)
-                .WillByDefault(Return(&objSipMessageRequiresSomeOptionTag));
-    }
-
-    void InitMessageSupportsOptionTag(IN const AString& strOptionTag)
-    {
-        ImsList<AString> lstEmptyHeaders;
-        ImsList<AString> lstSupportedHeaders;
-        lstSupportedHeaders.Append(strOptionTag);
-
-        ON_CALL(objSipMessageSupportsSomeOptionTag, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
-        ON_CALL(objSipMessageSupportsSomeOptionTag, GetHeaders(ISipHeader::SUPPORTED, _))
-                .WillByDefault(Return(lstSupportedHeaders));
-
-        ON_CALL(objMessageSupportsSomeOptionTag, GetMessage)
-                .WillByDefault(Return(&objSipMessageSupportsSomeOptionTag));
-    }
 };
 
 TEST_F(MtcExtensionTest, CopyConstructor)
@@ -117,67 +80,169 @@ TEST_F(MtcExtensionTest, IsRequiredOnRemoteReturnsFalseInitially)
 
 TEST_F(MtcExtensionTest, GetOptionTag)
 {
-    EXPECT_STREQ(strSomeOptionTag.GetStr(), pExtension->GetOptionTag().GetStr());
+    EXPECT_STREQ(OPTION_TAG.GetStr(), pExtension->GetOptionTag().GetStr());
 }
 
-TEST_F(MtcExtensionTest, FormatRequestDoesNothing)
+TEST_F(MtcExtensionTest, FormatRequestDoesNothingIfNotSupportedMessage)
 {
-    pExtension->FormatRequest(RequestType::START, objMessageRequiresSomeOptionTag);
+    pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    pExtension->FormatRequest(RequestType::START, objMessageSupportsSomeOptionTag);
+    pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 }
 
-TEST_F(MtcExtensionTest, FormatResponseDoesNothing)
+TEST_F(MtcExtensionTest, FormatRequestDoesNothingIfNotAvailableOnRemote)
 {
-    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresSomeOptionTag);
+    pExtension->FormatRequest(RequestType::START, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
 
-    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsSomeOptionTag);
+    pExtension->FormatRequest(RequestType::START, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+}
+
+TEST_F(MtcExtensionTest, FormatRequestAddsOptionTagIfSupportedOnRemote)
+{
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, OPTION_TAG, ISipHeader::SUPPORTED, _));
+    pExtension->FormatRequest(RequestType::START, objMessage);
+}
+
+TEST_F(MtcExtensionTest, FormatRequestAddsOptionTagIfRequiredOnRemote)
+{
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_TRUE));
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, OPTION_TAG, ISipHeader::SUPPORTED, _));
+    pExtension->FormatRequest(RequestType::START, objMessage);
+}
+
+TEST_F(MtcExtensionTest, FormatResponseDoesNothingIfNotSupportedMessage)
+{
+    pExtension->FormatResponse(ResponseType::REJECT, objMessage);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+
+    pExtension->FormatResponse(ResponseType::REJECT, objMessage);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+}
+
+TEST_F(MtcExtensionTest, FormatResponseDoesNothingIfNotAvailableOnRemote)
+{
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+}
+
+TEST_F(MtcExtensionTest, FormatResponseAddOptionTagIfSupportedOnRemote)
+{
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+
+    MockIMessage objMessage;
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, OPTION_TAG, ISipHeader::SUPPORTED, _));
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+}
+
+TEST_F(MtcExtensionTest, FormatResponseAddOptionTagIfRequiredOnRemote)
+{
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_TRUE));
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
+
+    MockIMessage objMessage;
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, OPTION_TAG, ISipHeader::SUPPORTED, _));
+    pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
 }
 
 TEST_F(MtcExtensionTest, HandleRequestForSupportedRequiringMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(RequestType::START, objMessageRequiresSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pExtension->HandleRequest(RequestType::START, objMessage);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleRequestForSupportedSupportingMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(RequestType::START, objMessageSupportsSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleRequest(RequestType::START, objMessage);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleResponseForSupportedRequiringMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_TRUE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleResponseForSupportedSupportingMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleRequestForNotSupportedMessageUpdatesAvailability)
 {
-    pExtension->HandleRequest(RequestType::TERMINATE, objMessageRequiresSomeOptionTag);
-    pExtension->HandleRequest(RequestType::TERMINATE, objMessageSupportsSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleRequest(RequestType::TERMINATE, objMessage);
+    pExtension->HandleRequest(RequestType::TERMINATE, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
 
 TEST_F(MtcExtensionTest, HandleResponseForNotSupportedMessageUpdatesAvailability)
 {
-    pExtension->HandleResponse(ResponseType::REJECT, objMessageRequiresSomeOptionTag);
-    pExtension->HandleResponse(ResponseType::REJECT, objMessageSupportsSomeOptionTag);
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasValue(_, OPTION_TAG, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::REJECT, objMessage);
+    pExtension->HandleResponse(ResponseType::REJECT, objMessage);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
