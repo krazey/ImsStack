@@ -73,7 +73,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
-    m_objContext.GetUiNotifier().SendStartFailed(
+    m_objContext.GetUiNotifier().SendIncomingCallRejected(
             TerminationHandler(m_objContext).Handle(*piSession));
     return CallStateName::TERMINATING;
 }
@@ -115,7 +115,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISe
         m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
         return GetStateName();
     }
-    m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+    m_objContext.GetUiNotifier().SendIncomingCallRejected(
+            CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     return CallStateName::TERMINATING;
 }
 

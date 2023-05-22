@@ -188,7 +188,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         MtcApp mtcApp = Mockito.mock(MtcApp.class);
         MtcCall mtcCall = Mockito.mock(MtcCall.class);
         ImsCallManager manager = Mockito.mock(ImsCallManager.class);
-        when(mtcApp.createCall(MtcCall.FLAG_MO)).thenReturn(mtcCall);
+        when(mtcApp.createMtcCallAndAttach(MtcCall.FLAG_MO)).thenReturn(mtcCall);
         when(manager.getMtcApp()).thenReturn(mtcApp);
         when(mCallApp.getCallManager()).thenReturn(manager);
         when(mImsServiceManager.getCallApp(SLOT_0)).thenReturn(mCallApp);
@@ -213,11 +213,11 @@ public class ImsTestHelperTest extends ImsStackTest {
         Mockito.reset(mImsServiceManager);
         mImsTestHelperReceiver.onReceive(mContext, intentSrv);
         verify(mImsServiceManager, times(1)).getCallApp(SLOT_0);
-        verify(mtcApp, times(1)).createCall(anyInt());
+        verify(mtcApp, times(1)).createMtcCallAndAttach(anyInt());
 
         // 102
         Mockito.reset(mImsServiceManager);
-        when(mtcApp.createCall(MtcCall.FLAG_MO)).thenReturn(mtcCall);
+        when(mtcApp.createMtcCallAndAttach(MtcCall.FLAG_MO)).thenReturn(mtcCall);
         when(manager.getMtcApp()).thenReturn(mtcApp);
         when(mCallApp.getCallManager()).thenReturn(manager);
         when(mImsServiceManager.getCallApp(SLOT_0)).thenReturn(mCallApp);

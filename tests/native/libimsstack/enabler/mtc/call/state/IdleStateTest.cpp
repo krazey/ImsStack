@@ -845,7 +845,7 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSdpOaFailed)
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnAttached());
@@ -867,7 +867,7 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
     ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE)).WillByDefault(Return(IMS_FAILURE));
 
     const CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnAttached());
@@ -1039,7 +1039,7 @@ TEST_F(IdleStateTest, OnUssiAttachedRejectsIfSdpOaFailed)
     ON_CALL(*pMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     const CallReasonInfo objReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(objMtcSession, Reject(objReasonInfo));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnUssiAttached());
@@ -1079,7 +1079,7 @@ TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfMt)
     const IMtcBlockChecker::Result objBlockResult(
             IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo));
     EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(_, _)).Times(0);
 
     objCallInfo.ePeerType = PeerType::MT;
@@ -1124,7 +1124,7 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForAcBlocked)
     const IMtcBlockChecker::Result objBlockResult(
             IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo)).Times(0);
     EXPECT_CALL(
             *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
 
@@ -1147,7 +1147,7 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForRrcReject)
                     IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo)));
     ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout).WillByDefault(Return(nTimerVzw));
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReasonInfo)).Times(0);
     EXPECT_CALL(
             *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
 

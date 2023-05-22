@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2022 The Android Open Source Project
  *
@@ -136,6 +135,22 @@ TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
     EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(0);
     pNotifier->SendIncomingCallReceived();
+}
+
+TEST_F(MtcUiNotifierTest, SendIncomingCallRejected)
+{
+    MockIMtcService objService;
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
+    MockIJniMtcServiceThread objMockServiceThread;
+
+    ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(_, _, _, _, _, _)).Times(0);
+    pNotifier->SendIncomingCallRejected(*pReason);
+
+    ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objMockServiceThread));
+    EXPECT_CALL(objMockServiceThread, OnRejectedIncomingCall(_, _, _, _, _, _)).Times(1);
+    pNotifier->SendIncomingCallRejected(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendStarted)

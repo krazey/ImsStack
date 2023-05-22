@@ -19,8 +19,11 @@
 #include "IJniEnablerThread.h"
 #include "IMtcService.h"
 #include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
+#include "JniCallInfo.h"
+#include "MtcDef.h"
 
 struct JniExternalCall;
 
@@ -53,6 +56,20 @@ public:
      * @param nCallKey
      */
     virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) = 0;
+
+    /**
+     * @brief Notifies there is an rejected incoming call for call logs.
+     *
+     * @param objCallInfo
+     * @param objMediaInfo
+     * @param objSuppServices
+     * @param eOipType
+     * @param strRemoteNumber
+     */
+    virtual void OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
+            IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) = 0;
 
     /**
      * @brief Notifies Java that {@code JniExternalCall} state is changed.

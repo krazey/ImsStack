@@ -310,7 +310,7 @@ public class ConferenceProxy {
             return null;
         }
 
-        MtcCall confCall = app.createCall(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE);
+        MtcCall confCall = app.createMtcCallAndAttach(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE);
 
         if (confCall != null) {
             confCall.open(IUMtcCall.SERVICETYPE_NORMAL, false, false, false);

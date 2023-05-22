@@ -38,6 +38,7 @@ public:
 
     void SendPreIncomingCallReceived() override;
     void SendIncomingCallReceived() override;
+    void SendIncomingCallRejected(IN const CallReasonInfo& objReason) override;
     void SendStarted() override;
     void SendStartFailed(IN const CallReasonInfo& objReason) override;
     void SendProgressing() override;

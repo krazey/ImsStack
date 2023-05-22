@@ -658,6 +658,7 @@ IMS_RESULT MtcCallState::SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* pi
 PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
+    IMS_TRACE_D("RejectIncomingAndToTerminating", 0, 0, 0);
     if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||  // TODO: remove?
             objReason.nCode == CODE_REJECT_QOS_FAILURE)
     {
@@ -666,7 +667,16 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonIn
     }
 
     m_objContext.GetSession()->Reject(objReason);
-    m_objContext.GetUiNotifier().SendStartFailed(objReason);
+
+    if (GetStateName() == CallStateName::IDLE || GetStateName() == CallStateName::INCOMING)
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallRejected(objReason);
+    }
+    else
+    {
+        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+    }
+
     return CallStateName::TERMINATING;
 }
 

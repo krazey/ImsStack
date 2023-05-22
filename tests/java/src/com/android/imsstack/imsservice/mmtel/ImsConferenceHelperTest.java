@@ -101,13 +101,13 @@ public class ImsConferenceHelperTest {
         when(mImsCallManager.getActiveSession()).thenReturn(mFgImsCallSession);
         when(mFgImsCallSession.getMtcCall()).thenReturn(mFgMtcCall);
         when(mImsCallManager.getMtcApp()).thenReturn(mMtcApp);
-        when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
+        when(mMtcApp.createMtcCallAndAttach(18)).thenReturn(mMtcCall);
 
         assertEquals(true, mConfHelper.extendToConference(mICallContext, mParticipants));
         verify(mFgImsCallSession).setConferenceProxy(any(ConferenceProxy.class));
 
         mMtcCall = null;
-        when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
+        when(mMtcApp.createMtcCallAndAttach(18)).thenReturn(mMtcCall);
         assertEquals(false, mConfHelper.extendToConference(mICallContext, mParticipants));
 
         mFgMtcCall = null;
@@ -130,7 +130,7 @@ public class ImsConferenceHelperTest {
         when(mFgImsCallSession.getMtcCall()).thenReturn(mFgMtcCall);
         when(mBgImsCallSession.getMtcCall()).thenReturn(mBgMtcCall);
         when(mImsCallManager.getMtcApp()).thenReturn(mMtcApp);
-        when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
+        when(mMtcApp.createMtcCallAndAttach(18)).thenReturn(mMtcCall);
 
         assertEquals(true, mConfHelper.merge(mICallContext));
         verify(mBgImsCallSession).setConferenceProxy(any(ConferenceProxy.class));
@@ -141,7 +141,7 @@ public class ImsConferenceHelperTest {
         assertEquals(false, mConfHelper.merge(mICallContext));
 
         mMtcCall = null;
-        when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
+        when(mMtcApp.createMtcCallAndAttach(18)).thenReturn(mMtcCall);
         assertEquals(false, mConfHelper.merge(mICallContext));
 
         mFgMtcCall = null;

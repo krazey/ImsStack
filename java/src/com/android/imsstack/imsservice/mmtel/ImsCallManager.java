@@ -29,7 +29,6 @@ import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
-import com.android.imsstack.enabler.mtc.IncomingCallInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
@@ -172,7 +171,7 @@ public class ImsCallManager {
             sessionAttributes |= MtcCall.FLAG_RTT;
         }
 
-        MtcCall call = mMtcApp.createCall(sessionAttributes);
+        MtcCall call = mMtcApp.createMtcCallAndAttach(sessionAttributes);
         String callId = createCallId();
 
         if (call == null) {
@@ -560,7 +559,8 @@ public class ImsCallManager {
 
         addPendingSession(session);
 
-        logi("IncomingCall :: callId=" + session.getCallId() + ", phoneId=" + getPhoneId());
+        logi("onCallPreIncomingReceived :: callId=" + session.getCallId()
+                + ", phoneId=" + getPhoneId());
     }
 
     private void onCallIncomingReceived(final ImsCallSessionImpl session) {
@@ -890,6 +890,7 @@ public class ImsCallManager {
 
         @Override
         public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
+            log("onPreIncomingCallReceived");
             MtcCall call = mMtcApp.getPendingCall(nativeCallObject);
 
             if (call == null) {
@@ -900,29 +901,10 @@ public class ImsCallManager {
             ImsCallProfile profile = new ImsCallProfile();
             String callId = createCallId();
 
-            ImsCallSessionImpl callSession =  createImsCallSession(
+            ImsCallSessionImpl callSession = createImsCallSession(
                     mCallContext, mCT, call, callId, profile, false);
 
             onCallPreIncomingReceived(callSession);
-        }
-
-        @Override
-        public void onIncomingCallInfoReceived(IncomingCallInfo incomingCallInfo) {
-            logi("onIncomingCallInfoReceived");
-
-            if (incomingCallInfo.mOIR == IncomingCallInfo.OIPTYPE_INVALID) {
-                removeIncomingCallInfo();
-            } else {
-                int callType = ImsCallUtils.getProfileCallTypeFromCallInfo(
-                        incomingCallInfo.mVideoCapable, incomingCallInfo.mCallType);
-                ImsCallProfile profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
-                        callType);
-                profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, incomingCallInfo.mOIR);
-                profile.setCallExtraInt(ImsCallProfile.EXTRA_CNAP, incomingCallInfo.mCNAP);
-                profile.setCallExtra(ImsCallProfile.EXTRA_OI, incomingCallInfo.mOI);
-                profile.setCallExtra(ImsCallProfile.EXTRA_CNA, incomingCallInfo.mCNA);
-                onCallInfoReceived(profile);
-            }
         }
     }
 

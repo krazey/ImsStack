@@ -80,6 +80,28 @@ void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
 }
 
 PUBLIC
+void JniMtcServiceThread::OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo,
+        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN OipType eOipType, IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason)
+{
+    IMS_TRACE_D("OnRejectedIncomingCall", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcService::AUTO_REJECTED_CALL);
+
+    JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
+    JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);
+
+    objParcel.writeInt32(static_cast<IMS_SINT32>(eOipType));
+    objParcel.writeString16(android::String16(strRemoteNumber.GetStr()));
+
+    JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
+
+    JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
+
+    SendData2Java(objParcel);
+}
+
+PUBLIC
 void JniMtcServiceThread::OnJniReady()
 {
     IMS_TRACE_D("OnJniReady", 0, 0, 0);

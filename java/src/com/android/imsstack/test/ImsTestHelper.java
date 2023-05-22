@@ -240,14 +240,14 @@ public final class ImsTestHelper {
                 // 0 : callAttributes
                 // 1 : emergencyRouting type
                 ImsLog.d("sendMtcTestCommand :: open emergency service");
-                sTempCall = mtcApp.createCall(extras[0]);
+                sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
                 mtcApp.openEmergencyService(sTempCall, extras[1]);
                 return;
             } else if (command == 101) {
                 // 0 : callAttributes
                 // 1 : serviceType, 2 : emergency, 3 : offline, 4 : ussi
                 ImsLog.d("sendMtcTestCommand :: open call");
-                sTempCall = mtcApp.createCall(extras[0]);
+                sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
                 sTempCall.open(extras[1], extras[2] != 0, extras[3] != 0, extras[4] != 0);
                 return;
             } else if (command == 102) {

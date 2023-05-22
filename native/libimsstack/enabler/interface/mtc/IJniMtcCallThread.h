@@ -242,7 +242,7 @@ public:
     virtual void OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies there is an incoming call that needs to be processed.
      *
      * @param nCallKey
      * @param objCallInfo

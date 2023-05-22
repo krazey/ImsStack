@@ -136,7 +136,7 @@ TEST_F(IncomingStateTest, RejectTransitsStateToTerminating)
     const CallReasonInfo objAnyReason(CODE_REJECT_ONGOING_CALL_SETUP);
 
     EXPECT_CALL(objMtcSession, Reject(objAnyReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objAnyReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objAnyReason));
 
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->Reject(objAnyReason));
 }
@@ -153,7 +153,7 @@ TEST_F(IncomingStateTest, TerminateInvokesTerminate)
 
 TEST_F(IncomingStateTest, SessionTerminatedTransitsStateToTerminated)
 {
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_));
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionTerminated(&objISession));
 }
 
@@ -185,7 +185,8 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
 
 TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
+    EXPECT_CALL(
+            objUiNotifier, SendIncomingCallRejected(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pIncomingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
@@ -197,7 +198,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
             .WillByDefault(Return(&objIMessage));
     ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(_)).Times(0);
     EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
 
@@ -254,7 +255,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedRejectsCallIfSendingRes
 
     const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
     EXPECT_EQ(CallStateName::TERMINATING,
             pIncomingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
@@ -288,7 +289,7 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
             .WillOnce(Return(IMS_FAILURE));
     const CallReasonInfo objReason(CODE_MEDIA_NOT_ACCEPTABLE);
     EXPECT_CALL(objMtcSession, Reject(objReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
     EXPECT_EQ(CallStateName::TERMINATING,
             pIncomingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
@@ -323,7 +324,7 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRespondToPrackAndSendsIncom
             .WillOnce(Return(IMS_FAILURE));
     const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionPrackReceived(&objISession));
 }
 
@@ -345,7 +346,7 @@ TEST_F(IncomingStateTest, SessionPrackReceivedInvokesRejectIncomingIfOfferAnswer
     const CallReasonInfo objReason(CODE_SIP_NOT_ACCEPTABLE);
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMtcSession, Reject(objReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
     EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->SessionPrackReceived(&objISession));
 }
 
@@ -353,7 +354,7 @@ TEST_F(IncomingStateTest, SessionRprDeliveryFailedRejectsIncomingCall)
 {
     const CallReasonInfo objReason(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
     EXPECT_CALL(objMtcSession, Reject(objReason));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_CALL(objUiNotifier, SendIncomingCallRejected(objReason));
 
     pIncomingState->SessionRprDeliveryFailed(&objISession);
 }

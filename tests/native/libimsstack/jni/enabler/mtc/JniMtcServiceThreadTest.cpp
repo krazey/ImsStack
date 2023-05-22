@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "CallReasonInfo.h"
 #include "IMtcService.h"
+#include "ImsMap.h"
 #include "ImsProcess.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
+#include "JniCallInfo.h"
 #include "JniMtcServiceThread.h"
 #include "MockIThread.h"
+#include "MtcDef.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
 #include <binder/Parcel.h>
@@ -125,6 +129,23 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
             .Times(1);
 
     pJniServiceThread->OnPreIncomingCallReceived(1);
+}
+
+TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
+{
+    IMS_UINT32 eType = IuMtcService::AUTO_REJECTED_CALL;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    JniCallInfo objCallInfo;
+    MediaInfo objMediaInfo;
+    ImsMap<SuppType, SuppService*> objSuppServices;
+    CallReasonInfo objReason(CODE_NONE);
+    pJniServiceThread->OnRejectedIncomingCall(
+            objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnJniReady)

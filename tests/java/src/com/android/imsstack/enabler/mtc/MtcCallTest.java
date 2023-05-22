@@ -664,6 +664,18 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeIncomingCallReceivedForAutoRejecting() {
+        mTestMtcCall.setListener(mListener);
+        Parcel parcel = Parcel.obtain();
+        mTestMtcCall.invokeIncomingCallReceivedForAutoRejecting(new IncomingMtcCall(parcel));
+        parcel.recycle();
+
+        verify(mCT, times(1)).updateCallState(eq(mTestMtcCall),
+                eq(CallTracker.CALL_EVENT_INCOMING_RECEIVED), eq(null));
+        verify(mListener, times(1)).onCallIncomingReceived(eq(mTestMtcCall), any());
+    }
+
+    @Test
     public void testJniListenerStarted() {
         sendMessageToJniListener(IUMtcCall.STARTED);
 

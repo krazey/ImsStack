@@ -78,6 +78,25 @@ void MtcUiNotifier::SendIncomingCallReceived()
 }
 
 PUBLIC
+void MtcUiNotifier::SendIncomingCallRejected(IN const CallReasonInfo& objReason)
+{
+    IMS_TRACE_I("SendIncomingCallRejected", 0, 0, 0);
+
+    IJniMtcServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
+    if (piServiceThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        return;
+    }
+
+    piServiceThread->OnRejectedIncomingCall(m_objContext.CreateJniCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetSupplementaryService().GetServices(),
+            m_objContext.GetParticipantInfo().GetOipType(),
+            m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason);
+}
+
+PUBLIC
 void MtcUiNotifier::SendStarted()
 {
     IMS_TRACE_I("SendStarted", 0, 0, 0);
