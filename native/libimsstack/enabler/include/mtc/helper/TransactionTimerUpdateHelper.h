@@ -21,11 +21,13 @@
 
 class MtcConfigurationProxy;
 class IMtcCallContext;
+class ISipConfig;
 
 class TransactionTimerUpdateHelper
 {
 public:
-    explicit TransactionTimerUpdateHelper(IN IMtcCallContext& objContext);
+    explicit TransactionTimerUpdateHelper(
+            IN IMtcCallContext& objContext, IN const ISipConfig* pSipConfig);
     virtual ~TransactionTimerUpdateHelper();
     TransactionTimerUpdateHelper(IN const TransactionTimerUpdateHelper&) = delete;
     TransactionTimerUpdateHelper& operator=(IN const TransactionTimerUpdateHelper&) = delete;
@@ -39,6 +41,7 @@ private:
     void UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
     IMS_BOOL IsNeedToUpdate() const;
 
+    const ISipConfig* m_pSipConfig;
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy& m_objConfiguration;
     IMS_BOOL m_bEmergency;
