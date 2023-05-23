@@ -128,8 +128,10 @@ public class MediaTestUtils {
 
     static void assertParcelEquals(Parcel testParcel, Parcel actualParcel) {
         byte[] testByte = testParcel.marshall();
+        testParcel.recycle();
         testParcel = null;
         byte[] actualByte = actualParcel.marshall();
+        actualParcel.recycle();
         actualParcel = null;
         assertArrayEquals(testByte,actualByte);
     }

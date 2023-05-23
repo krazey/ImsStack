@@ -67,7 +67,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -82,7 +81,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -101,7 +99,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -120,7 +117,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -139,7 +135,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -156,7 +151,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -184,7 +178,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -206,7 +199,6 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 
     @Test
@@ -225,6 +217,5 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
     }
 }
