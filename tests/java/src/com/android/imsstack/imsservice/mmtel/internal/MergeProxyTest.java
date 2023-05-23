@@ -191,10 +191,16 @@ public class MergeProxyTest extends ImsStackTest {
         when(mMockMtcCall.getConferenceInterface()).thenReturn(mMockMtcConference);
         when(mMockFgCall.getConferenceInterface()).thenReturn(mtcConferenceFg);
 
-        // NotifySessionMergeFailed()
         mMtcConferencelistenerProxy.onCallMergeFailed(mMockMtcConference, mFailInfo);
         processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mtcConferenceFg, mFailInfo);
+
+        mMergeProxy.setForegroundCallRecoveryForTest(true);
+        when(mMockFgCall.isOnHold()).thenReturn(true);
+        mMtcConferencelistenerProxy.onCallMergeFailed(mMockMtcConference, mFailInfo);
+        processAllMessages();
+        verify(mMockMtcConferencelistenerProxy, never()).onCallMergeFailed(mMockMtcConference,
+                mFailInfo);
 
         //NotifySessionMergeStarted and NotifySessionMerged()
         when(mMockCarrierConfig.getBoolean(
@@ -323,6 +329,7 @@ public class MergeProxyTest extends ImsStackTest {
     @Test
     public void testOnCallTerminatedConferenceCall() {
         mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        mMergeProxy.setInitialConferenceExtensionForTest(false);
         mMergeProxy.setStateForTest(STATE_MERGE_WAITING);
         mMtcCallListenerProxy.onCallTerminated(mMockMtcCall, mFailInfo);
         processAllMessages();
@@ -396,6 +403,15 @@ public class MergeProxyTest extends ImsStackTest {
         mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
         when(mMockFgCall.getConferenceInterface()).thenReturn(mMockMtcConference);
         mMergeProxy.setForegroundCallRecoveryForTest(true);
+        mMtcCallListenerProxy.onCallHoldFailed(mMockFgCall, mFailInfo);
+        processAllMessages();
+        verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
+        clearInvocations(mMockMtcConferencelistenerProxy);
+
+        //added to get mMergeFailedReason value as not null
+        mMergeProxy.setStateForTest(STATE_UNHOLDING);
+        mMtcCallListenerProxy.onCallResumeFailed(mMockBgCall, mFailInfo);
+
         mMtcCallListenerProxy.onCallHoldFailed(mMockFgCall, mFailInfo);
         processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
