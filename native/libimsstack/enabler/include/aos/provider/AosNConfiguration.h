@@ -94,6 +94,7 @@ public:
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
+    IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
 
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
@@ -149,7 +150,6 @@ public:
     ImsVector<IMS_SINT32>& GetSubErrorRegRequired() override;
     IMS_SINT32 GetRetryCountSubErrorRegRequired() const override;
     ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() override;
-    ImsVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() override;
     ImsVector<IMS_SINT32>& GetSubErrorSubTerminated() override;
     IMS_SINT32 GetRetryCountSubErrorSubTerminated() const override;
     ImsVector<IMS_SINT32>& GetSubErrorStoppingResub() override;
@@ -200,6 +200,7 @@ private:
     AosRegRetryIntervalBundle m_objRegRetryInterval;
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
+    AosWfcErrMessageBundle m_objWfcErrMessage;
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;

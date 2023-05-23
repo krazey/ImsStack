@@ -45,8 +45,9 @@ public interface IRegistrationNotifier {
      *
      * @param networkType the radio access technology.
      * @param reason the disconnected reason.
+     * @param message the disconnected message.
      */
-    void notifyDeregistered(int networkType, int reason);
+    void notifyDeregistered(int networkType, int reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology
@@ -54,8 +55,9 @@ public interface IRegistrationNotifier {
      *
      * @param networkType the current network type (before handover)
      * @param reason the handover failure reason.
+     * @param message the handover failure message.
      */
-    void notifyTechnologyChangeFailed(int networkType, int reason);
+    void notifyTechnologyChangeFailed(int networkType, int reason, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter

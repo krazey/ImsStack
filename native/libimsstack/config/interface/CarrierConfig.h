@@ -857,7 +857,6 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[];
         static const IMS_CHAR KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[];
         static const IMS_CHAR KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[];
-        static const IMS_CHAR KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY[];
 
         // Bundle {
         static const IMS_CHAR KEY_EXTRA_REG_ERR_BUNDLE[];
@@ -908,6 +907,15 @@ public:
         static const IMS_CHAR KEY_REREGISTRATION_ERROR_CODE_WITH_CALL_END_INT_ARRAY[];
         static const IMS_CHAR
                 KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[];
+        // }
+        // Bundle {
+        static const IMS_CHAR KEY_WFC_ERR_MESSAGE_BUNDLE[];
+        static const IMS_CHAR KEY_WFC_ERR_REG_403_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_REG_500_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_SUB_403_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_NOTIFY_TERMINATED_STRING[];
+        static const IMS_CHAR KEY_WFC_ERR_OTHER_FAILURES_STRING[];
         // }
         // Mtc
         static const IMS_CHAR KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[];
@@ -1114,11 +1122,15 @@ public:
             REG_RETRY_CNT_RESET_POLICY_NOTIFY = 2
         };
 
-        // error codes for reg event package by missing 911 address in wifi
+        // WFC error
         enum
         {
-            WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
-            WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403 = 2
+            WFC_ERROR_REG_403 = 1,
+            WFC_ERROR_REG_500 = 2,
+            WFC_ERROR_NOT_SUPPORTED_COUNTRY = 3,
+            WFC_ERROR_SUB_403 = 4,
+            WFC_ERROR_NOTIFY_TERMINATED = 5,
+            WFC_ERROR_OTHER_FAILURES = 6
         };
 
         // IP verion types

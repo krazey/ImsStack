@@ -62,10 +62,6 @@
     <int-array name="vowifi_sub_error_code_for_init_reg_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <int-array name="wfc_sub_err_code_by_missing_911_address_int_array" num="2">
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
@@ -99,6 +95,15 @@
         <int-array name="sub_err_code_for_init_reg_int_array" num="1">
             <item value="0"/>
         </int-array>
+    </pbundle>
+    <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
+    <pbundle name="wfc_err_message_bundle">
+        <string name="wfc_err_reg_403_string">REG90 - Unable to Connect</string>
+        <string name="wfc_err_reg_500_string">REG91 - Unable to Connect</string>
+        <string name="wfc_err_not_supported_country_string">REG92 - Wi-Fi Calling isn't supported in this country</string>
+        <string name="wfc_err_sub_403_string">REG09 - Missing 911 Address</string>
+        <string name="wfc_err_notify_terminated_string">REG09 - Missing 911 Address</string>
+        <string name="wfc_err_other_failures_string">REG99 - Unable to Connect</string>
     </pbundle>
 
     <!-- Uce -->

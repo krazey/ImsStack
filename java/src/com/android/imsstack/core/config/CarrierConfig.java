@@ -588,8 +588,6 @@ public class CarrierConfig {
                 "supported_roaming_rats_int_array";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
                 "vowifi_sub_error_code_for_init_reg_int_array";
-        public static final String KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY =
-                "wfc_sub_err_code_by_missing_911_address_int_array";
         // Bundle {
         public static final String KEY_EXTRA_REG_ERR_BUNDLE =
                 "extra_reg_err_bundle";
@@ -664,6 +662,22 @@ public class CarrierConfig {
                 "sub_err_code_for_terminated_with_retry_max_count_int";
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
                 "sub_err_code_for_terminated_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_WFC_ERR_MESSAGE_BUNDLE =
+                "wfc_err_message_bundle";
+        public static final String KEY_WFC_ERR_REG_403_STRING =
+                "wfc_err_reg_403_string";
+        public static final String KEY_WFC_ERR_REG_500_STRING =
+                "wfc_err_reg_500_string";
+        public static final String KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING =
+                "wfc_err_not_supported_country_string";
+        public static final String KEY_WFC_ERR_SUB_403_STRING =
+                "wfc_err_sub_403_string";
+        public static final String KEY_WFC_ERR_NOTIFY_TERMINATED_STRING =
+                "wfc_err_notify_terminated_string";
+        public static final String KEY_WFC_ERR_OTHER_FAILURES_STRING =
+                "wfc_err_other_failures_string";
         // }
         // Mtc
         public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
@@ -951,11 +965,12 @@ public class CarrierConfig {
             CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
             CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
             Assets.KEY_EXTRA_REG_ERR_BUNDLE,
+            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
             Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
             Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
             Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
             Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE);
+            Assets.KEY_WFC_ERR_MESSAGE_BUNDLE);
 
     private final PersistableBundle mConfig = new PersistableBundle();
 

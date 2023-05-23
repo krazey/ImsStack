@@ -19,8 +19,8 @@ package com.android.imsstack.enabler.aos.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -858,8 +858,9 @@ public class AosServiceTest extends ImsStackTest {
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
         verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.LTE,
-                ReasonCode.CODE_REGISTRATION_ERROR);
+                ReasonCode.CODE_REGISTRATION_ERROR, null);
     }
 
     @Test
@@ -876,7 +877,8 @@ public class AosServiceTest extends ImsStackTest {
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
-        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(NetworkType.LTE, reason);
+        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(
+                NetworkType.LTE, reason, null);
     }
 
     @Test

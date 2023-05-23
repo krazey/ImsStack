@@ -30,8 +30,8 @@ public:
             (override));
     MOCK_METHOD(IMS_BOOL, Subscription_CanBeTransmitted, (), (override));
     MOCK_METHOD(void, Subscription_NotifyReceived, (IN IMS_SINT32 nEvent), (override));
-    MOCK_METHOD(void, Subscription_Request, (IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter),
-            (override));
+    MOCK_METHOD(void, Subscription_Request,
+            (IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter, IN IMS_BOOL bAwt), (override));
 };
 
 #endif  // MOCK_I_AOS_SUBSCRIPTION_LISTENER_H_

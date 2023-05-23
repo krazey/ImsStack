@@ -231,7 +231,8 @@ IMS_BOOL AosSubscription::IsTerminated() const
 }
 
 PROTECTED
-void AosSubscription::ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand /*=0*/)
+void AosSubscription::ReportState(
+        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand /*=0*/, IN IMS_BOOL bAwt /*= IMS_FALSE*/)
 {
     if (nReason == REASON_SUB_TERMINATED)
     {
@@ -246,80 +247,71 @@ void AosSubscription::ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand 
 
     m_piListener->Subscription_StateChanged(m_nState, nReason);
 
-    if (nCommand != COMMAND_NONE)
+    if (nCommand != CMD_NONE)
     {
-        m_piListener->Subscription_Request(nCommand);
+        m_piListener->Subscription_Request(nCommand, 0, bAwt);
     }
 }
 
 PROTECTED
 void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter /* = 0 */)
 {
-    IMS_BOOL bRegRequired = IMS_FALSE;
-    IMS_BOOL bSetWaitTime = IMS_FALSE;
-
     m_piListener->Subscription_NotifyReceived(nEvent);
-    if (nRetryAfter <= 0)
+
+    IMS_UINT32 nFeature = 0;
+    switch (nEvent)
     {
-        nRetryAfter = 0;
+        case EVENT_EXPIRED:
+            nFeature = IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED;
+            break;
+        case EVENT_DEACTIVATED:
+            nFeature = IAosNConfiguration::NOTIFY_TERMINATED_DEACTIVATED;
+            break;
+        case EVENT_PROBATION:
+            nFeature = IAosNConfiguration::NOTIFY_TERMINATED_PROBATION;
+            break;
+        case EVENT_UNREGISTERED:
+            nFeature = IAosNConfiguration::NOTIFY_TERMINATED_UNREGISTERED;
+            break;
+        case EVENT_REJECTED:
+            nFeature = IAosNConfiguration::NOTIFY_TERMINATED_REJECTED;
+            break;
+        default:
+            break;
     }
 
-    if (nEvent == EVENT_EXPIRED)
-    {
-        bRegRequired = IsRegRequiredByNotofy(IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED);
-        bSetWaitTime =
-                IsRegAfterWaitRequiredByNotify(IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED);
-    }
-    else if (nEvent == EVENT_DEACTIVATED)
-    {
-        bRegRequired = IsRegRequiredByNotofy(IAosNConfiguration::NOTIFY_TERMINATED_DEACTIVATED);
-        bSetWaitTime =
-                IsRegAfterWaitRequiredByNotify(IAosNConfiguration::NOTIFY_TERMINATED_DEACTIVATED);
-    }
-    else if (nEvent == EVENT_PROBATION)
-    {
-        bRegRequired = IsRegRequiredByNotofy(IAosNConfiguration::NOTIFY_TERMINATED_PROBATION);
-        bSetWaitTime =
-                IsRegAfterWaitRequiredByNotify(IAosNConfiguration::NOTIFY_TERMINATED_PROBATION);
-    }
-    else if (nEvent == EVENT_UNREGISTERED)
-    {
-        bRegRequired = IsRegRequiredByNotofy(IAosNConfiguration::NOTIFY_TERMINATED_UNREGITERED);
-        bSetWaitTime =
-                IsRegAfterWaitRequiredByNotify(IAosNConfiguration::NOTIFY_TERMINATED_UNREGITERED);
-    }
-    else if (nEvent == EVENT_REJECTED)
-    {
-        bRegRequired = IsRegRequiredByNotofy(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED);
-        bSetWaitTime =
-                IsRegAfterWaitRequiredByNotify(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED);
-    }
-    else
+    if (nFeature == 0)
     {
         return;
     }
 
-    if (bSetWaitTime)
+    IMS_BOOL bRegRequired = IMS_FALSE;
+
+    if (IsRegAfterWaitRequiredByNotify(nFeature))
     {
         bRegRequired = IMS_TRUE;
         nRetryAfter = GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyWaitTime();
     }
-
-    if (bRegRequired)
+    else
     {
-        if (IsWfcErrorCodeByMissing911Address(
-                    CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED))
-        {
-            m_piListener->Subscription_Request(COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR);
-        }
-        else
-        {
-            m_piListener->Subscription_Request(COMMAND_REG_REQUIRED, nRetryAfter);
-        }
+        bRegRequired = IsRegRequiredByNotify(nFeature);
+        nRetryAfter = (nRetryAfter > 0) ? nRetryAfter : 0;
+    }
+
+    if (!bRegRequired)
+    {
+        m_piListener->Subscription_Request(CMD_REG_TERMINATED);
+        return;
+    }
+
+    if (IsWfcErrorMessageSupportedWithStateChecked(
+                CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
+    {
+        m_piListener->Subscription_Request(CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG);
     }
     else
     {
-        m_piListener->Subscription_Request(COMMAND_REG_TERMINATED);
+        m_piListener->Subscription_Request(CMD_REG_REQUIRED, nRetryAfter);
     }
 }
 
@@ -504,7 +496,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
     if (AosUtil::GetInstance()->IsInitialRegistrationRequired(piMsg))
     {
         IMS_TRACE_I("Request initial registration", 0, 0, 0);
-        SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
+        SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED);
         return IMS_TRUE;
     }
 
@@ -525,7 +517,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter(IN IMS_B
         {
             m_bIsErrChecked = IMS_TRUE;
             IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
-            SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
+            SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_NEXT_PCSCF);
             return IMS_TRUE;
         }
     }
@@ -559,7 +551,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
                 {
                     m_nRetryCountSubTerminated = 0;
                     IMS_TRACE_I("Request terminating its subscription", 0, 0, 0);
-                    RequestCommand(REASON_SUB_TERMINATED, COMMAND_SUB_TERMINATED);
+                    RequestCommand(REASON_SUB_TERMINATED, CMD_SUB_TERMINATED);
                     return IMS_TRUE;
                 }
             }
@@ -595,7 +587,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
                 {
                     m_nRetryCountRegRequired = 0;
                     IMS_TRACE_I("Request initial registration", 0, 0, 0);
-                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
+                    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED);
                     return IMS_TRUE;
                 }
             }
@@ -620,7 +612,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
             {
                 m_bIsErrChecked = IMS_TRUE;
                 IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
-                SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
+                SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_NEXT_PCSCF);
                 return IMS_TRUE;
             }
         }
@@ -649,17 +641,17 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
             {
                 m_bIsErrChecked = IMS_TRUE;
                 IMS_TRACE_I("Request initial registration", 0, 0, 0);
-                IMS_BOOL bErrCodeByNo911Addr = IsWfcErrorCodeByMissing911Address(
-                        CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403);
 
-                if (bErrCodeByNo911Addr == IMS_TRUE)
+                if (IsWfcErrorMessageSupportedWithStateChecked(
+                            CarrierConfig::Assets::WFC_ERROR_SUB_403))
                 {
-                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR);
+                    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_SUB_403_MSG);
                 }
                 else
                 {
-                    SetRequestCommand(bIsRefreshed, COMMAND_REG_REQUIRED);
+                    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED);
                 }
+
                 return IMS_TRUE;
             }
         }
@@ -725,7 +717,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     {
         if ((!m_bIsErrChecked) && (nStatusCode == SipStatusCode::SC_481))
         {
-            RequestCommand(REASON_SUB_TERMINATED, COMMAND_SUB_REQUIRED);
+            RequestCommand(REASON_SUB_TERMINATED, CMD_SUB_REQUIRED);
             return IMS_TRUE;
         }
         else if ((!m_bIsErrChecked) && (IsResubscriptionStopped(nStatusCode) == IMS_TRUE))
@@ -737,27 +729,20 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotofy(IN IMS_UINT32 nFeature)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotify(IN IMS_UINT32 nFeature)
 {
-    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration()))
-    {
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration());
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
 {
-    if (AosUtil::GetInstance()->IsFeatureOn(nFeature,
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime()))
-    {
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime());
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorCodeByMissing911Address(IN IMS_SINT32 nErrorCode)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChecked(
+        IN IMS_SINT32 nError)
 {
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
     {
@@ -769,17 +754,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorCodeByMissing911Address(IN IM
         return IMS_FALSE;
     }
 
-    ImsVector<IMS_SINT32>& objErrDisplayRequired =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetWfcSubErrorByMissing911Address();
-    for (IMS_UINT32 i = 0; i < objErrDisplayRequired.GetSize(); i++)
-    {
-        if (nErrorCode == objErrDisplayRequired.GetAt(i))
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
+    return GET_N_CONFIG(m_piContext->GetSlotId())->IsWfcErrorMessageSupported(nError);
 }
 
 PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
@@ -800,27 +775,15 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
 {
     IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
-    if (nCommand == COMMAND_REG_REQUIRED || nCommand == COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR)
-    {
-        IMS_SINT32 nRegistrationRetryResetPolicy =
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy();
-        if (nRegistrationRetryResetPolicy !=
-                CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
-        {
-            if (nCommand == COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR)
-            {
-                ReportState(
-                        nReason, COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME);
-            }
-            else
-            {
-                ReportState(nReason, COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME);
-            }
-            return;
-        }
-    }
 
-    ReportState(nReason, nCommand);
+    IMS_BOOL bIsRegRequired =
+            (nCommand == CMD_REG_REQUIRED || nCommand == CMD_REG_REQUIRED_WITH_SUB_403_MSG ||
+                    nCommand == CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG);
+
+    ReportState(nReason, nCommand,
+            bIsRegRequired &&
+                    GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() !=
+                            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -1240,7 +1203,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Terminated(IN IMS_SINT32
     A_IMS_TRACE_I(AOSTAG, "RegSubscription_Terminated :: reason(%d)", nReason, 0, 0);
 
     SetState(STATE_OFFLINE);
-    ReportState(REASON_SUB_TERMINATED, COMMAND_SUB_REQUIRED);
+    ReportState(REASON_SUB_TERMINATED, CMD_SUB_REQUIRED);
 }
 
 PROTECTED VIRTUAL void AosSubscription::Transaction_OnConnectionFailed(

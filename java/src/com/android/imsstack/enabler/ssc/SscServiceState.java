@@ -800,7 +800,7 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason) {
+        public void notifyDeregistered(int networkType, int reason, String message) {
             ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
 
             if (mImsRegistrationState) {
@@ -810,7 +810,7 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int causeCode) {
+        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
             // do nothing
         }
 

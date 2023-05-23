@@ -250,42 +250,64 @@ enum class AosReasonCode
      */
     REGISTRATION_ERROR = 3,
     /**
-     * IMS Registration error code due to missing 911 address
+     * WFC Registration error code if the network returns 403 Forbidden for Register.
+     * The 403 Forbidden case due to non-support for other countries are not included.
      */
-    REGISTRATION_ERROR_BY_MISSING_911_ADDRESS = 4,
+    REGISTRATION_ERROR_WFC_REG_403 = 4,
+    /**
+     * WFC Registration error code if the network returns 500 Internal server error for Register.
+     */
+    REGISTRATION_ERROR_WFC_REG_500 = 5,
+    /**
+     * WFC Registration error code if the network returns 403 Forbidden with a different country for
+     * register.
+     */
+    REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY = 6,
+    /**
+     * WFC Registration error code if the network returns 403 response for Subscribe.
+     */
+    REGISTRATION_ERROR_WFC_SUB_403 = 7,
+    /**
+     * WFC Registration error code if the network returns Notify Terminate message.
+     */
+    REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED = 8,
+    /**
+     * WFC Registration error code for all other failures.
+     */
+    REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9,
     /**
      * Service unavailable; radio power off
      */
-    LOCAL_POWER_OFF = 5,
+    LOCAL_POWER_OFF = 10,
     /**
      * Service unavailable; low battery
      */
-    LOCAL_LOW_BATTERY = 6,
+    LOCAL_LOW_BATTERY = 11,
     /**
      * Service unavailable; out of service (data service state)
      */
-    LOCAL_NETWORK_NO_SERVICE = 7,
+    LOCAL_NETWORK_NO_SERVICE = 12,
     /**
      * Service unavailable; no LTE coverage
      * (VoLTE is not supported even though IMS is registered)
      */
-    LOCAL_NETWORK_NO_LTE_COVERAGE = 8,
+    LOCAL_NETWORK_NO_LTE_COVERAGE = 13,
     /**
      * Service unavailable; located in roaming area
      */
-    LOCAL_NETWORK_ROAMING = 9,
+    LOCAL_NETWORK_ROAMING = 14,
     /**
      * Service unavailable; IP changed
      */
-    NETWORK_IP_CHANGED = 10,
+    NETWORK_IP_CHANGED = 15,
     /**
      * Service unavailable; for an unspecified reason
      */
-    LOCAL_SERVICE_UNAVAILABLE = 11,
+    LOCAL_SERVICE_UNAVAILABLE = 16,
     /**
      * Service unavailable; IMS is not registered
      */
-    LOCAL_NOT_REGISTERED = 12
+    LOCAL_NOT_REGISTERED = 17
 };
 
 /**

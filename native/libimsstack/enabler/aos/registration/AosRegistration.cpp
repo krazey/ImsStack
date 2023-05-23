@@ -5328,40 +5328,59 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_NotifyReceived(IN IMS_SINT3
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::Subscription_Request(
-        IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter /*= 0 */)
+PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nCommand,
+        IN IMS_SINT32 nRetryAfter /*= 0 */, IN IMS_BOOL bAwt /*= IMS_FALSE*/)
 {
-    A_IMS_TRACE_I(REGID, "Subscription_Request :: nCommand (%d), nRetryAfter (%d) ", nCommand,
-            nRetryAfter, 0);
+    A_IMS_TRACE_I(REGID, "Subscription_Request :: nCommand(%d), nRetryAfter(%d) bAwt(%s)", nCommand,
+            nRetryAfter, _TRACE_B_(bAwt));
 
     switch (nCommand)
     {
-        case AosSubscription::COMMAND_REG_REQUIRED:
-            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nRetryAfter, 0);
+        case AosSubscription::CMD_REG_REQUIRED:
+        {
+            IMS_SINT32 nTime = nRetryAfter;
+            if (bAwt)
+            {
+                IncreaseConsecutiveFailCount();
+                nTime = GetActualWaitTime();
+            }
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nTime, 0);
             break;
-        case AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR:
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_BY_MISSING_911_ADDRESS;
-            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nRetryAfter, 0);
-            break;
-        case AosSubscription::COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF:
+        }
+        case AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF:
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
             break;
-        case AosSubscription::COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME:
-            IncreaseConsecutiveFailCount();
-            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, GetActualWaitTime(), 0);
+        case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
+        {
+            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_SUB_403;
+            IMS_SINT32 nTime = nRetryAfter;
+            if (bAwt)
+            {
+                IncreaseConsecutiveFailCount();
+                nTime = GetActualWaitTime();
+            }
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nTime, 0);
             break;
-        case AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME:
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_BY_MISSING_911_ADDRESS;
-            IncreaseConsecutiveFailCount();
-            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, GetActualWaitTime(), 0);
+        }
+        case AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG:
+        {
+            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED;
+            IMS_SINT32 nTime = nRetryAfter;
+            if (bAwt)
+            {
+                IncreaseConsecutiveFailCount();
+                nTime = GetActualWaitTime();
+            }
+            PostMessage(MSG_REG_REQUIRED_WITH_WAIT_TIME, nTime, 0);
             break;
-        case AosSubscription::COMMAND_REG_TERMINATED:
+        }
+        case AosSubscription::CMD_REG_TERMINATED:
             PostMessage(MSG_REG_TERMINATED_BY_NOTIFY, 0, 0);
             break;
-        case AosSubscription::COMMAND_SUB_REQUIRED:
+        case AosSubscription::CMD_SUB_REQUIRED:
             PostMessage(MSG_SUB_REINITIATE, 0, 0);
             break;
-        case AosSubscription::COMMAND_SUB_TERMINATED:
+        case AosSubscription::CMD_SUB_TERMINATED:
             PostMessage(MSG_SUB_TERMINATED, 0, 0);
             break;
         default:

@@ -1034,7 +1034,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
-        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0);
+        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
         processDelayedMessage();
 
         verifyNoMoreInteractions(mMockUtInterface);
@@ -1051,7 +1051,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = true;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
 
-        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0);
+        mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
         processDelayedMessage();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -1066,7 +1066,7 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
 
         mSscServiceState = createAndInitSscServiceState();
-        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0);
+        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0, null);
         processDelayedMessage();
 
         verifyNoMoreInteractions(mMockUtInterface);

@@ -342,7 +342,8 @@ protected:
     void Subscription_StateChanged(IN IMS_SINT32 nState, IN IMS_SINT32 nReason = 0) override;
     IMS_BOOL Subscription_CanBeTransmitted() override;
     void Subscription_NotifyReceived(IN IMS_SINT32 nEvent) override;
-    void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0) override;
+    void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0,
+            IN IMS_BOOL bAwt = IMS_FALSE) override;
 
     /// Ipsec Helper
     virtual void CreateIpsecHelper();

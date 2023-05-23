@@ -82,6 +82,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegWithFeatureTagUnavailableSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupported, (IN IMS_SINT32 nError), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
@@ -136,7 +137,6 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequired, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorRegRequired, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequiredWithNextPcscf, (), (override));
-    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetWfcSubErrorByMissing911Address, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorSubTerminated, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorSubTerminated, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorStoppingResub, (), (override));
@@ -163,7 +163,6 @@ public:
     MOCK_METHOD(
             ImsVector<IMS_SINT32>&, GetReregErrCodeForInitRegWithAvailablePcscf, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetReregErrCodeForImsPdnReactivation, (), (override));
-
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };
 

@@ -384,8 +384,6 @@
     </int-array>
     <int-array name="vowifi_sub_error_code_for_init_reg_int_array" num="0">
     </int-array>
-    <int-array name="wfc_sub_err_code_by_missing_911_address_int_array" num="0">
-    </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <pbundle name="extra_reg_err_bundle">
@@ -442,6 +440,15 @@
         <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="0"/>
         <int-array name="sub_err_code_for_terminated_int_array" num="0">
         </int-array>
+    </pbundle>
+    <!-- KEY_WFC_ERR_MESSAGE_BUNDLE -->
+    <pbundle name="wfc_err_message_bundle">
+        <string name="wfc_err_reg_403_string"></string>
+        <string name="wfc_err_reg_500_string"></string>
+        <string name="wfc_err_not_supported_country_string"></string>
+        <string name="wfc_err_sub_403_string"></string>
+        <string name="wfc_err_notify_terminated_string"></string>
+        <string name="wfc_err_other_failures_string"></string>
     </pbundle>
 
     <!-- Mtc -->

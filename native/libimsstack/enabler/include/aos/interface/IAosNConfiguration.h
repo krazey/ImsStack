@@ -438,6 +438,13 @@ public:
     virtual IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const = 0;
 
     /**
+     * @brief Flag specifying if WFC error message is support.
+     *
+     * @return IMS_TRUE if support, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -1053,16 +1060,6 @@ public:
     virtual ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
 
     /**
-     * @brief Get error codes of reg event package(SUBSCRIBE msg) by missing 911 Address
-     *
-     *        This function called when it comes to the below defined situation.
-     *        WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
-     *        WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403 = 2
-     *
-     * @return ImsVector<IMS_SINT32>&  return array list for error codes
-     */
-    virtual ImsVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() = 0;
-    /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
      *        its subscription.
      *
@@ -1310,7 +1307,7 @@ public:
         NOTIFY_TERMINATED_EXPIRED = 0x01,
         NOTIFY_TERMINATED_DEACTIVATED = 0x02,
         NOTIFY_TERMINATED_PROBATION = 0x04,
-        NOTIFY_TERMINATED_UNREGITERED = 0x08,
+        NOTIFY_TERMINATED_UNREGISTERED = 0x08,
         NOTIFY_TERMINATED_REJECTED = 0x10
     };
 

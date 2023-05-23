@@ -232,7 +232,7 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testnotifyDeRegistered() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -255,7 +255,8 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testnotifyDeRegistered_WithError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS);
+                IAosRegistrationListener.ReasonCode
+                        .CODE_REGISTRATION_ERROR_WFC_SUB_403, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -278,7 +279,7 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testnotifyDeRegistered_WithPLMNError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK);
+                IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -302,11 +303,11 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyTechnologyChangeFailed() {
         assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.NONE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
-
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.LTE,
-                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE, null);
+
     }
 
     @Test

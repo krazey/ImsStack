@@ -137,7 +137,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
             Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
             Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
             Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE);
+            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
+            Assets.KEY_WFC_ERR_MESSAGE_BUNDLE);
     private static final Map<String, List<String>> BUNDLE_ITEMS_MAP = Map.ofEntries(
             Map.entry(ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
                     ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
@@ -217,7 +218,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
             Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
                     Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)));
+                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)),
+            Map.entry(Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
+                    Assets.KEY_WFC_ERR_REG_403_STRING,
+                    Assets.KEY_WFC_ERR_REG_500_STRING,
+                    Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING,
+                    Assets.KEY_WFC_ERR_SUB_403_STRING,
+                    Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING,
+                    Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING)));
     private static final List<String> KEYS_OF_VALUE_USED_AS_BUNDLE_KEY = List.of(
             ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,

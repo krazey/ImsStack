@@ -38,6 +38,7 @@ AosNConfiguration::AosNConfiguration() :
         m_objRegRetryInterval(AosRegRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
+        m_objWfcErrMessage(AosWfcErrMessageBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
         m_objListeners(ImsList<IAosNConfigurationListener*>())
@@ -382,6 +383,27 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnav
     return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const
+{
+    switch (nError)
+    {
+        case CarrierConfig::Assets::WFC_ERROR_REG_403:
+            return !m_objWfcErrMessage.strWfcErrorReg403.IsEmpty();
+        case CarrierConfig::Assets::WFC_ERROR_REG_500:
+            return !m_objWfcErrMessage.strWfcErrorReg500.IsEmpty();
+        case CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY:
+            return !m_objWfcErrMessage.strWfcErrorNotSupportedCountry.IsEmpty();
+        case CarrierConfig::Assets::WFC_ERROR_SUB_403:
+            return !m_objWfcErrMessage.strWfcErrorSub403.IsEmpty();
+        case CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED:
+            return !m_objWfcErrMessage.strWfcErrorNotifyTerminated.IsEmpty();
+        case CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES:
+            return !m_objWfcErrMessage.strWfcErrorOtherFailures.IsEmpty();
+        default:
+            return IMS_FALSE;
+    }
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -637,11 +659,6 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequired(
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredWithNextPcscf()
 {
     return m_objAsset.objSubErrorCodeForInitRegWithNextPcscf;
-}
-
-PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetWfcSubErrorByMissing911Address()
-{
-    return m_objAsset.objWfcSubErrByMissing911Address;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorSubTerminated() const
@@ -1036,6 +1053,40 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
+
+    // AosWfcErrMessageBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_WFC_ERR_MESSAGE_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objWfcErrMessage.strWfcErrorReg403 =
+                piCcBundle->GetString(CarrierConfig::Assets::KEY_WFC_ERR_REG_403_STRING);
+        m_objWfcErrMessage.strWfcErrorReg500 =
+                piCcBundle->GetString(CarrierConfig::Assets::KEY_WFC_ERR_REG_500_STRING);
+        m_objWfcErrMessage.strWfcErrorNotSupportedCountry = piCcBundle->GetString(
+                CarrierConfig::Assets::KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING);
+        m_objWfcErrMessage.strWfcErrorSub403 =
+                piCcBundle->GetString(CarrierConfig::Assets::KEY_WFC_ERR_SUB_403_STRING);
+        m_objWfcErrMessage.strWfcErrorNotifyTerminated =
+                piCcBundle->GetString(CarrierConfig::Assets::KEY_WFC_ERR_NOTIFY_TERMINATED_STRING);
+        m_objWfcErrMessage.strWfcErrorOtherFailures =
+                piCcBundle->GetString(CarrierConfig::Assets::KEY_WFC_ERR_OTHER_FAILURES_STRING);
+
+        piCcBundle->ReleaseBundle();
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_403_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorReg403.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_REG_500_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorReg500.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorNotSupportedCountry.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_SUB_403_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorSub403.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_NOTIFY_TERMINATED_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorNotifyTerminated.GetStr(), 0, 0);
+        A_IMS_TRACE_D(LOGTAG, "KEY_WFC_ERR_OTHER_FAILURES_STRING :: STECRM(%s)",
+                m_objWfcErrMessage.strWfcErrorOtherFailures.GetStr(), 0, 0);
+#endif
+    }
 }
 
 PRIVATE
@@ -1282,8 +1333,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
-    m_objAsset.objWfcSubErrByMissing911Address = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY);
 }
 
 PRIVATE

@@ -803,9 +803,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
         "supported_roaming_rats_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
         "vowifi_sub_error_code_for_init_reg_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY[] =
-        "wfc_sub_err_code_by_missing_911_address_int_array";
-
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE[] = "extra_reg_err_bundle";
 const IMS_CHAR
@@ -877,7 +874,18 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[] =
         "sub_err_code_for_terminated_int_array";
 // }
-
+// Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_MESSAGE_BUNDLE[] = "wfc_err_message_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_REG_403_STRING[] = "wfc_err_reg_403_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_REG_500_STRING[] = "wfc_err_reg_500_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING[] =
+        "wfc_err_not_supported_country_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_SUB_403_STRING[] = "wfc_err_sub_403_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_NOTIFY_TERMINATED_STRING[] =
+        "wfc_err_notify_terminated_string";
+const IMS_CHAR CarrierConfig::Assets::KEY_WFC_ERR_OTHER_FAILURES_STRING[] =
+        "wfc_err_other_failures_string";
+// }
 // Mtc
 const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
         "check_conference_event_package_version_bool";

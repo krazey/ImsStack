@@ -15,19 +15,24 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
+import static com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
@@ -575,21 +580,22 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private void onDeregistered(int networkType, int reason) {
         if (mRegState == IAosRegistrationListener.RegistrationState.DEREGISTERED
-                && reason == IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED) {
+                && reason == ReasonCode.CODE_UNSPECIFIED) {
             return;
         }
+
         mRegState = IAosRegistrationListener.RegistrationState.DEREGISTERED;
         mRegisteredNetworkType = NetworkType.NONE;
         mFeatureTagBits = 0;
         mFeatureTags.clear();
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyDeregistered(networkType, reason);
+            l.notifyDeregistered(networkType, reason, getErrorMessage(reason));
         }
     }
 
     private void onTechnologyChangeFailed(int networkType, int causeCode) {
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyTechnologyChangeFailed(networkType, causeCode);
+            l.notifyTechnologyChangeFailed(networkType, causeCode, null);
         }
     }
 
@@ -737,6 +743,38 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 onWifiServiceRequest(command);
             }
         });
+    }
+
+    private String getErrorMessage(int reason) {
+        String key = convertReasonToKey(reason);
+        return (key == null) ? null :
+                getStringFromBundle(CarrierConfig.Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
+    }
+
+    private String convertReasonToKey(int reason) {
+        switch (reason) {
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403:
+                return CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500:
+                return CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY:
+                return CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403:
+                return CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED:
+                return CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES:
+                return CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
+            default:
+                return null;
+        }
+    }
+
+    private String getStringFromBundle(String bundleKey, String key) {
+        ConfigInterface ci = AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
+        CarrierConfig cc = (ci == null) ? null : ci.getCarrierConfig();
+        PersistableBundle pb = (cc == null) ? null : cc.getBundle(bundleKey);
+        return (pb == null) ? null : pb.getString(key, null);
     }
 
     private final class NativeStateListener implements NativeStateInterface.Listener {

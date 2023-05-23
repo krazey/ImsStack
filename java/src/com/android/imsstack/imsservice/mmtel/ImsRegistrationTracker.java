@@ -127,7 +127,7 @@ public class ImsRegistrationTracker {
 
     public void dispose() {
         mRegTracker.notifyDeregistered(mRegTracker.getNetworkType(),
-                IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED);
+                IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED, null);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -642,11 +642,11 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason) {
+        public void notifyDeregistered(int networkType, int reason, String message) {
             logi("ImsRegistrationTracker notifyDeregistered - network=" + networkType
-                    + ", reason =" + reason);
+                    + ", reason =" + reason + ", message =" + message);
             int radioTech = convertToTelephonyNetworkType(networkType);
-            mRegImpl.notifyDeregistered(radioTech, reason);
+            mRegImpl.notifyDeregistered(radioTech, reason, message);
             boolean networkTypeChanged = updateNetworkType(
                     IAosRegistrationListener.NetworkType.NONE);
             boolean featureChanged = updateFeatures(FeatureTagMask.NONE);
@@ -657,10 +657,10 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int reason) {
+        public void notifyTechnologyChangeFailed(int networkType, int reason, String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
 
-            mRegImpl.notifyTechnologyChangeFailed(radioTech, reason);
+            mRegImpl.notifyTechnologyChangeFailed(radioTech, reason, message);
         }
 
         @Override

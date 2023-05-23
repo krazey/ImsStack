@@ -4229,33 +4229,40 @@ TEST_F(AosRegistrationTest, Subscription_NotifyReceived)
 
 TEST_F(AosRegistrationTest, Subscription_Request)
 {
-    // COMMAND_REG_REQUIRED
-    m_pTestAosRegistration->Subscription_Request(AosSubscription::COMMAND_REG_REQUIRED, 0);
+    // CMD_REG_REQUIRED
+    m_pTestAosRegistration->Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE);
 
-    // COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR
+    // CMD_REG_REQUIRED_WITH_SUB_403_MSG
     m_pTestAosRegistration->Subscription_Request(
-            AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR, 0);
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_FALSE);
 
-    // COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF
+    // CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG
     m_pTestAosRegistration->Subscription_Request(
-            AosSubscription::COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF, 0);
+            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_FALSE);
 
-    // COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME
+    // CMD_REG_REQUIRED_WITH_NEXT_PCSCF
     m_pTestAosRegistration->Subscription_Request(
-            AosSubscription::COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME, 0);
+            AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE);
 
-    // COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME
+    // CMD_REG_REQUIRED with AWT
+    m_pTestAosRegistration->Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_TRUE);
+
+    // CMD_REG_REQUIRED_WITH_SUB_403_MSG with AWT
     m_pTestAosRegistration->Subscription_Request(
-            AosSubscription::COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME, 0);
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE);
 
-    // COMMAND_REG_TERMINATED
-    m_pTestAosRegistration->Subscription_Request(AosSubscription::COMMAND_REG_TERMINATED, 0);
+    // CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG with AWT
+    m_pTestAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_TRUE);
 
-    // COMMAND_SUB_REQUIRED
-    m_pTestAosRegistration->Subscription_Request(AosSubscription::COMMAND_SUB_REQUIRED, 0);
+    // CMD_REG_TERMINATED
+    m_pTestAosRegistration->Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE);
 
-    // COMMAND_SUB_TERMINATED
-    m_pTestAosRegistration->Subscription_Request(AosSubscription::COMMAND_SUB_TERMINATED, 0);
+    // CMD_SUB_REQUIRED
+    m_pTestAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_REQUIRED, 0, IMS_FALSE);
+
+    // CMD_SUB_TERMINATED
+    m_pTestAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_TERMINATED, 0, IMS_FALSE);
 }
 
 TEST_F(AosRegistrationTest, NConfiguration_NotifyConfigChanged)

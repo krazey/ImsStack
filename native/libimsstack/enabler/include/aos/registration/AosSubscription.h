@@ -59,7 +59,8 @@ protected:
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
-    void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0);
+    void ReportState(
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0, IN IMS_BOOL bAwt = IMS_FALSE);
     void ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter = 0);
 
     void SetState(IN IMS_UINT32 nState);
@@ -91,9 +92,9 @@ public:
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
 
-    virtual IMS_BOOL IsRegRequiredByNotofy(IN IMS_UINT32 nFeature);
+    virtual IMS_BOOL IsRegRequiredByNotify(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
-    virtual IMS_BOOL IsWfcErrorCodeByMissing911Address(IN IMS_SINT32 nErrorCode);
+    virtual IMS_BOOL IsWfcErrorMessageSupportedWithStateChecked(IN IMS_SINT32 nError);
 
 protected:
     virtual void SetRequestCommand(IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand);
@@ -177,15 +178,14 @@ public:
 
     enum
     {
-        COMMAND_NONE = 0,
-        COMMAND_REG_REQUIRED,
-        COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF,
-        COMMAND_REG_REQUIRED_WITH_REG_RETRY_TIME,
-        COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR,
-        COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR_WITH_REG_RETRY_TIME,
-        COMMAND_REG_TERMINATED,
-        COMMAND_SUB_REQUIRED,
-        COMMAND_SUB_TERMINATED
+        CMD_NONE = 0,
+        CMD_REG_REQUIRED,
+        CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
+        CMD_REG_REQUIRED_WITH_SUB_403_MSG,
+        CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
+        CMD_REG_TERMINATED,
+        CMD_SUB_REQUIRED,
+        CMD_SUB_TERMINATED
     };
 
 protected:

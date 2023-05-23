@@ -149,4 +149,20 @@ public:
     ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
 };
 
+struct AosWfcErrMessageBundle
+{
+public:
+    AosWfcErrMessageBundle() {}
+
+    AosWfcErrMessageBundle(IN const AosWfcErrMessageBundle&) = delete;
+    AosWfcErrMessageBundle& operator=(IN const AosWfcErrMessageBundle&) = delete;
+
+public:
+    AString strWfcErrorReg403;
+    AString strWfcErrorReg500;
+    AString strWfcErrorNotSupportedCountry;
+    AString strWfcErrorSub403;
+    AString strWfcErrorNotifyTerminated;
+    AString strWfcErrorOtherFailures;
+};
 #endif  // AOS_ASSET_BUNDLE_H_

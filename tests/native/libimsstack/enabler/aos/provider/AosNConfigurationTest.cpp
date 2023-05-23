@@ -22,6 +22,7 @@
 #include "interface/IAosNConfiguration.h"
 #include "provider/AosNConfiguration.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 class AosNConfigurationTest : public ::testing::Test
@@ -755,14 +756,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
             .WillOnce(Return(objVowifiSubErrorCodeForInitReg));
 
-    ImsVector<IMS_SINT32> objWfcSubErrByMissing911Address;
-    objWfcSubErrByMissing911Address.Clear();
-    objWfcSubErrByMissing911Address.Add(403);
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(
-                    CarrierConfig::Assets::KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY))
-            .WillOnce(Return(objWfcSubErrByMissing911Address));
-
     InitAssetsConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     EXPECT_FALSE(pAosNConfiguration->IsCdmalessFeatureTagRequired());
@@ -883,8 +876,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     }
     EXPECT_EQ(2, cnt);
     objErrCode.Clear();
-    objErrCode = pAosNConfiguration->GetWfcSubErrorByMissing911Address();
-    EXPECT_EQ(403, objErrCode.GetAt(0));
 }
 
 TEST_F(AosNConfigurationTest, InitBundleConfig)
@@ -1092,6 +1083,44 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
 
     EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
 
+    // AosWfcErrMessageBundle
+    MockICarrierConfig objWfcErrMessageBundle;
+
+    AString strWfcErrorReg403("REG90 - Unable to Connect");
+    AString strWfcErrorReg500("REG91 - Unable to Connect");
+    AString strWfcErrorNotSupportedCountry("REG92 - Wi-Fi Calling isn't supported in this country");
+    AString strWfcErrorSub403("REG09 - Missing 911 Address");
+    AString strWfcErrorNotifyTerminated("REG09 - Missing 911 Address");
+    AString strWfcErrorOtherFailures("REG99 - Unable to Connect");
+
+    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Assets::KEY_WFC_ERR_MESSAGE_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objWfcErrMessageBundle)));
+
+    EXPECT_CALL(
+            objWfcErrMessageBundle, GetString(CarrierConfig::Assets::KEY_WFC_ERR_REG_403_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorReg403));
+    EXPECT_CALL(
+            objWfcErrMessageBundle, GetString(CarrierConfig::Assets::KEY_WFC_ERR_REG_500_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorReg500));
+    EXPECT_CALL(objWfcErrMessageBundle,
+            GetString(CarrierConfig::Assets::KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorNotSupportedCountry));
+    EXPECT_CALL(
+            objWfcErrMessageBundle, GetString(CarrierConfig::Assets::KEY_WFC_ERR_SUB_403_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorSub403));
+    EXPECT_CALL(objWfcErrMessageBundle,
+            GetString(CarrierConfig::Assets::KEY_WFC_ERR_NOTIFY_TERMINATED_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorNotifyTerminated));
+    EXPECT_CALL(objWfcErrMessageBundle,
+            GetString(CarrierConfig::Assets::KEY_WFC_ERR_OTHER_FAILURES_STRING, _))
+            .Times(1)
+            .WillOnce(Return(strWfcErrorOtherFailures));
+
     InitBundleConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     // AosExtraRegErrBundle
@@ -1123,7 +1152,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             (pAosNConfiguration->GetNotifyEventForInitialRegistration()));
     EXPECT_TRUE(IAosNConfiguration::NOTIFY_TERMINATED_PROBATION &
             (pAosNConfiguration->GetNotifyEventForInitialRegistration()));
-    EXPECT_FALSE(IAosNConfiguration::NOTIFY_TERMINATED_UNREGITERED &
+    EXPECT_FALSE(IAosNConfiguration::NOTIFY_TERMINATED_UNREGISTERED &
             (pAosNConfiguration->GetNotifyEventForInitialRegistration()));
 
     EXPECT_FALSE(IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED &
@@ -1160,4 +1189,18 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetSubErrorSubTerminated();
     EXPECT_EQ(3, objErrCode.GetSize());
+
+    // AosWfcErrMessageBundle
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_REG_403));
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_REG_500));
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY));
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_SUB_403));
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED));
+    EXPECT_TRUE(pAosNConfiguration->IsWfcErrorMessageSupported(
+            CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES));
 }

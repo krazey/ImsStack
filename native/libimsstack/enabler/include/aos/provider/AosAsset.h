@@ -88,8 +88,7 @@ public:
             objSubErrorCodeForInitRegWithNextPcscf(ImsVector<IMS_SINT32>()),
             objSubErrorCodeForStoppingByExpirationTime(ImsVector<IMS_SINT32>()),
             objSupportedRoamingRats(ImsVector<IMS_SINT32>()),
-            objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>()),
-            objWfcSubErrByMissing911Address(ImsVector<IMS_SINT32>())
+            objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -158,6 +157,5 @@ public:
     ImsVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
     ImsVector<IMS_SINT32> objSupportedRoamingRats;
     ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
-    ImsVector<IMS_SINT32> objWfcSubErrByMissing911Address;
 };
 #endif  // AOS_ASSET_H_

@@ -70,7 +70,7 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyDeregistered(int networkType, int reason) {
+    public void notifyDeregistered(int networkType, int reason, String message) {
         int suggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
 
         if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK) {
@@ -78,34 +78,34 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
         } else if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT) {
             suggestedAction = RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
         }
-        onDeregistered(getReasonInfo(reason), suggestedAction, networkType);
+        onDeregistered(getReasonInfo(reason, message), suggestedAction, networkType);
     }
 
     @Override
-    public void notifyTechnologyChangeFailed(int networkType, int reason) {
-        onTechnologyChangeFailed(networkType, getReasonInfo(reason));
+    public void notifyTechnologyChangeFailed(int networkType, int reason, String message) {
+        onTechnologyChangeFailed(networkType, getReasonInfo(reason, message));
     }
 
     public void notifyAssociatedUriChanged(Uri[] uris) {
         onSubscriberAssociatedUriChanged(uris);
     }
 
-    private ImsReasonInfo getReasonInfo(int reason) {
+    private ImsReasonInfo getReasonInfo(int reason, String message) {
         if (reason == DataFailCause.IWLAN_IKEV2_AUTH_FAILURE) {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE,
                     ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE, null);
-        } else if (reason == IAosRegistrationListener.ReasonCode
-                .CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS) {
+        } else if (message != null && !message.trim().equals("")) {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                    ImsReasonInfo.CODE_UNSPECIFIED, "REG09 - No 911 Address");
+                    ImsReasonInfo.CODE_UNSPECIFIED, message);
         } else {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,
                     ImsReasonInfo.CODE_UNSPECIFIED, null);
         }
     }
+
     /**
      * Sip Delegate feature tag configuration is changed hence requested network registration for
      * all the sip delegates created by this ImsService.

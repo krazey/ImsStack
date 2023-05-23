@@ -28,8 +28,7 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
      * @param featureTags Type of {@code Set<String>}.
      */
-    public void notifyRegistered(int networkType, int featureTagBits,
-            Set<String> featureTags);
+    void notifyRegistered(int networkType, int featureTagBits, Set<String> featureTags);
     /**
      * Notify the application that the device is connected to the IMS network.
      *
@@ -37,15 +36,16 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
      * @param featureTags Type of {@code Set<String>}.
      */
-    public void notifyRegistering(int networkType, int featureTagBits,
-            Set<String> featureTags);
+    void notifyRegistering(int networkType, int featureTagBits, Set<String> featureTags);
+
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
+     * @param message associated with why registration was disconnected.
      */
-    void notifyDeregistered(int networkType, int reason);
+    void notifyDeregistered(int networkType, int reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
@@ -53,8 +53,9 @@ public interface IAosRegistrationListener {
      *
      * @param networkType The technology that has failed to be changed to. See {@link NetworkType}.
      * @param causeCode The handover failure cause. See {@link android.telephony.DataFailCause}.
+     * @param message The handover failure message.
      */
-    public void notifyTechnologyChangeFailed(int networkType, int causeCode);
+    void notifyTechnologyChangeFailed(int networkType, int causeCode, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -62,7 +63,7 @@ public interface IAosRegistrationListener {
      *
      * @param uris the network provisioned public user identities.
      */
-    public void notifyAssociatedUriChanged(Uri[] uris);
+    void notifyAssociatedUriChanged(Uri[] uris);
 
     /**
      * This method is called when capability update fails after
@@ -72,7 +73,7 @@ public interface IAosRegistrationListener {
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason Reason for update failure. See {@link CapabilityReason}.
      */
-    public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
+    void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
 
     /**
      * Regsitration State
@@ -173,42 +174,64 @@ public interface IAosRegistrationListener {
          */
         public static final int CODE_REGISTRATION_ERROR = 3;
         /**
-         * IMS Registration error code due to missing 911 address
+         * WFC Registration error code if the network returns 403 Forbidden for Register.
+         * The 403 Forbidden case due to non-support for other countries are not included.
          */
-        public static final int CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS = 4;
+        public static final int CODE_REGISTRATION_ERROR_WFC_REG_403 = 4;
+        /**
+         * WFC Registration error code if the network returns 500 error for Register.
+         */
+        public static final int CODE_REGISTRATION_ERROR_WFC_REG_500 = 5;
+        /**
+         * WFC Registration error code if the network returns 403 error
+         *  with a different country for register.
+         */
+        public static final int CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY = 6;
+        /**
+         * WFC Registration error code if the network returns 403 response for Subscribe.
+         */
+        public static final int CODE_REGISTRATION_ERROR_WFC_SUB_403 = 7;
+        /**
+         * WFC Registration error code if the network returns Notify Terminate message.
+         */
+        public static final int CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED = 8;
+        /**
+         * WFC Registration error code for all other failures.
+         */
+        public static final int CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9;
         /**
          * Service unavailable; radio power off
          */
-        public static final int CODE_LOCAL_POWER_OFF = 5;
+        public static final int CODE_LOCAL_POWER_OFF = 10;
         /**
          * Service unavailable; low battery
          */
-        public static final int CODE_LOCAL_LOW_BATTERY = 6;
+        public static final int CODE_LOCAL_LOW_BATTERY = 11;
         /**
          * Service unavailable; out of service (data service state)
          */
-        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 7;
+        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 12;
         /**
          * Service unavailable; no LTE coverage
          * (VoLTE is not supported even though IMS is registered)
          */
-        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 8;
+        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 13;
         /**
          * Service unavailable; located in roaming area
          */
-        public static final int CODE_LOCAL_NETWORK_ROAMING = 9;
+        public static final int CODE_LOCAL_NETWORK_ROAMING = 14;
         /**
          * Service unavailable; IP changed
          */
-        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 10;
+        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 15;
         /**
          * Service unavailable; for an unspecified reason
          */
-        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 11;
+        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 16;
         /**
          * Service unavailable; IMS is not registered
          */
-        public static final int CODE_LOCAL_NOT_REGISTERED = 12;
+        public static final int CODE_LOCAL_NOT_REGISTERED = 17;
     }
 
     /**
