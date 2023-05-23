@@ -26,9 +26,12 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.telecom.VideoProfile;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
@@ -40,6 +43,7 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
+import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +61,7 @@ public class ImsVideoCallSessionTest {
     private static final int SLOT_ID = 0;
     private ImsVideoCallSession mVideoSession;
 
+    @Mock private Context mMockContext;
     @Mock private ImsCallContext mCallContext;
     @Mock private ImsCallSessionImpl mImsCallSession;
     @Mock private ImsVideoCallProvider mVideoCallProvider;
@@ -66,6 +71,7 @@ public class ImsVideoCallSessionTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        AppContext.init(mMockContext);
         mVideoSession = new ImsVideoCallSession(mCallContext, mImsCallSession, true);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
@@ -74,7 +80,9 @@ public class ImsVideoCallSessionTest {
     @After
     public void tearDown() throws Exception {
         mVideoSession = null;
+        mMockContext = null;
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
+        AppContext.deinit();
     }
 
     @Test
@@ -159,6 +167,52 @@ public class ImsVideoCallSessionTest {
     }
 
     @Test
+    public void testHandleVideoProfileUpdate() {
+        mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
+        ImsStreamMediaProfile mediaProfile = new ImsStreamMediaProfile(
+                ImsStreamMediaProfile.AUDIO_QUALITY_NONE, ImsStreamMediaProfile.DIRECTION_RECEIVE,
+                ImsStreamMediaProfile.VIDEO_QUALITY_NONE, ImsStreamMediaProfile.DIRECTION_INACTIVE);
+        ImsCallProfile callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, new Bundle(), mediaProfile);
+        doReturn(callProfile).when(mImsCallSession).getCallProfile();
+        mVideoSession.setVideoCallProvider(mVideoCallProvider);
+        VideoProfile fromProfile = new VideoProfile(VideoProfile.STATE_RX_ENABLED,
+                VideoProfile.QUALITY_HIGH);
+        VideoProfile toProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED,
+                VideoProfile.QUALITY_HIGH);
+
+        // Verify {@link IVideoCallSession#MODIFICATION_VIDEO_PROFILE} with camers on.
+        mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
+        assertTrue(mVideoSession.isCameraOn());
+        verify(mVideoCallProvider, times(1)).receiveSessionModifyResponse(anyInt(),
+                any(VideoProfile.class), any(VideoProfile.class));
+        assertFalse(mVideoSession.isSessionModificationInProgress());
+        mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
+
+        // Verify {@link IVideoCallSession#MODIFICATION_VIDEO_PROFILE} with camers off.
+        fromProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED,
+                VideoProfile.QUALITY_HIGH);
+        toProfile = new VideoProfile(VideoProfile.STATE_RX_ENABLED,
+                VideoProfile.QUALITY_HIGH);
+        mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
+        assertFalse(mVideoSession.isCameraOn());
+        verify(mVideoCallProvider, times(2)).receiveSessionModifyResponse(anyInt(),
+                any(VideoProfile.class), any(VideoProfile.class));
+        assertFalse(mVideoSession.isSessionModificationInProgress());
+        mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
+
+        // Verify resume request when camera is off.
+        callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, new Bundle(), new ImsStreamMediaProfile());
+        doReturn(callProfile).when(mImsCallSession).getCallProfile();
+        mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
+        assertTrue(mVideoSession.isSessionModificationInProgress());
+        verify(mImsCallSession).update(anyInt(), any(ImsStreamMediaProfile.class));
+        mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
+        mVideoSession.setVideoCallProvider(null);
+    }
+
+    @Test
     public void testSendSessionModifyResponse() {
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_CALL_TYPE);
         mVideoSession.setVideoCallProvider(mVideoCallProvider);
@@ -201,6 +255,7 @@ public class ImsVideoCallSessionTest {
         callProfile = null;
         callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
+        videoProfile = new VideoProfile(VideoProfile.STATE_PAUSED, VideoProfile.QUALITY_HIGH);
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE,
                 IVideoCallSession.MODIFICATION_VIDEO_PROFILE);
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
