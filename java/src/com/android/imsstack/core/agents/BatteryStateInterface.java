@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,27 @@ package com.android.imsstack.core.agents;
 /**
  * This provides an interface to check and control the battery status of the device.
  */
-public interface IBatteryState extends IAgent {
+public interface BatteryStateInterface extends IAgent {
+    /** Indicates that the battery level couldn't be recognized. */
+    int INVALID_BATTERY_LEVEL = -1;
+
     /**
-     * Returns the battery level.
+     * Returns the current battery level.
      */
     int getBatteryLevel();
 
     /**
-     * Checks if battery level is low or not.
+     * Checks whether the current battery level is low or not.
      */
     boolean isLowBattery();
 
     /**
-     * Checks if the device is connected by USB cable or charger.
+     * Checks whether the device is connected by USB cable or charger.
      */
-    boolean isPowerPlugged(boolean log);
+    boolean isPowerPlugged();
 
     /**
-     * Notifies the low battery state to the native.
+     * Notifies the low battery state to the native layer.
      */
     void notifyLowBatteryState(int slotId);
 }

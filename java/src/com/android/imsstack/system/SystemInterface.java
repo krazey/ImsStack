@@ -53,7 +53,6 @@ public class SystemInterface implements JniSystemListener {
             new ThreadMessageExecutor(SystemInterface.class.getSimpleName() + "_DEFAULT");
 
     private DefaultSystemCallInterface mDefaultSystemCall;
-    private ISystemAPIBattery mISystemAPIBattery;
 
     /**
      * Returns a singleton System interface.
@@ -75,6 +74,9 @@ public class SystemInterface implements JniSystemListener {
         sSystemInterface = systemInterface;
     }
 
+    /**
+     * Initializes the system interface.
+     */
     public void init() {
         if (mNativeObject == 0) {
 
@@ -93,6 +95,9 @@ public class SystemInterface implements JniSystemListener {
         }
     }
 
+    /**
+     * Cleans up the system interface.
+     */
     public void cleanup() {
         if (mNativeObject != 0) {
             mDefaultExecutor = null;
@@ -102,35 +107,96 @@ public class SystemInterface implements JniSystemListener {
         }
     }
 
-    public synchronized ISystem getSystem(int slotId) {
-        return mSystems.get(slotId);
+    /**
+     * Returns the {@link System} object for the specified slot.
+     *
+     * @param slotId The slot id.
+     * @return A {@link System} object or null.
+     */
+    public ISystem getSystem(int slotId) {
+        synchronized (mSystems) {
+            return mSystems.get(slotId);
+        }
     }
 
-    public synchronized void start(int slotId) {
+    /**
+     * Starts the {@link System} object for the specified slot.
+     *
+     * @param slotId The slot id.
+     */
+    public void start(int slotId) {
         ImsLog.d(slotId, "");
         ImsSystem system = new ImsSystem(slotId);
         system.init();
-        mSystems.put(slotId, system);
+
+        synchronized (mSystems) {
+            mSystems.put(slotId, system);
+        }
     }
 
-    public synchronized void stop(int slotId) {
+    /**
+     * Stops the {@link System} object for the specified slot.
+     *
+     * @param slotId The slot id.
+     */
+    public void stop(int slotId) {
         ImsLog.d(slotId, "");
-        ImsSystem system = (ImsSystem) mSystems.get(slotId);
+        ImsSystem system = (ImsSystem) getSystem(slotId);
 
-        if (system == null) {
-            return;
+        if (system != null) {
+            system.cleanup();
         }
 
-        system.cleanup();
-        mSystems.remove(slotId);
+        synchronized (mSystems) {
+            mSystems.remove(slotId);
+        }
     }
 
     public void setSystemCallInterface(DefaultSystemCallInterface systemCall) {
         mDefaultSystemCall = systemCall;
     }
 
-    public void setISystemAPIBattery(ISystemAPIBattery api) {
-        mISystemAPIBattery = api;
+    /**
+     * Notifies the low battery state for all the systems.
+     */
+    public void notifyLowBatteryStateChanged() {
+        synchronized (mSystems) {
+            for (int i = 0; i < mSystems.size(); ++i) {
+                ISystem system = mSystems.get(i);
+                if (system != null) {
+                    system.notifyEvent(ImsEventDef.IMS_EVENT_POWER_LOW_BATTERY,
+                            ImsEventDef.IMS_POWER_LOW_CHANGED, 0);
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies the low battery state for all the systems.
+     */
+    public void notifyLowBatteryState() {
+        synchronized (mSystems) {
+            for (int i = 0; i < mSystems.size(); ++i) {
+                ISystem system = mSystems.get(i);
+                if (system != null) {
+                    system.notifyEvent(ImsEventDef.IMS_EVENT_POWER_LOW_BATTERY,
+                            ImsEventDef.IMS_POWER_LOW_BATTERY, 0);
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies the low battery state for the specified slot.
+     *
+     * @param slotId The slot id.
+     */
+    public void notifyLowBatteryState(int slotId) {
+        ISystem system = getSystem(slotId);
+        if (system != null) {
+            system.notifyEvent(ImsEventDef.IMS_EVENT_POWER_LOW_BATTERY,
+                    ImsEventDef.IMS_POWER_LOW_BATTERY, 0);
+        }
     }
 
     /**
@@ -256,7 +322,7 @@ public class SystemInterface implements JniSystemListener {
                 result = handleSystemCallForWifi(method, parcel);
                 break;
             case SystemConstants.GET_BATTERY_LEVEL:
-                result = handleSystemAPIBattery(method);
+                result = handleSystemCallForBattery(method);
                 break;
             case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
             case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
@@ -451,20 +517,20 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private Parcel handleSystemAPIBattery(int method) {
-        if (mISystemAPIBattery == null) {
+    private Parcel handleSystemCallForBattery(int method) {
+        if (mDefaultSystemCall == null) {
             return null;
         }
 
         Parcel result = Parcel.obtain();
 
         switch (method) {
-        case SystemConstants.GET_BATTERY_LEVEL:
-            result.writeInt(mISystemAPIBattery.getBatteryLevel4Sys());
-            break;
-        default:
-            result.recycle();
-            return null;
+            case SystemConstants.GET_BATTERY_LEVEL:
+                result.writeInt(mDefaultSystemCall.getBatteryLevel());
+                break;
+            default:
+                result.recycle();
+                return null;
         }
 
         return result;

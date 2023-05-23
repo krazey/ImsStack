@@ -433,7 +433,9 @@ public class ContextFixture implements TestFixture<Context> {
             Intent result = null;
             synchronized (mBroadcastReceiversByAction) {
                 for (int i = 0 ; i < filter.countActions() ; i++) {
-                    mBroadcastReceiversByAction.put(filter.getAction(i), receiver);
+                    if (receiver != null) {
+                        mBroadcastReceiversByAction.put(filter.getAction(i), receiver);
+                    }
                     if (result == null) {
                         result = mStickyBroadcastByAction.get(filter.getAction(i));
                     }

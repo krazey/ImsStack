@@ -47,6 +47,13 @@ public interface DefaultSystemCallInterface {
     void stopTimer(long tid);
 
     /**
+     * Returns the current battery level.
+     *
+     * @return The current battery level.
+     */
+    int getBatteryLevel();
+
+    /**
      * Returns the Wi-Fi interface.
      *
      * @return A WifiInterface object.
