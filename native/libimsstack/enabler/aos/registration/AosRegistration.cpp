@@ -3384,6 +3384,27 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsSupp
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage(IN IMS_SINT32 nStatusCode)
+{
+    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
+    {
+        return;
+    }
+
+    switch (nStatusCode)
+    {
+        case SipStatusCode::SC_403:
+            ProcessRequiredWfcErrMessage_403();
+            break;
+        case SipStatusCode::SC_500:
+            ProcessRequiredWfcErrMessage_500();
+            break;
+        default:
+            ProcessRequiredWfcErrMessage_Others();
+            break;
+    }
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         IN IMS_SINT32 nStatusCode /* 0 */)
 {
@@ -3867,6 +3888,69 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
             ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_503);
         }
     }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_403()
+{
+    if (!GET_N_CONFIG(m_piContext->GetSlotId())
+                    ->IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403) &&
+            !GET_N_CONFIG(m_piContext->GetSlotId())
+                     ->IsWfcErrorMessageSupported(
+                             CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
+    {
+        return;
+    }
+
+    AosReasonCode eReason = AosReasonCode::REGISTRATION_ERROR_WFC_REG_403;
+    if (m_pUtil->IsDifferentCountry(
+                UtilService::GetUtilService()->GetPrivateProperty()->GetPersistent(
+                        ImsPrivateProperties::Persistent::KEY_SIM_COUNTRY, m_nSlotId),
+                m_nSlotId))
+    {
+        eReason = AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
+    }
+
+    if (m_eImsReasonCode == eReason)
+    {
+        return;
+    }
+
+    m_eImsReasonCode = eReason;
+    NotifyDeregistered();
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_500()
+{
+    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_REG_500)
+    {
+        return;
+    }
+
+    if (!GET_N_CONFIG(m_piContext->GetSlotId())
+                    ->IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
+    {
+        return;
+    }
+
+    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_REG_500;
+    NotifyDeregistered();
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_Others()
+{
+    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES)
+    {
+        return;
+    }
+
+    if (!GET_N_CONFIG(m_piContext->GetSlotId())
+                    ->IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES))
+    {
+        return;
+    }
+
+    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES;
+    NotifyDeregistered();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
@@ -4667,11 +4751,13 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     ClearAuthChallengedCount();
     ClearAuthIpsecCount();
 
+    IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
+    ProcessRequiredWfcErrMessage(nStatusCode);
+
     switch (nReason)
     {
         case IRegistration::REASON_STATUS_CODE:
-            ProcessStartFailed_StatusCode(
-                    m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse()));
+            ProcessStartFailed_StatusCode(nStatusCode);
             break;
 
         case IRegistration::REASON_TRANSACTION_TIMEOUT:
@@ -5834,6 +5920,17 @@ void AosRegistration::UpdateCallingNumberVerification()
             IMS_TRACE_I("Calling number verification is not supported", 0, 0, 0);
         }
     */
+}
+
+PROTECTED
+void AosRegistration::NotifyDeregistered()
+{
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        A_IMS_TRACE_D(REGID, "NotifyDeregistered :: ImsReasonCode(%d)", m_eImsReasonCode, 0, 0);
+        piService->NotifyDeregistered(GetNetworkTypeForImsRegState(), m_eImsReasonCode);
+    }
 }
 
 PROTECTED

@@ -95,6 +95,8 @@ public:
 
     IMS_BOOL IsWifiTest() const;
 
+    IMS_BOOL IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const;
+
     // Test
     void SetISipConfigV(IN ISipConfigV* piSipConfigV);
 
