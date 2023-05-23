@@ -1065,14 +1065,20 @@ TEST_F(MtcCallTest, GetSupplementaryServiceReturnsMember)
 
 TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
 {
-    ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
-    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     EXPECT_CALL(objContext, GetSlotId).Times(1);
     objCall.GetSlotId();
+}
+
+TEST_F(MtcCallTest, GetSubscriberConfigCallsMtcContext)
+{
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    EXPECT_CALL(objContext, GetSubscriberConfig).Times(1);
+    objCall.GetSubscriberConfig();
 }
 
 TEST_F(MtcCallTest, GetDialingPlanCallsMtcContext)

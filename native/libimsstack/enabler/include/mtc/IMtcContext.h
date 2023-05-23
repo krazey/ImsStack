@@ -37,6 +37,7 @@ class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
+class ISubscriberConfig;
 class MtcConfigurationProxy;
 class OperationAsyncRunner;
 
@@ -46,11 +47,18 @@ public:
     virtual ~IMtcContext() = default;
 
     /**
-     * @brief Gets
+     * @brief Gets current slot ID.
      *
-     * @return
+     * @return Slot ID.
      */
-    virtual IMS_SINT32 GetSlotId() = 0;
+    virtual IMS_SINT32 GetSlotId() const = 0;
+
+    /**
+     * @brief Gets ISubscriberConfig from Configuration using current slot ID.
+     *
+     * @return Instance of ISubscriberConfig. Could be null.
+     */
+    virtual const ISubscriberConfig* GetSubscriberConfig() const = 0;
 
     /**
      * @brief Gets

@@ -178,7 +178,11 @@ public:
     {
         return m_objSupplementaryService;
     }
-    inline IMS_SINT32 GetSlotId() override { return m_objContext.GetSlotId(); }
+    inline IMS_SINT32 GetSlotId() const override { return m_objContext.GetSlotId(); }
+    inline const ISubscriberConfig* GetSubscriberConfig() const override
+    {
+        return m_objContext.GetSubscriberConfig();
+    }
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objContext.GetDialingPlan(); }
     inline IMtcService* GetServiceByType(IN ServiceType eServiceType) override
     {

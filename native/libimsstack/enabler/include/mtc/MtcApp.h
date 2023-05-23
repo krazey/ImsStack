@@ -17,6 +17,7 @@
 #ifndef MTC_APP_H_
 #define MTC_APP_H_
 
+#include "Configuration.h"
 #include "IMtcApp.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
@@ -70,7 +71,11 @@ public:
     virtual void Stop() override;
 
     // IMtcContext implementation
-    inline IMS_SINT32 GetSlotId() override { return m_nSlotId; }
+    inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
+    inline const ISubscriberConfig* GetSubscriberConfig() const override
+    {
+        return Configuration::GetInstance()->GetSubscriberConfig(GetSlotId());
+    }
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
     inline IMtcCallController& GetCallController() override { return m_objCallController; }

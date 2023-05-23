@@ -47,7 +47,8 @@ class MockIMtcContext : public IMtcContext
 public:
     virtual ~MockIMtcContext() {}
 
-    MOCK_METHOD(IMS_SINT32, GetSlotId, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
+    MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (), (const, override));
     MOCK_METHOD(IMtcService*, GetServiceByType, (IN ServiceType), (override));
     MOCK_METHOD(IMtcDialingPlan&, GetDialingPlan, (), (override));
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));

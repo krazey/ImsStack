@@ -15,7 +15,6 @@
  */
 
 #include "CarrierConfig.h"
-#include "Configuration.h"
 #include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
 #include "GeolocationHelper.h"
@@ -162,8 +161,7 @@ void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
         return;
     }
 
-    const AString strCid =
-            CreateCid(*Configuration::GetInstance()->GetSubscriberConfig(m_objContext.GetSlotId()));
+    const AString strCid = CreateCid(*m_objContext.GetSubscriberConfig());
 
     objMessage.AddHeader(SipHeaderName::GEOLOCATION, GetGeolocationHeader(strCid));
     objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING,
@@ -222,8 +220,7 @@ ByteArray MtcLocationObject::CreateCallComposerLocationBody(
     const IMS_SINT32 eNamespaces = Presence::Namespace::DM | Presence::Namespace::GP |
             Presence::Namespace::GML | Presence::Namespace::GS;
 
-    AString strEntityUri = GetEntityUri(
-            *Configuration::GetInstance()->GetSubscriberConfig(m_objContext.GetSlotId()));
+    AString strEntityUri = GetEntityUri(*m_objContext.GetSubscriberConfig());
 
     // clang-format off
     PidfLoXml{

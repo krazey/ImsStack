@@ -92,7 +92,8 @@ public:
     MOCK_METHOD(void, RunPendingOperationIfPossible, (), (override));
 
     // IMtcContext
-    MOCK_METHOD(IMS_SINT32, GetSlotId, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
+    MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (), (const, override));
     MOCK_METHOD(IMtcService*, GetServiceByType, (IN ServiceType eServiceType), (override));
     MOCK_METHOD(IMtcDialingPlan&, GetDialingPlan, (), (override));
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));

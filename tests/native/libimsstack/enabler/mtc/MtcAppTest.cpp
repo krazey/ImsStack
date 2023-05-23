@@ -72,6 +72,12 @@ TEST_F(MtcAppTest, GetSlotId)
     pMtcApp->Stop();
 }
 
+TEST_F(MtcAppTest, GetSubscriberConfig)
+{
+    EXPECT_EQ(pMtcApp->GetSubscriberConfig(), nullptr);
+    pMtcApp->Stop();
+}
+
 TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
 {
     IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);

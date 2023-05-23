@@ -15,38 +15,79 @@
  */
 
 #include "CarrierConfig.h"
+#include "GeolocationHelper.h"
 #include "INetworkWatcher.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
 #include "MockIMtcService.h"
+#include "MockIPhoneInfoLocation.h"
+#include "MockIPhoneInfoSubscriber.h"
+#include "PlatformContext.h"
 #include "SipHeaderName.h"
+#include "TestPhoneInfoService.h"
+#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/MockISipMessageBodyPart.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgReferee;
+
+LOCAL const IMS_SINT32 SLOT_ID = 0;
+LOCAL const AString HOME_DOMAIN = "homedomain";
+LOCAL const AString PRIVATE_USER_ID = "prid";
 
 class MtcLocationObjectTest : public ::testing::Test
 {
 public:
+    const AString strLatitude = "lat";
+    const AString strLongitude = "long";
+    const AString strRadius = "radius";
+    const AString strShape = "Ellipsoid";
+    const AString strConfidence = "confidence";
+    const AString strCurrentTime = "time";
+    const AString strMethod = "method";
+    const AString strCountry = "country";
+    const AString strState = "state";
+    const AString strCity = "city";
+    const AString strPostal = "postal";
+    const AString strAltitude = "alt";
+    const AString strVerticalAccuracy = "v_accuracy";
+
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
+    ParticipantInfo* pParticipantInfo;
     MtcSupplementaryService* pSupplementaryService;
+    TestPhoneInfoService objPhoneInfoService;
+    MockILocationProperties objLocationProperties;
+    MockISubscriberConfig objSubscriberConfig;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
+        pParticipantInfo = new ParticipantInfo(objContext);
+
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -55,17 +96,60 @@ protected:
         pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
+
+        ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(HOME_DOMAIN));
+        ON_CALL(objSubscriberConfig, GetPrivateUserId).WillByDefault(ReturnRef(PRIVATE_USER_ID));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
     }
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+
+        delete pParticipantInfo;
         delete pConfigurationProxy;
         delete pSupplementaryService;
+    }
+
+    void SetupDeviceLocation()
+    {
+        ON_CALL(objPhoneInfoService.GetMockLocationInfo(), GetLocationProperties(_))
+                .WillByDefault(Return(&objLocationProperties));
+
+        ON_CALL(objLocationProperties, GetLatitude).WillByDefault(ReturnRef(strLatitude));
+        ON_CALL(objLocationProperties, GetLongitude).WillByDefault(ReturnRef(strLongitude));
+        ON_CALL(objLocationProperties, GetRadius).WillByDefault(ReturnRef(strRadius));
+        ON_CALL(objLocationProperties, GetShape).WillByDefault(ReturnRef(strShape));
+        ON_CALL(objLocationProperties, GetConfidence).WillByDefault(ReturnRef(strConfidence));
+        ON_CALL(objLocationProperties, GetCurrentTime).WillByDefault(ReturnRef(strCurrentTime));
+        ON_CALL(objLocationProperties, GetMethod).WillByDefault(ReturnRef(strMethod));
+        ON_CALL(objLocationProperties, GetCountry).WillByDefault(ReturnRef(strCountry));
+        ON_CALL(objLocationProperties, GetState).WillByDefault(ReturnRef(strState));
+        ON_CALL(objLocationProperties, GetCity).WillByDefault(ReturnRef(strCity));
+        ON_CALL(objLocationProperties, GetPostal).WillByDefault(ReturnRef(strPostal));
+        ON_CALL(objLocationProperties, GetAltitude).WillByDefault(ReturnRef(strAltitude));
+        ON_CALL(objLocationProperties, GetVerticalAccuracy)
+                .WillByDefault(ReturnRef(strVerticalAccuracy));
     }
 
     void AddGeoLocationValue(IN IMS_BOOL bGeoLocation)
     {
         pSupplementaryService->Add(SuppType::GEOLOCATION, bGeoLocation);
+    }
+
+    void AssertPidfLoXmlExceptDeviceId(IN const AString& strActual, IN const AString& strExpected)
+    {
+        AString strActualExceptDeviceId = strActual;
+        strActualExceptDeviceId.Replace("\n", "");
+
+        // dm:deviceId is not consistent, don't compare.
+        IMS_SINT32 nStart = strActualExceptDeviceId.GetIndexOf("<dm:deviceID>");
+        IMS_SINT32 nEnd = strActualExceptDeviceId.GetIndexOf("</dm:deviceID>") + 14;
+        strActualExceptDeviceId.Erase(nStart, nEnd - nStart);
+
+        EXPECT_STREQ(strActualExceptDeviceId.GetStr(), strExpected.GetStr());
     }
 };
 
@@ -228,8 +312,8 @@ TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithPointShape)
 
     MtcLocationProperties* pLocation = MtcLocationObject::GetLocationFromMessage(objMessage);
     ASSERT_NE(pLocation, nullptr);
-    EXPECT_EQ(pLocation->GetLatitude(), AString("-34.407"));
-    EXPECT_EQ(pLocation->GetLongitude(), AString("150.883"));
+    EXPECT_STREQ(pLocation->GetLatitude().GetStr(), "-34.407");
+    EXPECT_STREQ(pLocation->GetLongitude().GetStr(), "150.883");
     EXPECT_EQ(pLocation->GetRadius().GetLength(), 0);
     delete pLocation;
 }
@@ -274,9 +358,9 @@ TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithCircleShape)
 
     MtcLocationProperties* pLocation = MtcLocationObject::GetLocationFromMessage(objMessage);
     ASSERT_NE(pLocation, nullptr);
-    EXPECT_EQ(pLocation->GetLatitude(), AString("47.577866"));
-    EXPECT_EQ(pLocation->GetLongitude(), AString("-122.164080"));
-    EXPECT_EQ(pLocation->GetRadius(), AString("30"));
+    EXPECT_STREQ(pLocation->GetLatitude().GetStr(), "47.577866");
+    EXPECT_STREQ(pLocation->GetLongitude().GetStr(), "-122.164080");
+    EXPECT_STREQ(pLocation->GetRadius().GetStr(), "30");
     delete pLocation;
 }
 
@@ -288,4 +372,275 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageDoesNothingIfContentEmpty)
     EXPECT_CALL(objMessage, AddHeader(_, _)).Times(0);
     EXPECT_CALL(objMessage, GetMessage).Times(0);
     MtcLocationObject(objContext).SetLocationToMessage(objMessage, objEmptyContent, IMS_FALSE);
+}
+
+TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeolocationRouting)
+{
+    const AString strCid = "c-i-d";
+    ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+
+    ByteArray objContent("PIDF-LO XML Content");
+    MockIMessage objMessage;
+    MockISipMessage objSipMessage;
+    MockISipMessageBodyPart objSipMessageBodyPart;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("no")));
+
+    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
+                    AString("Content-Length")));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
+                    _));
+
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_FALSE);
+}
+
+TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRouting)
+{
+    const AString strCid = "c-i-d";
+    ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+
+    ByteArray objContent("PIDF-LO XML Content");
+    MockIMessage objMessage;
+    MockISipMessage objSipMessage;
+    MockISipMessageBodyPart objSipMessageBodyPart;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("yes")));
+
+    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
+                    AString("Content-Length")));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
+    EXPECT_CALL(objSipMessageBodyPart,
+            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
+                    _));
+
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_TRUE);
+}
+
+TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsEmptyIfNoCreator)
+{
+    EXPECT_STREQ(MtcLocationObject(objContext)
+                         .CreateLocationBody()
+                         .ToString()
+                         .Replace("\n", "")
+                         .GetStr(),
+            "");
+}
+
+TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
+            .WillByDefault(Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG));
+    SetupDeviceLocation();
+
+    AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"\">"
+            "<dm:device id=\"Phone\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</dm:device>"
+            "</presence>";
+    AssertPidfLoXmlExceptDeviceId(
+            MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
+}
+
+TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAndCivic)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC));
+    SetupDeviceLocation();
+
+    AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"\">"
+            "<dm:device id=\"Phone\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "<cl:A1>state</cl:A1>"
+            "<cl:A2>city</cl:A2>"
+            "<cl:PC>postal</cl:PC>"
+            "</cl:civicAddress>"
+            "<gs:Ellipsoid srsName=\"urn:ogc:def:crs:EPSG::4979\">"
+            "<gml:pos>lat long alt</gml:pos>"
+            "<gs:semiMajorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMajorAxis>"
+            "<gs:semiMinorAxis uom=\"urn:ogc:def:uom:EPSG::9001\">radius</gs:semiMinorAxis>"
+            "<gs:verticalAxis uom=\"urn:ogc:def:uom:EPSG::9001\">v_accuracy</gs:verticalAxis>"
+            "<gs:orientation uom=\"urn:ogc:def:uom:EPSG::9102\">0</gs:orientation>"
+            "</gs:Ellipsoid>"
+            "<con:confidence pdf=\"normal\">confidence</con:confidence>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "<gp:method>method</gp:method>"
+            "</gp:geopriv>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</dm:device>"
+            "</presence>";
+    AssertPidfLoXmlExceptDeviceId(
+            MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
+}
+
+TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountry)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY));
+    SetupDeviceLocation();
+
+    AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"\">"
+            "<dm:device id=\"Phone\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "</cl:civicAddress>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</dm:device>"
+            "</presence>";
+    AssertPidfLoXmlExceptDeviceId(
+            MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
+}
+
+TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountryAndState)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE));
+    SetupDeviceLocation();
+
+    AString strExpected =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"\">"
+            "<dm:device id=\"Phone\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<cl:civicAddress>"
+            "<cl:country>country</cl:country>"
+            "<cl:A1>state</cl:A1>"
+            "</cl:civicAddress>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "<dm:timestamp>time</dm:timestamp>"
+            "</dm:device>"
+            "</presence>";
+    AssertPidfLoXmlExceptDeviceId(
+            MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
+}
+
+TEST_F(MtcLocationObjectTest, CreateCallComposerLocationBodyReturnsLocation)
+{
+    MockISubscriberInfo* pSubscriberInfo = new MockISubscriberInfo();
+    objPhoneInfoService.SetSubscriberInfo(pSubscriberInfo);
+
+    const AString strPhoneNumber = "1234";
+    ON_CALL(*pSubscriberInfo, GetPhoneNumber(_))
+            .WillByDefault(DoAll(SetArgReferee<0>(strPhoneNumber), Return(IMS_TRUE)));
+
+    AString strActual =
+            MtcLocationObject(objContext).CreateCallComposerLocationBody("lat", "long").ToString();
+    AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                          "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                          "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                          "xmlns:gml=\"http://www.opengis.net/gml\" "
+                          "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">"
+                          "<dm:person id=\"1234\">"
+                          "<gp:geopriv>"
+                          "<gp:location-info>"
+                          "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+                          "<gml:pos>lat long</gml:pos>"
+                          "</gs:Circle>"
+                          "</gp:location-info>"
+                          "<gp:usage-rules/>"
+                          "</gp:geopriv>"
+                          "</dm:person>"
+                          "</presence>";
+    EXPECT_STREQ(strActual.Replace("\n", "").GetStr(), strExpected.GetStr());
+}
+
+TEST_F(MtcLocationObjectTest, CreateCallComposerLocationBodyReturnsLocationIfSubscriberInfoIsNull)
+{
+    objPhoneInfoService.SetSubscriberInfo(IMS_NULL);
+
+    AString strActual =
+            MtcLocationObject(objContext).CreateCallComposerLocationBody("lat", "long").ToString();
+    AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                          "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                          "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                          "xmlns:gml=\"http://www.opengis.net/gml\" "
+                          "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">"
+                          "<dm:person id=\"\">"
+                          "<gp:geopriv>"
+                          "<gp:location-info>"
+                          "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+                          "<gml:pos>lat long</gml:pos>"
+                          "</gs:Circle>"
+                          "</gp:location-info>"
+                          "<gp:usage-rules/>"
+                          "</gp:geopriv>"
+                          "</dm:person>"
+                          "</presence>";
+    EXPECT_STREQ(strActual.Replace("\n", "").GetStr(), strExpected.GetStr());
 }
