@@ -15,93 +15,70 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.SystemClock;
 
-import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.ISystemAPIBattery;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This implements an interface to check and control the battery status of the device.
  */
-public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
-    // Refer to res (/values/config.xml - config_lowBatteryWarningLevel) in framework
-    private static final int LOW_BATTERY_THRESHOLD = 15;
+public class BatteryStateAgent implements BatteryStateInterface {
+    @VisibleForTesting
+    protected static final int DELAY_INSTALL_BATTERY_CHANGED_RECEIVER = 100;
+    // For VT call (low battery: 2%)
+    @VisibleForTesting
+    protected static final int LOW_BATTERY_WARNING_LEVEL_FOR_CALL = 2;
 
-    // FIXME
-    // private static final int LOW_BATTERY_LEVEL = 5;
-    // UX scenario changed for VT call (low battery: 5% to 2%)
-    private static final int LOW_BATTERY_LEVEL_FOR_CALL = 2;
-    private static final int HANDLER_POST_DELAY = 100;
-    // Timer id for polling timer to track the battery state
-    private static final int TID_POLLING_TIMER = 100;
-
-    private static final int EVENT_BATTERY_CHANGED = 101;
-    private static final int EVENT_NOTIFY_LOW_BATTERY_STATE = 102;
-
-    private static final String ACTION_BATTERY_POLLING_TIMER =
-            "com.android.imsstack.action.BATTERY_POLLING_TIMER";
-
-    private static BatteryStateAgent sBatteryStateAgent = null;
-    private Context mContext;
-    private BatteryChangedReceiver mBatteryChangedReceiver = null;
-    private BatteryStateHandler mBatteryStateHandler = null;
-    private BatteryStateReceiver mBatteryStateReceiver = null;
-    private boolean mLowBatteryNotified = false;
-    private boolean mPollingTimerStarted = false;
-    private boolean mBatteryChangedReceiverInstalled = false;
-    private int mBatteryLowThreshold = LOW_BATTERY_LEVEL_FOR_CALL;
+    private final Handler mHandler;
+    private final BatteryChangedReceiver mBatteryChangedReceiver;
+    private final BatteryStateReceiver mBatteryStateReceiver;
+    private final TimerListener mTimerListener;
+    // Map for <level(criteria), time interval(milliseconds)>
+    private final Map<Integer, Long> mPollingIntervals = new LinkedHashMap<>();
+    private final int mLowBatteryWarningLevel;
+    private int mStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+    private int mPlugged = 0;
+    private int mLevel = INVALID_BATTERY_LEVEL;
+    private long mPollingTimerId = TimerInterface.INVALID_TID;
+    private boolean mLowBatteryNotified;
+    private Runnable mBatteryChangedReceiverInstaller;
 
     public BatteryStateAgent() {
-    }
+        mHandler = new Handler(AppContext.getInstance().getMainLooper());
+        mBatteryChangedReceiver = new BatteryChangedReceiver();
+        mBatteryStateReceiver = new BatteryStateReceiver();
+        mTimerListener = new TimerListener();
 
-    public static IBatteryState getInstance() {
-        if (sBatteryStateAgent == null) {
-            sBatteryStateAgent = new BatteryStateAgent();
-        }
+        mLowBatteryWarningLevel = AppContext.getInstance().getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
 
-        return sBatteryStateAgent;
+        // no polling timer; install battery changed receiver
+        mPollingIntervals.put(mLowBatteryWarningLevel, 0L);
+        mPollingIntervals.put(mLowBatteryWarningLevel + 10, 10 * 60 * 1000L); // 10 minutes
+        mPollingIntervals.put(mLowBatteryWarningLevel + 20, 20 * 60 * 1000L); // 20 minutes
+        mPollingIntervals.put(mLowBatteryWarningLevel + 30, 40 * 60 * 1000L); // 40 minutes
+        mPollingIntervals.put(Integer.MAX_VALUE, 60 * 60 * 1000L); // 1 hour
     }
 
     @Override
     public void init(Context context) {
-        if (context == null) {
-            return;
-        }
+        mBatteryStateReceiver.register();
+        updateCurrentBatteryStates();
 
-        mContext = context;
-        SystemInterface.getInstance().setISystemAPIBattery(this);
-
-        mBatteryStateHandler = new BatteryStateHandler(Looper.myLooper());
-        mBatteryChangedReceiver = new BatteryChangedReceiver();
-        mBatteryStateReceiver = new BatteryStateReceiver();
-
-        mContext.registerReceiver(mBatteryStateReceiver,
-                mBatteryStateReceiver.getFilter(), Context.RECEIVER_EXPORTED);
-
-        if (isPowerPlugged(true)) {
-            int interval = getPollingInterval(getBatteryLevel());
-
-            if (interval == 0) {
-                installBatteryChangedReceiver();
-            }
-            else {
-                startPollingTimer(interval);
-            }
-        } else if (getBatteryLevel() <= (LOW_BATTERY_THRESHOLD + 1)) {
+        if (mPlugged != 0 || mStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
+            startListeningForBatteryState(mLevel);
+        } else if (mLevel <= mLowBatteryWarningLevel) {
             installBatteryChangedReceiver();
         }
     }
@@ -109,157 +86,100 @@ public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
     @Override
     public void cleanup() {
         ImsLog.d("");
-
-        if (mBatteryStateHandler != null) {
-            mBatteryStateHandler.removeCallbacksAndMessages(null);
-            mBatteryStateHandler = null;
-        }
-
-        if (mBatteryChangedReceiverInstalled) {
-            if (mContext != null && mBatteryChangedReceiver != null) {
-                mContext.unregisterReceiver(mBatteryChangedReceiver);
-                mBatteryChangedReceiver = null;
-            }
-            mBatteryChangedReceiverInstalled = false;
-        }
-
-        if (mContext != null && mBatteryStateReceiver != null) {
-            mContext.unregisterReceiver(mBatteryStateReceiver);
-            mBatteryStateReceiver = null;
-        }
-
+        uninstallBatteryChangedReceiver();
+        mHandler.removeCallbacksAndMessages(null);
+        mBatteryStateReceiver.unregister();
         stopPollingTimer();
-
-        SystemInterface.getInstance().setISystemAPIBattery(null);
     }
 
     @Override
     public int getBatteryLevel() {
-        if (mContext == null) {
-            return (-1);
-        }
-
-        Intent stickyIntent = mContext.registerReceiver(null,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
-
-        if (stickyIntent == null) {
-            return (-1);
-        }
-
-        int level = stickyIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-
-        ImsLog.i("Battery level=" + level);
-
-        return level;
+        updateCurrentBatteryStates();
+        return mLevel;
     }
 
     @Override
     public boolean isLowBattery() {
-        return (getBatteryLevel() <= mBatteryLowThreshold);
+        return getBatteryLevel() <= LOW_BATTERY_WARNING_LEVEL_FOR_CALL;
     }
 
     @Override
-    public boolean isPowerPlugged(boolean log) {
-        if (mContext == null) {
-            return false;
-        }
-
-        Intent stickyIntent = mContext.registerReceiver(null,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
-
-        if (stickyIntent == null) {
-            return false;
-        }
-
-        int status = stickyIntent.getIntExtra(BatteryManager.EXTRA_STATUS, 0);
-        int plugged = stickyIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-
-        if (log) {
-            ImsLog.i("Battery status=" + status + ", plugged=" + plugged);
-        }
-
-        return ((plugged != 0) || (status == BatteryManager.BATTERY_STATUS_CHARGING));
+    public boolean isPowerPlugged() {
+        updateCurrentBatteryStates();
+        return mPlugged != 0 || mStatus == BatteryManager.BATTERY_STATUS_CHARGING;
     }
 
     @Override
     public void notifyLowBatteryState(int slotId) {
-        if (mBatteryStateHandler == null) {
-            if (isLowBattery()) {
-                notifyBatteryStateForSlot(slotId, ImsEventDef.IMS_POWER_LOW_BATTERY);
-            }
+        if (isLowBattery()) {
+            SystemInterface.getInstance().notifyLowBatteryState(slotId);
+        }
+    }
+
+    private void updateCurrentBatteryStates() {
+        Intent stickyIntent = AppContext.getInstance().registerReceiver(null,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
+        updateBatteryStates(stickyIntent);
+    }
+
+    private void updateBatteryStates(Intent intent) {
+        if (intent != null) {
+            mStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+                    BatteryManager.BATTERY_STATUS_UNKNOWN);
+            mPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+            mLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, INVALID_BATTERY_LEVEL);
         } else {
-            Message.obtain(mBatteryStateHandler,
-                    EVENT_NOTIFY_LOW_BATTERY_STATE, slotId, 0).sendToTarget();
-        }
-    }
-
-    @Override
-    public int getBatteryLevel4Sys() {
-        return getBatteryLevel();
-    }
-
-    private AlarmManager getAlarmManager() {
-        return (mContext != null) ?
-                mContext.getSystemService(AlarmManager.class) : null;
-    }
-
-    private void handleBatteryChanged(Intent intent) {
-        if (intent == null) {
-            return;
+            mStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+            mPlugged = 0;
+            mLevel = INVALID_BATTERY_LEVEL;
         }
 
-        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, mBatteryLowThreshold);
+        ImsLog.i("BatteryState: status=" + mStatus
+                + ", plugged=" + mPlugged + ", level=" + mLevel);
+    }
 
-        ImsLog.i("Battery level=" + level);
+    private void handleBatteryChanged() {
+        int level = (mLevel == INVALID_BATTERY_LEVEL)
+                ? LOW_BATTERY_WARNING_LEVEL_FOR_CALL : mLevel;
 
         // Manages the battery level in the native logic
-        if (level <= (LOW_BATTERY_THRESHOLD + 1)) {
+        if (level <= mLowBatteryWarningLevel) {
             SystemInterface.getInstance().notifyBatteryLevelChanged(level);
         } else if ((level % 5) == 0) {
             SystemInterface.getInstance().notifyBatteryLevelChanged(level);
         }
 
-        if (level <= mBatteryLowThreshold) {
+        if (level <= LOW_BATTERY_WARNING_LEVEL_FOR_CALL) {
             if (!mLowBatteryNotified) {
-                notifyBatteryState(ImsEventDef.IMS_POWER_LOW_BATTERY);
+                SystemInterface.getInstance().notifyLowBatteryState();
                 mLowBatteryNotified = true;
             }
         } else {
             if (mLowBatteryNotified) {
-                notifyBatteryState(ImsEventDef.IMS_POWER_LOW_CHANGED);
+                SystemInterface.getInstance().notifyLowBatteryStateChanged();
                 mLowBatteryNotified = false;
             }
         }
 
-        if (level > (LOW_BATTERY_THRESHOLD + 1)) {
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, 0);
-            int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+        if (level > mLowBatteryWarningLevel) {
+            uninstallBatteryChangedReceiver();
 
-            ImsLog.i("Battery status=" + status + ", plugged=" + plugged);
-
-            if ((plugged != 0) || (status == BatteryManager.BATTERY_STATUS_CHARGING)) {
-                int interval = getPollingInterval(level);
-
-                if (interval != 0) {
-                    uninstallBatteryChangedReceiver();
-                    startPollingTimer(interval);
-                }
-            } else {
-                uninstallBatteryChangedReceiver();
+            if ((mPlugged != 0) || (mStatus == BatteryManager.BATTERY_STATUS_CHARGING)) {
+                startListeningForBatteryState(level);
             }
         }
     }
 
     private void installBatteryChangedReceiver() {
-        if (mBatteryStateHandler == null) {
-            return;
-        }
-
-        if (!mBatteryChangedReceiverInstalled) {
-            mBatteryChangedReceiverInstalled = true;
-            mBatteryStateHandler.postDelayed(
-                    new BatteryChangedReceiverInstaller(), HANDLER_POST_DELAY);
-
+        if (mBatteryChangedReceiverInstaller == null) {
+            mBatteryChangedReceiverInstaller = () -> {
+                ImsLog.d("BatteryChangedReceiverInstaller is run...");
+                AppContext.getInstance().registerReceiver(mBatteryChangedReceiver,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED), null,
+                        mHandler, Context.RECEIVER_EXPORTED);
+            };
+            mHandler.postDelayed(mBatteryChangedReceiverInstaller,
+                    DELAY_INSTALL_BATTERY_CHANGED_RECEIVER);
             stopPollingTimer();
         } else {
             ImsLog.d("BatteryChangedReceiver is already installed");
@@ -267,172 +187,105 @@ public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
     }
 
     private void uninstallBatteryChangedReceiver() {
-        if (mBatteryStateHandler == null) {
-            return;
-        }
-
-        if (mBatteryChangedReceiverInstalled) {
-            mBatteryChangedReceiverInstalled = false;
-            mBatteryStateHandler.postDelayed(
-                    new BatteryChangedReceiverUninstaller(), HANDLER_POST_DELAY);
+        if (mBatteryChangedReceiverInstaller != null) {
+            if (mHandler.hasCallbacks(mBatteryChangedReceiverInstaller)) {
+                mHandler.removeCallbacks(mBatteryChangedReceiverInstaller);
+            } else {
+                AppContext.getInstance().unregisterReceiver(mBatteryChangedReceiver);
+            }
+            mBatteryChangedReceiverInstaller = null;
         } else {
             ImsLog.d("BatteryChangedReceiver is already uninstalled");
         }
     }
 
-    private void startPollingTimer(int interval) {
-        if (mPollingTimerStarted) {
-            ImsLog.i("Polling timer is already started");
+    private void startPollingTimer(long interval) {
+        if (mPollingTimerId != TimerInterface.INVALID_TID) {
+            ImsLog.i("BatteryState: Polling timer is already started");
             return;
         }
 
-        AlarmManager am = getAlarmManager();
-        if (am == null) {
-            return;
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
+
+        if (timer != null) {
+            mPollingTimerId = timer.startTimer(interval, mTimerListener);
         }
 
-        Intent intent = new Intent(ACTION_BATTERY_POLLING_TIMER);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-
-        PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                TID_POLLING_TIMER, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + interval, sender);
-
-        mPollingTimerStarted = true;
-
-        ImsLog.i("Polling timer is started - interval=" + interval);
+        ImsLog.i("BatteryState: Polling timer is started - tid="
+                + mPollingTimerId + ", interval=" + interval);
     }
 
     private void stopPollingTimer() {
-        if (!mPollingTimerStarted) {
-            ImsLog.i("Polling timer is already stopped");
+        if (mPollingTimerId == TimerInterface.INVALID_TID) {
+            ImsLog.i("BatteryState: Polling timer is already stopped");
             return;
         }
 
-        AlarmManager am = getAlarmManager();
-        if (am == null) {
-            return;
+        TimerInterface timer = AgentFactory.getInstance().getAgent(TimerInterface.class);
+
+        if (timer != null) {
+            timer.stopTimer(mPollingTimerId);
         }
 
-        Intent intent = new Intent(ACTION_BATTERY_POLLING_TIMER);
-        PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                TID_POLLING_TIMER, intent, PendingIntent.FLAG_IMMUTABLE);
-
-        am.cancel(sender);
-
-        mPollingTimerStarted = false;
-
-        ImsLog.i("Polling timer is stopped");
+        mPollingTimerId = TimerInterface.INVALID_TID;
+        ImsLog.i("BatteryState: Polling timer is stopped");
     }
 
-    private int getPollingInterval(int level) {
-        // Interval (milliseconds) for battery level check
-        int multiplicationToMinute = 60 * 1000;
-        if (level <= (LOW_BATTERY_THRESHOLD + 1)) {
-            // do not start polling timer; install the battery changed receiver
-            return 0;
-        } else if (level < 20) {
-            // 5 minutes
-            return 5 * multiplicationToMinute;
-        } else if (level < 30) {
-            // 10 minutes
-            return 10 * multiplicationToMinute;
-        } else if (level < 40) {
-            // 20 minutes
-            return 20 * multiplicationToMinute;
-        } else if (level < 50) {
-            // 40 minutes
-            return 40 * multiplicationToMinute;
+    private long getPollingInterval(int level) {
+        return mPollingIntervals.entrySet().stream()
+                .filter(e -> level <= e.getKey())
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(60 * 60 * 1000L);
+    }
+
+    private void startListeningForBatteryState(int batteryLevel) {
+        long interval = getPollingInterval(batteryLevel);
+
+        if (interval == 0L) {
+            installBatteryChangedReceiver();
         } else {
-            // 60 minutes
-            return 60 * multiplicationToMinute;
+            startPollingTimer(interval);
         }
     }
 
-    private void notifyBatteryState(int state) {
-        int activeSimCount = MSimUtils.getActiveSimCount();
-        for (int i = 0; i < activeSimCount; i++) {
-            ISystem system = SystemInterface.getInstance().getSystem(i);
-            if (system != null) {
-                system.notifyEvent(ImsEventDef.IMS_EVENT_POWER_LOW_BATTERY, state, 0);
-            }
-        }
-    }
-
-    private void notifyBatteryStateForSlot(int slotId, int state) {
-        if (slotId == MSimUtils.INVALID_PHONE_ID) {
-            notifyBatteryState(state);
-        } else {
-            ISystem system = SystemInterface.getInstance().getSystem(slotId);
-            if (system != null) {
-                system.notifyEvent(ImsEventDef.IMS_EVENT_POWER_LOW_BATTERY, state, 0);
-            }
-        }
-    }
-
-    private final class BatteryStateHandler extends Handler {
-        BatteryStateHandler(Looper looper) {
-            super(looper);
-        }
-
+    private final class TimerListener implements TimerInterface.Listener {
         @Override
-        public void handleMessage(Message msg) {
-            if (msg == null) {
-                return;
-            }
-
-            ImsLog.i("BatteryState :: msg=" + msg.what);
-
-            switch (msg.what) {
-            case EVENT_BATTERY_CHANGED: {
-                handleBatteryChanged((Intent)msg.obj);
-                break;
-            }
-            case EVENT_NOTIFY_LOW_BATTERY_STATE: {
-                if (isLowBattery()) {
-                    notifyBatteryStateForSlot(msg.arg1, ImsEventDef.IMS_POWER_LOW_BATTERY);
-                }
-                break;
-            }
-            default:
-                break;
+        public void onTimerExpired(long tid) {
+            if (mPollingTimerId == tid) {
+                ImsLog.i("BatteryState: Polling timer is expired.");
+                mPollingTimerId = TimerInterface.INVALID_TID;
+                startListeningForBatteryState(getBatteryLevel());
             }
         }
     }
 
     private final class BatteryChangedReceiver extends BroadcastReceiver {
-
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             ImsLog.i(ImsLog.lastSubString(action, "."));
 
             if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-                if (mBatteryStateHandler != null) {
-                    Message.obtain(mBatteryStateHandler,
-                            EVENT_BATTERY_CHANGED, intent).sendToTarget();
-                } else {
-                    handleBatteryChanged(intent);
-                }
+                updateBatteryStates(intent);
+                handleBatteryChanged();
             }
         }
     }
 
     private final class BatteryStateReceiver extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_BATTERY_LOW);
+            filter.addAction(Intent.ACTION_POWER_CONNECTED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
-        public BatteryStateReceiver() {
-            mIntentFilter.addAction(Intent.ACTION_BATTERY_LOW);
-            mIntentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
-            mIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-            mIntentFilter.addAction(ACTION_BATTERY_POLLING_TIMER);
+            AppContext.getInstance().registerReceiver(this, filter, null,
+                    mHandler, Context.RECEIVER_EXPORTED);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        public void unregister() {
+            AppContext.getInstance().unregisterReceiver(this);
         }
 
         @Override
@@ -443,64 +296,11 @@ public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
             if (Intent.ACTION_BATTERY_LOW.equals(action)) {
                 installBatteryChangedReceiver();
             } else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
-                int interval = getPollingInterval(getBatteryLevel());
-
-                if (interval == 0) {
-                    installBatteryChangedReceiver();
-                } else {
-                    startPollingTimer(interval);
-                }
+                startListeningForBatteryState(getBatteryLevel());
             } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
                 stopPollingTimer();
-
-                if (getBatteryLevel() <= (LOW_BATTERY_THRESHOLD + 1)) {
-                    installBatteryChangedReceiver();
-                } else {
-                    uninstallBatteryChangedReceiver();
-                }
-            } else if (ACTION_BATTERY_POLLING_TIMER.equals(action)) {
-                mPollingTimerStarted = false;
-
-                int interval = getPollingInterval(getBatteryLevel());
-
-                if (interval == 0) {
-                    installBatteryChangedReceiver();
-                } else {
-                    startPollingTimer(interval);
-                }
+                startListeningForBatteryState(getBatteryLevel());
             }
-        }
-    }
-
-    private final class BatteryChangedReceiverInstaller implements Runnable {
-
-        @Override
-        public void run() {
-            ImsLog.d("BatteryChangedReceiverInstaller is run...");
-
-            if (mContext == null) {
-                return;
-            }
-
-            if (mBatteryChangedReceiver != null) {
-                mContext.registerReceiver(mBatteryChangedReceiver,
-                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-                        Context.RECEIVER_EXPORTED);
-            }
-        }
-    }
-
-    private final class BatteryChangedReceiverUninstaller implements Runnable {
-
-        @Override
-        public void run() {
-            ImsLog.d("BatteryChangedReceiverUninstaller is run...");
-
-            if (mContext == null) {
-                return;
-            }
-
-            mContext.unregisterReceiver(mBatteryChangedReceiver);
         }
     }
 }

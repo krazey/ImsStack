@@ -55,7 +55,7 @@ import java.util.HashMap;
 public class NativeStateAgentTest {
     private static final int SLOT0 = 0;
 
-    @Mock IBatteryState mBatteryState;
+    @Mock BatteryStateInterface mBatteryState;
     @Mock ICellInfo mCellInfo;
     @Mock IDcNetWatcher mDcNetWatcher;
     @Mock ISystem mSystem;
@@ -78,7 +78,7 @@ public class NativeStateAgentTest {
         ServiceCaps.setServiceCapabilities(SLOT0, false, false, true);
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
-        AgentFactory.setDefaultAgent(AgentFactory.BATTERY_STATE, mBatteryState);
+        AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryState);
         AgentFactory.setAgentForMIms(mCellInfo, AgentFactory.CELL_INFO, SLOT0);
         replaceDcNetWatcher(mDcNetWatcher);
         mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
@@ -103,7 +103,7 @@ public class NativeStateAgentTest {
 
         DcFactory.setObjects(SLOT0, null);
         AgentFactory.setAgentForMIms(null, AgentFactory.CELL_INFO, SLOT0);
-        AgentFactory.setDefaultAgent(AgentFactory.BATTERY_STATE, null);
+        AgentFactory.getInstance().setAgent(BatteryStateInterface.class, null);
         SystemInterface.setSystemInterface(null);
         mCellInfo = null;
         mBatteryState = null;

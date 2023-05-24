@@ -97,7 +97,7 @@ public class NativeStateAgent implements NativeStateInterface {
     }
 
     private void initState() {
-        IBatteryState bs = (IBatteryState) AgentFactory.getAgent(AgentFactory.BATTERY_STATE);
+        BatteryStateInterface bs = AgentFactory.getInstance().getAgent(BatteryStateInterface.class);
 
         if (bs != null) {
             bs.notifyLowBatteryState(mSlotId);

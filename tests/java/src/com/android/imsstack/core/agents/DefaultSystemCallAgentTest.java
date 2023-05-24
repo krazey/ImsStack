@@ -54,6 +54,7 @@ public class DefaultSystemCallAgentTest {
     @Mock private PreferenceInterface mPreferenceInterface;
     @Mock private WakeLockInterface mWakeLockInterface;
     @Mock private WifiInterface mWifiInterface;
+    @Mock private BatteryStateInterface mBatteryStateInterface;
     @Mock private TimerAgent mTimerAgent;
 
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
@@ -68,6 +69,7 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLockInterface);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
+        AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryStateInterface);
 
         mDefaultSystemCallAgent = new DefaultSystemCallAgent();
     }
@@ -79,6 +81,7 @@ public class DefaultSystemCallAgentTest {
             mDefaultSystemCallAgent = null;
         }
 
+        AgentFactory.getInstance().setAgent(BatteryStateInterface.class, null);
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, null);
@@ -142,6 +145,20 @@ public class DefaultSystemCallAgentTest {
         mDefaultSystemCallAgent.stopTimer(tid);
 
         verifyNoMoreInteractions(mTimerAgent);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetBatteryLevel() {
+        mDefaultSystemCallAgent.getBatteryLevel();
+
+        verify(mBatteryStateInterface).getBatteryLevel();
+
+        AgentFactory.getInstance().setAgent(BatteryStateInterface.class, null);
+
+        assertEquals(BatteryStateInterface.INVALID_BATTERY_LEVEL,
+                mDefaultSystemCallAgent.getBatteryLevel());
+        verifyNoMoreInteractions(mBatteryStateInterface);
     }
 
     @Test

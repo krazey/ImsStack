@@ -79,6 +79,20 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
     }
 
     /**
+     * Returns the current battery level.
+     *
+     * @return The current battery level.
+     */
+    @Override
+    public int getBatteryLevel() {
+        BatteryStateInterface bs = AgentFactory.getInstance().getAgent(BatteryStateInterface.class);
+        if (bs != null) {
+            return bs.getBatteryLevel();
+        }
+        return BatteryStateInterface.INVALID_BATTERY_LEVEL;
+    }
+
+    /**
      * Returns the Wi-Fi interface.
      *
      * @return A WifiInterface object.
