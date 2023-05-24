@@ -53,6 +53,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     private int mUpdateState = UPDATE_STATE_IDLE;
     private int mCameraSetting = CAMERA_ON;
     private int mMultitaskingState = MULTITASKING_NONE;
+    private boolean mIsPausedByRemote = false;
 
     public ImsVideoCallSession(ICallContext callContext,
             ImsCallSessionImplBase callSession, boolean isMO) {
@@ -161,9 +162,12 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         } else {
             // Changes the video profile only
             setSessionModificationType(MODIFICATION_VIDEO_PROFILE);
+            // FIXME : Is operator checked required.?
+            if (handleVideoProfileUpdate(fromProfile, toProfile, callProfile)) {
+                return;
+            }
+            mediaProfile = createProposalMedia(getProposalProfile(), true);
         }
-
-        // mProfileBeforeRequest = ImsCallMediaUtils.cloneVideoProfile(fromProfile);
 
         try {
             setUpdateState(UPDATE_STATE_SENT);
@@ -171,6 +175,131 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         } catch (Throwable t) {
             loge(t.toString(), t);
         }
+    }
+
+    public boolean handleVideoProfileUpdate(VideoProfile fromProfile,
+            VideoProfile toProfile, ImsCallProfile callProfile) {
+        ImsStreamMediaProfile mediaProfile = callProfile.getMediaProfile();
+        int audioDirection = mediaProfile.getAudioDirection();
+        int videoDirection = mediaProfile.getVideoDirection();
+        int fromVideoState = fromProfile.getVideoState();
+        int toVideoState = toProfile.getVideoState();
+        boolean isTurnOffCameraRequest = isTurnOffCameraRequest(fromVideoState, toVideoState);
+        boolean isTurnOnCameraRequest = isTurnOnCameraRequest(fromVideoState, toVideoState);
+
+        log("handleVideoProfileUpdate :: " + "AudioDirection:" + audioDirection
+                + ", VideoDirection:" + videoDirection + ", FromVideoState:" + fromVideoState
+                + ", ToVideoState:" + toVideoState + ", IsCameraTurnOffRequest:"
+                + isTurnOffCameraRequest + ", IsCameraTurnOnRequest:" + isTurnOnCameraRequest);
+
+        if (isTurnOnCameraRequest) {
+            setCameraSetting(CAMERA_ON);
+        } else if (isTurnOffCameraRequest) {
+            setCameraSetting(CAMERA_OFF);
+        }
+
+        /* Media direction will be `inactive` in below cases
+         * 1. Device is held by remote.
+         * 2. Device is in pause state when MT device goes in background.
+         * In above both cases Device must not send any SIP signaling when
+         * 1. Device turns camera on/off
+         * 2. Device goes to background/foreground
+         */
+        if ((isTurnOffCameraRequest || isTurnOnCameraRequest
+                || isPauseOrResumeRequest(fromVideoState, toVideoState))
+                    && (isHeldByRemote(audioDirection, videoDirection) || isPausedByRemote())) {
+            log("Ignore camera on/off when video direction is inactive");
+            /* No SIP signaling, accept the request with
+             * (@link Connection.VideoProvide#SESSION_MODIFY_REQUEST_SUCCESS}
+             * Dialer UI changes when camera on/off button press.
+             */
+            clearSessionModificationInfo();
+            finalizeSessionModification();
+            mVideoCallProvider.receiveSessionModifyResponse(
+                    Connection.VideoProvider.SESSION_MODIFY_REQUEST_SUCCESS, toProfile, toProfile);
+            return true;
+        } else if (isResumeRequest(fromVideoState, toVideoState) && !isCameraOn()) {
+            /* When camera is off and device comes to foreground from background,
+             * video direction must be recvonly.
+             */
+            log("come to foreground with camera off");
+            VideoProfile profile = new VideoProfile(VideoProfile.STATE_RX_ENABLED,
+                    toProfile.getQuality());
+            setProposalProfile(profile);
+        }
+
+        return false;
+    }
+
+    private void setPausedByRemote(boolean pausedByRemote) {
+        mIsPausedByRemote = pausedByRemote;
+    }
+
+    private boolean isPausedByRemote() {
+        return mIsPausedByRemote;
+    }
+
+    private static boolean isPauseOrResumeRequest(int from, int to) {
+        return isPauseRequest(from, to) || isResumeRequest(from, to);
+    }
+
+    private static boolean isHeldByRemote(int audioDirection, int videoDirection) {
+        return (audioDirection == ImsStreamMediaProfile.DIRECTION_RECEIVE
+                && videoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE);
+    }
+
+    /**
+     * Determines if this request includes turning the camera off (i.e. turning off transmission).
+     *
+     * @param from the from video state.
+     * @param to the to video state.
+     * @return {@code true} if the state change disables the user's camera.
+     */
+    private static boolean isTurnOffCameraRequest(int from, int to) {
+        if (!isPauseRequest(from, to)) {
+            return VideoProfile.isTransmissionEnabled(from)
+                    && !VideoProfile.isTransmissionEnabled(to);
+        }
+
+        return false;
+    }
+
+    /**
+     * Determines if this request includes turning the camera on (i.e. turning on transmission).
+     *
+     * @param from the from video state.
+     * @param to the to video state.
+     * @return {@code true} if the state change enables the user's camera.
+     */
+    private static boolean isTurnOnCameraRequest(int from, int to) {
+        if (!isResumeRequest(from, to)) {
+            return !VideoProfile.isTransmissionEnabled(from)
+                    && VideoProfile.isTransmissionEnabled(to);
+        }
+
+        return false;
+    }
+
+    /**
+     * Determines if a session modify request represents a request to resume the video.
+     *
+     * @param from The from video state.
+     * @param to The to video state.
+     * @return {@code true} if a resume was requested, {@code false} otherwise.
+     */
+    private static boolean isResumeRequest(int from, int to) {
+        return VideoProfile.isPaused(from) && !VideoProfile.isPaused(to);
+    }
+
+    /**
+     * Determines if a session modify request represents a request to pause the video.
+     *
+     * @param from The from video state.
+     * @param to The to video state.
+     * @return {@code true} if a pause was requested.
+     */
+    private static boolean isPauseRequest(int from, int to) {
+        return !VideoProfile.isPaused(from) && VideoProfile.isPaused(to);
     }
 
     @Override
@@ -224,6 +353,13 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             }
         } else if (modificationType == MODIFICATION_VIDEO_PROFILE) {
             // FIXME: how to identify if the response video profile is for accept?
+
+            /* When remote device goes in background local device will be in paused state.
+             * Update the device paused state by remote.
+             */
+            setPausedByRemote(mediaProfile.getAudioDirection()
+                    == ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE
+                    && VideoProfile.isPaused(responseProfile.getVideoState()));
             acceptSessionModification(callType, mediaProfile);
         } else {
             acceptSessionModification(callType, mediaProfile);
