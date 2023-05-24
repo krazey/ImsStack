@@ -71,7 +71,7 @@ public class PhoneStateAgentTest {
     private static final int[] SUB_ID1 = { 2 };
 
     @Mock private ServiceState mServiceState;
-    @Mock private ISubscription mSubscription;
+    @Mock private SimInterface mSimInterface;
     @Mock private ImsPhoneStateListener mPsListener;
     @Mock private PhoneStateNotifier mPsNotifier;
 
@@ -114,19 +114,19 @@ public class PhoneStateAgentTest {
         AppContext.init(context);
         ImsLog.setDebugOn(true);
         MSimUtils.setSubscriptionManagerProxy(mSubscriptionManagerProxy);
-        AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, mSubscription);
+        AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
         mPsAgent = new PhoneStateAgent(SLOT0);
         mPsAgent.init(context);
     }
 
     @After
     public void tearDown() throws Exception {
-        AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         MSimUtils.setSubscriptionManagerProxy(null);
         ImsLog.setDebugOn(false);
         mPsNotifier = null;
         mPsListener = null;
-        mSubscription = null;
+        mSimInterface = null;
         mTelephonyManager = null;
         mContextFixture = null;
         mPsAgent.cleanup();
@@ -142,10 +142,10 @@ public class PhoneStateAgentTest {
 
         verify(mTelephonyManager, times(eventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(mSubscription).addListener(any(SubscriptionListener.class));
+        verify(mSimInterface).addListener(any(Sim.Listener.class));
         verify(mTelephonyManager, times(eventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mSubscription).removeListener(any(SubscriptionListener.class));
+        verify(mSimInterface).removeListener(any(Sim.Listener.class));
     }
 
     @Test
@@ -232,100 +232,33 @@ public class PhoneStateAgentTest {
 
     @Test
     @SmallTest
-    public void testSimLoadCompleted() {
+    public void testOnSimStateChanged() {
         int eventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
         TelephonyManager tm = Mockito.mock(TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
-        ArgumentCaptor<SubscriptionListener> captor =
-                ArgumentCaptor.forClass(SubscriptionListener.class);
-        verify(mSubscription).addListener(captor.capture());
+        ArgumentCaptor<Sim.Listener> captor = ArgumentCaptor.forClass(Sim.Listener.class);
+        verify(mSimInterface).addListener(captor.capture());
 
-        SubscriptionListener listener = captor.getValue();
+        Sim.Listener simListener = captor.getValue();
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
+        // Ignored because SimInterface is null.
+        simListener.onSimStateChanged();
+
+        AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
+        when(mSimInterface.isSimLoadCompleted()).thenReturn(false);
+        // Ignored because SIM state is not fully loaded.
+        simListener.onSimStateChanged();
+
         // Same slot & same subscription
-        listener.onSimLoadCompleted(SLOT0);
+        when(mSimInterface.isSimLoadCompleted()).thenReturn(true);
+        when(mSimInterface.getSubId()).thenReturn(SUB_ID[0]);
+        simListener.onSimStateChanged();
 
         TelephonyManager tm1 = Mockito.mock(TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID1[0]))).thenReturn(tm1);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID1);
-        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(SUB_ID1[0]);
-
+        when(mSimInterface.getSubId()).thenReturn(SUB_ID1[0]);
         // Same slot & different subscription
-        listener.onSimLoadCompleted(SLOT0);
-
-        verify(tm1, times(eventCount))
-                .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(tm, times(eventCount))
-                .unregisterTelephonyCallback(any(TelephonyCallback.class));
-    }
-
-    @Test
-    @SmallTest
-    public void testDefaultSubscriptionChanged() {
-        TelephonyManager defaultTelephonyManager = Mockito.mock(TelephonyManager.class);
-        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, defaultTelephonyManager);
-
-        int eventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
-        TelephonyManager tm = Mockito.mock(TelephonyManager.class);
-        when(defaultTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
-        ArgumentCaptor<SubscriptionListener> captor =
-                ArgumentCaptor.forClass(SubscriptionListener.class);
-        verify(mSubscription).addListener(captor.capture());
-
-        SubscriptionListener listener = captor.getValue();
-        // Same subscription
-        listener.onDefaultSubscriptionChanged(SUB_ID[0]);
-
-        TelephonyManager tm1 = Mockito.mock(TelephonyManager.class);
-        when(defaultTelephonyManager.createForSubscriptionId(eq(SUB_ID1[0]))).thenReturn(tm1);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID1);
-        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(SUB_ID1[0]);
-
-        // Different subscription
-        listener.onDefaultSubscriptionChanged(SUB_ID1[0]);
-
-        verify(tm1, times(eventCount))
-                .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(tm, times(eventCount))
-                .unregisterTelephonyCallback(any(TelephonyCallback.class));
-
-        // Invalid subscription
-        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(MSimUtils.INVALID_SUB_ID);
-        listener.onDefaultSubscriptionChanged(MSimUtils.INVALID_SUB_ID);
-
-        verify(defaultTelephonyManager, times(eventCount))
-                .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(tm1, times(eventCount))
-                .unregisterTelephonyCallback(any(TelephonyCallback.class));
-
-        // When TelephonyManager is null
-        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
-        listener.onDefaultSubscriptionChanged(SUB_ID[0]);
-
-        verify(defaultTelephonyManager, never())
-                .unregisterTelephonyCallback(any(TelephonyCallback.class));
-    }
-
-    @Test
-    @SmallTest
-    public void testDefaultDataSubscriptionChanged() {
-        int eventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
-        TelephonyManager tm = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
-        ArgumentCaptor<SubscriptionListener> captor =
-                ArgumentCaptor.forClass(SubscriptionListener.class);
-        verify(mSubscription).addListener(captor.capture());
-
-        SubscriptionListener listener = captor.getValue();
-        // Same subscription
-        listener.onDefaultDataSubscriptionChanged(SUB_ID[0]);
-
-        TelephonyManager tm1 = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID1[0]))).thenReturn(tm1);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID1);
-        when(mSubscription.getSubId(eq(SLOT0))).thenReturn(SUB_ID1[0]);
-
-        // Different subscription
-        listener.onDefaultDataSubscriptionChanged(SUB_ID1[0]);
+        simListener.onSimStateChanged();
 
         verify(tm1, times(eventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));

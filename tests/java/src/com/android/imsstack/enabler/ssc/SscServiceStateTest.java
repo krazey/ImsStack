@@ -183,7 +183,6 @@ public class SscServiceStateTest {
 
         mLooper.destroy();
 
-        AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);

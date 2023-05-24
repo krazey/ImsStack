@@ -20,7 +20,8 @@ import android.os.Message;
 import android.telephony.ims.feature.MmTelFeature;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
@@ -28,6 +29,7 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListene
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 public class ImsFeatureManager {
     private final Object mLock = new Object();
@@ -207,8 +209,19 @@ public class ImsFeatureManager {
     }
 
     private static boolean isAllSimAbsent() {
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (isub != null) ? isub.isAllSimAbsent() : true;
+        boolean allSimAbsent = true;
+        int activeSimCount = MSimUtils.getActiveSimCount();
+
+        for (int i = 0; i < activeSimCount; ++i) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
+            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
+            if (simState != Sim.STATE_ABSENT) {
+                allSimAbsent = false;
+                break;
+            }
+        }
+
+        return allSimAbsent;
     }
 
     private static void log(String s) {

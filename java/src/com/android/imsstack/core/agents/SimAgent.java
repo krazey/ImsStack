@@ -177,6 +177,13 @@ public class SimAgent implements SimInterface {
     }
 
     @Override
+    public boolean isSimLoadCompleted() {
+        return mSimState == Sim.STATE_LOADED
+                || mSimState == Sim.STATE_LOCKED
+                || mSimState == Sim.STATE_ABSENT;
+    }
+
+    @Override
     public byte[] getUsimServiceTable() {
         return mUst;
     }

@@ -22,7 +22,6 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
@@ -183,8 +182,8 @@ public class ImsCallContext implements ICallContext {
 
     @Override
     public int getSubId() {
-        ISubscription isub = getSubscription();
-        return (isub != null) ? isub.getSubId(getSlotId()) : MSimUtils.getSubId(getPhoneId());
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, getSlotId());
+        return (sim != null) ? sim.getSubId() : MSimUtils.getSubId(getPhoneId());
     }
 
     @Override
@@ -210,11 +209,6 @@ public class ImsCallContext implements ICallContext {
     @Override
     public NativeStateInterface getNativeStateInterface() {
         return AgentFactory.getInstance().getAgent(NativeStateInterface.class, getSlotId());
-    }
-
-    @Override
-    public ISubscription getSubscription() {
-        return (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
     }
 
     @Override

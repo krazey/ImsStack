@@ -45,9 +45,9 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.NativeStateInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
@@ -58,6 +58,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -83,7 +84,7 @@ public class DcApnTest {
     private FakeDcApn mDcApn;
 
     @Mock IApn mMockIApn;
-    @Mock ISubscription mMockISubscription;
+    @Mock SimInterface mMockSimInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock Network mMockNetwork;
 
@@ -100,7 +101,8 @@ public class DcApnTest {
 
         when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_IDS);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
-
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
 
@@ -120,6 +122,7 @@ public class DcApnTest {
         mSubscriptionManager = null;
         mConnectivityManager = null;
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
 
         AppContext.deinit();
     }
@@ -132,8 +135,7 @@ public class DcApnTest {
         assertNotNull(mDcApn.getApnControl(EApnType.XCAP.getType()));
         assertNotNull(mDcApn.getApnControl(EApnType.INTERNET.getType()));
 
-        assertNotNull(mDcApn.mSubscriptionListener);
-        verify(mMockISubscription).addListener(mDcApn.mSubscriptionListener);
+        verify(mMockSimInterface).addListener(any(Sim.Listener.class));
 
         assertNotNull(mDcApn.mPreciseDcStateListener);
         verify(mTelephonyManager).registerTelephonyCallback(
@@ -144,9 +146,7 @@ public class DcApnTest {
     public void testCleanup() throws Exception {
         mDcApn.cleanup();
 
-        verify(mMockISubscription).removeListener(any(SubscriptionListener.class));
-        assertNull(mDcApn.mSubscriptionListener);
-
+        verify(mMockSimInterface).removeListener(any(Sim.Listener.class));
         verify(mTelephonyManager).unregisterTelephonyCallback(
                 any(DcApn.PreciseDcStateListener.class));
         assertNull(mDcApn.mPreciseDcStateListener);
@@ -662,58 +662,34 @@ public class DcApnTest {
     }
 
     @Test
-    public void testSubscriptionListener_onSimLoadCompleted() throws Exception {
-        mDcApn.mFakeSlotIndex = SLOT_1;
-        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
+    public void testOnSimStateChanged() {
+        ArgumentCaptor<Sim.Listener> captor = ArgumentCaptor.forClass(Sim.Listener.class);
+        verify(mMockSimInterface).addListener(captor.capture());
+        Sim.Listener simListener = captor.getValue();
 
-        mDcApn.mSubscriptionListener.onSimLoadCompleted(SLOT_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        // Ignored because SimInterface is null.
+        simListener.onSimStateChanged();
+
+        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        when(mMockSimInterface.isSimLoadCompleted()).thenReturn(false);
+        // Ignored because SIM state is not fully loaded.
+        simListener.onSimStateChanged();
+
+        // Same subscription
+        when(mMockSimInterface.isSimLoadCompleted()).thenReturn(true);
+        simListener.onSimStateChanged();
+
+        mDcApn.mFakeSlotIndex = SLOT_1;
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
+        // Different subscription
+        simListener.onSimStateChanged();
 
         verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
         // register callback when init() and updateSubscription()
         verify(mTelephonyManager, times(2)).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
-    }
-
-    @Test
-    public void testSubscriptionListener_onDefaultSubscriptionChanged() throws Exception {
-        mDcApn.mFakeSlotIndex = SLOT_1;
-        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
-
-        mDcApn.mSubscriptionListener.onDefaultSubscriptionChanged(SUB_ID_1);
-
-        verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
-        // register callback when init() and updateSubscription()
-        verify(mTelephonyManager, times(2)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
-    }
-
-    @Test
-    public void testSubscriptionListener_onDefaultDataSubscriptionChanged() throws Exception {
-        mDcApn.mFakeSlotIndex = SLOT_1;
-        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
-
-        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_1);
-
-        verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
-        // register callback when init() and updateSubscription()
-        verify(mTelephonyManager, times(2)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
-    }
-
-
-    @Test
-    public void testSubscriptionListener_updateSubscriptionFail() throws Exception {
-        mMockISubscription = null;
-
-        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
-        mDcApn.mFakeSlotIndex = SLOT_1;
-        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
-
-        verify(mTelephonyManager, never()).unregisterTelephonyCallback(
-                mDcApn.mPreciseDcStateListener);
     }
 
     private class FakeDcApn extends DcApn {
@@ -721,12 +697,6 @@ public class DcApnTest {
 
         FakeDcApn(int slotId) {
             super(slotId);
-        }
-
-        @Override
-        protected ISubscription getSubscription() {
-            super.getSubscription();
-            return mMockISubscription;
         }
 
         @Override

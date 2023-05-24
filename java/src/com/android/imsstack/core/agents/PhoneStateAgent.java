@@ -57,7 +57,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             new CopyOnWriteArraySet<PhoneStateNotifier>();
     private final PhoneStateEvents mEvents = new PhoneStateEvents();
     private final int mSlotId;
-    private SubscriptionListenerProxy mSubscriptionListener;
+    private Sim.Listener mSimListener;
     private PhoneStateListener mPhoneStateListener;
     private ServiceState mServiceState;
     private BarringInfo mBarringInfo;
@@ -73,21 +73,26 @@ public class PhoneStateAgent implements PhoneStateInterface,
         mPhoneStateListener = new PhoneStateListener(MSimUtils.getSubId(mSlotId));
         mPhoneStateListener.registerCallbacks(mEvents.getEvents());
 
-        mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        if (isub != null) {
-            isub.addListener(mSubscriptionListener);
+        mSimListener = new Sim.Listener() {
+                @Override
+                public void onSimStateChanged() {
+                    handleSimStateChanged();
+                }
+            };
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (sim != null) {
+            sim.addListener(mSimListener);
         }
     }
 
     @Override
     public void cleanup() {
-        if (mSubscriptionListener != null) {
-            ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-            if (isub != null) {
-                isub.removeListener(mSubscriptionListener);
+        if (mSimListener != null) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            if (sim != null) {
+                sim.removeListener(mSimListener);
             }
-            mSubscriptionListener = null;
+            mSimListener = null;
         }
 
         mPhoneStateNotifiers.clear();
@@ -239,14 +244,15 @@ public class PhoneStateAgent implements PhoneStateInterface,
         }
     }
 
-    private void listenForSubscriptionChanged(int subId) {
+    private void handleSimStateChanged() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim == null || !sim.isSimLoadCompleted()) {
+            return;
+        }
+
         synchronized (mLock) {
-            int slotId = MSimUtils.getSlotId(subId);
-            if (mSlotId != slotId) {
-                ISubscription isub = (ISubscription) AgentFactory.getAgent(
-                        AgentFactory.SUBSCRIPTION);
-                subId = (isub != null) ? isub.getSubId(mSlotId) : mPhoneStateListener.getSubId();
-            }
+            int subId = sim.getSubId();
 
             if (subId == mPhoneStateListener.getSubId()) {
                 // no-op
@@ -254,7 +260,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 return;
             }
 
-            ImsLog.i(mSlotId, "listenForSubscriptionChanged: subId=" + subId);
+            ImsLog.i(mSlotId, "handleSimStateChanged: subId=" + subId);
             mPhoneStateListener.unregisterCallbacks();
             mPhoneStateListener.dispose();
 
@@ -545,28 +551,6 @@ public class PhoneStateAgent implements PhoneStateInterface,
                         ? TelephonyManager.NETWORK_TYPE_UNKNOWN
                         : nri.getAccessNetworkTechnology();
             }
-        }
-    }
-
-    private final class SubscriptionListenerProxy extends SubscriptionListener {
-        SubscriptionListenerProxy() {
-        }
-
-        @Override
-        public void onSimLoadCompleted(int slotId) {
-            if (mSlotId == slotId) {
-                listenForSubscriptionChanged(MSimUtils.getSubId(slotId));
-            }
-        }
-
-        @Override
-        public void onDefaultSubscriptionChanged(int subId) {
-            listenForSubscriptionChanged(subId);
-        }
-
-        @Override
-        public void onDefaultDataSubscriptionChanged(int subId) {
-            listenForSubscriptionChanged(subId);
         }
     }
 }

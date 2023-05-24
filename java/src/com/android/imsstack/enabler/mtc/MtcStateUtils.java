@@ -19,7 +19,6 @@ import android.content.Context;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.internal.enabler.ImsStateStore;
@@ -47,9 +46,7 @@ public class MtcStateUtils {
 
     // When "ims" service is opened or operator is changed
     public static void initializeState(Context context, int slotId) {
-        int phoneId = getPhoneId(slotId);
-
-        ImsStateStore.init(phoneId);
+        ImsStateStore.init(slotId);
 
         boolean isVoLteEnabled = ServiceCaps.isVoLteEnabledByPlatform(slotId);
         boolean isWfcEnabled = ServiceCaps.isWfcEnabledByPlatform(slotId);
@@ -169,16 +166,6 @@ public class MtcStateUtils {
         logi("updateWfcProvisioned :: provisioned=" + provisioned + ", slotId=" + slotId);
 
         ImsStateStore.getMmTelState(slotId).setWfcProvisioned(provisioned);
-    }
-
-    private static int getPhoneId(int slotId) {
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (isub == null) ? slotId : isub.getPhoneId(slotId);
-    }
-
-    private static int getSubId(int slotId) {
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (isub == null) ? MSimUtils.INVALID_SUB_ID : isub.getSubId(slotId);
     }
 
     private static void initializeImsStateInternal(int phoneId, int initFlags) {

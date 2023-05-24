@@ -19,8 +19,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
-import com.android.imsstack.core.agents.SubscriptionListener;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
 import com.android.imsstack.core.config.ServiceCaps;
@@ -43,7 +43,6 @@ public class ImsServiceManager {
     private static ImsServiceManager sServiceManager;
     private final Context mContext;
     private final MessageExecutor mExecutor;
-    protected final SubscriptionListenerProxy mSubscriptionListener;
     protected final ImsServiceListener mImsServiceListener;
     // PhoneId -> ImsServiceRecord
     private ConcurrentHashMap<Integer, ImsServiceRecord> mServiceRecords
@@ -61,7 +60,6 @@ public class ImsServiceManager {
     public ImsServiceManager(Context context, MessageExecutor executor) {
         mContext = context;
         mExecutor = executor;
-        mDefaultPhoneId = getActivePhoneId();
 
         int supportedSimCount = MSimUtils.getSupportedSimCount();
 
@@ -78,13 +76,6 @@ public class ImsServiceManager {
         }
 
         createServiceRecords();
-
-        mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-
-        if (subs != null) {
-            subs.addListener(mSubscriptionListener);
-        }
 
         mImsServiceListener = new ImsServiceListener();
         ImsStackRegistry.addImsServiceListener(mImsServiceListener);
@@ -104,14 +95,6 @@ public class ImsServiceManager {
     }
 
     public void dispose() {
-        if (mSubscriptionListener != null) {
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-
-            if (subs != null) {
-                subs.removeListener(mSubscriptionListener);
-            }
-        }
-
         if (mImsServiceListener != null) {
             ImsStackRegistry.removeImsServiceListener(mImsServiceListener);
         }
@@ -428,18 +411,6 @@ public class ImsServiceManager {
         }
     }
 
-    // Check whether ImsService should be down by hotswap
-    private void checkImsServiceAvailabilityAndBroadcastServiceUpDown(
-            int phoneId) {
-        if (phoneId < MSimUtils.DEFAULT_PHONE_ID || phoneId >= MSimUtils.getActiveSimCount()) {
-            return;
-        }
-
-        if (ImsConstants.USE_CARRIER_CONFIG) {
-            return;
-        }
-    }
-
     // Operator changed by hotswap
     private void checkOperatorAndRebindCallApp(int phoneId) {
         if (phoneId < MSimUtils.DEFAULT_PHONE_ID || phoneId >= MSimUtils.getActiveSimCount()) {
@@ -453,8 +424,6 @@ public class ImsServiceManager {
             mCountry[phoneId] = new String(ImsPrivateProperties.getSimCountry(phoneId));
             mServiceFeatures[phoneId] = getServiceFeatures(phoneId);
             mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
-
-            checkImsServiceAvailabilityAndBroadcastServiceUpDown(phoneId);
 
             if (!TextUtils.isEmpty(mOperator[phoneId])
                     && (mServiceFeatures[phoneId] > 0)) {
@@ -508,8 +477,6 @@ public class ImsServiceManager {
             }
         }
 
-        checkImsServiceAvailabilityAndBroadcastServiceUpDown(phoneId);
-
         if (operatorOrServiceFeaturesChanged) {
             refreshServiceRecordAndCallApp(phoneId, operatorChanged);
         }
@@ -520,9 +487,10 @@ public class ImsServiceManager {
 
         // VOLTE_EMERGENCY_CALLING
         if (serviceFeatures == 0) {
-            ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, phoneId);
+            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
 
-            if ((isub != null) && (isub.isSimAbsent(phoneId) || isub.isSimLocked(phoneId))) {
+            if (simState == Sim.STATE_ABSENT || simState == Sim.STATE_LOCKED) {
                 logi("SimAbsentOrLocked: VoLTE is enabled for IMS e-call");
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
@@ -580,11 +548,6 @@ public class ImsServiceManager {
         }
     }
 
-    private static int getActivePhoneId() {
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (isub != null) ? isub.getPhoneId() : MSimUtils.DEFAULT_PHONE_ID;
-    }
-
     private static int getServiceFeatures(int phoneId) {
         int serviceFeatures = 0;
         List<FeatureTable.Feature> serviceFeatureList = FeatureTable.getServiceFeatures();
@@ -624,51 +587,6 @@ public class ImsServiceManager {
 
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
-    }
-
-    protected final class SubscriptionListenerProxy extends SubscriptionListener {
-        public SubscriptionListenerProxy() {
-            log("SubscriptionListenerProxy :: phoneId=" + getActivePhoneId());
-        }
-
-        @Override
-        public void onSimLoadCompleted(int slotId) {
-            logi("onSimLoadCompleted :: slotId=" + slotId);
-
-            // If DDS slot is not in LOADED state (such as LOCKED),
-            // call-frw may not determine the operator which supports VoLTE.
-            if (MSimUtils.isMultiSimEnabled() && !isMultiImsEnabled()) {
-                ISubscription isub
-                        = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-
-                if ((isub != null)
-                        && (slotId == isub.getSlotId())
-                        && isub.isSimLoaded(slotId)) {
-                    checkImsServiceAvailabilityAndBroadcastServiceUpDown(slotId);
-                }
-            }
-        }
-
-        @Override
-        public void onDefaultSubscriptionChanged(int subId) {
-            logi("onDefaultSubscriptionChanged :: subId=" + subId);
-            setDefaultPhoneId(getPhoneIdFromMSimUtils(subId));
-        }
-
-        @Override
-        public void onDefaultDataSubscriptionChanged(int subId) {
-            logi("onDefaultDataSubscriptionChanged :: subId=" + subId);
-            setDefaultPhoneId(getPhoneIdFromMSimUtils(subId));
-        }
-
-        @Override
-        public void onCarrierConfigChanged(int phoneId, int subId) {
-            logi("onCarrierConfigChanged :: subId=" + subId + ", phoneId=" + phoneId);
-
-            if (ImsConstants.USE_CARRIER_CONFIG) {
-                checkImsServiceAvailabilityAndBroadcastServiceUpDown(phoneId);
-            }
-        }
     }
 
     protected class ImsServiceListener implements ImsStackRegistry.ImsServiceListener {

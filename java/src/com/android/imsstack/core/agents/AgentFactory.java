@@ -31,18 +31,12 @@ import java.util.Map;
  * This class provides the APIs to manage and control Multi-SIM state.
  */
 public final class AgentFactory {
-    // agents without slot id
-    public static final int SUBSCRIPTION = 1;
-
     // agents with slot id
     public static final int CELL_INFO = 11;
     public static final int PHONE_CALL_DB = 12;
 
     private static final int AGENT_END = (PHONE_CALL_DB + 1);
     private static final int AGENT_MAX = AGENT_END;
-
-    private static Map<Integer, IAgent> sAgents =
-            new HashMap<Integer, IAgent>(AGENT_MAX);
 
     private static Map<Integer, HashMap<Integer, IAgent>> sAgentSlots =
             new HashMap<Integer, HashMap<Integer, IAgent>>(MSimUtils.getSupportedSimCount());
@@ -81,7 +75,6 @@ public final class AgentFactory {
         mAgents.clear();
         mSystemCallAgents.clear();
         mAgentsForSlot.clear();
-        sAgents.clear();
         sAgentSlots.clear();
     }
 
@@ -154,15 +147,6 @@ public final class AgentFactory {
         }
     }
 
-    public static synchronized IAgent getAgent(int agentType) {
-        return sAgents.get(agentType);
-    }
-
-    @VisibleForTesting
-    public static void setDefaultAgent(int agentType, IAgent agent) {
-        sAgents.put(agentType, agent);
-    }
-
     public static synchronized IAgent getAgent(int agentType, int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
 
@@ -173,7 +157,7 @@ public final class AgentFactory {
             }
         }
 
-        return getAgent(agentType);
+        return null;
     }
 
     public static synchronized void createAgents(Context context, int slotId) {
@@ -215,12 +199,6 @@ public final class AgentFactory {
         getInstance().destroyAgentsForSlot(slotId);
     }
 
-    public static synchronized void createDefaultAgents() {
-        sAgents.put(SUBSCRIPTION, SubscriptionAgent.getInstance());
-
-        getInstance().createAgents();
-    }
-
     public static void initAgentsForMIms(Context context, int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
 
@@ -239,12 +217,6 @@ public final class AgentFactory {
         }
 
         getInstance().initAgentsForSlot(context, slotId);
-    }
-
-    public static void initDefaultAgents(Context context) {
-        SubscriptionAgent.getInstance().init(context);
-
-        getInstance().initAgents(context);
     }
 
     public static void setAgentForMIms(IAgent agent, int agentType, int slotId) {

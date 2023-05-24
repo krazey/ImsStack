@@ -27,7 +27,6 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
@@ -66,6 +65,7 @@ import java.util.concurrent.Executor;
 public class ImsCallContextTest extends ImsStackTest {
     /* Indicates that geolocation information is required to make a call */
     private static final int FLAG_LOCATION_REQUIRED = 0x00000001;
+    private static final int SUB_ID = 1;
     private int mSlotId = 0;
 
     private ImsCallContext mImsCallContext;
@@ -76,7 +76,6 @@ public class ImsCallContextTest extends ImsStackTest {
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SimInterface mMockSimInterface;
-    @Mock private ISubscription mMockISubscription;
     @Mock private Context mContext;
     @Mock private IBaseContext mIBaseContext;
     @Mock private Executor mExecutor;
@@ -95,7 +94,8 @@ public class ImsCallContextTest extends ImsStackTest {
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, mSlotId);
-        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockISubscription);
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID);
+        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, mSlotId);
 
         HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
         dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
@@ -116,7 +116,7 @@ public class ImsCallContextTest extends ImsStackTest {
     @After
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId);
-        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, mSlotId);
         DcFactory.setObjects(mSlotId, null);
         mStateTracker = null;
         mImsCallContext.dispose();
@@ -244,8 +244,7 @@ public class ImsCallContextTest extends ImsStackTest {
 
     @Test
     public void getSubIdTest() {
-        Assert.assertEquals(0, mImsCallContext.getSubId());
-        Mockito.verify(mMockISubscription).getSubId(mImsCallContext.getSlotId());
+        Assert.assertEquals(SUB_ID, mImsCallContext.getSubId());
     }
 
     @Test

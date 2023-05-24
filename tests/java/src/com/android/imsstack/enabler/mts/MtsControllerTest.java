@@ -97,7 +97,7 @@ public class MtsControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        AgentFactory.setDefaultAgent(AgentFactory.PHONE_CALL_DB, mMockPhoneCallDBAgent);
+        AgentFactory.setAgentForMIms(mMockPhoneCallDBAgent, AgentFactory.PHONE_CALL_DB, SLOT_ID);
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
@@ -118,6 +118,7 @@ public class MtsControllerTest {
     @After
     public void tearDown() {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
+        AgentFactory.setAgentForMIms(null, AgentFactory.PHONE_CALL_DB, SLOT_ID);
         mMtsJni.release(SLOT_ID);
         mMtsController.cleanup();
     }

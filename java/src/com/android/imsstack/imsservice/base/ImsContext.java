@@ -20,7 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
@@ -84,8 +84,8 @@ public class ImsContext implements IContext {
      */
     @Override
     public int getSubId() {
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (isub != null) ? isub.getSubId(getSlotId()) : MSimUtils.getSubId(getPhoneId());
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        return (sim != null) ? sim.getSubId() : MSimUtils.getSubId(getPhoneId());
     }
 
     /**

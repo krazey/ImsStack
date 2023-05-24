@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,9 +47,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -66,15 +65,12 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Field;
 
@@ -82,7 +78,6 @@ import java.lang.reflect.Field;
 @TestableLooper.RunWithLooper
 public class ApnTest {
     private static final int SLOT_0 = 0;
-    static ContextFixture sContext;
     FakeApn mApn;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
@@ -92,26 +87,22 @@ public class ApnTest {
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private ISystem mMockISystem;
-    @Mock private ISubscription mMockISubscription;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private IAosRegistration mMockIAosReg;
     @Mock private Network mMockNetwork;
     @Mock private MsgProcInterface mMockMsgProc;
 
+    private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
     private ConnectivityManager mConnectivityManager;
-    private SubscriptionListener mSubscriptionListener;
     private PreciseDataConnectionState mPreciseDataConnectionState;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
         // create the instance to test
         mApn = new FakeApn(AppContext.getInstance(), SLOT_0);
         mApn.mType = EApnType.IMS;
@@ -120,6 +111,7 @@ public class ApnTest {
         mTestableLooper = TestableLooper.get(ApnTest.this);
         mTestableLooper.processAllMessages();
 
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_0);
         replaceInstance(Apn.class, "mSystem", mApn, mMockISystem);
     }
 
@@ -133,20 +125,17 @@ public class ApnTest {
             mPreciseDataConnectionState = null;
         }
         mTestableLooper = null;
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
         AppContext.deinit();
-        sContext = null;
+        mContextFixture = null;
     }
 
     @Test
-    public void testCelanup() throws Exception {
+    public void testCleanup() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
         replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
                 mMockNetworkMonitoringCallback);
-        mApn.registerSubscription();
+        mApn.registerConfigListener();
         mApn.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         mApn.cleanup();
@@ -155,7 +144,6 @@ public class ApnTest {
         verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
         verify(mMockNetworkCallback).cleanUp();
 
-        assertNull(mApn.mSubscriptionListener);
         assertNull(mApn.mNetworkMonitoringCallback);
         assertNull(mApn.mNetworkCallback);
         assertEquals(EApnReqState.APN_REQUEST_IDLE, mApn.getApnReqState());
@@ -390,34 +378,27 @@ public class ApnTest {
     }
 
     @Test
-    public void testRegisterSubscription() throws Exception {
-        replaceInstance(Apn.class, "mSubscription", mApn, mMockISubscription);
-
-        mApn.registerSubscription();
-        verify(mMockISubscription).addListener(any(Apn.ApnSubscriptionListener.class));
-        mApn.unregisterSubscription();
-        verify(mMockISubscription).removeListener(any(Apn.ApnSubscriptionListener.class));
+    public void testRegisterConfigListener() throws Exception {
+        mApn.registerConfigListener();
+        verify(mMockConfigInterface).addListener(any(ConfigInterface.Listener.class));
+        mApn.unregisterConfigListener();
+        verify(mMockConfigInterface).removeListener(any(ConfigInterface.Listener.class));
     }
 
     @Test
-    public void testSubscriptionListener() throws Exception {
+    public void testOnCarrierConfigChanged() throws Exception {
         int subId = 1;
-        replaceInstance(Apn.class, "mSubscription", mApn, mMockISubscription);
         replaceInstance(Apn.class, "mNetworkMonitoringCallback", mApn,
                 mMockNetworkMonitoringCallback);
         when(mMockNetworkMonitoringCallback.getEvents())
                 .thenReturn(Apn.ImsNetworkCallback.EVENT_LOST);
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                mSubscriptionListener = (SubscriptionListener) invocation.getArguments()[0];
-                return null;
-            }
-        }).when(mMockISubscription).addListener(any(SubscriptionListener.class));
         mApn.mIsMonitoringCallbackRegistered = true;
-
-        mApn.registerSubscription();
-        mSubscriptionListener.onCarrierConfigChanged(SLOT_0, subId);
+        mApn.registerConfigListener();
+        ArgumentCaptor<ConfigInterface.Listener> captor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mMockConfigInterface).addListener(captor.capture());
+        ConfigInterface.Listener configListener = captor.getValue();
+        configListener.onCarrierConfigChanged(SLOT_0, subId);
 
         // perform unregisterCallback()
         verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkMonitoringCallback);

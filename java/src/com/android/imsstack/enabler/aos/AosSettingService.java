@@ -26,9 +26,9 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.NativeStateInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
@@ -53,9 +53,8 @@ public class AosSettingService {
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private boolean mMobileDataEnabled = false;
     @VisibleForTesting
-    protected SubscriptionListenerProxy mSubscriptionListener = null;
-    @VisibleForTesting
     protected IntentReceiverListener mIntentReceiverListener = null;
+    private Sim.Listener mSimListener;
     private NativeStateListener mNativeStateListener;
 
     public AosSettingService(int slotId) {
@@ -79,10 +78,15 @@ public class AosSettingService {
         AppContext.getInstance().registerReceiver(mIntentReceiverListener,
                 mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
 
-        mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        if (isub != null) {
-            isub.addListener(mSubscriptionListener);
+        mSimListener = new Sim.Listener() {
+                @Override
+                public void onSimStateChanged() {
+                    updateSubscription();
+                }
+            };
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (sim != null) {
+            sim.addListener(mSimListener);
         }
 
         mSubId = MSimUtils.getSubId(mSlotId);
@@ -100,12 +104,12 @@ public class AosSettingService {
             mUserMobileDataStateListener = null;
         }
 
-        if (mSubscriptionListener != null) {
-            ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-            if (isub != null) {
-                isub.removeListener(mSubscriptionListener);
+        if (mSimListener != null) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            if (sim != null) {
+                sim.removeListener(mSimListener);
             }
-            mSubscriptionListener = null;
+            mSimListener = null;
         }
 
         if (mIntentReceiverListener != null) {
@@ -146,22 +150,19 @@ public class AosSettingService {
         }
     }
 
-    private void updateSubscription(int subId) {
+    private void updateSubscription() {
         ImsLog.d(mSlotId, "");
 
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim == null || !sim.isSimLoadCompleted()) {
+            return;
+        }
+
         synchronized (mLock) {
-            int slotId = getSlotId(subId);
-            if (mSlotId != slotId) {
-                ISubscription isub = (ISubscription) AgentFactory.getAgent(
-                        AgentFactory.SUBSCRIPTION);
-                if (isub == null) {
-                    return;
-                }
+            int subId = sim.getSubId();
 
-                subId = isub.getSubId(mSlotId);
-            }
-
-            if (mSubId == subId || (subId == MSimUtils.INVALID_SUB_ID)) {
+            if (mSubId == subId || subId == MSimUtils.INVALID_SUB_ID) {
                 return;
             }
 
@@ -200,11 +201,6 @@ public class AosSettingService {
         }
     }
 
-    @VisibleForTesting
-    protected int getSlotId(int subId) {
-        return MSimUtils.getSlotId(subId);
-    }
-
     private final class SettingServiceHandler extends Handler {
         private SettingServiceHandler(Looper looper) {
             super(looper);
@@ -229,31 +225,6 @@ public class AosSettingService {
                         break;
                 }
             }
-        }
-    }
-
-    @VisibleForTesting
-    protected final class SubscriptionListenerProxy extends SubscriptionListener {
-
-        public SubscriptionListenerProxy() {
-        }
-
-        @Override
-        public void onSimLoadCompleted(int slotId) {
-            if (mSlotId == slotId) {
-                int subId = MSimUtils.getSubId(mSlotId);
-                updateSubscription(subId);
-            }
-        }
-
-        @Override
-        public void onDefaultSubscriptionChanged(int subId) {
-            updateSubscription(subId);
-        }
-
-        @Override
-        public void onDefaultDataSubscriptionChanged(int subId) {
-            updateSubscription(subId);
         }
     }
 

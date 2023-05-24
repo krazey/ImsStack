@@ -59,11 +59,24 @@ public interface SimInterface extends IAgent {
     @Sim.State int getSimState();
 
     /**
-     * Checks if SIM is loaded or not.
+     * Checks whether the current SIM state is in a {@link Sim#STATE_LOADED} state.
      *
-     * @return true if SIM state is loaded, false otherwise.
+     * @return {@code true} if the current SIM state is in a {@link Sim#STATE_LOADED} state,
+     *         {@code false} otherwise.
      */
     boolean isSimLoaded();
+
+    /**
+     * Checks whether the SIM is fully loaded.
+     *
+     * The fully loaded SIM states are:
+     *      {@link Sim#STATE_ABSENT},
+     *      {@link Sim#STATE_LOCKED},
+     *      {@link Sim#STATE_LOADED}
+     *
+     * @return {@code true} if the SIM state is a final state, {@code false} otherwise.
+     */
+    boolean isSimLoadCompleted();
 
     /**
      * Returns the USIM service table that contains a bit field of enabled services.

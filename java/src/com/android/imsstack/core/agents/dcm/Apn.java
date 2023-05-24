@@ -35,9 +35,10 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -140,9 +141,8 @@ public abstract class Apn extends Handler implements IApn {
     protected IDcSettings mDcSettings;
     protected IDcNetWatcher mDcNetWatcher;
     protected ISystem mSystem;
-    protected ISubscription mSubscription;
     protected IAosRegistration mAosReg;
-    protected int mSlotId = 0;
+    protected final int mSlotId;
     protected EApnType mType;
     protected EApnReqState mAPNState = EApnReqState.APN_REQUEST_IDLE;
     protected int mDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -157,7 +157,7 @@ public abstract class Apn extends Handler implements IApn {
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
     protected boolean mIsMonitoringCallbackRegistered = false;
     protected int mSubId = MSimUtils.INVALID_SUB_ID;
-    protected ApnSubscriptionListener mSubscriptionListener = null;
+    protected ConfigInterface.Listener mConfigListener;
     protected Set<ApnStateListener> mApnStateListeners =
             new CopyOnWriteArraySet<ApnStateListener>();
 
@@ -170,7 +170,6 @@ public abstract class Apn extends Handler implements IApn {
         mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
         mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
-        mSubscription = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         mAosReg = AosFactory.getInstance().getAosRegistration(mSlotId);
 
         registerEvent();
@@ -181,7 +180,7 @@ public abstract class Apn extends Handler implements IApn {
     public void cleanup() {
         ImsLog.d(mSlotId, "clean up");
 
-        unregisterSubscription();
+        unregisterConfigListener();
 
         unregisterCallback();
 
@@ -352,10 +351,10 @@ public abstract class Apn extends Handler implements IApn {
 
         if (MSimUtils.isMultiSimEnabled()) {
             mSubId = MSimUtils.getSubId(mSlotId);
-            registerSubscription();
+            registerConfigListener();
 
             nrb.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
-                    .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build());
+                    .setSubscriptionId(mSubId).build());
         }
 
         if (mType.getType() == DcConstants.TYPE_IMS) {
@@ -419,19 +418,17 @@ public abstract class Apn extends Handler implements IApn {
 
         if (MSimUtils.isMultiSimEnabled()) {
             boolean setSubId = true;
+            int subId = MSimUtils.getSubId(mSlotId);
 
             if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
-                int subId = MSimUtils.getSubId(mSlotId);
-
-                if ((mSubscription != null) && mSubscription.isAllSimAbsentOrLocked()
-                        && !MSimUtils.isValidSubId(subId)) {
+                if (isAllSimAbsentOrLocked() && !MSimUtils.isValidSubId(subId)) {
                     setSubId = false;
                 }
             }
 
             if (setSubId) {
                 nrb.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
-                        .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build());
+                        .setSubscriptionId(subId).build());
             }
         }
 
@@ -499,21 +496,31 @@ public abstract class Apn extends Handler implements IApn {
         mAPNState = s;
     }
 
-    protected void registerSubscription() {
-        if (mSubscriptionListener == null) {
-            mSubscriptionListener = new ApnSubscriptionListener();
-            if (mSubscription != null) {
-                mSubscription.addListener(mSubscriptionListener);
+    protected void registerConfigListener() {
+        if (mConfigListener == null) {
+            mConfigListener = new ConfigInterface.Listener() {
+                @Override
+                public void onCarrierConfigChanged(int slotId, int subId) {
+                    handleCarrierConfigChanged(slotId, subId);
+                }
+            };
+
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+            if (config != null) {
+                config.addListener(mConfigListener);
             }
         }
     }
 
-    protected void unregisterSubscription() {
-        if (mSubscriptionListener != null) {
-            if (mSubscription != null) {
-                mSubscription.removeListener(mSubscriptionListener);
+    protected void unregisterConfigListener() {
+        if (mConfigListener != null) {
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+            if (config != null) {
+                config.removeListener(mConfigListener);
             }
-            mSubscriptionListener = null;
+            mConfigListener = null;
         }
     }
 
@@ -635,13 +642,13 @@ public abstract class Apn extends Handler implements IApn {
         return true;
     }
 
-    protected void handleCarrierConfigChanged(int phoneId, int subId) {
-        if (mSlotId != phoneId || subId == mSubId) {
+    protected void handleCarrierConfigChanged(int slotId, int subId) {
+        if (subId == mSubId) {
             return;
         }
 
         ImsLog.d("onCarrierConfigChanged :: subId=" + mSubId + "->" + subId
-                + ", phoneId=" + phoneId);
+                + ", slotId=" + slotId);
 
         if (mIsMonitoringCallbackRegistered) {
             unregisterCallback();
@@ -675,6 +682,22 @@ public abstract class Apn extends Handler implements IApn {
         for (ApnStateListener l : mApnStateListeners) {
             l.onHandoverInfoChanged(handoverState, networkType, failCause);
         }
+    }
+
+    private boolean isAllSimAbsentOrLocked() {
+        boolean allSimAbsentOrLocked = true;
+        int activeSimCount = MSimUtils.getActiveSimCount();
+
+        for (int i = 0; i < activeSimCount; ++i) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
+            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
+            if (simState != Sim.STATE_ABSENT && simState != Sim.STATE_LOCKED) {
+                allSimAbsentOrLocked = false;
+                break;
+            }
+        }
+
+        return allSimAbsentOrLocked;
     }
 
     /**
@@ -1350,21 +1373,6 @@ public abstract class Apn extends Handler implements IApn {
                     ? IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
 
             return (currentType != checkType);
-        }
-    }
-
-    /* ---------------------------------------------------------------------------------------------
-        Listener class - SubscriptionListener
-    --------------------------------------------------------------------------------------------- */
-    @VisibleForTesting
-    protected final class ApnSubscriptionListener extends SubscriptionListener {
-        ApnSubscriptionListener() {
-            ImsLog.d("ApnSubscriptionListener");
-        }
-
-        @Override
-        public void onCarrierConfigChanged(int phoneId, int subId) {
-            handleCarrierConfigChanged(phoneId, subId);
         }
     }
 }

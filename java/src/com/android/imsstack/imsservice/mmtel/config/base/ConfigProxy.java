@@ -25,7 +25,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.ISubscription;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -80,9 +80,10 @@ public class ConfigProxy {
         }
 
         int oldCarrierId = preferences.getInt(KEY_CARRIER_ID, -1);
-
-        int subId = getSubId(mContext.getSlotId());
         int oldSubId = preferences.getInt(KEY_SUB_ID, -1);
+        SimInterface sim = AgentFactory.getInstance().getAgent(
+                SimInterface.class, mContext.getSlotId());
+        int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
 
         if ((subId != oldSubId) || (carrierId != oldCarrierId)) {
             return true;
@@ -416,11 +417,6 @@ public class ConfigProxy {
                     ProvisioningManager.PROVISIONING_VALUE_DISABLED);
         }
         editor.apply();
-    }
-
-    private static int getSubId(int slotId) {
-        ISubscription iSub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-        return (iSub == null) ? MSimUtils.INVALID_SUB_ID : iSub.getSubId(slotId);
     }
 
     private static void log(String s) {

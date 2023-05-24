@@ -82,8 +82,9 @@ public class ServiceLoader {
         ImsLog.init();
         NativeCommands.setDeviceConfig(context);
         SystemInterface.getInstance().init();
-        AgentFactory.createDefaultAgents();
-        AgentFactory.initDefaultAgents(context);
+        AgentFactory agentFactory = AgentFactory.getInstance();
+        agentFactory.createAgents();
+        agentFactory.initAgents(context);
         mInitialized = true;
     }
 

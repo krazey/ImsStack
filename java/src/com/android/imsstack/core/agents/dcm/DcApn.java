@@ -28,9 +28,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.NativeStateInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
@@ -80,8 +80,7 @@ public class DcApn implements IDcApn {
 
     @VisibleForTesting
     protected PreciseDcStateListener mPreciseDcStateListener = null;
-    @VisibleForTesting
-    protected SubscriptionListenerProxy mSubscriptionListener;
+    private Sim.Listener mSimListener;
 
     // Public methods --------------------------------------------
     public DcApn(int slotId) {
@@ -101,10 +100,15 @@ public class DcApn implements IDcApn {
 
         apnFactory();
 
-        mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription isub = getSubscription();
-        if (isub != null) {
-            isub.addListener(mSubscriptionListener);
+        mSimListener = new Sim.Listener() {
+                @Override
+                public void onSimStateChanged() {
+                    updateSubscription();
+                }
+            };
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (sim != null) {
+            sim.addListener(mSimListener);
         }
 
         mPreciseDcStateListener = new PreciseDcStateListener();
@@ -119,12 +123,12 @@ public class DcApn implements IDcApn {
     public void cleanup() {
         ImsLog.d(mSlotId, "");
 
-        if (mSubscriptionListener != null) {
-            ISubscription subs = getSubscription();
-            if (subs != null) {
-                subs.removeListener(mSubscriptionListener);
+        if (mSimListener != null) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            if (sim != null) {
+                sim.removeListener(mSimListener);
             }
-            mSubscriptionListener = null;
+            mSimListener = null;
         }
 
         if (mPreciseDcStateListener != null) {
@@ -674,19 +678,17 @@ public class DcApn implements IDcApn {
         }
     }
 
-    private void updateSubscription(int subId) {
+    private void updateSubscription() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim == null || !sim.isSimLoadCompleted()) {
+            return;
+        }
+
         synchronized (mLock) {
-            int slotId = getSlotId(subId);
-            if (mSlotId != slotId) {
-                ISubscription isub = getSubscription();
+            int subId = sim.getSubId();
 
-                if (isub == null) {
-                    return;
-                }
-                subId = isub.getSubId(mSlotId);
-            }
-
-            if (mSubId == subId || (subId == MSimUtils.INVALID_SUB_ID)) {
+            if (mSubId == subId || subId == MSimUtils.INVALID_SUB_ID) {
                 return;
             }
 
@@ -751,35 +753,6 @@ public class DcApn implements IDcApn {
                 sendDataConnectionState(EApnType.XCAP.getType(), dataConnectionState);
             }
         }
-    }
-
-    @VisibleForTesting
-    protected class SubscriptionListenerProxy extends SubscriptionListener {
-        SubscriptionListenerProxy() {
-        }
-
-        @Override
-        public void onSimLoadCompleted(int slotId) {
-            if (mSlotId == slotId) {
-                int subId = MSimUtils.getSubId(mSlotId);
-                updateSubscription(subId);
-            }
-        }
-
-        @Override
-        public void onDefaultSubscriptionChanged(int subId) {
-            updateSubscription(subId);
-        }
-
-        @Override
-        public void onDefaultDataSubscriptionChanged(int subId) {
-            updateSubscription(subId);
-        }
-    }
-
-    @VisibleForTesting
-    protected ISubscription getSubscription() {
-        return (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
     }
 
     @VisibleForTesting

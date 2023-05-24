@@ -132,7 +132,7 @@ public class ApnIms extends Apn {
         registerHandler(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
                 new HandleDefaultNetworkStatusChanged());
 
-        registerSubscription();
+        registerConfigListener();
         registerDefaultNetworkCallback();
     }
 
