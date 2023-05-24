@@ -322,7 +322,9 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     public void peerDimensionChanged(final int width, final int height) {
         log("peerDimensionChanged width[" + width + "] height[" + height + "]");
 
-        mVideoListener.onMediaSessionPeerDimensionsChanged(this, width, height);
+        if (mVideoListener != null) {
+            mVideoListener.onMediaSessionPeerDimensionsChanged(this, width, height);
+        }
     }
 
     /**
