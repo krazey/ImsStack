@@ -25,9 +25,9 @@ import android.util.Base64;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.system.ISystemAPICallInfo;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -198,19 +198,16 @@ public class MtsController {
             }
         }
 
-        ISystemAPICallInfo ci = (ISystemAPICallInfo) AgentFactory.getAgent(
-                AgentFactory.PHONE_CALL_DB, mSlotId);
-        boolean bEmergencyNumber = false;
-        if (ci.isEmergencyNumber(dialedNumber) != 0) {
-            bEmergencyNumber = true;
-        }
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MO_SMS);
         parcel.writeInt(smsFormat);
         parcel.writeString(encodedPdu);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
-        parcel.writeBoolean(bEmergencyNumber);
+        parcel.writeBoolean((telephony != null)
+                ? telephony.isEmergencyNumber(dialedNumber) : false);
         mMtsJni.sendMessage(parcel, mSlotId);
         return true;
     }

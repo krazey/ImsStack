@@ -31,7 +31,6 @@ public interface ISystem {
     /**
      * set system interface
      */
-    public void setISystemAPICallInfo(ISystemAPICallInfo api);
     public void setISystemAPINetwork(ISystemAPINetwork api);
     /**
      * Notifies the changes of airplane mode in the phone settings.

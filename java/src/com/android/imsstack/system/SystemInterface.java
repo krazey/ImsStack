@@ -885,7 +885,6 @@ public class SystemInterface implements JniSystemListener {
     }
 
     private class ImsSystem implements ISystem, MmTelFeatureRegistry.Listener {
-        private ISystemAPICallInfo mISystemAPICallInfo;
         private ISystemAPINetwork mISystemAPINetwork;
 
         private ThreadMessageExecutor mExecutor =
@@ -928,13 +927,6 @@ public class SystemInterface implements JniSystemListener {
         @Override
         public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
             mSystemRadio = systemRadio;
-        }
-
-        @Override
-        public void setISystemAPICallInfo(ISystemAPICallInfo api) {
-            synchronized (mLock) {
-                mISystemAPICallInfo = api;
-            }
         }
 
         @Override

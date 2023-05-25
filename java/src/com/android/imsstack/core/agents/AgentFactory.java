@@ -32,10 +32,8 @@ import java.util.Map;
  */
 public final class AgentFactory {
     // agents with slot id
-    public static final int CELL_INFO = 11;
-    public static final int PHONE_CALL_DB = 12;
-
-    private static final int AGENT_END = (PHONE_CALL_DB + 1);
+    public static final int CELL_INFO = 1;
+    private static final int AGENT_END = (CELL_INFO + 1);
     private static final int AGENT_MAX = AGENT_END;
 
     private static Map<Integer, HashMap<Integer, IAgent>> sAgentSlots =
@@ -169,8 +167,6 @@ public final class AgentFactory {
 
         agents = new HashMap<Integer, IAgent>(AGENT_MAX);
 
-        agents.put(PHONE_CALL_DB, new PhoneCallDBAgent(slotId));
-
         // below types should be initialized and cleaned up from VoLTE package
         agents.put(CELL_INFO, new CellInfoAgent(slotId));
 
@@ -182,17 +178,15 @@ public final class AgentFactory {
     public static synchronized void cleanUpAgents(int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
 
-        if (agents == null) {
-            return;
-        }
+        if (agents != null) {
+            List<IAgent> agentList = new ArrayList<>();
+            agentList.add(agents.get(CELL_INFO));
 
-        List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(PHONE_CALL_DB));
-
-        for (int i = 0; i < agentList.size(); i++) {
-            IAgent agent = agentList.get(i);
-            if (agent != null) {
-                agent.cleanup();
+            for (int i = 0; i < agentList.size(); ++i) {
+                IAgent agent = agentList.get(i);
+                if (agent != null) {
+                    agent.cleanup();
+                }
             }
         }
 
@@ -202,17 +196,15 @@ public final class AgentFactory {
     public static void initAgentsForMIms(Context context, int slotId) {
         HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
 
-        if (agents == null) {
-            return;
-        }
+        if (agents != null) {
+            List<IAgent> agentList = new ArrayList<IAgent>();
+            agentList.add(agents.get(CELL_INFO));
 
-        List<IAgent> agentList = new ArrayList<IAgent>();
-        agentList.add(agents.get(PHONE_CALL_DB));
-
-        for (int i = 0; i < agentList.size(); i++) {
-            IAgent agent = agentList.get(i);
-            if (agent != null) {
-                agent.init(context);
+            for (int i = 0; i < agentList.size(); i++) {
+                IAgent agent = agentList.get(i);
+                if (agent != null) {
+                    agent.init(context);
+                }
             }
         }
 
