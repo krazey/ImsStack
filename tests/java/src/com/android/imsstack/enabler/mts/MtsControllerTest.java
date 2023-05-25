@@ -30,7 +30,7 @@ import android.util.Base64;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
-import com.android.imsstack.core.agents.PhoneCallDBAgent;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mts.MtsJni;
@@ -55,7 +55,7 @@ public class MtsControllerTest {
     @Mock CarrierConfig mMockCarrierConfig;
     @Mock ConfigInterface mMockConfigInterface;
     @Mock IBaseContext mMockIBaseContext;
-    @Mock PhoneCallDBAgent mMockPhoneCallDBAgent;
+    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock MtsController.Listener mMockMtsControllerListener = new MtsController.Listener();
 
     // test configurations
@@ -97,8 +97,8 @@ public class MtsControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        AgentFactory.setAgentForMIms(mMockPhoneCallDBAgent, AgentFactory.PHONE_CALL_DB, SLOT_ID);
-
+        AgentFactory.getInstance().setAgent(
+                TelephonyInterface.class, mMockTelephonyInterface, SLOT_ID);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
 
@@ -118,14 +118,14 @@ public class MtsControllerTest {
     @After
     public void tearDown() {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
-        AgentFactory.setAgentForMIms(null, AgentFactory.PHONE_CALL_DB, SLOT_ID);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_ID);
         mMtsJni.release(SLOT_ID);
         mMtsController.cleanup();
     }
 
     @Test
     public void testSendMessageCallBackSuccess() {
-        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(0);
+        when(mMockTelephonyInterface.isEmergencyNumber(mDialedNumber)).thenReturn(false);
         boolean result = mMtsController.sendMessage(
                 mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
@@ -151,7 +151,7 @@ public class MtsControllerTest {
 
     @Test
     public void testSendMessageWithEmergencyNumber() {
-        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(1);
+        when(mMockTelephonyInterface.isEmergencyNumber(mDialedNumber)).thenReturn(true);
         boolean result = mMtsController.sendMessage(
                 mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
@@ -177,7 +177,7 @@ public class MtsControllerTest {
 
     @Test
     public void testSendMessageCallBackErrorRetry() {
-        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(0);
+        when(mMockTelephonyInterface.isEmergencyNumber(mDialedNumber)).thenReturn(false);
 
         boolean result = mMtsController.sendMessage(
                 mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
