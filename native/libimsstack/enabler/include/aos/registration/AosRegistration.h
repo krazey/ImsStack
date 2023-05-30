@@ -263,6 +263,7 @@ protected:
     virtual IMS_BOOL ProcessAkaResponseFailed();
     virtual void ProcessAwtRecovery();
     virtual void ProcessIpsecFallback(IN IMS_BOOL bIsIpsecRetry);
+    virtual void ProcessRequiredWfcErrMessage(IN IMS_SINT32 nStatusCode);
 
     virtual void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0);
     virtual void ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(IN IMS_UINT32 nRetryAfter);
@@ -277,6 +278,9 @@ protected:
     virtual void ProcessStartFailed_421();
     virtual void ProcessStartFailed_423();
     virtual void ProcessStartFailed_503();
+    virtual void ProcessRequiredWfcErrMessage_403();
+    virtual void ProcessRequiredWfcErrMessage_500();
+    virtual void ProcessRequiredWfcErrMessage_Others();
 
     virtual IMS_BOOL ProcessUpdateFailed_305();
     virtual void ProcessUpdateFailed_423();
@@ -382,6 +386,7 @@ private:
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateCallingNumberVerification();
+    void NotifyDeregistered();
 
     IMS_BOOL IsErrorCodeExisted(
             IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;

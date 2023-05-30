@@ -653,6 +653,25 @@ IMS_BOOL AosUtil::IsWifiTest() const
 }
 
 PUBLIC
+IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const
+{
+    ILocationProperties* piLocation =
+            PhoneInfoService::GetPhoneInfoService()
+                    ->GetLocationInfo(nSlotId)
+                    ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
+    if (piLocation == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strCountry = piLocation->GetCountry();
+    IMS_TRACE_I("IsDifferentCountry :: country (%s), sim country (%s)", strCountry.GetStr(),
+            strSimCountry.GetStr(), 0);
+
+    return !strCountry.Equals(strSimCountry);
+}
+
+PUBLIC
 void AosUtil::SetISipConfigV(IN ISipConfigV* piSipConfigV)
 {
     m_piSipConfigV = piSipConfigV;
