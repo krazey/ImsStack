@@ -39,6 +39,10 @@ public class IUMtcMedia {
     public static final int IMS_MSG_BASE_MEDIA_TEXT_IND = IMS_MEDIA_MSG_IND + 80;
 
     public static final int SEND_HEADER_EXTENSION        = (IMS_MSG_BASE_MEDIA_AUDIO_CMD + 9);
+
+    /* Set Media Quality Threshold to Media */
+    public static final int SET_QNS_MEDIA_THRESHOLD     = (IMS_MSG_BASE_MEDIA_AUDIO_CMD + 11);
+
     /** Send dtmf digit value to native */
     public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 19);
     /** Set surface buffer to native */

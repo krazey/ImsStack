@@ -37,6 +37,8 @@ public class MediaConstants {
     public static final int REQUEST_HEADER_EXTENSION      = (IMSMEDIA_REQUEST + 9);
     public static final int REQUEST_QOS                   = (IMSMEDIA_REQUEST + 10);
 
+    public static final int REQUEST_SET_QNS_MEDIA_THRESHOLD = (IMSMEDIA_REQUEST + 11);
+
     // Requests for video
     public static final int IMSMEDIA_VIDEO_REQUEST        = (IMSMEDIA_REQUEST + 50);
     public static final int REQUEST_SET_PREVIEW_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 1);

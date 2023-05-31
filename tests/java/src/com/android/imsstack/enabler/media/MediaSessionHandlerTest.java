@@ -23,8 +23,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.MediaQualityThreshold;
 import android.util.Pair;
 
 import com.android.imsstack.ImsStackTest;
@@ -56,7 +58,7 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
     @Mock protected Executor mMockExecutor;
     @Mock protected QosAgent mMockQosAgent;
     @Mock protected DatagramSocket mMockRtpSocket;
-
+    @Mock protected MediaConfig mMockMediaConfig;
     // Initialized classes
     protected MediaSession mMediaSession;
     protected MediaManagerHelper mMediaManager;
@@ -70,6 +72,7 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
         stubContext();
         stubQosAgent();
+        stubMediaConfig();
 
         // create the instance to test
         mMediaSession = new MediaSession(mMockBaseContext, mMockMtcMediaSession,
@@ -96,5 +99,14 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
         doNothing().when(mMockQosAgent).destroyQosConnection(any(), any());
         when(mMockQosAgent.updateQosConnection(any(), any(), anyString(), anyInt()))
                 .thenReturn(true);
+    }
+
+    private void stubMediaConfig() {
+        doNothing().when(mMockMediaConfig).updateRtpConfig(any(AudioConfig.class));
+        when(mMockMediaConfig.getRtpConfig()).thenReturn(MediaTestUtils.createAudioConfig());
+        when(mMockMediaConfig.updateMediaQualityThreshold(any(MediaQualityThreshold.class)))
+                .thenReturn(true);
+        when(mMockMediaConfig.getMediaQualityThreshold())
+                .thenReturn(MediaTestUtils.createMediaQualityThreshold());
     }
 }

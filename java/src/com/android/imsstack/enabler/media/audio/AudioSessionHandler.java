@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
@@ -67,6 +68,7 @@ public class AudioSessionHandler extends MediaState {
     private final Object mLock = new Object();
     private boolean mQosUpdateRequired;
     private Pair<String, Integer> mLocalAddress;
+    private MediaConfig mMediaConfig;
 
     public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -76,6 +78,7 @@ public class AudioSessionHandler extends MediaState {
         mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mtcMediaInterface);
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         mAudioMessageHandler = new AudioMessageHandler(mMediaManager.getMediaLooper());
+        mMediaConfig = new MediaConfig();
         createQosAgent(mContext.getSlotId());
         ImsLog.d("AudioSessionHandler created");
     }
@@ -83,12 +86,13 @@ public class AudioSessionHandler extends MediaState {
     @VisibleForTesting
     public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull AudioSessionCallbackHandler audioCallbackHandler,
-            @NonNull ImsAudioSession audioSession, Looper looper) {
+            @NonNull ImsAudioSession audioSession, MediaConfig mediaConfig, Looper looper) {
         super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = audioCallbackHandler;
         mAudioSession = audioSession;
+        mMediaConfig = mediaConfig;
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         mAudioMessageHandler = new AudioMessageHandler(looper);
         ImsLog.d("AudioSessionHandler created");
@@ -228,6 +232,12 @@ public class AudioSessionHandler extends MediaState {
                 case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
                 {
                     handleAudioSetMediaQualityThreshold((MediaQualityThreshold) msg.obj);
+                }
+                    break;
+
+                case MediaConstants.REQUEST_SET_QNS_MEDIA_THRESHOLD:
+                {
+                    handleAudioSetQnsMediaThreshold((MediaThreshold) msg.obj);
                 }
                     break;
 
@@ -493,9 +503,18 @@ public class AudioSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                     MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("onAudioSetMediaQualityThreshold: " + threshold.toString());
+                ImsLog.v("MediaQualityThreshold: " + threshold.toString());
 
                 Message.obtain(mAudioMessageHandler, requestType, threshold).sendToTarget();
+            }
+                break;
+
+            case MediaConstants.REQUEST_SET_QNS_MEDIA_THRESHOLD:
+            {
+                MediaThreshold mediaThreshold = MediaThreshold.CREATOR.createFromParcel(parcel);
+                ImsLog.v("MediaThreshold: " + mediaThreshold.toString());
+
+                Message.obtain(mAudioMessageHandler, requestType, mediaThreshold).sendToTarget();
             }
                 break;
 
@@ -619,6 +638,7 @@ public class AudioSessionHandler extends MediaState {
     private void handleAudioModifySession(AudioConfig audioConfig) {
         if (mAudioSession != null) {
             mAudioSession.modifySession(audioConfig);
+            mMediaConfig.updateRtpConfig(audioConfig);
         }
         else {
             handleModifySessionResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
@@ -656,6 +676,7 @@ public class AudioSessionHandler extends MediaState {
         if (mAudioSession != null) {
             // TODO : rtpSocket has to be sent via addConfig
             mAudioSession.addConfig(audioConfig);
+            mMediaConfig.updateRtpConfig(audioConfig);
         }
         else {
             handleAddConfigResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
@@ -713,6 +734,7 @@ public class AudioSessionHandler extends MediaState {
                                 + mRtpSocketList.size());
                     }
                     mAudioSession.confirmConfig(audioConfig);
+                    mMediaConfig.updateRtpConfig(audioConfig);
                 } else {
                     handleConfirmConfigResponse(audioConfig, ImsMediaSession.RESULT_INVALID_PARAM);
                 }
@@ -728,9 +750,22 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold threshold) {
+    private void handleAudioSetMediaQualityThreshold(MediaQualityThreshold mediaThreshold) {
+        if (mMediaConfig.updateMediaQualityThreshold(mediaThreshold)) {
+            setAudioQualityThreshold();
+        }
+    }
+
+    private void handleAudioSetQnsMediaThreshold(MediaThreshold mediaThreshold) {
+        mMediaConfig.updateMediaQualityThreshold(mediaThreshold);
+        setAudioQualityThreshold();
+    }
+
+    private void setAudioQualityThreshold() {
         if (mAudioSession != null) {
-            mAudioSession.setMediaQualityThreshold(threshold);
+            MediaQualityThreshold mediaQualityThreshold = mMediaConfig.getMediaQualityThreshold();
+            ImsLog.d("setMediaQualityThreshold: " + mediaQualityThreshold.toString());
+            mAudioSession.setMediaQualityThreshold(mediaQualityThreshold);
         }
     }
 
@@ -762,6 +797,9 @@ public class AudioSessionHandler extends MediaState {
 
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.openSessionResponse(result);
+            mMediaConfig.updateMediaQualityThreshold(
+                    mAudioSessionCallbackHandler.getMediaThreshold(
+                            ImsMediaSession.SESSION_TYPE_AUDIO));
         }
     }
 
@@ -815,7 +853,8 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleMediaQualityStatusNotification(final MediaQualityStatus qualityStatus) {
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(qualityStatus);
+            mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(
+                    mMediaConfig.getRtpConfig().getAccessNetwork(), qualityStatus);
         }
     }
 

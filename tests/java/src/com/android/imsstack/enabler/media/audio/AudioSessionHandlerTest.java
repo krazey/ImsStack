@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
@@ -73,7 +74,8 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
 
         // create the instance to test
         mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, mMediaManager,
-                mMockAudioSessionCallbackHandler, mMockAudioSession, Looper.myLooper());
+                mMockAudioSessionCallbackHandler, mMockAudioSession, mMockMediaConfig,
+                Looper.myLooper());
         mMediaSession.setAudioSessionHandler(mAudioSessionHandler);
         mAudioSessionCallback = mAudioSessionHandler.getAudioSessionCallback();
     }
@@ -457,7 +459,8 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         MediaQualityStatus qualityStatus = MediaTestUtils.createMediaQualityStatus();
         mAudioSessionCallback.notifyMediaQualityStatus(qualityStatus);
         processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).onNotifyMediaQualityStatus(eq(qualityStatus));
+        verify(mMockAudioSessionCallbackHandler).onNotifyMediaQualityStatus(
+                eq(AccessNetworkType.EUTRAN), eq(qualityStatus));
     }
 
     @Test
