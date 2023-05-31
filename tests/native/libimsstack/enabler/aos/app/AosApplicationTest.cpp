@@ -724,15 +724,9 @@ TEST_F(AosApplicationTest, Reconfig)
 
 TEST_F(AosApplicationTest, IsPdnDisconnectRequired)
 {
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_ENABLER_DETACHED, _, _))
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED, _, _))
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
-
-    // AllDetached
-    EXPECT_TRUE(m_pTestAosApplication->IsPdnDisconnectRequired());
 
     // blocked with BLOCK_IMS_SERVICE_DISABLED
     EXPECT_TRUE(m_pTestAosApplication->IsPdnDisconnectRequired());

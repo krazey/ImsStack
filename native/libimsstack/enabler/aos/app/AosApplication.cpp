@@ -538,11 +538,6 @@ IMS_BOOL AosApplication::IsRegStateUpdatedByNrLteRatChange() const
 PROTECTED
 IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 {
-    if (IsAllDetached())
-    {
-        return IMS_TRUE;
-    }
-
     if (m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
     {
         return IMS_TRUE;
@@ -2081,32 +2076,42 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED)
     {
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
     }
     else if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
     {
+        IMS_BOOL bPlmnBlock = IMS_TRUE;
+
         if (m_nRat != NW_REPORT_RADIO_NR)
         {
             if (m_nRat != NW_REPORT_RADIO_LTE)
             {
-                return;
+                bPlmnBlock = IMS_FALSE;
             }
             else
             {
-                if (m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED)
+                if (m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+                        m_nLteExtraInfo == IMS_LTE_INFO_EXTRA_NONE)
                 {
-                    return;
+                    bPlmnBlock = IMS_FALSE;
                 }
             }
         }
 
-        NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        if (bPlmnBlock)
+        {
+            NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+            m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+        }
+        else
+        {
+            m_pConnector->Stop();
+        }
     }
     else
     {
-        return;
+        m_pConnector->Stop();
     }
-
-    m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRoamingState(IN IMS_BOOL bRoaming)
