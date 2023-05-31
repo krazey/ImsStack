@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.os.Message;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsExternalCallState;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.SrvccCall;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -355,6 +357,21 @@ public class ImsMmTelService extends MmTelFeature
     @Override
     public void notifySrvccCanceled() {
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_CANCELED);
+    }
+
+    @Override
+    public void setMediaThreshold(@MediaQualityStatus.MediaSessionType int mediaSessionType,
+            MediaThreshold mediaThreshold) {
+        logi("setMediaThreshold=" + mediaThreshold);
+
+        mServiceRegistry.getMmTelMediaRegistry()
+                .setMediaThreshold(mediaSessionType, mediaThreshold);
+    }
+
+    @Override
+    public void clearMediaThreshold(@MediaQualityStatus.MediaSessionType int mediaSessionType) {
+        logi("clearMediaThreshold=" + mediaSessionType);
+        mServiceRegistry.getMmTelMediaRegistry().setMediaThreshold(mediaSessionType, null);
     }
 
     @VisibleForTesting
