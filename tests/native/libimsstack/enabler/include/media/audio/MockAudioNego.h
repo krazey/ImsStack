@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_AUDIO_NEGO_H_
-#define MOCK_I_AUDIO_NEGO_H_
+#ifndef MOCK_AUDIO_NEGO_H_
+#define MOCK_AUDIO_NEGO_H_
 
 #include <gmock/gmock.h>
 
