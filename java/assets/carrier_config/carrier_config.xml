@@ -65,7 +65,7 @@
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="16000"/>
-    <int name="imsvoice.session_refresh_trigger_interval_millis_int" value="0"/>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="0"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="1"/>
     <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="0"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>

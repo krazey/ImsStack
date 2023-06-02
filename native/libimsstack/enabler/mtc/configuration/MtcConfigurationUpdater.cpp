@@ -100,7 +100,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
     objItems.nPrackUpdateResponseWaitTimer =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT);
     objItems.nSessionRefreshTriggerInterval =
-            piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT);
     objItems.nRegistrationRestorationModeOn504ForInvite = piCc->GetInt(
             CarrierConfig::ImsVoice::KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT);
     objItems.nPolicyOnAudioQosDeactivation =

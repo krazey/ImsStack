@@ -296,8 +296,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "incoming_call_reject_code_for_no_answer_int";
         public static final String KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT =
                 KEY_PREFIX + "prack_update_response_wait_timer_millis_int";
-        public static final String KEY_SESSION_REFRESH_TRIGGER_INTERVAL_MILLIS_INT =
-                KEY_PREFIX + "session_refresh_trigger_interval_millis_int";
+        public static final String KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT =
+                KEY_PREFIX + "session_refresh_trigger_interval_sec_int";
         public static final String KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT =
                 KEY_PREFIX + "registration_restoration_mode_on_504_for_invite_int";
         public static final String KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT =
