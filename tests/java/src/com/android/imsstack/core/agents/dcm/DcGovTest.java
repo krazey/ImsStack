@@ -26,7 +26,8 @@ import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.agents.ICellInfo;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.CellInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -36,9 +37,7 @@ import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -50,23 +49,22 @@ import java.io.FileDescriptor;
 public class DcGovTest {
     private static final int SLOT_ID = 0;
     private static final int APN_TYPE = 1;
-    static ContextFixture sContext;
-    DcGov mDcGov;
+
+    private ContextFixture mContextFixture;
+    private DcGov mDcGov;
 
     @Mock private IDcApn mMockIDcApn;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private IDcUtils mMockIDcUtils;
-    @Mock private ICellInfo mMockICellInfo;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    @Mock private CellInfoInterface mMockCellInfo;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, mMockCellInfo, SLOT_ID);
 
         // create the instance to test
         mDcGov = new FakeDcGov(SLOT_ID);
@@ -79,12 +77,10 @@ public class DcGovTest {
             mDcGov.cleanup();
             mDcGov = null;
         }
-    }
 
-    @AfterClass
-    public static void tearDownOnce() {
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT_ID);
+        mContextFixture = null;
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test
@@ -173,20 +169,20 @@ public class DcGovTest {
     public void testGetLastAccessNetworkInfo4Sys() throws Exception {
         int networkType = TelephonyManager.NETWORK_TYPE_LTE;
         String[] anInfo = {"NetworkType", "UtcTime", "CellInfoAge"};
-        when(mMockICellInfo.getAccessNetworkInfo(networkType)).thenReturn(anInfo);
+        when(mMockCellInfo.getAccessNetworkInfo(networkType)).thenReturn(anInfo);
 
         assertEquals(anInfo, mDcGov.getLastAccessNetworkInfo4Sys(networkType));
-        verify(mMockICellInfo).getAccessNetworkInfo(networkType);
+        verify(mMockCellInfo).getAccessNetworkInfo(networkType);
     }
 
     @Test
     public void testGetLastAccessNetworkInfo4Sys_InvalidNetworkType() throws Exception {
         int networkType = -1;
         String[] anInfo = {"NetworkType", "UtcTime", "CellInfoAge"};
-        when(mMockICellInfo.getAccessNetworkInfo()).thenReturn(anInfo);
+        when(mMockCellInfo.getAccessNetworkInfo()).thenReturn(anInfo);
 
         assertEquals(anInfo, mDcGov.getLastAccessNetworkInfo4Sys(networkType));
-        verify(mMockICellInfo).getAccessNetworkInfo();
+        verify(mMockCellInfo).getAccessNetworkInfo();
     }
 
     @Test
@@ -329,11 +325,6 @@ public class DcGovTest {
         @Override
         protected IDcUtils getDcUtil() {
             return mMockIDcUtils;
-        }
-
-        @Override
-        protected ICellInfo getCellInfo() {
-            return mMockICellInfo;
         }
     }
 }

@@ -52,10 +52,10 @@ public class NativeStateAgent implements NativeStateInterface {
 
     @Override
     public void cleanup() {
-        ICellInfo ci = (ICellInfo) AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotId);
-        if (ci != null) {
-            ci.stopTrackingCellInfo(AppContext.getInstance());
-            ci.cleanup();
+        CellInfoInterface cellInfo = AgentFactory.getInstance().getAgent(
+                CellInfoInterface.class, mSlotId);
+        if (cellInfo != null) {
+            cellInfo.stopTrackingCellInfo();
         }
 
         mHandler.removeCallbacksAndMessages(null);
@@ -133,11 +133,10 @@ public class NativeStateAgent implements NativeStateInterface {
         }
 
         if (ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
-            ICellInfo ci = (ICellInfo) AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotId);
-            if (ci != null) {
-                ci.init(AppContext.getInstance());
-                ci.startTrackingCellInfo(AppContext.getInstance());
-                ci.setLastCellInfoStorage(true);
+            CellInfoInterface cellInfo = AgentFactory.getInstance().getAgent(
+                    CellInfoInterface.class, mSlotId);
+            if (cellInfo != null) {
+                cellInfo.startTrackingCellInfo();
             }
         }
     }

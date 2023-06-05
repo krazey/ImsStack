@@ -19,7 +19,7 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ICellInfo;
+import com.android.imsstack.core.agents.CellInfoInterface;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -138,16 +138,17 @@ public class DcGov implements IDc, ISystemAPINetwork {
     public String[] getLastAccessNetworkInfo4Sys(int networkType) {
         ImsLog.d(mSlotId, "");
 
-        ICellInfo ci = getCellInfo();
+        CellInfoInterface cellInfo = AgentFactory.getInstance().getAgent(
+                CellInfoInterface.class, mSlotId);
 
-        if (ci == null) {
+        if (cellInfo == null) {
             return null;
         }
 
         if (networkType <= 0) {
-            return ci.getAccessNetworkInfo();
+            return cellInfo.getAccessNetworkInfo();
         } else {
-            return ci.getAccessNetworkInfo(networkType);
+            return cellInfo.getAccessNetworkInfo(networkType);
         }
     }
 
@@ -262,10 +263,5 @@ public class DcGov implements IDc, ISystemAPINetwork {
     @VisibleForTesting
     protected IDcUtils getDcUtil() {
         return (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
-    }
-
-    @VisibleForTesting
-    protected ICellInfo getCellInfo() {
-        return (ICellInfo) AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotId);
     }
 }

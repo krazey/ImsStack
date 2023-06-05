@@ -15,12 +15,10 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.content.Context;
-
 /**
- * This provides an interface to track and manage the last cell information.
+ * An interface to track and manage the most recent cell information.
  */
-public interface ICellInfo extends IAgent {
+public interface CellInfoInterface extends IAgent {
     /**
      * Returns the most recent cell information with the network type and timestamp (UTC format).
      *  [0] : network type
@@ -39,22 +37,11 @@ public interface ICellInfo extends IAgent {
 
     /**
      * Starts tracking the most recent cell information.
-     *
-     * @param context The Context object.
      */
-    void startTrackingCellInfo(Context context);
+    void startTrackingCellInfo();
 
     /**
      * Stops tracking the most recent cell information.
-     *
-     * @param context The Context object.
      */
-    void stopTrackingCellInfo(Context context);
-
-    /**
-     * Sets the most recent cell information to the storage.
-     *
-     * @param store The flag specifying whether the cell information should be stored or not.
-     */
-    void setLastCellInfoStorage(boolean store);
+    void stopTrackingCellInfo();
 }
