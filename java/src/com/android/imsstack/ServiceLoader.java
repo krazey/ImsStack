@@ -103,8 +103,9 @@ public class ServiceLoader {
         ImsTestMode.getInstance().init(slotId);
         FeatureConfig.init(slotId);
         SystemInterface.getInstance().start(slotId);
-        AgentFactory.createAgents(context, slotId);
-        AgentFactory.initAgentsForMIms(context, slotId);
+        AgentFactory agentFactory = AgentFactory.getInstance();
+        agentFactory.createAgentsForSlot(slotId);
+        agentFactory.initAgentsForSlot(context, slotId);
         AosFactory.getInstance().init(slotId);
         updateCarrierConfig(slotId);
         DcFactory.createDc(context, slotId);
@@ -128,7 +129,7 @@ public class ServiceLoader {
         AosFactory.getInstance().stop(slotId);
         DcFactory.cleanUpDc(slotId);
         AosFactory.getInstance().cleanup(slotId);
-        AgentFactory.cleanUpAgents(slotId);
+        AgentFactory.getInstance().destroyAgentsForSlot(slotId);
         SystemInterface.getInstance().stop(slotId);
         ImsTestMode.getInstance().cleanUp(slotId);
     }

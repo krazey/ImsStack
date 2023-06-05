@@ -17,7 +17,6 @@ package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -56,7 +55,7 @@ public class NativeStateAgentTest {
     private static final int SLOT0 = 0;
 
     @Mock BatteryStateInterface mBatteryState;
-    @Mock ICellInfo mCellInfo;
+    @Mock CellInfoInterface mCellInfoInterface;
     @Mock IDcNetWatcher mDcNetWatcher;
     @Mock ISystem mSystem;
     @Mock SystemInterface mSystemInterface;
@@ -79,7 +78,7 @@ public class NativeStateAgentTest {
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryState);
-        AgentFactory.setAgentForMIms(mCellInfo, AgentFactory.CELL_INFO, SLOT0);
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, mCellInfoInterface, SLOT0);
         replaceDcNetWatcher(mDcNetWatcher);
         mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
@@ -102,10 +101,10 @@ public class NativeStateAgentTest {
         }
 
         DcFactory.setObjects(SLOT0, null);
-        AgentFactory.setAgentForMIms(null, AgentFactory.CELL_INFO, SLOT0);
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, null);
         SystemInterface.setSystemInterface(null);
-        mCellInfo = null;
+        mCellInfoInterface = null;
         mBatteryState = null;
         mSystem = null;
         mSystemInterface = null;
@@ -126,8 +125,7 @@ public class NativeStateAgentTest {
     public void testCleanup() {
         mNativeStateAgent.cleanup();
 
-        verify(mCellInfo).stopTrackingCellInfo(any(Context.class));
-        verify(mCellInfo).cleanup();
+        verify(mCellInfoInterface).stopTrackingCellInfo();
     }
 
     @Test
@@ -164,9 +162,7 @@ public class NativeStateAgentTest {
                 eq(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED), anyInt(), anyInt());
         verify(mSystem).notifyEvent(
                 eq(ImsEventDef.IMS_EVENT_RTT_SETTING), anyInt(), anyInt());
-        verify(mCellInfo).init(any(Context.class));
-        verify(mCellInfo).startTrackingCellInfo(any(Context.class));
-        verify(mCellInfo).setLastCellInfoStorage(eq(true));
+        verify(mCellInfoInterface).startTrackingCellInfo();
         verify(mNativeStateListener).onNativeServiceReady();
 
         mNativeStateAgent.removeListener(mNativeStateListener);
@@ -187,7 +183,6 @@ public class NativeStateAgentTest {
         assertFalse(mNativeStateAgent.isServiceReady());
         verify(mBatteryState, never()).notifyLowBatteryState(anyInt());
         verify(mSystem, never()).notifyEvent(anyInt(), anyInt(), anyInt());
-        verify(mCellInfo, never()).init(any());
         verify(mNativeStateListener).onNativeServiceReady();
     }
 

@@ -22,28 +22,14 @@ import android.util.SparseArray;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * This class provides the APIs to manage and control Multi-SIM state.
+ * A factory class for managing and controlling the various agent components.
  */
 public final class AgentFactory {
-    // agents with slot id
-    public static final int CELL_INFO = 1;
-    private static final int AGENT_END = (CELL_INFO + 1);
-    private static final int AGENT_MAX = AGENT_END;
-
-    private static Map<Integer, HashMap<Integer, IAgent>> sAgentSlots =
-            new HashMap<Integer, HashMap<Integer, IAgent>>(MSimUtils.getSupportedSimCount());
-
-    private final Object mLock = new Object();
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
-    private final ArrayMap<Class<?>, IAgent> mAgents = new ArrayMap<>();
     private final SparseArray<SystemCallAgent> mSystemCallAgents;
-    private final SparseArray<ArrayMap<Class<?>, IAgent>> mAgentsForSlot;
+    private volatile ArrayMap<Class<?>, IAgent> mAgents = new ArrayMap<>();
+    private volatile SparseArray<ArrayMap<Class<?>, IAgent>> mAgentsForSlot;
     private static AgentFactory sInstance;
 
     private AgentFactory() {
@@ -73,14 +59,13 @@ public final class AgentFactory {
         mAgents.clear();
         mSystemCallAgents.clear();
         mAgentsForSlot.clear();
-        sAgentSlots.clear();
     }
 
     /**
-     * Returns the specific agent corresponding to the given class.
+     * Returns a specific {@link IAgent} object corresponding to the given class.
      *
-     * @param clazz The requested class name
-     * @return A {@link IAgent} object corresponding to the given class.
+     * @param clazz A requested class name.
+     * @return An {@link IAgent} object corresponding to the given class.
      */
     @SuppressWarnings("unchecked")
     public <T extends IAgent> T getAgent(Class<T> clazz) {
@@ -88,10 +73,10 @@ public final class AgentFactory {
     }
 
     /**
-     * Sets the specific agent corresponding to the given class for testing.
+     * Sets a specific {@link IAgent} object corresponding to the given class for testing.
      *
-     * @param clazz The requested class name
-     * @param agent A {@link IAgent} object corresponding to the given class
+     * @param clazz A requested class name.
+     * @param agent An {@link IAgent} object corresponding to the given class.
      */
     @VisibleForTesting
     @SuppressWarnings("unchecked")
@@ -100,11 +85,12 @@ public final class AgentFactory {
     }
 
     /**
-     * Returns the specific agent corresponding to the given class for the specified slot.
+     * Returns a specific {@link IAgent} object corresponding to the given class
+     * for the specified slot.
      *
-     * @param clazz The requested class name
-     * @param slotId The slot-id
-     * @return A {@link IAgent} object corresponding to the given class.
+     * @param clazz A requested class name.
+     * @param slotId A slot id.
+     * @return An {@link IAgent} object corresponding to the given class.
      */
     @SuppressWarnings("unchecked")
     public <T extends IAgent> T getAgent(Class<T> clazz, int slotId) {
@@ -113,18 +99,16 @@ public final class AgentFactory {
         }
 
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
-
-        synchronized(mLock) {
-            return (agents != null) ? (T) agents.get(clazz) : null;
-        }
+        return (agents != null) ? (T) agents.get(clazz) : null;
     }
 
     /**
-     * Sets the specific agent corresponding to the given class for the specified slot for testing.
+     * Sets a specific {@link IAgent} object corresponding to the given class
+     * for the specified slot for testing.
      *
-     * @param clazz The requested class name
-     * @param agent A {@link IAgent} object corresponding to the given class
-     * @param slotId The slot-id
+     * @param clazz A requested class name.
+     * @param agent An {@link IAgent} object corresponding to the given class.
+     * @param slotId A slot id.
      */
     @VisibleForTesting
     @SuppressWarnings("unchecked")
@@ -135,95 +119,22 @@ public final class AgentFactory {
 
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
-        synchronized (mLock) {
-            if (agents == null) {
-                agents = new ArrayMap<Class<?>, IAgent>();
-                mAgentsForSlot.put(slotId, agents);
-            }
-
-            agents.put(clazz, agent);
-        }
-    }
-
-    public static synchronized IAgent getAgent(int agentType, int slotId) {
-        HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
-
-        if (agents != null) {
-            IAgent agent = agents.get(agentType);
-            if (agent != null) {
-                return agent;
-            }
-        }
-
-        return null;
-    }
-
-    public static synchronized void createAgents(Context context, int slotId) {
-        HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
-
-        if (agents != null) {
-            return;
-        }
-
-        agents = new HashMap<Integer, IAgent>(AGENT_MAX);
-
-        // below types should be initialized and cleaned up from VoLTE package
-        agents.put(CELL_INFO, new CellInfoAgent(slotId));
-
-        sAgentSlots.put(slotId, agents);
-
-        getInstance().createAgentsForSlot(slotId);
-    }
-
-    public static synchronized void cleanUpAgents(int slotId) {
-        HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
-
-        if (agents != null) {
-            List<IAgent> agentList = new ArrayList<>();
-            agentList.add(agents.get(CELL_INFO));
-
-            for (int i = 0; i < agentList.size(); ++i) {
-                IAgent agent = agentList.get(i);
-                if (agent != null) {
-                    agent.cleanup();
-                }
-            }
-        }
-
-        getInstance().destroyAgentsForSlot(slotId);
-    }
-
-    public static void initAgentsForMIms(Context context, int slotId) {
-        HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
-
-        if (agents != null) {
-            List<IAgent> agentList = new ArrayList<IAgent>();
-            agentList.add(agents.get(CELL_INFO));
-
-            for (int i = 0; i < agentList.size(); i++) {
-                IAgent agent = agentList.get(i);
-                if (agent != null) {
-                    agent.init(context);
-                }
-            }
-        }
-
-        getInstance().initAgentsForSlot(context, slotId);
-    }
-
-    public static void setAgentForMIms(IAgent agent, int agentType, int slotId) {
-        HashMap<Integer, IAgent> agents = sAgentSlots.get(slotId);
         if (agents == null) {
-            agents = new HashMap<Integer, IAgent>(AGENT_MAX);
-            sAgentSlots.put(slotId, agents);
+            agents = new ArrayMap<Class<?>, IAgent>();
+            mAgentsForSlot.put(slotId, agents);
         }
-        agents.put(agentType, agent);
+
+        agents.put(clazz, agent);
     }
 
     /**
      * Creates the default agents.
      */
     public void createAgents() {
+        if (!mAgents.isEmpty()) {
+            return;
+        }
+
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
         }
@@ -254,11 +165,15 @@ public final class AgentFactory {
     }
 
     /**
-     * Initiaizes the default agents.
+     * Initializes the default agents.
      *
-     * @param context A {@code Context} object.
+     * @param context A {@link Context} object.
      */
     public void initAgents(Context context) {
+        if (mDefaultSystemCallAgent == null) {
+            mDefaultSystemCallAgent = new DefaultSystemCallAgent();
+        }
+
         for (int i = 0; i < mAgents.size(); ++i) {
             IAgent agent = mAgents.valueAt(i);
 
@@ -268,38 +183,51 @@ public final class AgentFactory {
         }
     }
 
+    /**
+     * Creates the agents for the specified slot.
+     *
+     * @param slotId A slot id.
+     */
     public void createAgentsForSlot(int slotId) {
-        mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
-
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
-        if (agents != null) {
-            synchronized(mLock) {
-                agents.put(NativeStateInterface.class, new NativeStateAgent(slotId));
-                agents.put(SimInterface.class, new SimAgent(slotId));
-                agents.put(ConfigInterface.class, new ConfigAgent(slotId));
-                agents.put(PhoneStateInterface.class, new PhoneStateAgent(slotId));
-                agents.put(TelephonyInterface.class, new TelephonyAgent(slotId));
-                agents.put(LocationInterface.class, new LocationAgent(slotId));
-                agents.put(IpSecInterface.class, new IpSecAgent(slotId));
-                agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
-                agents.put(GbaInterface.class, new GbaAgent(slotId));
-                agents.put(ImsRadioInterface.class, new ImsRadioAgent(slotId));
-            }
+        if (agents == null) {
+            agents = new ArrayMap<Class<?>, IAgent>();
+            mAgentsForSlot.put(slotId, agents);
+        } else if (!agents.isEmpty()) {
+            // Already created.
+            return;
         }
+
+        mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
+
+        agents.put(NativeStateInterface.class, new NativeStateAgent(slotId));
+        agents.put(SimInterface.class, new SimAgent(slotId));
+        agents.put(ConfigInterface.class, new ConfigAgent(slotId));
+        agents.put(PhoneStateInterface.class, new PhoneStateAgent(slotId));
+        agents.put(TelephonyInterface.class, new TelephonyAgent(slotId));
+        agents.put(LocationInterface.class, new LocationAgent(slotId));
+        agents.put(IpSecInterface.class, new IpSecAgent(slotId));
+        agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
+        agents.put(GbaInterface.class, new GbaAgent(slotId));
+        agents.put(ImsRadioInterface.class, new ImsRadioAgent(slotId));
+        agents.put(CellInfoInterface.class, new CellInfoAgent(slotId));
     }
 
+    /**
+     * Destroys the agents for the specified slot.
+     *
+     * @param slotId A slot id.
+     */
     public void destroyAgentsForSlot(int slotId) {
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
-            synchronized(mLock) {
-                for (int i = 0; i < agents.size(); ++i) {
-                    IAgent agent = agents.valueAt(i);
+            for (int i = 0; i < agents.size(); ++i) {
+                IAgent agent = agents.valueAt(i);
 
-                    if (agent != null) {
-                        agent.cleanup();
-                    }
+                if (agent != null) {
+                    agent.cleanup();
                 }
             }
         }
@@ -313,6 +241,12 @@ public final class AgentFactory {
         mSystemCallAgents.put(slotId, null);
     }
 
+    /**
+     * Initializes the agents for the specified slot.
+     *
+     * @param context A {@link Context} object.
+     * @param slotId A slot id.
+     */
     public void initAgentsForSlot(Context context, int slotId) {
         SystemCallAgent sca = mSystemCallAgents.get(slotId);
 
@@ -323,13 +257,11 @@ public final class AgentFactory {
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
-            synchronized(mLock) {
-                for (int i = 0; i < agents.size(); ++i) {
-                    IAgent agent = agents.valueAt(i);
+            for (int i = 0; i < agents.size(); ++i) {
+                IAgent agent = agents.valueAt(i);
 
-                    if (agent != null) {
-                        agent.init(context);
-                    }
+                if (agent != null) {
+                    agent.init(context);
                 }
             }
         }

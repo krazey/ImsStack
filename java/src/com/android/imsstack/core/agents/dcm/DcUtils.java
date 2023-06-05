@@ -261,7 +261,16 @@ public class DcUtils implements IDcUtils {
         return null;
     }
 
-    private static int getDuplexModeForNr(@NonNull CellIdentityNr ci, int slotId) {
+    /**
+     * Returns the duplex mode of NGRAN.
+     *
+     * @param ci The cell-identity of NGRAN.
+     * @param slotId The slot-id.
+     * @return The duplex mode of NGRAN.
+     *         {@link ServiceState#DUPLEX_MODE_FDD} or
+     *         {@link ServiceState#DUPLEX_MODE_TDD}.
+     */
+    public static int getDuplexModeForNr(@NonNull CellIdentityNr ci, int slotId) {
         String nrMode = ImsPrivateProperties.Persistent.get(
                 ImsPrivateProperties.Persistent.KEY_CONFIG_NR_DUPLEX_MODE, slotId);
 
