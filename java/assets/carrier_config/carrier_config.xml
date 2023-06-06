@@ -318,6 +318,7 @@
     <boolean name="reg_contact_validation_bool" value="false"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
+    <boolean name="request_ims_pdn_without_mmtel" value="false"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <boolean name="required_volte_block_by_ssac_bool" value="false"/>

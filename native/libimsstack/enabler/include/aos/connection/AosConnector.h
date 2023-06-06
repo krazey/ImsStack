@@ -45,6 +45,8 @@ public:
 
     virtual void SetListener(IN IAosConnectorListener* piListener);
     virtual IMS_BOOL IsReady() const;
+    virtual void SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired);
+    virtual IMS_BOOL IsPdnDeactivationRequired();
 
     // GetState
     enum
@@ -177,6 +179,7 @@ protected:
     IMS_BOOL m_bEmergencyType;
     IMS_BOOL m_bIsTerminating;
     IMS_BOOL m_bIsPcscfChangeIgnored;
+    IMS_BOOL m_bIsPdnDeactivationRequired;
 
     AString strTag;
 

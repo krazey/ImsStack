@@ -62,46 +62,34 @@ public class DcSettings implements IDcSettings {
     public boolean isVopsRequired() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        if (config == null) {
-            return true;
-        }
-
-        boolean ignoreVops = config.getBoolean(
+        return (config == null) ? false : !config.getBoolean(
                 CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
-        if (ignoreVops && !isVopsRequiredForPdn()) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override
-    public boolean isVopsRequiredForPdn() {
+    public boolean isImsPdnRequestWithoutMmtel() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        if (config == null) {
-            return true;
-        }
+        return (config == null) ? false : config.getBoolean(
+                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
+    }
 
-        int[] noVopsRequired = config.getIntArray(
-                CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
-        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
+    @Override
+    public int[] getImsPdnEnabledInNoVopsSupport() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
 
-        if ((noVopsRequired != null) && (dcnw != null)) {
-            for (int i = 0; i < noVopsRequired.length; i++) {
-                if (dcnw.isRoaming()) {
-                    if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING) {
-                        return false;
-                    }
-                } else {
-                    if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_HOME) {
-                        return false;
-                    }
-                }
+        if (config != null) {
+            int[] noVopsRequired = config.getIntArray(
+                    CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
+            if (noVopsRequired != null) {
+                return noVopsRequired;
+            } else {
+                ImsLog.w(mSlotId, "noVopsRequired is null");
             }
+        } else {
+            ImsLog.w(mSlotId, "config is null");
         }
-
-        return true;
+        return new int[]{};
     }
 
     @Override

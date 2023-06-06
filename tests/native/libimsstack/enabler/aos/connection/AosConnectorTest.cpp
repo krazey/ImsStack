@@ -286,6 +286,13 @@ TEST_F(AosConnectorTest, IsReady)
     StopTimer(AosConnector::TIMER_STOP_DELAY);
 }
 
+TEST_F(AosConnectorTest, PdnDeactivateRequired)
+{
+    EXPECT_FALSE(m_pAosConnector->IsPdnDeactivationRequired());
+    m_pAosConnector->SetPdnDeactivationRequired(IMS_TRUE);
+    EXPECT_TRUE(m_pAosConnector->IsPdnDeactivationRequired());
+}
+
 TEST_F(AosConnectorTest, IsPcoWaitingRequired_NotSupportLimitedAdminSmsMode)
 {
     IMS_SINT32 nOriginValue = GetIntFromProperty(
