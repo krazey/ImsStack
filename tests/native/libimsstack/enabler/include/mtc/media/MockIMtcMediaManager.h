@@ -74,8 +74,8 @@ public:
     MOCK_METHOD(CallType, GetNegotiatedCallType, (IN ISession * piSession), (override));
     MOCK_METHOD(PemType, GetPemType, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
-    MOCK_METHOD(void, AdjustDirectionForAutoAccept, (IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe),
-            (override));
+    MOCK_METHOD(void, AdjustDirectionForAutoOffer, (IN CallType eCallType), (override));
+    MOCK_METHOD(void, AdjustDirectionForAutoAnswer, (), (override));
     MOCK_METHOD(void, SetSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(IMS_BOOL, IsOnHold, (), (override));
 };

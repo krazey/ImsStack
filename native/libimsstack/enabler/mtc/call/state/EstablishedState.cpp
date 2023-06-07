@@ -575,7 +575,10 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         eStateName = CallStateName::ESTABLISHED;
     }
 
-    FormAutoAccept(IMS_FALSE);
+    m_objContext.GetMediaManager().AdjustDirectionForAutoAnswer();
+    m_objContext.GetUpdatingInfo().GetModifiedInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
+
     if (pMtcSession->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
@@ -597,7 +600,10 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
     }
     else
     {
-        FormAutoAccept(IMS_TRUE);
+        m_objContext.GetMediaManager().AdjustDirectionForAutoOffer(
+                m_objContext.GetSession()->GetCallType());
+        m_objContext.GetUpdatingInfo().GetModifyingInfo() =
+                m_objContext.GetMediaManager().GetMediaInfo();
     }
 
     if (m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)
@@ -606,24 +612,6 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
     }
 
     return IMS_SUCCESS;
-}
-
-PRIVATE
-void EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
-{
-    IMS_TRACE_D("FormAutoAccept", 0, 0, 0);
-
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.AdjustDirectionForAutoAccept(bWithoutOffer, m_objContext.IsHeldByMe());
-
-    if (bWithoutOffer)
-    {
-        m_objContext.GetUpdatingInfo().GetModifyingInfo() = objMediaManager.GetMediaInfo();
-    }
-    else
-    {
-        m_objContext.GetUpdatingInfo().GetModifiedInfo() = objMediaManager.GetMediaInfo();
-    }
 }
 
 PRIVATE

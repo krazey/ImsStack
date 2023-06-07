@@ -252,9 +252,16 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
 
     StopTimer();
 
+    m_objContext.GetSession()->HandleRequest(
+            RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
+
     // TODO: Internal error handling
     HandleSdpAnswer();
-    SendAck();
+
+    if (m_objContext.GetUpdatingInfo().IsModifier())
+    {
+        m_objContext.GetSession()->SendAck();
+    }
 
     if (m_objContext.GetUpdatingInfo().IsModifier() && m_objContext.GetUpdatingInfo().IsModified())
     {
@@ -699,19 +706,6 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
 
     return IMS_SUCCESS;
-}
-
-PRIVATE
-IMS_RESULT UpdatingState::SendAck()
-{
-    IMS_TRACE_D("SendAck", 0, 0, 0);
-
-    if (!m_objContext.GetUpdatingInfo().IsModifier())
-    {
-        return IMS_SUCCESS;
-    }
-
-    return m_objContext.GetSession()->SendAck();
 }
 
 PRIVATE

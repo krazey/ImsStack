@@ -259,6 +259,12 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
+    if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
+    {
+        m_objContext.GetMediaManager().AdjustDirectionForAutoOffer(
+                m_objContext.GetSession()->GetCallType());
+    }
+
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (IsRprSupported())

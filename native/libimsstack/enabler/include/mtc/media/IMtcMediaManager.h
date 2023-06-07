@@ -236,12 +236,16 @@ public:
     virtual IMS_BOOL IsAudioInactive() = 0;
 
     /**
-     * @brief Adjusts
+     * @brief Adjusts media direction to respond for an update that doesn't contain offer.
      *
-     * @param bSendOffer
-     * @param bHeldByMe
+     * @param eCallType Call type to set the media directions in the auto offer.
      */
-    virtual void AdjustDirectionForAutoAccept(IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) = 0;
+    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
+
+    /**
+     * @brief Adjusts media direction to respond for a hold or resume request.
+     */
+    virtual void AdjustDirectionForAutoAnswer();
 
     /**
      * @brief Sets

@@ -35,7 +35,6 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
@@ -277,9 +276,17 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 {
     m_objExtensionSet.HandleRequest(eType, objRequest);
 
-    if (eType == RequestType::START || eType == RequestType::UPDATE)
+    if (eType == RequestType::START || eType == RequestType::ACK || eType == RequestType::UPDATE)
     {
-        UpdateCallType(objRequest);
+        if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
+        {
+            UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
+        }
+        else
+        {
+            UpdateCallTypeFromCurrentCapability();
+        }
+
         UpdateCapabilityFromMessage(objRequest);
         SetInConference(objRequest);
     }
@@ -373,33 +380,15 @@ void MtcSession::UpdateSessionProperty()
 }
 
 PRIVATE
-void MtcSession::UpdateCallType(IN const IMessage& objMessage)
+void MtcSession::UpdateCallTypeFromCurrentCapability()
 {
-    if (UpdateCallTypeFromMessage(objMessage, IMS_FALSE) == IMS_SUCCESS)
+    if (!m_objCallTypeHistory.empty())
     {
-        return;
-    }
-
-    CallType eNewCallType;
-    if (m_objCallTypeHistory.empty())
-    {
-        eNewCallType = GetCallTypeByRegisteredFeature();
+        SetCallType(GetCallTypeByHistory());
     }
     else
     {
-        eNewCallType = GetCallTypeByHistory();
-    }
-
-    SetCallType(eNewCallType);
-
-    IMS_UINT32 eMediaTypes = MtcMediaUtil::GetMediaTypesFromCallType(m_eCallType);
-    std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
-    for (IMS_UINT32 eMediaType : objMediaTypes)
-    {
-        if (eMediaType & eMediaTypes)
-        {
-            m_objContext.GetMediaManager().UpdateMediaDirection(eMediaType, DIRECTION_SEND_RECEIVE);
-        }
+        SetCallType(GetCallTypeByRegisteredFeature());
     }
 }
 
