@@ -229,9 +229,9 @@ public interface IDcApn extends IDc {
      *                #EApnType#EMERGENCY#getType()
      *                #EApnType#INTERNET#getType()
      * @param sockFd The file descriptor for socket
-     * @return Returns 1 if the operation is succeeded. Otherwise, returns 0.
+     * @return {@code true} if the operation is succeeded, {@code false} otherwise.
      */
-    int bindSocket(int apnType, FileDescriptor sockFd);
+    boolean bindSocket(int apnType, FileDescriptor sockFd);
 
     /**
      * setApn

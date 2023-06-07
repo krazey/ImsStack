@@ -31,11 +31,11 @@ import java.util.Map;
  * This class provides the APIs to manage and control Multi-SIM state.
  */
 public final class DcFactory {
-    public static final int GOVERNOR = 1;
-    public static final int UTIL = 2;
-    public static final int SETTING = 3;
-    public static final int NETWORK_WATCHER = 4;
-    public static final int APN = 5;
+    /** DC object identifier. */
+    public static final int UTIL = 1;
+    public static final int SETTING = 2;
+    public static final int NETWORK_WATCHER = 3;
+    public static final int APN = 4;
     public static final int MAX = (APN + 1);
 
     private static Map<Integer, HashMap<Integer, IDc>> sDcSlots =
@@ -79,7 +79,6 @@ public final class DcFactory {
 
         agents = new HashMap<Integer, IDc>(MAX);
 
-        agents.put(GOVERNOR, new DcGov(slotId));
         agents.put(UTIL, new DcUtils(slotId));
         agents.put(SETTING, new DcSettings(slotId));
         agents.put(NETWORK_WATCHER, new DcNetWatcher(slotId));
@@ -101,7 +100,6 @@ public final class DcFactory {
         }
 
         List<IDc> dcList = new ArrayList<IDc>();
-        dcList.add(dcs.get(GOVERNOR));
         dcList.add(dcs.get(UTIL));
         dcList.add(dcs.get(SETTING));
         dcList.add(dcs.get(NETWORK_WATCHER));
@@ -129,7 +127,6 @@ public final class DcFactory {
         }
 
         List<IDc> dcList = new ArrayList<IDc>();
-        dcList.add(dcs.get(GOVERNOR));
         dcList.add(dcs.get(UTIL));
         dcList.add(dcs.get(SETTING));
         dcList.add(dcs.get(NETWORK_WATCHER));

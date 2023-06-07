@@ -240,19 +240,19 @@ public class WifiAgent implements WifiInterface {
     }
 
     @Override
-    public int bindSocket(FileDescriptor sockFd) {
+    public boolean bindSocket(FileDescriptor sockFd) {
         ImsLog.d("Wifi#bindSocket: network=" + mNetwork);
 
         if (mNetwork != null && sockFd != null) {
             try {
                 mNetwork.bindSocket(sockFd);
-                return 1;
+                return true;
             } catch (IOException e) {
                 ImsLog.e("Wifi#bindSocket: " + e.toString());
             }
         }
 
-        return 0;
+        return false;
     }
 
     @Override

@@ -409,7 +409,7 @@ public class DcApn implements IDcApn {
     }
 
     @Override
-    public int bindSocket(int apnType, FileDescriptor sockFd) {
+    public boolean bindSocket(int apnType, FileDescriptor sockFd) {
         Network network = getNetworkByCapability(apnType);
 
         ImsLog.d(mSlotId, "bindSocket: network=" + network);
@@ -417,13 +417,13 @@ public class DcApn implements IDcApn {
         if (network != null && sockFd != null) {
             try {
                 network.bindSocket(sockFd);
-                return 1;
+                return true;
             } catch (IOException e) {
                 ImsLog.e(mSlotId, "bindSocket: " + e.toString());
             }
         }
 
-        return 0;
+        return false;
     }
 
     @Override

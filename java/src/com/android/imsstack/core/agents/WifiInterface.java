@@ -135,9 +135,9 @@ public interface WifiInterface extends IAgent {
      * Binds the specified socket fd with the Wi-Fi network.
      *
      * @param sockFd A socket fd to be bound.
-     * @return 1 if binding socket is successfully done, 0 otherwise.
+     * @return {@code true} if binding socket is successfully done, {@code false} otherwise.
      */
-    int bindSocket(FileDescriptor sockFd);
+    boolean bindSocket(FileDescriptor sockFd);
 
     /**
      * Requests the Wi-Fi service to monitor the Wi-Fi setting/connection state

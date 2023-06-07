@@ -27,11 +27,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.EIpVersion;
+import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
@@ -44,6 +52,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileDescriptor;
 import java.util.HashMap;
 
 @RunWith(JUnit4.class)
@@ -51,15 +60,18 @@ public class SystemCallAgentTest {
     private static final int SLOT0 = 0;
     private static final int ISIM_EF_IMPI = 0x6F02;
 
-    @Mock ISystem mSystem;
-    @Mock SystemInterface mSystemInterface;
-    @Mock ConfigInterface mConfigInterface;
-    @Mock LocationInterface mLocationInterface;
-    @Mock IpSecInterface mIpSecInterface;
-    @Mock TelephonyInterface mTelephonyInterface;
-    @Mock IDcNetWatcher mDcNetWatcher;
-    @Mock SimAgent mSimAgent;
-    @Mock NativeStateAgent mNativeStateAgent;
+    @Mock private ISystem mSystem;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private ConfigInterface mConfigInterface;
+    @Mock private LocationInterface mLocationInterface;
+    @Mock private IpSecInterface mIpSecInterface;
+    @Mock private TelephonyInterface mTelephonyInterface;
+    @Mock private CellInfoInterface mCellInfoInterface;
+    @Mock private IDcApn mDcApn;
+    @Mock private IDcNetWatcher mDcNetWatcher;
+    @Mock private IDcUtils mDcUtil;
+    @Mock private SimAgent mSimAgent;
+    @Mock private NativeStateAgent mNativeStateAgent;
 
     private SystemCallAgent mSystemCallAgent;
 
@@ -73,9 +85,12 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(LocationInterface.class, mLocationInterface, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, mIpSecInterface, SLOT0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, mTelephonyInterface, SLOT0);
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, mCellInfoInterface, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimAgent, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, mNativeStateAgent, SLOT0);
+        replaceDcApn(mDcApn);
         replaceDcNetWatcher(mDcNetWatcher);
+        replaceDcUtil(mDcUtil);
 
         mSystemCallAgent = new SystemCallAgent(SLOT0);
     }
@@ -92,13 +107,19 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
         SystemInterface.setSystemInterface(null);
         mNativeStateAgent = null;
         mSimAgent = null;
+        mDcUtil = null;
         mDcNetWatcher = null;
+        mDcApn = null;
+        mCellInfoInterface = null;
+        mTelephonyInterface = null;
         mIpSecInterface = null;
+        mLocationInterface = null;
         mConfigInterface = null;
         mSystem = null;
         mSystemInterface = null;
@@ -442,6 +463,353 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testRequestNetwork() {
+        mSystemCallAgent.requestNetwork(EApnType.IMS.getType());
+
+        verify(mDcApn).connect(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        boolean result = mSystemCallAgent.requestNetwork(EApnType.IMS.getType());
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testReleaseNetwork() {
+        mSystemCallAgent.releaseNetwork(EApnType.IMS.getType());
+
+        verify(mDcApn).disconnect(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        boolean result = mSystemCallAgent.releaseNetwork(EApnType.IMS.getType());
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetApnName() {
+        mSystemCallAgent.getApnName(EApnType.IMS.getType());
+
+        verify(mDcApn).getApn(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        String result = mSystemCallAgent.getApnName(EApnType.IMS.getType());
+
+        assertEquals("", result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDataConnectionState() {
+        mSystemCallAgent.getDataConnectionState(EApnType.IMS.getType());
+
+        verify(mDcApn).getDataState(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        int result = mSystemCallAgent.getDataConnectionState(EApnType.IMS.getType());
+
+        assertEquals(EDataState.DATA_STATE_DISCONNECTED.getState(), result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetIfaceId() {
+        mSystemCallAgent.getIfaceId(EApnType.IMS.getType());
+
+        verify(mDcApn).getIfaceId(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        int result = mSystemCallAgent.getIfaceId(EApnType.IMS.getType());
+
+        assertEquals(SystemCallInterface.RESULT_ERROR, result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetIfaceName() {
+        mSystemCallAgent.getIfaceName(EApnType.IMS.getType());
+
+        verify(mDcApn).getIfaceName(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        String result = mSystemCallAgent.getIfaceName(EApnType.IMS.getType());
+
+        assertEquals("", result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetMtu() {
+        mSystemCallAgent.getMtu(EApnType.IMS.getType());
+
+        verify(mDcApn).getMtu(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        int result = mSystemCallAgent.getMtu(EApnType.IMS.getType());
+
+        assertEquals(0, result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetIpcanCategory() {
+        mSystemCallAgent.getIpcanCategory(EApnType.IMS.getType());
+
+        verify(mDcApn).getIpcanCategory(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        int result = mSystemCallAgent.getIpcanCategory(EApnType.IMS.getType());
+
+        assertEquals(IApn.IPCAN_CATEGORY_MOBILE, result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetLocalAddress() {
+        mSystemCallAgent.getLocalAddress(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt());
+
+        verify(mDcApn).getLocalAddress(eq(EApnType.IMS.getType()), eq(EIpVersion.IPV6V4.getInt()));
+
+        replaceDcApn(null);
+        String result = mSystemCallAgent.getLocalAddress(
+                EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt());
+
+        assertEquals("", result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetPcscfAddresses() {
+        mSystemCallAgent.getPcscfAddresses(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt());
+
+        verify(mDcApn).getPcscfAddress(
+                eq(EApnType.IMS.getType()), eq(EIpVersion.IPV6V4.getInt()));
+
+        replaceDcApn(null);
+        String[] result = mSystemCallAgent.getPcscfAddresses(
+                EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt());
+
+        assertNull(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsIpv6Preferred() {
+        mSystemCallAgent.isIpv6Preferred(EApnType.IMS.getType());
+
+        verify(mDcApn).isIpv6Preferred(eq(EApnType.IMS.getType()));
+
+        replaceDcApn(null);
+        boolean result = mSystemCallAgent.isIpv6Preferred(EApnType.IMS.getType());
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetHostByName() {
+        String host = "test.ims.com";
+        mSystemCallAgent.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);
+
+        verify(mDcApn).getHostByName(
+                eq(EApnType.IMS.getType()), eq(EIpVersion.IPV6V4.getInt()), eq(host));
+
+        replaceDcApn(null);
+        String[] result = mSystemCallAgent.getHostByName(
+                EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);
+
+        assertNull(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testBindSocket() {
+        FileDescriptor sockFd = new FileDescriptor();
+        mSystemCallAgent.bindSocket(EApnType.IMS.getType(), sockFd);
+
+        verify(mDcApn).bindSocket(eq(EApnType.IMS.getType()), eq(sockFd));
+
+        replaceDcApn(null);
+        boolean result = mSystemCallAgent.bindSocket(EApnType.IMS.getType(), sockFd);
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcApn);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetVoiceServiceState() {
+        mSystemCallAgent.getVoiceServiceState();
+
+        verify(mDcNetWatcher).getVoiceServiceState();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getVoiceServiceState();
+
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetVoiceRoamingType() {
+        mSystemCallAgent.getVoiceRoamingType();
+
+        verify(mDcNetWatcher).getVoiceRoamingType();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getVoiceRoamingType();
+
+        assertEquals(ServiceState.ROAMING_TYPE_NOT_ROAMING, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDataServiceState() {
+        mSystemCallAgent.getDataServiceState();
+
+        verify(mDcNetWatcher).getDataServiceState();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getDataServiceState();
+
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDataRoamingType() {
+        mSystemCallAgent.getDataRoamingType();
+
+        verify(mDcNetWatcher).getDataRoamingType();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getDataRoamingType();
+
+        assertEquals(ServiceState.ROAMING_TYPE_NOT_ROAMING, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetMocnPlmnInfo() {
+        mSystemCallAgent.getMocnPlmnInfo();
+
+        verify(mDcNetWatcher).getMocnPlmnInfo();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getMocnPlmnInfo();
+
+        assertEquals(0, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsNetworkRoaming() {
+        mSystemCallAgent.isNetworkRoaming();
+
+        verify(mDcNetWatcher).isRoaming();
+
+        replaceDcNetWatcher(null);
+        boolean result = mSystemCallAgent.isNetworkRoaming();
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsLteEmergencyOnly() {
+        mSystemCallAgent.isLteEmergencyOnly();
+
+        verify(mDcNetWatcher).isLteEmergencyOnly();
+
+        replaceDcNetWatcher(null);
+        boolean result = mSystemCallAgent.isLteEmergencyOnly();
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsEmergencyAttachSupported() {
+        mSystemCallAgent.isEmergencyAttachSupported();
+
+        verify(mDcNetWatcher).isEmergencyServiceSupported();
+
+        replaceDcNetWatcher(null);
+        boolean result = mSystemCallAgent.isEmergencyAttachSupported();
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsMobileDataEnabled() {
+        mSystemCallAgent.isMobileDataEnabled();
+
+        verify(mDcUtil).isMobileDataEnabled();
+
+        replaceDcUtil(null);
+        boolean result = mSystemCallAgent.isMobileDataEnabled();
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcUtil);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfo() {
+        mSystemCallAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mDcUtil).getAccessNetworkInfo(eq(TelephonyManager.NETWORK_TYPE_LTE));
+
+        replaceDcUtil(null);
+        IDcUtils.AccessNetworkInfo result =
+                mSystemCallAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
+
+        assertNull(result);
+        verifyNoMoreInteractions(mDcUtil);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetLastAccessNetworkInfo() {
+        mSystemCallAgent.getLastAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        mSystemCallAgent.getLastAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mCellInfoInterface).getAccessNetworkInfo();
+        verify(mCellInfoInterface).getAccessNetworkInfo(eq(TelephonyManager.NETWORK_TYPE_LTE));
+
+        AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT0);
+        String[] result =
+                mSystemCallAgent.getLastAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
+
+        assertNull(result);
+        verifyNoMoreInteractions(mCellInfoInterface);
+    }
+
+    @Test
+    @SmallTest
     public void testIsImsVoiceCallSupported() {
         mSystemCallAgent.isImsVoiceCallSupported();
 
@@ -524,12 +892,30 @@ public class SystemCallAgentTest {
         verifyNoMoreInteractions(mLocationInterface);
     }
 
-    private void replaceDcNetWatcher(IDcNetWatcher dcNetWatcher) {
+    private void replaceDcApn(IDcApn apn) {
         HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
         if (dcObjects == null) {
             dcObjects = new HashMap<>();
         }
-        dcObjects.put(DcFactory.NETWORK_WATCHER, dcNetWatcher);
+        dcObjects.put(DcFactory.APN, apn);
+        DcFactory.setObjects(SLOT0, dcObjects);
+    }
+
+    private void replaceDcNetWatcher(IDcNetWatcher netWatcher) {
+        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
+        if (dcObjects == null) {
+            dcObjects = new HashMap<>();
+        }
+        dcObjects.put(DcFactory.NETWORK_WATCHER, netWatcher);
+        DcFactory.setObjects(SLOT0, dcObjects);
+    }
+
+    private void replaceDcUtil(IDcUtils util) {
+        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
+        if (dcObjects == null) {
+            dcObjects = new HashMap<>();
+        }
+        dcObjects.put(DcFactory.UTIL, util);
         DcFactory.setObjects(SLOT0, dcObjects);
     }
 }

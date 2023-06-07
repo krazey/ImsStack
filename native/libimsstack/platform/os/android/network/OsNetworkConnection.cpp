@@ -141,8 +141,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
             (bEnableApn && (nApnType == NetworkPolicy::APN_IMS)) ||
             (bEnableApn && (nApnType == NetworkPolicy::APN_INTERNET)))
     {
-        if (PlatformContext::GetInstance()->GetSystem()->ActivateDataConnection(
-                    nApnType, GetSlotId()) == 0)
+        if (PlatformContext::GetInstance()->GetSystem()->RequestNetwork(nApnType, GetSlotId()) == 0)
         {
             IMS_TRACE_E(
                     0, "Enabling data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
@@ -227,7 +226,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::GetLastAccessNetworkInfo(
 {
     AStringArray objCellIdentities =
             PlatformContext::GetInstance()->GetSystem()->GetLastAccessNetworkInfo(
-                    RADIOTECH_TYPE_INVALID, GetSlotId());
+                    RADIOTECH_TYPE_UNKNOWN, GetSlotId());
 
     // 0 : network type
     // 1 : timestamp as UTC format
@@ -1229,7 +1228,7 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {
-        if (PlatformContext::GetInstance()->GetSystem()->DeactivateDataConnection(
+        if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
                     GetApnType(), GetSlotId()) == 0)
         {
             IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
@@ -1243,7 +1242,7 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
             IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
                     GetProfileName().GetStr(), 0, 0);
 
-            if (PlatformContext::GetInstance()->GetSystem()->DeactivateDataConnection(
+            if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
                         GetApnType(), GetSlotId()) == 0)
             {
                 IMS_TRACE_E(

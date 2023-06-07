@@ -721,10 +721,10 @@ public class SystemInterface implements JniSystemListener {
                 "GET_TTY_MODE");
         sMethodToString.put(SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED,
                 "IS_IMS_VOICE_CALL_SUPPORTED");
-        sMethodToString.put(SystemConstants.ACTIVATE_DATA_CONNECTION,
-                "ACTIVATE_DATA_CONNECTION");
-        sMethodToString.put(SystemConstants.DEACTIVATE_DATA_CONNECTION,
-                "DEACTIVATE_DATA_CONNECTION");
+        sMethodToString.put(SystemConstants.REQUEST_NETWORK,
+                "REQUEST_NETWORK");
+        sMethodToString.put(SystemConstants.RELEASE_NETWORK,
+                "RELEASE_NETWORK");
         sMethodToString.put(SystemConstants.GET_ACCESS_NETWORK_INFO,
                 "GET_ACCESS_NETWORK_INFO");
         sMethodToString.put(SystemConstants.GET_APN_NAME,
@@ -885,8 +885,6 @@ public class SystemInterface implements JniSystemListener {
     }
 
     private class ImsSystem implements ISystem, MmTelFeatureRegistry.Listener {
-        private ISystemAPINetwork mISystemAPINetwork;
-
         private ThreadMessageExecutor mExecutor =
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
 
@@ -927,13 +925,6 @@ public class SystemInterface implements JniSystemListener {
         @Override
         public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
             mSystemRadio = systemRadio;
-        }
-
-        @Override
-        public void setISystemAPINetwork(ISystemAPINetwork api) {
-            synchronized (mLock) {
-                mISystemAPINetwork = api;
-            }
         }
 
         /**
@@ -1479,11 +1470,6 @@ public class SystemInterface implements JniSystemListener {
         }
 
         public Parcel handleSystemAPI(int method, Parcel parcel, FileDescriptor fd) {
-            if (method == SystemConstants.GET_HOST_BY_NAME) {
-                final ISystemAPINetwork network = getSystemAPINetwork();
-                return handleSystemAPINetwork(network, method, parcel);
-            }
-
             Parcel result = null;
 
             synchronized (mLock) {
@@ -1492,9 +1478,8 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_RTT_MODE:
                         result = handleSystemCallForCallSettings(method);
                         break;
-                    //mISystemAPINetwork 1 ~ 10
-                    case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
-                    case SystemConstants.DEACTIVATE_DATA_CONNECTION: //FALL-THROUGH
+                    case SystemConstants.REQUEST_NETWORK: //FALL-THROUGH
+                    case SystemConstants.RELEASE_NETWORK: //FALL-THROUGH
                     case SystemConstants.GET_ACCESS_NETWORK_INFO: //FALL-THROUGH
                     case SystemConstants.GET_APN_NAME: //FALL-THROUGH
                     case SystemConstants.GET_DATA_CONNECTION_STATE: //FALL-THROUGH
@@ -1502,10 +1487,7 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_IFACE_ID: //FALL-THROUGH
                     case SystemConstants.GET_IFACE_NAME: //FALL-THROUGH
                     case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO: //FALL-THROUGH
-                    case SystemConstants.GET_LOCAL_ADDRESS:
-                        result = handleSystemAPINetwork1(method, parcel);
-                        break;
-                    //mISystemAPINetwork 11 ~ 22
+                    case SystemConstants.GET_LOCAL_ADDRESS: //FALL-THROUGH
                     case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
                     case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
                     case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
@@ -1518,7 +1500,7 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // FALL-THROUGH
                     case SystemConstants.BIND_SOCKET: // FALL-THROUGH
                     case SystemConstants.IS_IPV6_PREFERRED:
-                        result = handleSystemAPINetwork2(method, parcel, fd);
+                        result = handleSystemCallForNetwork(method, parcel, fd);
                         break;
                     case SystemConstants.GET_ISIM_STATE: //FALL-THROUGH
                     case SystemConstants.READ_ISIM_FILE_ATTR: //FALL-THROUGH
@@ -1618,56 +1600,27 @@ public class SystemInterface implements JniSystemListener {
 
         }
 
-        private Parcel handleSystemAPINetwork(ISystemAPINetwork network,
-                int method, Parcel parcel) {
-            if (network == null) {
+        private Parcel handleSystemCallForNetwork(int method, Parcel parcel, FileDescriptor fd) {
+            if (mSystemCall == null) {
                 return null;
             }
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.GET_HOST_BY_NAME:
-                String[] ipAddrs = network.getHostByName4Sys(
-                            parcel.readInt(), parcel.readInt(), parcel.readString());
-
-                if (ipAddrs == null) {
-                    result.writeInt(0);
+                case SystemConstants.REQUEST_NETWORK: {
+                    int apnType = parcel.readInt();
+                    result.writeInt(mSystemCall.requestNetwork(apnType) ? 1 : 0);
                     break;
                 }
-
-                result.writeInt(ipAddrs.length);
-
-                for (int i = 0; i < ipAddrs.length; ++i) {
-                    result.writeString(ipAddrs[i]);
+                case SystemConstants.RELEASE_NETWORK: {
+                    int apnType = parcel.readInt();
+                    result.writeInt(mSystemCall.releaseNetwork(apnType) ? 1 : 0);
+                    break;
                 }
-                break;
-            default:
-                result.recycle();
-                return null;
-            }
-
-            return result;
-        }
-
-        private Parcel handleSystemAPINetwork1(int method, Parcel parcel) {
-            if (mISystemAPINetwork == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-            switch (method) {
-                case SystemConstants.ACTIVATE_DATA_CONNECTION:
-                    result.writeInt(mISystemAPINetwork.activateDataConnection4Sys(
-                            parcel.readInt()));
-                    break;
-                case SystemConstants.DEACTIVATE_DATA_CONNECTION:
-                    result.writeInt(mISystemAPINetwork.deactivateDataConnection4Sys(
-                            parcel.readInt()));
-                    break;
-                case SystemConstants.GET_ACCESS_NETWORK_INFO:
+                case SystemConstants.GET_ACCESS_NETWORK_INFO: {
                     int defaultNetworkType = parcel.readInt();
                     IDcUtils.AccessNetworkInfo ani =
-                            mISystemAPINetwork.getAccessNetworkInfo4Sys(defaultNetworkType);
+                            mSystemCall.getAccessNetworkInfo(defaultNetworkType);
 
                     if (ani == null) {
                         result.writeInt(defaultNetworkType);
@@ -1687,13 +1640,17 @@ public class SystemInterface implements JniSystemListener {
                         }
                     }
                     break;
-                case SystemConstants.GET_APN_NAME:
-                    result.writeString(mISystemAPINetwork.getApnName4Sys(parcel.readInt()));
+                }
+                case SystemConstants.GET_APN_NAME: {
+                    int apnType = parcel.readInt();
+                    result.writeString(mSystemCall.getApnName(apnType));
                     break;
-                case SystemConstants.GET_DATA_CONNECTION_STATE:
-                    result.writeInt(
-                            mISystemAPINetwork.getDataConnectionState4Sys(parcel.readInt()));
+                }
+                case SystemConstants.GET_DATA_CONNECTION_STATE: {
+                    int apnType = parcel.readInt();
+                    result.writeInt(mSystemCall.getDataConnectionState(apnType));
                     break;
+                }
                 case SystemConstants.GET_HOST_BY_NAME: {
                     int apnType = parcel.readInt();
                     int ipVersion = parcel.readInt();
@@ -1707,7 +1664,7 @@ public class SystemInterface implements JniSystemListener {
                             ipAddrs = wifi.getHostByName(ipVersion, host);
                         }
                     } else {
-                        ipAddrs = mISystemAPINetwork.getHostByName4Sys(apnType, ipVersion, host);
+                        ipAddrs = mSystemCall.getHostByName(apnType, ipVersion, host);
                     }
 
                     if (ipAddrs == null) {
@@ -1724,7 +1681,7 @@ public class SystemInterface implements JniSystemListener {
                 }
                 case SystemConstants.GET_IFACE_ID: {
                     int apnType = parcel.readInt();
-                    int ifaceId = -1;
+                    int ifaceId = SystemCallInterface.RESULT_ERROR;
 
                     if (apnType == EApnType.WIFI.getType()) {
                         WifiInterface wifi = (mDefaultSystemCall != null)
@@ -1733,7 +1690,7 @@ public class SystemInterface implements JniSystemListener {
                             ifaceId = wifi.getIfaceId();
                         }
                     } else {
-                        ifaceId = mISystemAPINetwork.getIfaceId4Sys(apnType);
+                        ifaceId = mSystemCall.getIfaceId(apnType);
                     }
                     result.writeInt(ifaceId);
                     break;
@@ -1749,26 +1706,27 @@ public class SystemInterface implements JniSystemListener {
                             ifaceName = wifi.getIfaceName();
                         }
                     } else {
-                        ifaceName = mISystemAPINetwork.getIfaceName4Sys(apnType);
+                        ifaceName = mSystemCall.getIfaceName(apnType);
                     }
                     result.writeString(ifaceName);
                     break;
                 }
-                case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO:
-                    String[] lastANInfo = mISystemAPINetwork.getLastAccessNetworkInfo4Sys(
-                            parcel.readInt());
+                case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO: {
+                    int networkType = parcel.readInt();
+                    String[] lastAni = mSystemCall.getLastAccessNetworkInfo(networkType);
 
-                    if (lastANInfo == null) {
+                    if (lastAni == null) {
                         result.writeInt(0);
                         break;
                     }
 
-                    result.writeInt(lastANInfo.length);
+                    result.writeInt(lastAni.length);
 
-                    for (int i = 0; i < lastANInfo.length; ++i) {
-                        result.writeString(lastANInfo[i]);
+                    for (int i = 0; i < lastAni.length; ++i) {
+                        result.writeString(lastAni[i]);
                     }
                     break;
+                }
                 case SystemConstants.GET_LOCAL_ADDRESS: {
                     int apnType = parcel.readInt();
                     int ipVersion = parcel.readInt();
@@ -1781,39 +1739,25 @@ public class SystemInterface implements JniSystemListener {
                             localAddress = wifi.getLocalAddress(ipVersion);
                         }
                     } else {
-                        localAddress = mISystemAPINetwork.getLocalAddress4Sys(apnType, ipVersion);
+                        localAddress = mSystemCall.getLocalAddress(apnType, ipVersion);
                     }
                     result.writeString(localAddress);
                     break;
                 }
-                default:
-                    result.recycle();
-                    return null;
-            }
-
-            return result;
-        }
-
-        private Parcel handleSystemAPINetwork2(int method, Parcel parcel, FileDescriptor fd) {
-            if (mISystemAPINetwork == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-            switch (method) {
                 case SystemConstants.GET_IPCAN_CATEGORY: {
                     int apnType = parcel.readInt();
 
                     if (apnType == EApnType.WIFI.getType()) {
                         result.writeInt(IApn.IPCAN_CATEGORY_WLAN);
                     } else {
-                        result.writeInt(mISystemAPINetwork.getIpcanCategory4Sys(apnType));
+                        result.writeInt(mSystemCall.getIpcanCategory(apnType));
                     }
                     break;
                 }
-                case SystemConstants.GET_PCSCF_ADDRESSES:
-                    String[] pcscfs = mISystemAPINetwork.getPcscfAddresses4Sys(parcel.readInt(),
-                        parcel.readInt());
+                case SystemConstants.GET_PCSCF_ADDRESSES: {
+                    int apnType = parcel.readInt();
+                    int ipVersion = parcel.readInt();
+                    String[] pcscfs = mSystemCall.getPcscfAddresses(apnType, ipVersion);
 
                     if (pcscfs == null) {
                         result.writeInt(0);
@@ -1826,29 +1770,30 @@ public class SystemInterface implements JniSystemListener {
                         result.writeString(pcscfs[i]);
                     }
                     break;
+                }
                 case SystemConstants.GET_ROAMING_STATE:
-                    result.writeInt(mISystemAPINetwork.getRoamingState4Sys());
+                    result.writeInt(mSystemCall.isNetworkRoaming() ? 1 : 0);
                     break;
                 case SystemConstants.GET_SERVICE_STATE:
-                    result.writeInt(mISystemAPINetwork.getServiceState4Sys());
+                    result.writeInt(mSystemCall.getDataServiceState());
                     break;
                 case SystemConstants.IS_LTE_EMERGENCY_ONLY:
-                    result.writeInt(mISystemAPINetwork.isLteEmergencyOnly4Sys());
+                    result.writeInt(mSystemCall.isLteEmergencyOnly() ? 1 : 0);
                     break;
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:
-                    result.writeInt(mISystemAPINetwork.isMobileDataEnabled() ? 1 : 0);
+                    result.writeInt(mSystemCall.isMobileDataEnabled() ? 1 : 0);
                     break;
                 case SystemConstants.GET_MOCN_PLMN_INFO:
-                    result.writeInt(mISystemAPINetwork.getMocnPlmnInfo4Sys());
+                    result.writeInt(mSystemCall.getMocnPlmnInfo());
                     break;
                 case SystemConstants.GET_VOICE_SERVICE_STATE:
-                    result.writeInt(mISystemAPINetwork.getVoiceServiceState4Sys());
+                    result.writeInt(mSystemCall.getVoiceServiceState());
                     break;
                 case SystemConstants.GET_VOICE_ROAMING_TYPE:
-                    result.writeInt(mISystemAPINetwork.getVoiceRoamingType4Sys());
+                    result.writeInt(mSystemCall.getVoiceRoamingType());
                     break;
                 case SystemConstants.GET_DATA_ROAMING_TYPE:
-                    result.writeInt(mISystemAPINetwork.getDataRoamingType4Sys());
+                    result.writeInt(mSystemCall.getDataRoamingType());
                     break;
                 case SystemConstants.GET_MTU: {
                     int apnType = parcel.readInt();
@@ -1861,17 +1806,17 @@ public class SystemInterface implements JniSystemListener {
                             mtu = wifi.getMtu();
                         }
                     } else {
-                        mtu = mISystemAPINetwork.getMtu4Sys(apnType);
+                        mtu = mSystemCall.getMtu(apnType);
                     }
                     result.writeInt(mtu);
                     break;
                 }
                 case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED:
-                    result.writeInt(mISystemAPINetwork.isEmergencyAttachSupported4Sys());
+                    result.writeInt(mSystemCall.isEmergencyAttachSupported() ? 1 : 0);
                     break;
                 case SystemConstants.BIND_SOCKET: {
                     int apnType = parcel.readInt();
-                    int bindResult = 0;
+                    boolean bindResult = false;
 
                     if (apnType == EApnType.WIFI.getType()) {
                         WifiInterface wifi = (mDefaultSystemCall != null)
@@ -1880,15 +1825,16 @@ public class SystemInterface implements JniSystemListener {
                             bindResult = wifi.bindSocket(fd);
                         }
                     } else {
-                        bindResult = mISystemAPINetwork.bindSocket(apnType, fd);
+                        bindResult = mSystemCall.bindSocket(apnType, fd);
                     }
-                    result.writeInt(bindResult);
+                    result.writeInt(bindResult ? 1 : 0);
                     break;
                 }
-                case SystemConstants.IS_IPV6_PREFERRED:
+                case SystemConstants.IS_IPV6_PREFERRED: {
                     int apnType = parcel.readInt();
-                    result.writeInt(mISystemAPINetwork.isIpv6Preferred4Sys(apnType) ? 1 : 0);
+                    result.writeInt(mSystemCall.isIpv6Preferred(apnType) ? 1 : 0);
                     break;
+                }
                 default:
                     result.recycle();
                     return null;
@@ -2143,12 +2089,6 @@ public class SystemInterface implements JniSystemListener {
             }
 
             return result;
-        }
-
-        private ISystemAPINetwork getSystemAPINetwork() {
-            synchronized (mLock) {
-                return mISystemAPINetwork;
-            }
         }
 
         private Parcel handleSystemCall(int method) {

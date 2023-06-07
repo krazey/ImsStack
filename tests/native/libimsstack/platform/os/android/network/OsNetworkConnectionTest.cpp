@@ -129,9 +129,7 @@ protected:
                 .WillOnce(Return(DATA_DISCONNECTED))      // SetPreferredIpVersion()
                 .WillRepeatedly(Return(DATA_CONNECTED));  // second call to Activate()
 
-        EXPECT_CALL(m_objSystem, ActivateDataConnection(_, _))
-                .Times(AnyNumber())
-                .WillOnce(Return(1));
+        EXPECT_CALL(m_objSystem, RequestNetwork(_, _)).Times(AnyNumber()).WillOnce(Return(1));
 
         EXPECT_EQ(INetworkConnection::RESULT_DOING, pINetworkConnection->Activate(IMS_TRUE));
         EXPECT_EQ(INetworkConnection::STATE_DISCONNECTED, pINetworkConnection->GetState());
@@ -214,7 +212,7 @@ TEST_F(OsNetworkConnectionTest, Activate)
             .Times(AnyNumber())
             .WillOnce(Return(DATA_DISCONNECTED));
 
-    EXPECT_CALL(m_objSystem, ActivateDataConnection(_, _)).Times(AnyNumber()).WillOnce(Return(0));
+    EXPECT_CALL(m_objSystem, RequestNetwork(_, _)).Times(AnyNumber()).WillOnce(Return(0));
 
     EXPECT_EQ(INetworkConnection::RESULT_FAILED, pINetworkConnection->Activate(IMS_TRUE));
     EXPECT_EQ(INetworkConnection::STATE_DISCONNECTED, pINetworkConnection->GetState());
@@ -232,7 +230,7 @@ TEST_F(OsNetworkConnectionTest, Deactivate)
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
     INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
-    EXPECT_CALL(m_objSystem, DeactivateDataConnection(_, _))
+    EXPECT_CALL(m_objSystem, ReleaseNetwork(_, _))
             .Times(3)
             .WillOnce(Return(1))
             .WillOnce(Return(0))
@@ -931,9 +929,7 @@ TEST_F(OsNetworkConnectionTest, DispatchServiceMessage)
             .Times(AnyNumber())
             .WillOnce(Return(DATA_DISCONNECTED));
 
-    EXPECT_CALL(m_objSystem, ActivateDataConnection(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
+    EXPECT_CALL(m_objSystem, RequestNetwork(_, _)).Times(AnyNumber()).WillRepeatedly(Return(1));
 
     EXPECT_EQ(INetworkConnection::RESULT_DOING, pINetworkConnection->Activate(IMS_TRUE));
 

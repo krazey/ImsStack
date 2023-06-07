@@ -21,9 +21,14 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.ServiceState;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.IpSecSaParameter;
@@ -363,12 +368,391 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
+     * Requests the data connection with the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if this operation is successfully performed, {@code false} otherwise.
+     */
+    @Override
+    public boolean requestNetwork(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.connect(apnType) : false;
+    }
+
+    /**
+     * Releases the data connection with the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if this operation is successfully performed, {@code false} otherwise.
+     */
+    @Override
+    public boolean releaseNetwork(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.disconnect(apnType) : false;
+    }
+
+    /**
+     * Returns the APN name of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An APN name if present or empty string.
+     */
+    @Override
+    public String getApnName(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getApn(apnType) : "";
+    }
+
+    /**
+     * Returns the current connection state of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return The connection state.
+     *         {@link EDataState#DATA_STATE_DISCONNECTED},
+     *         {@link EDataState#DATA_STATE_CONNECTED},
+     *         {@link EDataState#DATA_STATE_CONNECT_FAILED},
+     *         {@link EDataState#DATA_STATE_IP_CHANGED},
+     *         {@link EDataState#DATA_STATE_PCSCF_CHANGED}
+     */
+    @Override
+    public int getDataConnectionState(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null)
+                ? apn.getDataState(apnType)
+                : EDataState.DATA_STATE_DISCONNECTED.getState();
+    }
+
+    /**
+     * Returns the network interface identifier of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return A network interface identifier or {@link #RESULT_ERROR} if an error occurs.
+     */
+    @Override
+    public int getIfaceId(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getIfaceId(apnType) : RESULT_ERROR;
+    }
+
+    /**
+     * Returns the network interface name of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return A network interface name or empty string.
+     */
+    @Override
+    public String getIfaceName(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getIfaceName(apnType) : "";
+    }
+
+    /**
+     * Returns the MTU size of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An MTU size.
+     */
+    @Override
+    public int getMtu(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getMtu(apnType) : 0;
+    }
+
+    /**
+     * Returns the IPCAN category of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An IPCAN category.
+     *         {@link IApn#IPCAN_CATEGORY_WLAN},
+     *         {@link IApn#IPCAN_CATEGORY_MOBILE}
+     */
+    @Override
+    public int getIpcanCategory(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getIpcanCategory(apnType) : IApn.IPCAN_CATEGORY_MOBILE;
+    }
+
+    /**
+     * Returns the local IP address of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @return A local IP address.
+     */
+    @Override
+    public String getLocalAddress(int apnType, int ipVersion) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getLocalAddress(apnType, ipVersion) : "";
+    }
+
+    /**
+     * Returns the P-CSCF address of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @return The P-CSCF addresses or null.
+     */
+    @Override
+    public String[] getPcscfAddresses(int apnType, int ipVersion) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getPcscfAddress(apnType, ipVersion) : null;
+    }
+
+    /**
+     * Checks whether the IPv6 is preferred or not for the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if the specified APN prefers IPv6 address, {@code false} otherwise.
+     */
+    @Override
+    public boolean isIpv6Preferred(int apnType) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.isIpv6Preferred(apnType) : false;
+    }
+
+    /**
+     * Returns the numeric IP address from the specified host name.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @param host A host name to be resolved.
+     * @return The numeric IP addresses or null.
+     */
+    @Override
+    public String[] getHostByName(int apnType, int ipVersion, String host) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.getHostByName(apnType, ipVersion, host) : null;
+    }
+
+    /**
+     * Binds the specified socket descriptor to the specified network.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param sockFd A socket FD.
+     * @return {@code true} if the operation is successfully performed, {@code false} otherwise.
+     */
+    @Override
+    public boolean bindSocket(int apnType, FileDescriptor sockFd) {
+        IDcApn apn = getDcApn();
+        return (apn != null) ? apn.bindSocket(apnType, sockFd) : false;
+    }
+
+    /**
+     * Returns the service state of the current voice network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    @Override
+    public int getVoiceServiceState() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getVoiceServiceState()
+                : ServiceState.STATE_OUT_OF_SERVICE;
+    }
+
+    /**
+     * Returns the roaming type of the current voice network.
+     *
+     * @return A roaming type.
+     *         {@link ServiceState#ROAMING_TYPE_NOT_ROAMING},
+     *         {@link ServiceState#ROAMING_TYPE_UNKNOWN},
+     *         {@link ServiceState#ROAMING_TYPE_DOMESTIC},
+     *         {@link ServiceState#ROAMING_TYPE_INTERNATIONAL}
+     */
+    @Override
+    public int getVoiceRoamingType() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getVoiceRoamingType()
+                : ServiceState.ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Returns the service state of the current data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    @Override
+    public int getDataServiceState() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getDataServiceState()
+                : ServiceState.STATE_OUT_OF_SERVICE;
+    }
+
+    /**
+     * Returns the roaming type of the current data network.
+     *
+     * @return A roaming type.
+     *         {@link ServiceState#ROAMING_TYPE_NOT_ROAMING},
+     *         {@link ServiceState#ROAMING_TYPE_UNKNOWN},
+     *         {@link ServiceState#ROAMING_TYPE_DOMESTIC},
+     *         {@link ServiceState#ROAMING_TYPE_INTERNATIONAL}
+     */
+    @Override
+    public int getDataRoamingType() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getDataRoamingType()
+                : ServiceState.ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Returns the PLMN information of MOCN.
+     *
+     * @return A PLMN info. of MOCN.
+     */
+    @Override
+    public int getMocnPlmnInfo() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.getMocnPlmnInfo() : 0;
+    }
+
+    /**
+     * Checks whether the current network is attached as roaming.
+     *
+     * @return {@code true} if the network is in roaming, {@code false} otherwise.
+     */
+    @Override
+    public boolean isNetworkRoaming() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.isRoaming() : false;
+    }
+
+    /**
+     * Checks whether the emergency is only available in the LTE network.
+     *
+     * @return {@code true} if the emergency is only available, {@code false} otherwise.
+     */
+    @Override
+    public boolean isLteEmergencyOnly() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.isLteEmergencyOnly() : false;
+    }
+
+    /**
+     * Checks whether the emergency attach is supported or not.
+     *
+     * @return {@code true} if emergency attach is supported, {@code false} otherwise.
+     */
+    @Override
+    public boolean isEmergencyAttachSupported() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.isEmergencyServiceSupported() : false;
+    }
+
+    /**
+     * Checks whether the mobile data setting is enabled or not.
+     *
+     * @return {@code true} if the mobile data setting is enabled, {@code false} otherwise.
+     */
+    @Override
+    public boolean isMobileDataEnabled() {
+        IDcUtils util = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
+        return (util != null) ? util.isMobileDataEnabled() : false;
+    }
+
+    /**
+     * Returns the access network information of the network that the IMS is registering
+     * or was registered.
+     *
+     * @param defaultNetworkType The default network type to be used when the network is unknown.
+     * @return The access network information or null.
+     */
+    @Override
+    public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType) {
+        IDcUtils util = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
+        return (util != null) ? util.getAccessNetworkInfo(defaultNetworkType) : null;
+    }
+
+    /**
+     * Returns the last known access network information for the specified network.
+     *
+     * @param networkType A network type.
+     * @return A last known access network information.
+     */
+    @Override
+    public String[] getLastAccessNetworkInfo(@NetworkType int networkType) {
+        CellInfoInterface cellInfo = AgentFactory.getInstance().getAgent(
+                CellInfoInterface.class, mSlotId);
+
+        if (cellInfo == null) {
+            return null;
+        }
+
+        if (networkType == NETWORK_TYPE_UNKNOWN) {
+            return cellInfo.getAccessNetworkInfo();
+        } else {
+            return cellInfo.getAccessNetworkInfo(networkType);
+        }
+    }
+
+    /**
      * Returns the flag specifying whether the IMS voice call is supported on the LTE network.
      */
     @Override
     public boolean isImsVoiceCallSupported() {
-        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
-        return (dcnw != null) ? dcnw.isVops() : false;
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.isVops() : false;
     }
 
     /**
@@ -439,5 +823,13 @@ public class SystemCallAgent implements SystemCallInterface {
         if (location != null) {
             location.startInstantLocationUpdate();
         }
+    }
+
+    private IDcApn getDcApn() {
+        return (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+    }
+
+    private IDcNetWatcher getDcNetWatcher() {
+        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
     }
 }

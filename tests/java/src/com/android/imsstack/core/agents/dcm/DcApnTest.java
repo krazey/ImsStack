@@ -533,7 +533,7 @@ public class DcApnTest {
         when(mMockIApn.getCachedNetwork()).thenReturn(null);
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(0, mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
+        assertFalse(mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
     }
 
     @Test
@@ -543,7 +543,7 @@ public class DcApnTest {
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(1, mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
+        assertTrue(mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
         verify(mMockNetwork).bindSocket(sockFd);
     }
 

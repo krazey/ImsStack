@@ -92,7 +92,7 @@ PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId,
 {
     AStringArray objCellIdentities =
             PlatformContext::GetInstance()->GetSystem()->GetLastAccessNetworkInfo(
-                    RADIOTECH_TYPE_INVALID, nSlotId);
+                    RADIOTECH_TYPE_UNKNOWN, nSlotId);
 
     // 0 : network type
     // 1 : timestamp as UTC format

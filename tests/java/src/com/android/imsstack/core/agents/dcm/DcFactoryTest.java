@@ -40,7 +40,6 @@ public class DcFactoryTest {
     private DcFactory mDcFactory;
 
     @Mock Context mMockContext;
-    @Mock DcGov mMockDcGov;
     @Mock DcUtils mMockDcUtils;
     @Mock DcSettings mMockDcSettings;
     @Mock DcNetWatcher mMockDcNetWatcher;
@@ -68,7 +67,6 @@ public class DcFactoryTest {
     public void testGetDc() throws Exception {
         createMockDcs(SLOT_0);
 
-        assertEquals(mDcFactory.getDc(DcFactory.GOVERNOR, SLOT_0), mMockDcGov);
         assertEquals(mDcFactory.getDc(DcFactory.UTIL, SLOT_0), mMockDcUtils);
         assertEquals(mDcFactory.getDc(DcFactory.SETTING, SLOT_0), mMockDcSettings);
         assertEquals(mDcFactory.getDc(DcFactory.NETWORK_WATCHER, SLOT_0), mMockDcNetWatcher);
@@ -82,7 +80,6 @@ public class DcFactoryTest {
         HashMap<Integer, IDc> agents = mDcFactory.getObjects(SLOT_0);
 
         assertNotNull(agents);
-        assertNotNull(agents.get(DcFactory.GOVERNOR));
         assertNotNull(agents.get(DcFactory.UTIL));
         assertNotNull(agents.get(DcFactory.SETTING));
         assertNotNull(agents.get(DcFactory.NETWORK_WATCHER));
@@ -94,7 +91,6 @@ public class DcFactoryTest {
         createMockDcs(SLOT_0);
         mDcFactory.cleanUpDc(SLOT_0);
 
-        verify(mMockDcGov).cleanup();
         verify(mMockDcUtils).cleanup();
         verify(mMockDcSettings).cleanup();
         verify(mMockDcNetWatcher).cleanup();
@@ -106,7 +102,6 @@ public class DcFactoryTest {
         createMockDcs(SLOT_0);
         mDcFactory.initDc(mMockContext, SLOT_0);
 
-        verify(mMockDcGov).init(mMockContext);
         verify(mMockDcUtils).init(mMockContext);
         verify(mMockDcSettings).init(mMockContext);
         verify(mMockDcNetWatcher).init(mMockContext);
@@ -122,7 +117,6 @@ public class DcFactoryTest {
 
         agents = new HashMap<Integer, IDc>(DcFactory.MAX);
 
-        agents.put(DcFactory.GOVERNOR, mMockDcGov);
         agents.put(DcFactory.UTIL, mMockDcUtils);
         agents.put(DcFactory.SETTING, mMockDcSettings);
         agents.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);

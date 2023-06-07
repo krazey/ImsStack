@@ -19,6 +19,7 @@ package com.android.imsstack.system;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import java.io.FileDescriptor;
@@ -201,6 +202,271 @@ public interface SystemCallInterface {
      * @return {@code true} if the number is an emergency number, {@code false} otherwise.
      */
     boolean isEmergencyNumber(String number);
+    ////}
+
+    //// Data interface {
+    /**
+     * Requests the data connection with the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if this operation is successfully performed, {@code false} otherwise.
+     */
+    boolean requestNetwork(int apnType);
+
+    /**
+     * Releases the data connection with the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if this operation is successfully performed, {@code false} otherwise.
+     */
+    boolean releaseNetwork(int apnType);
+
+    /**
+     * Returns the APN name of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An APN name if present or empty string.
+     */
+    String getApnName(int apnType);
+
+    /**
+     * Returns the current connection state of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return The connection state.
+     *         {@link EDataState#DATA_STATE_DISCONNECTED},
+     *         {@link EDataState#DATA_STATE_CONNECTED},
+     *         {@link EDataState#DATA_STATE_CONNECT_FAILED},
+     *         {@link EDataState#DATA_STATE_IP_CHANGED},
+     *         {@link EDataState#DATA_STATE_PCSCF_CHANGED}
+     */
+    int getDataConnectionState(int apnType);
+
+    /**
+     * Returns the network interface identifier of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return A network interface identifier or {@link #RESULT_ERROR} if an error occurs.
+     */
+    int getIfaceId(int apnType);
+
+    /**
+     * Returns the network interface name of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return A network interface name or empty string.
+     */
+    String getIfaceName(int apnType);
+
+    /**
+     * Returns the MTU size of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An MTU size.
+     */
+    int getMtu(int apnType);
+
+    /**
+     * Returns the IPCAN category of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return An IPCAN category.
+     *         {@link IApn#IPCAN_CATEGORY_WLAN},
+     *         {@link IApn#IPCAN_CATEGORY_MOBILE}
+     */
+    int getIpcanCategory(int apnType);
+
+    /**
+     * Returns the local IP address of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @return A local IP address or empty string.
+     */
+    String getLocalAddress(int apnType, int ipVersion);
+
+    /**
+     * Returns the P-CSCF address of the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @return The P-CSCF addresses or null.
+     */
+    String[] getPcscfAddresses(int apnType, int ipVersion);
+
+    /**
+     * Checks whether the IPv6 is preferred or not for the specified APN.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @return {@code true} if the specified APN prefers IPv6 address, {@code false} otherwise.
+     */
+    boolean isIpv6Preferred(int apnType);
+
+    /**
+     * Returns the numeric IP address from the specified host name.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param ipVersion An IP version type.
+     *                  {@link EIpVersion#IPV4},
+     *                  {@link EIpVersion#IPV6},
+     *                  {@link EIpVersion#IPV4V6},
+     *                  {@link EIpVersion#IPV6V4}
+     * @param host A host name to be resolved.
+     * @return The numeric IP addresses or null.
+     */
+    String[] getHostByName(int apnType, int ipVersion, String host);
+
+    /**
+     * Binds the specified socket descriptor to the specified network.
+     *
+     * @param apnType An APN type.
+     *                {@link EApnType#IMS},
+     *                {@link EApnType#INTERNET},
+     *                {@link EApnType#EMERGENCY}
+     * @param sockFd A socket FD.
+     * @return {@code true} if the operation is successfully performed, {@code false} otherwise.
+     */
+    boolean bindSocket(int apnType, FileDescriptor sockFd);
+
+    /**
+     * Returns the service state of the current voice network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    int getVoiceServiceState();
+
+    /**
+     * Returns the roaming type of the current voice network.
+     *
+     * @return A roaming type.
+     *         {@link ServiceState#ROAMING_TYPE_NOT_ROAMING},
+     *         {@link ServiceState#ROAMING_TYPE_UNKNOWN},
+     *         {@link ServiceState#ROAMING_TYPE_DOMESTIC},
+     *         {@link ServiceState#ROAMING_TYPE_INTERNATIONAL}
+     */
+    int getVoiceRoamingType();
+
+    /**
+     * Returns the service state of the current data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    int getDataServiceState();
+
+    /**
+     * Returns the roaming type of the current data network.
+     *
+     * @return A roaming type.
+     *         {@link ServiceState#ROAMING_TYPE_NOT_ROAMING},
+     *         {@link ServiceState#ROAMING_TYPE_UNKNOWN},
+     *         {@link ServiceState#ROAMING_TYPE_DOMESTIC},
+     *         {@link ServiceState#ROAMING_TYPE_INTERNATIONAL}
+     */
+    int getDataRoamingType();
+
+    /**
+     * Returns the PLMN information of MOCN.
+     *
+     * @return A PLMN info. of MOCN.
+     */
+    int getMocnPlmnInfo();
+
+    /**
+     * Checks whether the current network is attached as roaming.
+     *
+     * @return {@code true} if the network is in roaming, {@code false} otherwise.
+     */
+    boolean isNetworkRoaming();
+
+    /**
+     * Checks whether the emergency is only available in the LTE network.
+     *
+     * @return {@code true} if the emergency is only available, {@code false} otherwise.
+     */
+    boolean isLteEmergencyOnly();
+
+    /**
+     * Checks whether the emergency attach is supported or not.
+     *
+     * @return {@code true} if emergency attach is supported, {@code false} otherwise.
+     */
+    boolean isEmergencyAttachSupported();
+
+    /**
+     * Checks whether the mobile data setting is enabled or not.
+     *
+     * @return {@code true} if the mobile data setting is enabled, {@code false} otherwise.
+     */
+    boolean isMobileDataEnabled();
+
+    /**
+     * Returns the access network information of the network that the IMS is registering
+     * or was registered.
+     *
+     * @param defaultNetworkType The default network type to be used when the network is unknown.
+     * @return The access network information or null.
+     */
+    IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType);
+
+    /**
+     * Returns the last known access network information for the specified network.
+     *
+     * @param networkType A network type.
+     * @return A last known access network information or null.
+     */
+    String[] getLastAccessNetworkInfo(@NetworkType int networkType);
     ////}
 
     /**

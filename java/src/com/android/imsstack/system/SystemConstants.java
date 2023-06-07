@@ -106,8 +106,8 @@ public class SystemConstants {
     public static final int GET_ROAMING_STATE = CATEGORY_BASE + 402;
     public static final int GET_SERVICE_STATE = CATEGORY_BASE + 403;
     public static final int GET_ACCESS_NETWORK_INFO = CATEGORY_BASE + 404;
-    public static final int ACTIVATE_DATA_CONNECTION = CATEGORY_BASE + 405;
-    public static final int DEACTIVATE_DATA_CONNECTION = CATEGORY_BASE + 406;
+    public static final int REQUEST_NETWORK = CATEGORY_BASE + 405;
+    public static final int RELEASE_NETWORK = CATEGORY_BASE + 406;
     public static final int GET_APN_NAME = CATEGORY_BASE + 407;
     public static final int GET_DATA_CONNECTION_STATE = CATEGORY_BASE + 408;
     public static final int GET_LOCAL_ADDRESS = CATEGORY_BASE + 409;

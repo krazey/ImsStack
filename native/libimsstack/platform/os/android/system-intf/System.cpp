@@ -846,7 +846,7 @@ IMS_BOOL System::IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::RequestNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -857,7 +857,7 @@ IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 
     android::Parcel out;
 
     in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::ACTIVATE_DATA_CONNECTION);
+    in.writeInt32(SystemConstants::REQUEST_NETWORK);
     in.writeInt32(nApnType);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
@@ -869,7 +869,7 @@ IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 
 }
 
 PUBLIC
-IMS_SINT32 System::DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ReleaseNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -880,7 +880,7 @@ IMS_SINT32 System::DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT3
     android::Parcel out;
 
     in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::DEACTIVATE_DATA_CONNECTION);
+    in.writeInt32(SystemConstants::RELEASE_NETWORK);
     in.writeInt32(nApnType);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)

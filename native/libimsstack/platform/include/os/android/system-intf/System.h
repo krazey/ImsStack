@@ -103,8 +103,8 @@ public:
             OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId) override;
     AStringArray GetLastAccessNetworkInfo(
             IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 RequestNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 ReleaseNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
     AString GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetDataConnectionState(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
     AStringArray GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpVersion,

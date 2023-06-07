@@ -29,10 +29,6 @@ public interface ISystem {
     void setSystemRadioInterface(SystemRadioInterface systemRadio);
 
     /**
-     * set system interface
-     */
-    public void setISystemAPINetwork(ISystemAPINetwork api);
-    /**
      * Notifies the changes of airplane mode in the phone settings.
      *
      * @param airplaneMode the current airplane mode status 0: Airplane mode

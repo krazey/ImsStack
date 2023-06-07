@@ -1199,42 +1199,42 @@ TEST_F(SystemTest, IsImsVoiceCallSupported)
     EXPECT_EQ(m_pSystem->IsImsVoiceCallSupported(0), 0);
 }
 
-TEST_F(SystemTest, ActivateDataConnection)
+TEST_F(SystemTest, RequestNetwork)
 {
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->ActivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->RequestNetwork(NetworkPolicy::APN_IMS, 0), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->ActivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->RequestNetwork(NetworkPolicy::APN_IMS, 0), 0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->ActivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->RequestNetwork(NetworkPolicy::APN_IMS, 0), 0);
 }
 
-TEST_F(SystemTest, DeactivateDataConnection)
+TEST_F(SystemTest, ReleaseNetwork)
 {
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->DeactivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->ReleaseNetwork(NetworkPolicy::APN_IMS, 0), 0);
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->DeactivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->ReleaseNetwork(NetworkPolicy::APN_IMS, 0), 0);
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->DeactivateDataConnection(NetworkPolicy::APN_IMS, 0), 0);
+    EXPECT_EQ(m_pSystem->ReleaseNetwork(NetworkPolicy::APN_IMS, 0), 0);
 }
 
 TEST_F(SystemTest, GetApnName)

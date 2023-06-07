@@ -496,7 +496,7 @@ public class WifiAgentTest {
     @SmallTest
     public void testBindSocket() throws IOException {
         FileDescriptor sockFd = new FileDescriptor();
-        assertEquals(0, mWifiAgent.bindSocket(sockFd));
+        assertFalse(mWifiAgent.bindSocket(sockFd));
 
         ConnectivityManager.NetworkCallback networkCallback = getNetworkCallback();
         assertNotNull(networkCallback);
@@ -504,18 +504,18 @@ public class WifiAgentTest {
         networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
         networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
 
-        assertEquals(1, mWifiAgent.bindSocket(sockFd));
+        assertTrue(mWifiAgent.bindSocket(sockFd));
 
         // IOException
         doAnswer((invocation) -> {
             throw new IOException("bindSocket failed.");
         }).when(mNetwork).bindSocket(eq(sockFd));
 
-        assertEquals(0, mWifiAgent.bindSocket(sockFd));
+        assertFalse(mWifiAgent.bindSocket(sockFd));
 
         networkCallback.onLost(mNetwork);
 
-        assertEquals(0, mWifiAgent.bindSocket(sockFd));
+        assertFalse(mWifiAgent.bindSocket(sockFd));
     }
 
     private Intent createWifiStateChangedIntent(int state) {

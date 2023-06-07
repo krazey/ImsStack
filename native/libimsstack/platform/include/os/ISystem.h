@@ -90,8 +90,8 @@ public:
             IN IMS_SINT32 nSlotId) = 0;
     virtual AStringArray GetLastAccessNetworkInfo(
             IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 RequestNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 ReleaseNetwork(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
     virtual AString GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetDataConnectionState(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
     virtual AStringArray GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpVersion,
