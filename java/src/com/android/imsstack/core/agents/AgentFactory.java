@@ -16,11 +16,17 @@
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
-import android.util.ArrayMap;
 import android.util.SparseArray;
 
+import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A factory class for managing and controlling the various agent components.
@@ -28,9 +34,9 @@ import com.android.internal.annotations.VisibleForTesting;
 public final class AgentFactory {
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
     private final SparseArray<SystemCallAgent> mSystemCallAgents;
-    private volatile ArrayMap<Class<?>, IAgent> mAgents = new ArrayMap<>();
-    private volatile SparseArray<ArrayMap<Class<?>, IAgent>> mAgentsForSlot;
-    private static AgentFactory sInstance;
+    private volatile Map<Class<?>, IAgent> mAgents = new LinkedHashMap<>();
+    private volatile SparseArray<Map<Class<?>, IAgent>> mAgentsForSlot;
+    private static AgentFactory sInstance = null;
 
     private AgentFactory() {
         int supportedSimCount = MSimUtils.getSupportedSimCount();
@@ -39,7 +45,7 @@ public final class AgentFactory {
 
         for (int i = 0; i < supportedSimCount; ++i) {
             mSystemCallAgents.put(i, null);
-            mAgentsForSlot.put(i, new ArrayMap<>());
+            mAgentsForSlot.put(i, new LinkedHashMap<>());
         }
     }
 
@@ -98,7 +104,7 @@ public final class AgentFactory {
             return null;
         }
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+        Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
         return (agents != null) ? (T) agents.get(clazz) : null;
     }
 
@@ -117,10 +123,10 @@ public final class AgentFactory {
             return;
         }
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+        Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents == null) {
-            agents = new ArrayMap<Class<?>, IAgent>();
+            agents = new LinkedHashMap<>();
             mAgentsForSlot.put(slotId, agents);
         }
 
@@ -134,6 +140,8 @@ public final class AgentFactory {
         if (!mAgents.isEmpty()) {
             return;
         }
+
+        Log.i(Log.TAG, "createAgents");
 
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
@@ -150,9 +158,10 @@ public final class AgentFactory {
      * Destroys the default agents.
      */
     public void destroyAgents() {
-        for (int i = 0; i < mAgents.size(); ++i) {
-            IAgent agent = mAgents.valueAt(i);
+        Log.i(Log.TAG, "destroyAgents");
 
+        Collection<IAgent> agentList = reverseCollection(mAgents.values());
+        for (IAgent agent : agentList) {
             if (agent != null) {
                 agent.cleanup();
             }
@@ -170,13 +179,13 @@ public final class AgentFactory {
      * @param context A {@link Context} object.
      */
     public void initAgents(Context context) {
+        Log.i(Log.TAG, "initAgents");
+
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
         }
 
-        for (int i = 0; i < mAgents.size(); ++i) {
-            IAgent agent = mAgents.valueAt(i);
-
+        for (IAgent agent : mAgents.values()) {
             if (agent != null) {
                 agent.init(context);
             }
@@ -189,15 +198,17 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void createAgentsForSlot(int slotId) {
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+        Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents == null) {
-            agents = new ArrayMap<Class<?>, IAgent>();
+            agents = new LinkedHashMap<>();
             mAgentsForSlot.put(slotId, agents);
         } else if (!agents.isEmpty()) {
             // Already created.
             return;
         }
+
+        Log.i(Log.TAG, "createAgentsForSlot" + slotId);
 
         mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
 
@@ -220,12 +231,13 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void destroyAgentsForSlot(int slotId) {
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+        Log.i(Log.TAG, "destroyAgentsForSlot" + slotId);
+
+        Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
-            for (int i = 0; i < agents.size(); ++i) {
-                IAgent agent = agents.valueAt(i);
-
+            Collection<IAgent> agentList = reverseCollection(agents.values());
+            for (IAgent agent : agentList) {
                 if (agent != null) {
                     agent.cleanup();
                 }
@@ -248,22 +260,34 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void initAgentsForSlot(Context context, int slotId) {
+        Log.i(Log.TAG, "initAgentsForSlot" + slotId);
+
         SystemCallAgent sca = mSystemCallAgents.get(slotId);
 
         if (sca == null) {
             mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
         }
 
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+        Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
         if (agents != null) {
-            for (int i = 0; i < agents.size(); ++i) {
-                IAgent agent = agents.valueAt(i);
-
+            for (IAgent agent : agents.values()) {
                 if (agent != null) {
                     agent.init(context);
                 }
             }
         }
+    }
+
+    private static Collection<IAgent> reverseCollection(Collection<IAgent> c) {
+        return c.stream().collect(
+                Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        l -> {
+                                Collections.reverse(l);
+                                return l;
+                        }
+                )
+        );
     }
 }
