@@ -35,6 +35,7 @@
 #include "Reference.h"
 #include "Replaces.h"
 #include "SdpOaState.h"
+#include "SdpReader.h"
 #include "Service.h"
 #include "Session.h"
 #include "SessionDescriptor.h"
@@ -81,6 +82,7 @@ Session::Session(IN Service* pService) :
         m_strTerminationReasonFromApp(AString::ConstNull()),
         m_pOaState(IMS_NULL),
         m_pSessionDescriptor(IMS_NULL),
+        m_pRemoteMediaCapabilities(IMS_NULL),
         m_piSessionListener(IMS_NULL),
         m_piRefreshListener(IMS_NULL),
         m_pRefreshHelper(IMS_NULL),
@@ -116,6 +118,11 @@ PUBLIC VIRTUAL Session::~Session()
     {
         m_piAckPackage->Destroy();
         m_piAckPackage = IMS_NULL;
+    }
+
+    if (m_pRemoteMediaCapabilities != IMS_NULL)
+    {
+        delete m_pRemoteMediaCapabilities;
     }
 
     if (m_pSessionDescriptor != IMS_NULL)
@@ -6330,6 +6337,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
             // 488 : INVITE is rejected because the media negotiation failed
             if (nState == STATE_NEGOTIATING)
             {
+                CreateRemoteMediaCapabilities(piSipMsg);
                 SetState(STATE_TERMINATED);
                 CleanupMedia();
 
@@ -6337,6 +6345,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
             }
             else if (nState == STATE_RENEGOTIATING)
             {
+                CreateRemoteMediaCapabilities(piSipMsg);
                 UpdateMedia(Media::SESSION_UPDATE_FAILED);
 
                 SetState(STATE_ESTABLISHED);
@@ -7722,6 +7731,30 @@ IMS_BOOL Session::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE
+void Session::CreateRemoteMediaCapabilities(IN ISipMessage* piSipMsg)
+{
+    IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
+
+    if (nStatusCode == SipStatusCode::SC_488 || nStatusCode == SipStatusCode::SC_606)
+    {
+        ISipMessageBodyPart* piBodyPart = piSipMsg->GetSdpBodyPart();
+        const ByteArray& objSdp =
+                (piBodyPart != IMS_NULL) ? piBodyPart->GetContent() : ByteArray::ConstNull();
+
+        if (objSdp.GetLength() > 0)
+        {
+            if (m_pRemoteMediaCapabilities != IMS_NULL)
+            {
+                delete m_pRemoteMediaCapabilities;
+            }
+
+            IMS_TRACE_I("Remote media capabilities created.", 0, 0, 0);
+            m_pRemoteMediaCapabilities = new SdpReader(objSdp);
+        }
+    }
 }
 
 PRIVATE GLOBAL const IMS_CHAR* Session::StateToString(IN IMS_SINT32 nState)

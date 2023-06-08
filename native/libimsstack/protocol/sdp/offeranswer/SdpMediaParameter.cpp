@@ -1202,109 +1202,7 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL void SdpMediaParameter::Clear()
-{
-    SdpParameter::Clear();
-
-    m_objConnections.Clear();
-    m_objPrevConnections.Clear();
-
-    ClearMediaFormat(m_objMediaFormats);
-
-#if defined(__IMS_SDP_PRECONDITION__)
-    {
-        ClearPrecondition(this);
-    }
-#endif
-
-    for (IMS_SINT32 i = 0; i < ATTR_MAX; ++i)
-    {
-        m_abAttributeContains[i] = IMS_FALSE;
-    }
-}
-
-PRIVATE VIRTUAL IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
-{
-    if (SdpProfile::GetInstance()->IsAttributeDirectionRequiredForRemovedMedia())
-    {
-        return SdpParameter::IsDirectionAttributeRequired();
-    }
-
-    if (m_objMedia.GetPort() == 0)
-    {
-        IMS_TRACE_D(
-                "Direction attribute will not be formed; m-line is removed or rejected", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    return SdpParameter::IsDirectionAttributeRequired();
-}
-
-PRIVATE GLOBAL void SdpMediaParameter::ClearMediaFormat(
-        IN_OUT ImsList<SdpMediaFormat*>& objMediaFormats)
-{
-    for (IMS_UINT32 i = 0; i < objMediaFormats.GetSize(); ++i)
-    {
-        SdpMediaFormat* pMediaFormat = objMediaFormats.GetAt(i);
-
-        delete pMediaFormat;
-    }
-
-    objMediaFormats.Clear();
-}
-
-PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyMediaFormat(
-        IN const ImsList<SdpMediaFormat*>& objInFormats,
-        OUT ImsList<SdpMediaFormat*>& objOutFormats)
-{
-    if (objInFormats.IsEmpty())
-    {
-        return IMS_TRUE;
-    }
-
-    for (IMS_UINT32 i = 0; i < objInFormats.GetSize(); ++i)
-    {
-        const SdpMediaFormat* pFormat = objInFormats.GetAt(i);
-
-        if (pFormat == IMS_NULL)
-        {
-            continue;
-        }
-
-        SdpMediaFormat* pNewFormat = IMS_NULL;
-
-        if (pFormat->GetType() == SdpMediaFormat::TYPE_RTP)
-        {
-            const SdpAvCodec* pCodec = DYNAMIC_CAST(const SdpAvCodec*, pFormat);
-
-            if (pCodec == IMS_NULL)
-            {
-                continue;
-            }
-
-            pNewFormat = new SdpAvCodec(*pCodec);
-        }
-        else
-        {
-            pNewFormat = new SdpMediaFormat(*pFormat);
-        }
-
-        if (pNewFormat == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        if (!objOutFormats.Append(pNewFormat))
-        {
-            delete pNewFormat;
-            return IMS_FALSE;
-        }
-    }
-
-    return IMS_TRUE;
-}
-
-PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
+PUBLIC GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
         IN const SdpMediaDescription& objMediaDesc, OUT ImsList<SdpMediaFormat*>& objOutFormats)
 {
     const SdpMedia& objMedia = objMediaDesc.GetMedia();
@@ -1596,6 +1494,185 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
     return IMS_TRUE;
 }
 
+PUBLIC GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
+        IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs)
+{
+    if (objAttributes.IsEmpty())
+    {
+        return IMS_NULL;
+    }
+
+    SdpPrecondition* pPrecondition = IMS_NULL;
+    IMS_SINT32 nType = SdpPrecondition::TYPE_INVALID;
+    IMS_SINT32 nSubType = SdpPrecondition::STATUS_E2E;
+    SdpPrecondition::DetailInfo objInfo;
+
+    for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
+    {
+        const SdpAttribute& objAttr = objAttributes.GetAt(i);
+
+        IMS_TRACE_D("'qos' attribute :: %s", objAttr.GetAttributeValue().GetStr(), 0, 0);
+
+        if (!SdpPrecondition::ExtractProperties(
+                    objAttr.GetAttributeValue(), nType, nSubType, objInfo))
+        {
+            continue;
+        }
+
+        if (nType != SdpPrecondition::TYPE_QOS)
+        {
+            continue;
+        }
+
+        if ((nSubType != SdpPrecondition::SUBTYPE_E2E) &&
+                (nSubType != SdpPrecondition::SUBTYPE_SEGMENTED))
+        {
+            continue;
+        }
+
+        if (pPrecondition == IMS_NULL)
+        {
+            if (nSubType == SdpPrecondition::SUBTYPE_E2E)
+            {
+                pPrecondition = new SdpE2EPrecondition();
+            }
+            else
+            {
+                pPrecondition = new SdpSegmentedPrecondition();
+            }
+
+            if (pPrecondition == IMS_NULL)
+            {
+                continue;
+            }
+        }
+
+        if (!pPrecondition->AddStatus(
+                    objInfo.GetStatus(), objInfo.GetDirection(), objInfo.GetStrength()))
+        {
+            IMS_TRACE_E(0, "Adding status (%s) failed", objAttr.GetAttributeValue().GetStr(), 0, 0);
+            continue;
+        }
+
+        objQosAttrs.Append(objAttr);
+    }
+
+    if (pPrecondition == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    if (!pPrecondition->IsPreconditionPresent())
+    {
+        delete pPrecondition;
+        return IMS_NULL;
+    }
+
+    return pPrecondition;
+}
+
+PRIVATE VIRTUAL void SdpMediaParameter::Clear()
+{
+    SdpParameter::Clear();
+
+    m_objConnections.Clear();
+    m_objPrevConnections.Clear();
+
+    ClearMediaFormat(m_objMediaFormats);
+
+#if defined(__IMS_SDP_PRECONDITION__)
+    {
+        ClearPrecondition(this);
+    }
+#endif
+
+    for (IMS_SINT32 i = 0; i < ATTR_MAX; ++i)
+    {
+        m_abAttributeContains[i] = IMS_FALSE;
+    }
+}
+
+PRIVATE VIRTUAL IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
+{
+    if (SdpProfile::GetInstance()->IsAttributeDirectionRequiredForRemovedMedia())
+    {
+        return SdpParameter::IsDirectionAttributeRequired();
+    }
+
+    if (m_objMedia.GetPort() == 0)
+    {
+        IMS_TRACE_D(
+                "Direction attribute will not be formed; m-line is removed or rejected", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return SdpParameter::IsDirectionAttributeRequired();
+}
+
+PRIVATE GLOBAL void SdpMediaParameter::ClearMediaFormat(
+        IN_OUT ImsList<SdpMediaFormat*>& objMediaFormats)
+{
+    for (IMS_UINT32 i = 0; i < objMediaFormats.GetSize(); ++i)
+    {
+        SdpMediaFormat* pMediaFormat = objMediaFormats.GetAt(i);
+
+        delete pMediaFormat;
+    }
+
+    objMediaFormats.Clear();
+}
+
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyMediaFormat(
+        IN const ImsList<SdpMediaFormat*>& objInFormats,
+        OUT ImsList<SdpMediaFormat*>& objOutFormats)
+{
+    if (objInFormats.IsEmpty())
+    {
+        return IMS_TRUE;
+    }
+
+    for (IMS_UINT32 i = 0; i < objInFormats.GetSize(); ++i)
+    {
+        const SdpMediaFormat* pFormat = objInFormats.GetAt(i);
+
+        if (pFormat == IMS_NULL)
+        {
+            continue;
+        }
+
+        SdpMediaFormat* pNewFormat = IMS_NULL;
+
+        if (pFormat->GetType() == SdpMediaFormat::TYPE_RTP)
+        {
+            const SdpAvCodec* pCodec = DYNAMIC_CAST(const SdpAvCodec*, pFormat);
+
+            if (pCodec == IMS_NULL)
+            {
+                continue;
+            }
+
+            pNewFormat = new SdpAvCodec(*pCodec);
+        }
+        else
+        {
+            pNewFormat = new SdpMediaFormat(*pFormat);
+        }
+
+        if (pNewFormat == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        if (!objOutFormats.Append(pNewFormat))
+        {
+            delete pNewFormat;
+            return IMS_FALSE;
+        }
+    }
+
+    return IMS_TRUE;
+}
+
 PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(
         IN const ImsList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
 {
@@ -1790,83 +1867,6 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyPrecondition(
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
-        IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs)
-{
-    if (objAttributes.IsEmpty())
-    {
-        return IMS_NULL;
-    }
-
-    SdpPrecondition* pPrecondition = IMS_NULL;
-    IMS_SINT32 nType = SdpPrecondition::TYPE_INVALID;
-    IMS_SINT32 nSubType = SdpPrecondition::STATUS_E2E;
-    SdpPrecondition::DetailInfo objInfo;
-
-    for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
-    {
-        const SdpAttribute& objAttr = objAttributes.GetAt(i);
-
-        IMS_TRACE_D("'qos' attribute :: %s", objAttr.GetAttributeValue().GetStr(), 0, 0);
-
-        if (!SdpPrecondition::ExtractProperties(
-                    objAttr.GetAttributeValue(), nType, nSubType, objInfo))
-        {
-            continue;
-        }
-
-        if (nType != SdpPrecondition::TYPE_QOS)
-        {
-            continue;
-        }
-
-        if ((nSubType != SdpPrecondition::SUBTYPE_E2E) &&
-                (nSubType != SdpPrecondition::SUBTYPE_SEGMENTED))
-        {
-            continue;
-        }
-
-        if (pPrecondition == IMS_NULL)
-        {
-            if (nSubType == SdpPrecondition::SUBTYPE_E2E)
-            {
-                pPrecondition = new SdpE2EPrecondition();
-            }
-            else
-            {
-                pPrecondition = new SdpSegmentedPrecondition();
-            }
-
-            if (pPrecondition == IMS_NULL)
-            {
-                continue;
-            }
-        }
-
-        if (!pPrecondition->AddStatus(
-                    objInfo.GetStatus(), objInfo.GetDirection(), objInfo.GetStrength()))
-        {
-            IMS_TRACE_E(0, "Adding status (%s) failed", objAttr.GetAttributeValue().GetStr(), 0, 0);
-            continue;
-        }
-
-        objQosAttrs.Append(objAttr);
-    }
-
-    if (pPrecondition == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    if (!pPrecondition->IsPreconditionPresent())
-    {
-        delete pPrecondition;
-        return IMS_NULL;
-    }
-
-    return pPrecondition;
 }
 
 #if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)

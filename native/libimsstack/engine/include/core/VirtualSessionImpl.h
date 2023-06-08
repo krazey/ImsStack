@@ -120,6 +120,7 @@ private:
     // }
     inline IMS_BOOL IsSessionRefreshInProgress() const override { return IMS_FALSE; }
     inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* /*piSetter*/) override {}
+    inline ISdpReader* GetRemoteMediaCapabilities() const override { return IMS_NULL; }
 
 private:
     ISession* m_piOwnerSession;

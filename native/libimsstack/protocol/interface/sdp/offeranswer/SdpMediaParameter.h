@@ -173,6 +173,18 @@ public:
      */
     IMS_BOOL SetPrecondition(IN IMS_SINT32 nAttribute, IN SdpPrecondition* pPrecondition);
 
+    /**
+     * @brief Extracts the media format from the SDP media description.
+     */
+    static IMS_BOOL ExtractMediaFormat(IN const SdpMediaDescription& objMediaDesc,
+            OUT ImsList<SdpMediaFormat*>& objOutFormats);
+
+    /**
+     * @brief Creates the 'qos' precondition from the SDP attributes.
+     */
+    static SdpPrecondition* CreatePrecondition(
+            IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs);
+
 private:
     /**
      * @brief Clears the properties for the media-level parameter.
@@ -193,12 +205,6 @@ private:
      * @brief Copies all the media formats.
      */
     static IMS_BOOL CopyMediaFormat(IN const ImsList<SdpMediaFormat*>& objInFormats,
-            OUT ImsList<SdpMediaFormat*>& objOutFormats);
-
-    /**
-     * @brief Extracts the media format from the SDP media description.
-     */
-    static IMS_BOOL ExtractMediaFormat(IN const SdpMediaDescription& objMediaDesc,
             OUT ImsList<SdpMediaFormat*>& objOutFormats);
 
     /**
@@ -225,12 +231,6 @@ private:
      */
     static IMS_BOOL CopyPrecondition(
             IN const SdpMediaParameter& objMediaParam, IN_OUT SdpMediaParameter& objOutMediaParam);
-
-    /**
-     * @brief Creates the 'qos' precondition from the SDP attributes.
-     */
-    static SdpPrecondition* CreatePrecondition(
-            IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs);
 
 #if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)
     // 4 workaround solution for multiple fmtp

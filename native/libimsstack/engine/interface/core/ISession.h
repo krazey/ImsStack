@@ -25,6 +25,7 @@ class IPublication;
 class IReasonHeaderSetter;
 class IReference;
 class IRefreshListener;
+class ISdpReader;
 class ISessionDescriptor;
 class ISessionListener;
 class ISessionParameter;
@@ -680,6 +681,17 @@ public:
      * @param piSetter The setter interface for Reason header
      */
     virtual void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter) = 0;
+
+    /**
+     * @brief Returns a SDP reader if a failure response (488 or 606) for INVITE request contains
+     *        the SDP body part.
+     *
+     * This SDP reader contains the SDP body part that is most recently received.
+     *
+     * @return A SDP reader if a failure response for INVITE request contains the SDP body part,
+     *         IMS_NULL otherwise.
+     */
+    virtual ISdpReader* GetRemoteMediaCapabilities() const = 0;
 
 public:
     /// States of ISession
