@@ -733,7 +733,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return A byte array containing the location information.
      */
     private byte[] getLocationInfo(int networkType) {
-        IDcUtils dcUtils = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
+        IDcUtils dcUtils = DcFactory.getDcAgent(IDcUtils.class, getSlotId());
 
         if (dcUtils == null) {
             return null;

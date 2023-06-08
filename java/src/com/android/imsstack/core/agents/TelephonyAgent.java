@@ -82,12 +82,12 @@ public class TelephonyAgent implements TelephonyInterface {
             networkType = getCellularDataNetworkType();
         }
 
-        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
-        if (dcnw != null) {
-            if (is5G(networkType) && !dcnw.is5GRequired()) {
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+        if (dnw != null) {
+            if (is5G(networkType) && !dnw.is5GRequired()) {
                 networkType = TelephonyManager.NETWORK_TYPE_LTE;
             }
-            dcnw.setRatFromTelephonyManager(networkType);
+            dnw.setRatFromTelephonyManager(networkType);
         }
 
         return networkType;
@@ -100,12 +100,12 @@ public class TelephonyAgent implements TelephonyInterface {
                 ? tm.getVoiceNetworkType()
                 : TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
-        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
-        if (dcnw != null) {
-            if (is5G(voiceNetworkType) && !dcnw.is5GRequired()) {
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+        if (dnw != null) {
+            if (is5G(voiceNetworkType) && !dnw.is5GRequired()) {
                 voiceNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
             }
-            dcnw.setVoiceRatFromTelephonyManager(voiceNetworkType);
+            dnw.setVoiceRatFromTelephonyManager(voiceNetworkType);
         }
 
         return voiceNetworkType;

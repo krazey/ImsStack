@@ -108,8 +108,8 @@ public class ServiceLoader {
         agentFactory.initAgentsForSlot(context, slotId);
         AosFactory.getInstance().init(slotId);
         updateCarrierConfig(slotId);
-        DcFactory.createDc(context, slotId);
-        DcFactory.initDc(context, slotId);
+        DcFactory.createDcAgents(slotId);
+        DcFactory.initDcAgents(context, slotId);
 
         ImsStackRegistry.setImsServiceState(slotId, true);
 
@@ -127,7 +127,7 @@ public class ServiceLoader {
         ImsStackRegistry.setImsServiceState(slotId, false);
 
         AosFactory.getInstance().stop(slotId);
-        DcFactory.cleanUpDc(slotId);
+        DcFactory.cleanUpDcAgents(slotId);
         AosFactory.getInstance().cleanup(slotId);
         AgentFactory.getInstance().destroyAgentsForSlot(slotId);
         SystemInterface.getInstance().stop(slotId);

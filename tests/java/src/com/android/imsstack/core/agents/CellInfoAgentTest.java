@@ -50,7 +50,6 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.AppContext;
@@ -67,7 +66,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -117,7 +115,7 @@ public class CellInfoAgentTest {
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-        replaceDcNetWatcher(mDcNetWatcher);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
         mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mCellInfoAgent = new CellInfoAgent(SLOT0);
@@ -142,7 +140,7 @@ public class CellInfoAgentTest {
         mInvalidMnc = false;
         mInvalidCellId = false;
         mInvalidLacOrTac = false;
-        DcFactory.setObjects(SLOT0, null);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         mConfigInterface = null;
@@ -427,15 +425,6 @@ public class CellInfoAgentTest {
                 .thenReturn(enabled
                         ? new int[] { CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA }
                         : null);
-    }
-
-    private void replaceDcNetWatcher(IDcNetWatcher dcNetWatcher) {
-        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
-        if (dcObjects == null) {
-            dcObjects = new HashMap<>();
-        }
-        dcObjects.put(DcFactory.NETWORK_WATCHER, dcNetWatcher);
-        DcFactory.setObjects(SLOT0, dcObjects);
     }
 
     private void processAllMessages() {

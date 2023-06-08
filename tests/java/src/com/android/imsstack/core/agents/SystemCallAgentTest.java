@@ -36,7 +36,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
@@ -53,7 +52,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
-import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class SystemCallAgentTest {
@@ -69,7 +67,7 @@ public class SystemCallAgentTest {
     @Mock private CellInfoInterface mCellInfoInterface;
     @Mock private IDcApn mDcApn;
     @Mock private IDcNetWatcher mDcNetWatcher;
-    @Mock private IDcUtils mDcUtil;
+    @Mock private IDcUtils mDcUtils;
     @Mock private SimAgent mSimAgent;
     @Mock private NativeStateAgent mNativeStateAgent;
 
@@ -90,7 +88,7 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, mNativeStateAgent, SLOT0);
         replaceDcApn(mDcApn);
         replaceDcNetWatcher(mDcNetWatcher);
-        replaceDcUtil(mDcUtil);
+        replaceDcUtils(mDcUtils);
 
         mSystemCallAgent = new SystemCallAgent(SLOT0);
     }
@@ -102,7 +100,9 @@ public class SystemCallAgentTest {
             mSystemCallAgent = null;
         }
 
-        DcFactory.setObjects(SLOT0, null);
+        replaceDcApn(null);
+        replaceDcNetWatcher(null);
+        replaceDcUtils(null);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(IpSecInterface.class, null, SLOT0);
@@ -113,7 +113,7 @@ public class SystemCallAgentTest {
         SystemInterface.setSystemInterface(null);
         mNativeStateAgent = null;
         mSimAgent = null;
-        mDcUtil = null;
+        mDcUtils = null;
         mDcNetWatcher = null;
         mDcApn = null;
         mCellInfoInterface = null;
@@ -767,13 +767,13 @@ public class SystemCallAgentTest {
     public void testIsMobileDataEnabled() {
         mSystemCallAgent.isMobileDataEnabled();
 
-        verify(mDcUtil).isMobileDataEnabled();
+        verify(mDcUtils).isMobileDataEnabled();
 
-        replaceDcUtil(null);
+        replaceDcUtils(null);
         boolean result = mSystemCallAgent.isMobileDataEnabled();
 
         assertFalse(result);
-        verifyNoMoreInteractions(mDcUtil);
+        verifyNoMoreInteractions(mDcUtils);
     }
 
     @Test
@@ -781,14 +781,14 @@ public class SystemCallAgentTest {
     public void testGetAccessNetworkInfo() {
         mSystemCallAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
 
-        verify(mDcUtil).getAccessNetworkInfo(eq(TelephonyManager.NETWORK_TYPE_LTE));
+        verify(mDcUtils).getAccessNetworkInfo(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
-        replaceDcUtil(null);
+        replaceDcUtils(null);
         IDcUtils.AccessNetworkInfo result =
                 mSystemCallAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
 
         assertNull(result);
-        verifyNoMoreInteractions(mDcUtil);
+        verifyNoMoreInteractions(mDcUtils);
     }
 
     @Test
@@ -893,29 +893,14 @@ public class SystemCallAgentTest {
     }
 
     private void replaceDcApn(IDcApn apn) {
-        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
-        if (dcObjects == null) {
-            dcObjects = new HashMap<>();
-        }
-        dcObjects.put(DcFactory.APN, apn);
-        DcFactory.setObjects(SLOT0, dcObjects);
+        DcFactory.setDcAgent(IDcApn.class, apn, SLOT0);
     }
 
     private void replaceDcNetWatcher(IDcNetWatcher netWatcher) {
-        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
-        if (dcObjects == null) {
-            dcObjects = new HashMap<>();
-        }
-        dcObjects.put(DcFactory.NETWORK_WATCHER, netWatcher);
-        DcFactory.setObjects(SLOT0, dcObjects);
+        DcFactory.setDcAgent(IDcNetWatcher.class, netWatcher, SLOT0);
     }
 
-    private void replaceDcUtil(IDcUtils util) {
-        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
-        if (dcObjects == null) {
-            dcObjects = new HashMap<>();
-        }
-        dcObjects.put(DcFactory.UTIL, util);
-        DcFactory.setObjects(SLOT0, dcObjects);
+    private void replaceDcUtils(IDcUtils utils) {
+        DcFactory.setDcAgent(IDcUtils.class, utils, SLOT0);
     }
 }

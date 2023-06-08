@@ -167,7 +167,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         mContext = context;
 
-        mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
+        mDcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
         if (mDcSettings == null) {
             ImsLog.w(mSlotId, "IDcSettings is null");
         }
@@ -504,8 +504,8 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     @Override
     public boolean isVops() {
-        IDcSettings dcst = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
-        if ((dcst != null) && dcst.isVopsRequired()) {
+        IDcSettings dcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
+        if (dcSettings != null && dcSettings.isVopsRequired()) {
             return mImsVops;
         } else {
             return true;

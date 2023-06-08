@@ -106,12 +106,11 @@ public class NativeStateAgent implements NativeStateInterface {
         ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
 
         if (system != null) {
-            IDcNetWatcher dcnw =
-                    (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
 
-            if (dcnw != null) {
+            if (dnw != null) {
                 system.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
-                        dcnw.isVops()
+                        dnw.isVops()
                         ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
                         : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
             }

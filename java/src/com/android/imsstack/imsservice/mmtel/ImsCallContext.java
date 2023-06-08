@@ -198,12 +198,12 @@ public class ImsCallContext implements ICallContext {
 
     @Override
     public IDcApn getDcApn() {
-        return (IDcApn) DcFactory.getDc(DcFactory.APN, getSlotId());
+        return DcFactory.getDcAgent(IDcApn.class, getSlotId());
     }
 
     @Override
     public IDcNetWatcher getDcNetWatcher() {
-        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, getSlotId());
+        return DcFactory.getDcAgent(IDcNetWatcher.class, getSlotId());
     }
 
     @Override

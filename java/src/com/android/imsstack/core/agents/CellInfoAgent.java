@@ -207,12 +207,11 @@ public class CellInfoAgent implements CellInfoInterface {
             mCellInfoListener = new CellInfoListener(subId);
             mCellInfoListener.register();
 
-            IDcNetWatcher dcnw =
-                    (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
-            if (dcnw != null) {
-                dcnw.registerForRatChanged(mCellInfoHandler,
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+            if (dnw != null) {
+                dnw.registerForRatChanged(mCellInfoHandler,
                         EVENT_NETWORK_TYPE_CHANGED, null);
-                dcnw.registerForVoiceRatChanged(mCellInfoHandler,
+                dnw.registerForVoiceRatChanged(mCellInfoHandler,
                         EVENT_VOICE_NETWORK_TYPE_CHANGED, null);
             }
 
@@ -228,11 +227,10 @@ public class CellInfoAgent implements CellInfoInterface {
             mCellInfoListener.unregister();
             mCellInfoListener = null;
 
-            IDcNetWatcher dcnw =
-                    (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
-            if (dcnw != null) {
-                dcnw.unregisterForRatChanged(mCellInfoHandler);
-                dcnw.unregisterForVoiceRatChanged(mCellInfoHandler);
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+            if (dnw != null) {
+                dnw.unregisterForRatChanged(mCellInfoHandler);
+                dnw.unregisterForVoiceRatChanged(mCellInfoHandler);
             }
         }
     }
@@ -613,12 +611,10 @@ public class CellInfoAgent implements CellInfoInterface {
                 case EVENT_UPDATE_ALL_CELL_INFO: // fall through
                 case EVENT_NETWORK_TYPE_CHANGED: // fall through
                 case EVENT_VOICE_NETWORK_TYPE_CHANGED:
-                    IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
-                            DcFactory.NETWORK_WATCHER, mSlotId);
-
-                    if (dcnw != null
-                            && (dcnw.getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN
-                                    || dcnw.getVoiceNetworkType()
+                    IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                    if (dnw != null
+                            && (dnw.getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN
+                                    || dnw.getVoiceNetworkType()
                                             != TelephonyManager.NETWORK_TYPE_UNKNOWN)) {
                         updateAllCellInfo(getAllCellInfo());
                     }

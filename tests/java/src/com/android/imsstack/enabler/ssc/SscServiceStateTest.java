@@ -59,8 +59,7 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcm.DcNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -83,7 +82,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
@@ -106,7 +104,7 @@ public class SscServiceStateTest {
     @Mock private AosService mMockAosService;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
-    @Mock private DcNetWatcher mMockDcNetWatcher;
+    @Mock private IDcNetWatcher mMockDcNetWatcher;
     @Mock private IUtInterface mMockUtInterface;
     @Mock private WifiInterface mMockWifiInterface;
     @Mock private SimInterface mMockSimInterface;
@@ -162,10 +160,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_0);
         AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
 
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
-        dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
-        DcFactory.setObjects(SLOT_0, dcs);
-
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, mMockUtInterface);
 
         HandlerThread handlerThread = new HandlerThread("SscServiceStateTest");
@@ -188,7 +183,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
         AosFactory.getInstance().mAosServices.remove(SLOT_0);
-        DcFactory.setObjects(SLOT_0, null);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, null);
 
         SscConfig.clear(SLOT_0);

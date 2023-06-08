@@ -34,7 +34,6 @@ import android.util.Pair;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.AppContext;
 
@@ -49,7 +48,6 @@ import org.mockito.MockitoAnnotations;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class QosAgentTest {
@@ -83,9 +81,7 @@ public class QosAgentTest {
         mLinkProperties.addLinkAddress(new LinkAddress(LOCAL_LINK_ADDRESS));
         when(mConnectivityManager.getLinkProperties(eq(mMockNetwork))).thenReturn(mLinkProperties);
 
-        HashMap<Integer, IDc> dcObjects = new HashMap<>();
-        dcObjects.put(DcFactory.APN, mMockDcApn);
-        DcFactory.setObjects(SLOT0, dcObjects);
+        DcFactory.setDcAgent(IDcApn.class, mMockDcApn, SLOT0);
         when(mMockDcApn.getNetworkByCapability(anyInt())).thenReturn(mMockNetwork);
     }
 
@@ -96,7 +92,7 @@ public class QosAgentTest {
         mQosAgent = null;
         mMockNetwork = null;
         mMockDcApn = null;
-        DcFactory.setObjects(SLOT0, null);
+        DcFactory.setDcAgent(IDcApn.class, null, SLOT0);
     }
 
     @Test

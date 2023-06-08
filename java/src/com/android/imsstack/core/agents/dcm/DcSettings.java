@@ -195,7 +195,7 @@ public class DcSettings implements IDcSettings {
 
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
-        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
+        return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);
     }
 
     /**

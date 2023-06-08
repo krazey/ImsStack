@@ -386,7 +386,7 @@ public class QosAgent {
 
     private static @NonNull List<Network> getAllNetworks(int slotId) {
         List<Network> allNetworks = new ArrayList<>();
-        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, slotId);
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, slotId);
 
         if (dcApn != null) {
             Network network = dcApn.getNetworkByCapability(EApnType.IMS.getType());

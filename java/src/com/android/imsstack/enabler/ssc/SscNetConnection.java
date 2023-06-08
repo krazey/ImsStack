@@ -90,7 +90,7 @@ public class SscNetConnection implements ISscNetConnection {
         handlerThread.start();
         mSscNetConnectionHandler = new SscNetConnectionHandler(handlerThread.getLooper());
 
-        IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
             dnw.registerForDataStateChanged(mSscNetConnectionHandler,
                     EVENT_PDN_DATA_STATE_CHANGED, null);
@@ -99,7 +99,7 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         if (mApnType != null) {
-            IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
             IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
             if (apn != null) {
                 apn.addListener(mApnStateListener);
@@ -114,7 +114,7 @@ public class SscNetConnection implements ISscNetConnection {
         disconnect();
 
         if (mApnType != null) {
-            IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
             IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
             if (apn != null) {
                 apn.removeListener(mApnStateListener);
@@ -122,7 +122,7 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         if (mSscNetConnectionHandler != null) {
-            IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
             if (dnw != null) {
                 dnw.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
                 dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
@@ -143,9 +143,9 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         int dataState;
-        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcGovApnCtrl != null) {
-            dataState = dcGovApnCtrl.getDataState(mApnType.getType());
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        if (dcApn != null) {
+            dataState = dcApn.getDataState(mApnType.getType());
         } else {
             dataState = EDataState.convertFromTMtoImsType(TelephonyManager.DATA_DISCONNECTED);
         }
@@ -175,13 +175,13 @@ public class SscNetConnection implements ISscNetConnection {
             return true;
         }
 
-        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcGovApnCtrl == null) {
-            ImsLog.e("dcGovApnCtrl is null");
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        if (dcApn == null) {
+            ImsLog.e("dcApn is null");
             return false;
         }
 
-        if (!dcGovApnCtrl.connect(mApnType.getType())) {
+        if (!dcApn.connect(mApnType.getType())) {
             return false;
         }
 
@@ -201,9 +201,9 @@ public class SscNetConnection implements ISscNetConnection {
             return;
         }
 
-        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcGovApnCtrl != null) {
-            dcGovApnCtrl.disconnect(mApnType.getType());
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        if (dcApn != null) {
+            dcApn.disconnect(mApnType.getType());
         }
     }
 
@@ -211,16 +211,16 @@ public class SscNetConnection implements ISscNetConnection {
     public int getNetworkType() {
         int ipcanCategory = IApn.IPCAN_CATEGORY_MOBILE;
 
-        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        if (dcGovApnCtrl != null) {
-            ipcanCategory = dcGovApnCtrl.getIpcanCategory(mApnType.getType());
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        if (dcApn != null) {
+            ipcanCategory = dcApn.getIpcanCategory(mApnType.getType());
         }
 
         int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         if (ipcanCategory == IApn.IPCAN_CATEGORY_WLAN) {
             networkType = TelephonyManager.NETWORK_TYPE_IWLAN;
         } else {
-            IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
             if (dnw != null) {
                 networkType = dnw.getNetworkType();
             }

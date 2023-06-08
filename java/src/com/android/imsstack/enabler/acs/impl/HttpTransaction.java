@@ -366,7 +366,7 @@ public class HttpTransaction {
 
         try {
             Network nw = null;
-            IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
 
             if (dcApn == null) {
                 ImsLog.e("DCApn is null");

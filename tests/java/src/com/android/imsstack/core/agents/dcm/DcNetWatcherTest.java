@@ -57,7 +57,7 @@ import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
@@ -75,7 +75,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
-import java.util.HashMap;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -125,9 +124,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                         AccessNetworkConstants.AccessNetworkType.IWLAN,
                         AccessNetworkConstants.AccessNetworkType.UTRAN,
                         AccessNetworkConstants.AccessNetworkType.GERAN});
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
-        dcs.put(DcFactory.SETTING, mMockDcSetting);
-        DcFactory.setObjects(SLOT_0, dcs);
+        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT_0);
 
         mDcNetWatcher = new DcNetWatcher(SLOT_0);
         mDcNetWatcher.init(mContext);
@@ -141,7 +138,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
-        DcFactory.setObjects(SLOT_0, null);
+        DcFactory.setDcAgent(IDcSettings.class, null, SLOT_0);
     }
 
     @Test

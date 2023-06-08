@@ -17,142 +17,155 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
+import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.dcmif.IDc;
-import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * This class provides the APIs to manage and control Multi-SIM state.
+ * A factory class for managing and accessing the data connection related agents.
  */
 public final class DcFactory {
-    /** DC object identifier. */
-    public static final int UTIL = 1;
-    public static final int SETTING = 2;
-    public static final int NETWORK_WATCHER = 3;
-    public static final int APN = 4;
-    public static final int MAX = (APN + 1);
+    private static volatile SparseArray<Map<Class<?>, IDc>> sDcAgents = new SparseArray<>(2);
 
-    private static Map<Integer, HashMap<Integer, IDc>> sDcSlots =
-            new HashMap<Integer, HashMap<Integer, IDc>>(MSimUtils.getSupportedSimCount());
-
-    public DcFactory() {
+    /**
+     * Clears all the resources for the specified slot.
+     *
+     * @param slotId A slot id.
+     */
+    @VisibleForTesting
+    public static void clear(int slotId) {
+        sDcAgents.put(slotId, null);
     }
 
     /**
-     * Get the object of Data Connection Agent
+     * Returns a specific {@link IDc} object corresponding to the given class
+     * for the specified slot.
      *
-     * @param type Type of object to acquire.
-     * @param slotId The slot-id which will be used.
-     * @return The object of Data Connection Agent
+     * @param clazz A requested class name.
+     * @param slotId A slot id.
+     * @return An {@link IDc} object corresponding to the given class.
      */
-    public static IDc getDc(int type, int slotId) {
-        HashMap<Integer, IDc> dcs = getObjects(slotId);
-
-        if (dcs != null) {
-            IDc dc = dcs.get(type);
-            if (dc != null) {
-                return dc;
-            }
+    @SuppressWarnings("unchecked")
+    public static <T extends IDc> T getDcAgent(Class<T> clazz, int slotId) {
+        if (slotId < 0 || slotId >= sDcAgents.size()) {
+            return null;
         }
 
-        return null;
+        Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
+        return (agents != null) ? (T) agents.get(clazz) : null;
     }
 
     /**
-     * Create the object of Data Connection Agent
+     * Sets a specific {@link IDc} object corresponding to the given class
+     * for the specified slot for testing.
      *
-     * @param context Context
-     * @param slotId The slot-id which will be used.
+     * @param clazz A requested class name.
+     * @param agent An {@link IDc} object corresponding to the given class.
+     * @param slotId A slot id.
      */
-    public static void createDc(Context context, int slotId) {
-        HashMap<Integer, IDc> agents = getObjects(slotId);
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public static void setDcAgent(Class<?> clazz, IDc agent, int slotId) {
+        if (slotId < 0) {
+            return;
+        }
+
+        Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
+
+        if (agents == null) {
+            agents = new LinkedHashMap<>();
+            sDcAgents.put(slotId, agents);
+        }
+
+        agents.put(clazz, agent);
+    }
+
+    /**
+     * Creates the data connection related agents for the specified slot.
+     *
+     * @param slotId A slot id.
+     */
+    public static void createDcAgents(int slotId) {
+        Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
+
+        if (agents == null) {
+            agents = new LinkedHashMap<>();
+            sDcAgents.put(slotId, agents);
+        } else if (!agents.isEmpty()) {
+            // Already created.
+            return;
+        }
+
+        Log.i(Log.TAG, "createDcAgents: slot" + slotId);
+
+        agents.put(IDcUtils.class, new DcUtils(slotId));
+        agents.put(IDcSettings.class, new DcSettings(slotId));
+        agents.put(IDcNetWatcher.class, new DcNetWatcher(slotId));
+        agents.put(IDcApn.class, new DcApn(slotId));
+    }
+
+    /**
+     * Initiaizes the data connection related agents for the specified slot.
+     *
+     * @param context The {@link Context} object to initialize.
+     * @param slotId A slot id.
+     */
+    public static void initDcAgents(Context context, int slotId) {
+        Log.i(Log.TAG, "initDcAgents: slot" + slotId);
+
+        Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 
         if (agents != null) {
-            return;
-        }
-
-        agents = new HashMap<Integer, IDc>(MAX);
-
-        agents.put(UTIL, new DcUtils(slotId));
-        agents.put(SETTING, new DcSettings(slotId));
-        agents.put(NETWORK_WATCHER, new DcNetWatcher(slotId));
-        agents.put(APN, new DcApn(slotId));
-
-        setObjects(slotId, agents);
-    }
-
-    /**
-     * Clean up each of Data Connection Agent
-     *
-     * @param slotId The slot-id which will be used.
-     */
-    public static void cleanUpDc(int slotId) {
-        HashMap<Integer, IDc> dcs = getObjects(slotId);
-
-        if (dcs == null) {
-            return;
-        }
-
-        List<IDc> dcList = new ArrayList<IDc>();
-        dcList.add(dcs.get(UTIL));
-        dcList.add(dcs.get(SETTING));
-        dcList.add(dcs.get(NETWORK_WATCHER));
-        dcList.add(dcs.get(APN));
-
-        for (int i = 0; i < dcList.size(); i++) {
-            IDc dc = dcList.get(i);
-            if (dc != null) {
-                dc.cleanup();
+            for (IDc dc : agents.values()) {
+                if (dc != null) {
+                    dc.init(context);
+                }
             }
         }
     }
 
     /**
-     * Initialize each of Data Connection Agent
+     * Cleans up the data connection related agents for the specified slot.
      *
-     * @param context Context
-     * @param slotId The slot-id which will be used.
+     * @param slotId A slot id.
      */
-    public static void initDc(Context context, int slotId) {
-        HashMap<Integer, IDc> dcs = getObjects(slotId);
+    public static void cleanUpDcAgents(int slotId) {
+        Log.i(Log.TAG, "cleanUpDcAgents: slot" + slotId);
 
-        if (dcs == null) {
-            return;
-        }
+        Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 
-        List<IDc> dcList = new ArrayList<IDc>();
-        dcList.add(dcs.get(UTIL));
-        dcList.add(dcs.get(SETTING));
-        dcList.add(dcs.get(NETWORK_WATCHER));
-        dcList.add(dcs.get(APN));
-
-        for (int i = 0; i < dcList.size(); i++) {
-            IDc dc = dcList.get(i);
-            if (dc != null) {
-                dc.init(context);
+        if (agents != null) {
+            Collection<IDc> values = reverseCollection(agents.values());
+            for (IDc dc : values) {
+                if (dc != null) {
+                    dc.cleanup();
+                }
             }
         }
     }
 
-    /**
-     * Get the object include Data Connection Agents for each slot id
-     */
-    @VisibleForTesting
-    public static synchronized HashMap<Integer, IDc> getObjects(int slotId) {
-        return sDcSlots.get(slotId);
+    private static Collection<IDc> reverseCollection(Collection<IDc> c) {
+        return c.stream().collect(
+                Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        l -> {
+                            Collections.reverse(l);
+                            return l;
+                        }
+                ));
     }
 
-    /**
-     * Set the object include Data Connection Agents for each slot id
-     */
-    @VisibleForTesting
-    public static synchronized void setObjects(int slotId, HashMap<Integer, IDc> objects) {
-        sDcSlots.put(slotId, objects);
-    }
+    private DcFactory() {}
 }

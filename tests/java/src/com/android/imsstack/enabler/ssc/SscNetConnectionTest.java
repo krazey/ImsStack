@@ -37,7 +37,6 @@ import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -51,8 +50,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class SscNetConnectionTest {
@@ -87,10 +84,8 @@ public class SscNetConnectionTest {
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         when(mMockDcApn.getApnControl(APN_TYPE.getType())).thenReturn(mMockApn);
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(2);
-        dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
-        dcs.put(DcFactory.APN, mMockDcApn);
-        DcFactory.setObjects(SLOT_0, dcs);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
+        DcFactory.setDcAgent(IDcApn.class, mMockDcApn, SLOT_0);
 
         mSscNetConnection = new FakeSscNetConnection(SLOT_0);
         mSscNetConnection.init(APN_TYPE);
@@ -102,6 +97,8 @@ public class SscNetConnectionTest {
     public void tearDown() {
         mSscNetConnection.cleanup();
         SscConfig.clear(SLOT_0);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
+        DcFactory.setDcAgent(IDcApn.class, null, SLOT_0);
     }
 
     @Test
@@ -137,7 +134,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void isConnected_getDcApnNull() {
-        DcFactory.setObjects(SLOT_0, null);
+        DcFactory.clear(SLOT_0);
 
         boolean isConnected = mSscNetConnection.isConnected();
         assertEquals(false, isConnected);
@@ -185,7 +182,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void connect_getDcApnNull() {
-        DcFactory.setObjects(SLOT_0, null);
+        DcFactory.clear(SLOT_0);
         when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
 
@@ -234,7 +231,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void disconnect_getDcApnNull() {
-        DcFactory.setObjects(SLOT_0, null);
+        DcFactory.clear(SLOT_0);
 
         mSscNetConnection.disconnect();
 

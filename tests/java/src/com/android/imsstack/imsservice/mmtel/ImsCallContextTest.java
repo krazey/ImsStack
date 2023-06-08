@@ -31,7 +31,6 @@ import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -58,7 +57,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
@@ -97,9 +95,7 @@ public class ImsCallContextTest extends ImsStackTest {
         when(mMockSimInterface.getSubId()).thenReturn(SUB_ID);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, mSlotId);
 
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
-        dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
-        DcFactory.setObjects(mSlotId, dcs);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, mSlotId);
 
         when(mMockSystemInterface.getSystem(mSlotId)).thenReturn(mMockSystem);
         replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
@@ -117,7 +113,7 @@ public class ImsCallContextTest extends ImsStackTest {
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, mSlotId);
-        DcFactory.setObjects(mSlotId, null);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, mSlotId);
         mStateTracker = null;
         mImsCallContext.dispose();
         mImsCallContext = null;
@@ -128,10 +124,9 @@ public class ImsCallContextTest extends ImsStackTest {
     @Test
     public void getDcApnTest() {
         IDcApn mockIDcApn = Mockito.mock(IDcApn.class);
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
-        dcs.put(DcFactory.APN, mockIDcApn);
-        DcFactory.setObjects(mSlotId, dcs);
+        DcFactory.setDcAgent(IDcApn.class, mockIDcApn, mSlotId);
         Assert.assertNotNull(mImsCallContext.getDcApn());
+        DcFactory.setDcAgent(IDcApn.class, null, mSlotId);
     }
 
     @Test

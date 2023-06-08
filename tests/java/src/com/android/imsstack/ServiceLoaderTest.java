@@ -36,6 +36,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.jni.JniIms;
@@ -104,6 +105,7 @@ public class ServiceLoaderTest {
         ImsStackRegistry.setImsServiceState(SLOT0, false);
         SystemInterface.setSystemInterface(null);
         JniImsProxy.setJniIms(null);
+        DcFactory.clear(SLOT0);
         AgentFactory.getInstance().clear();
         AppContext.deinit();
     }

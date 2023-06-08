@@ -31,7 +31,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.AppContext;
 
@@ -42,8 +41,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class TelephonyAgentTest {
@@ -70,7 +67,7 @@ public class TelephonyAgentTest {
         when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0])))
                 .thenReturn(mTelephonyManager);
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT0);
-        replaceDcNetWatcher(mDcNetWatcher);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
 
         AppContext.init(context);
         mTelephonyAgent = new TelephonyAgent(SLOT0);
@@ -84,7 +81,7 @@ public class TelephonyAgentTest {
         mContextFixture = null;
         mTelephonyAgent.cleanup();
         mTelephonyAgent = null;
-        DcFactory.setObjects(SLOT0, null);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
         AppContext.deinit();
     }
@@ -348,14 +345,5 @@ public class TelephonyAgentTest {
         verify(mTelephonyManager).getGroupIdLevel1();
         verify(mTelephonyManager).getSimOperatorName();
         verify(mTelephonyManager).getNetworkCountryIso();
-    }
-
-    private void replaceDcNetWatcher(IDcNetWatcher dcNetWatcher) {
-        HashMap<Integer, IDc> dcObjects = DcFactory.getObjects(SLOT0);
-        if (dcObjects == null) {
-            dcObjects = new HashMap<>();
-        }
-        dcObjects.put(DcFactory.NETWORK_WATCHER, dcNetWatcher);
-        DcFactory.setObjects(SLOT0, dcObjects);
     }
 }

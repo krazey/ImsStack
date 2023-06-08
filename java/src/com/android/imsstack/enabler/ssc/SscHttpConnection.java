@@ -87,9 +87,9 @@ public class SscHttpConnection implements ISscHttpConnection {
         int responseCode = HTTP_REQUEST_FAILED_UNSPECIFIED;
         try {
             Network nw = null;
-            IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-            if (dcGovApnCtrl != null) {
-                nw = dcGovApnCtrl.getNetworkByCapability(mApnType.getType());
+            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+            if (dcApn != null) {
+                nw = dcApn.getNetworkByCapability(mApnType.getType());
             }
 
             if (nw == null) {

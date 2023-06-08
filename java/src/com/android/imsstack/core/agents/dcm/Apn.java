@@ -166,9 +166,9 @@ public abstract class Apn extends Handler implements IApn {
 
         mContext = context;
         mSlotId = slotId;
-        mDcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
-        mDcSettings = (IDcSettings) DcFactory.getDc(DcFactory.SETTING, mSlotId);
-        mDcNetWatcher = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        mDcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        mDcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
+        mDcNetWatcher = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
         mAosReg = AosFactory.getInstance().getAosRegistration(mSlotId);
 

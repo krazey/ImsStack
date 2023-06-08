@@ -581,11 +581,9 @@ public class LocationAgent implements LocationInterface {
             WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
 
             if (wifi != null) {
-                IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
-                        DcFactory.NETWORK_WATCHER, mSlotId);
-
-                if ((dcnw != null)
-                        && (dcnw.getDataServiceState() != ServiceState.STATE_IN_SERVICE)
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if ((dnw != null)
+                        && (dnw.getDataServiceState() != ServiceState.STATE_IN_SERVICE)
                         && wifi.isWifiConnected()) {
                     method = "802.11";
                 }

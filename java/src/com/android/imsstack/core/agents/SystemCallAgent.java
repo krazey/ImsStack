@@ -707,8 +707,8 @@ public class SystemCallAgent implements SystemCallInterface {
      */
     @Override
     public boolean isMobileDataEnabled() {
-        IDcUtils util = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
-        return (util != null) ? util.isMobileDataEnabled() : false;
+        IDcUtils utils = DcFactory.getDcAgent(IDcUtils.class, mSlotId);
+        return (utils != null) ? utils.isMobileDataEnabled() : false;
     }
 
     /**
@@ -720,8 +720,8 @@ public class SystemCallAgent implements SystemCallInterface {
      */
     @Override
     public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType) {
-        IDcUtils util = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, mSlotId);
-        return (util != null) ? util.getAccessNetworkInfo(defaultNetworkType) : null;
+        IDcUtils utils = DcFactory.getDcAgent(IDcUtils.class, mSlotId);
+        return (utils != null) ? utils.getAccessNetworkInfo(defaultNetworkType) : null;
     }
 
     /**
@@ -826,10 +826,10 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     private IDcApn getDcApn() {
-        return (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+        return DcFactory.getDcAgent(IDcApn.class, mSlotId);
     }
 
     private IDcNetWatcher getDcNetWatcher() {
-        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        return DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
     }
 }

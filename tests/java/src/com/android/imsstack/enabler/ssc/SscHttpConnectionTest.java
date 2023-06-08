@@ -35,7 +35,6 @@ import android.telephony.CarrierConfigManager;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.config.CarrierConfig;
 
@@ -94,9 +93,7 @@ public class SscHttpConnectionTest {
         when(mMockNetwork.openConnection(mUrl)).thenReturn(mMockConnection);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false);
 
-        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
-        dcs.put(DcFactory.APN, mMockDcApn);
-        DcFactory.setObjects(SLOT_0, dcs);
+        DcFactory.setDcAgent(IDcApn.class, mMockDcApn, SLOT_0);
 
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
@@ -107,6 +104,7 @@ public class SscHttpConnectionTest {
     @After
     public void tearDown() {
         SscConfig.clear(SLOT_0);
+        DcFactory.setDcAgent(IDcApn.class, null, SLOT_0);
     }
 
     @Test

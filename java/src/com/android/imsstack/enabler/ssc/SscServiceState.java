@@ -486,7 +486,7 @@ public class SscServiceState {
     }
 
     private IDcNetWatcher getDcNetWatcher() {
-        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+        return DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
     }
 
     private void registerWifiConnectionStateChangedEvent() {

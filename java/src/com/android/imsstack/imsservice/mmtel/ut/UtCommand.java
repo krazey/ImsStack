@@ -292,10 +292,9 @@ public final class UtCommand {
     }
 
     private int getNetworkTypeForUsat() {
-        IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER,
-                mContext.getSlotId());
-        int networkType = (dcnw != null)
-                ? dcnw.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mContext.getSlotId());
+        int networkType = (dnw != null)
+                ? dnw.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN;
         if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
             networkType = TelephonyManager.NETWORK_TYPE_IWLAN;
         }

@@ -94,7 +94,7 @@ public class ApnEmergency extends Apn {
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.EMERGENCY;
-        mDcUtils = (IDcUtils) DcFactory.getDc(DcFactory.UTIL, getSlotId());
+        mDcUtils = DcFactory.getDcAgent(IDcUtils.class, getSlotId());
 
         registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
         registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());

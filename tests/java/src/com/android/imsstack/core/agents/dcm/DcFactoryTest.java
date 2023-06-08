@@ -18,11 +18,18 @@ package com.android.imsstack.core.agents.dcm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,96 +39,105 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.HashMap;
-
 @RunWith(JUnit4.class)
 public class DcFactoryTest {
     private static final int SLOT_0 = 0;
-    private DcFactory mDcFactory;
+    private static final int SLOT_1 = 1;
 
-    @Mock Context mMockContext;
-    @Mock DcUtils mMockDcUtils;
-    @Mock DcSettings mMockDcSettings;
-    @Mock DcNetWatcher mMockDcNetWatcher;
-    @Mock DcApn mMockDcApn;
+    @Mock private Context mContext;
+    @Mock private DcUtils mDcUtils;
+    @Mock private DcSettings mDcSettings;
+    @Mock private DcNetWatcher mDcNetWatcher;
+    @Mock private DcApn mDcApn;
+    @Mock private DcApn mDcApn2;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        // create the instance to test
-        mDcFactory = new DcFactory();
-
     }
 
     @After
     public void tearDown() throws Exception {
-        mDcFactory.setObjects(SLOT_0, null);
-
-        if (mDcFactory != null) {
-            mDcFactory = null;
-        }
+        DcFactory.clear(SLOT_0);
     }
 
     @Test
-    public void testGetDc() throws Exception {
-        createMockDcs(SLOT_0);
+    @SmallTest
+    public void testGetDcAgent() {
+        assertNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
+        assertNull(DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
+        assertNull(DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
+        assertNull(DcFactory.getDcAgent(IDcApn.class, SLOT_0));
 
-        assertEquals(mDcFactory.getDc(DcFactory.UTIL, SLOT_0), mMockDcUtils);
-        assertEquals(mDcFactory.getDc(DcFactory.SETTING, SLOT_0), mMockDcSettings);
-        assertEquals(mDcFactory.getDc(DcFactory.NETWORK_WATCHER, SLOT_0), mMockDcNetWatcher);
-        assertEquals(mDcFactory.getDc(DcFactory.APN, SLOT_0), mMockDcApn);
+        setUpDcAgents();
+
+        assertEquals(mDcUtils, DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
+        assertEquals(mDcSettings, DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
+        assertEquals(mDcNetWatcher, DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
+        assertEquals(mDcApn, DcFactory.getDcAgent(IDcApn.class, SLOT_0));
+
+        // Exception handling.
+        assertNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_1));
+        assertNull(DcFactory.getDcAgent(IDcSettings.class, MSimUtils.INVALID_SUB_ID));
+
+        DcFactory.setDcAgent(IDcApn.class, mDcApn2, MSimUtils.INVALID_SUB_ID);
+
+        // Expect: not changed
+        assertEquals(mDcApn, DcFactory.getDcAgent(IDcApn.class, SLOT_0));
     }
 
     @Test
-    public void testCreateDc() throws Exception {
-        mDcFactory.createDc(mMockContext, SLOT_0);
+    @SmallTest
+    public void testCreateDcAgent() {
+        DcFactory.createDcAgents(SLOT_0);
 
-        HashMap<Integer, IDc> agents = mDcFactory.getObjects(SLOT_0);
-
-        assertNotNull(agents);
-        assertNotNull(agents.get(DcFactory.UTIL));
-        assertNotNull(agents.get(DcFactory.SETTING));
-        assertNotNull(agents.get(DcFactory.NETWORK_WATCHER));
-        assertNotNull(agents.get(DcFactory.APN));
+        assertNotNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
+        assertNotNull(DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
+        assertNotNull(DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
+        assertNotNull(DcFactory.getDcAgent(IDcApn.class, SLOT_0));
     }
 
     @Test
+    @SmallTest
+    public void testCreateDcAgentWhenAlreadyPresent() {
+        setUpDcAgents();
+        // Mocked object will be kept because the agents are already present.
+        DcFactory.createDcAgents(SLOT_0);
+
+        assertEquals(mDcUtils, DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
+        assertEquals(mDcSettings, DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
+        assertEquals(mDcNetWatcher, DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
+        assertEquals(mDcApn, DcFactory.getDcAgent(IDcApn.class, SLOT_0));
+    }
+
+    @Test
+    @SmallTest
+    public void testInitDcAgent() throws Exception {
+        setUpDcAgents();
+        DcFactory.initDcAgents(mContext, SLOT_0);
+
+        verify(mDcUtils).init(eq(mContext));
+        verify(mDcSettings).init(eq(mContext));
+        verify(mDcNetWatcher).init(eq(mContext));
+        verify(mDcApn).init(eq(mContext));
+    }
+
+    @Test
+    @SmallTest
     public void testCleanUpDc() throws Exception {
-        createMockDcs(SLOT_0);
-        mDcFactory.cleanUpDc(SLOT_0);
+        setUpDcAgents();
+        DcFactory.cleanUpDcAgents(SLOT_0);
 
-        verify(mMockDcUtils).cleanup();
-        verify(mMockDcSettings).cleanup();
-        verify(mMockDcNetWatcher).cleanup();
-        verify(mMockDcApn).cleanup();
+        verify(mDcUtils).cleanup();
+        verify(mDcSettings).cleanup();
+        verify(mDcNetWatcher).cleanup();
+        verify(mDcApn).cleanup();
     }
 
-    @Test
-    public void testInitDc() throws Exception {
-        createMockDcs(SLOT_0);
-        mDcFactory.initDc(mMockContext, SLOT_0);
-
-        verify(mMockDcUtils).init(mMockContext);
-        verify(mMockDcSettings).init(mMockContext);
-        verify(mMockDcNetWatcher).init(mMockContext);
-        verify(mMockDcApn).init(mMockContext);
-    }
-
-    private void createMockDcs(int slotId) {
-        HashMap<Integer, IDc> agents = mDcFactory.getObjects(slotId);
-
-        if (agents != null) {
-            return;
-        }
-
-        agents = new HashMap<Integer, IDc>(DcFactory.MAX);
-
-        agents.put(DcFactory.UTIL, mMockDcUtils);
-        agents.put(DcFactory.SETTING, mMockDcSettings);
-        agents.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
-        agents.put(DcFactory.APN, mMockDcApn);
-
-        mDcFactory.setObjects(slotId, agents);
+    private void setUpDcAgents() {
+        DcFactory.setDcAgent(IDcUtils.class, mDcUtils, SLOT_0);
+        DcFactory.setDcAgent(IDcSettings.class, mDcSettings, SLOT_0);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT_0);
+        DcFactory.setDcAgent(IDcApn.class, mDcApn, SLOT_0);
     }
 }

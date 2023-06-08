@@ -254,7 +254,7 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     }
 
     private static IDcNetWatcher getDcNetWatcher(int slotId) {
-        return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
+        return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);
     }
 
     private static int convertConnectionFailureReason(int reason) {
