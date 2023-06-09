@@ -73,7 +73,6 @@ public:
     virtual IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) = 0;
 
     virtual IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) = 0;
-    virtual IMS_SINT32 GetDigestSha1(IN const AString& strIn, OUT AString& strOut) = 0;
 
     ////
     // Network-related information (mobile)

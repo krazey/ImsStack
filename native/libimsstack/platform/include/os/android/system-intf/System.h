@@ -87,7 +87,6 @@ public:
     IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) override;
 
     IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) override;
-    IMS_SINT32 GetDigestSha1(IN const AString& strIn, OUT AString& strOut) override;
 
     ////
     // Network-related information (mobile)

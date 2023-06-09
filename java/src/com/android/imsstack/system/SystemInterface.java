@@ -421,12 +421,7 @@ public class SystemInterface implements JniSystemListener {
             }
         }
 
-        ImsSystem system;
-        if (isActiveSlotIdRequired(method)) {
-            system = getActiveSystem();
-        } else {
-            system = (ImsSystem) getSystem(slotId);
-        }
+        ImsSystem system = (ImsSystem) getSystem(slotId);
 
         if (system == null) {
             return new byte[] {(byte)0};
@@ -483,20 +478,6 @@ public class SystemInterface implements JniSystemListener {
         result = null;
 
         return buffer;
-    }
-
-
-    private synchronized ImsSystem getActiveSystem() {
-        int activeSimCount = MSimUtils.getActiveSimCount();
-
-        for (int i = 0; i < activeSimCount; i++) {
-            ImsSystem system = (ImsSystem) getSystem(i);
-            if (system != null) {
-                return system;
-            }
-        }
-
-        return null;
     }
 
     private Parcel handleSystemCallForTimer(int method, Parcel parcel) {
@@ -671,17 +652,6 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private boolean isActiveSlotIdRequired(int method) {
-        switch (method) {
-        case SystemConstants.GET_DIGEST_SHA1:
-            return true;
-        default:
-            break;
-        }
-
-        return false;
-    }
-
     private boolean isSendEvent(int method) {
         return (method == SystemConstants.SEND_EVENT);
     }
@@ -785,8 +755,6 @@ public class SystemInterface implements JniSystemListener {
                 "SET_PRIVATE_PROPERTY");
         sMethodToString.put(SystemConstants.GET_CARRIER_CONFIG,
                 "GET_CARRIER_CONFIG");
-        sMethodToString.put(SystemConstants.GET_DIGEST_SHA1,
-                "GET_DIGEST_SHA1");
         sMethodToString.put(SystemConstants.SEND_EVENT,
                 "SEND_EVENT");
         sMethodToString.put(SystemConstants.GET_ISIM_STATE,

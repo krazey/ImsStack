@@ -120,12 +120,6 @@ PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
     return s_pUtil;
 }
 
-PRIVATE VIRTUAL void OsUtil::DigestSha1(IN const AString& strIn, OUT AString& strOut)
-{
-    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
-    piSystem->GetDigestSha1(strIn, strOut);
-}
-
 PRIVATE VIRTUAL AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
 {
     // This function will be re-written or reviewed whether it's really needed or not.

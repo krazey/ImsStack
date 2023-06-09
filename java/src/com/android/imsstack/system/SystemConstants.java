@@ -97,8 +97,6 @@ public class SystemConstants {
     public static final int GET_RTT_MODE = CATEGORY_BASE + 204;
     public static final int GET_CS_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
 
-    public static final int GET_DIGEST_SHA1 = CATEGORY_BASE + 303;
-
     /**
      * Network-related information (mobile)
      */

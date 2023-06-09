@@ -962,28 +962,6 @@ TEST_F(SystemTest, GetDeviceName)
     EXPECT_EQ(m_pSystem->GetDeviceName(strName), 0);
 }
 
-TEST_F(SystemTest, GetDigestSha1)
-{
-    AString strIn("/files/client.pem");
-    AString strOut;
-
-    m_pSystem->SetCallback(IMS_NULL);
-
-    EXPECT_EQ(m_pSystem->GetDigestSha1(strIn, strOut), 0);
-
-    m_pSystem->SetCallback(&m_objMockSystemCallback);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetDigestSha1(strIn, strOut), 1);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->GetDigestSha1(strIn, strOut), 0);
-}
-
 TEST_F(SystemTest, GetNetworkType)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))

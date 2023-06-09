@@ -23,10 +23,9 @@
 class MockISystemUtil : public ISystemUtil
 {
 public:
-    inline MockISystemUtil() {}
-    inline virtual ~MockISystemUtil() {}
+    MockISystemUtil() = default;
+    virtual ~MockISystemUtil() = default;
 
-    MOCK_METHOD(void, DigestSha1, (IN const AString& strIn, OUT AString& strOut), (override));
     MOCK_METHOD(AString, GetUuid, (IN IMS_SINT32 nOption), (override));
 };
 

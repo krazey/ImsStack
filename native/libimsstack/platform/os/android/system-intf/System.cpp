@@ -630,36 +630,6 @@ IMS_SINT32 System::GetDeviceName(OUT AString& strDeviceName)
 }
 
 PUBLIC
-IMS_SINT32 System::GetDigestSha1(IN const AString& strIn, OUT AString& strOut)
-{
-    if (m_pCallback == IMS_NULL)
-    {
-        return 0;
-    }
-
-    android::Parcel in;
-    android::Parcel out;
-
-    in.writeInt32(IMS_SLOT_0);
-    in.writeInt32(SystemConstants::GET_DIGEST_SHA1);
-
-    String16 str16Key(strIn.GetStr());
-    in.writeString16(str16Key);
-
-    if (m_pCallback->SendDataToJava(in, out) == 1)
-    {
-        String16 str16Sha1 = out.readString16();
-        String8 str8Sha1(str16Sha1);
-
-        strOut = AString(str8Sha1.string());
-
-        return 1;
-    }
-
-    return 0;
-}
-
-PUBLIC
 IMS_SINT32 System::GetNetworkType(IN IMS_SINT32 nSlotId)
 {
     return GetInt(SystemConstants::GET_NETWORK_TYPE, 0, nSlotId);

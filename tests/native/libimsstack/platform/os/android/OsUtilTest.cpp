@@ -79,21 +79,6 @@ TEST_F(OsUtilTest, IsServerInfoHiddenInLog)
 TEST_F(OsUtilTest, SystemUtil)
 {
     ISystemUtil* piSystemUtil = static_cast<ISystemUtil*>(m_pOsUtil);
-    AString strOutValue("Digest");
-    EXPECT_CALL(m_objMockSystem, GetDigestSha1(_, _))
-            .Times(1)
-            .WillOnce(Invoke(
-                    [strOutValue](Unused, AString& strOut)
-                    {
-                        strOut = strOutValue;
-                        return 1;
-                    }));
-
-    AString strValue("Certificate");
-    AString strOut;
-    piSystemUtil->DigestSha1(strValue, strOut);
-    EXPECT_EQ(strOut, strOutValue);
-
     AString strUid("00000000-0000-0000-0000-000000000000");
     EXPECT_EQ(piSystemUtil->GetUuid(), strUid);
 }

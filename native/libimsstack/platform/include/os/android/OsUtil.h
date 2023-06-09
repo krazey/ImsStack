@@ -43,7 +43,6 @@ public:
 
 private:
     // ISystemUtil class
-    void DigestSha1(IN const AString& strIn, OUT AString& strOut) override;
     AString GetUuid(IN IMS_SINT32 nOption = 0) override;
 
     // ISystemProperty class

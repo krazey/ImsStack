@@ -25,14 +25,6 @@ protected:
 
 public:
     /**
-     * @brief Gets Digest result using SHA1 algorithm.
-     *
-     * @param strIn The raw string to be hashed
-     * @param strOut The digest result using SHA1 algorithm
-     */
-    virtual void DigestSha1(IN const AString& strIn, OUT AString& strOut) = 0;
-
-    /**
      * @brief Gets the time or random based UUID (version 1).
      *        The time-based UUID will be prioritized.
      *
