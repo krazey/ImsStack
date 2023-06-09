@@ -32,6 +32,7 @@
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -231,12 +232,8 @@ CallType SilentRedialHelper::GetCallType() const
 {
     if (m_nType == EXTRA_CODE_REDIAL_FOR_SDP_CHANGE)
     {
-        // TODO: temp code for TC verification.
-        if (m_strExtra.Contains("m=video") == IMS_FALSE || m_strExtra.Contains("m=video 0"))
-        {
-            return CallType::VOIP;
-        }
-        return CallType::VT;
+        return MtcMediaUtil::GetCallTypeFromMediaTypes(
+                MtcMediaUtil::StringToMediaTypes(m_strExtra));
     }
 
     return m_objContext.GetCallInfo().eInitialCallType;

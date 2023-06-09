@@ -31,9 +31,12 @@
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessageBodyPart.h"
+#include "core/ISession.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcTimerWrapper.h"
+#include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "sipcore/ISipMessage.h"
 #include "utility/IMessageUtils.h"
 
@@ -43,8 +46,9 @@ LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
         "simultaneous call limit has already been reached";
 
 PUBLIC
-StartErrorHandler::StartErrorHandler(IN IMtcCallContext& objContext) :
-        m_objContext(objContext)
+StartErrorHandler::StartErrorHandler(IN IMtcCallContext& objContext, IN ISession& objSession) :
+        m_objContext(objContext),
+        m_objSession(objSession)
 {
 }
 
@@ -379,10 +383,13 @@ CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessag
 {
     if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
     {
-        // TODO: silent redial with the SDP to be implemented.
-        // Temporary solution. to be verified.
-        AString strSdp = objMessage.GetMessage()->GetSdpBodyPart()->GetContent().ToString();
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdp);
+        IMS_UINT32 eMediaTypes =
+                m_objContext.GetMediaManager().GetSupportedMediaTypesFromSdp(&m_objSession);
+        if (eMediaTypes != MEDIATYPE_NONE)
+        {
+            return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE,
+                    MtcMediaUtil::MediaTypesToString(eMediaTypes));
+        }
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))

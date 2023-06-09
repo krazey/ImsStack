@@ -251,3 +251,46 @@ PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 e
 
     return eGttMode;
 }
+
+PUBLIC GLOBAL AString MtcMediaUtil::MediaTypesToString(IN IMS_UINT32 eMediaTypes)
+{
+    AString strMediaTypes;
+    if (eMediaTypes & MEDIATYPE_AUDIO)
+    {
+        strMediaTypes.Append("audio");
+    }
+
+    if (eMediaTypes & MEDIATYPE_VIDEO)
+    {
+        strMediaTypes.Append("video");
+    }
+
+    if (eMediaTypes & MEDIATYPE_TEXT)
+    {
+        strMediaTypes.Append("text");
+    }
+
+    return strMediaTypes;
+}
+
+PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::StringToMediaTypes(IN const AString& strMediaTypes)
+{
+    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
+
+    if (strMediaTypes.Contains("audio"))
+    {
+        eMediaTypes |= MEDIATYPE_AUDIO;
+    }
+
+    if (strMediaTypes.Contains("video"))
+    {
+        eMediaTypes |= MEDIATYPE_VIDEO;
+    }
+
+    if (strMediaTypes.Contains("text"))
+    {
+        eMediaTypes |= MEDIATYPE_TEXT;
+    }
+
+    return eMediaTypes;
+}

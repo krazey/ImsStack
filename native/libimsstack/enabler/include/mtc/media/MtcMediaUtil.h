@@ -39,6 +39,9 @@ public:
     static MEDIA_NETWORK_TYPE GetMediaNetworkType(IN IMtcService* piMtcService,
             IN IMS_SINT32 eRadioType = INetworkWatcher::RADIOTECH_TYPE_INVALID);
     static IMS_SINT32 GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality);
+
+    static AString MediaTypesToString(IN IMS_UINT32 eMediaTypes);
+    static IMS_UINT32 StringToMediaTypes(IN const AString& strMediaTypes);
 };
 
 #endif

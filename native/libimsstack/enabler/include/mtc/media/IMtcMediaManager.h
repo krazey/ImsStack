@@ -260,6 +260,14 @@ public:
      * @return
      */
     virtual IMS_BOOL IsOnHold() = 0;
+
+    /**
+     * @brief Gets the supported Media Types from SDP Body
+     *
+     * @param piSession ISession instance to get media profile id.
+     * @return Media Types which are supported.
+     */
+    virtual IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) = 0;
 };
 
 #endif

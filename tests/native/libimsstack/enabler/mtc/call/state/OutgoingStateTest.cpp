@@ -52,7 +52,6 @@
 #include "precondition/QosDef.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -673,12 +672,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedSetsSipNotAcceptableReasonIfSilentRe
             .WillByDefault(Return(&objMessage));
     SetUpStartErrorHandler(objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    MockISipMessage objSipMessage;
-    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-    MockISipMessageBodyPart objSipMessageBodyPart;
-    ON_CALL(objSipMessage, GetSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
-    ByteArray objContent("anyContent");
-    ON_CALL(objSipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
+
+    ON_CALL(objMediaManager, GetSupportedMediaTypesFromSdp(&objSession))
+            .WillByDefault(Return(MEDIATYPE_AUDIO));
 
     ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
 

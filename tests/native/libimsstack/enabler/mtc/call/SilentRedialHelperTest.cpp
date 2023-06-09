@@ -316,9 +316,9 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedirectionType)
 
 TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithVideoSdpChangeType)
 {
-    AString strSdpBody("m=audio 1234.... m=video 5678");
+    AString strMediaTypes("audiovideo");
     const CallReasonInfo objAnyReason(
-            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdpBody);
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     pRedialHelper->Redial();
 
@@ -334,27 +334,9 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithVideoSdpChangeType)
 
 TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithAudioSdpChangeType)
 {
-    AString strSdpBody("m=audio 1234....");
+    AString strMediaTypes("audio");
     const CallReasonInfo objAnyReason(
-            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdpBody);
-    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
-    pRedialHelper->Redial();
-
-    ParticipantInfo objParticipantInfo(objContext);
-    ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
-
-    AString strEmptyNumber;
-    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
-
-    pRedialHelper->Timer_TimerExpired(&objTimer);
-}
-
-TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithDowngradeAudioSdpChangeType)
-{
-    AString strSdpBody("m=audio 1234.... m=video 0");
-    const CallReasonInfo objAnyReason(
-            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdpBody);
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     pRedialHelper->Redial();
 

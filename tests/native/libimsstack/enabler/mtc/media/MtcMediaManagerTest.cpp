@@ -1235,6 +1235,15 @@ TEST_F(MtcMediaManagerTest, IsOnHoldReturnsFalseIfAudioDirectionIsSendReceiveOrI
     EXPECT_FALSE(pMediaManager->IsOnHold());
 }
 
+TEST_F(MtcMediaManagerTest,
+        GetSupportedMediaTypesFromSdpInvokesMediaSessionGetSupportedMediaTypesFromSdp)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    ON_CALL(objMediaSession, GetSupportedMediaTypesFromSdp(NEGO_ID, &objISession))
+            .WillByDefault(Return(MEDIA_TYPE_AUDIO));
+    EXPECT_EQ(MEDIATYPE_AUDIO, pMediaManager->GetSupportedMediaTypesFromSdp(&objISession));
+}
+
 TEST_F(MtcMediaManagerTest, FinalizeSdpInvokesMediaSessionFinalizeSDP)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));

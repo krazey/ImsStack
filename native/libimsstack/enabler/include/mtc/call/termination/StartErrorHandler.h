@@ -22,6 +22,7 @@
 
 class IMessage;
 class IMtcCallContext;
+class ISession;
 
 /*
  * It handles error responses when `ISessionListener::SessionStartFailed` occurs.
@@ -29,7 +30,7 @@ class IMtcCallContext;
 class StartErrorHandler final
 {
 public:
-    explicit StartErrorHandler(IN IMtcCallContext& objContext);
+    explicit StartErrorHandler(IN IMtcCallContext& objContext, IN ISession& objSession);
     ~StartErrorHandler();
     StartErrorHandler(const StartErrorHandler&) = delete;
     StartErrorHandler& operator=(const StartErrorHandler&) = delete;
@@ -87,6 +88,7 @@ private:
     AString GetSupported() const;
 
     IMtcCallContext& m_objContext;
+    ISession& m_objSession;
 };
 
 #endif

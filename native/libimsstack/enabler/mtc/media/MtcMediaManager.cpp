@@ -619,6 +619,12 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsOnHold()
     return (nAudioDirection != DIRECTION_INVALID && nAudioDirection != DIRECTION_SEND_RECEIVE);
 }
 
+PUBLIC VIRTUAL IMS_UINT32 MtcMediaManager::GetSupportedMediaTypesFromSdp(IN ISession* piSession)
+{
+    return MtcMediaUtil::GetMediaTypesFromMediaContents(
+            m_piMediaSession->GetSupportedMediaTypesFromSdp(GetMediaNegoId(piSession), piSession));
+}
+
 PRIVATE
 void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage)
 {

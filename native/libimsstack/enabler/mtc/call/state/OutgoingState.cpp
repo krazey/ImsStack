@@ -48,6 +48,7 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
@@ -206,7 +207,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 
     IMessage* piResponse =
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
-    CallReasonInfo objReason = StartErrorHandler(m_objContext).Handle(piResponse);
+    CallReasonInfo objReason = StartErrorHandler(m_objContext, *piSession).Handle(piResponse);
 
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
@@ -739,7 +740,7 @@ IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(
     IMS_TRACE_D("HandleB1TimerAfterTerminate", 0, 0, 0);
 
     // To invoke HandleTransactionTimeout() / ControlAos()
-    StartErrorHandler(m_objContext).Handle(IMS_NULL);
+    StartErrorHandler(m_objContext, piMtcSession->GetISession()).Handle(IMS_NULL);
 
     // To set Reason Header.
     const CallReasonInfo objNewReason(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);

@@ -78,6 +78,7 @@ public:
     MOCK_METHOD(void, AdjustDirectionForAutoAnswer, (), (override));
     MOCK_METHOD(void, SetSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(IMS_BOOL, IsOnHold, (), (override));
+    MOCK_METHOD(IMS_UINT32, GetSupportedMediaTypesFromSdp, (IN ISession * piSession), (override));
 };
 
 #endif

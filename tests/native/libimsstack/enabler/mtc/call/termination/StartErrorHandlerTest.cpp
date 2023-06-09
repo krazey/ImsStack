@@ -33,9 +33,8 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "internal/Ims3gpp.h"
+#include "media/MockIMtcMediaManager.h"
 #include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
 #include "sipcore/SipStatusCode.h"
 #include "util/ByteArray.h"
 #include "utility/MockIMessageUtils.h"
@@ -91,7 +90,7 @@ protected:
 
         ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
 
-        pHandler = new StartErrorHandler(objCallContext);
+        pHandler = new StartErrorHandler(objCallContext, objSession);
     }
 
     virtual void TearDown() override
@@ -621,21 +620,32 @@ TEST_F(StartErrorHandlerTest, Handle407Response)
 TEST_F(StartErrorHandlerTest, Handle488Response)
 {
     SetMessageCode(SipStatusCode::SC_488);
-    MockISipMessage objISipMessage;
-    MockISipMessageBodyPart objISipMessageBodyPart;
-    AString strAnySdpBodyStr("audio video");
-    ByteArray objAnySdpBody(strAnySdpBodyStr);
+
+    // 1. SDP body exists and get the supported media type from it.
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessage, GetMessage()).WillByDefault(Return(&objISipMessage));
-    ON_CALL(objISipMessage, GetSdpBodyPart).WillByDefault(Return(&objISipMessageBodyPart));
-    ON_CALL(objISipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objAnySdpBody));
 
+    MockIMtcMediaManager objMediaManager;
+    ON_CALL(objCallContext, GetMediaManager()).WillByDefault(ReturnRef(objMediaManager));
+
+    IMS_UINT32 eMediaTypes = (MEDIATYPE_AUDIO | MEDIATYPE_VIDEO);
+    ON_CALL(objMediaManager, GetSupportedMediaTypesFromSdp(&objSession))
+            .WillByDefault(Return(eMediaTypes));
+
+    AString strMediaTypes("audiovideo");
     EXPECT_TRUE(CheckHandleResult(
-            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strAnySdpBodyStr));
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes));
 
+    // 2. SDP body exists and there's no supported media type from it.
+    eMediaTypes = MEDIATYPE_NONE;
+    ON_CALL(objMediaManager, GetSupportedMediaTypesFromSdp(&objSession))
+            .WillByDefault(Return(eMediaTypes));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
+
+    // 3. No SDP body and it's not required to CSFB.
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488));
 
+    // 4. No SDP body and it's required to CSFB.
     SetCsfbConfig(SipStatusCode::SC_488);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));

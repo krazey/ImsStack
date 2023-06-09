@@ -262,4 +262,38 @@ TEST_F(MtcMediaUtilTest, GetGttModeFromTextQuality)
     EXPECT_EQ(MtcMediaUtil::GetGttModeFromTextQuality(eInvalidTextQuality), GTT_MODE_INVALID);
 }
 
+TEST_F(MtcMediaUtilTest, MediaTypesToStringReturnsConvertedStringOfMediaTypes)
+{
+    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
+    EXPECT_TRUE(MtcMediaUtil::MediaTypesToString(eMediaTypes).Equals(""));
+
+    eMediaTypes = MEDIATYPE_AUDIO;
+    EXPECT_TRUE(MtcMediaUtil::MediaTypesToString(eMediaTypes).Contains("audio"));
+
+    eMediaTypes |= MEDIATYPE_VIDEO;
+    EXPECT_TRUE(MtcMediaUtil::MediaTypesToString(eMediaTypes).Contains("video"));
+
+    eMediaTypes |= MEDIATYPE_TEXT;
+    EXPECT_TRUE(MtcMediaUtil::MediaTypesToString(eMediaTypes).Contains("text"));
+}
+
+TEST_F(MtcMediaUtilTest, StringToMediaTypesReturnsMediaTypesFromString)
+{
+    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
+    AString strMediaTypes;
+    EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
+
+    strMediaTypes.Append("audio");
+    eMediaTypes |= MEDIATYPE_AUDIO;
+    EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
+
+    strMediaTypes.Append("video");
+    eMediaTypes |= MEDIATYPE_VIDEO;
+    EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
+
+    strMediaTypes.Append("text");
+    eMediaTypes |= MEDIATYPE_TEXT;
+    EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
+}
+
 }  // namespace android

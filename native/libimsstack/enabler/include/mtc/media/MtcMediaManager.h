@@ -109,6 +109,7 @@ public:
     virtual void AdjustDirectionForAutoAnswer();
     void SetSrvccState(IN SrvccState eState) override;
     IMS_BOOL IsOnHold() override;
+    IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
 
 private:
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
