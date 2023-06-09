@@ -550,6 +550,7 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallType)
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VOIP));
@@ -573,6 +574,7 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeToVoIpIfMessageDoesNotIn
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VOIP));
@@ -595,6 +597,7 @@ TEST_F(MtcSessionTest, HandleStartRequestDoesNotChangeCallTypeIfVideoIsOnlyOneRe
             .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VT));
@@ -642,6 +645,7 @@ TEST_F(MtcSessionTest, HandleUpdateRequestInvokesSetCallTypeIfSameCallType)
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
@@ -669,6 +673,7 @@ TEST_F(MtcSessionTest, HandleEarlyUpdateRequestDoesNotInvokeSetCallTypeIfSameCal
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VT));
     ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
@@ -690,6 +695,7 @@ TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndRetu
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
@@ -707,6 +713,7 @@ TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndRetu
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
@@ -725,6 +732,7 @@ TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByHistory)
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::UNKNOWN));
 

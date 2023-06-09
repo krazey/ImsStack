@@ -33,6 +33,7 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "utility/IMessageUtils.h"
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -541,18 +542,44 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
     return m_bAudioInactive;
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
-        IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe)
+PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoOffer(IN CallType eCallType)
 {
-    if (bSendOffer)
+    const IMS_SINT32 eNewDirection =
+            m_objContext.IsHeldByMe() ? DIRECTION_SEND : DIRECTION_SEND_RECEIVE;
+
+    m_pMediaInfo->eAudioDirection = eNewDirection;
+
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
     {
-        AdjustDirectionForAutoOffer(bHeldByMe);
+        m_pMediaInfo->eVideoDirection = eNewDirection;
     }
-    else if (bHeldByMe)
+
+    if (eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
     {
-        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eAudioDirection);
-        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eVideoDirection);
-        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eTextDirection);
+        m_pMediaInfo->eTextDirection = eNewDirection;
+    }
+}
+
+PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAnswer()
+{
+    if (!m_objContext.IsHeldByMe())
+    {
+        return;
+    }
+
+    std::vector<IMS_SINT32*> objAllMediaDirections{&m_pMediaInfo->eAudioDirection,
+            &m_pMediaInfo->eVideoDirection, &m_pMediaInfo->eTextDirection};
+
+    for (IMS_SINT32* pDirection : objAllMediaDirections)
+    {
+        if (*pDirection == DIRECTION_SEND_RECEIVE)
+        {
+            *pDirection = DIRECTION_SEND;
+        }
+        else if (*pDirection == DIRECTION_RECEIVE)
+        {
+            *pDirection = DIRECTION_INACTIVE;
+        }
     }
 }
 
@@ -662,36 +689,6 @@ void MtcMediaManager::SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32
 {
     IMS_TRACE_D("SetNetworkToneRtpTimer : NegoId[%" PFLS_x "] Duration[%d]", nNegoId, nDuration, 0);
     m_piMediaSession->SetNetworkToneRtpTimer(nNegoId, MEDIA_TYPE_AUDIO, nDuration);
-}
-
-PRIVATE
-void MtcMediaManager::AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe)
-{
-    IMS_SINT32 eNewDirection = bHeldByMe ? DIRECTION_SEND : DIRECTION_SEND_RECEIVE;
-
-    m_pMediaInfo->eAudioDirection = eNewDirection;
-    if (m_pMediaInfo->eVideoDirection != DIRECTION_INVALID)
-    {
-        m_pMediaInfo->eVideoDirection = eNewDirection;
-    }
-
-    if (m_pMediaInfo->eTextDirection != DIRECTION_INVALID)
-    {
-        m_pMediaInfo->eTextDirection = eNewDirection;
-    }
-}
-
-PRIVATE
-void MtcMediaManager::AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection)
-{
-    if (eDirection == DIRECTION_SEND_RECEIVE)
-    {
-        eDirection = DIRECTION_SEND;
-    }
-    else if (eDirection == DIRECTION_RECEIVE)
-    {
-        eDirection = DIRECTION_INACTIVE;
-    }
 }
 
 PRIVATE

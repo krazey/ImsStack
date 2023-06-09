@@ -105,8 +105,8 @@ public:
     virtual PemType GetPemType(IN ISession* piSession) override;  // remove..?
 
     virtual IMS_BOOL IsAudioInactive() override;
-    virtual void AdjustDirectionForAutoAccept(
-            IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) override;
+    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
+    virtual void AdjustDirectionForAutoAnswer();
     void SetSrvccState(IN SrvccState eState) override;
     IMS_BOOL IsOnHold() override;
 
@@ -114,8 +114,6 @@ private:
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
-    void AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe);
-    static void AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);
     IMS_UINTP GetMediaNegoId(IN ISession* piSession);
