@@ -70,6 +70,8 @@ public:
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
             IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;
+    virtual MEDIA_CONTENT_TYPE GetSupportedMediaTypesFromSdp(
+            IN IMS_UINTP nNegoId, IN ISession* pSession) override;
     IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
@@ -95,7 +97,7 @@ public:
 protected:
     // for MediaNego
     MediaNego* CreateMediaNego(IN IMS_UINTP nNegoId);
-    MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
+    virtual MediaNego* FindMediaNego(IN IMS_UINTP nNegoId);
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     void ClearMediaNego();

@@ -92,7 +92,7 @@ public:
      * Audio/Video/TestMediaSession
      *
      * @param nNegoId The identification of the session
-     * @param pSession The SDP module to put the formed SDP
+     * @param pSession ISession instance to get the SDP descriptor
      * @param eMediaType The type of media
      * @param nAudioDirection The direction of audio m-line in SDP to form
      * @param nVideoDirection The direction of video m-line in SDP to form
@@ -106,11 +106,21 @@ public:
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;
 
     /**
+     * @brief Get Supported Media Types from SDP
+     *
+     * @param nNegoId The identification of the session
+     * @param pSession ISession instance to get the SDP descriptor
+     * @return MEDIA_CONTENT_TYPE The Supported media types
+     */
+    virtual MEDIA_CONTENT_TYPE GetSupportedMediaTypesFromSdp(
+            IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
+
+    /**
      * @brief Negotiate the SDP to the target dialog with the direction parameters for each
      * Audio/Video/TestMediaSession
      *
      * @param nNegoId The identification of the session
-     * @param pSession The SDP module to get the SDP parameter to negotiated
+     * @param pSession ISession instance to get the SDP descriptor
      * @param eMediaType The type of media
      * @param nAudioDirection The direction of audio m-line in SDP to negotiate
      * @param nVideoDirection The direction of video m-line in SDP to negotiate
@@ -137,7 +147,7 @@ public:
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
      *
      * @param nNegoId The negotiation id to clean the SDP set
-     * @param pSession SDP module to remove when it is necessary
+     * @param pSession ISession instance to get the SDP descriptor
      */
     virtual void FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 

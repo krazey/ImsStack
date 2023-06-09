@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 #include "ImsCore.h"
 #include "ICoreService.h"
+#include "ISdpReader.h"
 #include "ISessionDescriptor.h"
 
 #include "config/MediaSessionConfigFactory.h"
@@ -66,7 +67,7 @@ MediaNego::~MediaNego()
 PUBLIC
 void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
 {
-    if (pMediaEnvironment == NULL)
+    if (pMediaEnvironment == IMS_NULL)
     {
         return;
     }
@@ -433,6 +434,114 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     return IMS_TRUE;
 }
 
+PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN ISession* pSession)
+{
+    IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): pSession[%" PFLS_x "]", pSession, 0, 0);
+
+    if (pSession == IMS_NULL)
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+
+    MEDIA_CONTENT_TYPE eSupportedMediaType = MEDIA_TYPE_INVALID;
+
+    ISdpReader* piSdpReader = pSession->GetRemoteMediaCapabilities();
+    if (piSdpReader == IMS_NULL)
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+
+    if (piSdpReader->GetMediaDescriptors().IsEmpty())
+    {
+        return MEDIA_TYPE_INVALID;
+    }
+    const ImsList<IMediaDescriptor*>& objMediaDescriptors = piSdpReader->GetMediaDescriptors();
+
+    IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): objMediaDescriptors size[%d]",
+            objMediaDescriptors.GetSize(), 0, 0);
+
+    for (IMS_UINT32 i = 0; i < objMediaDescriptors.GetSize(); i++)
+    {
+        IMediaDescriptor* pDescriptor = objMediaDescriptors.GetAt(i);
+
+        if (pDescriptor == IMS_NULL)
+        {
+            IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - MediaDescriptor is null", 0, 0, 0);
+            continue;
+        }
+
+        const SdpMedia* pSDPMedia = pDescriptor->GetMediaDescriptionEx();
+
+        if (pSDPMedia == IMS_NULL)
+        {
+            IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - MediaDescriptionEx is null", 0, 0, 0);
+            continue;
+        }
+
+        IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - pSDPMedia : Type[%d], Port[%d]",
+                pSDPMedia->GetType(), pSDPMedia->GetPort(), 0);
+
+        // Negotiate audio m line
+        switch (pSDPMedia->GetType())
+        {
+            case (SdpMedia::TYPE_AUDIO):
+                if (m_pAudioNego == IMS_NULL)
+                {
+                    break;
+                }
+
+                if (!MEDIA_IS_CONTAINED_THIS_TYPE(eSupportedMediaType, MEDIA_TYPE_AUDIO))
+                {
+                    if (m_pAudioNego->IsMediaCodecFromSdpSupported(
+                                piSdpReader->GetSessionDescriptor(), pDescriptor))
+                    {
+                        eSupportedMediaType =
+                                (MEDIA_CONTENT_TYPE)(eSupportedMediaType | MEDIA_TYPE_AUDIO);
+                    }
+                }
+                break;
+            case (SdpMedia::TYPE_VIDEO):
+                if (m_pVideoNego == IMS_NULL)
+                {
+                    break;
+                }
+
+                if (!MEDIA_IS_CONTAINED_THIS_TYPE(eSupportedMediaType, MEDIA_TYPE_VIDEO))
+                {
+                    if (m_pVideoNego->IsMediaCodecFromSdpSupported(
+                                piSdpReader->GetSessionDescriptor(), pDescriptor))
+                    {
+                        eSupportedMediaType =
+                                (MEDIA_CONTENT_TYPE)(eSupportedMediaType | MEDIA_TYPE_VIDEO);
+                    }
+                }
+                break;
+            case (SdpMedia::TYPE_TEXT):
+                if (m_pTextNego == IMS_NULL)
+                {
+                    break;
+                }
+
+                if (!MEDIA_IS_CONTAINED_THIS_TYPE(eSupportedMediaType, MEDIA_TYPE_TEXT))
+                {
+                    if (m_pTextNego->IsMediaCodecFromSdpSupported(
+                                piSdpReader->GetSessionDescriptor(), pDescriptor))
+                    {
+                        eSupportedMediaType =
+                                (MEDIA_CONTENT_TYPE)(eSupportedMediaType | MEDIA_TYPE_TEXT);
+                    }
+                }
+                break;
+            default:
+                IMS_TRACE_D("GetSupportedMediaTypesFromSdp() - Not supported media type", 0, 0, 0);
+                break;
+        }
+    }
+
+    IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - return[%d]", eSupportedMediaType, 0, 0);
+    return eSupportedMediaType;
+}
+
 PUBLIC
 IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
         OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
@@ -499,12 +608,12 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
         switch (pSDPMedia->GetType())
         {
             case (SdpMedia::TYPE_AUDIO):
-                if (m_pAudioNego == NULL)
+                if (m_pAudioNego == IMS_NULL)
                 {
                     break;
                 }
 
-                if (pNegotiatedAudioDescriptor == NULL)
+                if (pNegotiatedAudioDescriptor == IMS_NULL)
                 {
                     m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
                             pDescriptor, nAudioDirection);
@@ -516,12 +625,12 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
                 }
                 break;
             case (SdpMedia::TYPE_VIDEO):
-                if (m_pVideoNego == NULL)
+                if (m_pVideoNego == IMS_NULL)
                 {
                     break;
                 }
 
-                if (pNegotiatedVideoDescriptor == NULL)
+                if (pNegotiatedVideoDescriptor == IMS_NULL)
                 {
                     m_pVideoNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
                             pDescriptor, nVideoDirection);
@@ -533,12 +642,12 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
                 }
                 break;
             case (SdpMedia::TYPE_TEXT):
-                if (m_pTextNego == NULL)
+                if (m_pTextNego == IMS_NULL)
                 {
                     break;
                 }
 
-                if (pNegotiatedTextDescriptor == NULL)
+                if (pNegotiatedTextDescriptor == IMS_NULL)
                 {
                     m_pTextNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
                             pDescriptor, nTextDirection);

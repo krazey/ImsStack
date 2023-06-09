@@ -67,7 +67,7 @@ public:
      * @brief Forms SDP with the profile created and send the offer or answer with the given
      * arguments
      *
-     * @param pSession ISession instance of SDP stack framework to set the formed SDP
+     * @param pSession ISession instance to get the SDP descriptor
      * @param eMediaType The media type to form, it can be audio/video/text defined in
      * MEDIA_CONTENT_TYPE
      * @param nAudioDirection The audio direction to set in the SDP
@@ -82,9 +82,17 @@ public:
             IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode);
 
     /**
+     * @brief Get Supported Media Types from SDP
+     *
+     * @param pSession ISession instance to get the SDP descriptor
+     * @return MEDIA_CONTENT_TYPE The Supported media types
+     */
+    virtual MEDIA_CONTENT_TYPE GetSupportedMediaTypesFromSdp(IN ISession* pSession);
+
+    /**
      * @brief Create negotiate profile from the SDP received from the network by the given arguments
      *
-     * @param pSession ISession instance to get the SDP received
+     * @param pSession ISession instance to get the SDP descriptor
      * @param nAudioDirection The audio direction negotiated
      * @param nVideoDirection The video direction negotiated
      * @param nTextDirection The text direction negotiated

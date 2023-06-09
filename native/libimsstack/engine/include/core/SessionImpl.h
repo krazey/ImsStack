@@ -19,6 +19,7 @@
 #include "IOnSessionExListener.h"
 #include "IOnSessionListener.h"
 #include "ISession.h"
+#include "SdpReader.h"
 #include "SessionDescriptor.h"
 #include "SessionEx.h"
 #include "VirtualSessionImpl.h"
@@ -211,6 +212,10 @@ private:
     inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter) override
     {
         return m_pSession->SetReasonHeaderSetter(piSetter);
+    }
+    inline ISdpReader* GetRemoteMediaCapabilities() const override
+    {
+        return m_pSession->GetRemoteMediaCapabilities();
     }
 
     // IOnSessionListener interface

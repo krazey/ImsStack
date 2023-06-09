@@ -41,6 +41,8 @@ public:
                     IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
                     IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
             (override));
+    MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp,
+            (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
     MOCK_METHOD(IMS_BOOL, NegotiateSDP,
             (IN IMS_UINTP nNegoID, IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
                     OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,

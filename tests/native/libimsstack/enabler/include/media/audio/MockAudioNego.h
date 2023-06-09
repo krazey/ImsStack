@@ -34,6 +34,9 @@ public:
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
                     IN IMS_BOOL bEnforceReofferMode),
             (override));
+    MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
+            (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
+            (override));
     MOCK_METHOD(void, NegotiateSDP,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),

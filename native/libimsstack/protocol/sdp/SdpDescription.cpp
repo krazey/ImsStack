@@ -417,6 +417,29 @@ IMS_SINT32 SdpDescription::GetDirection() const
 }
 
 PUBLIC
+void SdpDescription::RemoveAttributes(IN IMS_SINT32 nAttribute)
+{
+    for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize();)
+    {
+        const SdpAttribute& objAttribute = m_objAttributes.GetAt(i);
+
+        if (objAttribute.GetAttribute() == nAttribute)
+        {
+            m_objAttributes.RemoveAt(i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    if (m_objAttributes.IsEmpty())
+    {
+        m_abLineContains[Sdp::TYPE_A] = IMS_FALSE;
+    }
+}
+
+PUBLIC
 void SdpDescription::RemoveAttribute(IN const SdpAttribute& objAttribute)
 {
     for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); ++i)

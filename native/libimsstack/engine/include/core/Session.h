@@ -40,6 +40,7 @@ class Publication;
 class Reference;
 class Replaces;
 class SdpOaState;
+class SdpReader;
 class SessionDescriptor;
 class SessionRefreshHelper;
 class Subscription;
@@ -138,6 +139,7 @@ public:
     {
         m_piReasonHeaderSetter = piSetter;
     }
+    inline SdpReader* GetRemoteMediaCapabilities() const { return m_pRemoteMediaCapabilities; }
 
 protected:
     // Activity class
@@ -318,6 +320,7 @@ private:
     IMS_BOOL UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger);
+    void CreateRemoteMediaCapabilities(IN ISipMessage* piSipMsg);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -494,6 +497,9 @@ private:
     SdpOaState* m_pOaState;
     SessionDescriptor* m_pSessionDescriptor;
     ImsList<Media*> m_objMedias;
+    // This is used for containing the SDP body part when a failure response is received
+    // such as 488 or 606 with SDP body part.
+    SdpReader* m_pRemoteMediaCapabilities;
 
     IOnSessionListener* m_piSessionListener;
     // For session refresh

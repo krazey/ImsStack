@@ -123,6 +123,11 @@ public:
     inline const SdpInformation* GetInformation() const { return m_pInformation; }
 
     /**
+     * @brief Removes the attributes that match with the specified attribute.
+     */
+    void RemoveAttributes(IN IMS_SINT32 nAttribute);
+
+    /**
      * @brief Removes the attribute that it matches with the specified attribute.
      */
     void RemoveAttribute(IN const SdpAttribute& objAttribute);
