@@ -229,7 +229,7 @@ public class SystemInterface implements JniSystemListener {
      *
      * @param level the battery level (integer between 1 and 100)
      */
-    public void notifyBatteryLevelChanged(final int level) {
+    public void notifyBatteryLevelChanged(int level) {
         mDefaultExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -330,7 +330,7 @@ public class SystemInterface implements JniSystemListener {
                 break;
             case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
             case SystemConstants.SET_PRIVATE_PROPERTY:
-                result = handleSystemAPIConfiguration(method, parcel);
+                result = handleSystemCallForConfiguration(method, parcel);
                 break;
             default:
                 break;
@@ -454,8 +454,18 @@ public class SystemInterface implements JniSystemListener {
                 result.writeInt(1);
                 break;
             }
+            case SystemConstants.GET_TTY_MODE: // fall through
+            case SystemConstants.GET_RTT_MODE:
+                result = system.handleSystemCallForCallSettings(method);
+                break;
+            case SystemConstants.IS_WFC_ENABLED: // fall through
+            case SystemConstants.GET_WFC_PREFERENCES: // fall through
+            case SystemConstants.IS_WFC_PROVISIONED: // fall through
+            case SystemConstants.GET_WFC_ADDRESS_ID:
+                result = system.handleSystemCallForWifiCalling(method);
+                break;
             default:
-                result = system.handleSystemAPI(method, parcel, fd);
+                result = system.handleSystemCall(method, parcel, fd);
                 break;
         }
 
@@ -558,7 +568,7 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    public Parcel handleSystemAPIConfiguration(int method, Parcel parcel) {
+    private Parcel handleSystemCallForConfiguration(int method, Parcel parcel) {
         Parcel result = Parcel.obtain();
 
         switch (method) {
@@ -891,8 +901,7 @@ public class SystemInterface implements JniSystemListener {
         private final Object mLock = new Object();
         private final ArraySet<Integer> mRegisteredEvents = new ArraySet<>();
         private final int mSlotId;
-        private SystemCallInterface mSystemCall = null;
-        private SystemRadioInterface mSystemRadio = null;
+        private SystemCallInterface mSystemCall;
 
         ImsSystem(int slotId) {
             mSlotId = slotId;
@@ -922,11 +931,6 @@ public class SystemInterface implements JniSystemListener {
             mSystemCall = systemCall;
         }
 
-        @Override
-        public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
-            mSystemRadio = systemRadio;
-        }
-
         /**
          * Notifies the changes of airplane mode in the phone settings.
          *
@@ -934,7 +938,7 @@ public class SystemInterface implements JniSystemListener {
          *          0: Airplane mode OFF, 1: Airplane mode ON
          */
         @Override
-        public void notifyAirplaneModeChanged(final int airplaneMode) {
+        public void notifyAirplaneModeChanged(int airplaneMode) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -961,7 +965,7 @@ public class SystemInterface implements JniSystemListener {
          * @param apnType the APN type (1: ims, 2: internet, 3: xcap, 9: emergency, 21: wifi)
          */
         @Override
-        public void notifyDataConnectionFailed(final int apnType) {
+        public void notifyDataConnectionFailed(int apnType) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -989,8 +993,7 @@ public class SystemInterface implements JniSystemListener {
          * @param ipcanCategory the IPCAN category (0: MOBILE, 1: WLAN); Refer to IIPCAN.h
          */
         @Override
-        public void notifyDataConnectionIpcanChanged(final int apnType,
-                final int ipcanCategory) {
+        public void notifyDataConnectionIpcanChanged(int apnType, int ipcanCategory) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1023,7 +1026,7 @@ public class SystemInterface implements JniSystemListener {
          *          {@link TelephonyManager.DATA_SUSPENDED} (3)
          */
         @Override
-        public void notifyDataConnectionStateChanged(final int apnType, final int state) {
+        public void notifyDataConnectionStateChanged(int apnType, int state) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1056,7 +1059,7 @@ public class SystemInterface implements JniSystemListener {
          *          {@link RAT_2G} (5)
          */
         @Override
-        public void notifyNetworkTypeChanged(final int networkType) {
+        public void notifyNetworkTypeChanged(int networkType) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1088,7 +1091,7 @@ public class SystemInterface implements JniSystemListener {
          *          {@link RAT_2G} (5)
          */
         @Override
-        public void notifyVoiceNetworkTypeChanged(final int networkType) {
+        public void notifyVoiceNetworkTypeChanged(int networkType) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1118,7 +1121,7 @@ public class SystemInterface implements JniSystemListener {
          *          {@link ServiceState.STATE_POWER_OFF} (3)
          */
         @Override
-        public void notifyServiceStateChanged(final int serviceState) {
+        public void notifyServiceStateChanged(int serviceState) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1147,7 +1150,7 @@ public class SystemInterface implements JniSystemListener {
          *          {@link TelephonyManager.CALL_STATE_OFFHOOK} (2)
          */
         @Override
-        public void notifyVoiceCallStateChanged(final int state) {
+        public void notifyVoiceCallStateChanged(int state) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1173,7 +1176,7 @@ public class SystemInterface implements JniSystemListener {
          * @param configs the configuration items to be updated
          */
         @Override
-        public void notifyConfigurationChanged(final int configs) {
+        public void notifyConfigurationChanged(int configs) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1201,7 +1204,7 @@ public class SystemInterface implements JniSystemListener {
          * @param param2 the additional parameter related to the current event
          */
         @Override
-        public void notifyEvent(final int event, final int param1, final int param2) {
+        public void notifyEvent(int event, int param1, int param2) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1450,34 +1453,33 @@ public class SystemInterface implements JniSystemListener {
             notifyEvent(ImsEventDef.IMS_EVENT_RTT_SETTING, mtfr.getRttMode(), 0);
         }
 
-        // Private/Protected methods ---------------------------------
-        public boolean isEventRegistered(final int event) {
+        public boolean isEventRegistered(int event) {
             synchronized (mLock) {
                 return (mRegisteredEvents.contains(event));
             }
         }
 
-        public void registerEvent(final int event) {
+        public void registerEvent(int event) {
             synchronized (mLock) {
                 mRegisteredEvents.add(event);
             }
         }
 
-        public void unregisterEvent(final int event) {
+        public void unregisterEvent(int event) {
             synchronized (mLock) {
                 mRegisteredEvents.remove(event);
             }
         }
 
-        public Parcel handleSystemAPI(int method, Parcel parcel, FileDescriptor fd) {
-            Parcel result = null;
+        public Parcel handleSystemCall(int method, Parcel parcel, FileDescriptor fd) {
+            if (mSystemCall == null) {
+                return null;
+            }
+
+            Parcel result;
 
             synchronized (mLock) {
                 switch (method) {
-                    case SystemConstants.GET_TTY_MODE: //FALL-THROUGH
-                    case SystemConstants.GET_RTT_MODE:
-                        result = handleSystemCallForCallSettings(method);
-                        break;
                     case SystemConstants.REQUEST_NETWORK: //FALL-THROUGH
                     case SystemConstants.RELEASE_NETWORK: //FALL-THROUGH
                     case SystemConstants.GET_ACCESS_NETWORK_INFO: //FALL-THROUGH
@@ -1524,12 +1526,6 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.IS_EMERGENCY_NUMBER:
                         result = handleSystemCallForTelephony(method, parcel);
                         break;
-                    case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
-                    case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
-                    case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
-                    case SystemConstants.GET_WFC_ADDRESS_ID:
-                        result = handleSystemCallForWifiCalling(method);
-                        break;
                     case SystemConstants.START_LISTENING_FOR_LOCATION: //FALL-THROUGH
                     case SystemConstants.STOP_LISTENING_FOR_LOCATION: //FALL-THROUGH
                     case SystemConstants.GET_LAST_KNOWN_LOCATION: //FALL-THROUGH
@@ -1548,7 +1544,7 @@ public class SystemInterface implements JniSystemListener {
                         result = handleSystemCallForIpSec(method, parcel, fd);
                         break;
                     default:
-                        result = handleSystemCall(method);
+                        result = handleSystemCallForOthers(method);
                         break;
                 }
             }
@@ -1601,11 +1597,8 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemCallForNetwork(int method, Parcel parcel, FileDescriptor fd) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
+
             switch (method) {
                 case SystemConstants.REQUEST_NETWORK: {
                     int apnType = parcel.readInt();
@@ -1844,10 +1837,6 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemCallForSim(int method, Parcel parcel) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
 
             switch (method) {
@@ -1886,11 +1875,8 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemCallForTelephony(int method, Parcel parcel) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
+
             switch (method) {
                 case SystemConstants.GET_DEVICE_ID:
                     result.writeString(mSystemCall.getImei());
@@ -1975,11 +1961,8 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemCallForLocation(int method, Parcel parcel) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
+
             switch (method) {
                 case SystemConstants.START_LISTENING_FOR_LOCATION:
                     mSystemCall.startListeningForLocation(parcel.readInt());
@@ -2016,10 +1999,6 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private Parcel handleSystemCallForRadio(int method, Parcel parcel) {
-            if (mSystemRadio == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
 
             switch (method) {
@@ -2028,21 +2007,18 @@ public class SystemInterface implements JniSystemListener {
                     int trafficType = parcel.readInt();
                     int accessNetworkType = parcel.readInt();
                     int direction = parcel.readInt();
-
-                    result.writeInt(mSystemRadio.startImsTraffic(id, trafficType,
-                            accessNetworkType, direction));
+                    mSystemCall.startImsTraffic(id, trafficType, accessNetworkType, direction);
+                    result.writeInt(1);
                     break;
                 }
                 case SystemConstants.STOP_IMS_TRAFFIC: {
                     int id = parcel.readInt();
-
-                    mSystemRadio.stopImsTraffic(id);
+                    mSystemCall.stopImsTraffic(id);
                     break;
                 }
                 case SystemConstants.TRIGGER_EPS_FALLBACK: {
                     int reason = parcel.readInt();
-
-                    result.writeInt(mSystemRadio.triggerEpsFallback(reason));
+                    result.writeInt(mSystemCall.triggerEpsFallback(reason) ? 1 : 0);
                     break;
                 }
                 default:
@@ -2055,11 +2031,8 @@ public class SystemInterface implements JniSystemListener {
 
         // IpSec
         private Parcel handleSystemCallForIpSec(int method, Parcel parcel, FileDescriptor fd) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
             Parcel result = Parcel.obtain();
+
             switch (method) {
                 case SystemConstants.ADD_IPSEC_SA_PARAMETER: {
                     IpSecSaParameter param = IpSecSaParameter.CREATOR.createFromParcel(parcel);
@@ -2091,11 +2064,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemCall(int method) {
-            if (mSystemCall == null) {
-                return null;
-            }
-
+        private Parcel handleSystemCallForOthers(int method) {
             Parcel result = null;
 
             switch (method) {

@@ -15,18 +15,21 @@
  */
 package com.android.imsstack.system;
 
+/**
+ * An interface that notifies the native layer of system events.
+ */
 public interface ISystem {
     /**
-     * return slot id
+     * Returns the slot-id of this instance.
      */
-    public int getSlotId();
-
-    public void setSystemCallInterface(SystemCallInterface systemCall);
+    int getSlotId();
 
     /**
-     * set system radio interface
+     * Sets the {@link SystemCallInterface} to perform the system call from the native layer.
+     *
+     * @param systemCall The {@link SystemCallInterface} to be set.
      */
-    void setSystemRadioInterface(SystemRadioInterface systemRadio);
+    void setSystemCallInterface(SystemCallInterface systemCall);
 
     /**
      * Notifies the changes of airplane mode in the phone settings.
@@ -34,7 +37,7 @@ public interface ISystem {
      * @param airplaneMode the current airplane mode status 0: Airplane mode
      *            OFF, 1: Airplane mode ON
      */
-    public void notifyAirplaneModeChanged(final int airplaneMode);
+    void notifyAirplaneModeChanged(int airplaneMode);
 
     /**
      * Notifies the failure result to connect a data connection of the specified
@@ -43,7 +46,7 @@ public interface ISystem {
      * @param apnType the APN type (1: ims, 2: internet, 3: xcap, 9: emergency,
      *            21: wifi)
      */
-    public void notifyDataConnectionFailed(final int apnType);
+    void notifyDataConnectionFailed(int apnType);
 
     /**
      * Notifies the IPCAN category of the attached data connection.
@@ -52,8 +55,7 @@ public interface ISystem {
      *            21: wifi)
      * @param ipcanCategory the IPCAN category (0: MOBILE, 1: WLAN); Refer to IIPCAN.h
      */
-    public void notifyDataConnectionIpcanChanged(final int apnType,
-            final int ipcanCategory);
+    void notifyDataConnectionIpcanChanged(int apnType, int ipcanCategory);
 
     /**
      * Notifies the state of the specified data connection.
@@ -67,8 +69,7 @@ public interface ISystem {
      *            {@link TelephonyManager.DATA_CONNECTED} (2)
      *            {@link TelephonyManager.DATA_SUSPENDED} (3)
      */
-    public void notifyDataConnectionStateChanged(final int apnType,
-        final int state);
+    void notifyDataConnectionStateChanged(int apnType, int state);
 
     /**
      * Notifies the network type which the device is attached.
@@ -83,7 +84,7 @@ public interface ISystem {
      *          {@link RAT_EVDO} (6)
      *          {@link RAT_5G} (7)
      */
-    public void notifyNetworkTypeChanged(final int networkType);
+    void notifyNetworkTypeChanged(int networkType);
 
     /**
      * Notifies the voice network type which the device is attached.
@@ -98,7 +99,7 @@ public interface ISystem {
      *          {@link RAT_EVDO} (6)
      *          {@link RAT_5G} (7)
      */
-    public void notifyVoiceNetworkTypeChanged(final int networkType);
+    void notifyVoiceNetworkTypeChanged(int networkType);
 
     /**
      * Notifies the service state related to the attached network.
@@ -109,7 +110,7 @@ public interface ISystem {
      *            {@link ServiceState.STATE_EMERGENCY_ONLY} (2)
      *            {@link ServiceState.STATE_POWER_OFF} (3)
      */
-    public void notifyServiceStateChanged(final int serviceState);
+    void notifyServiceStateChanged(int serviceState);
 
     /**
      * Notifies the voice call (CS / IMS) state.
@@ -119,14 +120,14 @@ public interface ISystem {
      *            {@link TelephonyManager.CALL_STATE_RINGING} (1)
      *            {@link TelephonyManager.CALL_STATE_OFFHOOK} (2)
      */
-    public void notifyVoiceCallStateChanged(final int state);
+    void notifyVoiceCallStateChanged(int state);
 
     /**
      * Notifies the changes of the IMS configuration.
      *
      * @param configs the configuration items to be updated
      */
-    public void notifyConfigurationChanged(final int configs);
+    void notifyConfigurationChanged(int configs);
 
     /**
      * Notifies the events which are registered by the native modules.
@@ -135,7 +136,7 @@ public interface ISystem {
      * @param param1 the parameter related to the current event
      * @param param2 the additional parameter related to the current event
      */
-    public void notifyEvent(final int event, final int param1, final int param2);
+    void notifyEvent(int event, int param1, int param2);
 
     /**
      * Notifies the ISIM state to the native module.

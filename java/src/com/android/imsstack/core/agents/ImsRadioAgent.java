@@ -31,7 +31,6 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.system.SystemRadioInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 
@@ -45,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * activities to modem, getting NAS/RRC connection setup result details from modem and
  * triggering EPS fallback to modem.
  */
-public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
+public class ImsRadioAgent implements ImsRadioInterface {
     private final int mSlotId;
     private boolean mImsHalTestEnabled = false;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
@@ -69,26 +68,12 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         mSlotId = slotId;
     }
 
-    /**
-     * Set the system radio interface.
-     *
-     * @param systemRadio The system radio interface
-     */
-    public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
-        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
-
-        if (system != null) {
-            system.setSystemRadioInterface(systemRadio);
-        }
-    }
-
     @Override
     public void init(Context context) {
         mHandler = new Handler(Looper.myLooper());
         mPhoneStateListener = new ImsRadioPhoneStateListener();
         mPhoneStateListener.setListener();
         mSsacInfo = new SsacInfo();
-        setSystemRadioInterface(this);
 
         NativeStateInterface nsi =
                 AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
@@ -118,7 +103,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
             mNativeStateListener = null;
         }
 
-        setSystemRadioInterface(null);
         mSsacInfo = null;
         mPhoneStateListener.dispose();
         mHandler.removeCallbacksAndMessages(null);
@@ -195,7 +179,8 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     }
 
     @Override
-    public int startImsTraffic(int id, int trafficType, int accessNetworkType, int direction) {
+    public void startImsTraffic(int id, @TrafficType int trafficType,
+            @AccessNetworkType int accessNetworkType, @Direction int direction) {
         ImsLog.d(mSlotId, "startImsTraffic - id=" + id + ", type=" + trafficType
                 + ", network type=" + accessNetworkType + ", dir=" + direction);
 
@@ -207,7 +192,7 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
                     invokeModifyImsTrafficSession(convertAccessNetworkType(accessNetworkType),
                             tcb, mHandler::post);
                 }
-                return SystemRadioInterface.RESULT_OK;
+                return;
             }
         }
 
@@ -217,8 +202,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         invokeStartImsTrafficSession(convertTrafficType(trafficType),
                 convertAccessNetworkType(accessNetworkType),
                 convertTrafficDirection(direction), mHandler::post, tcb);
-
-        return SystemRadioInterface.RESULT_OK;
     }
 
     @Override
@@ -234,7 +217,7 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     }
 
     @Override
-    public int triggerEpsFallback(int reason) {
+    public boolean triggerEpsFallback(int reason) {
         ImsLog.d(mSlotId, "triggerEpsFallback - reason=" + reason);
 
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
@@ -243,14 +226,13 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         if (mtf != null) {
             try {
                 mtf.triggerEpsFallback(reason);
-                return SystemRadioInterface.RESULT_OK;
+                return true;
             } catch (IllegalStateException e) {
-                ImsLog.e("triggerEpsFallback: " + e.toString());
-                return SystemRadioInterface.RESULT_ERROR;
+                ImsLog.e(mSlotId, "triggerEpsFallback: " + e.toString());
             }
         }
 
-        return SystemRadioInterface.RESULT_ERROR;
+        return false;
     }
 
     private static IDcNetWatcher getDcNetWatcher(int slotId) {

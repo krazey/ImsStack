@@ -747,6 +747,55 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
+     * Indicates NAS and RRC layers of the modem that the upcoming IMS traffic is
+     * for the service mentioned in the traffic type.
+     *
+     * @param id The identification for IMS traffic
+     * @param trafficType The type for IMS traffic
+     * @param accessNetworkType The type for radio access network type
+     * @param direction The direction for IMS traffic
+     */
+    @Override
+    public void startImsTraffic(int id, int trafficType, int accessNetworkType, int direction) {
+        ImsRadioInterface imsRadio = AgentFactory.getInstance().getAgent(
+                ImsRadioInterface.class, mSlotId);
+        if (imsRadio != null) {
+            imsRadio.startImsTraffic(id, trafficType, accessNetworkType, direction);
+        }
+    }
+
+    /**
+     * Indicates IMS traffic has been stopped. For all IMS traffic,
+     * notified with startImsTraffic, IMS service shall notify stopImsTraffic
+     * when it completes the traffic. The reference listener corresponding to id is removed.
+     *
+     * @param id The identification to be removed
+     */
+    @Override
+    public void stopImsTraffic(int id) {
+        ImsRadioInterface imsRadio = AgentFactory.getInstance().getAgent(
+                ImsRadioInterface.class, mSlotId);
+        if (imsRadio != null) {
+            imsRadio.stopImsTraffic(id);
+        }
+    }
+
+    /**
+     * Triggers the EPS fallback procedure by UE for the case where the user is trying to
+     * place a voice call in NR network and the voice call is not established
+     * within several seconds.
+     *
+     * @param reason Specifies the reason that causes EPS fallback
+     * @return {@code true} if the operation is successfully performed, {@code false} otherwise.
+     */
+    @Override
+    public boolean triggerEpsFallback(int reason) {
+        ImsRadioInterface imsRadio = AgentFactory.getInstance().getAgent(
+                ImsRadioInterface.class, mSlotId);
+        return (imsRadio != null) ? imsRadio.triggerEpsFallback(reason) : false;
+    }
+
+    /**
      * Returns the flag specifying whether the IMS voice call is supported on the LTE network.
      */
     @Override

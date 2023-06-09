@@ -65,6 +65,7 @@ public class SystemCallAgentTest {
     @Mock private IpSecInterface mIpSecInterface;
     @Mock private TelephonyInterface mTelephonyInterface;
     @Mock private CellInfoInterface mCellInfoInterface;
+    @Mock private ImsRadioInterface mRadioInterface;
     @Mock private IDcApn mDcApn;
     @Mock private IDcNetWatcher mDcNetWatcher;
     @Mock private IDcUtils mDcUtils;
@@ -84,6 +85,7 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(IpSecInterface.class, mIpSecInterface, SLOT0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, mTelephonyInterface, SLOT0);
         AgentFactory.getInstance().setAgent(CellInfoInterface.class, mCellInfoInterface, SLOT0);
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, mRadioInterface, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimAgent, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, mNativeStateAgent, SLOT0);
         replaceDcApn(mDcApn);
@@ -108,6 +110,7 @@ public class SystemCallAgentTest {
         AgentFactory.getInstance().setAgent(IpSecInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
         SystemInterface.setSystemInterface(null);
@@ -116,6 +119,7 @@ public class SystemCallAgentTest {
         mDcUtils = null;
         mDcNetWatcher = null;
         mDcApn = null;
+        mRadioInterface = null;
         mCellInfoInterface = null;
         mTelephonyInterface = null;
         mIpSecInterface = null;
@@ -806,6 +810,53 @@ public class SystemCallAgentTest {
 
         assertNull(result);
         verifyNoMoreInteractions(mCellInfoInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testStartImsTraffic() {
+        int id = 1;
+        int trafficType = ImsRadioInterface.TRAFFIC_TYPE_VOICE;
+        int accessNetworkType = ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN;
+        int direction = ImsRadioInterface.DIRECTION_MO;
+        mSystemCallAgent.startImsTraffic(id, trafficType, accessNetworkType, direction);
+
+        verify(mRadioInterface).startImsTraffic(eq(id),
+                eq(trafficType), eq(accessNetworkType), eq(direction));
+
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT0);
+        mSystemCallAgent.startImsTraffic(id, trafficType, accessNetworkType, direction);
+
+        verifyNoMoreInteractions(mRadioInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testStopImsTraffic() {
+        int id = 1;
+        mSystemCallAgent.stopImsTraffic(id);
+
+        verify(mRadioInterface).stopImsTraffic(eq(id));
+
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT0);
+        mSystemCallAgent.stopImsTraffic(id);
+
+        verifyNoMoreInteractions(mRadioInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testTriggerEpsFallback() {
+        int reason = 1;
+        mSystemCallAgent.triggerEpsFallback(reason);
+
+        verify(mRadioInterface).triggerEpsFallback(eq(reason));
+
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT0);
+        boolean result = mSystemCallAgent.triggerEpsFallback(reason);
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mRadioInterface);
     }
 
     @Test
