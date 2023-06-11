@@ -79,7 +79,15 @@ IMS_BOOL VideoController::OpenSession()
         if (m_pSession->GetState() == VideoMediaSession::STATE_IDLE)
         {
             m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
-            return m_pSession->Open();
+
+            if (m_nPort > 0)
+            {
+                return m_pSession->Open();
+            }
+            else
+            {
+                IMS_TRACE_D("skip OpenSession() - Port is 0", 0, 0, 0);
+            }
         }
     }
 

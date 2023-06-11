@@ -60,12 +60,23 @@ IMS_BOOL TextController::CreateSession(IMediaSessionListener* pListener, TextCon
 PUBLIC
 IMS_BOOL TextController::OpenSession()
 {
-    IMS_TRACE_D("OpenSession()", 0, 0, 0);
-
-    if (m_pSession != IMS_NULL && m_pSession->GetState() == TextMediaSession::STATE_NONE)
+    if (m_pSession != IMS_NULL)
     {
-        m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
-        return m_pSession->Open();
+        IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
+        if (m_pSession->GetState() == TextMediaSession::STATE_NONE)
+        {
+            m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+
+            if (m_nPort > 0)
+            {
+                return m_pSession->Open();
+            }
+            else
+            {
+                IMS_TRACE_D("skip OpenSession() - Port is 0", 0, 0, 0);
+            }
+        }
     }
 
     return IMS_FALSE;
