@@ -32,6 +32,8 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo;
@@ -588,6 +590,18 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         mRegisteredNetworkType = NetworkType.NONE;
         mFeatureTagBits = 0;
         mFeatureTags.clear();
+
+        if (networkType == NetworkType.NONE) {
+            if (reason == ReasonCode.CODE_PLMN_BLOCK
+                    || reason == ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT) {
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if (dnw != null) {
+                    networkType = getRegistrationNetworkType(dnw.getNetworkType());
+                    ImsLog.d(mSlotId, "update actual networkType : " + networkType);
+                }
+            }
+        }
+
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyDeregistered(networkType, reason, getErrorMessage(reason));
         }
@@ -751,7 +765,27 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 getStringFromBundle(CarrierConfig.Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
     }
 
-    private String convertReasonToKey(int reason) {
+    private static int getRegistrationNetworkType(int telephonyNetworkType) {
+        switch (telephonyNetworkType) {
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return NetworkType.IWLAN;
+            case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPAP: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return NetworkType.UTRAN;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return NetworkType.LTE;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return NetworkType.NR;
+            default:
+                return NetworkType.NONE;
+        }
+    }
+
+    private static String convertReasonToKey(int reason) {
         switch (reason) {
             case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403:
                 return CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;

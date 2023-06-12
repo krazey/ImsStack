@@ -43,7 +43,9 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
@@ -93,6 +95,7 @@ public class AosServiceTest extends ImsStackTest {
     @Mock IAosRegistrationListener mMockAosRegistrationListener;
     @Mock IAosInfoListener mMockAosInfoListener;
     @Mock NativeStateInterface mMockNativeStateInterface;
+    @Mock IDcNetWatcher mMockDcNetWatcher;
 
     @Before
     public void setup() throws Exception {
@@ -110,6 +113,8 @@ public class AosServiceTest extends ImsStackTest {
         replaceInstance(ImsServiceRegistry.class, "sImsServiceRegistrys", null,
                 mMockImsServiceRegistrys);
 
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
+
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
@@ -123,6 +128,8 @@ public class AosServiceTest extends ImsStackTest {
     public void tearDown() throws Exception {
         mAosService.stop();
         mAosService.cleanup();
+
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
@@ -861,6 +868,50 @@ public class AosServiceTest extends ImsStackTest {
 
         verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.LTE,
                 ReasonCode.CODE_REGISTRATION_ERROR, null);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetwork() {
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(NetworkType.NONE);
+        parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.mNativeListener;
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.NONE,
+                ReasonCode.CODE_REGISTRATION_ERROR, null);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndPlmnBlock() {
+        mAosService.mRegisteredNetworkType = NetworkType.NONE;
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(NetworkType.NONE);
+        parcel.writeInt(ReasonCode.CODE_PLMN_BLOCK);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.mNativeListener;
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.UTRAN,
+                ReasonCode.CODE_PLMN_BLOCK, null);
     }
 
     @Test
