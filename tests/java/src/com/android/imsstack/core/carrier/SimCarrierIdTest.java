@@ -17,6 +17,7 @@ package com.android.imsstack.core.carrier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.test.suitebuilder.annotation.SmallTest;
@@ -38,7 +39,7 @@ public class SimCarrierIdTest {
 
     @Test
     @SmallTest
-    public void constructor_simAbsent() throws Exception {
+    public void testConstructorWithSimAbsent() {
         SimCarrierId cid = new SimCarrierId.Builder().build();
 
         assertEquals(SimCarrierId.UNKNOWN_ID, cid.getCarrierId());
@@ -56,7 +57,7 @@ public class SimCarrierIdTest {
 
     @Test
     @SmallTest
-    public void constructor_simLocked() throws Exception {
+    public void testConstructorWithSimLocked() {
         SimCarrierId cid = new SimCarrierId.Builder()
                 .setIccId(SIM_ICCID)
                 .setSimState(SimCarrierId.SIM_LOCKED)
@@ -77,7 +78,7 @@ public class SimCarrierIdTest {
 
     @Test
     @SmallTest
-    public void constructor_simLoaded() throws Exception {
+    public void testConstructorWithSimLoaded() {
         SimCarrierId cid = new SimCarrierId.Builder()
                 .setCarrierId(SIM_CARRIER_ID)
                 .setSpecificCarrierId(SIM_SPECIFIC_CARRIER_ID)
@@ -105,11 +106,13 @@ public class SimCarrierIdTest {
 
     @Test
     @SmallTest
-    public void equals() throws Exception {
+    public void testEquals() {
         SimCarrierId cid1 = new SimCarrierId.Builder().build();
         SimCarrierId cid2 = new SimCarrierId.Builder().build();
 
+        assertTrue(cid1.equals(cid1));
         assertTrue(cid1.equals(cid2));
+        assertEquals(cid1.hashCode(), cid2.hashCode());
 
         cid2 = new SimCarrierId.Builder()
                 .setCarrierId(SIM_CARRIER_ID)
@@ -124,6 +127,7 @@ public class SimCarrierIdTest {
                 .build();
 
         assertFalse(cid1.equals(cid2));
+        assertNotEquals(cid1.hashCode(), cid2.hashCode());
 
         SimCarrierId cid3 = new SimCarrierId.Builder()
                 .setCarrierId(SIM_CARRIER_ID)
@@ -138,5 +142,9 @@ public class SimCarrierIdTest {
                 .build();
 
         assertTrue(cid2.equals(cid3));
+        assertEquals(cid2.hashCode(), cid3.hashCode());
+
+        assertFalse(cid1.equals(null));
+        assertFalse(cid1.equals(new Object()));
     }
 }

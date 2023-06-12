@@ -38,6 +38,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
+import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -196,6 +197,24 @@ public class CarrierInfoTest {
             assertEquals(SIM_OPERATOR_NAME, cid.getSpn());
             assertEquals(SIM_ICCID, cid.getIccId());
         }
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateCarrierIdWithInvalidSlotId() {
+        assertFalse(mCi.updateCarrierId(MAX_SIM_SLOT));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetCarrierIdFromSimWhenTelephonyManagerNull() {
+        SubscriptionManager sm =
+                AppContext.getInstance().getSystemService(SubscriptionManager.class);
+        when(sm.getSubscriptionIds(anyInt())).thenReturn(new int[] { MSimUtils.INVALID_SUB_ID });
+
+        SimCarrierId simCarrierId = mCi.getCarrierIdFromSim(SLOT0);
+
+        assertEquals(simCarrierId, new SimCarrierId.Builder().build());
     }
 
     @Test
