@@ -387,8 +387,11 @@ public class ImsStackApp extends Application {
             carrierId = testCarrierId;
         }
 
-        ImsCarrierResolver.Carrier carrier = ImsCarrierResolver.getCarrierFromCarrierId(
-                slotId, subId, carrierId, specificCarrierId);
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(carrierId)
+                .setSpecificCarrierId(specificCarrierId)
+                .build();
+        ImsCarrierResolver.Carrier carrier = ImsCarrierResolver.getCarrierFromCarrierId(scid);
 
         Log.d(TAG, "resolveImsCarrier: " + carrier.toString());
 
