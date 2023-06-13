@@ -1039,10 +1039,11 @@ void SdpOaState::CompleteExchange()
         {
             SetCurrentView(m_pProposalView);
 
-            // Update the direction information if pLastOfferMade is present...
+            // Update the session parameter related information if pLastOfferMade is present.
             if ((m_nMode == MODE_ANSWERER) && (m_pLastOfferMade != IMS_NULL))
             {
                 m_pLastOfferMade->UpdateDirection(m_pProposalView);
+                m_pLastOfferMade->UpdateRemoteVersion(m_pProposalView->GetRemoteVersion());
             }
         }
         else
@@ -1716,6 +1717,10 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
                 (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
             (m_nState == STATE_OFFER_CHANGE_RECEIVED))
     {
+        // Sets this flag in the proposal view because the negotiated SDP will be sent
+        // with the selected codec.
+        m_pProposalView->SetLastSdpProvidedWithNegotiatedSdp(IMS_TRUE);
+
         // Increase the session version of the negotiated session
         m_pProposalView->IncreaseSessionVersion();
         // Increase the session version of the capabilities session
