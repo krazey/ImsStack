@@ -211,6 +211,8 @@ protected:
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
     static IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason);
 
+    IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
+
     IMtcCallContext& m_objContext;
 
 private:

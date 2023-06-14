@@ -1517,6 +1517,79 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogIfSupportedAndSd
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
 }
 
+TEST_F(OutgoingStateTest,
+        SessionRprReceivedDoesNotSendLocalResourceConfirmationWithPrackIfNotRequired)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+    EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest,
+        SessionRprReceivedDoesNotSendLocalResourceConfirmationWithPrackIfResourceNotReserved)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+    EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest,
+        SessionRprReceivedInvokesLocalResourceConfirmationWithPrackIfResourceReserved)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_183));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+    EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
+    EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
 TEST_F(OutgoingStateTest, UssiStartedInvokesSendStartedToUi)
 {
     MockIMessage objMessage;

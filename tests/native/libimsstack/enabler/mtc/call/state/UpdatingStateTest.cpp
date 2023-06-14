@@ -850,10 +850,46 @@ TEST_F(UpdatingStateTest, SessionRprDeliveryFailedReturnsEstablishedState)
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionRprDeliveryFailed(&objSession));
 }
 
-TEST_F(UpdatingStateTest, SessionRprReceivedInvokesSendPrack)
+TEST_F(UpdatingStateTest,
+        SessionRprReceivedInvokesSendLocalResourceConfirmationWithPrackIfResourceReserved)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_TRUE)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionRprReceived(&objSession, -1));
+}
+
+TEST_F(UpdatingStateTest,
+        SessionRprReceivedDoesNotSendLocalResourceConfirmationWithPrackIfNotRequired)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
+    EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionRprReceived(&objSession, -1));
+}
+
+TEST_F(UpdatingStateTest,
+        SessionRprReceivedDoesNotSendLocalResourceConfirmationWithPrackIfResourceNotReserved)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillOnce(Return(IMS_SUCCESS));
 
@@ -867,6 +903,21 @@ TEST_F(UpdatingStateTest, SessionRprReceivedNotifiesFailureIfSdpNegoFailed)
             .WillByDefault(Return(&objMessage));
     EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
     EXPECT_CALL(objMtcSession, SendPrack(IMS_FALSE)).Times(0);
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
+    EXPECT_CALL(objUiNotifier,
+            SendUpdateFailed(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION)));
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionRprReceived(&objSession, -1));
+}
+
+TEST_F(UpdatingStateTest, SessionRprReceivedNotifiesFailureIfSendPrackFailed)
+{
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(objMtcSession, HandleResponse(ResponseType::PROVISIONAL_RESPONSE, Ref(objMessage)));
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession));
     EXPECT_CALL(objUiNotifier,
@@ -934,6 +985,26 @@ TEST_F(UpdatingStateTest, QosReservedInvokesSendEarlyUpdateIfPreconditionReady)
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->QosReserved(&objSession, 0));
+}
+
+TEST_F(UpdatingStateTest, QosReservedInvokesRecoverModificationIfSendEarlyUpdateFail)
+{
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_200));
+
+    pUpdatingInfo->SetModifier();
+    ON_CALL(objMtcPreconditionManager, IsLocalResourceConfirmationRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcPreconditionManager, IsAvailableToSendLocalResourceConfirmation(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(objMediaManager, RestoreSdp(&objSession)).Times(1);
+    EXPECT_CALL(objMtcPreconditionManager, OnCallModified(&objSession)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->QosReserved(&objSession, 0));
 }

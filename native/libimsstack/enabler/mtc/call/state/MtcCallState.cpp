@@ -1067,3 +1067,12 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
             return CODE_LOCAL_NOT_REGISTERED;
     }
 }
+
+PROTECTED
+IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const
+{
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+
+    return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
+            objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);
+}

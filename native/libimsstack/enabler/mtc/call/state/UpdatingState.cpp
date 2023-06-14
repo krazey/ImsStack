@@ -392,13 +392,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDelivered(IN ISession* p
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
-    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsLocalResourceConfirmationRequired(piSession))
-    {
-        return GetStateName();
-    }
-
-    if (!objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession))
+    if (!IsNeedToSendLocalResourceConfirmation(piSession))
     {
         return GetStateName();
     }
@@ -484,7 +478,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
         return CallStateName::ESTABLISHED;
     }
 
-    if (pSession->SendPrack(IMS_FALSE) == IMS_FAILURE)
+    if (pSession->SendPrack(IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
     {
         // TODO: Send CANCEL
         RecoverModificationFailure();
@@ -579,14 +573,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::QosReserved(
 
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
-        const IMtcPreconditionManager& objPreconditionManager =
-                m_objContext.GetPreconditionManager();
-        if (!objPreconditionManager.IsLocalResourceConfirmationRequired(piSession))
-        {
-            return GetStateName();
-        }
-
-        if (!objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession))
+        if (!IsNeedToSendLocalResourceConfirmation(piSession))
         {
             return GetStateName();
         }

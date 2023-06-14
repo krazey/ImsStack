@@ -48,7 +48,6 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
@@ -105,13 +104,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         return GetStateName();
     }
 
-    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsLocalResourceConfirmationRequired(piSession))
-    {
-        return GetStateName();
-    }
-
-    if (!objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession))
+    if (!IsNeedToSendLocalResourceConfirmation(piSession))
     {
         return GetStateName();
     }
@@ -355,13 +348,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
-    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsLocalResourceConfirmationRequired(piSession))
-    {
-        return GetStateName();
-    }
-
-    if (!objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession))
+    if (!IsNeedToSendLocalResourceConfirmation(piSession))
     {
         return GetStateName();
     }
@@ -551,7 +538,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (pSession->SendPrack(IMS_FALSE) == IMS_FAILURE)
+    if (pSession->SendPrack(IsNeedToSendLocalResourceConfirmation(piSession)) == IMS_FAILURE)
     {
         // TODO: If there is no ISession in ISession::STATE_ESTABLISHED state and
         // not piSession->IsFinalResponseReceivedForInitialInviteRequest())
