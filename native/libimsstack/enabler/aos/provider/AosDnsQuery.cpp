@@ -39,18 +39,21 @@ private:
     AosDnsQueryPrivate& operator=(IN const AosDnsQueryPrivate& objRhs);
 
 public:
-    IMS_BOOL DoDnsQuery(IN AString& strDomainName, IN INetworkConnection* piConnection);
     IMS_BOOL Start();
     IMS_BOOL Terminate();
+    IMS_BOOL DoDnsQuery(IN AString& strDomainName, IN INetworkConnection* piConnection);
 
-private:
     void RunImp() override;
 
     IMS_BOOL ResetEvent(IN IMS_UINT32 nEvent);
     IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
+    IMS_BOOL HasEvent(IN IMS_UINT32 nEvent);
+    void SetThread(IN OsPthread* pThread);
+    void SetConnection(IN INetworkConnection* piConnection);
+    void SetSignaled(IN IMS_BOOL bSignaled);
 
-    void SetDomainName(IN const AString& strDomainName) { m_strDomainName = strDomainName; };
-    void SetNetConnection(IN INetworkConnection* piConnection) { m_piConnection = piConnection; };
+private:
+    void SetDomainName(IN const AString& strDomainName);
 
 private:
     // Dns Query Event
@@ -111,122 +114,6 @@ PUBLIC VIRTUAL AosDnsQueryPrivate::~AosDnsQueryPrivate()
     }
 }
 
-PRIVATE VIRTUAL void AosDnsQueryPrivate::RunImp()
-{
-    IMS_BOOL bLoop = IMS_TRUE;
-    IMS_SINT32 nWaitResult;
-
-    if (m_pQueryer != IMS_NULL)
-    {
-        m_pQueryer->DnsQueryPrivate_Ready();
-    }
-
-    while (bLoop)
-    {
-        m_objMutex4Signal.Lock();
-
-        if (m_bSignaled)
-        {
-            IMS_TRACE_D("AosDnsQueryPrivate :: signal is already triggered", 0, 0, 0);
-            nWaitResult = 1;
-        }
-        else
-        {
-            nWaitResult = pthread_cond_wait(&m_stSignal,
-                    reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
-
-            if (nWaitResult == 0)
-            {
-                // no_op
-            }
-        }
-
-        m_bSignaled = IMS_FALSE;
-
-        m_objMutex4Signal.Unlock();
-
-        m_objMutex4Event.Lock();
-        IMS_UINT32 nEventCache = m_nEvent;
-        m_objMutex4Event.Unlock();
-
-        IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
-                nWaitResult, m_nEvent, 0);
-
-        if ((nEventCache & DNS_QUERY_EXEC) != 0)
-        {
-            ImsList<IpAddress> objIps;
-
-            if (m_piConnection->GetHostByName(m_strDomainName, objIps) == -1)
-            {
-                IMS_TRACE_I("GetHostByName is failed", 0, 0, 0);
-
-                if (m_pQueryer != IMS_NULL)
-                {
-                    m_pQueryer->DnsQueryPrivate_Done(IMS_FALSE, objIps);
-                }
-            }
-            else
-            {
-                IMS_TRACE_I("GetHostByName is success", 0, 0, 0);
-
-                if (m_pQueryer != IMS_NULL)
-                {
-                    m_pQueryer->DnsQueryPrivate_Done(IMS_TRUE, objIps);
-                }
-            }
-
-            ResetEvent(DNS_QUERY_EXEC);
-        }
-
-        if ((nEventCache & DNS_QUERY_TERMINATE) != 0)
-        {
-            bLoop = IMS_FALSE;
-            ResetEvent(DNS_QUERY_TERMINATE);
-        }
-
-        IMS_TRACE_D("AosDnsQueryPrivate :: event (%d) after processing", m_nEvent, 0, 0);
-    }
-
-    IMS_TRACE_D("AosDnsQueryPrivate :: terminated", 0, 0, 0);
-
-    JniDetachNativeThread();
-
-    if (m_pQueryer != IMS_NULL)
-    {
-        m_pQueryer->DnsQueryPrivate_Terminated();
-    }
-}
-
-PRIVATE
-IMS_BOOL AosDnsQueryPrivate::ResetEvent(IN IMS_UINT32 nEvent)
-{
-    m_objMutex4Event.Lock();
-
-    m_nEvent &= (~nEvent);
-    m_objMutex4Event.Unlock();
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL AosDnsQueryPrivate::SetEvent(IN IMS_UINT32 nEvent)
-{
-    m_objMutex4Event.Lock();
-
-    if ((m_nEvent & nEvent) != 0)
-    {
-        IMS_TRACE_D("SetEvent :: Event(%d) is already set", nEvent, 0, 0);
-        m_objMutex4Event.Unlock();
-
-        return IMS_FALSE;
-    }
-
-    m_nEvent |= nEvent;
-    m_objMutex4Event.Unlock();
-
-    return IMS_TRUE;
-}
-
 PUBLIC
 IMS_BOOL AosDnsQueryPrivate::Start()
 {
@@ -239,35 +126,15 @@ IMS_BOOL AosDnsQueryPrivate::Start()
 
     if (m_pThread->IsRunning())
     {
-        IMS_TRACE_D("thread is already running ...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    return m_pThread->Activate();
-}
-
-PUBLIC
-IMS_BOOL AosDnsQueryPrivate::DoDnsQuery(
-        IN AString& strDomainName, IN INetworkConnection* piConnection)
-{
-    IMS_TRACE_D("DoDnsQuery :: domain = %s", strDomainName.GetStr(), 0, 0);
-
-    if (!SetEvent(DNS_QUERY_EXEC))
+    if (m_pQueryer->IsTestMode())
     {
         return IMS_FALSE;
     }
 
-    SetDomainName(strDomainName);
-    SetNetConnection(piConnection);
-
-    m_objMutex4Signal.Lock();
-
-    m_bSignaled = IMS_TRUE;
-
-    pthread_cond_signal(&m_stSignal);
-    m_objMutex4Signal.Unlock();
-
-    return IMS_TRUE;
+    return m_pThread->Activate();
 }
 
 PUBLIC
@@ -299,6 +166,188 @@ IMS_BOOL AosDnsQueryPrivate::Terminate()
 }
 
 PUBLIC
+IMS_BOOL AosDnsQueryPrivate::DoDnsQuery(
+        IN AString& strDomainName, IN INetworkConnection* piConnection)
+{
+    IMS_TRACE_D("DoDnsQuery :: domain = %s", strDomainName.GetStr(), 0, 0);
+
+    if (!SetEvent(DNS_QUERY_EXEC))
+    {
+        return IMS_FALSE;
+    }
+
+    SetDomainName(strDomainName);
+    SetConnection(piConnection);
+
+    m_objMutex4Signal.Lock();
+
+    m_bSignaled = IMS_TRUE;
+
+    pthread_cond_signal(&m_stSignal);
+    m_objMutex4Signal.Unlock();
+
+    return IMS_TRUE;
+}
+
+PUBLIC
+VIRTUAL void AosDnsQueryPrivate::RunImp()
+{
+    IMS_BOOL bLoop = IMS_TRUE;
+    IMS_SINT32 nWaitResult = 0;
+
+    if (m_pQueryer != IMS_NULL)
+    {
+        m_pQueryer->DnsQueryPrivate_Ready();
+    }
+
+    while (bLoop)
+    {
+        m_objMutex4Signal.Lock();
+
+        if (m_bSignaled)
+        {
+            IMS_TRACE_D("AosDnsQueryPrivate :: signal is already triggered", 0, 0, 0);
+            nWaitResult = 1;
+        }
+        else
+        {
+            nWaitResult = (m_pQueryer->IsTestMode())
+                    ? 1
+                    : pthread_cond_wait(&m_stSignal,
+                              reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
+        }
+
+        m_bSignaled = IMS_FALSE;
+
+        m_objMutex4Signal.Unlock();
+
+        m_objMutex4Event.Lock();
+        IMS_UINT32 nEventCache = m_nEvent;
+        m_objMutex4Event.Unlock();
+
+        IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
+                nWaitResult, m_nEvent, 0);
+
+        if ((nEventCache & DNS_QUERY_EXEC) != 0)
+        {
+            ImsList<IpAddress> objIps;
+
+            if (m_piConnection->GetHostByName(m_strDomainName, objIps) == -1)
+            {
+                if (m_pQueryer != IMS_NULL)
+                {
+                    m_pQueryer->DnsQueryPrivate_Done(IMS_FALSE, objIps);
+                }
+            }
+            else
+            {
+                if (m_pQueryer != IMS_NULL)
+                {
+                    m_pQueryer->DnsQueryPrivate_Done(IMS_TRUE, objIps);
+                }
+            }
+
+            ResetEvent(DNS_QUERY_EXEC);
+        }
+
+        if ((nEventCache & DNS_QUERY_TERMINATE) != 0)
+        {
+            bLoop = IMS_FALSE;
+            ResetEvent(DNS_QUERY_TERMINATE);
+        }
+
+        if (m_pQueryer->IsTestMode())
+        {
+            bLoop = IMS_FALSE;
+        }
+
+        IMS_TRACE_D("AosDnsQueryPrivate :: event (%d) after processing", m_nEvent, 0, 0);
+    }
+
+    IMS_TRACE_D("AosDnsQueryPrivate :: terminated", 0, 0, 0);
+
+    JniDetachNativeThread();
+
+    if (m_pQueryer != IMS_NULL)
+    {
+        m_pQueryer->DnsQueryPrivate_Terminated();
+    }
+}
+
+PUBLIC
+void AosDnsQueryPrivate::SetDomainName(IN const AString& strDomainName)
+{
+    m_strDomainName = strDomainName;
+};
+
+PUBLIC
+IMS_BOOL AosDnsQueryPrivate::ResetEvent(IN IMS_UINT32 nEvent)
+{
+    m_objMutex4Event.Lock();
+
+    if ((m_nEvent & nEvent) == 0)
+    {
+        IMS_TRACE_D("ResetEvent :: Event(%d) is already reset", nEvent, 0, 0);
+        m_objMutex4Event.Unlock();
+
+        return IMS_FALSE;
+    }
+
+    m_nEvent &= (~nEvent);
+    m_objMutex4Event.Unlock();
+
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL AosDnsQueryPrivate::SetEvent(IN IMS_UINT32 nEvent)
+{
+    m_objMutex4Event.Lock();
+
+    if ((m_nEvent & nEvent) != 0)
+    {
+        IMS_TRACE_D("SetEvent :: Event(%d) is already set", nEvent, 0, 0);
+        m_objMutex4Event.Unlock();
+
+        return IMS_FALSE;
+    }
+
+    m_nEvent |= nEvent;
+    m_objMutex4Event.Unlock();
+
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL AosDnsQueryPrivate::HasEvent(IN IMS_UINT32 nEvent)
+{
+    if ((m_nEvent & nEvent) != 0)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
+void AosDnsQueryPrivate::SetThread(IN OsPthread* pThread)
+{
+    m_pThread = pThread;
+}
+
+PUBLIC
+void AosDnsQueryPrivate::SetConnection(IN INetworkConnection* piConnection)
+{
+    m_piConnection = piConnection;
+}
+
+PROTECTED
+void AosDnsQueryPrivate::SetSignaled(IN IMS_BOOL bSignaled)
+{
+    m_bSignaled = bSignaled;
+}
+
+PUBLIC
 AosDnsQuery::AosDnsQuery(IN IMS_BOOL bIsTest /*= IMS_FALSE*/) :
         ImsActivityEx(),
         m_pPrivate(IMS_NULL),
@@ -308,11 +357,6 @@ AosDnsQuery::AosDnsQuery(IN IMS_BOOL bIsTest /*= IMS_FALSE*/) :
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosDnsQuery = %" PFLS_u "/%" PFLS_x, GetName().GetStr(),
             sizeof(AosDnsQuery), this);
-
-    if (m_bIsTest)
-    {
-        return;
-    }
 
     m_pPrivate = new AosDnsQueryPrivate(this);
 
@@ -342,38 +386,119 @@ void AosDnsQuery::SetListener(IN IAosDnsQueryListener* piListener)
 PUBLIC
 IMS_BOOL AosDnsQuery::Request(IN const AString& strDomainName, IN INetworkConnection* piConnection)
 {
+    IMS_TRACE_I("Request", 0, 0, 0);
     m_strDomainName = strDomainName;
     m_piConnection = piConnection;
 
-    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_REQUEST, 0, 0);
+    PostMessage(MSG_REQUEST, 0, 0);
+    return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::Destroy()
 {
-    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DESTROY, 0, 0);
+    IMS_TRACE_I("Destroy", 0, 0, 0);
+    PostMessage(MSG_DESTROY, 0, 0);
+    return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Ready()
 {
-    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_READY, 0, 0);
+    IMS_TRACE_I("DnsQueryPrivate_Ready", 0, 0, 0);
+    PostMessage(MSG_READY, 0, 0);
+    return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const ImsList<IpAddress>& objIps)
 {
+    IMS_TRACE_I("DnsQueryPrivate_Done : %s", (bResult) ? "SUCCESS" : "FAILED", 0, 0);
+
     m_objIps = objIps;
-    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);
+    PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);
+    return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL AosDnsQuery::DnsQueryPrivate_Terminated()
 {
-    return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_TERMINATED, 0, 0);
+    IMS_TRACE_I("DnsQueryPrivate_Terminated", 0, 0, 0);
+    PostMessage(MSG_TERMINATED, 0, 0);
+    return IMS_TRUE;
 }
 
-PRIVATE
+// For Unit testing
+PUBLIC
+IMS_BOOL AosDnsQuery::IsTestMode()
+{
+    return m_bIsTest;
+}
+
+// For Unit testing
+PROTECTED
+IMS_BOOL AosDnsQuery::ResetEvent(IN IMS_UINT32 nEvent)
+{
+    return m_pPrivate->ResetEvent(nEvent);
+}
+
+// For Unit testing
+PROTECTED
+IMS_BOOL AosDnsQuery::SetEvent(IN IMS_UINT32 nEvent)
+{
+    return m_pPrivate->SetEvent(nEvent);
+};
+
+// For Unit testing
+PROTECTED
+IMS_BOOL AosDnsQuery::HasEvent(IN IMS_UINT32 nEvent)
+{
+    return m_pPrivate->HasEvent(nEvent);
+};
+
+// For Unit testing
+PROTECTED
+IMS_BOOL AosDnsQuery::Start()
+{
+    return m_pPrivate->Start();
+}
+
+// For Unit testing
+PROTECTED
+IMS_BOOL AosDnsQuery::Terminate()
+{
+    return m_pPrivate->Terminate();
+}
+
+// For Unit testing
+PROTECTED
+void AosDnsQuery::SetThread(IN OsPthread* pThread)
+{
+    return m_pPrivate->SetThread(pThread);
+};
+
+// For Unit testing
+PROTECTED
+void AosDnsQuery::SetConnection(IN INetworkConnection* piConnection)
+{
+    m_pPrivate->SetConnection(piConnection);
+};
+
+// For Unit testing
+PROTECTED
+void AosDnsQuery::SetSignaled(IN IMS_BOOL bSignaled)
+{
+    m_pPrivate->SetSignaled(bSignaled);
+}
+
+// For Unit testing
+PROTECTED
+void AosDnsQuery::RunImp()
+{
+    return m_pPrivate->RunImp();
+};
+
+PROTECTED
 IMS_BOOL AosDnsQuery::OnMessage(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("OnMessage :: (%d)", objMsg.nMSG, 0, 0);
@@ -391,31 +516,26 @@ IMS_BOOL AosDnsQuery::OnMessage(IN IMSMSG& objMsg)
 
         case MSG_REQUEST:
             if (m_pPrivate != IMS_NULL)
-            {
                 m_pPrivate->DoDnsQuery(m_strDomainName, m_piConnection);
-            }
             break;
 
         case MSG_DONE:
-        {
-            IMS_BOOL bResult = (LONG_TO_INT(objMsg.nWparam) > 0) ? IMS_TRUE : IMS_FALSE;
-            m_piListener->DnsQuery_Done(bResult, m_objIps);
-        }
-        break;
+            m_piListener->DnsQuery_Done(
+                    (LONG_TO_INT(objMsg.nWparam) > 0) ? IMS_TRUE : IMS_FALSE, m_objIps);
+            break;
 
         case MSG_DESTROY:
-            if (m_pPrivate != IMS_NULL && !m_pPrivate->Terminate())
-            {
+            if (m_pPrivate != IMS_NULL && !m_pPrivate->Terminate() && !m_bIsTest)
                 delete this;
-            }
             break;
 
         case MSG_TERMINATED:
-            delete this;
+            if (!m_bIsTest)
+                delete this;
             break;
 
         default:
-            break;
+            return IMS_FALSE;
     }
 
     return IMS_TRUE;

@@ -19,6 +19,7 @@
 #include "ImsActivityEx.h"
 #include "ImsList.h"
 #include "IpAddress.h"
+#include "OsPthread.h"
 #include "interface/AosInternalMsgDef.h"
 
 class INetworkConnection;
@@ -46,7 +47,31 @@ public:
     IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const ImsList<IpAddress>& objIps);
     IMS_BOOL DnsQueryPrivate_Terminated();
 
-private:
+public:
+    // For Unit testing
+    IMS_BOOL IsTestMode();
+
+protected:
+    // For Unit testing
+    IMS_BOOL ResetEvent(IN IMS_UINT32 nEvent);
+    // For Unit testing
+    IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
+    // For Unit testing
+    IMS_BOOL HasEvent(IN IMS_UINT32 nEvent);
+    // For Unit testing
+    IMS_BOOL Start();
+    // For Unit testing
+    IMS_BOOL Terminate();
+    // For Unit testing
+    void SetThread(IN OsPthread* pThread);
+    // For Unit testing
+    void SetConnection(IN INetworkConnection* piConnection);
+    // For Unit testing
+    void SetSignaled(IN IMS_BOOL bSignaled);
+    // For Unit testing
+    void RunImp();
+
+protected:
     // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMsg);
 
@@ -62,7 +87,7 @@ private:
 public:
     static IMS_UINT32 m_nIdentity;
 
-private:
+protected:
     AosDnsQueryPrivate* m_pPrivate;
     IAosDnsQueryListener* m_piListener;
     AString m_strDomainName;
@@ -70,9 +95,8 @@ private:
     ImsList<IpAddress> m_objIps;
 
 private:
-    // Use only for Unit test
+    // For Unit testing
     IMS_BOOL m_bIsTest;
-    friend class AosDnsQueryTest;
 };
 
 class IAosDnsQueryListener
