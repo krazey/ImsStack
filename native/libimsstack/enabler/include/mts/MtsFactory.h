@@ -23,20 +23,22 @@
 
 class IMtsApp;
 
-class MtsFactory final
+class MtsFactory
 {
 public:
     MtsFactory();
-    ~MtsFactory();
+    virtual ~MtsFactory();
 
     static MtsFactory* GetInstance();
 
     void Start(IN IMS_SINT32 nSlotId);
     void Stop(IN IMS_SINT32 nSlotId);
 
+protected:
+    ImsMap<IMS_SINT32, IMtsApp*> m_objMtsApps;
+
 private:
     IMutex* m_piLock;
-    ImsMap<IMS_SINT32, IMtsApp*> m_objMtsApps;
 };
 
-#endif  // MTS_FACTORY_H_
+#endif

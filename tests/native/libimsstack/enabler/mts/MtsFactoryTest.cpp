@@ -15,17 +15,101 @@
  */
 
 #include <gtest/gtest.h>
+#include "CarrierConfig.h"
+#include "ImsIdentity.h"
+#include "ImsTypeDef.h"
+#include "MockICarrierConfig.h"
+#include "MtsDef.h"
 #include "MtsFactory.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace android
 {
 
+class TestMtsFactory : public MtsFactory
+{
+public:
+    IMS_BOOL Has(IN IMS_SINT32 nSlotId) { return m_objMtsApps.GetIndexOfKey(nSlotId) >= 0; }
+};
+
 class MtsFactoryTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    TestConfigService objConfigService;
 
-    virtual void TearDown() override {}
+protected:
+    virtual void SetUp() override
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+
+        ON_CALL(objConfigService.GetMockCarrierConfig(),
+                GetInt(CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT, _))
+                .WillByDefault(Return(URI_SCHEME_SIP));
+        ON_CALL(objConfigService.GetMockCarrierConfig(),
+                GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT, _))
+                .WillByDefault(Return(ImsIdentity::DIALING_POLICY_HOME_LOCAL));
+    }
+
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+    }
 };
+
+TEST_F(MtsFactoryTest, GetInstanceReturnsSameInstance)
+{
+    EXPECT_EQ(MtsFactory::GetInstance(), MtsFactory::GetInstance());
+}
+
+TEST_F(MtsFactoryTest, StartCreatesNewApp)
+{
+    TestMtsFactory objFactory;
+
+    EXPECT_FALSE(objFactory.Has(IMS_SLOT_0));
+    EXPECT_FALSE(objFactory.Has(IMS_SLOT_1));
+
+    objFactory.Start(IMS_SLOT_1);
+
+    EXPECT_FALSE(objFactory.Has(IMS_SLOT_0));
+    EXPECT_TRUE(objFactory.Has(IMS_SLOT_1));
+}
+
+TEST_F(MtsFactoryTest, StartTwiceDoesNothing)
+{
+    TestMtsFactory objFactory;
+
+    objFactory.Start(IMS_SLOT_0);
+    objFactory.Start(IMS_SLOT_0);
+
+    EXPECT_TRUE(objFactory.Has(IMS_SLOT_0));
+}
+
+TEST_F(MtsFactoryTest, StopDestroysApp)
+{
+    TestMtsFactory objFactory;
+    objFactory.Start(IMS_SLOT_0);
+    objFactory.Start(IMS_SLOT_1);
+
+    objFactory.Stop(IMS_SLOT_1);
+
+    EXPECT_TRUE(objFactory.Has(IMS_SLOT_0));
+    EXPECT_FALSE(objFactory.Has(IMS_SLOT_1));
+}
+
+TEST_F(MtsFactoryTest, StopTwiceDoesNothing)
+{
+    TestMtsFactory objFactory;
+    objFactory.Start(IMS_SLOT_0);
+
+    objFactory.Stop(IMS_SLOT_0);
+    objFactory.Stop(IMS_SLOT_0);
+
+    EXPECT_FALSE(objFactory.Has(IMS_SLOT_0));
+}
 
 }  // namespace android
