@@ -28,9 +28,7 @@ import com.android.imsstack.ContextFixture;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -41,22 +39,19 @@ import org.mockito.MockitoAnnotations;
 public class NativeCommandsTest {
     private static final int SLOT0 = 0;
 
-    static ContextFixture sContext;
+    @Mock private JniIms mJniIms;
 
-    @Mock JniIms mJniIms;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    private ContextFixture mContextFixture;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        TelephonyManager tm = sContext.getTestDouble().getSystemService(TelephonyManager.class);
-        when(sContext.getTestDouble().getResources().getBoolean(anyInt())).thenReturn(true);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
+        TelephonyManager tm = mContextFixture.getTestDouble()
+                .getSystemService(TelephonyManager.class);
+        when(mContextFixture.getTestDouble().getResources().getBoolean(anyInt())).thenReturn(true);
         when(tm.getActiveModemCount()).thenReturn(1);
         when(tm.getSupportedModemCount()).thenReturn(1);
 
@@ -66,31 +61,27 @@ public class NativeCommandsTest {
     @After
     public void tearDown() throws Exception {
         JniImsProxy.setJniIms(null);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
         AppContext.deinit();
-        sContext = null;
+        mContextFixture = null;
     }
 
     @Test
     @SmallTest
-    public void setDeviceConfig() throws Exception {
+    public void setDeviceConfig() {
         NativeCommands.setDeviceConfig(AppContext.getInstance());
         verify(mJniIms).sendCommand(eq(NativeCommands.CMD_SET_DEVICE_CONFIG), anyInt(), any());
     }
 
     @Test
     @SmallTest
-    public void startEnabler() throws Exception {
+    public void startEnabler() {
         NativeCommands.startEnabler(SLOT0);
         verify(mJniIms).sendCommand(eq(NativeCommands.CMD_START_ENABLER), eq(SLOT0), any());
     }
 
     @Test
     @SmallTest
-    public void stopEnabler() throws Exception {
+    public void stopEnabler() {
         NativeCommands.stopEnabler(SLOT0);
         verify(mJniIms).sendCommand(eq(NativeCommands.CMD_STOP_ENABLER), eq(SLOT0), any());
     }

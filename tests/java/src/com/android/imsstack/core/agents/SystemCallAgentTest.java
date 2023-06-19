@@ -20,6 +20,7 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -604,7 +605,8 @@ public class SystemCallAgentTest {
         String[] result = mSystemCallAgent.getPcscfAddresses(
                 EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt());
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(0, result.length);
         verifyNoMoreInteractions(mDcApn);
     }
 
@@ -791,7 +793,8 @@ public class SystemCallAgentTest {
         IDcUtils.AccessNetworkInfo result =
                 mSystemCallAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, result.mNetworkType);
         verifyNoMoreInteractions(mDcUtils);
     }
 
@@ -808,7 +811,8 @@ public class SystemCallAgentTest {
         String[] result =
                 mSystemCallAgent.getLastAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(0, result.length);
         verifyNoMoreInteractions(mCellInfoInterface);
     }
 
@@ -900,7 +904,8 @@ public class SystemCallAgentTest {
         String[] result = mSystemCallAgent.getLastKnownLocation(
                 LocationInterface.LOCATION_CATEGORY_ALL);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(0, result.length);
         verifyNoMoreInteractions(mLocationInterface);
     }
 

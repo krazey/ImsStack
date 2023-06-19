@@ -16,6 +16,7 @@
 
 package com.android.imsstack.system;
 
+import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 
@@ -328,9 +329,9 @@ public interface SystemCallInterface {
      *                  {@link EIpVersion#IPV6},
      *                  {@link EIpVersion#IPV4V6},
      *                  {@link EIpVersion#IPV6V4}
-     * @return The P-CSCF addresses or null.
+     * @return The P-CSCF addresses or empty array.
      */
-    String[] getPcscfAddresses(int apnType, int ipVersion);
+    @NonNull String[] getPcscfAddresses(int apnType, int ipVersion);
 
     /**
      * Checks whether the IPv6 is preferred or not for the specified APN.
@@ -456,17 +457,17 @@ public interface SystemCallInterface {
      * or was registered.
      *
      * @param defaultNetworkType The default network type to be used when the network is unknown.
-     * @return The access network information or null.
+     * @return The access network information.
      */
-    IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType);
+    @NonNull IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType);
 
     /**
      * Returns the last known access network information for the specified network.
      *
      * @param networkType A network type.
-     * @return A last known access network information or null.
+     * @return The last known access network information.
      */
-    String[] getLastAccessNetworkInfo(@NetworkType int networkType);
+    @NonNull String[] getLastAccessNetworkInfo(@NetworkType int networkType);
     ////}
 
     /**
@@ -521,8 +522,9 @@ public interface SystemCallInterface {
      *                 {@link LocationInterface#LOCATION_CATEGORY_ALL},
      *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION_N_COUNTRY},
      *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION}
+     * @return The last known location information.
      */
-    String[] getLastKnownLocation(int category);
+    @NonNull String[] getLastKnownLocation(int category);
 
     /**
      * Starts listening the location information with the given interval.

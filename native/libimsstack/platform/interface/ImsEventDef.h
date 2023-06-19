@@ -80,17 +80,6 @@
 #define IMS_LTE_SR_IGNORE_DURING_5SEC                  (15)
 #define IMS_LTE_BARRING_MO_DATA                        (16)
 #define IMS_LTE_SR_REJECT_WITH_EMM                     (17)  // LParam (waittime : ms)
-#define IMS_LTE_BARRING_SSAC                           (18)  // LParam (?)
-#define IMS_LTE_BARRING_SSAC_EX                        (19)  // LParam (?)
-#define IMS_LTE_QOS_DEDICATED_BEARER_COMPLETED         (31)  // LParam (QCI)
-#define IMS_LTE_TRIGGER_DEREGISTRATION                 (32)  // uicc refresh '0' type
-#define IMS_LTE_DEACTIVATE_IMS_PDN                     (33)  // no update ims state(0) for hVoLTE
-// update current ims reg state for hVoLTE (state 0(CSFB))
-#define IMS_LTE_CSFB_PREF_SUB_STATE                    (34)
-// update current ims reg state for hVoLTE
-#define IMS_LTE_UPDATE_CURRENT_REG_STATE               (35)
-#define IMS_LTE_SA_UPDATE_CURRENT_REG_STATE            (36)  // update current ims reg state for SA
-#define IMS_LTE_BLOCK_WITH_TIME                        (51)  // LParam (time : ms)
 
 #define IMS_EVENT_WFC_SETTING_CHANGED                  (0x00000200)
 // WParam

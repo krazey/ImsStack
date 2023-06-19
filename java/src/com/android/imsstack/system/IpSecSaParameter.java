@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.system;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -44,8 +45,8 @@ public class IpSecSaParameter implements Parcelable {
     private final byte[] mCk;
     private final List<IpSecSaPolicy> mPolicys;
 
-    public IpSecSaParameter(int id, int integrityAlgorithm, byte[] ik,
-            int encryptionAlgorithm, byte[] ck, List<IpSecSaPolicy> policys) {
+    public IpSecSaParameter(int id, int integrityAlgorithm, @NonNull byte[] ik,
+            int encryptionAlgorithm, @NonNull byte[] ck, List<IpSecSaPolicy> policys) {
         mId = id;
         mSecurityProtocol = 1; // ESP
         mIntegrityAlgorithm = integrityAlgorithm;
@@ -192,10 +193,6 @@ public class IpSecSaParameter implements Parcelable {
     };
 
     private static String toHexString(byte[] data) {
-        if (data == null) {
-            return "(null)";
-        }
-
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < data.length; i++) {
