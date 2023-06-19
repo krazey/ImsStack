@@ -20,11 +20,6 @@ package com.android.imsstack.system;
  */
 public interface ISystem {
     /**
-     * Returns the slot-id of this instance.
-     */
-    int getSlotId();
-
-    /**
      * Sets the {@link SystemCallInterface} to perform the system call from the native layer.
      *
      * @param systemCall The {@link SystemCallInterface} to be set.

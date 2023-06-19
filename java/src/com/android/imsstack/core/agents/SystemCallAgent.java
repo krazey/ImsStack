@@ -19,6 +19,7 @@ package com.android.imsstack.core.agents;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
+import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
@@ -528,12 +529,17 @@ public class SystemCallAgent implements SystemCallInterface {
      *                  {@link EIpVersion#IPV6},
      *                  {@link EIpVersion#IPV4V6},
      *                  {@link EIpVersion#IPV6V4}
-     * @return The P-CSCF addresses or null.
+     * @return The P-CSCF addresses or empty array.
      */
     @Override
+    @NonNull
     public String[] getPcscfAddresses(int apnType, int ipVersion) {
+        String[] pcscfAddresses = null;
         IDcApn apn = getDcApn();
-        return (apn != null) ? apn.getPcscfAddress(apnType, ipVersion) : null;
+        if (apn != null) {
+            pcscfAddresses = apn.getPcscfAddress(apnType, ipVersion);
+        }
+        return (pcscfAddresses != null) ? pcscfAddresses : new String[0];
     }
 
     /**
@@ -716,12 +722,16 @@ public class SystemCallAgent implements SystemCallInterface {
      * or was registered.
      *
      * @param defaultNetworkType The default network type to be used when the network is unknown.
-     * @return The access network information or null.
+     * @return The access network information.
      */
     @Override
-    public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(@NetworkType int defaultNetworkType) {
+    @NonNull
+    public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(
+            @NetworkType int defaultNetworkType) {
         IDcUtils utils = DcFactory.getDcAgent(IDcUtils.class, mSlotId);
-        return (utils != null) ? utils.getAccessNetworkInfo(defaultNetworkType) : null;
+        return (utils != null)
+                ? utils.getAccessNetworkInfo(defaultNetworkType)
+                : new IDcUtils.AccessNetworkInfo(defaultNetworkType, null);
     }
 
     /**
@@ -731,19 +741,20 @@ public class SystemCallAgent implements SystemCallInterface {
      * @return A last known access network information.
      */
     @Override
+    @NonNull
     public String[] getLastAccessNetworkInfo(@NetworkType int networkType) {
         CellInfoInterface cellInfo = AgentFactory.getInstance().getAgent(
                 CellInfoInterface.class, mSlotId);
+        String[] lani = null;
 
-        if (cellInfo == null) {
-            return null;
+        if (cellInfo != null) {
+            if (networkType == NETWORK_TYPE_UNKNOWN) {
+                lani = cellInfo.getAccessNetworkInfo();
+            } else {
+                lani = cellInfo.getAccessNetworkInfo(networkType);
+            }
         }
-
-        if (networkType == NETWORK_TYPE_UNKNOWN) {
-            return cellInfo.getAccessNetworkInfo();
-        } else {
-            return cellInfo.getAccessNetworkInfo(networkType);
-        }
+        return (lani != null) ? lani : new String[0];
     }
 
     /**
@@ -828,12 +839,18 @@ public class SystemCallAgent implements SystemCallInterface {
      *                 {@link LocationInterface#LOCATION_CATEGORY_ALL},
      *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION_N_COUNTRY},
      *                 {@link LocationInterface#LOCATION_CATEGORY_POSITION}
+     * @return The last known location information.
      */
     @Override
+    @NonNull
     public String[] getLastKnownLocation(int category) {
         LocationInterface location = AgentFactory.getInstance().getAgent(
                 LocationInterface.class, mSlotId);
-        return (location != null) ? location.getLastKnownLocation(category) : null;
+        String[] lastKnownLocation = null;
+        if (location != null) {
+            lastKnownLocation = location.getLastKnownLocation(category);
+        }
+        return (lastKnownLocation != null) ? lastKnownLocation : new String[0];
     }
 
     /**

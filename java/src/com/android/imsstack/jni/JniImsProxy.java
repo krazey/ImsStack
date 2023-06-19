@@ -27,6 +27,8 @@ public final class JniImsProxy {
     public static final int ERROR = JniIms.ERROR;
     /** Error code when there is no matched listener. */
     public static final int ERROR_NO_LISTENER = JniIms.ERROR_NO_LISTENER;
+    /** Byte array representation of the failure result of the JNI operations. */
+    public static final byte[] RESULT_FAILURE = JniIms.RESULT_FAILURE;
 
     private static JniIms sJniIms = new JniIms();
 

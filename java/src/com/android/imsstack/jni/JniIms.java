@@ -35,6 +35,8 @@ public class JniIms {
     public static final int ERROR = -1;
     /** Error code when there is no matched listener. */
     public static final int ERROR_NO_LISTENER = -2;
+    /** Byte array representation of the failure result of the JNI operations. */
+    public static final byte[] RESULT_FAILURE = new byte[] {(byte) 0};
 
     private class Callback {
         public int onDataReceived(long nativeObject, byte[] data) {
@@ -226,12 +228,13 @@ public class JniIms {
         }
 
         Parcel parcel = Parcel.obtain();
-        parcel.unmarshall(data, 0, data.length);
-        parcel.setDataPosition(0);
-
-        listener.onMessage(parcel);
-
-        parcel.recycle();
+        try {
+            parcel.unmarshall(data, 0, data.length);
+            parcel.setDataPosition(0);
+            listener.onMessage(parcel);
+        } finally {
+            parcel.recycle();
+        }
 
         return OK;
     }
@@ -242,15 +245,18 @@ public class JniIms {
 
         if (listener == null) {
             Log.d(Log.TAG, "No listener :: nativeObject=" + nativeObject);
-            return new byte[] {(byte) 0};
+            return RESULT_FAILURE;
         }
 
+        byte[] result;
         Parcel parcel = Parcel.obtain();
-        parcel.unmarshall(data, 0, data.length);
-        parcel.setDataPosition(0);
-
-        byte[] result = listener.onMessage(parcel, fd);
-        parcel.recycle();
+        try {
+            parcel.unmarshall(data, 0, data.length);
+            parcel.setDataPosition(0);
+            result = listener.onMessage(parcel, fd);
+        } finally {
+            parcel.recycle();
+        }
 
         return result;
     }

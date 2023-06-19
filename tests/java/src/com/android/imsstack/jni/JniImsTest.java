@@ -160,7 +160,7 @@ public class JniImsTest {
         parcel.recycle();
 
         byte[] result = JniIms.sendDataToJavaForSystem(SYSTEM_NATIVE_OBJECT, data, null);
-        assertTrue(Arrays.equals(result, new byte[] {(byte) 0}));
+        assertTrue(Arrays.equals(result, JniIms.RESULT_FAILURE));
 
         mJniIms.setSystemListener(SYSTEM_NATIVE_OBJECT, mSystemListener);
         JniIms.sendDataToJavaForSystem(SYSTEM_NATIVE_OBJECT, data, null);
