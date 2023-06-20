@@ -56,9 +56,9 @@ private:
         inline EnablerThreadParam(IN EnablerFactory* pEnablerFactory, IN IMS_SINT32 nSlotId) :
                 m_pEnablerFactory(pEnablerFactory),
                 m_nSlotId(nSlotId)
-        {}
-        inline ~EnablerThreadParam()
-        {}
+        {
+        }
+        inline ~EnablerThreadParam() {}
 
     public:
         EnablerFactory* m_pEnablerFactory;

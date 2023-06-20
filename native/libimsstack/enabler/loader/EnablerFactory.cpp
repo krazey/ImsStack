@@ -106,7 +106,7 @@ void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
     {
         IMS_SINT32 i = static_cast<IMS_SINT32>(pEnablers->GetSize() - 1);
 
-        for ( ; i >= 0; i--)
+        for (; i >= 0; i--)
         {
             Enabler* pEnabler = DYNAMIC_CAST(Enabler*, pEnablers->GetAt(i));
 

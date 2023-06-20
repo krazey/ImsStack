@@ -83,8 +83,7 @@ IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
 
     if (!strIms3gpp.EqualsIgnoreCase(ELEMENT_IMS_3GPP))
     {
-        IMS_TRACE_E(0, "Root element (%s) is not matched in '3gpp-ims'",
-                strIms3gpp.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Root element (%s) is not matched in '3gpp-ims'", strIms3gpp.GetStr(), 0, 0);
 
         piDocument->DestroyDocument();
         pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);

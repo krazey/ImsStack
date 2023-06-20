@@ -20,8 +20,7 @@
 
 class ConfigApp;
 
-class ConfigEnabler
-    : public Enabler
+class ConfigEnabler : public Enabler
 {
 public:
     explicit ConfigEnabler(IN IMS_SINT32 nSlotId);

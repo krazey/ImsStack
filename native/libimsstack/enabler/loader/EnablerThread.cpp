@@ -45,8 +45,7 @@ void EnablerThread::ControlEnablers(IN IMS_SINT32 nCtrlFlags)
     IMS_MSG_CreateNPostThreadMessage(GetThread(), TMSG_CONTROL_ENABLERS, nCtrlFlags, 0);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL EnablerThread::Initialize()
+PROTECTED VIRTUAL IMS_BOOL EnablerThread::Initialize()
 {
     return IMS_TRUE;
 }
@@ -216,7 +215,7 @@ void EnablerThread::StopEnablers()
 
     IMS_SINT32 i = static_cast<IMS_SINT32>(pEnablers->GetSize() - 1);
 
-    for ( ; i >= 0; i--)
+    for (; i >= 0; i--)
     {
         IEnabler* piEnabler = pEnablers->GetAt(i);
 

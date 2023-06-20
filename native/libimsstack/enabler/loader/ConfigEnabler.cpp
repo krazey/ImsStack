@@ -38,8 +38,7 @@ ConfigEnabler::ConfigEnabler(IN IMS_SINT32 nSlotId) :
 {
 }
 
-PUBLIC VIRTUAL
-ConfigEnabler::~ConfigEnabler()
+PUBLIC VIRTUAL ConfigEnabler::~ConfigEnabler()
 {
     if (m_pConfigApp != IMS_NULL)
     {
@@ -47,8 +46,7 @@ ConfigEnabler::~ConfigEnabler()
     }
 }
 
-PRIVATE VIRTUAL
-void ConfigEnabler::Start()
+PRIVATE VIRTUAL void ConfigEnabler::Start()
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
     ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
@@ -76,7 +74,7 @@ void ConfigEnabler::Start()
         }
 
         if (piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
+                    CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
         {
             m_bUseResetWhenClosingSipTcpConnection = IMS_TRUE;
             objSocketOption.nValue = 0;
@@ -109,13 +107,13 @@ void ConfigEnabler::Start()
         IMS_SINT32 nFeatures = 0;
 
         if (piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+                    CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_FORMAT_TUPLE;
         }
 
         if (!piCc->GetBoolean(CarrierConfig::Assets::
-                KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+                            KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_NO_COUNTRY_IF_UNKNOWN;
         }
@@ -130,8 +128,8 @@ void ConfigEnabler::Start()
         nSdpFeatures |= SdpProfile::FEATURE_A_PRECONDITION_SUPPORTED;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::
-            KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
+    if (piCc->GetBoolean(
+                CarrierConfig::Assets::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
     {
         nSdpFeatures |= SdpProfile::FEATURE_A_DIRECTION_REQUIRED_FOR_REMOVED_MEDIA;
     }
@@ -139,8 +137,7 @@ void ConfigEnabler::Start()
     SdpProfile::GetInstance()->InitFeatures(GetSlotId(), nSdpFeatures);
 }
 
-PRIVATE VIRTUAL
-void ConfigEnabler::Stop()
+PRIVATE VIRTUAL void ConfigEnabler::Stop()
 {
     GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(GetSlotId());

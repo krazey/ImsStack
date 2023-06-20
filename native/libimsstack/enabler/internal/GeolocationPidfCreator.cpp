@@ -112,7 +112,7 @@ LOCAL void geolocationPidfCreator_CreateCirclePosition(IN_OUT IXmlStreamWriter* 
             geolocationPidfCreator_CreateEndElement(piWriter);
         }
 
-        //end of gs:Circle
+        // end of gs:Circle
         geolocationPidfCreator_CreateEndElement(piWriter);
     }
 
@@ -128,10 +128,10 @@ LOCAL void geolocationPidfCreator_CreateCirclePosition(IN_OUT IXmlStreamWriter* 
 
 LOCAL void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWriter* piWriter,
         IN const AString& strPosition, IN const AString& strRadius,
-        IN const AString& strVerticalAccuarcy, IN const AString& strConfidence)
+        IN const AString& strVerticalAccuracy, IN const AString& strConfidence)
 {
     if (strPosition.GetLength() != 0 ||
-            (strRadius.GetLength() != 0 && strVerticalAccuarcy.GetLength() != 0))
+            (strRadius.GetLength() != 0 && strVerticalAccuracy.GetLength() != 0))
     {
         // gs:Ellipsoid element
         piWriter->WriteStartElement("gs:Ellipsoid");
@@ -146,7 +146,7 @@ LOCAL void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWrite
             geolocationPidfCreator_CreateEndElement(piWriter);
         }
 
-        if (strRadius.GetLength() != 0 && strVerticalAccuarcy.GetLength() != 0)
+        if (strRadius.GetLength() != 0 && strVerticalAccuracy.GetLength() != 0)
         {
             // gs:semiMajorAxis element
             piWriter->WriteStartElement("gs:semiMajorAxis");
@@ -163,7 +163,7 @@ LOCAL void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWrite
             // gs:verticalAxis element
             piWriter->WriteStartElement("gs:verticalAxis");
             piWriter->WriteAttribute("uom", "urn:ogc:def:uom:EPSG::9001");
-            piWriter->WriteCharacters(strVerticalAccuarcy);
+            piWriter->WriteCharacters(strVerticalAccuracy);
             geolocationPidfCreator_CreateEndElement(piWriter);
         }
 
@@ -173,7 +173,7 @@ LOCAL void geolocationPidfCreator_CreateEllipsoidPosition(IN_OUT IXmlStreamWrite
         piWriter->WriteCharacters("0");
         geolocationPidfCreator_CreateEndElement(piWriter);
 
-        //end of gs:Ellipsoid
+        // end of gs:Ellipsoid
         geolocationPidfCreator_CreateEndElement(piWriter);
     }
 
@@ -257,22 +257,21 @@ LOCAL void geolocationPidfCreator_CreatePIDFForDevice(IN_OUT IXmlStreamWriter* p
     piWriter->WriteCharacters(TextParser::STR_LF);
 
     // cl:civicAddress
-    geolocationPidfCreator_CreateCivicAddress(piWriter,
-            strCountry, strState, strCity, strPostal);
+    geolocationPidfCreator_CreateCivicAddress(piWriter, strCountry, strState, strCity, strPostal);
 
     // Geodetic Shape Representation (gs:...)
     if (strShape.EqualsIgnoreCase("Circle"))
     {
-        geolocationPidfCreator_CreateCirclePosition(piWriter,
-                strPosition, strRadius, strConfidence);
+        geolocationPidfCreator_CreateCirclePosition(
+                piWriter, strPosition, strRadius, strConfidence);
     }
     else if (strShape.EqualsIgnoreCase("Ellipsoid"))
     {
-        geolocationPidfCreator_CreateEllipsoidPosition(piWriter,
-                strPosition, strRadius, strVerticalAccuracy, strConfidence);
+        geolocationPidfCreator_CreateEllipsoidPosition(
+                piWriter, strPosition, strRadius, strVerticalAccuracy, strConfidence);
     }
 
-    //end of gp:location-info
+    // end of gp:location-info
     geolocationPidfCreator_CreateEndElement(piWriter);
 
     // gp:usage-rules element
@@ -287,7 +286,7 @@ LOCAL void geolocationPidfCreator_CreatePIDFForDevice(IN_OUT IXmlStreamWriter* p
         geolocationPidfCreator_CreateEndElement(piWriter);
     }
 
-    //end of gp:geopriv
+    // end of gp:geopriv
     geolocationPidfCreator_CreateEndElement(piWriter);
 
     // dm:deviceID element
@@ -332,22 +331,21 @@ LOCAL void geolocationPidfCreator_CreatePIDFForTuple(IN_OUT IXmlStreamWriter* pi
     piWriter->WriteCharacters(TextParser::STR_LF);
 
     // cl:civicAddress
-    geolocationPidfCreator_CreateCivicAddress(piWriter,
-            strCountry, strState, strCity, strPostal);
+    geolocationPidfCreator_CreateCivicAddress(piWriter, strCountry, strState, strCity, strPostal);
 
     // Geodetic Shape Representation (gs:...)
     if (strShape.EqualsIgnoreCase("Circle"))
     {
-        geolocationPidfCreator_CreateCirclePosition(piWriter,
-                strPosition, strRadius, strConfidence);
+        geolocationPidfCreator_CreateCirclePosition(
+                piWriter, strPosition, strRadius, strConfidence);
     }
     else if (strShape.EqualsIgnoreCase("Ellipsoid"))
     {
-        geolocationPidfCreator_CreateEllipsoidPosition(piWriter,
-                strPosition, strRadius, strVerticalAccuracy, strConfidence);
+        geolocationPidfCreator_CreateEllipsoidPosition(
+                piWriter, strPosition, strRadius, strVerticalAccuracy, strConfidence);
     }
 
-    //end of gp:location-info
+    // end of gp:location-info
     geolocationPidfCreator_CreateEndElement(piWriter);
 
     // gp:usage-rules element
@@ -362,7 +360,7 @@ LOCAL void geolocationPidfCreator_CreatePIDFForTuple(IN_OUT IXmlStreamWriter* pi
         geolocationPidfCreator_CreateEndElement(piWriter);
     }
 
-    //end of gp:geopriv
+    // end of gp:geopriv
     geolocationPidfCreator_CreateEndElement(piWriter);
 
     // end of status
@@ -405,11 +403,9 @@ LOCAL void geolocationPidfCreator_CreatePIDF(IN const AString& strEntityUri,
 
     if (strTupleId.GetLength() > 0)
     {
-        geolocationPidfCreator_CreatePIDFForTuple(piWriter,
-                strTupleId,
-                strCountry, strState, strCity, strPostal,
-                strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-                strMethod, strTimeStamp);
+        geolocationPidfCreator_CreatePIDFForTuple(piWriter, strTupleId, strCountry, strState,
+                strCity, strPostal, strPosition, strRadius, strVerticalAccuracy, strShape,
+                strConfidence, strMethod, strTimeStamp);
     }
     else
     {
@@ -425,11 +421,9 @@ LOCAL void geolocationPidfCreator_CreatePIDF(IN const AString& strEntityUri,
             strDeviceId.Prepend("urn:uuid:");
         }
 
-        geolocationPidfCreator_CreatePIDFForDevice(piWriter,
-                strDeviceName, strDeviceId,
-                strCountry, strState, strCity, strPostal,
-                strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-                strMethod, strTimeStamp);
+        geolocationPidfCreator_CreatePIDFForDevice(piWriter, strDeviceName, strDeviceId, strCountry,
+                strState, strCity, strPostal, strPosition, strRadius, strVerticalAccuracy, strShape,
+                strConfidence, strMethod, strTimeStamp);
     }
 
     // end of presence
@@ -469,10 +463,7 @@ GeolocationPidfCreator::GeolocationPidfCreator(IN IMS_SINT32 nSlotId) :
     }
 }
 
-PUBLIC VIRTUAL
-GeolocationPidfCreator::~GeolocationPidfCreator()
-{
-}
+PUBLIC VIRTUAL GeolocationPidfCreator::~GeolocationPidfCreator() {}
 
 // This method creates PIDF for Geolocation with country only or country and state.
 // but if country is not determined, then don't create PIDF.
@@ -509,11 +500,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEnti
 
     geolocationPidfCreator_CreatePIDF(
             (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            strCountry, strState,
-            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(),
+            GetTupleId(), GetDeviceName(), GetDeviceId(), strCountry, strState,
+            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
+            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
             strCurrentTime, objContent, NAMESPACE_COUNTRY);
 
     return objContent.GetLength() != 0;
@@ -536,8 +525,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
     const AString& strLatitude = piLocation->GetLatitude();
     const AString& strLongitude = piLocation->GetLongitude();
 
-    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0))
-            || (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
+    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0)) ||
+            (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
     {
         IMS_TRACE_I("Lat/Lon is not available", 0, 0, 0);
         return IMS_FALSE;
@@ -574,10 +563,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
 
     geolocationPidfCreator_CreatePIDF(
             (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            strCountry, strState, strCity, strPostal,
-            strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-            strMethod, strCurrentTime, objContent);
+            GetTupleId(), GetDeviceName(), GetDeviceId(), strCountry, strState, strCity, strPostal,
+            strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence, strMethod,
+            strCurrentTime, objContent);
 
     return objContent.GetLength() != 0;
 }
@@ -601,8 +589,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
     const AString& strLatitude = piLocation->GetLatitude();
     const AString& strLongitude = piLocation->GetLongitude();
 
-    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0))
-            || (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
+    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0)) ||
+            (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
     {
         IMS_TRACE_I("Lat/Lon is not available", 0, 0, 0);
         return IMS_FALSE;
@@ -636,11 +624,9 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
 
     geolocationPidfCreator_CreatePIDF(
             (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            strCountry, AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(),
-            strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-            strMethod, strCurrentTime, objContent);
+            GetTupleId(), GetDeviceName(), GetDeviceId(), strCountry, AString::ConstNull(),
+            AString::ConstNull(), AString::ConstNull(), strPosition, strRadius, strVerticalAccuracy,
+            strShape, strConfidence, strMethod, strCurrentTime, objContent);
 
     return objContent.GetLength() != 0;
 }
@@ -662,8 +648,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityU
     const AString& strLatitude = piLocation->GetLatitude();
     const AString& strLongitude = piLocation->GetLongitude();
 
-    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0))
-            || (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
+    if (((strLatitude.GetLength() == 0) || (strLongitude.GetLength() == 0)) ||
+            (strLatitude.Equals("0.0") && strLongitude.Equals("0.0")))
     {
         IMS_TRACE_I("Lat/Lon is not available", 0, 0, 0);
         return IMS_FALSE;
@@ -693,14 +679,13 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityU
 
     geolocationPidfCreator_CreatePIDF(
             (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
-            strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-            strMethod, strCurrentTime, objContent);
+            GetTupleId(), GetDeviceName(), GetDeviceId(), AString::ConstNull(),
+            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(), strPosition,
+            strRadius, strVerticalAccuracy, strShape, strConfidence, strMethod, strCurrentTime,
+            objContent);
 
     return objContent.GetLength() != 0;
 }
-
 
 // IMEI URN or UUID
 PUBLIC
@@ -731,8 +716,7 @@ void GeolocationPidfCreator::SetTupleId(IN const AString& strId)
     }
 }
 
-PUBLIC GLOBAL
-AString GeolocationPidfCreator::CreateEntityUri(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL AString GeolocationPidfCreator::CreateEntityUri(IN IMS_SINT32 nSlotId)
 {
     const ISubscriberConfig* piSubsConfig =
             Configuration::GetInstance()->GetSubscriberConfig(nSlotId);

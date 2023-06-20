@@ -22,8 +22,7 @@
 
 class ILocationProperties;
 
-class GeolocationPidfCreator
-    : public ImsSlot
+class GeolocationPidfCreator : public ImsSlot
 {
 public:
     explicit GeolocationPidfCreator(IN IMS_SINT32 nSlotId);

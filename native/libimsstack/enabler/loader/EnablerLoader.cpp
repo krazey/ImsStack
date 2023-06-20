@@ -92,8 +92,7 @@ PUBLIC VIRTUAL void EnablerLoader::StopEnabler(IN IMS_SINT32 nSlotId)
     }
 }
 
-PUBLIC GLOBAL
-void EnablerLoader::CreateInstance()
+PUBLIC GLOBAL void EnablerLoader::CreateInstance()
 {
     if (s_pEnablerLoader == IMS_NULL)
     {
@@ -101,8 +100,7 @@ void EnablerLoader::CreateInstance()
     }
 }
 
-PUBLIC GLOBAL
-void EnablerLoader::DestroyInstance()
+PUBLIC GLOBAL void EnablerLoader::DestroyInstance()
 {
     if (s_pEnablerLoader != IMS_NULL)
     {
@@ -111,8 +109,7 @@ void EnablerLoader::DestroyInstance()
     }
 }
 
-PUBLIC GLOBAL
-EnablerLoader* EnablerLoader::GetInstance()
+PUBLIC GLOBAL EnablerLoader* EnablerLoader::GetInstance()
 {
     if (s_pEnablerLoader == IMS_NULL)
     {
@@ -129,8 +126,8 @@ void EnablerLoader::CreateAndAddThread(IN IMS_SINT32 nSlotId)
     EnablerThreadParam objParam(m_pEnablerFactory, nSlotId);
     ImsProcess* pProcess = ImsProcess::GetInstance();
 
-    pProcess->LoadAppThreadWithParam(strThreadName,
-            EnablerLoader::CreateThread, reinterpret_cast<void*>(&objParam), nSlotId);
+    pProcess->LoadAppThreadWithParam(strThreadName, EnablerLoader::CreateThread,
+            reinterpret_cast<void*>(&objParam), nSlotId);
 
     EnablerThread* pThread =
             DYNAMIC_CAST(EnablerThread*, pProcess->GetApplicationThread(strThreadName));

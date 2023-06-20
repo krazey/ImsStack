@@ -24,19 +24,14 @@ AosEnabler::AosEnabler(IN IMS_SINT32 nSlotId) :
 {
 }
 
-PUBLIC VIRTUAL
-AosEnabler::~AosEnabler()
-{
-}
+PUBLIC VIRTUAL AosEnabler::~AosEnabler() {}
 
-PUBLIC VIRTUAL
-void AosEnabler::Start()
+PUBLIC VIRTUAL void AosEnabler::Start()
 {
     AosFactory::Start(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-void AosEnabler::Stop()
+PUBLIC VIRTUAL void AosEnabler::Stop()
 {
     AosFactory::Stop(GetSlotId());
 }

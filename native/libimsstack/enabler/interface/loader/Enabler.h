@@ -18,8 +18,7 @@
 
 #include "IEnabler.h"
 
-class Enabler
-    : public IEnabler
+class Enabler : public IEnabler
 {
 public:
     inline explicit Enabler(IN IMS_SINT32 nSlotId) :

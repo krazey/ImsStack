@@ -40,7 +40,9 @@ protected:
     IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;
 
     inline IMS_BOOL IsControlSet(IN IMS_SINT32 nCtrlFlags, IN IMS_SINT32 nCtrlFlag) const
-    { return (nCtrlFlags & nCtrlFlag) == nCtrlFlag; }
+    {
+        return (nCtrlFlags & nCtrlFlag) == nCtrlFlag;
+    }
     inline IMS_SINT32 GetState() const { return m_nState; }
 
     void InitializeGlobals();
@@ -56,7 +58,7 @@ public:
     /// Bitmask for operations
     enum
     {
-        CONTROL_NONE  = 0x0000,
+        CONTROL_NONE = 0x0000,
 
         CONTROL_CREATE = 0x0001,
         CONTROL_DESTROY = 0x0002,

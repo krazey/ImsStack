@@ -37,8 +37,8 @@ public:
 
     static GeolocationHelper* GetInstance();
     // Creates an identifier for Content-ID header field
-    static AString CreateContentId(IN IMS_SINT32 nSlotId,
-            IN const AString& strDomain = AString::ConstNull());
+    static AString CreateContentId(
+            IN IMS_SINT32 nSlotId, IN const AString& strDomain = AString::ConstNull());
     // Returns the recent country or newly updated country
     static const AString& GetCountry(IN IMS_SINT32 nSlotId, IN IMS_BOOL bLocationUpdate);
 

@@ -16,11 +16,9 @@
 #include "Const3GPP.h"
 
 //// FEATURE TAG
-PUBLIC GLOBAL
-const IMS_CHAR Const3GPP::FEATURE_TAG_SMSIP[] = "+g.3gpp.smsip";
+PUBLIC GLOBAL const IMS_CHAR Const3GPP::FEATURE_TAG_SMSIP[] = "+g.3gpp.smsip";
 
 //// IARI
 
 //// ICSI
-PUBLIC GLOBAL
-const IMS_CHAR Const3GPP::ICSI_MMTEL[] = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
+PUBLIC GLOBAL const IMS_CHAR Const3GPP::ICSI_MMTEL[] = "urn:urn-7:3gpp-service.ims.icsi.mmtel";

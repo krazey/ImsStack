@@ -35,9 +35,9 @@ public:
                 m_nAction(ACTION_UNKNOWN),
                 m_strAction(AString::ConstNull()),
                 m_strReason(AString::ConstNull())
-        {}
-        inline ~AlternativeService()
-        {}
+        {
+        }
+        inline ~AlternativeService() {}
 
         AlternativeService(IN const AlternativeService&) = delete;
         AlternativeService& operator=(IN const AlternativeService&) = delete;
@@ -81,9 +81,9 @@ public:
     public:
         inline ServiceInfo() :
                 m_strServiceInfo(AString::ConstNull())
-        {}
-        inline ~ServiceInfo()
-        {}
+        {
+        }
+        inline ~ServiceInfo() {}
 
         ServiceInfo(IN const ServiceInfo&) = delete;
         ServiceInfo& operator=(IN const ServiceInfo&) = delete;

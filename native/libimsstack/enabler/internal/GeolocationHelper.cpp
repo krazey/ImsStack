@@ -141,8 +141,7 @@ GeolocationPidfCreator* GeolocationHelper::GetPidfCreator(IN IMS_SINT32 nSlotId)
     return m_pPrivate->GetPidfCreator(nSlotId);
 }
 
-PUBLIC GLOBAL
-GeolocationHelper* GeolocationHelper::GetInstance()
+PUBLIC GLOBAL GeolocationHelper* GeolocationHelper::GetInstance()
 {
     if (s_pGeolocationHelper == IMS_NULL)
     {
@@ -179,8 +178,8 @@ PUBLIC GLOBAL AString GeolocationHelper::CreateContentId(
 }
 
 // Returns the recent country or newly updated country
-PUBLIC GLOBAL
-const AString& GeolocationHelper::GetCountry(IN IMS_SINT32 nSlotId, IN IMS_BOOL bLocationUpdate)
+PUBLIC GLOBAL const AString& GeolocationHelper::GetCountry(
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bLocationUpdate)
 {
     ILocationInfo* piLocationInfo =
             PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);

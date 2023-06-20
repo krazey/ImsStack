@@ -19,8 +19,7 @@
 #include "Enabler.h"
 #include "ImsTypeDef.h"
 
-class MtsEnabler final :
-        public Enabler
+class MtsEnabler final : public Enabler
 {
 public:
     explicit MtsEnabler(IN IMS_SINT32 nSlotId);

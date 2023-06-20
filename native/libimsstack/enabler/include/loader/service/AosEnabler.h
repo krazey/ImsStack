@@ -18,8 +18,7 @@
 
 #include "Enabler.h"
 
-class AosEnabler
-    : public Enabler
+class AosEnabler : public Enabler
 {
 public:
     explicit AosEnabler(IN IMS_SINT32 nSlotId);

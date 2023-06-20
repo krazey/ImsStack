@@ -58,10 +58,9 @@ PROTECTED VIRTUAL void ConfigApp::Event_NotifyEvent(
     // Subclass MAY implement this method to handle the external events.
 }
 
-PROTECTED VIRTUAL
-void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
+PROTECTED VIRTUAL void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
 {
-    (void) nParam;
+    (void)nParam;
 
     IMS_BOOL bSubscriberChanged = ((nItem & ImsConfig::FLAG_IMS_SUBSCRIBER) != 0);
     IMS_BOOL bSipConfigChanged = ((nItem & ImsConfig::FLAG_IMS_SIP) != 0);
@@ -133,7 +132,7 @@ void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
 
 PROTECTED VIRTUAL void ConfigApp::UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam)
 {
-    (void) nParam;
+    (void)nParam;
 
     IMS_BOOL bSipConfigChanged = ((nItem & ImsConfig::FLAG_IMS_SIP) != 0);
     IMS_BOOL bSipConfigVChanged = ((nItem & ImsConfig::FLAG_IMS_COM_SIP) != 0);
