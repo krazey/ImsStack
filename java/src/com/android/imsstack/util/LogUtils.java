@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.util;
 
+/** A class for providing the utility methods for logging. */
 public final class LogUtils {
     public static final int TRACE_OPTION_D = 0x00000001;
     public static final int TRACE_OPTION_E = 0x00000002;

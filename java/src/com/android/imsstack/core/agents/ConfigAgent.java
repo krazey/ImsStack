@@ -48,6 +48,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** A class for providing the configuration related information. */
 public class ConfigAgent implements ConfigInterface {
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
@@ -182,6 +183,12 @@ public class ConfigAgent implements ConfigInterface {
         }, 0);
     }
 
+    /**
+     * Updates the carrier configuration for the given subscription and carrier identifier.
+     *
+     * @param subId The subscription id.
+     * @param id The SIM carrier identifier.
+     */
     public void updateCarrierConfig(int subId, SimCarrierId id) {
         // Loads IMS carrier configuration from CarrierConfigManager.
         PersistableBundle config = getCarrierConfig(subId);
@@ -334,8 +341,7 @@ public class ConfigAgent implements ConfigInterface {
             int mccMncCarrierId = (tm != null) ? tm.getCarrierIdFromSimMccMnc() : 0;
             int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                     ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
-            int specificCarrierId = (testCarrierId > 0) ?
-                    testCarrierId : id.getSpecificCarrierId();
+            int specificCarrierId = (testCarrierId > 0) ? testCarrierId : id.getSpecificCarrierId();
             String fileNameForSpecificCarrierId = null;
             String fileNameForCarrierId = null;
             String fileNameForMccMncCarrierId = null;
@@ -490,11 +496,11 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private static boolean matchOnSpn(String xmlSpn, SimCarrierId id) {
-        final String SPN_EMPTY_MATCH = "null";
+        final String spnEmptyMatch = "null";
         boolean matchFound = false;
         String currentSpn = id.getSpn();
 
-        if (SPN_EMPTY_MATCH.equalsIgnoreCase(xmlSpn)) {
+        if (spnEmptyMatch.equalsIgnoreCase(xmlSpn)) {
             if (TextUtils.isEmpty(currentSpn)) {
                 matchFound = true;
             }

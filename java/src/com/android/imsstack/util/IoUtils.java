@@ -19,12 +19,17 @@ package com.android.imsstack.util;
  * This class provides the helper APIs for input/output streams.
  */
 public final class IoUtils {
+    /**
+     * Closes the {@link AutoCloseable} object silently.
+     *
+     * @param closeable The {@link AutoCloseable} object to be closed.
+     */
     public static void closeQuietly(AutoCloseable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
             } catch (RuntimeException rethrown) {
-               throw rethrown;
+                throw rethrown;
             } catch (Exception e) {
                 Log.e(Log.TAG, "close: " + e);
             }

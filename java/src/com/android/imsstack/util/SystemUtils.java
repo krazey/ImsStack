@@ -26,6 +26,7 @@ import java.util.TimeZone;
  * This class provides the wrapper APIs for Android Platform.
  */
 public final class SystemUtils {
+    /** Pattern of UTC time format. */
     public static final String UTC_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     /**
@@ -92,6 +93,12 @@ public final class SystemUtils {
         return (int) (longValue & 0xFFFFFFFF);
     }
 
+    /**
+     * Converts the byte array to the hexadecimal string representation.
+     *
+     * @param input The byte array.
+     * @return A hexadecimal string representation of the given byte array.
+     */
     public static String toHexString(byte[] input) {
         if (input == null) {
             return null;

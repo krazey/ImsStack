@@ -43,7 +43,7 @@ public class MessageExecutor extends Handler implements Executor {
     @Override
     public void handleMessage(Message msg) {
         if (msg.obj instanceof Runnable) {
-            executeInternal((Runnable)msg.obj);
+            executeInternal((Runnable) msg.obj);
         } else {
             Log.d(Log.TAG, "[MessageExecutor] handleMessage: Not runnable object - " + msg);
         }

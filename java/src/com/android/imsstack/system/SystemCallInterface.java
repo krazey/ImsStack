@@ -25,6 +25,7 @@ import com.android.imsstack.core.config.CarrierConfig;
 
 import java.io.FileDescriptor;
 
+/** An interface for providing the system call. */
 public interface SystemCallInterface {
     /** Result code of execution with no error. */
     int RESULT_OK = 1;

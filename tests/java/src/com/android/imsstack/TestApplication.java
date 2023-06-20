@@ -20,14 +20,14 @@ import android.app.Application;
 import android.content.Context;
 
 public class TestApplication extends Application {
-    private static Context context;
+    private static Context sContext;
 
     public void onCreate() {
         super.onCreate();
-        TestApplication.context = getApplicationContext();
+        TestApplication.sContext = getApplicationContext();
     }
 
     public static Context getAppContext() {
-        return TestApplication.context;
+        return TestApplication.sContext;
     }
 }
