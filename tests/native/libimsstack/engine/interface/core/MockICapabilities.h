@@ -27,7 +27,7 @@ class MockICapabilities : public ICapabilities
 public:
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
+    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     // IServiceMethod
     MOCK_METHOD(IMessage*, GetNextRequest, (), (override));

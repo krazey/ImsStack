@@ -580,8 +580,8 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed", nType, nBandwidth,
-                strType.GetStr());
+        IMS_TRACE_E(
+                0, "Decoding a bandwidth (%d, %d, %s) failed", nType, nBandwidth, strType.GetStr());
         return IMS_FAILURE;
     }
 
@@ -994,7 +994,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
         return IMS_FAILURE;
     }
 
-    // Remove all the attributes if the type is ATTRIBTUE_ALL
+    // Remove all the attributes if the type is ATTRIBUTE_ALL
     if (nType == SdpAttribute::ATTRIBUTE_ALL)
     {
         Ims::SetLastError(ImsError::NO_ERROR);

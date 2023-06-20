@@ -42,7 +42,7 @@ public:
     MOCK_METHOD(IMS_RESULT, Receive, (IN IMS_SLONG nTimeout), (override));
     MOCK_METHOD(IMS_RESULT, SetCredentials, (IN ImsList<Credential> & objCredentials), (override));
     MOCK_METHOD(IMS_RESULT, SetCredentials, (IN const Credential& objCredential), (override));
-    MOCK_METHOD(void, SetListener, (IN ISipClientConnectionListener* piListener), (override));
+    MOCK_METHOD(void, SetListener, (IN ISipClientConnectionListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, SetRequestUri, (IN const AString& strUri), (override));
     MOCK_METHOD(ISipGenericChallenge*, GetAuthenticationChallenge, (IN IMS_SINT32 nIndex),
             (const, override));
@@ -50,7 +50,7 @@ public:
     MOCK_METHOD(IMS_RESULT, InitResubmissionRequest, (), (override));
     MOCK_METHOD(void, RemoveAllChallenges, (), (override));
     MOCK_METHOD(void, RemoveAllCredentials, (), (override));
-    MOCK_METHOD(IMS_RESULT, SetAuthenticationChallenge, (IN ISipGenericChallenge* piChallenge),
+    MOCK_METHOD(IMS_RESULT, SetAuthenticationChallenge, (IN ISipGenericChallenge * piChallenge),
             (override));
     MOCK_METHOD(void, SetExtensionTokenForViaBranch, (IN const AString& strToken), (override));
     MOCK_METHOD(void, SetImplicitRouteHeader, (IN const AString& strRouteHeader), (override));
@@ -70,7 +70,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetStatusCode, (), (const, override));
     MOCK_METHOD(IMS_RESULT, RemoveHeader, (IN const AString& strName), (override));
     MOCK_METHOD(IMS_RESULT, Send, (), (override));
-    MOCK_METHOD(void, SetErrorListener, (IN ISipErrorListener* piListener), (override));
+    MOCK_METHOD(void, SetErrorListener, (IN ISipErrorListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, SetHeader, (IN const AString& strName, IN const AString& strValue),
             (override));
     MOCK_METHOD(const ByteArray&, GetContent, (), (const, override));
@@ -78,7 +78,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IN const AString& strName), (const, override));
     MOCK_METHOD(ISipMessage*, GetMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
-    MOCK_METHOD(void, SetSipProfile, (IN SipProfile* pProfile), (override));
+    MOCK_METHOD(void, SetSipProfile, (IN SipProfile * pProfile), (override));
     MOCK_METHOD(void, SetTransactionTimerValues, (IN const SipTimerValues& objTv), (override));
 
     MOCK_METHOD(void, Close, (), (override));

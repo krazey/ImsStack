@@ -28,7 +28,7 @@ public:
 
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
+    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     // IServiceMethod
     MOCK_METHOD(IMessage*, GetNextRequest, (), (override));
@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(IMS_RESULT, Send,
             (IN const ByteArray& objContent, IN const AString& strContentType), (override));
-    MOCK_METHOD(void, SetListener, (IN IPageMessageListener* piListener), (override));
+    MOCK_METHOD(void, SetListener, (IN IPageMessageListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, Accept, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(
             IMS_RESULT, Reject, (IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter), (override));

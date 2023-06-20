@@ -2320,7 +2320,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
                 {
                     // To avoid an infinite loop, clear the flag
                     m_bAckWithSdpInProgress = IMS_FALSE;
-                    IMS_TRACE_D("CriticialError :: AckWithSDPInProgress is cleared", 0, 0, 0);
+                    IMS_TRACE_D("CriticalError :: AckWithSDPInProgress is cleared", 0, 0, 0);
                 }
 
                 Dialog_NotifyRequest(piSsc);
@@ -6730,7 +6730,7 @@ IMS_RESULT Session::SendRequestToCancel()
     // REFUSE_SDP_OFFER_ANSWER_EXCHANGE
     SetSdpBodyPartFromRefusedView(piSipMsg);
 
-    // Try to send an CANCEL request to the network
+    // Try to send a CANCEL request to the network
     if (!SendNUpdateRequest(nMethodForCancel, piCancel))
     {
         piCancel->Close();

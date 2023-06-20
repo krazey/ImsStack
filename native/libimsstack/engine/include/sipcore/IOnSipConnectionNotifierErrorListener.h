@@ -33,9 +33,9 @@ protected:
 
 public:
     /**
-     * Called when any error occurrs in the SipConnectionNotifier.
+     * Called when any error occurs in the SipConnectionNotifier.
      *
-     * @param pScn The SipConnectionNotifier object which error occurrs
+     * @param pScn The SipConnectionNotifier object which error occurs
      * @param nCode The reason code of error
      * @param strMessage The reason phrase of error
      */

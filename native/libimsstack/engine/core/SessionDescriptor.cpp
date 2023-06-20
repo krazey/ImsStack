@@ -540,8 +540,8 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed", nType, nBandwidth,
-                strType.GetStr());
+        IMS_TRACE_E(
+                0, "Decoding a bandwidth (%d, %d, %s) failed", nType, nBandwidth, strType.GetStr());
         return IMS_FAILURE;
     }
 

@@ -49,9 +49,9 @@ __IMS_TRACE_TAG_REG__;
 
 #define REG_SUB_MAKE_LPARAM(HIWORD, LOWORD) (IMS_UINT32)(((HIWORD) << 16) | (LOWORD))
 
-#define REG_SUB_HIWORD(LPARAM) (IMS_UINT16)(((LPARAM) >> 16) & (0xFFFF))
+#define REG_SUB_HIWORD(LPARAM)              (IMS_UINT16)(((LPARAM) >> 16) & (0xFFFF))
 
-#define REG_SUB_LOWORD(LPARAM) (IMS_UINT16)((LPARAM)&0xFFFF)
+#define REG_SUB_LOWORD(LPARAM)              (IMS_UINT16)((LPARAM)&0xFFFF)
 
 PRIVATE GLOBAL const IMS_CHAR RegSubscription::EVENT[] = "reg";
 PRIVATE GLOBAL const IMS_CHAR RegSubscription::MEDIA_TYPE[] = "application";

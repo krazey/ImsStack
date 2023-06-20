@@ -34,9 +34,9 @@ protected:
 
 public:
     /**
-     * Called when an asynchronous send operation fails or any error occurrs.
+     * Called when an asynchronous send operation fails or any error occurs.
      *
-     * @param pSc The SipConnection object which error occurrs
+     * @param pSc The SipConnection object which error occurs
      * @param nCode The reason code of error
      * @param strMessage The reason phrase of error
      */
