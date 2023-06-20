@@ -171,7 +171,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Set(IN const AString& strName, IN const AString
 PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompData)
 {
 #define MAX_COMPRESS_SIZE 32767
-#define GZIP_MAX_WBITS (16 + MAX_WBITS)
+#define GZIP_MAX_WBITS    (16 + MAX_WBITS)
 
     z_stream stream;
     IMS_SINT32 nError;
@@ -246,7 +246,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteA
 PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objData)
 {
 #define MAX_UNCOMPRESS_SIZE 32767
-#define GZIP_MAX_WBITS (16 + MAX_WBITS)
+#define GZIP_MAX_WBITS      (16 + MAX_WBITS)
 
     z_stream stream;
     IMS_SINT32 nError;

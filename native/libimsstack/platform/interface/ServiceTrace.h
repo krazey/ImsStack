@@ -56,43 +56,27 @@ private:
 };
 
 ////
-// DEFINITION OF VARIABLE ARGUMENT FORMAT STRING
-////
-
-//// unknown tag trace statement
-#define _VAF(FORMAT) FORMAT
-
-//// 'I' : information trace statement
-#define _VAF_I(FORMAT) ITrace::CAT_I, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, FORMAT
-
-//// 'D' : debugging trace statement
-#define _VAF_D(FORMAT) ITrace::CAT_D, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, FORMAT
-
-//// 'E' : error trace statement
-#define _VAF_E(FORMAT) __IMS_FUNC__, __IMS_LINE__, __IMS_TRACE_NAME__, __IMS_TRACE_MODULE__, FORMAT
-
-////
 // MACRO DEFINITION FOR TRACE
 ////
 
 // Macro based on platform's log configuration
-#define _IMS_LOG_DEBUG_ TraceService::IsLoggableForDebug()
+#define _IMS_LOG_DEBUG_      TraceService::IsLoggableForDebug()
 
 // Marco for boolean
-#define _TRACE_B_(B) (((B) == IMS_TRUE) ? "true" : "false")
+#define _TRACE_B_(B)         (((B) == IMS_TRUE) ? "true" : "false")
 // Macro for null-terminated string
-#define _TRACE_S_(S) (((S) != IMS_NULL) ? (S) : "__NULL__")
+#define _TRACE_S_(S)         (((S) != IMS_NULL) ? (S) : "__NULL__")
 
-#define IMS_TRACE_OPT_NONE 0x0000
-#define IMS_TRACE_OPT_D 0x0001
-#define IMS_TRACE_OPT_E 0x0002
-#define IMS_TRACE_OPT_I 0x0004
-#define IMS_TRACE_OPT_TEXT 0x0008
-#define IMS_TRACE_OPT_MEM 0x0010
+#define IMS_TRACE_OPT_NONE   0x0000
+#define IMS_TRACE_OPT_D      0x0001
+#define IMS_TRACE_OPT_E      0x0002
+#define IMS_TRACE_OPT_I      0x0004
+#define IMS_TRACE_OPT_TEXT   0x0008
+#define IMS_TRACE_OPT_MEM    0x0010
 
 // Additional options
-#define IMS_TRACE_OPT_TIME 0x0100
-#define IMS_TRACE_OPT_FILE 0x0200
+#define IMS_TRACE_OPT_TIME   0x0100
+#define IMS_TRACE_OPT_FILE   0x0200
 
 //// Macro for unknown tag trace statement
 #define IMS_TRACE(VA_FORMAT) TraceService::GetTraceService()->GetTrace()->Out VA_FORMAT

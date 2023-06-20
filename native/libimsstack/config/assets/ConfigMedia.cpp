@@ -15,12 +15,13 @@
  */
 #include "ConfigMedia.h"
 
-#define CONFIG_CAPABILITIES "capabilities"
+#define CONFIG_CAPABILITIES       "capabilities"
 #define CONFIG_MEDIA_CAPABILITIES "ims.media.capabilities"
 
 PUBLIC GLOBAL const IMS_CHAR ConfigMedia::MEDIA_NAME[] = "media";
 PUBLIC GLOBAL const IMS_CHAR ConfigMedia::MEDIA_CAPABILITIES_NAME[] = CONFIG_MEDIA_CAPABILITIES;
 
+// clang-format off
 PUBLIC GLOBAL const IMS_CHAR ConfigMedia::MEDIA_CONFIG[] = {
         "[profiles]\n"
         "ids=" CONFIG_CAPABILITIES "," CONFIG_MEDIA_MTC "\n"
@@ -57,3 +58,4 @@ PUBLIC GLOBAL const IMS_CHAR ConfigMedia::MEDIA_CAPABILITIES_CONFIG[] = {
         "stream_video_4=a=fmtp:34 profile=0; level=10\n"
         "\n"
 };
+// clang-format on

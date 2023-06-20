@@ -182,7 +182,7 @@ public:
     virtual const IMS_CHAR* GetFileSeparator() const = 0;
 
     /**
-     * @brief Creates an directory to file system.
+     * @brief Creates a directory to file system.
      *
      * @param strPathName The directory name to be created
      * @param nMode The directory access mode

@@ -16,8 +16,8 @@
 #include "ConfigMedia.h"
 #include "ConfigMtc.h"
 
-#define CONFIG_APP_NAME "ims.app.mtc"
-#define CONFIG_SERVICE_NAME "ims.service.mtc"
+#define CONFIG_APP_NAME               "ims.app.mtc"
+#define CONFIG_SERVICE_NAME           "ims.service.mtc"
 #define CONFIG_EMERGENCY_SERVICE_NAME "ims.service.mtc.emergency"
 
 PUBLIC GLOBAL const IMS_CHAR ConfigMtc::APP_NAME[] = CONFIG_APP_NAME;

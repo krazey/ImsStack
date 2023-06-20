@@ -17,20 +17,21 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-class IMSInterfaceTest : public ::testing::Test {
-
+class IMSInterfaceTest : public ::testing::Test
+{
 protected:
-    virtual void SetUp() override {
-
-  // Set up as needed for every TEST_F(IMSInterfaceTest, ...)
-  // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
-
+    virtual void SetUp() override
+    {
+        // Set up as needed for every TEST_F(IMSInterfaceTest, ...)
+        // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
     }
-    virtual void TearDown() override {
-    // cleans up after each test finishes. Called after executing each TEST_F.
+    virtual void TearDown() override
+    {
+        // cleans up after each test finishes. Called after executing each TEST_F.
     }
 };
 
-TEST_F(IMSInterfaceTest, TestName) {
+TEST_F(IMSInterfaceTest, TestName)
+{
     //.. test body..
 }

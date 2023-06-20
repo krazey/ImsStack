@@ -30,6 +30,7 @@ enum FLAG_ENTYPE
     FLAG_CAPITAL_E_X = 0x20
 };
 
+// clang-format off
 PRIVATE GLOBAL AString::Data AString::SHARED_NULL =
 {
     0, 0, AString::SHARED_NULL.acValue,
@@ -45,6 +46,7 @@ PRIVATE GLOBAL AString::Data AString::SHARED_EMPTY =
         0
     }
 };
+// clang-format on
 
 LOCAL
 IMS_SINT32 astring_CharToWideChar(IN const IMS_CHAR* pszSrc, IN IMS_SINT32 nSrcLen,

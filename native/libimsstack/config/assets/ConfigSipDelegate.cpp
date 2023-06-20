@@ -15,12 +15,13 @@
  */
 #include "ConfigSipDelegate.h"
 
-#define CONFIG_APP_NAME "ims.app.sip_delegate"
+#define CONFIG_APP_NAME     "ims.app.sip_delegate"
 #define CONFIG_SERVICE_NAME "ims.service.sip_delegate"
 
 PUBLIC GLOBAL const IMS_CHAR ConfigSipDelegate::APP_NAME[] = CONFIG_APP_NAME;
 PUBLIC GLOBAL const IMS_CHAR ConfigSipDelegate::SERVICE_NAME[] = CONFIG_SERVICE_NAME;
 
+// clang-format off
 PUBLIC GLOBAL const IMS_CHAR ConfigSipDelegate::APP_CONFIG[] = {
         "[Uniqueness]\n"
         "Stream=0\n"
@@ -57,3 +58,4 @@ PUBLIC GLOBAL const IMS_CHAR ConfigSipDelegate::APP_CONFIG[] = {
         "header_names=\n"
         "\n"
 };
+// clang-format on

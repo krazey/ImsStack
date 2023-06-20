@@ -15,14 +15,15 @@
  */
 #include "ConfigMts.h"
 
-#define CONFIG_APP_NAME "ims.app.mts"
-#define CONFIG_SERVICE_NAME "ims.service.mts"
+#define CONFIG_APP_NAME               "ims.app.mts"
+#define CONFIG_SERVICE_NAME           "ims.service.mts"
 #define CONFIG_EMERGENCY_SERVICE_NAME "ims.service.mts.emergency"
 
 PUBLIC GLOBAL const IMS_CHAR ConfigMts::APP_NAME[] = CONFIG_APP_NAME;
 PUBLIC GLOBAL const IMS_CHAR ConfigMts::SERVICE_NAME[] = CONFIG_SERVICE_NAME;
 PUBLIC GLOBAL const IMS_CHAR ConfigMts::EMERGENCY_SERVICE_NAME[] = CONFIG_EMERGENCY_SERVICE_NAME;
 
+// clang-format off
 PUBLIC GLOBAL const IMS_CHAR ConfigMts::APP_CONFIG[] = {
         "[Uniqueness]\n"
         "Stream=0\n"
@@ -70,3 +71,4 @@ PUBLIC GLOBAL const IMS_CHAR ConfigMts::APP_CONFIG[] = {
         "header_names=Content-Type From Request-Disposition Retry-After To Call-ID\n"
         "\n"
 };
+// clang-format on

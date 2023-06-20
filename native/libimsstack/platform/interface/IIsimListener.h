@@ -55,7 +55,7 @@ public:
     virtual void Isim_OnImpu(IN const ImsList<ByteArray>& objImpus) = 0;
 
     /**
-     * @brief Notifies the application that the error occurrs in the ISIM module.
+     * @brief Notifies the application that the error occurs in the ISIM module.
      *
      * @param nErrorCode The error code
      */

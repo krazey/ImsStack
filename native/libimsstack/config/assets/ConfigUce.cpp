@@ -15,12 +15,13 @@
  */
 #include "ConfigUce.h"
 
-#define CONFIG_APP_NAME "ims.app.uce"
+#define CONFIG_APP_NAME     "ims.app.uce"
 #define CONFIG_SERVICE_NAME "ims.service.uce"
 
 PUBLIC GLOBAL const IMS_CHAR ConfigUce::APP_NAME[] = CONFIG_APP_NAME;
 PUBLIC GLOBAL const IMS_CHAR ConfigUce::SERVICE_NAME[] = CONFIG_SERVICE_NAME;
 
+// clang-format off
 PUBLIC GLOBAL const IMS_CHAR ConfigUce::APP_CONFIG[] = {
         "[Uniqueness]\n"
         "Stream=0\n"
@@ -60,3 +61,4 @@ PUBLIC GLOBAL const IMS_CHAR ConfigUce::APP_CONFIG[] = {
         "header_names=\n"
         "\n"
 };
+// clang-format on

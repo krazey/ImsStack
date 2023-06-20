@@ -210,17 +210,17 @@ typedef signed long IMS_SINTP;
 typedef unsigned long IMS_UINTP;
 #endif
 
-#define LONG_TO_INT(l) ((l)&0xFFFFFFFF)
+#define LONG_TO_INT(l)      ((l)&0xFFFFFFFF)
 
 #define INT64_TO_SINTP(i64) (i64)
 #define INT64_TO_UINTP(i64) (static_cast<IMS_UINTP>(i64))
 
 // Printf Format : Length-Specifier
-#define PFLS_d "ld"
-#define PFLS_u "lu"
-#define PFLS_o "lo"
-#define PFLS_x "lx"
-#define PFLS_X "lX"
+#define PFLS_d              "ld"
+#define PFLS_u              "lu"
+#define PFLS_o              "lo"
+#define PFLS_x              "lx"
+#define PFLS_X              "lX"
 
 #else  // __IMS_LP64__
 
@@ -244,17 +244,17 @@ typedef signed int IMS_SINTP;
 typedef unsigned int IMS_UINTP;
 #endif
 
-#define LONG_TO_INT(l) (l)
+#define LONG_TO_INT(l)      (l)
 
 #define INT64_TO_SINTP(i64) ((i64)&0xFFFFFFFF)
 #define INT64_TO_UINTP(i64) (static_cast<IMS_UINTP>((i64)&0xFFFFFFFF))
 
 // Printf Format : Length-Specifier
-#define PFLS_d "d"
-#define PFLS_u "u"
-#define PFLS_o "o"
-#define PFLS_x "x"
-#define PFLS_X "X"
+#define PFLS_d              "d"
+#define PFLS_u              "u"
+#define PFLS_o              "o"
+#define PFLS_x              "x"
+#define PFLS_X              "X"
 
 #endif  // __IMS_LP64__
 
@@ -267,11 +267,11 @@ typedef unsigned int IMS_UINTP;
 
 // Slot definition for Multi-IMS architecture
 // Slot 0 is a default if not specified
-#define IMS_SLOT_ANY (-1)
-#define IMS_SLOT_0 0
-#define IMS_SLOT_1 1
+#define IMS_SLOT_ANY    (-1)
+#define IMS_SLOT_0      0
+#define IMS_SLOT_1      1
 // FIXME: for dual SIM only
-#define IMS_SLOT_MAX 2
+#define IMS_SLOT_MAX    2
 
 #ifndef NULL
 #define NULL (0)

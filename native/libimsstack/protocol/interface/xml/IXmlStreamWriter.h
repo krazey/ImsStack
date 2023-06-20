@@ -524,8 +524,8 @@ public:
      */
     virtual const XmlError* GetLastError() const = 0;
 
-#define XMLSTREAMWRITER_SPACE " "
-#define XMLSTREAMWRITER_TAB "\t"
+#define XMLSTREAMWRITER_SPACE  " "
+#define XMLSTREAMWRITER_TAB    "\t"
 #define XMLSTREAMWRITER_RETURN "\n"
 };
 
