@@ -22,10 +22,10 @@
 #include "SipDefNetworkUtil.h"
 #include "msg/SipMsgUtil.h"
 
-static SipUtil *gpUtil = SIP_NULL;
+static SipUtil* gpUtil = SIP_NULL;
 
-SipUtil::SipUtil()
-    : m_pTxnListener(SIP_NULL)
+SipUtil::SipUtil() :
+        m_pTxnListener(SIP_NULL)
 {
     /* Create Default In-Build Services */
     m_pLoggerUtil = new SipDefLoggerUtil();
@@ -55,7 +55,6 @@ SipUtil::~SipUtil()
     {
         delete m_pLoggerUtil;
     }
-
 }
 
 SIP_VOID SipUtil::RegisterNetwork(ISipNetworkUtil* pNwUtil)

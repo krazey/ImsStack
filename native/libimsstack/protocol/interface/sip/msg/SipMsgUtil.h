@@ -20,8 +20,8 @@
 #include "SipAbnfUtil.h"
 #include "msg/SipHeaderBase.h"
 
-#define SIP_SIP_VERSION "SIP/2.0"
-#define ZERO            "0"
+#define SIP_SIP_VERSION               "SIP/2.0"
+#define ZERO                          "0"
 
 #define INVITE_METHOD                 "INVITE"
 #define ACK_METHOD                    "ACK"

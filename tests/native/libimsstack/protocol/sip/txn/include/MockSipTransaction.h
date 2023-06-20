@@ -22,12 +22,16 @@ class SipTxn;
 class MockSipTransaction
 {
 public:
-    inline MockSipTransaction(SipTxnKey* pKey, SipTxn* pTxn)
-            : m_pKey(pKey), m_pTxn(pTxn) {}
-    inline virtual ~MockSipTransaction(){}
+    inline MockSipTransaction(SipTxnKey* pKey, SipTxn* pTxn) :
+            m_pKey(pKey),
+            m_pTxn(pTxn)
+    {
+    }
+    inline virtual ~MockSipTransaction() {}
 
     inline SipTxn* GetTxn() const { return m_pTxn; }
     inline SipTxnKey* GetKey() const { return m_pKey; }
+
 private:
     SipTxnKey* m_pKey;
     SipTxn* m_pTxn;

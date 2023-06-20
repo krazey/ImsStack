@@ -15,7 +15,7 @@
  */
 #include "SipContextUtils.h"
 
-static SipContextUtils *gpUtil = SIP_NULL;
+static SipContextUtils* gpUtil = SIP_NULL;
 
 SipContextUtils* SipContextUtils::GetInstance()
 {
@@ -36,13 +36,9 @@ SIP_VOID SipContextUtils::Destruct()
     }
 }
 
-SipContextUtils::SipContextUtils()
-{
-}
+SipContextUtils::SipContextUtils() {}
 
-SipContextUtils::~SipContextUtils()
-{
-}
+SipContextUtils::~SipContextUtils() {}
 
 SipTxnContext* SipContextUtils::Sip_CreateTxnContext()
 {

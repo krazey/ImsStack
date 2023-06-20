@@ -76,8 +76,8 @@ SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** 
     return SIP_TRUE;
 }
 
-SIP_BOOL MockTxn_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey,
-        SIP_VOID** ppvTxn)
+SIP_BOOL MockTxn_ReleaseTransaction(
+        SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey, SIP_VOID** ppvTxn)
 {
     SIP_UINT32 nSize = objTxnList.GetSize();
 

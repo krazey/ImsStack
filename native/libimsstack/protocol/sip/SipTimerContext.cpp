@@ -15,9 +15,9 @@
  */
 #include "SipTimerContext.h"
 
-SipTimerContext::SipTimerContext()
-    : pTxnSipTxnTimers(new SipTxnTimerValues())
-    , nTimerOptions(0)
+SipTimerContext::SipTimerContext() :
+        pTxnSipTxnTimers(new SipTxnTimerValues()),
+        nTimerOptions(0)
 {
 }
 

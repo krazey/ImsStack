@@ -15,12 +15,8 @@
  */
 #include "SipDefNetworkUtil.h"
 
-SipDefNetworkUtil::SipDefNetworkUtil()
-{
-}
-SipDefNetworkUtil::~SipDefNetworkUtil()
-{
-}
+SipDefNetworkUtil::SipDefNetworkUtil() {}
+SipDefNetworkUtil::~SipDefNetworkUtil() {}
 
 SIP_BOOL SipDefNetworkUtil::SendToNetwork(SipTransportBuffer* pTransportBuffer,
         SipTransportParameter* pTransportParam, ISipUserData* pUserData)
