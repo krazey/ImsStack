@@ -139,17 +139,17 @@ PROTECTED VIRTUAL IMS_SINT32 OsIpcan::GetNetworkType(IN IMS_SINT32 nSlotId)
 PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
         IN IMS_SINT32 nNetworkType, IN const AStringArray& objCellIdentities)
 {
-#define ANI_ITEM_COUNT 4
+#define ANI_ITEM_COUNT        4
 
-#define ANI_ITEM_MCC_I 0
-#define ANI_ITEM_MNC_I 1
-#define ANI_ITEM_CELL_ID_I 2
-#define ANI_ITEM_LAC_I 3
-#define ANI_ITEM_TAC_I 3
-#define ANI_ITEM_MODE_I 4
+#define ANI_ITEM_MCC_I        0
+#define ANI_ITEM_MNC_I        1
+#define ANI_ITEM_CELL_ID_I    2
+#define ANI_ITEM_LAC_I        3
+#define ANI_ITEM_TAC_I        3
+#define ANI_ITEM_MODE_I       4
 
-#define ANI_ITEM_COUNT_EHRPD 2
-#define ANI_ITEM_SECTOR_ID_I 0
+#define ANI_ITEM_COUNT_EHRPD  2
+#define ANI_ITEM_SECTOR_ID_I  0
 #define ANI_ITEM_SUBNET_LEN_I 1
 
     AccessNetworkInfo objAni;

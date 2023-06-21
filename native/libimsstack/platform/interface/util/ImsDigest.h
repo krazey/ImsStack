@@ -21,7 +21,7 @@
 /**
  * @brief This file implements the digest authentication scheme.
  */
-#define HASHHEX_SIZE                32
+#define HASHHEX_SIZE 32
 
 typedef IMS_CHAR HASHHEX[HASHHEX_SIZE + 1];
 

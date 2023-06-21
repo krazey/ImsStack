@@ -18,6 +18,7 @@
 #include "ImsStrLib.h"
 #include "ServiceMemory.h"
 
+// clang-format off
 PRIVATE GLOBAL ByteArray::Data ByteArray::SHARED_NULL =
 {
     0, 0, ByteArray::SHARED_NULL.byValue,
@@ -25,6 +26,7 @@ PRIVATE GLOBAL ByteArray::Data ByteArray::SHARED_NULL =
         0
     }
 };
+// clang-format on
 
 LOCAL
 IMS_SINT32 ByteArray_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)

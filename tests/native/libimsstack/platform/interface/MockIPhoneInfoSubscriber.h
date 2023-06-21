@@ -27,7 +27,7 @@ public:
     inline MockISubscriberInfo() {}
     inline virtual ~MockISubscriberInfo() {}
 
-    MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString& strPhoneNumber), (const, override));
+    MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString & strPhoneNumber), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSimMcc, (OUT AString & strMcc), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSimMnc, (OUT AString & strMnc), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSimCountryIso, (OUT AString & strCountry), (const, override));

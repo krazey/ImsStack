@@ -24,9 +24,9 @@ typedef IMS_SINT32 IMS_SOCKET;
 // Macro definition for socket handle
 #define IMS_SOCKET_MAKEPARAM(HIWORD, LOWORD) (IMS_UINT32)(((HIWORD) << 16) | (LOWORD))
 
-#define IMS_SOCKET_HIWORD(LPARAM) (IMS_UINT16)(((LPARAM) >> 16) & (0xFFFF))
+#define IMS_SOCKET_HIWORD(LPARAM)            (IMS_UINT16)(((LPARAM) >> 16) & (0xFFFF))
 
-#define IMS_SOCKET_LOWORD(LPARAM) (IMS_UINT16)((LPARAM)&0xFFFF)
+#define IMS_SOCKET_LOWORD(LPARAM)            (IMS_UINT16)((LPARAM)&0xFFFF)
 
 class ImsSocket : public ISocket
 {

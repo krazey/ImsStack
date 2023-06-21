@@ -37,10 +37,10 @@ public:
     inline const AString& GetName() const override { return m_strName; }
     inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
     MOCK_METHOD(IMS_BOOL, IsRunning, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, PostMessageI, (IN ImsMessage& objMsg), (override));
+    MOCK_METHOD(IMS_BOOL, PostMessageI, (IN ImsMessage & objMsg), (override));
     MOCK_METHOD(IMS_BOOL, PostMessageI,
             (IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam), (override));
-    MOCK_METHOD(void, SetRunnable, (IN IRunnable* piRunnable), (override));
+    MOCK_METHOD(void, SetRunnable, (IN IRunnable * piRunnable), (override));
     MOCK_METHOD(IMS_SINT32, RemoveMessages,
             (IN ImsMessage::IMessageCallback * piCallback, OUT ImsList<ImsMessage>* pImsMsgs),
             (override));

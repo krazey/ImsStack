@@ -32,27 +32,27 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 // NR / LTE
-#define UTRAN_ANI_ITEM_SIZE 4
+#define UTRAN_ANI_ITEM_SIZE        4
 
-#define UTRAN_ANI_MCC_INDEX 0
-#define UTRAN_ANI_MNC_INDEX 1
-#define UTRAN_ANI_CELLID_INDEX 2
-#define UTRAN_ANI_TAC_INDEX 3
-#define UTRAN_ANI_MODE_INDEX 4
+#define UTRAN_ANI_MCC_INDEX        0
+#define UTRAN_ANI_MNC_INDEX        1
+#define UTRAN_ANI_CELLID_INDEX     2
+#define UTRAN_ANI_TAC_INDEX        3
+#define UTRAN_ANI_MODE_INDEX       4
 
 // eHRPD
-#define EHRPD_ANI_ITEM_SIZE 2
+#define EHRPD_ANI_ITEM_SIZE        2
 
-#define EHRPD_ANI_SECTOR_ID_INDEX 0
+#define EHRPD_ANI_SECTOR_ID_INDEX  0
 #define EHRPD_ANI_SUBNET_LEN_INDEX 1
 
 // GERAN
-#define GERAN_ANI_ITEM_SIZE 4
+#define GERAN_ANI_ITEM_SIZE        4
 
-#define GERAN_ANI_MCC_INDEX 0
-#define GERAN_ANI_MNC_INDEX 1
-#define GERAN_ANI_CELLID_INDEX 2
-#define GERAN_ANI_LAC_INDEX 3
+#define GERAN_ANI_MCC_INDEX        0
+#define GERAN_ANI_MNC_INDEX        1
+#define GERAN_ANI_CELLID_INDEX     2
+#define GERAN_ANI_LAC_INDEX        3
 
 PUBLIC
 OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
