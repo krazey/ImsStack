@@ -20,6 +20,7 @@ ColumnLimit: 100
 CommentPragmas: NOLINT:.*
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
+DeriveLineEnding: false
 DerivePointerAlignment: false
 IncludeBlocks: Preserve
 IndentWidth: 4
@@ -33,5 +34,6 @@ SpaceBeforeCaseColon: false
 SpaceBeforeParens: ControlStatements
 Standard: c++20
 TabWidth: 4
+UseCRLF: false
 UseTab: Never
 ---
