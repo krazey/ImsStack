@@ -41,7 +41,7 @@ static SipStackManager* gpStackMngr = SIP_NULL;
  *****************************************************************************/
 SipStackManager::SipStackManager()
 {
-    SipUtil_Construct();  /* Singleton Util Obj, maintained by Util module*/
+    SipUtil_Construct(); /* Singleton Util Obj, maintained by Util module*/
 }
 
 /******************************************************************************

@@ -413,7 +413,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
             return SIP_FALSE;
         }
     }
-    else /* For Relaible Transport */
+    else /* For Reliable Transport */
     {
         // TimerI = 0, for TCP.
         pFsmData->bTxnTerminated = SIP_TRUE;
@@ -472,7 +472,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
             }
         }
     }
-    else /* For Relaible Transport */
+    else /* For Reliable Transport */
     {
         pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
         nDuration = SIP_ZERO;  // Transaction to be timedout immediately.
@@ -526,81 +526,82 @@ static SIP_BOOL InvSerFsm_ConfirmedStTimerI_TimeoutEvt(
     return SIP_TRUE;
 }
 
+// clang-format off
 SIP_BOOL(*gpfSipInvSerTxnFsm[SipTxn::INV_SER_INVALID_ST + 1][SipTxn::INV_SER_INVALID_EVT + 1])
 (SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError) = {
-  /* IDLE State:: S0*/
-        {
-            InvSerFsm_IdleStRecvInvReqEvt, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        },
- /* PROCEEDING State:: S1*/
-        {
-            InvSerFsm_ProceedingStRecvInvReqEvt, /* InvSerFsm_ProceedingStRecvInvReqEvt,
-                                                    SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_ProceedingStSendNon100ProvRespEvt, /* SendNon100ProvRespEvt*/
-            InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt, /* Send3xx6xxFailureRespEvt*/
-            InvSerFsm_ProceedingStSend2xxSuccessRespEvt, /*Send2xxSuccessRespEvt*/
-            InvSerFsm_ProceedingStTranspErrorEvt, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_ProceedingStTimerG_H_TimeoutEvt, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        },
- /* COMPLETE State:: S2*/
-        {
-            InvSerFsm_CompletedStRecvInvReqEvt, /*InvSerFsm_CompletedStRecvInvReqEvt,
-                                                  SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
-            InvSerFsm_CompletedStTranspErrorEvt, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_CompletedStRecvAckReqEvt, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_CompletedStTimerG_H_TimeoutEvt, /* TimerG_H_TimeoutEvt*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        },
- /* CONFIRMED State:: S3*/
-        {
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_ConfirmedStRecvAckReqEvt, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_NullFxn, /* TimerG_H_TimeoutEvt*/
-            InvSerFsm_ConfirmedStTimerI_TimeoutEvt, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        },
-
- /* TERMINATED State:: S4*/
-        {
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        },
- /* Invalid State:: S4*/
-        {
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
-            InvSerFsm_NullFxn
-        }
+    /* IDLE State:: S0*/
+    {
+        InvSerFsm_IdleStRecvInvReqEvt, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    },
+    /* PROCEEDING State:: S1*/
+    {
+        InvSerFsm_ProceedingStRecvInvReqEvt, /* InvSerFsm_ProceedingStRecvInvReqEvt,
+                                                SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_ProceedingStSendNon100ProvRespEvt, /* SendNon100ProvRespEvt*/
+        InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt, /* Send3xx6xxFailureRespEvt*/
+        InvSerFsm_ProceedingStSend2xxSuccessRespEvt, /*Send2xxSuccessRespEvt*/
+        InvSerFsm_ProceedingStTranspErrorEvt, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_ProceedingStTimerG_H_TimeoutEvt, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    },
+    /* COMPLETE State:: S2*/
+    {
+        InvSerFsm_CompletedStRecvInvReqEvt, /*InvSerFsm_CompletedStRecvInvReqEvt,
+                                              SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
+        InvSerFsm_CompletedStTranspErrorEvt, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_CompletedStRecvAckReqEvt, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_CompletedStTimerG_H_TimeoutEvt, /* TimerG_H_TimeoutEvt*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    },
+    /* CONFIRMED State:: S3*/
+    {
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_ConfirmedStRecvAckReqEvt, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_NullFxn, /* TimerG_H_TimeoutEvt*/
+        InvSerFsm_ConfirmedStTimerI_TimeoutEvt, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    },
+    /* TERMINATED State:: S4*/
+    {
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    },
+    /* Invalid State:: S4*/
+    {
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_INV_REQ_EVT */
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TRANSP_ERROR_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_RECV_ACK_REQ_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn, /* SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT*/
+        InvSerFsm_NullFxn
+    }
 };
+// clang-format on

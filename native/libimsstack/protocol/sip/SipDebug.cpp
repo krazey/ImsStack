@@ -38,8 +38,8 @@ void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 
 
     SIP_CHAR* pszTempFilename = SipPf_Strdup(pszFilename);
 
-    const SIP_CHAR* pTemp = (pszTempFilename != SIP_NULL) ?\
-            SipPf_StripFileName(pszTempFilename) : "xxx";
+    const SIP_CHAR* pTemp =
+            (pszTempFilename != SIP_NULL) ? SipPf_StripFileName(pszTempFilename) : "xxx";
 
     SIP_CHAR szFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
     SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "[%s:%d] %s", pTemp, nLine, szTemp);

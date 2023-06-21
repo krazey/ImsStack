@@ -22,6 +22,7 @@
 
 #define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
 
+// clang-format off
 SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
         "Allow",  // 0
         "Allow-Events",
@@ -140,6 +141,7 @@ SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
         "Session-ID",
         "UNKNOWN",  // 115
 };
+// clang-format on
 
 const SIP_CHAR* gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] = {
         "Content-Type",        /*CONTENT_TYPE*/

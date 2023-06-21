@@ -342,61 +342,63 @@ static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(
     return SIP_TRUE;
 }
 
+// clang-format off
 SIP_BOOL (*gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_INVALID_ST + 1]
                                 [SipTxn::NON_INV_SER_INVALID_EVT + 1])
 (SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError) = {
-  /* Idle State:: S0*/
-        {
-            NonInvSerFsm_IdleStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-            NonInvSerFsm_NullFxn
-        },
- /* TRYING State:: S1*/
-        {
-            NonInvSerFsm_TryingStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-            NonInvSerFsm_TryingStSend1xxRespEvt, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-            NonInvSerFsm_TryingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
-            NonInvSerFsm_TryingStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-            NonInvSerFsm_NullFxn
-        },
- /* PROCEEDING State:: S2*/
-        {
-            NonInvSerFsm_ProceedingStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
-            NonInvSerFsm_ProceedingStSend1xxRespEvt, /* Send1xxRespEvt */
-            NonInvSerFsm_ProceedingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
-            NonInvSerFsm_ProceedingStTranspErrorEvt, /* ranspnErrorEvt */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-            NonInvSerFsm_NullFxn
-        },
- /* COMPLETED State:: S3*/
-        {
-            NonInvSerFsm_CompletedStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-            NonInvSerFsm_CompletedStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-            NonInvSerFsm_CompletedStTimer_J_TimeoutEvt, /* Timer_J_TimeoutEvt */
-            NonInvSerFsm_NullFxn
-        },
- /* TERMINATED State:: S4*/
-        {
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-            NonInvSerFsm_NullFxn
-        },
- /* Invalid State:: S5*/
-        {
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-            NonInvSerFsm_NullFxn
-        }
+    /* Idle State:: S0*/
+    {
+        NonInvSerFsm_IdleStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+        NonInvSerFsm_NullFxn
+    },
+    /* TRYING State:: S1*/
+    {
+        NonInvSerFsm_TryingStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+        NonInvSerFsm_TryingStSend1xxRespEvt, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+        NonInvSerFsm_TryingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
+        NonInvSerFsm_TryingStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+        NonInvSerFsm_NullFxn
+    },
+    /* PROCEEDING State:: S2*/
+    {
+        NonInvSerFsm_ProceedingStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
+        NonInvSerFsm_ProceedingStSend1xxRespEvt, /* Send1xxRespEvt */
+        NonInvSerFsm_ProceedingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
+        NonInvSerFsm_ProceedingStTranspErrorEvt, /* ranspnErrorEvt */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+        NonInvSerFsm_NullFxn
+    },
+    /* COMPLETED State:: S3*/
+    {
+        NonInvSerFsm_CompletedStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+        NonInvSerFsm_CompletedStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+        NonInvSerFsm_CompletedStTimer_J_TimeoutEvt, /* Timer_J_TimeoutEvt */
+        NonInvSerFsm_NullFxn
+    },
+    /* TERMINATED State:: S4*/
+    {
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+        NonInvSerFsm_NullFxn
+    },
+    /* Invalid State:: S5*/
+    {
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+        NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+        NonInvSerFsm_NullFxn
+    }
 };
+// clang-format on

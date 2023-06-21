@@ -64,8 +64,10 @@
 #define IS_DIGIT(ch)               ((ch) >= 48 && (ch) <= 57)
 #define IS_OCTAL(ch)               ((ch) >= 48 && (ch) <= 55)
 #define IS_BINARY(ch)              ((ch) >= 48 && (ch) <= 49)
+// clang-format off
 #define IS_HEXDIG(ch)              (((ch) >= 65 && (ch) <= 70) || \
                                    ((ch) >= 97 && (ch) <= 102) || IS_DIGIT((ch)))
+// clang-format on
 #define IS_HEXL(ch)                (((ch) >= 0x61 && (ch) <= 0x66) || IS_DIGIT((ch)))
 #define IS_ALPHANUM(ch)            (IS_ALPHA((ch)) || IS_DIGIT((ch)))
 
@@ -157,8 +159,10 @@
 
 #define IS_ESCAPED(ch1, ch2, ch3) (((ch1) == '%') && (IS_HEXDIG((ch2))) && (IS_HEXDIG((ch3))))
 
+// clang-format off
 #define IS_SCHEME(ch)             (IS_ALPHANUM((ch)) || \
                                   ((ch) == '+') || ((ch) == '-') || ((ch) == '.'))
+// clang-format on
 
 #define SIP_COLLECT_TEMP_POS(pch1, pch2) \
     (pch1) = (pch2);                     \

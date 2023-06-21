@@ -16,8 +16,8 @@
 #include "SipConfiguration.h"
 
 // 3GPP-based timer intervals
-#define DEFAULT_T1      2000
-#define DEFAULT_T2      16000
+#define DEFAULT_T1 2000
+#define DEFAULT_T2 16000
 
 SipConfiguration* SipConfiguration::pSipConfig = SIP_NULL;
 
@@ -30,23 +30,21 @@ SipConfiguration::SipConfiguration()
     m_nParseStyle &= ~SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     m_nParseStyle &= ~SipConfiguration::MSG_OPT_DECODE_STRICT;
 
-    m_nT1                  = DEFAULT_T1;
-    m_nT2                  = DEFAULT_T2;
-    m_nT4                  = DEFAULT_T2 + 1000;
-    m_nTimerB              = 64*m_nT1;
-    m_nTimerC              = 180000;
-    m_nTimerCr             = 180000;
-    m_nTimerD_T3           = 64*m_nT1;
-    m_nTimerF_T3           = 64*m_nT1;
-    m_nTimerH              = 64*m_nT1;
-    m_nTimerI_T4           = m_nT4;
-    m_nTimerJ_T3           = 64*m_nT1;
-    m_nTimerK_T4           = m_nT4;
+    m_nT1 = DEFAULT_T1;
+    m_nT2 = DEFAULT_T2;
+    m_nT4 = DEFAULT_T2 + 1000;
+    m_nTimerB = 64 * m_nT1;
+    m_nTimerC = 180000;
+    m_nTimerCr = 180000;
+    m_nTimerD_T3 = 64 * m_nT1;
+    m_nTimerF_T3 = 64 * m_nT1;
+    m_nTimerH = 64 * m_nT1;
+    m_nTimerI_T4 = m_nT4;
+    m_nTimerJ_T3 = 64 * m_nT1;
+    m_nTimerK_T4 = m_nT4;
 }
 
-SipConfiguration::~SipConfiguration()
-{
-}
+SipConfiguration::~SipConfiguration() {}
 
 SIP_VOID SipConfiguration::SetMultiLineEncoding(SIP_BOOL bEnableMultiLine)
 {
