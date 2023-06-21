@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.Collection;
 
+/** A class for providing the utility method of the configuration XML parser. */
 public final class ConfigXmlUtils {
     /**
      * Parses the XML configuration and returns the structured format as {@link PersistableBundle}.

@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 
 import com.android.imsstack.core.config.CarrierConfig;
 
+/** An interface for providing the configuration related information. */
 public interface ConfigInterface extends IAgent {
     /**
      * A listener to monitor the change notification when the configuration is changed.

@@ -17,17 +17,24 @@ package com.android.imsstack.util;
 
 import android.util.SparseArray;
 
+/** A class for providing the integer key and long value pair. */
 public final class MapIntLong {
-    public final static int INVALID_KEY = (-1);
-    public final static long INVALID_VALUE = (-1);
+    public static final int INVALID_KEY = (-1);
+    public static final long INVALID_VALUE = (-1);
 
-    private final static boolean DBG = false;
+    private static final boolean DBG = false;
     private final SparseArray<Long> mIntLong = new SparseArray<>();
     private int mNextKey = 1;
 
     public MapIntLong() {
     }
 
+    /**
+     * Adds a key and value.
+     *
+     * @param key The integer type key.
+     * @param value The long type value.
+     */
     public void add(int key, long value) {
         synchronized (mIntLong) {
             mIntLong.put(key, Long.valueOf(value));
@@ -38,12 +45,23 @@ public final class MapIntLong {
         }
     }
 
+    /**
+     * Checks whether the given key is contained or not.
+     *
+     * @param key The integer type key.
+     * @return {@code true} if the given key contains, {@code false} otherwise.
+     */
     public boolean contains(int key) {
         synchronized (mIntLong) {
             return mIntLong.contains(key);
         }
     }
 
+    /**
+     * Returns a new key.
+     *
+     * @return A new key.
+     */
     public int getNewKey() {
         synchronized (mIntLong) {
             do {
@@ -62,6 +80,12 @@ public final class MapIntLong {
         }
     }
 
+    /**
+     * Returns the integer type key for the given long type value.
+     *
+     * @param value The long type value.
+     * @return The integer type key.
+     */
     public int getKey(long value) {
         synchronized (mIntLong) {
             for (int i = 0; i < mIntLong.size(); ++i) {
@@ -76,6 +100,12 @@ public final class MapIntLong {
         return INVALID_KEY;
     }
 
+    /**
+     * Returns the long type value for the given integer type key.
+     *
+     * @param key The integer type key.
+     * @return The long type value.
+     */
     public long getValue(int key) {
         synchronized (mIntLong) {
             Long v = mIntLong.get(key);
@@ -83,6 +113,11 @@ public final class MapIntLong {
         }
     }
 
+    /**
+     * Removes the value for the given key.
+     *
+     * @param key The integer type key.
+     */
     public void remove(int key) {
         synchronized (mIntLong) {
             mIntLong.remove(key);
@@ -93,6 +128,9 @@ public final class MapIntLong {
         }
     }
 
+    /**
+     * Removes all the values.
+     */
     public void removeAll() {
         synchronized (mIntLong) {
             if (DBG) {
@@ -103,6 +141,11 @@ public final class MapIntLong {
         }
     }
 
+    /**
+     * Removes the entry for the given value.
+     *
+     * @param value The long type value to be removed.
+     */
     public void removeValue(long value) {
         synchronized (mIntLong) {
             for (int i = 0; i < mIntLong.size(); ++i) {

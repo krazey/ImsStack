@@ -57,6 +57,7 @@ public final class ImsPrivateProperties {
         }
     }
 
+    /** Ephemeral properties. */
     public static class Ephemeral {
         /**
          * Codec information during IMS call.
@@ -92,8 +93,8 @@ public final class ImsPrivateProperties {
          * Caches the default dialer information and it will be checked in active call.
          * Value: boolean
          */
-        public static final String KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL
-                = "third_party_dialer_for_video_call";
+        public static final String KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL =
+                "third_party_dialer_for_video_call";
         /**
          * Caches the video quality information for H.265 if operator provides this value.
          * It may be used for preview's video resolution for 3rd party dialer.
@@ -103,51 +104,128 @@ public final class ImsPrivateProperties {
 
         private static final String NAME = "ephemeral_prop";
 
+        /**
+         * Returns the string value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return A string value or null.
+         */
         public static String get(String key, int slotId) {
             return get(key, null, slotId);
         }
 
+        /**
+         * Returns the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return A boolean value.
+         */
         public static boolean getBoolean(String key, int slotId) {
             return getBoolean(key, false, slotId);
         }
 
+        /**
+         * Returns the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return An integer value.
+         */
         public static int getInt(String key, int slotId) {
             return getInt(key, -1, slotId);
         }
 
+        /**
+         * Returns the string value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return A string value.
+         */
         public static String get(String key, String defValue, int slotId) {
             SharedPreferences sp = getSharedPreferences(slotId);
             return sp.getString(key, defValue);
         }
 
+        /**
+         * Returns the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return A boolean value.
+         */
         public static boolean getBoolean(String key, boolean defValue, int slotId) {
             return Boolean.valueOf(get(key, String.valueOf(defValue), slotId));
         }
 
+        /**
+         * Returns the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return An integer value.
+         */
         public static int getInt(String key, int defValue, int slotId) {
             return Integer.valueOf(get(key, String.valueOf(defValue), slotId));
         }
 
+        /**
+         * Sets the string value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void set(String key, String value, int slotId) {
             SharedPreferences.Editor editor = getSharedPreferences(slotId).edit();
             editor.putString(key, value);
             editor.commit();
         }
 
+        /**
+         * Sets the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void setBoolean(String key, boolean value, int slotId) {
             set(key, String.valueOf(value), slotId);
         }
 
+        /**
+         * Sets the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void setInt(String key, int value, int slotId) {
             set(key, String.valueOf(value), slotId);
         }
 
+        /**
+         * Removes the property for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         */
         public static void remove(String key, int slotId) {
             SharedPreferences.Editor editor = getSharedPreferences(slotId).edit();
             editor.remove(key);
             editor.commit();
         }
 
+        /**
+         * Removes all the properties.
+         *
+         * @param slotId The slot id.
+         */
         public static void removeAll(int slotId) {
             SharedPreferences.Editor editor = getSharedPreferences(slotId).edit();
             editor.clear();
@@ -162,6 +240,7 @@ public final class ImsPrivateProperties {
         private Ephemeral() {}
     }
 
+    /** Persistent properties. */
     public static class Persistent {
         // Test properties
         /**
@@ -327,14 +406,14 @@ public final class ImsPrivateProperties {
         public static final String KEY_CONFIG_IMPU_LIST = "config_impu_list";
         public static final String KEY_CONFIG_HOME_DOMAIN_NAME = "config_home_domain_name";
 
-        public static final String[] CONFIG_PROPERTIES =
-            {
-                KEY_CONFIG_PCSCF_ADDRESS_LIST,
-                KEY_CONFIG_IMPI,
-                KEY_CONFIG_IMPU_LIST,
-                KEY_CONFIG_HOME_DOMAIN_NAME
-            };
+        public static final String[] CONFIG_PROPERTIES = {
+            KEY_CONFIG_PCSCF_ADDRESS_LIST,
+            KEY_CONFIG_IMPI,
+            KEY_CONFIG_IMPU_LIST,
+            KEY_CONFIG_HOME_DOMAIN_NAME
+        };
 
+        /** Checks whether the given key is for the configuration properties or not. */
         public static boolean isConfigProperty(String key) {
             for (String configKey : ImsPrivateProperties.Persistent.CONFIG_PROPERTIES) {
                 if (configKey.equals(key)) {
@@ -347,56 +426,124 @@ public final class ImsPrivateProperties {
 
         private static final String NAME = "persistent_prop";
 
-        public static final String[] TEST_PROPERTIES =
-            {
-                KEY_PREF_OPERATOR,
-                KEY_PREF_COUNTRY,
-                KEY_PREF_KR_ENABLER,
-                KEY_WIFI_TEST,
-                KEY_IMS_HAL_TEST,
-                KEY_CARRIER_SIGNAL_PCO_TEST,
-                KEY_TEST_IMS_DISABLED,
-                KEY_TEST_DEBUG_ENABLED,
-                KEY_TEST_TESTMODE_ENABLED,
-                KEY_USE_PREDEFINED_UA_STRING,
-                KEY_CONFIG_NR_DUPLEX_MODE,
-                KEY_TEST_CARRIER_ID,
-                KEY_TEST_LOG_OPTIONS
-            };
+        public static final String[] TEST_PROPERTIES = {
+            KEY_PREF_OPERATOR,
+            KEY_PREF_COUNTRY,
+            KEY_PREF_KR_ENABLER,
+            KEY_WIFI_TEST,
+            KEY_IMS_HAL_TEST,
+            KEY_CARRIER_SIGNAL_PCO_TEST,
+            KEY_TEST_IMS_DISABLED,
+            KEY_TEST_DEBUG_ENABLED,
+            KEY_TEST_TESTMODE_ENABLED,
+            KEY_USE_PREDEFINED_UA_STRING,
+            KEY_CONFIG_NR_DUPLEX_MODE,
+            KEY_TEST_CARRIER_ID,
+            KEY_TEST_LOG_OPTIONS
+        };
 
+        /**
+         * Returns the string value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return A string value or null.
+         */
         public static String get(String key, int slotId) {
             return get(key, null, slotId);
         }
 
+        /**
+         * Returns the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return A boolean value.
+         */
         public static boolean getBoolean(String key, int slotId) {
             return getBoolean(key, false, slotId);
         }
 
+        /**
+         * Returns the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         * @return An integer value.
+         */
         public static int getInt(String key, int slotId) {
             return getInt(key, -1, slotId);
         }
 
+        /**
+         * Returns the string value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return A string value.
+         */
         public static String get(String key, String defValue, int slotId) {
             return get(AppContext.getInstance(), key, defValue, slotId);
         }
 
+        /**
+         * Returns the string value for the given key.
+         *
+         * @param c The Context.
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return A string value.
+         */
         public static String get(Context c, String key, String defValue, int slotId) {
             SharedPreferences sp = getSharedPreferences(c, slotId);
             return (sp != null) ? sp.getString(key, defValue) : defValue;
         }
 
+        /**
+         * Returns the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return A boolean value.
+         */
         public static boolean getBoolean(String key, boolean defValue, int slotId) {
             return Boolean.valueOf(get(key, String.valueOf(defValue), slotId));
         }
 
+        /**
+         * Returns the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param defValue The default value when the key is not set.
+         * @param slotId The slot id.
+         * @return An integer value.
+         */
         public static int getInt(String key, int defValue, int slotId) {
             return Integer.valueOf(get(key, String.valueOf(defValue), slotId));
         }
 
+        /**
+         * Sets the string value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void set(String key, String value, int slotId) {
             set(AppContext.getInstance(), key, value, slotId);
         }
 
+        /**
+         * Sets the string value for the given key.
+         *
+         * @param c The Context.
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void set(Context c, String key, String value, int slotId) {
             if (c == null) {
                 return;
@@ -411,14 +558,33 @@ public final class ImsPrivateProperties {
             }
         }
 
+        /**
+         * Sets the boolean value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void setBoolean(String key, boolean value, int slotId) {
             set(key, String.valueOf(value), slotId);
         }
 
+        /**
+         * Sets the integer value for the given key.
+         *
+         * @param key The property key.
+         * @param value The property value.
+         * @param slotId The slot id.
+         */
         public static void setInt(String key, int value, int slotId) {
             set(key, String.valueOf(value), slotId);
         }
 
+        /**
+         * Removes the test properties for the given slot.
+         *
+         * @param slotId The slot id.
+         */
         public static void removeTestProperties(int slotId) {
             SharedPreferences.Editor editor = getSharedPreferences(
                     AppContext.getInstance(), slotId).edit();

@@ -36,6 +36,9 @@ public final class Log {
         }
     }
 
+    /**
+     * Checks whether the debug mode is enabled or not.
+     */
     public static boolean isDebuggable() {
         if (sDebug == 1 || sImsDebug == 1) {
             return true;
@@ -46,59 +49,84 @@ public final class Log {
         return false;
     }
 
+    /**
+     * Checks whether the logging is enabled for the given log level.
+     */
     public static boolean isLoggable(int level) {
         return android.util.Log.isLoggable(TAG, level);
     }
 
+    /**
+     * Prints the debug level log.
+     */
     public static void d(String tag, String msg) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_D)) {
             android.util.Log.d(tag, msg);
         }
     }
 
+    /**
+     * Prints the error level log.
+     */
     public static void e(String tag, String msg) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_E)) {
             android.util.Log.e(tag, msg);
         }
     }
 
+    /**
+     * Prints the error level log.
+     */
     public static void e(String tag, String msg, Throwable t) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_E)) {
             android.util.Log.e(tag, msg, t);
         }
     }
 
+    /**
+     * Prints the information level log.
+     */
     public static void i(String tag, String msg) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_I)) {
             android.util.Log.i(tag, msg);
         }
     }
 
+    /**
+     * Prints the verbose level log.
+     */
     public static void v(String tag, String msg) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_D)) {
             android.util.Log.v(tag, msg);
         }
     }
 
+    /**
+     * Prints the warning level log.
+     */
     public static void w(String tag, String msg) {
         if (isLogEnabled(LogUtils.TRACE_OPTION_I)) {
             android.util.Log.w(tag, msg);
         }
     }
 
-    // Conditional logging {
+    /**
+     * Prints the debug level log when the debug mode is enabled.
+     */
     public static void dc(String tag, String msg) {
         if (isDebuggable()) {
             d(tag, msg);
         }
     }
 
+    /**
+     * Prints the verbose level log when the debug mode is enabled.
+     */
     public static void vc(String tag, String msg) {
         if (isDebuggable()) {
             v(tag, msg);
         }
     }
-    // }
 
     /**
      * Returns a logging string depending on whether it's debuggable or not.

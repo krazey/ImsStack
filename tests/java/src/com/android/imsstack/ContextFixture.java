@@ -132,8 +132,8 @@ public class ContextFixture implements TestFixture<Context> {
                 mNumKeyValuePairs++;
                 newUri = Uri.withAppendedPath(uri, "" + mNumKeyValuePairs);
             }
-            logd("insert called, new mNumKeyValuePairs: " + mNumKeyValuePairs + " uri: " + uri +
-                    " newUri: " + newUri);
+            logd("insert called, new mNumKeyValuePairs: " + mNumKeyValuePairs + " uri: " + uri
+                    + " newUri: " + newUri);
             return newUri;
         }
 
@@ -152,8 +152,8 @@ public class ContextFixture implements TestFixture<Context> {
 
         @Override
         public Bundle call(String method, String request, Bundle args) {
-            logd("call called, mNumKeyValuePairs: " + mNumKeyValuePairs + " method: " + method +
-                    " request: " + request + ", args=" + args);
+            logd("call called, mNumKeyValuePairs: " + mNumKeyValuePairs + " method: " + method
+                    + " request: " + request + ", args=" + args);
             Bundle bundle = new Bundle();
             switch(method) {
                 case Settings.CALL_METHOD_GET_GLOBAL:
@@ -161,16 +161,16 @@ public class ContextFixture implements TestFixture<Context> {
                 case Settings.CALL_METHOD_GET_SYSTEM:
                     if (mKeyValuePairs.containsKey(request)) {
                         bundle.putCharSequence("value", mKeyValuePairs.get(request));
-                        logd("returning value pair: " + mKeyValuePairs.get(request) + " for " +
-                                request);
+                        logd("returning value pair: " + mKeyValuePairs.get(request) + " for "
+                                + request);
                         return bundle;
                     }
                     break;
                 case Settings.CALL_METHOD_PUT_GLOBAL:
                 case Settings.CALL_METHOD_PUT_SECURE:
                 case Settings.CALL_METHOD_PUT_SYSTEM:
-                    logd("adding key-value pair: " + request + "-" + (String)args.get("value"));
-                    mKeyValuePairs.put(request, (String)args.get("value"));
+                    logd("adding key-value pair: " + request + "-" + (String) args.get("value"));
+                    mKeyValuePairs.put(request, (String) args.get("value"));
                     mNumKeyValuePairs++;
                     break;
                 case Settings.CALL_METHOD_LIST_CONFIG:
@@ -432,7 +432,7 @@ public class ContextFixture implements TestFixture<Context> {
         private Intent registerReceiverFakeImpl(BroadcastReceiver receiver, IntentFilter filter) {
             Intent result = null;
             synchronized (mBroadcastReceiversByAction) {
-                for (int i = 0 ; i < filter.countActions() ; i++) {
+                for (int i = 0; i < filter.countActions(); i++) {
                     if (receiver != null) {
                         mBroadcastReceiversByAction.put(filter.getAction(i), receiver);
                     }
@@ -715,7 +715,7 @@ public class ContextFixture implements TestFixture<Context> {
     private final TelecomManager mTelecomManager = mock(TelecomManager.class);
     private final PackageInfo mPackageInfo = mock(PackageInfo.class);
     private final TelephonyRegistryManager mTelephonyRegistryManager =
-        mock(TelephonyRegistryManager.class);
+            mock(TelephonyRegistryManager.class);
     private final SystemConfigManager mSystemConfigManager = mock(SystemConfigManager.class);
     private final LocationManager mLocationManager = mock(LocationManager.class);
     private final KeyguardManager mKeyguardManager = mock(KeyguardManager.class);

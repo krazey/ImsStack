@@ -18,9 +18,9 @@ package com.android.imsstack;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.nullable;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -77,7 +77,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public abstract class ImsStackTest {
-    protected static String TAG;
+    protected static String sLogTag;
 
     private static final int MAX_INIT_WAIT_MS = 30000; // 30 seconds
 
@@ -169,7 +169,7 @@ public abstract class ImsStackTest {
                 try {
                     mLock.wait(MAX_INIT_WAIT_MS);
                 } catch (InterruptedException ie) {
-                    Log.d(TAG, "InterruptedException: " + ie);
+                    Log.d(sLogTag, "InterruptedException: " + ie);
                 }
 
                 if (!mReady) {
@@ -240,7 +240,7 @@ public abstract class ImsStackTest {
     }
 
     protected void setUp(String tag) throws Exception {
-        TAG = tag;
+        sLogTag = tag;
         enableStrictMode();
         mRegistrantList = Mockito.mock(RegistrantList.class);
         mServiceState = Mockito.mock(ServiceState.class);
@@ -256,8 +256,8 @@ public abstract class ImsStackTest {
 
         TelephonyManager.disableServiceHandleCaching();
         // For testing do not allow Log.WTF as it can cause test process to crash
-        Log.setWtfHandler((tagString, what, system) -> Log.d(TAG, "WTF captured, ignoring. Tag: "
-                + tagString + ", exception: " + what));
+        Log.setWtfHandler((tagString, what, system) -> Log.d(sLogTag,
+                "WTF captured, ignoring. Tag: " + tagString + ", exception: " + what));
 
         mContextFixture = new ContextFixture();
         mContext = mContextFixture.getTestDouble();
@@ -280,8 +280,8 @@ public abstract class ImsStackTest {
         doReturn(true).when(mTelephonyManager).getSmsSendCapableForPhone(anyInt(), anyBoolean());
 
         //Misc
-        doReturn(ServiceState.RIL_RADIO_TECHNOLOGY_UMTS).when(mServiceState).
-                getRilDataRadioTechnology();
+        doReturn(ServiceState.RIL_RADIO_TECHNOLOGY_UMTS).when(mServiceState)
+                .getRilDataRadioTechnology();
         doReturn(mIBinder).when(mIIntentSender).asBinder();
         doReturn(mIIntentSender).when(mIActivityManager).getIntentSenderWithFeature(anyInt(),
                 nullable(String.class), nullable(String.class), nullable(IBinder.class),
@@ -375,7 +375,7 @@ public abstract class ImsStackTest {
     }
 
     protected static void logd(String s) {
-        Log.d(TAG, s);
+        Log.d(sLogTag, s);
     }
 
     public static class FakeBlockedNumberContentProvider extends MockContentProvider {

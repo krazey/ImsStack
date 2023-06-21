@@ -31,72 +31,75 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+/** A class for providing the key/value pair configuration. */
 public class CarrierConfig {
     // Assets path / files
     public static final String CARRIER_CONFIG = "carrier_config";
+    // A default configuration file.
     public static final String DEFAULT_CARRIER_CONFIG_FILE =
             CARRIER_CONFIG + "/carrier_config.xml";
     // Non-Assets file
     public static final String TEST_CARRIER_CONFIG_FILE =
             "test_carrier_config.xml";
 
-    public static final String IMS_KEY_PREFIXES[] =
-        {
-            CarrierConfigManager.Ims.KEY_PREFIX,
-            CarrierConfigManager.ImsEmergency.KEY_PREFIX,
-            CarrierConfigManager.ImsRtt.KEY_PREFIX,
-            CarrierConfigManager.ImsSms.KEY_PREFIX,
-            CarrierConfigManager.ImsSs.KEY_PREFIX,
-            CarrierConfigManager.ImsVoice.KEY_PREFIX,
-            CarrierConfigManager.ImsVt.KEY_PREFIX,
-            CarrierConfigManager.ImsWfc.KEY_PREFIX
-        };
+    /** Configuration prefixes for IMS. */
+    public static final String[] IMS_KEY_PREFIXES = {
+        CarrierConfigManager.Ims.KEY_PREFIX,
+        CarrierConfigManager.ImsEmergency.KEY_PREFIX,
+        CarrierConfigManager.ImsRtt.KEY_PREFIX,
+        CarrierConfigManager.ImsSms.KEY_PREFIX,
+        CarrierConfigManager.ImsSs.KEY_PREFIX,
+        CarrierConfigManager.ImsVoice.KEY_PREFIX,
+        CarrierConfigManager.ImsVt.KEY_PREFIX,
+        CarrierConfigManager.ImsWfc.KEY_PREFIX
+    };
 
+    /** Configuration items for IMS common. */
     @SuppressWarnings("deprecation")
-    public static final String IMS_COMMON_KEYS[] =
-        {
-            CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
-            CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
-            CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
-            CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS,
-            CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL,
-            CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL,
-            CarrierConfigManager.KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL,
-            CarrierConfigManager.KEY_CARRIER_USSD_METHOD_INT,
-            CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL,
-            CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL,
-            CarrierConfigManager.KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL,
-            CarrierConfigManager.KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL,
-            CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL,
+    public static final String[] IMS_COMMON_KEYS = {
+        CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
+        CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
+        CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
+        CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS,
+        CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL,
+        CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL,
+        CarrierConfigManager.KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL,
+        CarrierConfigManager.KEY_CARRIER_USSD_METHOD_INT,
+        CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL,
+        CarrierConfigManager.KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL,
+        CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL,
 
-            CarrierConfigManager.KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL,
-            CarrierConfigManager.KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL,
-            CarrierConfigManager.KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL,
-            CarrierConfigManager.KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL,
-            CarrierConfigManager.KEY_IMS_CONFERENCE_SIZE_LIMIT_INT,
-            CarrierConfigManager.KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL,
-            CarrierConfigManager.KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL,
-            CarrierConfigManager.KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL,
-            CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
-            CarrierConfigManager.KEY_RTT_AUTO_UPGRADE_BOOL,
-            CarrierConfigManager.KEY_RTT_SUPPORTED_FOR_VT_BOOL,
-            CarrierConfigManager.KEY_RTT_UPGRADE_SUPPORTED_BOOL,
-            CarrierConfigManager.KEY_RTT_DOWNGRADE_SUPPORTED_BOOL,
-            CarrierConfigManager.KEY_RCS_CONFIG_SERVER_URL_STRING,
-            CarrierConfigManager.KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL,
-            CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL,
-            CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL,
-            CarrierConfigManager.KEY_GBA_MODE_INT,
+        CarrierConfigManager.KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL,
+        CarrierConfigManager.KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL,
+        CarrierConfigManager.KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL,
+        CarrierConfigManager.KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL,
+        CarrierConfigManager.KEY_IMS_CONFERENCE_SIZE_LIMIT_INT,
+        CarrierConfigManager.KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL,
+        CarrierConfigManager.KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL,
+        CarrierConfigManager.KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL,
+        CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
+        CarrierConfigManager.KEY_RTT_AUTO_UPGRADE_BOOL,
+        CarrierConfigManager.KEY_RTT_SUPPORTED_FOR_VT_BOOL,
+        CarrierConfigManager.KEY_RTT_UPGRADE_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_RTT_DOWNGRADE_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_RCS_CONFIG_SERVER_URL_STRING,
+        CarrierConfigManager.KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL,
+        CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL,
+        CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL,
+        CarrierConfigManager.KEY_GBA_MODE_INT,
 
-            // Internal usage temporarily
-            CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
-            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL,
-            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT,
-            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL,
-            CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT,
-            CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL
-        };
+        // Internal usage temporarily
+        CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
+        CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ENABLED_BOOL,
+        CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT,
+        CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL,
+        CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT,
+        CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL
+    };
 
+    /** Configuration items for generic IMS. */
     public static class Ims {
         public static final String KEY_PREFIX = "ims.";
         public static final String KEY_SIP_COMPACT_FORM_ENABLED_BOOL =
@@ -134,6 +137,7 @@ public class CarrierConfig {
         private Ims() {}
     }
 
+    /** Configuration items for ACS. */
     public static class ImsAcs {
         public static final String KEY_PREFIX = "imsacs.";
         public static final String KEY_REFRESH_RATIO_INT =
@@ -158,6 +162,7 @@ public class CarrierConfig {
         private ImsAcs() {}
     }
 
+    /** Configuration items for emergency calling. */
     public static class ImsEmergency {
         public static final String KEY_PREFIX = "imsemergency.";
         public static final String KEY_EMERGENCY_CELLULAR_SCAN_TIMER_MILLIS_INT =
@@ -190,6 +195,7 @@ public class CarrierConfig {
         private ImsEmergency() {}
     }
 
+    /** Configuration items for RTT. */
     public static class ImsRtt {
         public static final String KEY_PREFIX = "imsrtt.";
         public static final String KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT =
@@ -200,6 +206,7 @@ public class CarrierConfig {
         private ImsRtt() {}
     }
 
+    /** Configuration items for SMS over IP. */
     public static class ImsSms {
         public static final String KEY_PREFIX = "imssms.";
         public static final String KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL =
@@ -208,6 +215,7 @@ public class CarrierConfig {
         private ImsSms() {}
     }
 
+    /** Configuration items for supplementary service settings. */
     public static class ImsSs {
         public static final String KEY_PREFIX = "imsss.";
         public static final String KEY_XCAP_AUID_PREFIX_STRING =
@@ -224,6 +232,7 @@ public class CarrierConfig {
         private ImsSs() {}
     }
 
+    /** Configuration items for UCE. */
     public static class ImsUce {
         public static final String KEY_PREFIX = "imsuce.";
         public static final String KEY_EXPIRE_VALUE_PUBLISH_SEC_INT =
@@ -276,6 +285,7 @@ public class CarrierConfig {
         private ImsUce() {}
     }
 
+    /** Configuration items for voice calling. */
     public static class ImsVoice {
         public static final String KEY_PREFIX = "imsvoice.";
         public static final String KEY_SIP_18X_TIMER_MILLIS_INT =
@@ -384,6 +394,7 @@ public class CarrierConfig {
         private ImsVoice() {}
     }
 
+    /** Configuration items for video calling. */
     public static class ImsVt {
         public static final String KEY_PREFIX = "imsvt.";
         public static final String KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT =
@@ -420,6 +431,7 @@ public class CarrierConfig {
         private ImsVt() {}
     }
 
+    /** Configuration items for Wi-Fi calling. */
     public static class ImsWfc {
         public static final String KEY_PREFIX = "imswfc.";
         public static final String KEY_REGISTRATION_PRIVATE_HEADER_INT =
@@ -430,6 +442,7 @@ public class CarrierConfig {
         private ImsWfc() {}
     }
 
+    /** Configuration items for internal assets. */
     public static class Assets {
         // Ims General
         public static final String KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL =
@@ -974,9 +987,14 @@ public class CarrierConfig {
 
     private final PersistableBundle mConfig = new PersistableBundle();
 
-    public CarrierConfig() {
-    }
+    public CarrierConfig() {}
 
+    /**
+     * Sets the configuration with the given configuration and slot.
+     *
+     * @param config The configuration to be set.
+     * @param slotId The slot id.
+     */
     public void setConfig(PersistableBundle config, int slotId) {
         mConfig.clear();
         mConfig.putAll(config);
@@ -1072,7 +1090,7 @@ public class CarrierConfig {
      * Returns the boolean-array value for a specified key.
      *
      * @param key The config key
-     * @return An boolean-array value if present. Otherwise, returns an empty array.
+     * @return A boolean-array value if present. Otherwise, returns an empty array.
      */
     public boolean[] getBooleanArray(String key) {
         return mConfig.getBooleanArray(key);
@@ -1118,10 +1136,18 @@ public class CarrierConfig {
         return mConfig.getPersistableBundle(key);
     }
 
+    /**
+     * Returns the total configuration.
+     */
     public PersistableBundle getConfig() {
         return mConfig;
     }
 
+    /**
+     * Writes the configuration to the given {@link Parcel} object.
+     *
+     * @param p The {@link Parcel} object.
+     */
     public void writeToParcel(Parcel p) {
         mConfig.writeToParcel(p, 0);
     }

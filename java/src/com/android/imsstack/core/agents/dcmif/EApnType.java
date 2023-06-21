@@ -45,12 +45,15 @@ public enum EApnType {
     private final String mStrType;
     private final int mNetCapability;
 
-    private EApnType(int type, String strType, int netCapability) {
+    EApnType(int type, String strType, int netCapability) {
         mType = type;
         mStrType = strType;
         mNetCapability = netCapability;
     }
 
+    /**
+     * Returns an APN type from the given APN setting type.
+     */
     public static int getTypeFromApnSettingType(String type) {
         if (ApnSetting.TYPE_IMS_STRING.equals(type)) {
             return IMS.getType();
@@ -67,6 +70,9 @@ public enum EApnType {
         return DcConstants.TYPE_NONE;
     }
 
+    /**
+     * Returns an APN setting type from the given APN type.
+     */
     public static String getApnSettingTypeFromType(int type) {
         if (IMS.getType() == type) {
             return ApnSetting.TYPE_IMS_STRING;
@@ -83,6 +89,9 @@ public enum EApnType {
         return null;
     }
 
+    /**
+     * Returns a network capability from the given APN type.
+     */
     public static int getNetCapabilityFromType(int type) {
         if (IMS.getType() == type) {
             return EApnType.IMS.getNetCapability();

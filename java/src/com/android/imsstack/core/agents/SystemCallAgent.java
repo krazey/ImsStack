@@ -38,6 +38,7 @@ import com.android.imsstack.system.SystemInterface;
 
 import java.io.FileDescriptor;
 
+/** A class for providing the implementation of system call. */
 public class SystemCallAgent implements SystemCallInterface {
     private final int mSlotId;
 
@@ -47,10 +48,18 @@ public class SystemCallAgent implements SystemCallInterface {
         setSystemCallInterface(this);
     }
 
+    /**
+     * Destroys the system call agent.
+     */
     public void destroy() {
         setSystemCallInterface(null);
     }
 
+    /**
+     * Sets the {@link SystemCallInterface} instance.
+     *
+     * @param systemCall The {@link SystemCallInterface} to be set.
+     */
     public void setSystemCallInterface(SystemCallInterface systemCall) {
         ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
 
