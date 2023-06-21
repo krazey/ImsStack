@@ -30,7 +30,7 @@ class MockIReference : public IReference
 public:
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
+    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     // IServiceMethod
     MOCK_METHOD(IMessage*, GetNextRequest, (), (override));
@@ -43,14 +43,14 @@ public:
 
     // IReference
     MOCK_METHOD(IMS_RESULT, Accept, (), (override));
-    MOCK_METHOD(IMS_RESULT, ConnectReferMethod, (IN IServiceMethod* piServiceMethod), (override));
+    MOCK_METHOD(IMS_RESULT, ConnectReferMethod, (IN IServiceMethod * piServiceMethod), (override));
     MOCK_METHOD(const AString&, GetReferMethod, (), (const, override));
     MOCK_METHOD(const AString&, GetReferToUserId, (), (const, override));
     MOCK_METHOD(const AString&, GetReplaces, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(IMS_RESULT, Refer, (IN IMS_BOOL bImplicitSubscription), (override));
     MOCK_METHOD(IMS_RESULT, Reject, (), (override));
-    MOCK_METHOD(void, SetListener, (IN IReferenceListener* piListener), (override));
+    MOCK_METHOD(void, SetListener, (IN IReferenceListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, SetReplaces, (IN const AString& strSessionId), (override));
     MOCK_METHOD(
             IMS_RESULT, AcceptEx, (IN IMS_SINT32 nStatusCode, IN IMS_BOOL b100Trying), (override));
@@ -60,8 +60,9 @@ public:
     MOCK_METHOD(IMS_RESULT, RejectEx, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SendNotification,
             (IN IMS_SINT32 nSubState, IN const ByteArray& objContent, IN IMS_SINT32 nReason,
-                    IN IMS_SINT32 nExpires), (override));
-    MOCK_METHOD(void, SetNotificationListener, (IN INotificationListener* piListener), (override));
+                    IN IMS_SINT32 nExpires),
+            (override));
+    MOCK_METHOD(void, SetNotificationListener, (IN INotificationListener * piListener), (override));
     MOCK_METHOD(void, SetImplicitRoutingRequired, (IN IMS_BOOL bFlag), (override));
 };
 

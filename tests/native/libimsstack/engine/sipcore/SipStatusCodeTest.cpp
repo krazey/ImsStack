@@ -22,15 +22,10 @@ namespace android
 class SipStatusCodeTest : public ::testing::Test
 {
 public:
-
 protected:
-    virtual void SetUp() override
-    {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override
-    {
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(SipStatusCodeTest, Constructor)
@@ -103,8 +98,8 @@ TEST_F(SipStatusCodeTest, GetReasonPhrase)
 
     EXPECT_STREQ("SUCCESS", objSsc2.GetReasonPhrase().GetStr());
 
-    SipStatusCode objSsc3(SipStatusCode::SC_400,
-            SipStatusCode::GetReasonPhrase(SipStatusCode::SC_400));
+    SipStatusCode objSsc3(
+            SipStatusCode::SC_400, SipStatusCode::GetReasonPhrase(SipStatusCode::SC_400));
 
     EXPECT_STREQ("Bad Request", objSsc3.GetReasonPhrase().GetStr());
 }
@@ -192,4 +187,4 @@ TEST_F(SipStatusCodeTest, IsFinalFailure)
     EXPECT_EQ(IMS_FALSE, SipStatusCode::IsFinalFailure(SipStatusCode::SC_MAX));
 }
 
-} // namespace android
+}  // namespace android

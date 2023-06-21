@@ -28,7 +28,7 @@ class MockISubscription : public ISubscription
 public:
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
+    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     // IServiceMethod
     MOCK_METHOD(IMessage*, GetNextRequest, (), (override));
@@ -43,14 +43,15 @@ public:
     MOCK_METHOD(const AString&, GetEvent, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(IMS_RESULT, Poll, (), (override));
-    MOCK_METHOD(void, SetListener, (IN ISubscriptionListener* piListener), (override));
+    MOCK_METHOD(void, SetListener, (IN ISubscriptionListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, Subscribe, (), (override));
     MOCK_METHOD(IMS_RESULT, Unsubscribe, (), (override));
     MOCK_METHOD(void, SetImplicitRoutingRequired, (IN IMS_BOOL bFlag), (override));
-    MOCK_METHOD(void, SetRefreshListener, (IN IRefreshListener* piListener), (override));
+    MOCK_METHOD(void, SetRefreshListener, (IN IRefreshListener * piListener), (override));
     MOCK_METHOD(void, SetRefreshPolicy,
             (IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLt,
-                    IN IMS_SINT32 nValueGt), (override));
+                    IN IMS_SINT32 nValueGt),
+            (override));
 };
 
 #endif

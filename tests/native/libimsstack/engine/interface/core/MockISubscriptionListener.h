@@ -28,13 +28,13 @@ class MockISubscriptionListener : public ISubscriptionListener
 {
 public:
     MOCK_METHOD(void, SubscriptionForkedNotify,
-            (IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription),
+            (IN ISubscription * piSubscription, IN ISubscription* piForkedSubscription),
             (override));
     MOCK_METHOD(void, SubscriptionNotify,
-            (IN ISubscription* piSubscription, IN IMessage* piNotify), (override));
-    MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription* piSubscription), (override));
-    MOCK_METHOD(void, SubscriptionStartFailed, (IN ISubscription* piSubscription), (override));
-    MOCK_METHOD(void, SubscriptionTerminated, (IN ISubscription* piSubscription), (override));
+            (IN ISubscription * piSubscription, IN IMessage* piNotify), (override));
+    MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription * piSubscription), (override));
+    MOCK_METHOD(void, SubscriptionStartFailed, (IN ISubscription * piSubscription), (override));
+    MOCK_METHOD(void, SubscriptionTerminated, (IN ISubscription * piSubscription), (override));
 };
 
 #endif

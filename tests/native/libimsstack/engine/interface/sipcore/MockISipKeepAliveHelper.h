@@ -37,8 +37,8 @@ public:
     MOCK_METHOD(IMS_RESULT, SendPacket, (IN const ByteArray&), (override));
     MOCK_METHOD(void, SetListener, (IN ISipKeepAliveHelperListener*), (override));
     MOCK_METHOD(void, SetTransportTupleD, (IN const IpAddress&, IN IMS_SINT32), (override));
-    MOCK_METHOD(void, SetTransportTupleS, (IN const IpAddress&, IN IMS_SINT32,
-            IN IMS_SINT32), (override));
+    MOCK_METHOD(void, SetTransportTupleS, (IN const IpAddress&, IN IMS_SINT32, IN IMS_SINT32),
+            (override));
 };
 
 #endif

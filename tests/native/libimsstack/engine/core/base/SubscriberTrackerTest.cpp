@@ -17,20 +17,21 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-class SubscriberTrackerTest : public ::testing::Test {
-
+class SubscriberTrackerTest : public ::testing::Test
+{
 protected:
-    virtual void SetUp() override {
-
-  // Set up as needed for every TEST_F(SubscriberTrackerTest, ...)
-  // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
-
+    virtual void SetUp() override
+    {
+        // Set up as needed for every TEST_F(SubscriberTrackerTest, ...)
+        // A new XxxTest fixture is created and SetUp() is called before executing each TEST_F.
     }
-    virtual void TearDown() override {
-    // cleans up after each test finishes. Called after executing each TEST_F.
+    virtual void TearDown() override
+    {
+        // cleans up after each test finishes. Called after executing each TEST_F.
     }
 };
 
-TEST_F(SubscriberTrackerTest, TestName) {
+TEST_F(SubscriberTrackerTest, TestName)
+{
     //.. test body..
 }

@@ -22,15 +22,10 @@ namespace android
 class SipMethodTest : public ::testing::Test
 {
 public:
-
 protected:
-    virtual void SetUp() override
-    {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override
-    {
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(SipMethodTest, Constructor)
@@ -196,4 +191,4 @@ TEST_F(SipMethodTest, ToName)
     EXPECT_STREQ("", SipMethod::ToName(SipMethod::MAX));
 }
 
-} // namespace android
+}  // namespace android

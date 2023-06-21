@@ -27,32 +27,32 @@ class ISipServerConnection;
 class MockISessionListener : public ISessionListener
 {
 public:
-    MOCK_METHOD(void, SessionAlerting, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, SessionAlerting, (IN ISession * piSession), (override));
     MOCK_METHOD(void, SessionReferenceReceived,
-            (IN ISession* piSession, IN IReference* piReference), (override));
-    MOCK_METHOD(void, SessionStarted, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionStartFailed, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionTerminated, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionUpdated, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionUpdateFailed, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionUpdateReceived, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionCancelDelivered, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionCancelDeliveryFailed, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionEarlyMediaUpdated, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionEarlyMediaUpdateFailed, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionEarlyMediaUpdateReceived, (IN ISession* piSession), (override));
+            (IN ISession * piSession, IN IReference* piReference), (override));
+    MOCK_METHOD(void, SessionStarted, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionStartFailed, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionTerminated, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionUpdated, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionUpdateFailed, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionUpdateReceived, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionCancelDelivered, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionCancelDeliveryFailed, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionEarlyMediaUpdated, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionEarlyMediaUpdateFailed, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionEarlyMediaUpdateReceived, (IN ISession * piSession), (override));
     MOCK_METHOD(void, SessionForkedResponseReceived,
-            (IN ISession* piSession, IN ISession* piForkedSession), (override));
-    MOCK_METHOD(void, SessionPrackDelivered, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionPrackDeliveryFailed, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SessionPrackReceived, (IN ISession* piSession), (override));
+            (IN ISession * piSession, IN ISession* piForkedSession), (override));
+    MOCK_METHOD(void, SessionPrackDelivered, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionPrackDeliveryFailed, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, SessionPrackReceived, (IN ISession * piSession), (override));
     MOCK_METHOD(void, SessionProvisionalResponseReceived,
-            (IN ISession* piSession, IN IMS_UINT32 nIndex), (override));
-    MOCK_METHOD(void, SessionRprDeliveryFailed, (IN ISession* piSession), (override));
+            (IN ISession * piSession, IN IMS_UINT32 nIndex), (override));
+    MOCK_METHOD(void, SessionRprDeliveryFailed, (IN ISession * piSession), (override));
     MOCK_METHOD(
-            void, SessionRprReceived, (IN ISession* piSession, IN IMS_UINT32 nIndex), (override));
+            void, SessionRprReceived, (IN ISession * piSession, IN IMS_UINT32 nIndex), (override));
     MOCK_METHOD(void, SessionTransactionReceived,
-            (IN ISession* piSession, IN ISipServerConnection* piSsc), (override));
+            (IN ISession * piSession, IN ISipServerConnection* piSsc), (override));
 };
 
 #endif

@@ -34,9 +34,9 @@ protected:
 
 public:
     /**
-     * @brief Called when an asynchronous send operation fails or any error occurrs.
+     * @brief Called when an asynchronous send operation fails or any error occurs.
      *
-     * @param piSc Pointer to ISipConnection object which error occurrs
+     * @param piSc Pointer to ISipConnection object which error occurs
      * @param nCode Reason code of error
      * @param strMessage Reason phrase of error\n
      *                   Implementation dependent non-localized information about the error

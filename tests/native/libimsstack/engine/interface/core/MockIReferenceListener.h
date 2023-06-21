@@ -27,11 +27,11 @@ class IReference;
 class MockIReferenceListener : public IReferenceListener
 {
 public:
-    MOCK_METHOD(void, ReferenceDelivered, (IN IReference* piReference), (override));
-    MOCK_METHOD(void, ReferenceDeliveryFailed, (IN IReference* piReference), (override));
-    MOCK_METHOD(void, ReferenceNotify, (IN IReference* piReference, IN IMessage* piNotify),
+    MOCK_METHOD(void, ReferenceDelivered, (IN IReference * piReference), (override));
+    MOCK_METHOD(void, ReferenceDeliveryFailed, (IN IReference * piReference), (override));
+    MOCK_METHOD(void, ReferenceNotify, (IN IReference * piReference, IN IMessage* piNotify),
             (override));
-    MOCK_METHOD(void, ReferenceTerminated, (IN IReference* piReference), (override));
+    MOCK_METHOD(void, ReferenceTerminated, (IN IReference * piReference), (override));
 };
 
 #endif

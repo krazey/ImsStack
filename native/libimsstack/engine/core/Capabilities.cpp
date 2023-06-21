@@ -1086,7 +1086,7 @@ void Capabilities::HandleCapabilities(IN ISipClientConnection* piScc)
 
     if (m_pRemoteCapabilities == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Allocating RemoteCapabilties failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Allocating RemoteCapabilities failed", 0, 0, 0);
         return;
     }
 

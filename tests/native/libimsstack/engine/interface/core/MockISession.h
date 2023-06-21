@@ -45,7 +45,7 @@ public:
 
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator* piMediator), (override));
+    MOCK_METHOD(void, SetMessageMediator, (IN IMessageMediator * piMediator), (override));
 
     // IServiceMethod
     MOCK_METHOD(IMessage*, GetNextRequest, (), (override));
@@ -72,9 +72,9 @@ public:
     MOCK_METHOD(IMS_RESULT, Reject, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, RejectWithDiversion, (IN const AString& strAlternativeUserAddress),
             (override));
-    MOCK_METHOD(IMS_RESULT, RemoveMedia, (IN IMedia* piMedia), (override));
+    MOCK_METHOD(IMS_RESULT, RemoveMedia, (IN IMedia * piMedia), (override));
     MOCK_METHOD(IMS_RESULT, Restore, (), (override));
-    MOCK_METHOD(void, SetListener, (IN ISessionListener* piListener), (override));
+    MOCK_METHOD(void, SetListener, (IN ISessionListener * piListener), (override));
     MOCK_METHOD(IMS_RESULT, Start, (), (override));
     MOCK_METHOD(IMS_RESULT, Terminate, (), (override));
     MOCK_METHOD(IMS_RESULT, Update, (), (override));
@@ -103,7 +103,8 @@ public:
             (override));
     MOCK_METHOD(IMS_RESULT, SendRpr,
             (IN IMS_SINT32 nStatusCode, IN const AString& strReason, IN IMS_BOOL bSdp,
-                    IN IMS_SINT32 nFlags), (override));
+                    IN IMS_SINT32 nFlags),
+            (override));
     MOCK_METHOD(IMS_RESULT, SetCallerPreference, (IN const ImsList<AString>& objCallerPreference),
             (override));
     MOCK_METHOD(void, SetConfiguration, (IN IMS_SINT32 nConfigValue), (override));
@@ -111,10 +112,11 @@ public:
             (IN const AString& strParameter, IN IMS_SINT32 nOperation), (override));
     MOCK_METHOD(void, SetImplicitRoutingRequired, (IN IMS_BOOL bFlag), (override));
     MOCK_METHOD(void, SetReasonForCallTermination, (IN IMS_SINT32 nReason), (override));
-    MOCK_METHOD(void, SetRefreshListener, (IN IRefreshListener* piListener), (override));
+    MOCK_METHOD(void, SetRefreshListener, (IN IRefreshListener * piListener), (override));
     MOCK_METHOD(void, SetRefreshPolicy,
             (IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLt,
-                    IN IMS_SINT32 nValueGt), (override));
+                    IN IMS_SINT32 nValueGt),
+            (override));
     MOCK_METHOD(IMS_RESULT, TerminateEx, (IN IMS_BOOL bTerminateMethodBye), (override));
     MOCK_METHOD(IMS_RESULT, UpdateEarlyMedia, (), (override));
     MOCK_METHOD(

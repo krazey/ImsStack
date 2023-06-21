@@ -33,9 +33,9 @@ protected:
 
 public:
     /**
-     * @brief Called when any error occurrs in the SipConnectionNotifier.
+     * @brief Called when any error occurs in the SipConnectionNotifier.
      *
-     * @param piScn Pointer to ISipConnectionNotifier object which error occurrs
+     * @param piScn Pointer to ISipConnectionNotifier object which error occurs
      * @param nCode Reason code of error
      * @param strMessage Reason phrase of error\n
      *                   Implementation dependent non-localized information about the error
