@@ -119,6 +119,17 @@ TEST_F(MtsServiceTest, CoreServicePageMessageReceived)
     EXPECT_CALL(objMtsServiceListener, NotifyMtSms(piMessage)).Times(1);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
+
+    ByteArray objRpData((IMS_BYTE)0x01);  // message type indicator(RP-MT-DATA)
+    objRpData.Append((IMS_BYTE)0x03);     // message reference
+    objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    AString strContent;
+    strContent.Attach(
+            reinterpret_cast<const IMS_CHAR*>(objRpData.GetData()), objRpData.GetLength());
+    ByteArray objContent = strContent.ToBase64();
+
+    pMtsService->ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, objContent);
 }
 
 TEST_F(MtsServiceTest, CoreServicePageMessageReceivedWithInvalidParameter)
@@ -280,6 +291,57 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
 
+TEST_F(MtsServiceTest, SendNormalMoSmsAndTrafficConnectionFailed)
+{
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_FALSE;
+    ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    objRpData.Append((IMS_BYTE)0x02);     // message reference
+    objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+
+    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    pMtsService->Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+            IImsRadio::REASON_RF_BUSY, 400, 2000);
+}
+
+TEST_F(MtsServiceTest, SendNormalMoSmsAndInvalidTrafficTypeIsAllowed)
+{
+    AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_FALSE;
+    ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    objRpData.Append((IMS_BYTE)0x02);     // message reference
+    objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+
+    pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+    // Invalid traffic type
+    pMtsService->Traffic_OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO);
+}
+
 TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
@@ -305,6 +367,13 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 
     pMtsService->SendMoSms(eSmsFormat, &objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
+}
+
+TEST_F(MtsServiceTest, InvalidGuardTimerExpired)
+{
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
+    // Invalid traffic type
+    pMtsService->Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO);
 }
 
 TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
