@@ -140,7 +140,6 @@
     <int name="imsvoice.session_refresher_type_int" value="0"/>
     <int name="imsvoice.session_refresh_method_int" value="2"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
-    <int name="imsvoice.conference_sip_flow_order_int" value="2"/>
     <boolean name="add_replace_header_for_conference_bool" value="true"/>
 
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
