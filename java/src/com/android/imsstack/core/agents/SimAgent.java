@@ -21,7 +21,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -31,11 +33,12 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -45,16 +48,20 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class SimAgent implements SimInterface {
     /** Internal events */
-    private static final int EVENT_REQUEST_SIM_AUTHENTICATION = 1;
-    private static final int EVENT_READ_ISIM_FILE_ATTRIBUTES = 2;
-    private static final int EVENT_READ_ISIM_RECORD = 3;
+    private static final int EVENT_READ_ISIM_FILE_ATTRIBUTES = 1;
+    private static final int EVENT_READ_ISIM_RECORD = 2;
 
     /** SIM related notifications */
-    private static final int NOTIFICATION_ISIM_STATE_CHANGED = 102;
-    private static final int NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE = 103;
-    private static final int NOTIFICATION_ISIM_READ_RECORD = 104;
-    private static final int NOTIFICATION_ISIM_AUTH = 105;
-    private static final int NOTIFICATION_USIM_AUTH = 106;
+    @VisibleForTesting
+    protected static final int NOTIFICATION_ISIM_STATE_CHANGED = 102;
+    @VisibleForTesting
+    protected static final int NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE = 103;
+    @VisibleForTesting
+    protected static final int NOTIFICATION_ISIM_READ_RECORD = 104;
+    @VisibleForTesting
+    protected static final int NOTIFICATION_ISIM_AUTH = 105;
+    @VisibleForTesting
+    protected static final int NOTIFICATION_USIM_AUTH = 106;
 
     /** Defines event class for asynchronous SIM(USIM/ISIM) authentication */
     static final class AuthEvent {
@@ -73,6 +80,7 @@ public class SimAgent implements SimInterface {
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private final SimHandler mSimHandler;
     private final SimStateReceiver mSimStateReceiver;
+    private final MessageExecutor mAuthExecutor;
     /** USIM states */
     private int mSimCardState = Sim.STATE_UNKNOWN;
     private int mSimState = Sim.STATE_UNKNOWN;
@@ -94,6 +102,7 @@ public class SimAgent implements SimInterface {
         mSimHandler = new SimHandler();
         mSimStateReceiver = new SimStateReceiver();
         mUsatAgent = new UsatAgent(this);
+        mAuthExecutor = new MessageExecutor(SimAgent.class.getSimpleName());
     }
 
     @Override
@@ -301,15 +310,20 @@ public class SimAgent implements SimInterface {
     public void requestSimAuthentication(@Sim.AppType int appType, String nonce, long owner) {
         final AuthEvent event = new AuthEvent(appType, nonce, owner);
 
-        executeOnIsimThread(()-> {
+        mAuthExecutor.execute(()-> {
             handleRequestSimAuthentication(event);
         });
     }
     //// }
 
+    @VisibleForTesting
+    public Looper getAuthLooper() {
+        return mAuthExecutor.getLooper();
+    }
+
     private void handleRequestSimAuthentication(AuthEvent event) {
         String response = "";
-        TelephonyManager tm = getTelephonyManager(mSlotId, mSubId);
+        TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
         if (tm != null) {
             response = tm.getIccAuthentication(event.appType,
@@ -337,29 +351,18 @@ public class SimAgent implements SimInterface {
     private void handleReadIsimFileAttributes(int fileId) {
         String[] fileContent = null;
 
-        switch (fileId) {
-            case Sim.ISIM_FILE_ID_IMPI: {
-                if (mIsimImpi != null) {
-                    fileContent = new String[] { mIsimImpi };
-                }
-                break;
+        if (fileId == Sim.ISIM_FILE_ID_IMPI) {
+            if (mIsimImpi != null) {
+                fileContent = new String[] { mIsimImpi };
             }
-            case Sim.ISIM_FILE_ID_DOMAIN: {
-                if (mIsimDomain != null) {
-                    fileContent = new String[] { mIsimDomain };
-                }
-                break;
+        } else if (fileId == Sim.ISIM_FILE_ID_DOMAIN) {
+            if (mIsimDomain != null) {
+                fileContent = new String[] { mIsimDomain };
             }
-            case Sim.ISIM_FILE_ID_IMPU: {
-                if (!mIsimImpu.isEmpty()) {
-                    fileContent = new String[mIsimImpu.size()];
-                    fileContent = mIsimImpu.toArray(fileContent);
-                }
-                break;
-            }
-            default: {
-                // no-op
-                break;
+        } else if (fileId == Sim.ISIM_FILE_ID_IMPU) {
+            if (!mIsimImpu.isEmpty()) {
+                fileContent = new String[mIsimImpu.size()];
+                fileContent = mIsimImpu.toArray(fileContent);
             }
         }
 
@@ -381,24 +384,13 @@ public class SimAgent implements SimInterface {
     private void handleReadIsimRecord(int fileId, int recordIndex) {
         String record = null;
 
-        switch (fileId) {
-            case Sim.ISIM_FILE_ID_IMPI: {
-                record = mIsimImpi;
-                break;
-            }
-            case Sim.ISIM_FILE_ID_DOMAIN: {
-                record = mIsimDomain;
-                break;
-            }
-            case Sim.ISIM_FILE_ID_IMPU: {
-                if (recordIndex >= 0 && recordIndex < mIsimImpu.size()) {
-                    record = mIsimImpu.get(recordIndex);
-                }
-                break;
-            }
-            default: {
-                // no-op
-                break;
+        if (fileId == Sim.ISIM_FILE_ID_IMPI) {
+            record = mIsimImpi;
+        } else if (fileId == Sim.ISIM_FILE_ID_DOMAIN) {
+            record = mIsimDomain;
+        } else if (fileId == Sim.ISIM_FILE_ID_IMPU) {
+            if (recordIndex >= 0 && recordIndex < mIsimImpu.size()) {
+                record = mIsimImpu.get(recordIndex);
             }
         }
 
@@ -430,23 +422,19 @@ public class SimAgent implements SimInterface {
                 + ", state=" + Sim.stateToString(getSimState())
                 + ", isimState=" + isimStateToString(getIsimState()));
 
-        if (mSlotId != slotId) {
-            return;
+        if (mSlotId == slotId) {
+            int simState = Sim.getSimStateFromTelephonySimState(state);
+
+            if (simState != Sim.STATE_INVALID) {
+                simState = refineSimState(simState);
+
+                boolean oldSimLoaded = isSimLoaded();
+
+                setSubId(subId);
+                setSimState(simState);
+                updateIsimStateOnSimStateChanged(oldSimLoaded, isSimLoaded());
+            }
         }
-
-        int simState = Sim.getSimStateFromTelephonySimState(state);
-
-        if (simState == Sim.STATE_INVALID) {
-            return;
-        }
-
-        simState = refineSimState(simState);
-
-        boolean oldSimLoaded = isSimLoaded();
-
-        setSubId(subId);
-        setSimState(simState);
-        updateIsimStateOnSimStateChanged(oldSimLoaded, isSimLoaded());
     }
 
     private void handleSimCardStateChanged(int slotId, int subId, int state) {
@@ -454,18 +442,14 @@ public class SimAgent implements SimInterface {
                 + ", subId=" + subId + ", newState=" + Sim.stateToString(state)
                 + ", state=" + Sim.stateToString(getSimCardState()));
 
-        if (mSlotId != slotId) {
-            return;
+        if (mSlotId == slotId) {
+            int simCardState = Sim.getSimCardStateFromTelephonySimState(state);
+
+            if (simCardState != Sim.STATE_INVALID) {
+                setSubId(subId);
+                setSimCardState(simCardState);
+            }
         }
-
-        int simCardState = Sim.getSimCardStateFromTelephonySimState(state);
-
-        if (simCardState == Sim.STATE_INVALID) {
-            return;
-        }
-
-        setSubId(subId);
-        setSimCardState(simCardState);
     }
 
     private void setSubId(int subId) {
@@ -500,15 +484,13 @@ public class SimAgent implements SimInterface {
     private void loadSimRecords() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
-        if (tm == null) {
-            return;
+        if (tm != null) {
+            String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_USIM);
+
+            mUst = SimUtils.hexStringToBytes(serviceTable);
+
+            ImsLog.i(getSlotId(), "[SIM] SimRecords: ust=" + serviceTable);
         }
-
-        String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_USIM);
-
-        mUst = SimUtils.hexStringToBytes(serviceTable);
-
-        ImsLog.d(getSlotId(), "[SIM] SimRecords: ust=" + serviceTable);
     }
 
     private void notifySimStateChanged() {
@@ -551,40 +533,41 @@ public class SimAgent implements SimInterface {
     @VisibleForTesting
     protected void updateSimState() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+        int telephonyCardState = Sim.STATE_INVALID;
+        int telephonySimState = Sim.STATE_INVALID;
 
-        if (tm == null) {
-            return;
+        if (tm != null) {
+            telephonyCardState = tm.getSimCardState();
+            telephonySimState = tm.getSimApplicationState();
         }
 
-        int cardState = tm.getSimCardState();
-        int simCardState = Sim.getSimCardStateFromTelephonySimState(cardState);
+        int simCardState = Sim.getSimCardStateFromTelephonySimState(telephonyCardState);
+        int simState = Sim.getSimStateFromTelephonySimState(telephonySimState);
+
+        ImsLog.d(getSlotId(), "[SIM] updateSimState: "
+                + "cardState=" + Sim.stateToString(simCardState)
+                + ", simState=" + Sim.stateToString(simState));
 
         if (simCardState != Sim.STATE_INVALID) {
             setSimCardState(simCardState);
         }
 
-        int state = tm.getSimApplicationState();
-        int simState = Sim.getSimStateFromTelephonySimState(state);
+        if (simState != Sim.STATE_INVALID) {
+            simState = refineSimState(simState);
 
-        if (simState == Sim.STATE_INVALID) {
-            ImsLog.d(getSlotId(), "[SIM] Invalid state");
-            return;
-        }
+            boolean oldSimLoaded = isSimLoaded();
+            int oldSimState = getSimState();
 
-        simState = refineSimState(simState);
+            setSimState(simState);
 
-        boolean oldSimLoaded = isSimLoaded();
-        int oldSimState = getSimState();
+            int newSimState = getSimState();
 
-        setSimState(simState);
+            ImsLog.d(getSlotId(), "[SIM] updateSimState: "
+                    + Sim.stateToString(oldSimState) + " >> " + Sim.stateToString(newSimState));
 
-        int newSimState = getSimState();
-
-        ImsLog.d(getSlotId(), "[SIM] updateSimState: "
-                + Sim.stateToString(oldSimState) + " >> " + Sim.stateToString(newSimState));
-
-        if (oldSimState != newSimState) {
-            updateIsimStateOnSimStateChanged(oldSimLoaded, isSimLoaded());
+            if (oldSimState != newSimState) {
+                updateIsimStateOnSimStateChanged(oldSimLoaded, isSimLoaded());
+            }
         }
     }
 
@@ -598,27 +581,36 @@ public class SimAgent implements SimInterface {
     private void loadIsimRecords() {
         TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
 
-        if (tm == null) {
-            return;
+        if (tm != null) {
+            String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_ISIM);
+            mIsimIst = SimUtils.hexStringToBytes(serviceTable);
+            mIsimDomain = tm.getIsimDomain();
+
+            try {
+                mIsimImpi = tm.getImsPrivateUserIdentity();
+            } catch (RuntimeException e) {
+                ImsLog.w(getSlotId(), "[SIM] Reading IMPI failed: " + e.toString());
+                mIsimImpi = null;
+            }
+
+            List<Uri> uris = Collections.emptyList();
+            try {
+                uris = tm.getImsPublicUserIdentities();
+            } catch (RuntimeException e) {
+                ImsLog.w(getSlotId(), "[SIM] Reading IMPU failed: " + e.toString());
+            }
+
+            mIsimImpu.clear();
+
+            for (Uri uri : uris) {
+                mIsimImpu.add(uri.toString());
+            }
+
+            ImsLog.i(getSlotId(), "[SIM] IsimRecords: ist=" + serviceTable
+                    + ", impi=" + ImsLog.hiddenString(mIsimImpi)
+                    + ", domain=" + ImsLog.hiddenString(mIsimDomain)
+                    + ", impu=" + ImsLog.hiddenString(mIsimImpu.toArray(new String[0])));
         }
-
-        String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_ISIM);
-        String[] isimImpus = tm.getIsimImpu();
-
-        mIsimIst = SimUtils.hexStringToBytes(serviceTable);
-        mIsimImpi = tm.getIsimImpi();
-        mIsimDomain = tm.getIsimDomain();
-
-        mIsimImpu.clear();
-
-        if (isimImpus != null) {
-            mIsimImpu.addAll(Arrays.asList(isimImpus));
-        }
-
-        ImsLog.d(getSlotId(), "[SIM] IsimRecords: ist=" + serviceTable
-                + ", impi=" + ImsLog.hiddenString(mIsimImpi)
-                + ", domain=" + ImsLog.hiddenString(mIsimDomain)
-                + ", impu=" + ImsLog.hiddenString(isimImpus));
     }
 
     private void notifyIsimStateChanged() {
@@ -685,11 +677,6 @@ public class SimAgent implements SimInterface {
             }
         }
 
-        if (newIsimState == Sim.ISIM_STATE_UNKNOWN) {
-            ImsLog.w(getSlotId(), "[SIM] updateIsimStateOnSimStateChanged: unknown state");
-            return;
-        }
-
         setIsimState(newIsimState);
     }
 
@@ -734,13 +721,7 @@ public class SimAgent implements SimInterface {
 
         @Override
         public void handleMessage(@NonNull Message msg) {
-            ImsLog.i(getSlotId(), "[SIM] handleMessage - msg=" + msg.what);
-
             switch (msg.what) {
-                case EVENT_REQUEST_SIM_AUTHENTICATION: {
-                    handleRequestSimAuthentication((AuthEvent) msg.obj);
-                    break;
-                }
                 case EVENT_READ_ISIM_FILE_ATTRIBUTES: {
                     handleReadIsimFileAttributes(msg.arg1);
                     break;
@@ -750,7 +731,7 @@ public class SimAgent implements SimInterface {
                     break;
                 }
                 default:
-                    // no-op
+                    ImsLog.w(getSlotId(), "[SIM] handleMessage: unexpected msg: " + msg.what);
                     break;
             }
         }
@@ -758,17 +739,16 @@ public class SimAgent implements SimInterface {
 
     private static @Sim.IsimState int getIsimStateFromSimState(@Sim.State int state) {
         switch (state) {
-            case Sim.STATE_UNKNOWN: // FALL-THROUGH
+            case Sim.STATE_UNKNOWN: // fall through
             case Sim.STATE_ABSENT:
                 return Sim.ISIM_STATE_NOT_PRESENT;
-            case Sim.STATE_PRESENT: // FALL-THROUGH
-            case Sim.STATE_LOCKED: // FALL-THROUGH
-            case Sim.STATE_NOT_READY:
-                return Sim.ISIM_STATE_NOT_READY;
             case Sim.STATE_LOADED:
                 return Sim.ISIM_STATE_LOADED;
+            case Sim.STATE_PRESENT: // fall through
+            case Sim.STATE_LOCKED: // fall through
+            case Sim.STATE_NOT_READY: // fall through
             default:
-                return Sim.ISIM_STATE_UNKNOWN;
+                return Sim.ISIM_STATE_NOT_READY;
         }
     }
 
@@ -778,44 +758,20 @@ public class SimAgent implements SimInterface {
         }
 
         SmsManager sm = AppContext.getInstance().getSystemService(SmsManager.class);
-
-        if (sm != null) {
-            if (!MSimUtils.isValidSubId(subId)) {
-                if (!MSimUtils.isMultiSimEnabled()) {
-                    return sm;
-                }
-
-                return null;
-            }
-
-            return sm.createForSubscriptionId(subId);
-        }
-
-        return null;
+        return (sm != null)
+                ? (MSimUtils.isValidSubId(subId) ? sm.createForSubscriptionId(subId) : null)
+                : null;
     }
 
     private static TelephonyManager getTelephonyManager(int slotId, int subId) {
         if (!MSimUtils.isValidSubId(subId)) {
             subId = MSimUtils.getSubId(slotId);
         }
-
-        if (!MSimUtils.isValidSubId(subId)) {
-            if (!MSimUtils.isMultiSimEnabled()) {
-                return AppContext.getTelephonyManager();
-            }
-
-            return null;
-        }
-
-        return AppContext.getTelephonyManager(subId);
+        return MSimUtils.isValidSubId(subId) ? AppContext.getTelephonyManager(subId) : null;
     }
 
     private static ISystem getSystem(int slotId) {
         return SystemInterface.getInstance().getSystem(slotId);
-    }
-
-    private static void executeOnIsimThread(Runnable r) {
-        new Thread(r, "IsimThread").start();
     }
 
     private static String isimFileIdToString(@Sim.IsimFileId int fileId) {
@@ -833,8 +789,6 @@ public class SimAgent implements SimInterface {
 
     private static String isimStateToString(@Sim.IsimState int state) {
         switch (state) {
-            case Sim.ISIM_STATE_UNKNOWN:
-                return "UNKNOWN";
             case Sim.ISIM_STATE_NOT_PRESENT:
                 return "NOT_PRESENT";
             case Sim.ISIM_STATE_NOT_READY:
@@ -847,8 +801,9 @@ public class SimAgent implements SimInterface {
                 return "REFRESH_COMPLETED";
             case Sim.ISIM_STATE_REMOVED:
                 return "SIM_REMOVED";
+            case Sim.ISIM_STATE_UNKNOWN: // fall through
             default:
-                return "INVALID";
+                return "UNKNOWN";
         }
     }
 }

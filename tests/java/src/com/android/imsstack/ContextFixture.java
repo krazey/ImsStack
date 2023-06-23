@@ -74,6 +74,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SmsManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
@@ -293,6 +294,7 @@ public class ContextFixture implements TestFixture<Context> {
                 case Context.POWER_SERVICE:
                 case Context.PERMISSION_SERVICE:
                 case Context.LEGACY_PERMISSION_SERVICE:
+                case Context.SMS_SERVICE:
                     // These are final classes so cannot be mocked,
                     // return real services.
                     return TestApplication.getAppContext().getSystemService(name);
@@ -347,6 +349,8 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.ALARM_SERVICE;
             } else if (serviceClass == PowerManager.class) {
                 return Context.POWER_SERVICE;
+            } else if (serviceClass == SmsManager.class) {
+                return Context.SMS_SERVICE;
             }
             return super.getSystemServiceName(serviceClass);
         }
