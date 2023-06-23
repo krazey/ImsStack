@@ -102,6 +102,7 @@ public interface Sim {
     int ISIM_STATE_REMOVED = 5;
 
     @IntDef(value = {
+        ISIM_STATE_UNKNOWN,
         ISIM_STATE_NOT_PRESENT,
         ISIM_STATE_NOT_READY,
         ISIM_STATE_LOADED,
