@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "Configuration.h"
 #include "IAosService.h"
@@ -578,7 +577,7 @@ const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
 }
 
 PROTECTED
-IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
+IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus)
 {
     AStringArray objValidImpus;
 
@@ -1280,11 +1279,10 @@ void AosSubscriberManager::NotifyMonitorState(IN IMS_UINT32 nState) const
 }
 
 PROTECTED
-IMS_BOOL AosSubscriberManager::IsPrimaryImpuValid(IN const AStringArray& objImpus) const
+IMS_BOOL AosSubscriberManager::IsPrimaryImpuValid(IN const AStringArray& objImpus)
 {
     AString strPhoneNumber;
-    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->GetPhoneNumber(
-            strPhoneNumber);
+    GetPhoneNumber(strPhoneNumber);
 
     if (strPhoneNumber.GetLength() == 0)
     {

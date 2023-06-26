@@ -16,6 +16,7 @@
 #ifndef AOS_SUBSCRIBER_MANAGERH_
 #define AOS_SUBSCRIBER_MANAGERH_
 
+#include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
@@ -98,7 +99,7 @@ protected:
 
     const ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
-    IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus) const;
+    IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus);
     IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
 
     void RemoveImpu() const;
@@ -125,9 +126,15 @@ protected:
     void NotifyState(IN IMS_UINT32 nState) const;
     void NotifyMonitorState(IN IMS_UINT32 nState) const;
 
-    IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus) const;
+    IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus);
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
     void RequestStop() const;
+
+    virtual inline void GetPhoneNumber(OUT AString& strPhoneNumber)
+    {
+        PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->GetPhoneNumber(
+                strPhoneNumber);
+    }
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
