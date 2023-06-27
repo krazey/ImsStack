@@ -41,7 +41,6 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
-import com.android.imsstack.enabler.mtc.IncomingCallInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -187,13 +186,13 @@ public class ImsCallManagerTest {
         IECallStateTracker mockIECallStateTracker = Mockito.mock(IECallStateTracker.class);
         when(mMockCallContext.getECallStateTracker()).thenReturn(mockIECallStateTracker);
         when(mockIECallStateTracker.isEcbmEntered()).thenReturn(true);
-        when(mMockMtcApp.createCall(callAttributes)).thenReturn(mMockMtcCall);
+        when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(mMockMtcCall);
         when(mMockMtcCall.isEmergencyCall()).thenReturn(true);
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl result = mImsCallManager.createSession(profile);
         verify(mockIECallStateTracker).exitEmergencyCallbackMode(anyBoolean());
         verify(mMockCallContext).getECallStateTracker();
-        verify(mMockMtcApp).createCall((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
+        verify(mMockMtcApp).createMtcCallAndAttach((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcApp).openEmergencyService(
                 mMockMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
@@ -204,7 +203,7 @@ public class ImsCallManagerTest {
         //verify mtcCall.open
         Mockito.reset(mMockMtcApp);
         Mockito.reset(mMockMtcCall);
-        when(mMockMtcApp.createCall(callAttributes)).thenReturn(mMockMtcCall);
+        when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(mMockMtcCall);
         when(mMockMtcCall.isEmergencyCall()).thenReturn(false);
         result = mImsCallManager.createSession(profile);
         verify(mMockMtcCall).isEmergencyCall();
@@ -219,9 +218,9 @@ public class ImsCallManagerTest {
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
                 ImsCallProfile.CALL_TYPE_VT);
         callAttributes |= MtcCall.FLAG_VIDEO_CALL;
-        when(mMockMtcApp.createCall(callAttributes)).thenReturn(mMockMtcCall);
+        when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(mMockMtcCall);
         mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(callAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
         Assert.assertNotNull(result);
 
         // Verify Emergency call with call attribute video and Rtt
@@ -231,7 +230,7 @@ public class ImsCallManagerTest {
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
                 ImsCallProfile.CALL_TYPE_VT, null, mMediaProfile);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(callAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
         Assert.assertNotNull(result);
 
         // Verify Emergency call with call attribute voice and Rtt
@@ -239,14 +238,14 @@ public class ImsCallManagerTest {
                 ImsCallProfile.CALL_TYPE_VOICE, null, mMediaProfile);
         callAttributes &= ~MtcCall.FLAG_VIDEO_CALL;
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(callAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
         Assert.assertNotNull(result);
 
         // verify when mtccall is null
         reset(mMockMtcApp);
-        when(mMockMtcApp.createCall(callAttributes)).thenReturn(null);
+        when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(null);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(callAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(callAttributes);
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcApp);
 
@@ -256,13 +255,13 @@ public class ImsCallManagerTest {
         Bundle extras = new Bundle();
         extras.putInt(ImsCallProfile.EXTRA_DIALSTRING, ImsCallProfile.DIALSTRING_USSD);
         int normalCallAttributes = MtcCall.FLAG_MO;
-        when(mMockMtcApp.createCall(normalCallAttributes)).thenReturn(mMockMtcCall);
+        when(mMockMtcApp.createMtcCallAndAttach(normalCallAttributes)).thenReturn(mMockMtcCall);
         when(mMockMtcCall.isEmergencyCall()).thenReturn(false);
         when(mMockCallContext.getContext()).thenReturn(mMockContext);
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(normalCallAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         verify(mMockCallContext).getSrvccStateTracker();
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcCall).open(anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
@@ -275,7 +274,7 @@ public class ImsCallManagerTest {
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE, extras, mMediaProfile);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(normalCallAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         Assert.assertNotNull(result);
 
         // Normal call with video and rtt
@@ -283,13 +282,13 @@ public class ImsCallManagerTest {
         profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VT, extras, mMediaProfile);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(normalCallAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         Assert.assertNotNull(result);
 
         reset(mMockMtcApp);
-        when(mMockMtcApp.createCall(normalCallAttributes)).thenReturn(null);
+        when(mMockMtcApp.createMtcCallAndAttach(normalCallAttributes)).thenReturn(null);
         result = mImsCallManager.createSession(profile);
-        verify(mMockMtcApp).createCall(normalCallAttributes);
+        verify(mMockMtcApp).createMtcCallAndAttach(normalCallAttributes);
         Assert.assertNotNull(result);
         verifyNoMoreInteractions(mMockMtcApp);
     }
@@ -638,18 +637,6 @@ public class ImsCallManagerTest {
         verify(mMockImsCallSession, timeout(100)).close();
         verify(mMockImsCallSession, timeout(100)).reject(
                 eq(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE));
-    }
-
-    @Test
-    public void onIncomingCallInfoReceivedTest() {
-        IncomingCallInfo info = Mockito.mock(IncomingCallInfo.class);
-        info.mOIR = IncomingCallInfo.OIPTYPE_INVALID;
-        mMtcAppCallListenerProxy.onIncomingCallInfoReceived(info);
-        Assert.assertNull(mImsCallManager.getIncomingCallInfo());
-
-        info.mOIR = IncomingCallInfo.OIPTYPE_IDENTITY;
-        mMtcAppCallListenerProxy.onIncomingCallInfoReceived(info);
-        Assert.assertNotNull(mImsCallManager.getIncomingCallInfo());
     }
 
     @Test

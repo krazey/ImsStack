@@ -191,7 +191,8 @@ public class ConferenceProxyTest {
         assertNotNull(mConfProxyWrapper.getConferenceParticipants());
 
         /* set and terminate conference */
-        when(mtcApp.createCall(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE)).thenReturn(newCall);
+        when(mtcApp.createMtcCallAndAttach(MtcCall.FLAG_MO | MtcCall.FLAG_CONFERENCE))
+                .thenReturn(newCall);
         MtcCall mtcCall = mConfProxyWrapper.createConferenceCallWrapper(mtcApp);
         assertNotNull(mtcCall);
         mConfProxyWrapper.setConferenceCallWrapper(mtcCall);

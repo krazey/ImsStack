@@ -1247,6 +1247,16 @@ public class MtcCall extends Call implements ConferenceTracker {
         return mMediaSession;
     }
 
+    /**
+     * Invokes fake event like there is an incoming call to notify auto missed call.
+     *
+     * @param incomingCall the object that has information of an incoming call.
+     */
+    public void invokeIncomingCallReceivedForAutoRejecting(IncomingMtcCall incomingCall) {
+        log("invokeIncomingCallReceivedForAutoRejecting");
+        mNativeListener.onIncomingCallReceived(incomingCall);
+    }
+
     private boolean checkAndHandleMediaMessage(int msg, Parcel parcel) {
         if (MtcMediaSession.isMessageForMediaSession(msg)) {
             if (mMediaSession != null) {
@@ -1849,13 +1859,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.INCOMING_CALL_RECEIVED: {
-                    setDetails(Details.ON_PRE_INCOMING, false);
-
-                    IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
-
-                    updateCallExtras(incomingCall);
-
-                    onIncomingCallReceived(incomingCall);
+                    onIncomingCallReceived(new IncomingMtcCall(parcel));
                     break;
                 }
                 case IUMtcCall.ECT_COMPLETED: {
@@ -2238,6 +2242,8 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
             logi("INCOMING_CALL_RECEIVED");
+            setDetails(Details.ON_PRE_INCOMING, false);
+            updateCallExtras(incomingCall);
 
             mCT.updateCallState(
                     MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);

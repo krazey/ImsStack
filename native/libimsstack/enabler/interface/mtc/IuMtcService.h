@@ -46,10 +46,9 @@ public:
     static const IMS_SINT32 SERVICE_CHANGED = (EVENT_I2U + 1);
     static const IMS_SINT32 E_SERVICE_CHANGED = (EVENT_I2U + 2);
     static const IMS_SINT32 PRE_INCOMING_CALL = (EVENT_I2U + 3);
-    static const IMS_SINT32 INCOMING_CALL_INFO = (EVENT_I2U + 4);
-    static const IMS_SINT32 AUTO_REJECTED_CALL = (EVENT_I2U + 5);
-    static const IMS_SINT32 JNI_READY = (EVENT_I2U + 6);
-    static const IMS_SINT32 EXTERNAL_CALLS_CHANGED = (EVENT_I2U + 7);
+    static const IMS_SINT32 AUTO_REJECTED_CALL = (EVENT_I2U + 4);
+    static const IMS_SINT32 JNI_READY = (EVENT_I2U + 5);
+    static const IMS_SINT32 EXTERNAL_CALLS_CHANGED = (EVENT_I2U + 6);
 
     // HO
     static const IMS_SINT32 HO_CONFIRMED = (EVENT_I2U + 50 + 1);

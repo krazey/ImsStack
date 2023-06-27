@@ -35,44 +35,21 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
 
     @Override
     public void readFromParcel(Parcel source) {
-
-        callKey = 0;
-
-        int callType = source.readInt();
+        callInfo = new CallInfo(source);
+        mediaInfo = new MediaInfo(source);
 
         OIPType = source.readInt();
-        source.readInt(); // same as OIPType
-        calleePartyNum = "";
         callerPartyNum = source.readString();
 
-        callInfo = new CallInfo(IUMtcCall.SERVICETYPE_NORMAL, callType);
-
-        int videoQuality = MediaInfo.VIDEO_QUALITY_NONE;
-        int videoDirection = MediaInfo.DIRECTION_INVALID;
-        if (MtcCallUtils.hasVideo(callType)) {
-            videoQuality = MediaInfo.VIDEO_QUALITY_QVGA_LS;
-            videoDirection = MediaInfo.DIRECTION_SEND_RECEIVE;
-        }
-        mediaInfo = new MediaInfo(MediaInfo.AUDIO_QUALITY_AMR_WB, videoQuality,
-                MediaInfo.DIRECTION_SEND_RECEIVE, videoDirection, MediaInfo.DIRECTION_INVALID,
-                MediaInfo.GTTMODE_INVALID);
-
-        suppInfo = new SuppInfo();
-        String cna = source.readString();
-        if (callerPartyNum != null && callerPartyNum.equals(cna) == false
-                && "".equals(cna) == false) {
-            suppInfo.addService_str(SuppInfo.TYPE_CNAP, cna);
-        }
-
+        suppInfo = new SuppInfo(source);
         rejectedReason = source.readInt();
 
         logTag = "";
 
-        ImsLog.d("callKey : " + callKey
+        ImsLog.d("callType  : " + callInfo.callType
                 + " OIPType : " + OIPType
                 + " callerPartyNum : " + callerPartyNum
-                + " cna : " + cna
-                + " ArcReason : " + rejectedReason
+                + " rejectedReason : " + rejectedReason
                  );
     }
 

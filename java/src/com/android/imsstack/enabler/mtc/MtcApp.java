@@ -74,10 +74,6 @@ public class MtcApp implements Closeable {
         public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
             // no-op
         }
-
-        public void onIncomingCallInfoReceived(IncomingCallInfo incomingCallInfo) {
-            // no-op
-        }
     }
 
     private static final int MSG_IMS_SERVICE_STARTED = 1;
@@ -94,6 +90,7 @@ public class MtcApp implements Closeable {
     private MtcJniProxy mMtcJniProxy;
     protected MmtelFeatureListener mMmtelFeatureListener = null;
     private NativeStateInterface.Listener mNativeStateListener;
+    private long mPreIncomingNativeCallId = 0;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -185,12 +182,13 @@ public class MtcApp implements Closeable {
     }
 
     /**
-     * Creates {@link MtcCall} according to received information.
+     * Creates {@link MtcCall} according to received information and attaches it
+     * to {@link MtcCallManager}.
      *
      * @param callAttributes The information used when creates {@link MtcCall}.
      * @return The created {@link MtcCall}.
      */
-    public MtcCall createCall(int callAttributes) {
+    public MtcCall createMtcCallAndAttach(int callAttributes) {
         if (getJNIService() == 0) {
             bindJNIService();
 
@@ -220,10 +218,10 @@ public class MtcApp implements Closeable {
     }
 
     /**
-     * Makes a new object of {@code MtcCall}.
+     * Creates {@link MtcCall} according to received information.
      *
-     * @param callAttributes attrubutes that this call will have.
-     * @return new {@code MtcCall}.
+     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @return The created {@link MtcCall}.
      */
     public MtcCall createMtcCall(int callAttributes) {
         return new MtcCall(mContext, mCM.getCallTracker(), callAttributes,
@@ -454,7 +452,6 @@ public class MtcApp implements Closeable {
 
             switch (msg) {
                 case IUMtcService.PRE_INCOMING_CALL: // FALL-THROUGH
-                case IUMtcService.INCOMING_CALL_INFO: // FALL-THROUGH
                 case IUMtcService.AUTO_REJECTED_CALL: // FALL-THROUGH
                 case IUMtcService.EXTERNAL_CALLS_CHANGED: // FALL-THROUGH
                     onMessageForCallApp(msg, parcel);
@@ -475,44 +472,30 @@ public class MtcApp implements Closeable {
                 long nativeCallKey = parcel.readLong();
                 parcel.readString();
 
-                MtcCall call = createCall(0);
+                MtcCall call = createMtcCallAndAttach(0);
 
                 if (mCallListener != null && call != null) {
-                    mCallListener.onPreIncomingCallReceived(MtcApp.this, call.getNativeCallId());
+                    mPreIncomingNativeCallId = call.getNativeCallId();
+                    mCallListener.onPreIncomingCallReceived(MtcApp.this, mPreIncomingNativeCallId);
                     call.attach(nativeCallKey);
                 } else {
                     rejectAndCloseCall(call);
                 }
-            }
-            // TODO : consider how to handle this msg.
-            // else if (msg == IUMtcService.INCOMING_CALL_INFO) {
-            //     IncomingCallInfo incomingCallInfo = new IncomingCallInfo(parcel);
+            } else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
+                MtcCall call = getPendingCall(mPreIncomingNativeCallId);
+                if (call == null) {
+                    call = createMtcCallAndAttach(0);
+                    if (mCallListener != null) {
+                        mCallListener.onPreIncomingCallReceived(
+                                MtcApp.this, call.getNativeCallId());
+                    }
+                } else {
+                    mPreIncomingNativeCallId = 0;
+                }
 
-            //     if (mCallListener != null) {
-            //         mCallListener.onIncomingCallInfoReceived(incomingCallInfo);
-            //     }
-            // }
-            // else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
-            //     IncomingRejectedMtcCall incomingCall = new IncomingRejectedMtcCall(parcel);
-            //     MtcCall call = new MtcCall(mContext,
-            //             mCM.getCallTracker(), 0/*callObject*/, 0, mCM.getVacantCallIndex(),
-            //                     incomingCall.logTag);
-
-            //     MtcCall call = getPendingCall(incomingCall.callMtcKey, false);
-
-            //     if (call == null) {
-            //         loge("No pending Mtc call");
-            //         return;
-            //     }
-
-            //     call.updateCallExtras(incomingCall);
-
-            //     if (mCallListener != null) {
-            //         mCM.attachIncomingCall(call);
-            //         //mCallListener.onIncomingCallReceived(MtcApp.this, 0, incomingCall);
-            //     }
-            // }
-            else if (msg == IUMtcService.EXTERNAL_CALLS_CHANGED) {
+                call.invokeIncomingCallReceivedForAutoRejecting(
+                        new IncomingRejectedMtcCall(parcel));
+            } else if (msg == IUMtcService.EXTERNAL_CALLS_CHANGED) {
                 ExternalCalls externalCalls = new ExternalCalls(parcel);
 
                 if (mCallListener != null) {

@@ -47,6 +47,13 @@ public:
     virtual void SendIncomingCallReceived() = 0;
 
     /**
+     * @brief Notifies that an incoming call is automatically rejected for call logs.
+     *
+     * @param objReason The reason causing this event.
+     */
+    virtual void SendIncomingCallRejected(IN const CallReasonInfo& objReason) = 0;
+
+    /**
      * @brief Notifies that the incoming or outgoing call is established and started.
      */
     virtual void SendStarted() = 0;

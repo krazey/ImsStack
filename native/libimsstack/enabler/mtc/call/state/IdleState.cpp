@@ -166,6 +166,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
 {
     IMS_TRACE_D("HandleIncoming", 0, 0, 0);
+
     m_objContext.GetCallInfo().eInitialCallType = CallType::UNKNOWN;
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
 
@@ -237,8 +238,13 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
             if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
             {
                 m_objContext.GetSession()->Reject(objResult.objReason);
+                m_objContext.GetUiNotifier().SendIncomingCallRejected(objResult.objReason);
             }
-            m_objContext.GetUiNotifier().SendStartFailed(objResult.objReason.ConvertFromInternal());
+            else
+            {
+                m_objContext.GetUiNotifier().SendStartFailed(
+                        objResult.objReason.ConvertFromInternal());
+            }
             return CallStateName::TERMINATING;
 
         default:  // IMtcBlockChecker::Result::Status::PENDING:
