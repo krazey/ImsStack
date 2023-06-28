@@ -74,9 +74,10 @@ public interface IAosInfo {
      * Native Listener : IAosServiceSettingListener.
      *
      * @param state {@code state} is type of {@link ServiceSetting}.
-     * @param serviceBits {@code serviceBits} is one of {@link com.android.imsstack.enabler.IUIMS}.
-     *          Valid values are the following : M_APP_UC(0x00000001), M_APP_SMS(0x00000002),
-     *          M_APP_VT(0x00000004), M_SERVICE_ALL(0xFFFFFFFF)
+     * @param serviceBits {@code serviceBits} is one of
+     *          {@link com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask}.
+     *          Valid values are the following : ALL(0xFFFFFFFF), MMTEL(0x00000001),
+     *          VIDEO(0x00000002), SMSIP(0x00000020), and so on
      */
     void notifyServiceSetting(int state, int serviceBits);
 

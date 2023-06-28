@@ -30,9 +30,9 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -473,13 +473,13 @@ public class TestConfigMenu extends PreferenceActivity {
                 IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
                 if (aosInfo != null) {
                     if ("YES".equals(value)) {
-                        aosInfo.notifyServiceSetting(
-                                IAosInfo.ServiceSetting.OFF, IUIMS.M_SERVICE_ALL);
+                        aosInfo.notifyServiceSetting(IAosInfo.ServiceSetting.OFF,
+                                IAosRegistrationListener.FeatureTagMask.ALL);
                         Toast.makeText(TestConfigMenu.this,
                                 "Send IMS deregister message!", Toast.LENGTH_SHORT).show();
                     } else {
-                        aosInfo.notifyServiceSetting(
-                                IAosInfo.ServiceSetting.ON, IUIMS.M_SERVICE_ALL);
+                        aosInfo.notifyServiceSetting(IAosInfo.ServiceSetting.ON,
+                                IAosRegistrationListener.FeatureTagMask.ALL);
                     }
                 }
             }

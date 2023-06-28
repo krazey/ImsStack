@@ -144,6 +144,8 @@ public interface IAosRegistrationListener {
         public static final int CHATBOT_VERSION_V2_SUPPORTED = 0x00200000;
         public static final int CHATBOT_ROLE = 0x00400000;
         public static final int PRESENCE = 0x00800000;
+        /// ALL
+        public static final int ALL = 0xFFFFFFFF;
     }
 
     // TODO : need to check this class.

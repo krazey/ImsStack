@@ -124,7 +124,10 @@ public:
         CHATBOT_VERSION_SUPPORTED = (0x00100000),
         CHATBOT_VERSION_V2_SUPPORTED = (0x00200000),
         CHATBOT_ROLE = (0x00400000),
-        PRESENCE = (0x00800000)
+        PRESENCE = (0x00800000),
+
+        /// ALL
+        ALL = (0xFFFFFFFF)
     };
 };
 

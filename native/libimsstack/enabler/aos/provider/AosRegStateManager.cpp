@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
-#include "IUIMS.h"
 #include "ImsAosParameter.h"
 #include "interface/IAosRegStateManagerListener.h"
 #include "provider/AosRegStateManager.h"
@@ -81,7 +80,7 @@ PUBLIC VIRTUAL void AosRegStateManager::SetEImsRegState(IN IMS_UINT32 nState)
 PUBLIC VIRTUAL void AosRegStateManager::SetRegState(
         IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState)
 {
-    if (ConvertServiceType(nServiceType) == IUIMS::APP_UNKNOWN)
+    if (nServiceType == ImsAosService::NONE)
     {
         return;
     }
@@ -103,22 +102,6 @@ PUBLIC VIRTUAL void AosRegStateManager::SetRegState(
         }
 
         RemoveRegService(nServiceType);
-    }
-}
-
-PROTECTED
-IMS_SINT32 AosRegStateManager::ConvertServiceType(IMS_UINT32 nServiceType)
-{
-    switch (nServiceType)
-    {
-        case ImsAosService::MTS:
-            return IUIMS::APP_MTS;
-
-        case ImsAosService::MTC:
-            return IUIMS::APP_MTC;
-
-        default:
-            return IUIMS::APP_UNKNOWN;
     }
 }
 

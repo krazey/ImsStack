@@ -343,9 +343,9 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyServiceSetting() {
         byte[] serviceSettingData = createBytes(IIAosService.J2N_NOTIFY_SERVICE_SETTING,
-                ServiceSetting.ON, IUIMS.APP_SIP_DELEGATE);
+                ServiceSetting.ON, FeatureTagMask.MMTEL);
 
-        mAosService.notifyServiceSetting(ServiceSetting.ON, IUIMS.APP_SIP_DELEGATE);
+        mAosService.notifyServiceSetting(ServiceSetting.ON, FeatureTagMask.MMTEL);
 
         verify(mMockJniIms).sendData(mNativeObject, serviceSettingData);
     }

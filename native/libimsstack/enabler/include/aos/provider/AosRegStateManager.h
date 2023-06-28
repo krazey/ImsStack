@@ -39,7 +39,6 @@ public:
     void SetRegState(IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState) override;
 
 protected:
-    IMS_SINT32 ConvertServiceType(IMS_UINT32 nServiceType);
     void AddRegService(IN IMS_UINT32 nType);
     void RemoveRegService(IN IMS_UINT32 nType);
     IMS_BOOL IsRegService(IN IMS_UINT32 nType) const;
