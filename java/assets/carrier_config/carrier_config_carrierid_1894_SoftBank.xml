@@ -48,4 +48,39 @@
 
     <!-- Ut/Xcap Assets -->
     <string name="ut_target_address_country_code_replace_to_zero_string">+81</string>
+
+    <!-- MTC -->
+    <int name="ims.request_uri_type_int" value="1"/>
+    <boolean name="imsvoice.include_caller_id_service_codes_in_sip_invite_bool" value="true"/>
+    <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
+    <boolean name="imsvoice.session_timer_supported_bool" value="true"/>
+    <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
+    <int name="imsvoice.session_refresher_type_int" value="0"/>
+    <int name="imsvoice.session_privacy_type_int" value="2"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+    <int name="imsvoice.conference_subscribe_type_int" value="1"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="true"/>
+    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="4000"/>
+    <int name="imsvoice.ringing_timer_millis_int" value="60000"/>
+    <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
+    <int name="imsvoice.session_refresh_method_int" value="1"/>
+    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="0"/>
+    <boolean name="imsemergency.retry_emergency_on_ims_pdn_bool" value="false"/>
+    <boolean name="imsemergency.emergency_callback_mode_supported_bool" value="true"/>
+    <boolean name="imsemergency.emergency_qos_precondition_supported_bool" value="true"/>
+    <int name="imsvoice.18x_timer_millis_int" value="10000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="60000"/>
+    <int name="imsemergency.emergency_18x_timer_millis_int" value="10000"/>
+    <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="true"/>
+    <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
+    <int name="imsvoice.policy_for_403_response_for_invite_int" value="0"/>
+    <int name="imsemergency.emergency_invite_18x_timer_millis_int" value="10000"/>
+    <boolean name="enable_oip_header_policy_fallback_bool" value="true"/>
+    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
+    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="0"/>
+    <int name="policy_for_tcall_timer_expiry_of_volte_emergency_call_int" value="0"/>
+    <int name="eps_fallback_watchdog_time_millis_int" value="0"/>
 </carrier_config>
