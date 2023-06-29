@@ -370,6 +370,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void notifyEmcCallbackModeChanged(int type, int state, long duration) {
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED);
+        parcel.writeInt(type);
+        parcel.writeInt(state);
+        parcel.writeLong(duration);
+        sendRequest(parcel);
+    }
+
+    @Override
     public void notifyCrossSimStatus(boolean isConnectedOverCrossSim) {
         ImsLog.d(mSlotId, "AosService: notifyCrossSimStatus");
         if (mIsConnectedOverCrossSim == isConnectedOverCrossSim) {

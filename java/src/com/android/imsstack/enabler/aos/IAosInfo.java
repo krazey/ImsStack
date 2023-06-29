@@ -203,6 +203,16 @@ public interface IAosInfo {
     void notifyCarrierSignalPcoValueChanged(Intent intent);
 
     /**
+     * Called to notify the update of emergency callback mode.
+     * Native Listener : IAosEmergencyListener.
+     *
+     * @param type {@code type} is callback mode entry {@link EmcCallbackType}
+     * @param state {@code state} is type of {@link EmcCallbackMode}.
+     * @param duration is the number of seconds remaining in the emergency callback mode.
+     */
+    void notifyEmcCallbackModeChanged(int type, int state, long duration);
+
+    /**
      * Called to notify the change of CrossSim connection status.
      *
      * @param isConnectedOverCrossSim
@@ -279,4 +289,21 @@ public interface IAosInfo {
         public static final int DISCONNECTED = 7;
         public static final int DISCONNECTING = 8;
     }
+
+    /**
+     * Emergency callback mode type
+     */
+    class EmcCallbackModeType {
+        public static final int CALL = 1;
+        public static final int SMS = 2;
+    };
+
+    /**
+     * Emergency callback mode state
+     */
+    class EmcCallbackMode {
+        public static final int STOP = 0;
+        public static final int START = 1;
+        public static final int STOP_BY_EMC = 2;
+    };
 }

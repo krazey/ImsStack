@@ -19,6 +19,7 @@
 #include "IJniEnabler.h"
 #include "ITimer.h"
 
+#include "interface/IAosEmergencyListener.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
@@ -34,6 +35,7 @@ PUBLIC
 AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_piPlmnChangeDelayTimer(IMS_NULL),
+        m_objAosEmergencyListeners(ImsList<IAosEmergencyListener*>()),
         m_objAosRegistrationControlListeners(ImsList<IAosRegistrationControlListener*>()),
         m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
@@ -52,6 +54,48 @@ PUBLIC VIRTUAL AosService::~AosService()
             m_nSlotId, EnablerType::AOS_SERVICE, IMS_NULL);
 
     CleanUp();
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosEmergencyListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener == piTempListener)
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    m_objAosEmergencyListeners.Append(piListener);
+    return IMS_TRUE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosEmergencyListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener == piTempListener)
+        {
+            m_objAosEmergencyListeners.RemoveAt(i);
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosRegistrationControlListener* piListener)
@@ -180,6 +224,23 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosServicePhoneListener* 
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC VIRTUAL void AosService::NotifyEmcCallbackModeChanged(
+        IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyEmcCallbackModeChanged :: nType(%d), nState(%d), nDuration(%d)",
+            nType, nState, nDuration);
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->CallbackModeChanged(static_cast<EmcCallbackModeType>(nType),
+                    static_cast<EmcCallbackMode>(nState), nDuration);
+        }
+    }
 }
 
 PUBLIC VIRTUAL void AosService::UpdateSipDelegateRegistration()
