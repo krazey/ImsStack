@@ -16,6 +16,7 @@
 #include "ImsMessageDef.h"
 #include "OsParcel.h"
 #include "PlatformContext.h"
+#include "ServiceImsRadio.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsImsRadio.h"
@@ -115,7 +116,8 @@ OsImsRadio::OsImsRadio(IN IMS_SINT32 nSlotId) :
         m_nId(0),
         m_piOwnerThread(IMS_NULL),
         m_objSsacInfo(),
-        m_objConnectionListeners(ImsMap<IMS_UINT32, IImsRadioConnectionListener*>()),
+        m_objTrafficStartedCount(ImsMap<IMS_UINT32, IMS_UINT32>()),
+        m_objConnectionListeners(ImsList<ConnectionListener*>()),
         m_objSsacListeners(ImsList<IImsRadioSsacListener*>()),
         m_objTrafficPriorityListeners(ImsList<IImsRadioTrafficPriorityListener*>())
 {
@@ -124,20 +126,49 @@ OsImsRadio::OsImsRadio(IN IMS_SINT32 nSlotId) :
     PlatformContext::GetInstance()->GetSystem()->AddListener(
             SystemConstants::CATEGORY_RADIO, this, GetSlotId());
 
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->AddListener(this);
+    }
+
     m_objSsacInfo.nBarringFactorForVoice = 100;
     m_objSsacInfo.nBarringTimeSecForVoice = 0;
     m_objSsacInfo.nBarringFactorForVideo = 100;
     m_objSsacInfo.nBarringTimeSecForVideo = 0;
+
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_EMERGENCY, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_EMERGENCY_SMS, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_VOICE, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_VIDEO, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_SMS, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_REGISTRATION, 0);
+    m_objTrafficStartedCount.Add(TRAFFIC_TYPE_UT_XCAP, 0);
 }
 
 PUBLIC VIRTUAL OsImsRadio::~OsImsRadio()
 {
+    m_objTrafficStartedCount.Clear();
+
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->RemoveListener(this);
+    }
+
     PlatformContext::GetInstance()->GetSystem()->RemoveListener(
             SystemConstants::CATEGORY_RADIO, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsImsRadio::IsImsTrafficAllowed(IN IMS_UINT32 /* nTrafficType */)
+PUBLIC VIRTUAL IMS_BOOL OsImsRadio::IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType)
 {
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+
+    if (piImsTraffic != IMS_NULL)
+    {
+        return piImsTraffic->IsAllowed(GetSlotId(), nTrafficType);
+    }
+
     return IMS_TRUE;
 }
 
@@ -154,8 +185,13 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
 
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
-        IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
+        if (pConnectionListener == IMS_NULL)
+        {
+            continue;
+        }
 
+        IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
         if (piCurrListener == piListener)
         {
             nIndex = i;
@@ -164,23 +200,44 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
     }
 
     IMS_UINT32 nId = 0;
+    IMS_BOOL bFirstStartTraffic = IMS_FALSE;
 
     if (nIndex < 0)
     {
+        IMS_UINT32 nStartedCount = m_objTrafficStartedCount.GetValue(nTrafficType);
+        if (nStartedCount == 0)
+        {
+            bFirstStartTraffic = IMS_TRUE;
+        }
+
         nId = GetId();
-        m_objConnectionListeners.Add(nId, piListener);
-        IMS_TRACE_D("OsImsRadio :: StartImsTraffic - slotId=%d, size=%d", GetSlotId(),
-                m_objConnectionListeners.GetSize(), 0);
+        m_objConnectionListeners.Append(new ConnectionListener(nId, nTrafficType, piListener));
+        m_objTrafficStartedCount.SetValue(nTrafficType, ++nStartedCount);
+
+        IMS_TRACE_D("OsImsRadio :: StartImsTraffic - slotId=%d, size=%d, count=%d", GetSlotId(),
+                m_objConnectionListeners.GetSize(), nStartedCount);
     }
     else
     {
-        nId = m_objConnectionListeners.GetKeyAt(nIndex);
+        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(nIndex);
+        if (pConnectionListener == IMS_NULL)
+        {
+            return;
+        }
+
+        nId = pConnectionListener->GetId();
     }
 
     if (PlatformContext::GetInstance()->GetSystem()->StartImsTraffic(
                 nId, nTrafficType, nAccessNetworkType, nDirection, GetSlotId()) <= 0)
     {
         IMS_TRACE_I("OsImsRadio :: [%d] StartImsTraffic is failed", GetSlotId(), 0, 0);
+    }
+
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+    if (bFirstStartTraffic && piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->Start(GetSlotId(), nTrafficType);
     }
 }
 
@@ -193,17 +250,37 @@ PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* p
 
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
-        IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
+        if (pConnectionListener == IMS_NULL)
+        {
+            continue;
+        }
 
+        IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
         if (piCurrListener == piListener)
         {
-            IMS_UINT32 nId = m_objConnectionListeners.GetKeyAt(i);
+            IMS_UINT32 nId = pConnectionListener->GetId();
+            IMS_UINT32 nTrafficType = pConnectionListener->GetTrafficType();
+            IMS_UINT32 nStartedCount = m_objTrafficStartedCount.GetValue(nTrafficType);
+
+            delete pConnectionListener;
             m_objConnectionListeners.RemoveAt(i);
+
+            if (nStartedCount > 0)
+            {
+                m_objTrafficStartedCount.SetValue(nTrafficType, --nStartedCount);
+            }
 
             IMS_TRACE_D("OsImsRadio :: StopImsTraffic - slotId=%d, id=%d, size=%d", GetSlotId(),
                     nId, m_objConnectionListeners.GetSize());
 
             PlatformContext::GetInstance()->GetSystem()->StopImsTraffic(nId, GetSlotId());
+
+            IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+            if (m_objTrafficStartedCount.GetValue(nTrafficType) == 0 && piImsTraffic != IMS_NULL)
+            {
+                piImsTraffic->Stop(GetSlotId(), nTrafficType);
+            }
             break;
         }
     }
@@ -342,6 +419,23 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
     }
 }
 
+PROTECTED VIRTUAL void OsImsRadio::ImsTraffic_OnPriorityChanged()
+{
+    IMS_TRACE_D("OsImsRadio :: ImsTraffic_OnPriorityChanged - slotId=%d", GetSlotId(), 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objTrafficPriorityListeners.GetSize(); ++i)
+    {
+        IImsRadioTrafficPriorityListener* piListener = m_objTrafficPriorityListeners.GetAt(i);
+
+        if (piListener == IMS_NULL)
+        {
+            continue;
+        }
+
+        piListener->ImsRadio_OnTrafficPriorityChanged();
+    }
+}
+
 PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP /* nWParam */, IN IMS_UINTP nLParam)
 {
@@ -397,9 +491,21 @@ PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
 
 PRIVATE IImsRadioConnectionListener* OsImsRadio::GetConnectionListener(IN IMS_UINT32 nId)
 {
-    IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nId);
+    for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
+    {
+        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
+        if (pConnectionListener == IMS_NULL)
+        {
+            continue;
+        }
 
-    return (nIndex >= 0) ? m_objConnectionListeners.GetValueAt(nIndex) : IMS_NULL;
+        if (nId == pConnectionListener->GetId())
+        {
+            return pConnectionListener->GetListener();
+        }
+    }
+
+    return IMS_NULL;
 }
 
 PRIVATE IMS_UINT32 OsImsRadio::GetId()

@@ -22,6 +22,7 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnectionListener.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosTransaction.h"
 
 #include "provider/AosProvider.h"
 #include "connection/AosConnection.h"
@@ -317,7 +318,19 @@ void AosConnection::SetState(IN IMS_UINT32 nState)
 }
 
 PROTECTED
-void AosConnection::UpdateIpcanForTrm() {}
+void AosConnection::UpdateIpcanForImsTraffic()
+{
+    if (m_nCnxType != NetworkPolicy::APN_IMS)
+    {
+        return;
+    }
+
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    if (piTransaction != IMS_NULL)
+    {
+        piTransaction->SetWlan(IsEpdgEnabled());
+    }
+}
 
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnected(
         IN INetworkConnection* piNetConnection)
@@ -331,7 +344,7 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnected(
 
     SetState(STATE_ACTIVE);
 
-    UpdateIpcanForTrm();
+    UpdateIpcanForImsTraffic();
 
     Notify();
 }
@@ -392,7 +405,7 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpcanChanged(
 
     A_IMS_TRACE_I(CNXID, "Connection_IpcanCatChanged", 0, 0, 0);
 
-    UpdateIpcanForTrm();
+    UpdateIpcanForImsTraffic();
 
     Notify(TYPE_IPCAN_CHANGED);
 }

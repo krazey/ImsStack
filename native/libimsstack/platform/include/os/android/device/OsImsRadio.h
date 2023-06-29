@@ -17,13 +17,37 @@
 #ifndef OS_IMS_RADIO_H_
 #define OS_IMS_RADIO_H_
 
+#include "IImsTraffic.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsRadio.h"
 
 class IThread;
 
-class OsImsRadio : public ImsRadio, public ISystemListener
+class ConnectionListener
+{
+public:
+    ConnectionListener(IN IMS_UINT32 nId, IN IMS_UINT32 nTrafficType,
+            IN IImsRadioConnectionListener* piListener) :
+            m_nId(nId),
+            m_nTrafficType(nTrafficType),
+            m_piListener(piListener)
+    {
+    }
+
+    virtual ~ConnectionListener() {}
+
+    inline IImsRadioConnectionListener* GetListener() const { return m_piListener; }
+    inline IMS_UINT32 GetId() const { return m_nId; }
+    inline IMS_UINT32 GetTrafficType() const { return m_nTrafficType; }
+
+private:
+    IMS_UINT32 m_nId;
+    IMS_UINT32 m_nTrafficType;
+    IImsRadioConnectionListener* m_piListener;
+};
+
+class OsImsRadio : public ImsRadio, public IImsTrafficListener, public ISystemListener
 {
 public:
     explicit OsImsRadio(IN IMS_SINT32 nSlotId);
@@ -52,6 +76,7 @@ public:
 
 protected:
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
+    void ImsTraffic_OnPriorityChanged() override;
     void System_NotifyEvent(
             IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
@@ -69,7 +94,8 @@ private:
     IMS_UINT32 m_nId;
     IThread* m_piOwnerThread;
     SsacInfo m_objSsacInfo;
-    ImsMap<IMS_UINT32, IImsRadioConnectionListener*> m_objConnectionListeners;
+    ImsMap<IMS_UINT32, IMS_UINT32> m_objTrafficStartedCount;
+    ImsList<ConnectionListener*> m_objConnectionListeners;
     ImsList<IImsRadioSsacListener*> m_objSsacListeners;
     ImsList<IImsRadioTrafficPriorityListener*> m_objTrafficPriorityListeners;
 

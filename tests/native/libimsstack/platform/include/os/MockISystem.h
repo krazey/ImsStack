@@ -208,6 +208,8 @@ public:
     MOCK_METHOD(void, StopImsTraffic, (IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_SINT32, TriggerEpsFallback, (IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId),
             (override));
+    MOCK_METHOD(IMS_SINT32, SetTrafficPriority,
+            (IN IMS_UINT32 nPriorityType, IN IMS_SINT32 nSlotId), (override));
 
     ////
     // IpSec

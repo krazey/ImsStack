@@ -311,6 +311,7 @@ PROTECTED VIRTUAL void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
             ConfigService::GetConfigService()->DispatchServiceMessage(objMsg);
             break;
         case IMS_MSG_RADIO:
+        case IMS_MSG_TRAFFIC:
             ImsRadioService::GetImsRadioService()->DispatchServiceMessage(objMsg);
             break;
     }

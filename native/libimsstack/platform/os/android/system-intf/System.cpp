@@ -1429,6 +1429,30 @@ IMS_SINT32 System::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 
     return (GetInt2(SystemConstants::TRIGGER_EPS_FALLBACK, nEpsfbReason, -1, nSlotId));
 }
 
+PUBLIC
+IMS_SINT32 System::SetTrafficPriority(IN IMS_UINT32 nPriorityType, IN IMS_SINT32 nSlotId)
+{
+    if (m_pCallback == IMS_NULL)
+    {
+        return -1;
+    }
+
+    android::Parcel in;
+    android::Parcel out;
+
+    in.writeInt32(IMS_SLOT_0);
+    in.writeInt32(SystemConstants::SET_TRAFFIC_PRIORITY);
+    in.writeInt32(nPriorityType);
+    in.writeInt32(nSlotId);
+
+    if (m_pCallback->SendDataToJava(in, out) == 1)
+    {
+        return out.readInt32();
+    }
+
+    return -1;
+}
+
 PRIVATE
 IMS_SINT32 System::GetInt(IN IMS_SINT32 nOperation, IN IMS_SINT32 nDefaultValue /*= 0*/,
         IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/)

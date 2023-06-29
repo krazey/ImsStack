@@ -60,6 +60,7 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_bIsTerminated(IMS_FALSE),
         m_bIsErrChecked(IMS_FALSE),
         m_bIsRadioWaiting(IMS_FALSE),
+        m_bIsTrafficPriorityBlocked(IMS_FALSE),
         m_nRetryCountSubTerminated(0),
         m_nRetryCountRegRequired(0)
 {
@@ -380,8 +381,8 @@ IMS_BOOL AosSubscription::CheckRadioReadyAndSetRadioWaiting()
 
     if (!m_piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_SUB))
     {
-        // TODO: implement to control priority
         A_IMS_TRACE_I(AOSTAG, "CheckRadioReadyAndSetRadioWaiting :: trx is not allowed", 0, 0, 0);
+        SetTrafficPriorityBlocked(IMS_TRUE);
         return IMS_FALSE;
     }
     else
@@ -404,9 +405,21 @@ IMS_BOOL AosSubscription::IsRadioWaiting() const
 }
 
 PROTECTED
+IMS_BOOL AosSubscription::IsTrafficPriorityBlocked() const
+{
+    return m_bIsTrafficPriorityBlocked;
+}
+
+PROTECTED
 void AosSubscription::SetRadioWaiting(IN IMS_BOOL bWaiting)
 {
     m_bIsRadioWaiting = bWaiting;
+}
+
+PROTECTED
+void AosSubscription::SetTrafficPriorityBlocked(IN IMS_BOOL bBlocked)
+{
+    m_bIsTrafficPriorityBlocked = bBlocked;
 }
 
 PROTECTED
@@ -1247,7 +1260,15 @@ PROTECTED VIRTUAL void AosSubscription::Transaction_OnConnectionSetupPrepared()
     }
 }
 
-PROTECTED VIRTUAL void AosSubscription::Transaction_OnTrafficPriorityChanged() {}
+PROTECTED VIRTUAL void AosSubscription::Transaction_OnTrafficPriorityChanged()
+{
+    if (IsTrafficPriorityBlocked())
+    {
+        A_IMS_TRACE_D(AOSTAG, "Transaction_OnTrafficPriorityChanged", 0, 0, 0);
+        SetTrafficPriorityBlocked(IMS_FALSE);
+        Start(IMS_TRUE);
+    }
+}
 
 PUBLIC VIRTUAL void AosSubscription::Timer_TimerExpired(IN ITimer* piTimer)
 {

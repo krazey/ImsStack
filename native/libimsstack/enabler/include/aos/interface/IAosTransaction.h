@@ -46,6 +46,8 @@ public:
     virtual void StopTraffic(IN IMS_UINT32 nType) = 0;
     virtual void StopEmergencyTraffic() = 0;
 
+    virtual void SetWlan(IN IMS_BOOL bEnabled) = 0;
+
     enum
     {
         TYPE_NONE = 0,

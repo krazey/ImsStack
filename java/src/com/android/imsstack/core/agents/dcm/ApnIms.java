@@ -24,6 +24,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -288,6 +289,15 @@ public class ApnIms extends Apn {
     protected boolean handleIpcanCategory(int networkType) {
         boolean ret = super.handleIpcanCategory(networkType);
         evaluateImsNetworkCapability();
+
+        if (ret) {
+            ImsTrafficInterface imsTraffic =
+                    AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+            if (imsTraffic != null) {
+                imsTraffic.setWlan(mIpcanCategory == IPCAN_CATEGORY_WLAN, mSlotId);
+            }
+        }
+
         return ret;
     }
 

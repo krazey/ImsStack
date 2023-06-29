@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IImsTraffic.h"
 #include "INetworkWatcher.h"
 #include "ServiceImsRadio.h"
 #include "ServiceTimer.h"
@@ -45,7 +46,6 @@ AosTransaction::AosTransaction(IN IMS_SINT32 nSlotId) :
     m_strTag.Sprintf("%d", m_nSlotId);
 
     m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
-
     if (m_piImsRadio != IMS_NULL)
     {
         m_piImsRadio->AddListenerForTrafficPriority(this);
@@ -76,9 +76,15 @@ PUBLIC VIRTUAL AosTransaction::~AosTransaction()
             delete pTraffic;
         }
     }
-    m_objTraffics.Clear();
 
+    m_objTraffics.Clear();
     m_objListeners.Clear();
+
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->Disable(m_nSlotId);
+    }
 
     if (m_piImsRadio != IMS_NULL)
     {
@@ -297,6 +303,15 @@ PUBLIC VIRTUAL void AosTransaction::StopEmergencyTraffic()
         {
             m_piImsRadio->StopImsTraffic(m_objTraffics.GetValueAt(nIndex));
         }
+    }
+}
+
+PUBLIC VIRTUAL void AosTransaction::SetWlan(IN IMS_BOOL bEnabled)
+{
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->SetWlan(m_nSlotId, bEnabled);
     }
 }
 

@@ -24,6 +24,7 @@ class IDeviceInfo;
 class IEventReceiver;
 class IEventSender;
 class IFileUtil;
+class IImsTraffic;
 class IIpcan;
 class ILocationInfo;
 class INetworkIpSec;
@@ -123,6 +124,8 @@ public:
     virtual ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId) = 0;
 
     virtual ImsRadio* CreateImsRadio(IN IMS_SINT32 nSlotId) = 0;
+    virtual IImsTraffic* CreateImsTraffic() = 0;
+    virtual void DestroyImsTraffic(IN IImsTraffic*& piImsTraffic) = 0;
 };
 
 #endif

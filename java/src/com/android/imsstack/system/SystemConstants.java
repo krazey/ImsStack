@@ -179,6 +179,7 @@ public interface SystemConstants {
     int START_IMS_TRAFFIC = CATEGORY_BASE + 1301;
     int STOP_IMS_TRAFFIC = CATEGORY_BASE + 1302;
     int TRIGGER_EPS_FALLBACK = CATEGORY_BASE + 1303;
+    int SET_TRAFFIC_PRIORITY = CATEGORY_BASE + 1304;
 
     ////
     // IpSec

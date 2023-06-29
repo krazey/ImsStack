@@ -123,6 +123,8 @@ public:
     MOCK_METHOD(ImsCarrierConfig*, CreateCarrierConfig, (IN IMS_SINT32 nSlotId), (override));
 
     MOCK_METHOD(ImsRadio*, CreateImsRadio, (IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IImsTraffic*, CreateImsTraffic, (), (override));
+    MOCK_METHOD(void, DestroyImsTraffic, (IN IImsTraffic * &piImsTraffic), (override));
 };
 
 #endif

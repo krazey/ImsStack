@@ -157,7 +157,9 @@ public:
         PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
         PENDING_SUBSCRIPTION = 0x40,
-        PENDING_TERMINATED = 0x80
+        PENDING_TERMINATED = 0x80,
+
+        PENDING_TRAFFIC = 0x100
     };
 
     enum
@@ -398,6 +400,8 @@ TEST(AosLogTest, RegPendingToString)
             "PENDING_SUBSCRIPTION");
     EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TERMINATED),
             "PENDING_TERMINATED");
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TRAFFIC),
+            "PENDING_TRAFFIC");
     EXPECT_STREQ(
             AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TERMINATED + 99),
             "__INVALID__");

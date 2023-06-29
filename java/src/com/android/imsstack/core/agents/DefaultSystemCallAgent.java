@@ -160,4 +160,19 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
         }
         return false;
     }
+
+    /**
+     * Sets the traffic priority for a specified slot.
+     *
+     * @param priorityType The priority type of the traffic.
+     * @param slotId The slot-id to be set.
+     */
+    @Override
+    public void setTrafficPriority(int priorityType, int slotId) {
+        ImsTrafficInterface traffic =
+                AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+        if (traffic != null) {
+            traffic.setTrafficPriority(priorityType, slotId);
+        }
+    }
 }

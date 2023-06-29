@@ -152,6 +152,7 @@ public final class AgentFactory {
         mAgents.put(TimerInterface.class, new TimerAgent());
         mAgents.put(BatteryStateInterface.class, new BatteryStateAgent());
         mAgents.put(WifiInterface.class, new WifiAgent());
+        mAgents.put(ImsTrafficInterface.class, new ImsTrafficAgent());
     }
 
     /**

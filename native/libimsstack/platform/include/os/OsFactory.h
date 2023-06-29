@@ -99,6 +99,8 @@ public:
     ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId) override;
 
     ImsRadio* CreateImsRadio(IN IMS_SINT32 nSlotId) override;
+    IImsTraffic* CreateImsTraffic() override;
+    void DestroyImsTraffic(IN IImsTraffic*& piImsTraffic) override;
 };
 
 #endif

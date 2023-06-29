@@ -105,6 +105,7 @@ protected:
     void SetHeldByCall(IN IMS_BOOL bHeld);
     void SetImsCall(IN IMS_BOOL bStarted);
     void SetRadioWaiting(IN IMS_BOOL bWaiting);
+    void SetTrafficPriorityBlocked(IN IMS_BOOL bBlocked);
     void SetRetryTime();
     IMS_BOOL SetTraffic(IN IMS_BOOL bStarted);
     void SetTrafficListener(IN IMS_BOOL bSet);
@@ -128,6 +129,7 @@ protected:
     IMS_BOOL IsNetworkBindingSupported(IN IAosHandle* piHandle);
     IMS_BOOL IsCallStateRequired() const;
     IMS_BOOL IsRadioWaiting() const;
+    IMS_BOOL IsTrafficPriorityBlocked() const;
 
     IMS_SINT32 GetRegExpires();
 
@@ -444,7 +446,9 @@ protected:
         PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
         PENDING_SUBSCRIPTION = 0x40,
-        PENDING_TERMINATED = 0x80
+        PENDING_TERMINATED = 0x80,
+
+        PENDING_TRAFFIC = 0x100
     };
 
     enum
@@ -498,6 +502,7 @@ protected:
     IMS_BOOL m_bIsHeldByCall;
     IMS_BOOL m_bIsAppReady;
     IMS_BOOL m_bIsRadioWaiting;
+    IMS_BOOL m_bIsTrafficPriorityBlocked;
 
     /// reg info
     AString m_strRegId;              /// aos_reg_0

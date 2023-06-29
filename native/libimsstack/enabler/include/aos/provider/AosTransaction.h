@@ -85,10 +85,12 @@ public:
 
     IMS_BOOL IsTransactionAllowed(IN IMS_UINT32 nType) override;
 
-    virtual IMS_BOOL StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) override;
-    virtual void StartEmergencyTraffic(IN IMS_UINT32 nRadioType) override;
-    virtual void StopTraffic(IN IMS_UINT32 nType) override;
-    virtual void StopEmergencyTraffic() override;
+    IMS_BOOL StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) override;
+    void StartEmergencyTraffic(IN IMS_UINT32 nRadioType) override;
+    void StopTraffic(IN IMS_UINT32 nType) override;
+    void StopEmergencyTraffic() override;
+
+    void SetWlan(IN IMS_BOOL bEnabled) override;
 
 protected:
     IMS_BOOL IsResponseWaiting(IN IMS_UINT32 nType) const;

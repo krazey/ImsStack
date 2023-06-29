@@ -71,7 +71,9 @@ protected:
 
     IMS_BOOL CheckRadioReadyAndSetRadioWaiting();
     IMS_BOOL IsRadioWaiting() const;
+    IMS_BOOL IsTrafficPriorityBlocked() const;
     void SetRadioWaiting(IN IMS_BOOL bWaiting);
+    void SetTrafficPriorityBlocked(IN IMS_BOOL bBlocked);
 
     // Print Log
     void PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo);
@@ -212,6 +214,7 @@ private:
     IMS_BOOL m_bIsTerminated;
     IMS_BOOL m_bIsErrChecked;
     IMS_BOOL m_bIsRadioWaiting;
+    IMS_BOOL m_bIsTrafficPriorityBlocked;
 
     IMS_UINT32 m_nRetryCountSubTerminated;
     IMS_UINT32 m_nRetryCountRegRequired;

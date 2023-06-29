@@ -1259,6 +1259,27 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallSetTrafficPriority() {
+        setUpSystemInterface();
+        int regPriorityType = 1;
+        byte[] result;
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+            data.writeInt(SystemConstants.SET_TRAFFIC_PRIORITY);
+            data.writeInt(regPriorityType);
+            data.writeInt(SLOT0);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mDefaultSystemCall).setTrafficPriority(eq(regPriorityType), eq(SLOT0));
+    }
+
+    @Test
+    @SmallTest
     public void testSendSystemEventWithException() {
         doThrow(new RuntimeException("JNI throws an exception."))
                 .when(mJniIms).sendDataForSystem(anyLong(), any());

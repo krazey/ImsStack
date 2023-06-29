@@ -19,24 +19,30 @@
 
 #include "ServiceImsRadio.h"
 #include "MockIImsRadio.h"
+#include "MockIImsTraffic.h"
 
 class TestImsRadioService : public ImsRadioService
 {
 public:
     inline TestImsRadioService() :
             ImsRadioService(),
-            m_piImsRadio(&m_objImsRadio)
+            m_piImsRadio(&m_objImsRadio),
+            m_piImsTraffic(&m_objImsTraffic)
     {
     }
 
     inline IImsRadio* GetImsRadio(IN IMS_SINT32 /* nSlotId */) override { return m_piImsRadio; }
+    inline IImsTraffic* GetImsTraffic() override { return m_piImsTraffic; }
 
     inline MockIImsRadio& GetMockImsRadio() { return m_objImsRadio; }
+    inline MockIImsTraffic& GetMockImsTraffic() { return m_objImsTraffic; }
 
 private:
     MockIImsRadio m_objImsRadio;
+    MockIImsTraffic m_objImsTraffic;
 
     IImsRadio* m_piImsRadio;
+    IImsTraffic* m_piImsTraffic;
 };
 
 #endif

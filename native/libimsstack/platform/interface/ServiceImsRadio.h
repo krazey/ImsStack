@@ -17,6 +17,7 @@
 #define SERVICE_IMS_RADIO_H_
 
 #include "IImsRadio.h"
+#include "IImsTraffic.h"
 #include "ImsMessage.h"
 #include "PlatformService.h"
 
@@ -34,6 +35,7 @@ protected:
 
 public:
     virtual IImsRadio* GetImsRadio(IN IMS_SINT32 nSlotId);
+    virtual IImsTraffic* GetImsTraffic();
 
     void DispatchServiceMessage(IN ImsMessage& objMsg);
     static ImsRadioService* GetImsRadioService();

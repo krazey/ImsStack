@@ -35,6 +35,7 @@ public:
     MOCK_METHOD(void, StartEmergencyTraffic, (IN IMS_UINT32 nRadioType), (override));
     MOCK_METHOD(void, StopTraffic, (IN IMS_UINT32 nType), (override));
     MOCK_METHOD(void, StopEmergencyTraffic, (), (override));
+    MOCK_METHOD(void, SetWlan, (IN IMS_BOOL bEnabled), (override));
 };
 
 #endif  // MOCK_I_AOS_TRANSACTION_H_

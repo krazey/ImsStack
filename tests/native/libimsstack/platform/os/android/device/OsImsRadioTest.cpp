@@ -22,7 +22,7 @@
 #include "MockIThread.h"
 #include "OsParcel.h"
 #include "PlatformContext.h"
-#include "TestPhoneInfoService.h"
+#include "TestImsRadioService.h"
 #include "TestThreadService.h"
 #include "device/OsImsRadio.h"
 
@@ -42,25 +42,30 @@ public:
     int EVENT_SSAC_STATE_CHANGED = 3;
 
     MockIImsRadioConnectionListener objImsRadioConnectionListener;
+    MockIImsRadioConnectionListener objImsRadioConnectionListener2;
     MockISystem m_objMockSystem;
     MockIThread m_objMockThread;
 
     ISystem* m_piDefaultSystem;
     ISystemListener* m_piSystemListener;
+
+    PlatformService* m_pThreadPlatformService;
+    PlatformService* m_pRadioPlatformService;
+
     OsImsRadio* m_pOsImsRadio;
     ImsRadio* m_pImsRadio;
 
-    TestPhoneInfoService m_objPhoneInfoService;
+    TestImsRadioService m_objRadioService;
     TestThreadService m_objThreadService;
 
 protected:
     virtual void SetUp() override
     {
         m_objThreadService.SetThread(&m_objMockThread);
-        PlatformContext::GetInstance()->SetService(
+        m_pThreadPlatformService = PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_THREAD, &m_objThreadService);
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
+        m_pRadioPlatformService = PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_RADIO, &m_objRadioService);
 
         EXPECT_CALL(m_objMockSystem, AddListener(_, _, _)).Times(1);
         m_piDefaultSystem = PlatformContext::GetInstance()->SetSystem(&m_objMockSystem);
@@ -81,13 +86,19 @@ protected:
             m_pOsImsRadio = IMS_NULL;
         }
         PlatformContext::GetInstance()->SetSystem(m_piDefaultSystem);
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_RADIO, m_pRadioPlatformService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_THREAD, m_pThreadPlatformService);
     }
 };
 
 TEST_F(OsImsRadioTest, StartAndStopImsTraffic)
 {
+    EXPECT_CALL(m_objRadioService.GetMockImsTraffic(), IsAllowed(_, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
     EXPECT_EQ(m_pOsImsRadio->IsImsTrafficAllowed(IImsRadio::TRAFFIC_TYPE_REGISTRATION), IMS_TRUE);
 
     EXPECT_CALL(m_objMockSystem, StartImsTraffic(_, _, _, _, _)).Times(0);
@@ -97,6 +108,8 @@ TEST_F(OsImsRadioTest, StartAndStopImsTraffic)
     EXPECT_CALL(m_objMockSystem, StartImsTraffic(_, _, _, _, _))
             .Times(1)
             .WillRepeatedly(Return(-1));
+
+    EXPECT_CALL(m_objRadioService.GetMockImsTraffic(), Start(_, _)).Times(1);
 
     m_pOsImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_REGISTRATION,
             IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MO,
@@ -112,7 +125,25 @@ TEST_F(OsImsRadioTest, StartAndStopImsTraffic)
     m_pOsImsRadio->StopImsTraffic(IMS_NULL);
 
     EXPECT_CALL(m_objMockSystem, StopImsTraffic(_, _)).Times(1);
+    EXPECT_CALL(m_objRadioService.GetMockImsTraffic(), Stop(_, _)).Times(1);
     m_pOsImsRadio->StopImsTraffic(&objImsRadioConnectionListener);
+}
+
+TEST_F(OsImsRadioTest, MultipleStartAndStopImsTraffic)
+{
+    EXPECT_CALL(m_objMockSystem, StartImsTraffic(_, _, _, _, _)).Times(2).WillRepeatedly(Return(1));
+    EXPECT_CALL(m_objRadioService.GetMockImsTraffic(), Start(_, _)).Times(1);
+    m_pOsImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE,
+            IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MO,
+            &objImsRadioConnectionListener);
+    m_pOsImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE,
+            IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, IImsRadio::DIRECTION_MT,
+            &objImsRadioConnectionListener2);
+
+    EXPECT_CALL(m_objMockSystem, StopImsTraffic(_, _)).Times(2);
+    EXPECT_CALL(m_objRadioService.GetMockImsTraffic(), Stop(_, _)).Times(1);
+    m_pOsImsRadio->StopImsTraffic(&objImsRadioConnectionListener);
+    m_pOsImsRadio->StopImsTraffic(&objImsRadioConnectionListener2);
 }
 
 TEST_F(OsImsRadioTest, TriggerEpsFallback)

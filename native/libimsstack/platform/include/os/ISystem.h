@@ -173,6 +173,7 @@ public:
             IN IMS_UINT32 nAccessNetworkType, IN IMS_UINT32 nDirection, IN IMS_SINT32 nSlotId) = 0;
     virtual void StopImsTraffic(IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 SetTrafficPriority(IN IMS_UINT32 nPriorityType, IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // IpSec

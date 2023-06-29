@@ -99,6 +99,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bIsHeldByCall(IMS_FALSE),
         m_bIsAppReady(IMS_FALSE),
         m_bIsRadioWaiting(IMS_FALSE),
+        m_bIsTrafficPriorityBlocked(IMS_FALSE),
         m_strRegId(strRegId),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nFlowId(0),
@@ -644,6 +645,14 @@ void AosRegistration::SetRadioWaiting(IN IMS_BOOL bWaiting)
 }
 
 PROTECTED
+void AosRegistration::SetTrafficPriorityBlocked(IN IMS_BOOL bBlocked)
+{
+    A_IMS_TRACE_I(REGID, "SetTrafficPriorityBlocked :: (%s)",
+            (bBlocked) ? "BLOCKED" : "NOT BLOCKED", 0, 0);
+    m_bIsTrafficPriorityBlocked = bBlocked;
+}
+
+PROTECTED
 void AosRegistration::SetRetryTime()
 {
     m_nRetryBaseTime = GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryBaseTime() / 1000;
@@ -845,6 +854,12 @@ PROTECTED
 IMS_BOOL AosRegistration::IsRadioWaiting() const
 {
     return m_bIsRadioWaiting;
+}
+
+PROTECTED
+IMS_BOOL AosRegistration::IsTrafficPriorityBlocked() const
+{
+    return m_bIsTrafficPriorityBlocked;
 }
 
 PROTECTED
@@ -2363,7 +2378,8 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
             SetHeldByCall(IMS_FALSE);
         }
 
-        m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall() || IsRadioWaiting());
+        m_bIsTransactionStarted =
+                !(IsBlocked() || IsHeldByCall() || IsRadioWaiting() || IsTrafficPriorityBlocked());
     }
 
     A_IMS_TRACE_I(REGID, "UpdateTransactionStarted :: (%s)",
@@ -2692,8 +2708,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
 
     if (!piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
     {
-        // TODO: implement to control priority
         A_IMS_TRACE_I(REGID, "CheckRadioReadyAndSetTxnPending :: trx is not allowed", 0, 0, 0);
+
+        SetTrafficPriorityBlocked(IMS_TRUE);
+        UpdateTransactionStarted();
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
         return IMS_FALSE;
     }
     else
@@ -2856,6 +2875,22 @@ PROTECTED VIRTUAL void AosRegistration::ProcessPendingTransaction()
         return;
     }
 
+    if (m_pUtil->IsFeatureOn(PENDING_TRAFFIC, m_nTxnPending))
+    {
+        m_pUtil->RemoveFeature(PENDING_TRAFFIC | PENDING_TRANSACTION, m_nTxnPending);
+
+        if (m_nState == STATE_REGSTOP || m_nState == STATE_REFRESHSTOP)
+        {
+            Update(IMS_TRUE, IMS_TRUE);
+        }
+        else
+        {
+            Start();
+        }
+
+        return;
+    }
+
     if (m_pUtil->IsFeatureOn(PENDING_TRANSACTION, m_nTxnPending))
     {
         m_pUtil->RemoveFeature(PENDING_TRANSACTION, m_nTxnPending);
@@ -2927,6 +2962,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRetryInRegStopped(
 
     ClearRetryTimers();
 
+    if (!IsTransactionStarted())
+    {
+        A_IMS_TRACE_I(REGID, "ProcessRetryInRegStopped :: txn couldn't be started", 0, 0, 0);
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
+        return;
+    }
+
     if (!CheckRadioReadyAndSetTxnPending())
     {
         A_IMS_TRACE_I(REGID, "ProcessRetryInRegStopped :: txn is pending due to radio", 0, 0, 0);
@@ -2952,6 +2994,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReregister()
 {
     if (m_nState != STATE_REGISTERED)
     {
+        return;
+    }
+
+    if (!IsTransactionStarted())
+    {
+        A_IMS_TRACE_I(REGID, "ProcessReregister :: txn couldn't be started", 0, 0, 0);
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
+        SetState(STATE_REFRESHSTOP);
         return;
     }
 
@@ -4650,6 +4700,14 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
         }
     }
 
+    if (!IsTransactionStarted())
+    {
+        A_IMS_TRACE_I(REGID, "Registration_RefreshTimerExpired :: txn can't be started", 0, 0, 0);
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
+        SetState(STATE_REFRESHSTOP);
+        return;
+    }
+
     CheckRadioReadyAndSetTxnPending();
 
     if (!IsTransactionStarted())
@@ -4945,6 +5003,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessOfflineRecoverTimerExpired()
         UpdateTransactionStarted();
     }
 
+    if (!IsTransactionStarted())
+    {
+        A_IMS_TRACE_I(REGID, "ProcessOfflineRecoverTimerExpired :: txn can't be started", 0, 0, 0);
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
+        return;
+    }
+
     CheckRadioReadyAndSetTxnPending();
 
     if (IsTransactionStarted())
@@ -4959,11 +5024,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessOfflineRecoverTimerExpired()
             ProcessUnpredictableFailure();
             return;
         }
-    }
-    else
-    {
-        m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
-        return;
     }
 }
 
@@ -4982,6 +5042,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
         UpdateTransactionStarted();
     }
 
+    if (!IsTransactionStarted())
+    {
+        A_IMS_TRACE_I(REGID, "ProcessStopRetryTimerExpired :: txn can't be started", 0, 0, 0);
+        m_pUtil->AddFeature(PENDING_TRAFFIC, m_nTxnPending);
+        return;
+    }
+
     CheckRadioReadyAndSetTxnPending();
 
     if (IsTransactionStarted())
@@ -4996,11 +5063,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
             ProcessUnpredictableFailure();
             return;
         }
-    }
-    else
-    {
-        m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
-        return;
     }
 }
 
@@ -5627,7 +5689,25 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionSetupPrepared()
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::Transaction_OnTrafficPriorityChanged() {}
+PROTECTED VIRTUAL void AosRegistration::Transaction_OnTrafficPriorityChanged()
+{
+    if (IsTrafficPriorityBlocked())
+    {
+        IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+        if (piTransaction == IMS_NULL ||
+                piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
+        {
+            SetTrafficPriorityBlocked(IMS_FALSE);
+            UpdateTransactionStarted();
+
+            if (IsTransactionStarted())
+            {
+                ProcessPendingTransaction();
+            }
+        }
+    }
+}
 
 PROTECTED VIRTUAL IMS_RESULT AosRegistration::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage /* = MESSAGE_NORMAL */)

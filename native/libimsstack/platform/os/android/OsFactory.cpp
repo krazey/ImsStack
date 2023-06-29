@@ -29,6 +29,7 @@
 #include "device/OsCarrierConfig.h"
 #include "device/OsDeviceInfo.h"
 #include "device/OsImsRadio.h"
+#include "device/OsImsTraffic.h"
 #include "device/OsIsim.h"
 #include "device/OsLocationInfo.h"
 #include "device/OsNetworkWatcher.h"
@@ -395,4 +396,21 @@ PUBLIC VIRTUAL ImsCarrierConfig* OsFactory::CreateCarrierConfig(IN IMS_SINT32 nS
 PUBLIC VIRTUAL ImsRadio* OsFactory::CreateImsRadio(IN IMS_SINT32 nSlotId)
 {
     return new OsImsRadio(nSlotId);
+}
+
+PUBLIC VIRTUAL IImsTraffic* OsFactory::CreateImsTraffic()
+{
+    return new OsImsTraffic();
+}
+
+PUBLIC VIRTUAL void OsFactory::DestroyImsTraffic(IN IImsTraffic*& piImsTraffic)
+{
+    OsImsTraffic* pImsTraffic = DYNAMIC_CAST(OsImsTraffic*, piImsTraffic);
+
+    if (pImsTraffic != IMS_NULL)
+    {
+        delete pImsTraffic;
+    }
+
+    piImsTraffic = IMS_NULL;
 }

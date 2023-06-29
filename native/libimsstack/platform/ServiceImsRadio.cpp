@@ -33,14 +33,19 @@ public:
     ImsRadioServicePrivate& operator=(IN const ImsRadioServicePrivate&) = delete;
 
 public:
+    IImsTraffic* GetImsTraffic();
     ImsRadio* GetImsRadio(IN IMS_SINT32 nSlotId);
 
 public:
     ImsMap<IMS_SINT32, ImsRadio*> m_objImsRadios;
+
+private:
+    IImsTraffic* m_piImsTraffic;
 };
 
 PUBLIC
-ImsRadioServicePrivate::ImsRadioServicePrivate()
+ImsRadioServicePrivate::ImsRadioServicePrivate() :
+        m_piImsTraffic(IMS_NULL)
 {
     for (IMS_UINT32 i = 0; i < SystemConfig::GetSupportedSimCount(); ++i)
     {
@@ -51,6 +56,10 @@ ImsRadioServicePrivate::ImsRadioServicePrivate()
 PUBLIC
 ImsRadioServicePrivate::~ImsRadioServicePrivate()
 {
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+
+    piOsFactory->DestroyImsTraffic(m_piImsTraffic);
+
     for (IMS_UINT32 i = 0; i < m_objImsRadios.GetSize(); ++i)
     {
         ImsRadio* pImsRadio = m_objImsRadios.GetValueAt(i);
@@ -62,6 +71,18 @@ ImsRadioServicePrivate::~ImsRadioServicePrivate()
     }
 
     m_objImsRadios.Clear();
+}
+
+PUBLIC
+IImsTraffic* ImsRadioServicePrivate::GetImsTraffic()
+{
+    if (m_piImsTraffic == IMS_NULL)
+    {
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        m_piImsTraffic = piOsFactory->CreateImsTraffic();
+    }
+
+    return m_piImsTraffic;
 }
 
 PUBLIC
@@ -104,6 +125,12 @@ IImsRadio* ImsRadioService::GetImsRadio(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+IImsTraffic* ImsRadioService::GetImsTraffic()
+{
+    return m_pPrivate->GetImsTraffic();
+}
+
+PUBLIC
 void ImsRadioService::DispatchServiceMessage(IN ImsMessage& objMsg)
 {
     IMS_TRACE_D("ImsRadioService: DispatchServiceMessage - msg=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
@@ -119,6 +146,17 @@ void ImsRadioService::DispatchServiceMessage(IN ImsMessage& objMsg)
             if (piRadio != IMS_NULL)
             {
                 piRadio->DispatchServiceMessage(objMsg.nWparam, objMsg.nLparam);
+            }
+        }
+        break;
+
+        case IMS_MSG_TRAFFIC:
+        {
+            IImsTraffic* piTraffic = m_pPrivate->GetImsTraffic();
+
+            if (piTraffic != IMS_NULL)
+            {
+                piTraffic->DispatchServiceMessage(objMsg.nWparam, objMsg.nLparam);
             }
         }
         break;

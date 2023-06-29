@@ -96,4 +96,12 @@ public interface DefaultSystemCallInterface {
      * @return {@code true} if the key and value is successfully set, {@code false} otherwise.
      */
     boolean setPreference(String fileName, String key, String value, int slotId);
+
+    /**
+     * Sets the traffic priority for a specified slot.
+     *
+     * @param priorityType The priority type of the traffic.
+     * @param slotId The slot-id to be set.
+     */
+    void setTrafficPriority(int priorityType, int slotId);
 }

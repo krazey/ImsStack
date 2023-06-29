@@ -154,7 +154,9 @@ public:
         PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
         PENDING_SUBSCRIPTION = 0x40,
-        PENDING_TERMINATED = 0x80
+        PENDING_TERMINATED = 0x80,
+
+        PENDING_TRAFFIC = 0x100
     };
 
     enum
@@ -483,6 +485,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 
         case RegistrationLog::PENDING_TERMINATED:
             return "PENDING_TERMINATED";
+
+        case RegistrationLog::PENDING_TRAFFIC:
+            return "PENDING_TRAFFIC";
 
         default:
             return "__INVALID__";

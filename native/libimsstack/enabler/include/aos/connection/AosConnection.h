@@ -64,7 +64,7 @@ protected:
 
     void SetActivationRequested(IN IMS_BOOL bRequest);
     void SetState(IN IMS_UINT32 nState);
-    void UpdateIpcanForTrm();
+    void UpdateIpcanForImsTraffic();
 
     // INetworkConnectionListener
     void NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection) override;

@@ -36,6 +36,8 @@ import com.android.imsstack.util.ImsPrivateProperties;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,12 +52,15 @@ public class ImsRadioAgent implements ImsRadioInterface {
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private Handler mHandler;
     private ImsRadioPhoneStateListener mPhoneStateListener;
+    private ImsTrafficListener mImsTrafficListener;
     private SsacInfo mSsacInfo;
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
     private Map<Integer, TrafficCallback> mTrafficCallbacks =
                 new HashMap<Integer, TrafficCallback>();
     private NativeStateInterface.Listener mNativeStateListener;
+    private Set<TrafficPriorityListener> mPriorityListeners =
+                new CopyOnWriteArraySet<TrafficPriorityListener>();
 
     private static final int EVENT_CONNECTION_FAILED = 1;
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
@@ -88,6 +93,13 @@ public class ImsRadioAgent implements ImsRadioInterface {
             nsi.addListener(mNativeStateListener);
         }
 
+        mImsTrafficListener = new ImsTrafficListener();
+        ImsTrafficInterface imsTraffic =
+                AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+        if (imsTraffic != null) {
+            imsTraffic.addListener(mImsTrafficListener);
+        }
+
         mImsHalTestEnabled = (ImsPrivateProperties.Persistent.getInt(
                     ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST, 0, mSlotId) == 1);
     }
@@ -103,17 +115,29 @@ public class ImsRadioAgent implements ImsRadioInterface {
             mNativeStateListener = null;
         }
 
+        if (mImsTrafficListener != null) {
+            ImsTrafficInterface imsTraffic =
+                    AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+            if (imsTraffic != null) {
+                imsTraffic.removeListener(mImsTrafficListener);
+            }
+            mImsTrafficListener = null;
+        }
+
         mSsacInfo = null;
         mPhoneStateListener.dispose();
         mHandler.removeCallbacksAndMessages(null);
 
         mConnectionListeners.clear();
         mTrafficCallbacks.clear();
+        mPriorityListeners.clear();
     }
 
     @Override
     public boolean isImsTrafficAllowed(int trafficType) {
-        return true;
+        ImsTrafficInterface imsTraffic =
+                AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+        return (imsTraffic != null) ? imsTraffic.isAllowed(trafficType, mSlotId) : true;
     }
 
     @Override
@@ -172,10 +196,12 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @Override
     public void addListenerForTrafficPriority(TrafficPriorityListener listener) {
+        mPriorityListeners.add(listener);
     }
 
     @Override
     public void removeListenerForTrafficPriority(TrafficPriorityListener listener) {
+        mPriorityListeners.remove(listener);
     }
 
     @Override
@@ -466,6 +492,17 @@ public class ImsRadioAgent implements ImsRadioInterface {
         }
     }
 
+    private void invokeTrafficPriorityListener() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (TrafficPriorityListener l : mPriorityListeners) {
+                    l.onTrafficPriorityChanged();
+                }
+            }
+        });
+    }
+
     private void notifySsacInfo(SsacInfo ssacInfo) {
         if (mSsacInfo.isChanged(ssacInfo)) {
             mSsacInfo.update(ssacInfo);
@@ -585,6 +622,13 @@ public class ImsRadioAgent implements ImsRadioInterface {
         public void onError(@NonNull ConnectionFailureInfo info) {
             handleTrafficCallbackOnError(mId, convertConnectionFailureReason(info.getReason()),
                     info.getCauseCode(), info.getWaitTimeMillis());
+        }
+    }
+
+    private final class ImsTrafficListener implements ImsTrafficInterface.PriorityListener {
+        @Override
+        public void onTrafficPriorityChanged() {
+            invokeTrafficPriorityListener();
         }
     }
 }

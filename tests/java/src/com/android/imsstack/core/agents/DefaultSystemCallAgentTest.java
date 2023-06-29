@@ -48,6 +48,7 @@ public class DefaultSystemCallAgentTest {
     private static final String TEST_KEY = "test-key";
     private static final String TEST_VALUE = "test-value";
     private static final int SLOT0 = 0;
+    private static final int TEST_PRIORITY_TYPE = 1;
 
     @Mock private Context mContext;
     @Mock private SystemInterface mSystemInterface;
@@ -56,6 +57,7 @@ public class DefaultSystemCallAgentTest {
     @Mock private WifiInterface mWifiInterface;
     @Mock private BatteryStateInterface mBatteryStateInterface;
     @Mock private TimerAgent mTimerAgent;
+    @Mock private ImsTrafficInterface mImsTrafficInterface;
 
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
@@ -70,6 +72,7 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, mWifiInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerAgent);
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryStateInterface);
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, mImsTrafficInterface);
 
         mDefaultSystemCallAgent = new DefaultSystemCallAgent();
     }
@@ -81,6 +84,7 @@ public class DefaultSystemCallAgentTest {
             mDefaultSystemCallAgent = null;
         }
 
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, null);
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
@@ -88,6 +92,7 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
         SystemInterface.setSystemInterface(null);
 
+        mImsTrafficInterface = null;
         mTimerAgent = null;
         mWifiInterface = null;
         mSystemInterface = null;
@@ -221,5 +226,17 @@ public class DefaultSystemCallAgentTest {
 
         assertFalse(result);
         verifyNoMoreInteractions(mPreferenceInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testSetTrafficPriority() {
+        mDefaultSystemCallAgent.setTrafficPriority(TEST_PRIORITY_TYPE, SLOT0);
+        verify(mImsTrafficInterface)
+                .setTrafficPriority(eq(TEST_PRIORITY_TYPE), eq(SLOT0));
+
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
+        mDefaultSystemCallAgent.setTrafficPriority(TEST_PRIORITY_TYPE, SLOT0);
+        verifyNoMoreInteractions(mImsTrafficInterface);
     }
 }
