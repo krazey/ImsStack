@@ -22,22 +22,27 @@ package com.android.imsstack.core.agents.dcmif;
 public interface IDcSettings extends IDc {
 
     /**
-     * Return whether VoLTE service is allowed in roaming state
+     * Returns whether VoLTE service is allowed in roaming state
      */
     boolean isRoamingAllowed();
 
     /**
-     * Return whether VoPS value should be notified when the VoPS is not supported
+     * Returns whether VoPS value should be notified when the VoPS is not supported
      */
     boolean isVopsRequired();
 
     /**
-     * Return whether VoPS value should be checked when request IMS PDN
+     * Returns whether IMS PDN request without MMTEL capability is required
      */
-    boolean isVopsRequiredForPdn();
+    boolean isImsPdnRequestWithoutMmtel();
 
     /**
-     * Return list of RAT technologies on which IMS is supported
+     * Returns scenarios that IMS PDN needs to be enabled even if VOPS is not support
+     */
+    int[] getImsPdnEnabledInNoVopsSupport();
+
+    /**
+     * Returns list of RAT technologies on which IMS is supported
      */
     int[] getImsSupportedRats();
 
@@ -47,22 +52,22 @@ public interface IDcSettings extends IDc {
     boolean isCrossSimEnabledByPlatform();
 
     /**
-     * Return preferred IP version for connection
+     * Returns preferred IP version for connection
      */
     int getPreferredIpVersion();
 
     /**
-     * Return preferred IP version for emergency connection
+     * Returns preferred IP version for emergency connection
      */
     int getEmergencyPreferredIpVersion();
 
     /**
-     * Return whether the casueCode should be handled as permanent failure
+     * Returns whether the casueCode should be handled as permanent failure
      */
     boolean isPermanentFailure(EApnType apnType, int causeCode);
 
     /**
-     * Return whether cdmaless feature tag is required
+     * Returns whether cdmaless feature tag is required
      */
     boolean isCdmalessFeatureTagRequired();
 }

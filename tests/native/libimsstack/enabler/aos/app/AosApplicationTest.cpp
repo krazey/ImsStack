@@ -164,7 +164,8 @@ private:
 class TestAosConnector : public AosConnector
 {
     inline explicit TestAosConnector(IN IAosAppContext* piAppContext) :
-            AosConnector(piAppContext)
+            AosConnector(piAppContext),
+            m_bIsPdnDeactivationRequired(IMS_FALSE)
     {
     }
 
@@ -180,8 +181,14 @@ public:
         }
     }
     inline void Stop(IN IMS_SINT32 /* nDelayTimeSec */) override {}
+    inline void SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired) override
+    {
+        m_bIsPdnDeactivationRequired = bIsRequired;
+    }
+    inline IMS_BOOL IsPdnDeactivationRequired() override { return m_bIsPdnDeactivationRequired; }
 
 private:
+    IMS_BOOL m_bIsPdnDeactivationRequired;
 };
 
 class AppTestAosRegistration : public AosRegistration
@@ -1903,6 +1910,19 @@ TEST_F(AosApplicationTest, Callback)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_IMS_SERVICE_DISABLED, IMS_FALSE)).Times(1);
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::IMS_SERVICE);
+    // eCause is PDN_CAPABILITY_CHANGED - eType is STOP
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_FALSE);
+    m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
+            AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
+    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_TRUE);
+
+    m_pTestAosApplication->SetImsCall(IMS_FALSE);
+    m_pTestAosConnector->SetPdnDeactivationRequired(IMS_FALSE);
+    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_FALSE);
+    m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
+            AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
+    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_TRUE);
     // eCause is DATA - eType is START
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::START, AosPcscfOrder::CURRENT, AosControlCause::DATA);

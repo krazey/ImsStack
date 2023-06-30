@@ -54,6 +54,7 @@
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
     <boolean name="reg_contact_validation_bool" value="true"/>
+    <boolean name="request_ims_pdn_without_mmtel" value="true"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="true"/>
     <boolean name="required_volte_block_by_ssac_bool" value="true"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>

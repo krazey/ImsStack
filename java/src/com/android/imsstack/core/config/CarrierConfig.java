@@ -500,6 +500,8 @@ public class CarrierConfig {
                 "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
+        public static final String KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL =
+                "request_ims_pdn_without_mmtel";
         public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
                 "required_cdmaless_feature_tag_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =

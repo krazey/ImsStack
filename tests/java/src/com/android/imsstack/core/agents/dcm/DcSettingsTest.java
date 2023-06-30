@@ -76,69 +76,49 @@ public class DcSettingsTest {
 
     @Test
     public void testIsVopsRequired() throws Exception {
-        int[] supportWithoutVopsAtHome = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME};
-
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
                 .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(true)
                 .thenReturn(true);
-        when(mMockIDcNetWatcher.isRoaming())
-                .thenReturn(true)
-                .thenReturn(false);
-        when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY)))
-                .thenReturn(supportWithoutVopsAtHome)
-                .thenReturn(supportWithoutVopsAtHome);
 
-        // configured to not ignore VoPS and VoPS is not required for PDN
+        // configured to not ignore VoPS
         assertTrue(mDcSettingsUT.isVopsRequired());
 
-        // configured to not ignore VoPS and VoPS is required for PDN
-        assertTrue(mDcSettingsUT.isVopsRequired());
-
-        // configured to ignore VoPS and VoPS is required for PDN
-        assertTrue(mDcSettingsUT.isVopsRequired());
-
-        // configured to ignore VoPS and VoPS is not required for PDN
+        // configured to ignore VoPS
         assertFalse(mDcSettingsUT.isVopsRequired());
     }
 
     @Test
-    public void testIsVopsRequiredForPdn() throws Exception {
-        int[] empty = {};
-        int[] all = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME,
-                CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING};
-
-        when(mMockIDcNetWatcher.isRoaming())
-                .thenReturn(false)
-                .thenReturn(false)
+    public void testIsImsPdnRequestWithoutMmtel() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
                 .thenReturn(true)
-                .thenReturn(true);
+                .thenReturn(false);
+
+        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
+        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
+    }
+
+    @Test
+    public void testGetImsPdnEnabledInNoVopsSupport() throws Exception {
+        int[] emptyList = {};
+        int[] availableList = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME};
         when(mMockCarrierConfig.getIntArray(
                 eq(CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY)))
-                .thenReturn(empty)
-                .thenReturn(all)
-                .thenReturn(empty)
-                .thenReturn(all);
+                .thenReturn(emptyList)
+                .thenReturn(availableList);
 
-        // Home Network and configured to not support without VoPS
-        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
+        int[] noNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
+        assertEquals(noNetwork.length, emptyList.length);
 
-        // Home Network and configured to support without VoPS
-        assertFalse(mDcSettingsUT.isVopsRequiredForPdn());
-
-        // Roaming Network and configured to not support without VoPS
-        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
-
-        // Roaming Network and configured to support without VoPS
-        assertFalse(mDcSettingsUT.isVopsRequiredForPdn());
+        int[] oneNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
+        assertEquals(oneNetwork.length, availableList.length);
     }
 
     @Test
     public void testGetImsSupportedRats() throws Exception {
-        int[] emptyList = {}, availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
+        int[] emptyList = {};
+        int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
 
         when(mMockCarrierConfig.getIntArray(
                 eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
@@ -221,14 +201,18 @@ public class DcSettingsTest {
         mDcSettingsUT.init(mMockContext);
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
-        assertTrue(mDcSettingsUT.isVopsRequired());
-        assertTrue(mDcSettingsUT.isVopsRequiredForPdn());
+        assertFalse(mDcSettingsUT.isVopsRequired());
+        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
+        int[] noVopsRequired = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
+        assertEquals(noVopsRequired.length, 0);
         int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
+        assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
         assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
                 CarrierConfig.Assets.IPV6_PREFERRED);
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
+        assertFalse(mDcSettingsUT.isCdmalessFeatureTagRequired());
     }
 
     private class FakeDcSettings extends DcSettings {

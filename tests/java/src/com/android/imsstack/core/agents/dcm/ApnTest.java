@@ -324,7 +324,7 @@ public class ApnTest {
     public void testRequestNetwork_vopsRequiredForPdn() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
-        when(mMockIDcSettings.isVopsRequiredForPdn()).thenReturn(true);
+        mApn.mIsMmtelRequired = true;
 
         NetworkRequest.Builder nrb = new NetworkRequest.Builder();
         nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
@@ -339,7 +339,7 @@ public class ApnTest {
     public void testRequestNetwork_noVopsRequiredForPdn() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
         replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
-        when(mMockIDcSettings.isVopsRequiredForPdn()).thenReturn(false);
+        mApn.mIsMmtelRequired = false;
 
         NetworkRequest.Builder nrb = new NetworkRequest.Builder();
         nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.os.Message;
+import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -40,8 +41,10 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.enabler.aos.IAosInfo;
+import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
@@ -62,8 +65,10 @@ public class ApnImsTest {
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
     @Mock private IDcApn mMockIDcApn;
+    @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IAosInfo mMockIAosInfo;
+    @Mock private IAosRegistration mMockIAosReg;
     @Mock private ISystem mMockISystem;
 
     private Context mContext;
@@ -246,6 +251,107 @@ public class ApnImsTest {
     }
 
     @Test
+    public void testEvaluateImsNetworkCapability() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
+        replaceInstance(Apn.class, "mAosReg", mApnIms, mMockIAosReg);
+        when(mMockIDcNetWatcher.getNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN)
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE)
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE)
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        mApnIms.mIsMmtelRequired = true;
+        mApnIms.mImsPdnRequestWithoutMmtel = true;
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        // do not change network capability when network is not registered
+        mApnIms.evaluateImsNetworkCapability();
+
+        // do not change network capability when PDN has not been requested before
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_IDLE);
+        mApnIms.evaluateImsNetworkCapability();
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+
+        // do not change network capability when network is connected through the IWLAN
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_WLAN;
+        mApnIms.evaluateImsNetworkCapability();
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+
+        // verify whether it request PDN capability change
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.evaluateImsNetworkCapability();
+        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP,
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.PDN_CAPABILITY_CHANGED);
+    }
+
+    @Test
+    public void testIsMmtelCapabilityRequired() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
+
+        // KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL is true
+        mApnIms.mImsPdnRequestWithoutMmtel = true;
+        assertFalse(mApnIms.isMmtelCapabilityRequired());
+
+        // Network is in scenario of KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY
+        mApnIms.mImsPdnRequestWithoutMmtel = false;
+        when(mMockIDcNetWatcher.isRoaming())
+                .thenReturn(true)
+                .thenReturn(false);
+
+        mApnIms.mNoVopsRequired = mApnIms.ROAMING_NETWORK;
+        assertFalse(mApnIms.isMmtelCapabilityRequired());
+
+        mApnIms.mNoVopsRequired = mApnIms.HOME_NETWORK;
+        assertFalse(mApnIms.isMmtelCapabilityRequired());
+
+        // Network is not in scenario of KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY
+        when(mMockIDcNetWatcher.isRoaming())
+                .thenReturn(false)
+                .thenReturn(true);
+
+        mApnIms.mNoVopsRequired = mApnIms.ROAMING_NETWORK;
+        assertTrue(mApnIms.isMmtelCapabilityRequired());
+
+        mApnIms.mNoVopsRequired = mApnIms.HOME_NETWORK;
+        assertTrue(mApnIms.isMmtelCapabilityRequired());
+
+        // Exception - DcNetWather is null
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, null);
+        when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
+        mApnIms.mImsPdnRequestWithoutMmtel = false;
+        mApnIms.mNoVopsRequired = mApnIms.ROAMING_NETWORK;
+        assertTrue(mApnIms.isMmtelCapabilityRequired());
+    }
+
+    @Test
+    public void testHandleIpcanCategory() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
+
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        assertTrue(mApnIms.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApnIms.mIpcanCategory);
+        verify(mMockISystem, times(1)).notifyDataConnectionIpcanChanged(
+                mApnIms.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockIDcNetWatcher, times(1)).getNetworkType();
+    }
+
+    @Test
+    public void testUpdateCarrierConfig() throws Exception {
+        int[] configNoVopsRequired = {CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING};
+        when(mMockIDcSettings.isImsPdnRequestWithoutMmtel()).thenReturn(false);
+        when(mMockIDcSettings.getImsPdnEnabledInNoVopsSupport()).thenReturn(configNoVopsRequired);
+        mApnIms.mImsPdnRequestWithoutMmtel = true;
+        mApnIms.mNoVopsRequired = mApnIms.HOME_NETWORK;
+
+        assertTrue(mApnIms.updateCarrierConfig());
+        assertEquals(false, mApnIms.mImsPdnRequestWithoutMmtel);
+        assertEquals(mApnIms.ROAMING_NETWORK, mApnIms.mNoVopsRequired);
+
+        replaceInstance(Apn.class, "mDcSettings", mApnIms, null);
+        assertFalse(mApnIms.updateCarrierConfig());
+    }
+
+    @Test
     public void testHandleNetworkAvailable() throws Exception {
         // if apn is not requested, ignore event
         mApnIms.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
@@ -282,7 +388,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleIpChanged_differentIp() throws Exception {
+    public void testHandleIpChanged_DifferentIp() throws Exception {
         replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
         when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("1.2.3.4");
         when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
@@ -302,7 +408,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleIpChanged_sameIp() throws Exception {
+    public void testHandleIpChanged_SameIp() throws Exception {
         replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
         when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("0.0.0.0");
         when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
@@ -380,6 +486,48 @@ public class ApnImsTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockIAosInfo).notifyCrossSimStatus(true);
+    }
+
+    @Test
+    public void testHandleRoamingStateChanged() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+
+        // do not handle invalid msg.obj
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_ROAMING_STATE_CHANGED;
+        msg1.obj = null;
+        mApnIms.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        Message msg2 = Message.obtain();
+        msg2.what = Apn.EVENT_ROAMING_STATE_CHANGED;
+        msg2.obj = true;
+        mApnIms.sendMessage(msg2);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIDcNetWatcher, times(1)).getNetworkType();
+    }
+
+    @Test
+    public void testHandleVopsSupportChanged() throws Exception {
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
+        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+
+        // do not handle invalid msg.obj
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_VOPS_SUPPORT_CHANGED;
+        msg1.obj = null;
+        mApnIms.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        Message msg2 = Message.obtain();
+        msg2.what = Apn.EVENT_VOPS_SUPPORT_CHANGED;
+        msg2.obj = false;
+        mApnIms.sendMessage(msg2);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIDcNetWatcher, times(1)).getNetworkType();
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

@@ -89,6 +89,8 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 1005;
     protected static final int EVENT_DATA_CONNECTION_FAILED = 1006;
     protected static final int EVENT_DEFAULT_NETWORK_STATUS_CHANGED = 1007;
+    protected static final int EVENT_ROAMING_STATE_CHANGED = 1008;
+    protected static final int EVENT_VOPS_SUPPORT_CHANGED = 1009;
 
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
@@ -131,6 +133,10 @@ public abstract class Apn extends Handler implements IApn {
                 "DATA_CONNECTION_FAILED");
         sEventToString.put(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
                 "DEFAULT_NETWORK_STATUS_CHANGED");
+        sEventToString.put(EVENT_ROAMING_STATE_CHANGED,
+                "ROAMING_STATE_CHANGED");
+        sEventToString.put(EVENT_VOPS_SUPPORT_CHANGED,
+                "EVENT_VOPS_SUPPORT_CHANGED");
 
         sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
                 "AIRPLANE_MODE_CHANGED");
@@ -151,6 +157,7 @@ public abstract class Apn extends Handler implements IApn {
     protected int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
     protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
+    protected boolean mIsMmtelRequired = true;
     protected LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
             new LinkedHashMap<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
@@ -433,10 +440,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mType.getType() == DcConstants.TYPE_IMS) {
-            if (mDcSettings != null) {
-                if (mDcSettings.isVopsRequiredForPdn()) {
-                    nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
-                }
+            if (mIsMmtelRequired) {
+                nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
             }
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
         } else if (mType.getType() == DcConstants.TYPE_INTERNET) {
