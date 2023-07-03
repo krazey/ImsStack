@@ -22,15 +22,12 @@
 #include "AString.h"
 #include "IAosService.h"
 #include "ImsMap.h"
-#include "interface/IAosEmergencyListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
 
 class MockIAosService : public IAosService
 {
 public:
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosEmergencyListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosEmergencyListener * piListener), (override));
     MOCK_METHOD(
             IMS_BOOL, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosRegistrationControlListener * piListener),
@@ -39,8 +36,6 @@ public:
     MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServiceSettingListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosServicePhoneListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
-    MOCK_METHOD(void, NotifyEmcCallbackModeChanged,
-            (IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration), (override));
     MOCK_METHOD(void, UpdateSipDelegateRegistration, (), (override));
     MOCK_METHOD(void, TriggerSipDelegateDeregistration, (), (override));
     MOCK_METHOD(void, TriggerFullNetworkRegistration,
@@ -73,7 +68,6 @@ public:
     MOCK_METHOD(void, NotifyPowerOff, (), (override));
     MOCK_METHOD(void, NotifyPreciseCallState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(void, NotifyCarrierSignalPcoValueChanged, (IN IMS_SINT32 nValue), (override));
-
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
             (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
                     IN const ImsList<AString>& objFeatureTags),

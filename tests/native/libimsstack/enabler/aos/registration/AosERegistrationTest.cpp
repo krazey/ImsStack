@@ -51,7 +51,6 @@
 #include "interface/AosInternalMsgDef.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
-#include "interface/IAosEmergencyListener.h"
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
 #include "handle/AosFeatureTag.h"
@@ -138,13 +137,11 @@ class TestAosERegistration : public AosERegistration
     FRIEND_TEST(AosERegistrationTest, Registration_Terminated);
     FRIEND_TEST(AosERegistrationTest, CallTracker_StateChanged);
     FRIEND_TEST(AosERegistrationTest, NConfiguration_NotifyConfigChanged);
+    FRIEND_TEST(AosERegistrationTest, Event_NotifyEvent);
     FRIEND_TEST(AosERegistrationTest, Transaction_OnConnectionFailed);
     FRIEND_TEST(AosERegistrationTest, Transaction_OnConnectionSetupPrepared);
     FRIEND_TEST(AosERegistrationTest, Transaction_OnTrafficPriorityChanged);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChanged_EcbmStartStop);
-    FRIEND_TEST(AosERegistrationTest, CallbackModeChanged_EcbmStartAndScbmStart);
-    FRIEND_TEST(AosERegistrationTest, IsRefreshRequiredByCbm_DiffTimeZero);
-    FRIEND_TEST(AosERegistrationTest, IsRefreshRequiredByCbm_DiffTimeNotZero);
+    FRIEND_TEST(AosERegistrationTest, IsEcbmTimer);
     FRIEND_TEST(AosERegistrationTest, ProcessRearrangePcscf);
     FRIEND_TEST(AosERegistrationTest, ProcessReinitiateWithRegState);
 
@@ -178,11 +175,6 @@ public:
     }
 
     inline void SetISipConfigV(ISipConfigV* piSipConfigV) { m_pUtil->SetISipConfigV(piSipConfigV); }
-
-    inline void SetReregTryTime(IMS_UINT32 nReregTryTime)
-    {
-        m_pEModeInfo->SetReRegTryTime(nReregTryTime);
-    }
 
     inline IMS_BOOL IsTxnPendingOn(IN IMS_UINT32 nFeature)
     {
@@ -367,11 +359,6 @@ protected:
         EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(0));
-
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-                .Times(AnyNumber())
-                .WillRepeatedly(
-                        Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
 
         EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
                 .Times(AnyNumber())
@@ -587,19 +574,6 @@ protected:
         {
             delete m_pAosStaticProfile;
         }
-    }
-
-    void ClearEmergencyCbm() { m_pTestAosERegistration->ClearCbm(); }
-
-    void EmergencyCallbackModeChanged(
-            IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration)
-    {
-        m_pTestAosERegistration->CallbackModeChanged(eType, eState, nDuration);
-    }
-
-    IMS_BOOL CheckRefreshRequiredByCbm()
-    {
-        return m_pTestAosERegistration->IsRefreshRequiredByCbm();
     }
 };
 
@@ -969,23 +943,13 @@ TEST_F(AosERegistrationTest, CallTracker_StateChanged)
 
 TEST_F(AosERegistrationTest, NConfiguration_NotifyConfigChanged)
 {
-    // IsEmergencyCallbackModeSupported TRUE and FALSE
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-
     m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
+    m_pTestAosERegistration->CleanUp();
+}
 
-    EXPECT_CALL(m_objMockIAosService,
-            RemoveListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-
-    m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
+TEST_F(AosERegistrationTest, Event_NotifyEvent)
+{
+    m_pTestAosERegistration->Event_NotifyEvent(IMS_EVENT_ECM_STATE, IMS_ECM_STATE_ON, 0);
 }
 
 TEST_F(AosERegistrationTest, Transaction_OnConnectionFailed)
@@ -1011,144 +975,9 @@ TEST_F(AosERegistrationTest, Transaction_OnTrafficPriorityChanged)
     m_pTestAosERegistration->Transaction_OnTrafficPriorityChanged();
 }
 
-TEST_F(AosERegistrationTest, CallbackModeChanged_EcbmStartStop)
+TEST_F(AosERegistrationTest, IsEcbmTimer)
 {
-    // m_pEModeInfo = IMS_NULL
-    m_pTestAosERegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))   // for NConfiguration_NotifyConfigChanged()
-            .WillOnce(Return(IMS_FALSE))  // for first return in CallbackModeChanged()
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // For setting m_pEModeInfo
-    EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-    m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // ECBM START - for first return in CallbackModeChanged()
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-
-    // ECBM STOP
-    m_pTestAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::STOP, 0);
-    EXPECT_EQ(m_pTestAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-
-    m_pTestAosERegistration->CleanUp();
-}
-
-TEST_F(AosERegistrationTest, CallbackModeChanged_EcbmStartAndScbmStart)
-{
-    // For setting m_pEModeInfo
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-    m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
-
-    m_pTestAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-
-    // ECBM STOP BY EMC
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::STOP_BY_EMC, 0);
-    EXPECT_EQ(m_pTestAosERegistration->GetState(), IAosRegistration::STATE_REGISTERED);
-
-    // SCBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::SMS, EmcCallbackMode::START, 300);
-
-    // SCBM STOP
-    EmergencyCallbackModeChanged(EmcCallbackModeType::SMS, EmcCallbackMode::STOP, 0);
-    EXPECT_EQ(m_pTestAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    m_pTestAosERegistration->CleanUp();
-}
-
-TEST_F(AosERegistrationTest, IsRefreshRequiredByCbm_DiffTimeZero)
-{
-    // For setting m_pEModeInfo
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-    m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
-
-    // IsEcbm() and IsScbm() are false
-    ClearEmergencyCbm();
-    EXPECT_EQ(IMS_FALSE, CheckRefreshRequiredByCbm());
-
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // m_pEModeInfo->IsESms()
-    m_pTestAosERegistration->HandleESmsState(IAosRegistration::CMD_ESMS_INIT);
-    EXPECT_EQ(IMS_TRUE, CheckRefreshRequiredByCbm());
-
-    // result: IMS_FALSE
-    m_pTestAosERegistration->HandleESmsState(IAosRegistration::CMD_ESMS_DONE);
-    m_pTestAosERegistration->SetIRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
-    EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(AnyNumber()).WillRepeatedly(Return(700));
-
-    m_pTestAosERegistration->SetReregTryTime(IMS_SYS_GetTimeInSeconds() - 50);
-
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-    EXPECT_EQ(IMS_FALSE, CheckRefreshRequiredByCbm());
-    ClearEmergencyCbm();
-
-    // result: IMS_TRUE
-    m_pTestAosERegistration->SetReregTryTime(IMS_SYS_GetTimeInSeconds() - 100);
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-    EXPECT_EQ(IMS_TRUE, CheckRefreshRequiredByCbm());
-    ClearEmergencyCbm();
-}
-
-TEST_F(AosERegistrationTest, IsRefreshRequiredByCbm_DiffTimeNotZero)
-{
-    // For setting m_pEModeInfo
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencyCallbackModeSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosEmergencyListener*, m_pTestAosERegistration)))
-            .Times(AnyNumber());
-    m_pTestAosERegistration->NConfiguration_NotifyConfigChanged();
-
-    // m_pEModeInfo->GetReRegTryTime() = 0
-    ClearEmergencyCbm();
-
-    m_pTestAosERegistration->SetIRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
-    EXPECT_CALL(m_objMockIRegContact, GetExpires())
-            .Times(AnyNumber())
-            .WillOnce(Return(500))   // IMS_TRUE
-            .WillOnce(Return(700));  // IMS_FALSE
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-    EXPECT_EQ(IMS_TRUE, CheckRefreshRequiredByCbm());
-    ClearEmergencyCbm();
-
-    // ECBM START
-    EmergencyCallbackModeChanged(EmcCallbackModeType::CALL, EmcCallbackMode::START, 300);
-    EXPECT_EQ(IMS_FALSE, CheckRefreshRequiredByCbm());
-    ClearEmergencyCbm();
+    EXPECT_FALSE(m_pTestAosERegistration->IsEcbmTimer());
 }
 
 TEST_F(AosERegistrationTest, ProcessRearrangePcscf)

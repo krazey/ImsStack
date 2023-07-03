@@ -23,12 +23,10 @@
 #include "CarrierConfig.h"
 #include "IRegistration.h"
 #include "SipStatusCode.h"
-#include "IAosService.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosCallTracker.h"
-#include "interface/IAosEmergencyListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosPcscf.h"
@@ -46,7 +44,7 @@ PUBLIC
 AosERegistration::AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
         AosRegistration(piAppContext, strRegId),
         m_bReinitiationRequested(IMS_FALSE),
-        m_pEModeInfo(IMS_NULL)
+        pEModeInfo(IMS_NULL)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosERegistration = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosERegistration), this);
@@ -131,6 +129,8 @@ PUBLIC VIRTUAL void AosERegistration::RequestCmd(
             HandleESmsState(nCmdType);
             break;
 
+            // TODO: SCBM handling
+
         default:
             AosRegistration::RequestCmd(nCmdType, nReason);
             break;
@@ -168,13 +168,8 @@ PROTECTED VIRTUAL void AosERegistration::Init()
 
     if (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
-        m_pEModeInfo = new EmergencyModeInfo();
-
-        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-        if (piService != IMS_NULL)
-        {
-            piService->AddListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
-        }
+        pEModeInfo = new EmergencyModeInfo();
+        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ECM_STATE, this, m_nSlotId);
     }
 
     IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
@@ -204,15 +199,11 @@ PROTECTED VIRTUAL void AosERegistration::CleanUp()
         piCt->RemoveListener(this);
     }
 
-    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
-    {
-        piService->RemoveListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
-    }
+    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ECM_STATE, this, m_nSlotId);
 
-    if (m_pEModeInfo != IMS_NULL)
+    if (pEModeInfo != IMS_NULL)
     {
-        delete m_pEModeInfo;
+        delete pEModeInfo;
     }
 }
 
@@ -226,12 +217,6 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::CreateRegistration()
     return AosRegistration::CreateRegistration();
 }
 
-PROTECTED VIRTUAL void AosERegistration::DestroyRegistration()
-{
-    ClearCbm();
-    AosRegistration::DestroyRegistration();
-}
-
 PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 {
     ProcessDefaultFlowRecovery_Start();
@@ -240,7 +225,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
         IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
 {
-    if (m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsECall())
+    if (pEModeInfo != IMS_NULL && !pEModeInfo->IsECall())
     {
         ProcessUnpredictableFailure();
         return;
@@ -276,8 +261,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
 PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
         IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
 {
-    if (!IsImsCall() && m_pEModeInfo != IMS_NULL && !m_pEModeInfo->IsEcbm() &&
-            !m_pEModeInfo->IsScbm())
+    if (!IsImsCall() && pEModeInfo != IMS_NULL && !pEModeInfo->IsEcbm())
     {
         ProcessUnpredictableFailure();
         return;
@@ -398,13 +382,20 @@ PROTECTED VIRTUAL void AosERegistration::SetRefreshPolicy()
 
 PROTECTED VIRTUAL void AosERegistration::UpdateTransactionStarted()
 {
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+    if (pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
         m_bIsTransactionStarted = IsImsCall();
     }
     else
     {
-        m_bIsTransactionStarted = IsImsCall() || IsRefreshRequiredByCbm();
+        if (pEModeInfo->IsEcbmCheckedForRefresh() && IsEcbmTimer())
+        {
+            m_bIsTransactionStarted = IsImsCall() || pEModeInfo->IsEcbm() || pEModeInfo->IsScbm();
+        }
+        else
+        {
+            m_bIsTransactionStarted = IsImsCall();
+        }
     }
 
     A_IMS_TRACE_D(REGID, "UpdateTransactionStarted :: (%s)",
@@ -423,10 +414,6 @@ PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
         return;
     }
 
-    if (m_pEModeInfo != IMS_NULL)
-    {
-        m_pEModeInfo->SetReRegTryTime(IMS_SYS_GetTimeInSeconds());
-    }
     UpdateTransactionStarted();
 
     if (!IsTransactionStarted())
@@ -457,12 +444,14 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Started()
 {
     StopTimer(TIMER_STOP_RETRY);
     StopTimer(TIMER_TRANSACTION);
+    ProcessEMode();
     SetTraffic(IMS_FALSE);
     AosRegistration::Registration_Started();
 }
 
 PROTECTED VIRTUAL void AosERegistration::Registration_Updated()
 {
+    ProcessEMode();
     SetTraffic(IMS_FALSE);
     AosRegistration::Registration_Updated();
 }
@@ -507,7 +496,7 @@ PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
 
         if (bCurrState)
         {
-            ProcessReRegStart();
+            ProcessECallStarted();
         }
     }
 }
@@ -518,29 +507,43 @@ PROTECTED VIRTUAL void AosERegistration::NConfiguration_NotifyConfigChanged()
     {
         AosRegistration::NConfiguration_NotifyConfigChanged();
 
-        if (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+        if (pEModeInfo == IMS_NULL)
         {
-            if (m_pEModeInfo == IMS_NULL)
-            {
-                m_pEModeInfo = new EmergencyModeInfo();
-                IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-                if (piService != IMS_NULL)
-                {
-                    piService->AddListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
-                }
-            }
+            pEModeInfo = new EmergencyModeInfo();
+            IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ECM_STATE, this, m_nSlotId);
         }
-        else
+    }
+}
+
+PROTECTED VIRTUAL void AosERegistration::Event_NotifyEvent(
+        IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 /* nLParam */)
+{
+    if (pEModeInfo == IMS_NULL || nEvent != IMS_EVENT_ECM_STATE)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_D(REGID, "ecm state :: (%d)", nWParam, 0, 0);
+
+    if (nWParam == IMS_ECM_STATE_ON)
+    {
+        if (pEModeInfo->IsScbm())
         {
-            if (m_pEModeInfo != IMS_NULL)
-            {
-                IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-                if (piService != IMS_NULL)
-                {
-                    piService->RemoveListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
-                }
-                delete m_pEModeInfo;
-            }
+            pEModeInfo->SetScbm(IMS_FALSE);
+            StopTimer(TIMER_MODE);
+        }
+
+        pEModeInfo->SetEcbm(IMS_TRUE);
+        StartTimer(TIMER_MODE, (EmergencyModeInfo::EMERGENCY_CALLBACK_MODE_TIME / 2) * 1000);
+    }
+    else if (nWParam == IMS_ECM_STATE_OFF || nWParam == IMS_ECM_STATE_OFF_BY_NEW_ECALL)
+    {
+        pEModeInfo->SetEcbm(IMS_FALSE);
+        StopTimer(TIMER_MODE);
+
+        if (nWParam == IMS_ECM_STATE_OFF)
+        {
+            ProcessUnpredictableFailure();
         }
     }
 }
@@ -564,19 +567,6 @@ PROTECTED VIRTUAL void AosERegistration::Transaction_OnConnectionSetupPrepared()
 
 PROTECTED VIRTUAL void AosERegistration::Transaction_OnTrafficPriorityChanged() {}
 
-PROTECTED VIRTUAL void AosERegistration::ClearCbm()
-{
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
-    {
-        return;
-    }
-
-    m_pEModeInfo->SetEcbm(IMS_FALSE);
-    m_pEModeInfo->SetScbm(IMS_FALSE);
-    m_pEModeInfo->SetCbmBeginTime(0);
-    m_pEModeInfo->SetReRegTryTime(0);
-}
-
 PROTECTED IMS_UINT32 AosERegistration::GetRetryTime()
 {
     ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
@@ -591,73 +581,24 @@ PROTECTED IMS_UINT32 AosERegistration::GetRetryTime()
                                                     : objWaitTime.GetAt(nRetryMaxCount - 1);
 }
 
-PROTECTED void AosERegistration::CallbackModeChanged(
-        IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration)
-{
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
-    {
-        return;
-    }
-
-    A_IMS_TRACE_I(REGID, "CallbackModeChanged eType (%d), eState(%d), nDuration(%d)", eType, eState,
-            nDuration);
-
-    if (eState == EmcCallbackMode::START)
-    {
-        if (eType == EmcCallbackModeType::CALL)
-        {
-            m_pEModeInfo->SetEcbm(IMS_TRUE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_TRUE);
-        }
-
-        m_pEModeInfo->SetCbmDuration(nDuration);
-        m_pEModeInfo->SetCbmBeginTime(IMS_SYS_GetTimeInSeconds());
-
-        if (GetState() != STATE_OFFLINE)
-        {
-            UpdateTransactionStarted();
-            ProcessReRegStart();
-        }
-    }
-    else
-    {
-        if (eType == EmcCallbackModeType::CALL)
-        {
-            m_pEModeInfo->SetEcbm(IMS_FALSE);
-        }
-        else
-        {
-            m_pEModeInfo->SetScbm(IMS_FALSE);
-        }
-
-        if (eState == EmcCallbackMode::STOP)
-        {
-            ProcessUnpredictableFailure();
-        }
-    }
-}
-
 PROTECTED void AosERegistration::HandleECallState(IN IMS_UINT32 nState)
 {
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+    if (pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
         return;
     }
 
-    m_pEModeInfo->SetECall(nState == CMD_ECALL_INIT);
+    pEModeInfo->SetECall(nState == CMD_ECALL_INIT);
 }
 
 PROTECTED void AosERegistration::HandleESmsState(IN IMS_UINT32 nState)
 {
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    if (pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
     {
         return;
     }
 
-    m_pEModeInfo->SetESms(nState == CMD_ESMS_INIT);
+    pEModeInfo->SetESms(nState == CMD_ESMS_INIT);
 }
 
 PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
@@ -679,37 +620,9 @@ PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
     ProcessFakeModeWithRegState(IsRegistered());
 }
 
-PROTECTED IMS_BOOL AosERegistration::IsRefreshRequiredByCbm()
+PROTECTED IMS_BOOL AosERegistration::IsEcbmTimer() const
 {
-    if (!m_pEModeInfo->IsEcbm() && !m_pEModeInfo->IsScbm())
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_pEModeInfo->IsESms())
-    {
-        return IMS_TRUE;
-    }
-
-    IMS_UINT32 nEndTimeSec = IMS_SYS_GetTimeInSeconds();
-    IMS_UINT32 nDiffTimeOffSec = nEndTimeSec - m_pEModeInfo->GetCbmBeginTime();
-    IMS_TRACE_D(
-            "IsRefreshRequiredByCbm()(seconds):: nDiffTime(%d), CBM Duration(%d) GetRegExpires(%d)",
-            nDiffTimeOffSec, m_pEModeInfo->GetCbmDuration(), GetRegExpires());
-
-    if (nDiffTimeOffSec == 0 && m_pEModeInfo->GetReRegTryTime() > 0)
-    {
-        return (m_pEModeInfo->GetCbmDuration() >
-                       (static_cast<IMS_UINT32>(GetRegExpires()) / 2 -
-                               (nEndTimeSec - m_pEModeInfo->GetReRegTryTime())))
-                ? IMS_TRUE
-                : IMS_FALSE;
-    }
-
-    return ((static_cast<IMS_SINT32>(m_pEModeInfo->GetCbmDuration()) -
-                    static_cast<IMS_SINT32>(nDiffTimeOffSec)) > (GetRegExpires()) / 2)
-            ? IMS_TRUE
-            : IMS_FALSE;
+    return (m_piModeTimer != IMS_NULL);
 }
 
 PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
@@ -730,14 +643,43 @@ PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
     return m_nConsecutiveFailure < objWaitTime.GetSize();
 }
 
-PROTECTED void AosERegistration::ProcessReRegStart()
+PROTECTED void AosERegistration::ProcessECallStarted()
 {
     if (GetState() == STATE_REFRESHSTOP)
     {
-        A_IMS_TRACE_I(REGID, "ProcessReRegStart :: re-reg is trying in refresh stop", 0, 0, 0);
-        if (IsTransactionStarted())
+        A_IMS_TRACE_I(REGID, "ProcessECallStarted :: re-reg is trying in refresh stop", 0, 0, 0);
+        ProcessRetryInRegStopped();
+    }
+}
+
+PROTECTED void AosERegistration::ProcessEMode()
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported() || pEModeInfo == IMS_NULL)
+    {
+        return;
+    }
+
+    pEModeInfo->SetEcbmCheckedForRefresh(IMS_FALSE);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    {
+        pEModeInfo->SetEcbmCheckedForRefresh(IMS_FALSE);
+    }
+
+    if (IsFakeRegistration() || GetRegExpires() <= 0)
+    {
+        return;
+    }
+
+    if ((GetRegExpires() / 2) < (EmergencyModeInfo::EMERGENCY_CALLBACK_MODE_TIME * 2))
+    {
+        A_IMS_TRACE_D(REGID, "ProcessEMode :: check ecbm for refreshing", 0, 0, 0);
+        pEModeInfo->SetEcbmCheckedForRefresh(IMS_TRUE);
+
+        if (GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
         {
-            ProcessRetryInRegStopped();
+            A_IMS_TRACE_D(REGID, "ProcessEMode :: check scbm for refreshing", 0, 0, 0);
+            pEModeInfo->SetScbmCheckedForRefresh(IMS_TRUE);
         }
     }
 }
