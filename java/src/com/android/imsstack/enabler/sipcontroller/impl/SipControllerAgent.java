@@ -37,11 +37,11 @@ import android.telephony.ims.SipMessage;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
 import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteListener;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -127,7 +127,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void initService(int slotId) {
-        long nativeObj = JniImsProxy.getInterface(IUIMS.APP_SIP_DELEGATE, slotId);
+        long nativeObj = JniImsProxy.getInterface(JniObjectId.SIP_DELEGATE, slotId);
         mNativeObj = nativeObj;
         if (nativeObj != 0) {
             JniImsProxy.setListener(nativeObj, this);

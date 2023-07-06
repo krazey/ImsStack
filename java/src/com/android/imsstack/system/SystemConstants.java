@@ -20,11 +20,6 @@ package com.android.imsstack.system;
  */
 public interface SystemConstants {
     /**
-     * Shared interface key value between native and java
-     */
-    int SYSTEM_INTERFACE = 51;
-
-    /**
      * Category for system interface.
      */
     int CATEGORY_BASE = 0x00000000;

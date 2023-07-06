@@ -55,6 +55,7 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -97,8 +98,7 @@ public class SystemInterfaceTest {
         mContextFixture = new ContextFixture();
         Context context = mContextFixture.getTestDouble();
         AppContext.init(context);
-        when(mJniIms.getInterface(eq(SystemConstants.SYSTEM_INTERFACE), eq(SLOT0)))
-                .thenReturn(NATIVE_OBJECT);
+        when(mJniIms.getInterface(eq(JniObjectId.SYSTEM), eq(SLOT0))).thenReturn(NATIVE_OBJECT);
         JniImsProxy.setJniIms(mJniIms);
         mSystemInterface = SystemInterface.getInstance();
     }
@@ -134,7 +134,7 @@ public class SystemInterfaceTest {
     public void testInit() {
         mSystemInterface.init();
 
-        verify(mJniIms).getInterface(eq(SystemConstants.SYSTEM_INTERFACE), eq(SLOT0));
+        verify(mJniIms).getInterface(eq(JniObjectId.SYSTEM), eq(SLOT0));
         verify(mJniIms).setSystemListener(eq(NATIVE_OBJECT), any(JniSystemListener.class));
 
         // Expected: no actions

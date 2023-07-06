@@ -18,11 +18,11 @@
 #include "ServiceTrace.h"
 
 #include "CoreInterfaceFactory.h"
-#include "IUIMS.h"
 #include "JniAosService.h"
 #include "JniMtcCall.h"
 #include "JniMtcService.h"
 #include "JniMtsService.h"
+#include "JniObjectId.h"
 #include "JniUceService.h"
 #include "JniSipControllerService.h"
 
@@ -37,32 +37,27 @@ PUBLIC GLOBAL BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInt
 
     switch (nInterfaceType)
     {
-        case IUIMS::APP_MTC:
+        case JniObjectId::MTC:
             pService = new JniMtcService(pfnSendDataToJava, nSlotId);
             break;
 
-        case IUIMS::MTC_CALL:
+        case JniObjectId::MTC_CALL:
             pService = new JniMtcCall(pfnSendDataToJava, nSlotId);
             break;
 
-        case IUIMS::APP_UCE:
+        case JniObjectId::UCE:
             pService = new JniUceService(pfnSendDataToJava, nSlotId);
             break;
 
-        case IUIMS::APP_MTS:
+        case JniObjectId::MTS:
             pService = new JniMtsService(pfnSendDataToJava, nSlotId);
             break;
 
-        case IUIMS::APP_SIP_DELEGATE:
+        case JniObjectId::SIP_DELEGATE:
             pService = new JniSipControllerService(pfnSendDataToJava, nSlotId);
             break;
 
-        case IUIMS::MTS_EMERGENCY_SERVICE:
-            // TODO: If need, a JniService for E911 SMS will be added
-            break;
-
-        // IMS_SERVICE_AOS
-        case IUIMS::AOS_SERVICE:
+        case JniObjectId::AOS:
             pService = new JniAosService(pfnSendDataToJava, nSlotId);
             break;
 

@@ -36,7 +36,6 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
@@ -171,7 +170,7 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
 
         msg.what = 101;
         msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(IUIMS.APP_MTC,
+                (Object) new ImsServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_OPENED,
                 IUMtcService.ES_IDLE_REASON_NONE),
                 null);
@@ -182,7 +181,7 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         mTestMtcECallStateTracker.setEcbmEntered(false);
         msg.what = 101;
         msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(IUIMS.APP_MTC,
+                (Object) new ImsServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_IDLE,
                 IUMtcService.ES_IDLE_REASON_WITH_ECM),
                 null);
@@ -196,7 +195,7 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
 
         mTestMtcECallStateTracker.setState(IUMtcService.ES_OPENED);
         msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(IUIMS.APP_MTC,
+                (Object) new ImsServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_IDLE,
                 ImsEventDef.IMS_ECM_STATE_OFF),
                 null);

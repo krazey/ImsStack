@@ -35,7 +35,6 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -46,6 +45,7 @@ import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -101,7 +101,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         mHandler = new Handler(Looper.myLooper());
 
-        mNativeObject = JniImsProxy.getInterface(IUIMS.AOS_SERVICE, mSlotId);
+        mNativeObject = JniImsProxy.getInterface(JniObjectId.AOS, mSlotId);
         if (mNativeObject != 0) {
             JniImsProxy.setListener(mNativeObject, mNativeListener);
         }

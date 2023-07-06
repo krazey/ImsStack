@@ -26,10 +26,10 @@ import android.telephony.imsmedia.ImsMediaSession;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JniImsListener;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -729,7 +729,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      */
     public void createNativeCallObject() {
         long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
-                mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
+                mContext.getSlotId(), JniObjectId.MTC_CALL, mNativeListener);
         super.updateNativeCallObject(nativeCallObject);
 
         mJniCreated = true;

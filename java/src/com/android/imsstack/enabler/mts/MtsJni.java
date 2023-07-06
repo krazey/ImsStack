@@ -21,10 +21,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class MtsJni {
     public void init(Handler handler, int slotId) {
         ImsLog.d(slotId, "");
         if (!mMtsJniImsListenerMap.containsKey(slotId)) {
-            long nativeObj = JniImsProxy.getInterface(IUIMS.APP_MTS, slotId);
+            long nativeObj = JniImsProxy.getInterface(JniObjectId.MTS, slotId);
             ImsLog.i(slotId, "mNativeObj: " + nativeObj);
             mNativeObjMap.put(slotId, nativeObj);
             mMtsJniImsListenerMap.put(slotId, new MtsJniImsListener());
