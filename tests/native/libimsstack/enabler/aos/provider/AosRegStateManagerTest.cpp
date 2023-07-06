@@ -100,6 +100,10 @@ TEST_F(AosRegStateManagerTest, RegServices)
     EXPECT_FALSE(IsRegService(ImsAosService::MTC));
     EXPECT_FALSE(IsRegService(ImsAosService::MTS));
 
+    pAosRegStateManager->SetRegState(ImsAosService::NONE, IMS_REG_ON);
+    EXPECT_FALSE(IsRegService(ImsAosService::MTC));
+    EXPECT_FALSE(IsRegService(ImsAosService::MTS));
+
     AddRegService(ImsAosService::MTS);
 
     pAosRegStateManager->SetRegState(ImsAosService::MTC, IMS_REG_ON);
