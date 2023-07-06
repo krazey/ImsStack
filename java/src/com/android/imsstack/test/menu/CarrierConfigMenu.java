@@ -31,7 +31,6 @@ import android.telephony.ims.ProvisioningManager;
 import android.util.SparseArray;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
-import android.widget.Toast;
 
 import com.android.imsstack.R;
 import com.android.imsstack.ServiceLoader;
@@ -46,6 +45,7 @@ import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.IoUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -65,21 +65,21 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
 
-    private static final String KEY_DUMP_CONFIG = "dump_config";
-    private static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
-    private static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
-    private static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
-    private static final String KEY_ASSETS_PREFIX = "assets_";
-    private static final String KEY_CONFIG_BOOLEAN_ITEMS = "config_boolean_items";
-    private static final String KEY_CONFIG_BOOLEAN_VALUE = "config_boolean_value";
-    private static final String KEY_CONFIG_INT_ITEMS = "config_int_items";
-    private static final String KEY_CONFIG_INT_VALUE = "config_int_value";
-    private static final String KEY_CONFIG_STRING_ITEMS = "config_string_items";
-    private static final String KEY_CONFIG_STRING_VALUE = "config_string_value";
-    private static final String KEY_CONFIG_INT_ARRAY_ITEMS = "config_int_array_items";
-    private static final String KEY_CONFIG_INT_ARRAY_VALUE = "config_int_array_value";
-    private static final String KEY_CONFIG_STRING_ARRAY_ITEMS = "config_string_array_items";
-    private static final String KEY_CONFIG_STRING_ARRAY_VALUE = "config_string_array_value";
+    protected static final String KEY_DUMP_CONFIG = "dump_config";
+    protected static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
+    protected static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+    protected static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
+    protected static final String KEY_ASSETS_PREFIX = "assets_";
+    protected static final String KEY_CONFIG_BOOLEAN_ITEMS = "config_boolean_items";
+    protected static final String KEY_CONFIG_BOOLEAN_VALUE = "config_boolean_value";
+    protected static final String KEY_CONFIG_INT_ITEMS = "config_int_items";
+    protected static final String KEY_CONFIG_INT_VALUE = "config_int_value";
+    protected static final String KEY_CONFIG_STRING_ITEMS = "config_string_items";
+    protected static final String KEY_CONFIG_STRING_VALUE = "config_string_value";
+    protected static final String KEY_CONFIG_INT_ARRAY_ITEMS = "config_int_array_items";
+    protected static final String KEY_CONFIG_INT_ARRAY_VALUE = "config_int_array_value";
+    protected static final String KEY_CONFIG_STRING_ARRAY_ITEMS = "config_string_array_items";
+    protected static final String KEY_CONFIG_STRING_ARRAY_VALUE = "config_string_array_value";
     private static final int CONFIG_I_BOOLEAN = 0;
     private static final int CONFIG_I_INT = 1;
     private static final int CONFIG_I_STRING = 2;
@@ -116,9 +116,9 @@ public class CarrierConfigMenu extends PreferenceActivity {
             Map.entry(ASSETS_CONFIG_I_STRING_ARRAY,
                     KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ARRAY_VALUE));
 
-    private static final String KEY_CONFIG_BUNDLE_KEYS = "config_bundle_keys";
-    private static final String KEY_CONFIG_BUNDLE_ITEMS = "config_bundle_items";
-    private static final String KEY_CONFIG_BUNDLE_VALUE = "config_bundle_value";
+    protected static final String KEY_CONFIG_BUNDLE_KEYS = "config_bundle_keys";
+    protected static final String KEY_CONFIG_BUNDLE_ITEMS = "config_bundle_items";
+    protected static final String KEY_CONFIG_BUNDLE_VALUE = "config_bundle_value";
     private static final int CONFIG_I_BUNDLE = 0;
     private static final int ASSETS_CONFIG_I_BUNDLE = 1;
     private static final int CONFIG_I_BUNDLE_MAX = 2;
@@ -253,7 +253,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private boolean mConfigChanged = false;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");
 
         super.onCreate(savedInstanceState);
@@ -281,12 +281,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
 
         ImsLog.d(mSlotId, "CarrierConfigMenu: onPause");
 
-        boolean isConfigChanged = mConfigChanged;
+        boolean isConfigChanged = isConfigChanged();
 
         storeTestConfig();
 
@@ -296,7 +296,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
 
         ImsLog.d(mSlotId, "CarrierConfigMenu: onResume");
@@ -307,6 +307,21 @@ public class CarrierConfigMenu extends PreferenceActivity {
     @Override
     protected boolean isValidFragment(String fragmentName) {
         return fragmentName != null;
+    }
+
+    @VisibleForTesting
+    protected void setConfigChanged(boolean changed) {
+        mConfigChanged = changed;
+    }
+
+    @VisibleForTesting
+    protected boolean isConfigChanged() {
+        return mConfigChanged;
+    }
+
+    @VisibleForTesting
+    protected PersistableBundle getTestConfig() {
+        return mTestConfig;
     }
 
     private void initTestConfig() {
@@ -327,11 +342,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private void storeTestConfig() {
-        if (mTestConfig == null) {
-            return;
-        }
-
-        if (!mConfigChanged) {
+        if (!isConfigChanged()) {
             return;
         }
 
@@ -340,7 +351,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
         if (config != null) {
             if (config.writeTestConfig(mTestConfig)) {
-                mConfigChanged = false;
+                setConfigChanged(false);
                 ImsLog.d(mSlotId, "storeTestConfig: success.");
             }
         }
@@ -349,16 +360,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private void initPreferences() {
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
             String key = KEY_LIST_PREFERENCES.get(i);
-            if (key == null) {
-                continue;
-            }
+            if (key != null) {
+                ListPreference itemList = (ListPreference) findPreference(key);
+                mConfigItems.put(i, itemList);
 
-            ListPreference itemList = (ListPreference) findPreference(key);
-            mConfigItems.put(i, itemList);
-
-            if (itemList != null) {
-                itemList.setValue("");
-                itemList.setOnPreferenceChangeListener(new ConfigItemChangeListener(i));
+                if (itemList != null) {
+                    itemList.setValue("");
+                    itemList.setOnPreferenceChangeListener(new ConfigItemChangeListener(i));
+                }
             }
         }
 
@@ -366,31 +375,27 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
             String key = KEY_EDIT_TEXT_PREFERENCES.get(i);
-            if (key == null) {
-                continue;
-            }
+            if (key != null) {
+                EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
+                mConfigValues.put(i, valueEdit);
 
-            EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
-            mConfigValues.put(i, valueEdit);
-
-            if (valueEdit != null) {
-                valueEdit.setText("");
-                valueEdit.setOnPreferenceChangeListener(new ConfigValueChangeListener(i));
+                if (valueEdit != null) {
+                    valueEdit.setText("");
+                    valueEdit.setOnPreferenceChangeListener(new ConfigValueChangeListener(i));
+                }
             }
         }
 
         for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
             String key = KEY_BUNDLE_KEY_LIST_PREFERENCES.get(i);
-            if (key == null) {
-                continue;
-            }
+            if (key != null) {
+                ListPreference keyList = (ListPreference) findPreference(key);
+                mConfigBundleKeys.put(i, keyList);
 
-            ListPreference keyList = (ListPreference) findPreference(key);
-            mConfigBundleKeys.put(i, keyList);
-
-            if (keyList != null) {
-                keyList.setValue("");
-                keyList.setOnPreferenceChangeListener(new ConfigBundleKeyChangeListener(i));
+                if (keyList != null) {
+                    keyList.setValue("");
+                    keyList.setOnPreferenceChangeListener(new ConfigBundleKeyChangeListener(i));
+                }
             }
         }
 
@@ -398,31 +403,27 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
         for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
             String key = KEY_BUNDLE_LIST_PREFERENCES.get(i);
-            if (key == null) {
-                continue;
-            }
+            if (key != null) {
+                ListPreference itemList = (ListPreference) findPreference(key);
+                mConfigBundleItems.put(i, itemList);
 
-            ListPreference itemList = (ListPreference) findPreference(key);
-            mConfigBundleItems.put(i, itemList);
-
-            if (itemList != null) {
-                itemList.setValue("");
-                itemList.setOnPreferenceChangeListener(new ConfigBundleItemChangeListener(i));
+                if (itemList != null) {
+                    itemList.setValue("");
+                    itemList.setOnPreferenceChangeListener(new ConfigBundleItemChangeListener(i));
+                }
             }
         }
 
         for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
             String key = KEY_BUNDLE_EDIT_TEXT_PREFERENCES.get(i);
-            if (key == null) {
-                continue;
-            }
+            if (key != null) {
+                EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
+                mConfigBundleValues.put(i, valueEdit);
 
-            EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
-            mConfigBundleValues.put(i, valueEdit);
-
-            if (valueEdit != null) {
-                valueEdit.setText("");
-                valueEdit.setOnPreferenceChangeListener(new ConfigBundleValueChangeListener(i));
+                if (valueEdit != null) {
+                    valueEdit.setText("");
+                    valueEdit.setOnPreferenceChangeListener(new ConfigBundleValueChangeListener(i));
+                }
             }
         }
 
@@ -485,11 +486,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
             if (KEY_CLEAR_TEST_CONFIG.equals(preference.getKey())) {
                 if ("1".equals(value)) {
-                    mConfigChanged = false;
-
-                    if (mTestConfig != null) {
-                        mTestConfig.clear();
-                    }
+                    setConfigChanged(false);
+                    mTestConfig.clear();
 
                     ConfigInterface config = AgentFactory.getInstance().getAgent(
                             ConfigInterface.class, mSlotId);
@@ -670,8 +668,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
             ImsLog.d(mSlotId, "onConfigValueChanged: value=" + newConfigValue + ", key=" + key);
 
             if (key == null) {
-                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid.",
-                        Toast.LENGTH_LONG).show();
+                ImsLog.w(mSlotId, "CarrierConfig: key is invalid.");
                 return false;
             }
 
@@ -706,6 +703,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         int[] value = toIntArray(newConfigValue);
                         cc.getConfig().putIntArray(key, value);
                         mTestConfig.putIntArray(key, value);
+                        newConfigValue = Arrays.toString(value);
                         break;
                     }
                     case CONFIG_I_STRING_ARRAY: // FALL-THROUGH
@@ -713,6 +711,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         String[] value = toStringArray(newConfigValue);
                         cc.getConfig().putStringArray(key, value);
                         mTestConfig.putStringArray(key, value);
+                        newConfigValue = Arrays.toString(value);
                         break;
                     }
                     default:
@@ -720,20 +719,13 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         return false;
                 }
 
-                mConfigChanged = true;
+                setConfigChanged(true);
             }
 
             EditTextPreference valueEdit = mConfigValues.valueAt(mConfigType);
 
             if (valueEdit != null) {
-                if (mConfigType == CONFIG_I_INT_ARRAY
-                        || mConfigType == ASSETS_CONFIG_I_INT_ARRAY
-                        || mConfigType == CONFIG_I_STRING_ARRAY
-                        || mConfigType == ASSETS_CONFIG_I_STRING_ARRAY) {
-                    valueEdit.setSummary("[" + newConfigValue + "]");
-                } else {
-                    valueEdit.setSummary(newConfigValue);
-                }
+                valueEdit.setSummary(newConfigValue);
             }
 
             return true;
@@ -799,8 +791,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
             String bundleKey = (keyList != null) ? keyList.getValue() : null;
 
             if (bundleKey == null) {
-                Toast.makeText(AppContext.getInstance(), "Bundle key is not found.",
-                        Toast.LENGTH_LONG).show();
+                ImsLog.w(mSlotId, "Bundle key is not found.");
                 return false;
             }
 
@@ -873,9 +864,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 valueEdit.setDialogMessage(key);
                 valueEdit.setSummary(value);
 
-                if (value.equals("[]")) {
-                    valueEdit.setText("");
-                } else if (value.startsWith("[") && value.endsWith("]")) {
+                if (value.startsWith("[") && value.endsWith("]")) {
                     valueEdit.setText(value.substring(1, value.length() - 1));
                 } else {
                     valueEdit.setText(value);
@@ -904,14 +893,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     + ", key=" + key + ", bundleKey=" + bundleKey);
 
             if (key == null) {
-                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid.",
-                        Toast.LENGTH_LONG).show();
+                ImsLog.w(mSlotId, "CarrierConfig: key is invalid.");
                 return false;
             }
 
             if (bundleKey == null) {
-                Toast.makeText(AppContext.getInstance(), "Bundle key is not found.",
-                        Toast.LENGTH_LONG).show();
+                ImsLog.w(mSlotId, "Bundle key is not found.");
                 return false;
             }
 
@@ -986,12 +973,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     int[] value = toIntArray(newConfigValue);
                     pb.putIntArray(key, value);
                     testPb.putIntArray(key, value);
+                    newConfigValue = Arrays.toString(value);
                     break;
                 }
                 case CONFIG_I_STRING_ARRAY: {
                     String[] value = toStringArray(newConfigValue);
                     pb.putStringArray(key, value);
                     testPb.putStringArray(key, value);
+                    newConfigValue = Arrays.toString(value);
                     break;
                 }
                 default:
@@ -1015,17 +1004,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 mTestConfig.putPersistableBundle(rootBundleKey, testRootPb);
             }
 
-            mConfigChanged = true;
+            setConfigChanged(true);
 
             EditTextPreference valueEdit = mConfigBundleValues.valueAt(mConfigType);
 
             if (valueEdit != null) {
-                if (configType == CONFIG_I_INT_ARRAY
-                        || configType == CONFIG_I_STRING_ARRAY) {
-                    valueEdit.setSummary("[" + newConfigValue + "]");
-                } else {
-                    valueEdit.setSummary(newConfigValue);
-                }
+                valueEdit.setSummary(newConfigValue);
             }
 
             if (KEYS_OF_VALUE_USED_AS_BUNDLE_KEY.contains(key)) {
@@ -1055,8 +1039,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
 
         if (cc == null) {
-            Toast.makeText(AppContext.getInstance(), "CarrierConfig is not found.",
-                    Toast.LENGTH_LONG).show();
+            ImsLog.w(mSlotId, "CarrierConfig is not found.");
             return;
         }
 

@@ -32,12 +32,25 @@ filegroup {
     path: "src",
 }
 
+// For testing.
+android_library {
+    name: "imsstack-res",
+    manifest: "AndroidManifest-res.xml",
+    asset_dirs: [
+        "assets",
+    ],
+    resource_dirs: [
+        "res",
+    ],
+}
+
 android_app {
     name: "ImsStack",
     privileged: true,
     certificate: "platform",
     platform_apis: true,
     system_ext_specific: true,
+    manifest: "AndroidManifest.xml",
 
     srcs: [
         ":imsstack_java_srcs",

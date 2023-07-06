@@ -35,12 +35,13 @@ android_test {
     static_libs: [
         "androidx.test.core",
         "androidx.test.rules",
-        "mockito-target",
-        "platform-test-annotations",
-        "truth-prebuilt",
         "frameworks-base-testutils",
+        "imsstack-res",
+        "mockito-target",
         "mockito-target-extended-minus-junit4",
+        "platform-test-annotations",
         "testables",
+        "truth-prebuilt",
         // TODO: move this to libs after API review
         "ImsMediaFramework",
     ],

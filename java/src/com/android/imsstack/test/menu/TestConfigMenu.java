@@ -43,29 +43,29 @@ import com.android.imsstack.util.SystemUtils;
 @SuppressWarnings("deprecation")
 public class TestConfigMenu extends PreferenceActivity {
     // Main tree
-    private static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
-    private static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
-    private static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
-    private static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
-    private static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
-    private static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
-    private static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
+    protected static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
+    protected static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
+    protected static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
+    protected static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
+    protected static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
+    protected static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
+    protected static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
             "test_carrier_signal_pco_enabled";
-    private static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
-    private static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
-    private static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
-    private static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
-    private static final String KEY_TEST_CLEAR_CONFIG = "test_clear_config";
+    protected static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
+    protected static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
+    protected static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
+    protected static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
+    protected static final String KEY_TEST_CLEAR_CONFIG = "test_clear_config";
 
     // Sub-tree for test_subscriber
-    private static final String KEY_SUBSCRIBER_HOME_DOMAIN_NAME = "subscriber_home_domain_name";
-    private static final String KEY_SUBSCRIBER_IMPI = "subscriber_impi";
-    private static final String KEY_SUBSCRIBER_IMPU = "subscriber_impu";
+    protected static final String KEY_SUBSCRIBER_HOME_DOMAIN_NAME = "subscriber_home_domain_name";
+    protected static final String KEY_SUBSCRIBER_IMPI = "subscriber_impi";
+    protected static final String KEY_SUBSCRIBER_IMPU = "subscriber_impu";
     // Sub-tree for test_user_agent
-    private static final String KEY_USER_AGENT_USE_PREDEFINED_UA_STRING =
+    protected static final String KEY_USER_AGENT_USE_PREDEFINED_UA_STRING =
             "user_agent_use_predefined_ua_string";
-    private static final String KEY_USER_AGENT_UA_STRING = "user_agent_ua_string";
-    private static final String KEY_NR_DUPLEX_MODE = "nr_duplex_mode";
+    protected static final String KEY_USER_AGENT_UA_STRING = "user_agent_ua_string";
+    protected static final String KEY_NR_DUPLEX_MODE = "nr_duplex_mode";
 
     private int mSlotId = 0;
 
@@ -89,7 +89,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private ListPreference mClearTestConfig;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");
 
         super.onCreate(savedInstanceState);
@@ -105,27 +105,9 @@ public class TestConfigMenu extends PreferenceActivity {
                 MSimUtils.EXTRA_KEY_SLOT_ID,
                 MSimUtils.INVALID_SLOT_ID);
 
-        if (mSlotId < 0) {
-            ImsLog.d("Invalid slot-id=" + mSlotId);
-        }
-
         addPreferencesFromResource(R.xml.test_config_menu);
 
         initPreferences();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        ImsLog.d(mSlotId, "TestModeMenu: onPause");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        ImsLog.d(mSlotId, "TestModeMenu: onResume");
     }
 
     @Override
@@ -326,8 +308,9 @@ public class TestConfigMenu extends PreferenceActivity {
     }
 
     private String getImsDeregisterSummary(String value) {
-        return ("YES".equals(value)) ? "YES : The IMS service is blocked" :
-                "NO : The IMS service is unblocked";
+        return "YES".equals(value)
+                ? "YES : The IMS service is blocked"
+                : "NO : The IMS service is unblocked";
     }
 
     private final class CheckBoxItemChangeListener

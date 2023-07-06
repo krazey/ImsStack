@@ -23,6 +23,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * This class helps to load carrier codes from "config/carrier_code.xml".
@@ -48,6 +49,14 @@ public final class CarrierInfo {
         }
 
         return sCarrierInfo;
+    }
+
+    /**
+     * Clears all the resources for this class.
+     */
+    @VisibleForTesting
+    public static void clear() {
+        sCarrierInfo = null;
     }
 
     /**

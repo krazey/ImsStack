@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
 
     <application android:name="com.android.imsstack.TestApplication"
         android:label="ImsStackJavaTests"
@@ -45,6 +46,9 @@
                 <action android:name="android.telephony.ims.ImsService"/>
             </intent-filter>
         </service>
+        <activity android:name="com.android.imsstack.test.menu.ImsConfigMenu"/>
+        <activity android:name="com.android.imsstack.test.menu.CarrierConfigMenu"/>
+        <activity android:name="com.android.imsstack.test.menu.TestConfigMenu"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

@@ -35,20 +35,17 @@ import java.util.ArrayList;
 
 @SuppressWarnings("deprecation")
 public class ImsConfigMenu extends PreferenceActivity {
-    private int mSlotId = -1;
+    protected static final String CARRIER_CONFIG_MENU = "carrier_config_menu";
+    protected static final String TEST_CONFIG_MENU = "test_config_menu";
+
+    private int mSlotId;
     private ArrayList<String> mSimList;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");
-
         super.onCreate(savedInstanceState);
-
-        if (mSlotId < 0) {
-            showSimList();
-        } else {
-            initConfigMenu();
-        }
+        showSimList();
     }
 
     @Override
@@ -94,16 +91,14 @@ public class ImsConfigMenu extends PreferenceActivity {
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String[] tokens = new String[] { "SIM1", "SIM2", "SIM3" };
                     String selectedSim = mSimList.get(position);
 
-                    if (selectedSim.contains("SIM1")) {
-                        setSlotId(0);
-                    } else if (selectedSim.contains("SIM2")) {
-                        setSlotId(1);
-                    } else if (selectedSim.contains("SIM3")) {
-                        setSlotId(2);
-                    } else {
-                        setSlotId(0);
+                    for (int i = 0; i < tokens.length; ++i) {
+                        if (selectedSim.contains(tokens[i])) {
+                            setSlotId(i);
+                            break;
+                        }
                     }
 
                     initConfigMenu();
@@ -117,14 +112,18 @@ public class ImsConfigMenu extends PreferenceActivity {
 
         for (int i = 0; i < activeSimCount; i++) {
             SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(i);
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("SIM").append(i + 1);
 
             if (cid != null) {
                 ImsCarrierResolver.Carrier c = ImsCarrierResolver.getCarrierFromCarrierId(cid);
-
-                mSimList.add("SIM" + (i + 1) + " - " + c.getOperator() + " / " + c.getCountry());
-            } else {
-                mSimList.add("SIM" + (i + 1));
+                sb.append(" - ");
+                sb.append(c.getOperator());
+                sb.append(" / ");
+                sb.append(c.getCountry());
             }
+            mSimList.add(sb.toString());
         }
 
         ImsLog.d("showSimList: sims=" + activeSimCount);

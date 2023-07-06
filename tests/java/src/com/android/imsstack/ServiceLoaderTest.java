@@ -20,12 +20,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
@@ -60,9 +64,11 @@ public class ServiceLoaderTest {
     private static final int SLOT0 = 0;
     private static final int[] SUB_ID = { 1 };
 
+    @Mock private SharedPreferences mSp;
     @Mock private JniIms mJniIms;
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
+
     private ContextFixture mContextFixture;
     private FakeSettingsProvider mSettingsProvider;
     private ServiceLoader mServiceLoader;
@@ -86,6 +92,7 @@ public class ServiceLoaderTest {
         mSettingsProvider = new FakeSettingsProvider();
         ((MockContentResolver) context.getContentResolver()).addProvider(
                 Settings.AUTHORITY, mSettingsProvider);
+        setUpSharedPreferences(context);
 
         AppContext.init(context);
         JniImsProxy.setJniIms(mJniIms);
@@ -98,6 +105,7 @@ public class ServiceLoaderTest {
 
     @After
     public void tearDown() throws Exception {
+        mSp = null;
         mSettingsProvider = null;
         mServiceLoader = null;
         mContextFixture = null;
@@ -173,5 +181,12 @@ public class ServiceLoaderTest {
 
         verifyNoMoreInteractions(configAgent);
         verifyNoMoreInteractions(mSystem);
+    }
+
+    private void setUpSharedPreferences(Context context) {
+        doAnswer(invocation -> {
+            return (String) invocation.getArgument(1);
+        }).when(mSp).getString(anyString(), anyString());
+        doReturn(mSp).when(context).getSharedPreferences(anyString(), anyInt());
     }
 }
