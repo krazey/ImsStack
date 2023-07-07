@@ -89,6 +89,8 @@ public class DcFactoryTest {
     @Test
     @SmallTest
     public void testCreateDcAgent() {
+        // To guarantee that the container of DC agents is empty.
+        DcFactory.clear(SLOT_0);
         DcFactory.createDcAgents(SLOT_0);
 
         assertNotNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
