@@ -25,12 +25,12 @@ import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -382,7 +382,7 @@ public class MtcApp implements Closeable {
             }
         }
         mNativeObject = mMtcJniProxy.getJniInterfaceAndSetListener(
-                mContext.getSlotId(), IUIMS.APP_MTC, mNativeListener);
+                mContext.getSlotId(), JniObjectId.MTC, mNativeListener);
 
         if (mNativeObject != 0) {
             if (nsi != null && mNativeStateListener != null) {

@@ -46,7 +46,6 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
@@ -68,6 +67,7 @@ import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 
 import org.junit.After;
 import org.junit.Before;
@@ -106,7 +106,7 @@ public class AosServiceTest extends ImsStackTest {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
 
-        when(mMockJniIms.getInterface(IUIMS.AOS_SERVICE, SLOT_0)).thenReturn(mNativeObject);
+        when(mMockJniIms.getInterface(JniObjectId.AOS, SLOT_0)).thenReturn(mNativeObject);
         replaceInstance(JniImsProxy.class, "sJniIms", null, mMockJniIms);
 
         when(mMockImsServiceRegistrys.get(SLOT_0)).thenReturn(mMockImsServiceRegistry);

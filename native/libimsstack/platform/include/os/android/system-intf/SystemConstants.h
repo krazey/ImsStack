@@ -57,11 +57,6 @@ class SystemConstants
 {
 public:
     ////
-    // Shared interface key value between native and java
-    ////
-    static const IMS_SINT32 SYSTEM_INTERFACE = 51;
-
-    ////
     // Category for system interface.
     ////
     static const IMS_UINT32 CATEGORY_BASE = 0x00000000;

@@ -29,8 +29,8 @@
 #include "ServiceTrace.h"
 
 #include "CoreInterfaceFactory.h"
-#include "IUIMS.h"
 #include "ImsMain.h"
+#include "JniObjectId.h"
 #include "JniSystem.h"
 #include "NativeCommands.h"
 
@@ -340,7 +340,7 @@ static jlong JniIms_nativeGetInterface(
 {
     BaseService* pService = IMS_NULL;
 
-    if (interfaceType == IUIMS::SYSTEM_INTERFACE)
+    if (interfaceType == JniObjectId::SYSTEM)
     {
         pService = new JniSystem(SendDataToJavaForSystem);
     }

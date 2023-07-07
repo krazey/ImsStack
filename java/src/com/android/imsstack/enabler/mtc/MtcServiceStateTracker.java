@@ -21,7 +21,6 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -57,8 +56,7 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
 
         if (mEServiceStateChangedRegistrants.size() > 0) {
             mEServiceStateChangedRegistrants.notifyResult(
-                    new ImsServiceState(IUIMS.APP_MTC,
-                        IUMtcService.SERVICE_EMERGENCY, state, reason));
+                    new ImsServiceState(IUMtcService.SERVICE_EMERGENCY, state, reason));
         }
     }
 
@@ -75,8 +73,7 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         updateState(state);
 
         if (mServiceStateChangedRegistrants.size() > 0) {
-            mServiceStateChangedRegistrants.notifyResult(
-                    new ImsServiceState(IUIMS.APP_MTC, state, -1, reason));
+            mServiceStateChangedRegistrants.notifyResult(new ImsServiceState(state, -1, reason));
         }
     }
 
@@ -147,8 +144,7 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         if (isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)
                 || isEmergencyServiceState(IUMtcService.ES_UNAVAILABLE)) {
             // To guard timing issue: emergency service is already unavailable
-            r.notifyResult(new ImsServiceState(IUIMS.APP_MTC,
-                    IUMtcService.SERVICE_EMERGENCY,
+            r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_EMERGENCY,
                     mEmergencyServiceState, mEmergencyServiceReason));
         }
     }
@@ -186,14 +182,14 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
 
     private void notifyServiceStateIfServiceRegistered(Registrant r) {
         if (isServiceRegistered(IUMtcService.SERVICE_UC)) {
-            r.notifyResult(new ImsServiceState(IUIMS.APP_MTC, IUMtcService.SERVICE_UC));
+            r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_UC));
         } else {
             if (isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
-                r.notifyResult(new ImsServiceState(IUIMS.APP_MTC, IUMtcService.SERVICE_VOIP));
+                r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_VOIP));
             }
 
             if (isServiceRegistered(IUMtcService.SERVICE_VT)) {
-                r.notifyResult(new ImsServiceState(IUIMS.APP_MTC, IUMtcService.SERVICE_VT));
+                r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_VT));
             }
         }
     }

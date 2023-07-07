@@ -30,6 +30,7 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -163,8 +164,7 @@ public class SystemInterface implements JniSystemListener {
 
         if (mNativeObject == 0) {
             mNativeObject = JniImsProxy.getInterface(
-                    SystemConstants.SYSTEM_INTERFACE, MSimUtils.DEFAULT_SLOT_ID);
-
+                    JniObjectId.SYSTEM, MSimUtils.DEFAULT_SLOT_ID);
             JniImsProxy.setSystemListener(mNativeObject, this);
         }
     }

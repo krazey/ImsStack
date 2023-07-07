@@ -18,10 +18,10 @@ package com.android.imsstack.enabler.uce.impl.jni;
 
 import android.os.Parcel;
 
-import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ interface UceJNIMessageHandlerFunc {
 }
 
 public class UceJNI {
-    public static final int INTERFACETYPE_IMS_UCE = IUIMS.APP_UCE;
+    public static final int INTERFACETYPE_IMS_UCE = JniObjectId.UCE;
     private static UceJNI mUceJni               = null;
     private HashMap<Integer, UceJNIImsListener> mUceJNIImsListenerMap =
         new HashMap<Integer, UceJNIImsListener>();
