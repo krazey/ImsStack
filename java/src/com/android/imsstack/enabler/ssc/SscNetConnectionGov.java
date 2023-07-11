@@ -25,9 +25,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.HashMap;
 
 public class SscNetConnectionGov implements ISscNetConnectionGov {
-    private static SscNetConnectionGov sSscNetConnectionGov = new SscNetConnectionGov();
+    private static final SscNetConnectionGov sSscNetConnectionGov = new SscNetConnectionGov();
 
-    private HashMap<Integer, ISscNetConnection> mSscNetConnection = new HashMap<>();
+    private final HashMap<Integer, ISscNetConnection> mSscNetConnection = new HashMap<>();
 
     public static ISscNetConnectionGov getInstance() {
         return sSscNetConnectionGov;
@@ -101,6 +101,7 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
 
     @VisibleForTesting
     protected void setSscNetConnection(int slotId, SscNetConnection sscNetConnection) {
+        cleanup(slotId);
         mSscNetConnection.put(slotId, sscNetConnection);
     }
 }

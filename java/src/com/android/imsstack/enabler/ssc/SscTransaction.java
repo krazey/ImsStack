@@ -89,6 +89,7 @@ public class SscTransaction {
     public void close() {
         ImsLog.d(mSlotId, "");
         if (mTransactionHandler != null) {
+            mTransactionHandler.removeCallbacksAndMessages(null);
             mTransactionHandler.getLooper().quit();
             mTransactionHandler = null;
         }

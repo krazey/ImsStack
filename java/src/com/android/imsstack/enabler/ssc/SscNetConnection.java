@@ -111,6 +111,7 @@ public class SscNetConnection implements ISscNetConnection {
 
     @Override
     public void cleanup() {
+        ImsLog.d(mSlotId, "cleanup");
         disconnect();
 
         if (mApnType != null) {
@@ -124,10 +125,11 @@ public class SscNetConnection implements ISscNetConnection {
         if (mSscNetConnectionHandler != null) {
             IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
             if (dnw != null) {
-                dnw.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
+                dnw.unregisterForDataStateChanged(mSscNetConnectionHandler);
                 dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
             }
 
+            mSscNetConnectionHandler.removeCallbacksAndMessages(null);
             mSscNetConnectionHandler.getLooper().quit();
             mSscNetConnectionHandler = null;
         }
@@ -135,10 +137,10 @@ public class SscNetConnection implements ISscNetConnection {
 
     @Override
     public boolean isConnected() {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         if (mApnType == null) {
-            ImsLog.e("mApnType is null");
+            ImsLog.e(mSlotId, "mApnType is null");
             return false;
         }
 
@@ -151,33 +153,29 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         EDataState eDataState = EDataState.convertIntTypeToEnum(dataState);
-        ImsLog.i("SlotId : " + mSlotId + ", ApnType : " + mApnType.getType()  + ", DataState : "
-                + dataState + "/" + eDataState);
+        ImsLog.i(mSlotId, "ApnType : " + mApnType.getType()  + ", DataState : " + dataState + "/"
+                + eDataState);
 
-        if (EDataState.DATA_STATE_CONNECTED == eDataState) {
-            return true;
-        }
-
-        return false;
+        return eDataState == EDataState.DATA_STATE_CONNECTED;
     }
 
     @Override
     public boolean connect() {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         if (mApnType == null) {
-            ImsLog.e("mApnType is null");
+            ImsLog.e(mSlotId, "mApnType is null");
             return false;
         }
 
         if (isConnected()) {
-            ImsLog.e("PDN is already connected");
+            ImsLog.e(mSlotId, "PDN is already connected");
             return true;
         }
 
         IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
         if (dcApn == null) {
-            ImsLog.e("dcApn is null");
+            ImsLog.e(mSlotId, "dcApn is null");
             return false;
         }
 
@@ -191,13 +189,13 @@ public class SscNetConnection implements ISscNetConnection {
 
     @Override
     public void disconnect() {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         stopTimer(EVENT_PDN_REQUEST_TIMEOUT);
         stopTimer(EVENT_PDN_CONNECTION_EXPIRED);
 
         if (mApnType != EApnType.XCAP) {
-            ImsLog.e("Don't need to disconnect unless XCAP APN");
+            ImsLog.e(mSlotId, "Don't need to disconnect unless XCAP APN");
             return;
         }
 
@@ -246,34 +244,35 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     private void startTimer(int eventNum, long duration) {
-        ImsLog.d("EventNumber : " + eventNum + ", Time : " + duration);
+        ImsLog.d(mSlotId, "EventNumber : " + eventNum + ", Time : " + duration);
 
         TimerInterface timer = getTimerInterface();
         if (timer == null) {
-            ImsLog.e("TimerInterface is null");
+            ImsLog.e(mSlotId, "TimerInterface is null");
             return;
         }
 
         long timerId = timer.startTimer(duration, mTimerListener);
 
         if (timerId == TimerInterface.INVALID_TID) {
-            ImsLog.e("Starting a timer failed");
+            ImsLog.e(mSlotId, "Starting a timer failed");
             return;
         }
 
         if (mTimerIdTable.containsKey(eventNum)) {
-            ImsLog.d("Restart Timer with Event " + eventNum);
+            ImsLog.d(mSlotId, "Restart Timer with Event " + eventNum);
             stopTimer(eventNum);
             mTimerIdTable.remove(eventNum);
         }
 
         mTimerIdTable.put(eventNum, timerId);
 
-        ImsLog.d(eventNum + " timer is started - tid[" + timerId + "], duration[" + duration + "]");
+        ImsLog.d(mSlotId, eventNum + " timer is started - tid[" + timerId + "], duration["
+                + duration + "]");
     }
 
     private void stopTimer(int eventNum) {
-        ImsLog.d("EventNumber : " + eventNum);
+        ImsLog.d(mSlotId, "EventNumber : " + eventNum);
 
         Long timerId = mTimerIdTable.get(eventNum);
         if (timerId == null) {
@@ -305,11 +304,11 @@ public class SscNetConnection implements ISscNetConnection {
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
-                ImsLog.e("msg is null");
+                ImsLog.e(mSlotId, "msg is null");
                 return;
             }
 
-            ImsLog.d("received a message[" + msg.what + "]");
+            ImsLog.d(mSlotId, "received a message[" + msg.what + "]");
 
             switch (msg.what) {
                 case EVENT_PDN_DATA_STATE_CHANGED:
@@ -345,7 +344,7 @@ public class SscNetConnection implements ISscNetConnection {
                 return;
             }
 
-            ImsLog.i("apnType[" + apnType + "], state[" + res.eDataState + "]");
+            ImsLog.i(mSlotId, "apnType[" + apnType + "], state[" + res.eDataState + "]");
 
             if (res.eDataState == EDataState.DATA_STATE_CONNECTED) {
                 stopTimer(EVENT_PDN_REQUEST_TIMEOUT);
@@ -373,7 +372,7 @@ public class SscNetConnection implements ISscNetConnection {
             }
 
             if (mApnType == EApnType.XCAP && res.eApnType == EApnType.XCAP) {
-                ImsLog.d("smCause : " + res.mSmCause);
+                ImsLog.d(mSlotId, "smCause : " + res.mSmCause);
 
                 SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, res.mSmCause);
 

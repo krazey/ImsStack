@@ -119,7 +119,7 @@ public class SscNetConnectionTest {
 
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         verify(mMockApn).removeListener(any());
-        verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
+        verify(mMockDcNetWatcher).unregisterForDataStateChanged(mSscNetConnectionHandler);
         verify(mMockDcNetWatcher).unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
     }
 
