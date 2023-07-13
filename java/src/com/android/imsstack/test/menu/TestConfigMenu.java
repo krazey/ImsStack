@@ -47,7 +47,6 @@ public class TestConfigMenu extends PreferenceActivity {
     protected static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
     protected static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
     protected static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
-    protected static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
     protected static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
     protected static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
             "test_carrier_signal_pco_enabled";
@@ -73,7 +72,6 @@ public class TestConfigMenu extends PreferenceActivity {
     private CheckBoxPreference mDebugEnabled;
     private CheckBoxPreference mTestModeEnabled;
     private CheckBoxPreference mWifiTestEnabled;
-    private CheckBoxPreference mImsHalTestEnabled;
     private CheckBoxPreference mCrossSimEnabled;
     private CheckBoxPreference mCarrierSignalPcoEnabled;
     private EditTextPreference mHomeDomainName;
@@ -150,15 +148,6 @@ public class TestConfigMenu extends PreferenceActivity {
                     ImsPrivateProperties.Persistent.KEY_WIFI_TEST, 0, mSlotId) == 1);
             mWifiTestEnabled.setChecked(wifiTestEnabled);
             mWifiTestEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
-        }
-
-        mImsHalTestEnabled = (CheckBoxPreference) findPreference(KEY_TEST_IMS_HAL_ENABLED);
-
-        if (mImsHalTestEnabled != null) {
-            boolean imsHalTestEnabled = (ImsPrivateProperties.Persistent.getInt(
-                    ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST, 0, mSlotId) == 1);
-            mImsHalTestEnabled.setChecked(imsHalTestEnabled);
-            mImsHalTestEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
         }
 
         mCrossSimEnabled = (CheckBoxPreference) findPreference(KEY_TEST_CROSS_SIM_ENABLED);
@@ -333,10 +322,6 @@ public class TestConfigMenu extends PreferenceActivity {
                     break;
                 case KEY_TEST_WIFI_TEST_ENABLED:
                     key = ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
-                    isValueTypeInt = true;
-                    break;
-                case KEY_TEST_IMS_HAL_ENABLED:
-                    key = ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST;
                     isValueTypeInt = true;
                     break;
                 case KEY_TEST_CROSS_SIM_ENABLED:

@@ -37,11 +37,6 @@
         android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
         android:enabled="true" android:defaultValue="false">
     </CheckBoxPreference>
-    <CheckBoxPreference android:title="IMS HAL Test Enabled"
-        android:key="test_ims_hal_enabled"
-        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
-        android:enabled="true" android:defaultValue="false">
-    </CheckBoxPreference>
     <CheckBoxPreference android:title="Cross Sim Enabled"
         android:key="test_cross_sim_enabled"
         android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
