@@ -32,7 +32,6 @@ import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ImsRadioAgent implements ImsRadioInterface {
     private final int mSlotId;
-    private boolean mImsHalTestEnabled = false;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private Handler mHandler;
     private ImsRadioPhoneStateListener mPhoneStateListener;
@@ -99,9 +97,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
         if (imsTraffic != null) {
             imsTraffic.addListener(mImsTrafficListener);
         }
-
-        mImsHalTestEnabled = (ImsPrivateProperties.Persistent.getInt(
-                    ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST, 0, mSlotId) == 1);
     }
 
     @Override
@@ -393,6 +388,11 @@ public class ImsRadioAgent implements ImsRadioInterface {
         ImsLog.d(mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
                 + " , cause=" + causeCode + " , timeM=" + waitTimeMillis);
 
+        if (reason == REASON_INTERNAL_ERROR) {
+            handleTrafficCallbackOnReady(id);
+            return;
+        }
+
         if (waitTimeMillis < 0) {
             waitTimeMillis = 0;
         }
@@ -433,11 +433,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     private void invokeModifyImsTrafficSession(int accessNetworkType,
             @NonNull ImsTrafficSessionCallback callback, @NonNull Executor executor) {
-        if (!mImsHalTestEnabled) {
-            executor.execute(() -> callback.onReady());
-            return;
-        }
-
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
@@ -454,12 +449,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
     private void invokeStartImsTrafficSession(int trafficType, int accessNetworkType,
             int direction, @NonNull Executor executor,
             @NonNull ImsTrafficSessionCallback callback) {
-
-        if (!mImsHalTestEnabled) {
-            executor.execute(() -> callback.onReady());
-            return;
-        }
-
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
@@ -475,10 +464,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     private void invokeStopImsTrafficSession(@NonNull ImsTrafficSessionCallback callback) {
-        if (!mImsHalTestEnabled) {
-            return;
-        }
-
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
