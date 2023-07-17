@@ -64,7 +64,7 @@ public class SmsRPErrorCauseTest {
                 SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(SmsRPErrorCause.SMS_TEMP_FAILURE));
         assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
                 SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(SmsRPErrorCause.SMS_RESERVED));
-        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
                 SmsRPErrorCause.getSendSmsStatusBySmsErrorCause(
                 SmsRPErrorCause.SMS_NW_OUT_OF_ORDER));
         assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
