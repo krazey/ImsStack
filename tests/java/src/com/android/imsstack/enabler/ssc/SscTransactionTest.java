@@ -111,6 +111,7 @@ public class SscTransactionTest {
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getInt(eq(CarrierConfigManager.KEY_GBA_MODE_INT)))
                 .thenReturn(mGbaMode);
+        when(mMockSscConnection.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mMockImsRadioInterface.isImsTrafficAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP))
                 .thenReturn(true);
         doAnswer((Answer<Void>) (invocation) -> {
@@ -209,6 +210,20 @@ public class SscTransactionTest {
     }
 
     @Test
+    public void startTransaction_xcapTrafficNotAllowedButConnectedOverIwlan() {
+        when(mMockSscConnection.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
+        when(mMockImsRadioInterface.isImsTrafficAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP))
+                .thenReturn(false);
+
+        mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
+        sleepToWaitThreadRun();
+
+        verify(mMockImsRadioInterface).startImsTraffic(eq(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP),
+                eq(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN),
+                eq(ImsRadioInterface.DIRECTION_MO), any());
+    }
+
+    @Test
     public void startTransaction_xcapTrafficConnectionFailed() {
         doAnswer((Answer<Void>) (invocation) -> {
             ConnectionListener connectionListener = mConnectionListenerCaptor.getValue();
@@ -252,7 +267,8 @@ public class SscTransactionTest {
     @Test
     public void startTransaction_pdnIpcanChanged() {
         when(mMockSscConnection.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE, TelephonyManager.NETWORK_TYPE_IWLAN);
+                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE, TelephonyManager.NETWORK_TYPE_LTE,
+                        TelephonyManager.NETWORK_TYPE_IWLAN);
         doNothing().when(mMockImsRadioInterface)
                 .startImsTraffic(anyInt(), anyInt(), anyInt(), any());
 

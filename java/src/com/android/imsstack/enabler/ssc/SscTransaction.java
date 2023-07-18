@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_IWLAN;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -174,15 +176,18 @@ public class SscTransaction {
             }
 
             if (mImsRadio == null) {
-                ImsLog.e(mSlotId, "Can't check whether the XCAP traffic is allowed");
+                ImsLog.e(mSlotId, "Can't start the XCAP traffic");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }
 
-            if (!mImsRadio.isImsTrafficAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP)) {
-                ImsLog.e(mSlotId, "XCAP traffic not allowed");
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                return;
+            // If XCAP is connected over cellular, it needs to check priorities for ongoing traffics
+            if (SscNetConnectionGov.getInstance().getNetworkType(mSlotId) != NETWORK_TYPE_IWLAN) {
+                if (!mImsRadio.isImsTrafficAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP)) {
+                    ImsLog.e(mSlotId, "XCAP traffic not allowed");
+                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                    return;
+                }
             }
 
             stratXcapTraffic();
