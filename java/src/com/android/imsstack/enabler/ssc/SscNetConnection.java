@@ -153,8 +153,8 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         EDataState eDataState = EDataState.convertIntTypeToEnum(dataState);
-        ImsLog.i(mSlotId, "ApnType : " + mApnType.getType()  + ", DataState : " + dataState + "/"
-                + eDataState);
+        ImsLog.i(mSlotId, "ApnType : " + mApnType.getType()  + ", DataState : " + eDataState
+                + ", NetworkTye : " + getNetworkType());
 
         return eDataState == EDataState.DATA_STATE_CONNECTED;
     }
