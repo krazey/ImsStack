@@ -327,16 +327,17 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
     nOverhead += (bIpV6 ? Sip::PACKET_OVERHEAD_IPV6 : Sip::PACKET_OVERHEAD_IPV4);
     nOverhead += (bWfcSupported ? Sip::PACKET_OVERHEAD_EPDG : 0);
 
-    if (bIpV6 && bWfcSupported && (nMss > Sip::MTU_IPV6))
+    // The MTU size will be adjusted to the MTU size of IPv6 regardless of the PDN's IP version
+    // because ePDG can use the IPv6 for tunneling.
+    if (bWfcSupported && (nMss > Sip::MTU_IPV6))
     {
-        IMS_TRACE_I("MTU (IPv6) :: %d >> %d", nMss, Sip::MTU_IPV6, 0);
-
+        IMS_TRACE_I("MTU(%s) :: %d >> %d", (bIpV6 ? "IPv6" : "IPv4"), nMss, Sip::MTU_IPV6);
         nMss = Sip::MTU_IPV6;
     }
 
     if (nMss <= 0)
     {
-        nMss = bIpV6 ? Sip::MTU_IPV6 : Sip::MTU_IPV4;
+        nMss = bIpV6 ? Sip::MTU_IPV6 : (bWfcSupported ? Sip::MTU_IPV6 : Sip::MTU_IPV4);
     }
 
     // MSS will be set to (MTU - lower layer's overhead)

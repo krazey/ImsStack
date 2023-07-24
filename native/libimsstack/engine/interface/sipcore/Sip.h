@@ -96,8 +96,8 @@ public:
         PACKET_OVERHEAD_IPV6 = 40,
         /// IP headers (v4)
         PACKET_OVERHEAD_IPV4 = 20,
-        /// ePDG IP/TCP/IPSec headers
-        PACKET_OVERHEAD_EPDG = 60
+        /// ePDG ESP headers + outer IP headers(40)
+        PACKET_OVERHEAD_EPDG = 100
     };
 
 public:
