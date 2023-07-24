@@ -22,15 +22,18 @@ import android.os.Looper;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.BarringInfo;
 import android.telephony.BarringInfo.BarringServiceInfo;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.ConnectionFailureInfo;
 import android.telephony.ims.feature.ImsTrafficSessionCallback;
 import android.telephony.ims.feature.MmTelFeature;
+import android.util.Pair;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -47,6 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ImsRadioAgent implements ImsRadioInterface {
     private final int mSlotId;
+    private boolean mIsImsHalSupported = true;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private Handler mHandler;
     private ImsRadioPhoneStateListener mPhoneStateListener;
@@ -97,6 +101,10 @@ public class ImsRadioAgent implements ImsRadioInterface {
         if (imsTraffic != null) {
             imsTraffic.addListener(mImsTrafficListener);
         }
+
+        checkHalVersion();
+
+        ImsLog.d(mSlotId, "ims hal supported = " + mIsImsHalSupported);
     }
 
     @Override
@@ -314,6 +322,23 @@ public class ImsRadioAgent implements ImsRadioInterface {
         }
     }
 
+    private void checkHalVersion() {
+        TelephonyManager tm = AppContext.getTelephonyManager();
+        if (tm != null) {
+            try {
+                Pair<Integer, Integer> halVersion = tm.getHalVersion(
+                        TelephonyManager.HAL_SERVICE_IMS);
+                if (halVersion.equals(TelephonyManager.HAL_VERSION_UNKNOWN)
+                        || halVersion.equals(TelephonyManager.HAL_VERSION_UNSUPPORTED)) {
+                    mIsImsHalSupported = false;
+                }
+            } catch (IllegalStateException e) {
+                ImsLog.e("checkHalVersion: " + e.toString());
+                return;
+            }
+        }
+    }
+
     private int convertAccessNetworkType(int type) {
         if (type == ACCESS_NETWORK_TYPE_UNKNOWN) {
             IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
@@ -433,6 +458,11 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     private void invokeModifyImsTrafficSession(int accessNetworkType,
             @NonNull ImsTrafficSessionCallback callback, @NonNull Executor executor) {
+        if (!mIsImsHalSupported) {
+            executor.execute(() -> callback.onReady());
+            return;
+        }
+
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
@@ -449,6 +479,11 @@ public class ImsRadioAgent implements ImsRadioInterface {
     private void invokeStartImsTrafficSession(int trafficType, int accessNetworkType,
             int direction, @NonNull Executor executor,
             @NonNull ImsTrafficSessionCallback callback) {
+        if (!mIsImsHalSupported) {
+            executor.execute(() -> callback.onReady());
+            return;
+        }
+
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
@@ -464,6 +499,10 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     private void invokeStopImsTrafficSession(@NonNull ImsTrafficSessionCallback callback) {
+        if (!mIsImsHalSupported) {
+            return;
+        }
+
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         MmTelFeature mtf = isr.getMmTelFeature();
 
