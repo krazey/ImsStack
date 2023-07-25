@@ -46,7 +46,7 @@ public final class DcFactory {
      */
     @VisibleForTesting
     public static void clear(int slotId) {
-        sDcAgents.put(slotId, null);
+        sDcAgents.remove(slotId);
     }
 
     /**
@@ -59,10 +59,6 @@ public final class DcFactory {
      */
     @SuppressWarnings("unchecked")
     public static <T extends IDc> T getDcAgent(Class<T> clazz, int slotId) {
-        if (slotId < 0 || slotId >= sDcAgents.size()) {
-            return null;
-        }
-
         Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
         return (agents != null) ? (T) agents.get(clazz) : null;
     }
