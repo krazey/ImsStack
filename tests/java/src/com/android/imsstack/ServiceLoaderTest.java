@@ -87,6 +87,8 @@ public class ServiceLoaderTest {
         when(tm.getActiveModemCount()).thenReturn(1);
         when(tm.getSupportedModemCount()).thenReturn(1);
         when(tm.getSimApplicationState()).thenReturn(TelephonyManager.SIM_STATE_ABSENT);
+        when(tm.getHalVersion(TelephonyManager.HAL_SERVICE_IMS)).thenReturn(
+                TelephonyManager.HAL_VERSION_UNSUPPORTED);
         SubscriptionManager sm = context.getSystemService(SubscriptionManager.class);
         when(sm.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
         mSettingsProvider = new FakeSettingsProvider();
