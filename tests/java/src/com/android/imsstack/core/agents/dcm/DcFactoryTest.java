@@ -59,11 +59,15 @@ public class DcFactoryTest {
     @After
     public void tearDown() throws Exception {
         DcFactory.clear(SLOT_0);
+        DcFactory.clear(SLOT_1);
     }
 
     @Test
     @SmallTest
     public void testGetDcAgent() {
+        DcFactory.clear(SLOT_0);
+        DcFactory.clear(SLOT_1);
+
         assertNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_0));
         assertNull(DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
         assertNull(DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
@@ -97,6 +101,19 @@ public class DcFactoryTest {
         assertNotNull(DcFactory.getDcAgent(IDcSettings.class, SLOT_0));
         assertNotNull(DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_0));
         assertNotNull(DcFactory.getDcAgent(IDcApn.class, SLOT_0));
+    }
+
+    @Test
+    @SmallTest
+    public void testCreateDcAgentOnSlot1() {
+        // To guarantee that the container of DC agents is empty.
+        DcFactory.clear(SLOT_1);
+        DcFactory.createDcAgents(SLOT_1);
+
+        assertNotNull(DcFactory.getDcAgent(IDcUtils.class, SLOT_1));
+        assertNotNull(DcFactory.getDcAgent(IDcSettings.class, SLOT_1));
+        assertNotNull(DcFactory.getDcAgent(IDcNetWatcher.class, SLOT_1));
+        assertNotNull(DcFactory.getDcAgent(IDcApn.class, SLOT_1));
     }
 
     @Test
