@@ -31,8 +31,6 @@
 
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
-
-    <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
     <int name="ims.preferred_ims_dscp_int" value="2"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>

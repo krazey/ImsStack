@@ -893,12 +893,12 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillRepeatedly(
                     Return(static_cast<IRegInfoRegistration*>(&objMockIRegInfoRegistration)));
 
-    EXPECT_CALL(m_objMockAosConfig, IsRegistrationEventForCatRequired())
+    EXPECT_CALL(m_objMockAosConfig, GetUsatRegEventDownloadPolicy())
             .Times(4)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
+            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD))
+            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD))
+            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD))
+            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
 
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
     EXPECT_EQ(GetAorState(), IRegInfoContact::STATE_TERMINATED);
@@ -989,8 +989,8 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillOnce(Return(5))
             .WillRepeatedly(Return(0));
 
-    EXPECT_CALL(m_objMockAosService, NotifyRegEventState(AosRegEvent::ACTIVE)).Times(1);
-
+    ImsList<AString> objImpus;
+    EXPECT_CALL(m_objMockAosService, NotifyRegEventState(200, objImpus)).Times(1);
     EXPECT_CALL(m_objMockAosRetryRepository, ResetRetryCount(0)).Times(1);
 
     SipAddress objContactAddr;

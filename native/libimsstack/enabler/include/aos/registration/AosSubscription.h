@@ -119,6 +119,7 @@ protected:
     virtual void ProcessNotifyState_Terminated(IN IMS_SINT32 nEvent);
     virtual void ProcessNotifyState_Active(IN IMS_SINT32 nState);
     virtual void ProcessNotifyState_InvalidBody();
+    virtual void ProcessRegEventChange(IN IMS_UINT32 nStatusCode);
 
     // IRegSubscriptionListener
     void RegSubscription_NotifyReceived(

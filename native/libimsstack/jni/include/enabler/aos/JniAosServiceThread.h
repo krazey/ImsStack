@@ -32,15 +32,22 @@ public:
             IN const ImsList<AString>& objFeatureTags) override;
 
     IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
+
     IMS_BOOL NotifyTechnologyChangeFailed(
             IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode) override;
+
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
+
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType,
             IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyAosIsimState(IN IMS_UINT32 nState) override;
-    IMS_BOOL NotifyRegEventState(IN IMS_UINT32 nState) override;
+
+    IMS_BOOL NotifyRegEventState(
+            IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus) override;
+
     IMS_BOOL RequestPhoneNumberRetry(IN IMS_UINT32 nCommand) override;
+
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
 
 private:

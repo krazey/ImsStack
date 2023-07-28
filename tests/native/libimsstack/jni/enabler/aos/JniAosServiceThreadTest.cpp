@@ -96,7 +96,9 @@ TEST_F(JniAosServiceThreadTest, NotifyAosIsimState)
 
 TEST_F(JniAosServiceThreadTest, NotifyRegEventState)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyRegEventState(0), AnyOf(IMS_TRUE, IMS_FALSE));
+    ImsList<AString> objImpus;
+    EXPECT_THAT(
+            m_pJniAosServiceThread->NotifyRegEventState(200, objImpus), AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
 TEST_F(JniAosServiceThreadTest, RequestPhoneNumberRetry)

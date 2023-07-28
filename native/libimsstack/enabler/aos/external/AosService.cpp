@@ -701,13 +701,14 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAosIsimState(IN AosIsimState eState)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegEventState(IN AosRegEvent eState)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegEventState(
+        IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus /*= ImsList<AString>()*/)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyRegEventState", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->NotifyRegEventState(static_cast<IMS_SINT32>(eState));
+        piJniThread->NotifyRegEventState(nStatusCode, objImpus);
     }
 
     return IMS_TRUE;

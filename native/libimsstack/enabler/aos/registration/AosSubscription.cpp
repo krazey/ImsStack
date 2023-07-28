@@ -33,6 +33,7 @@
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosConnection.h"
+#include "interface/IAosSubscriber.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "provider/AosRetryRepository.h"
@@ -1004,17 +1005,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 
 {
     if (nState == IRegInfoContact::STATE_ACTIVE)
     {
-        IMS_BOOL bCatSupported =
-                GET_N_CONFIG(m_piContext->GetSlotId())->IsRegistrationEventForCatRequired();
-        if (bCatSupported == IMS_TRUE)
-        {
-            IAosService* piService =
-                    AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
-            if (piService != IMS_NULL)
-            {
-                piService->NotifyRegEventState(AosRegEvent::ACTIVE);
-            }
-        }
+        ProcessRegEventChange(SipStatusCode::SC_200);
     }
 
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
@@ -1030,16 +1021,42 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 
 
 PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_InvalidBody()
 {
-    IMS_BOOL bCatSupported =
-            GET_N_CONFIG(m_piContext->GetSlotId())->IsRegistrationEventForCatRequired();
-    if (bCatSupported == IMS_TRUE)
+    ProcessRegEventChange(SipStatusCode::SC_INVALID);
+}
+
+PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
+{
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_piContext->GetSlotId())->GetUsatRegEventDownloadPolicy();
+    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD)
     {
-        IAosService* piService = AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
-        if (piService != IMS_NULL)
+        return;
+    }
+
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
+    if (piService == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsList<IRegInfoRegistration*> objRegInfoRegistrations =
+            m_piRegSubscription->GetRegInfo()->GetRegistrations();
+    ImsList<AString> objImpus;
+
+    for (IMS_UINT32 i = 0; i < objRegInfoRegistrations.GetSize(); ++i)
+    {
+        IRegInfoRegistration* piRegInfo = objRegInfoRegistrations.GetAt(i);
+        if (piRegInfo != IMS_NULL)
         {
-            piService->NotifyRegEventState(AosRegEvent::INVALID);
+            objImpus.Append(piRegInfo->GetAor().ToString());
         }
     }
+
+    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
+    {
+        piService->NotifyRegEventState(nStatusCode, objImpus);
+    }
+
+    // Notice : Handling for USAT_REG_EVENT_CONDITIONAL_DOWNLOAD has not yet been considered.
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(

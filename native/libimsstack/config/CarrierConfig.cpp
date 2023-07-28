@@ -178,8 +178,6 @@ const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
         KEY_IMS_PREFIX "pcscf_discovery_method_int_array";
 
 // Aos
-const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL[] =
-        KEY_IMS_PREFIX "registration_event_for_cat_required_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL[] =
         KEY_IMS_PREFIX "unsubscribe_registration_event_package_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT[] =
@@ -773,6 +771,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT[] =
         "roaming_preferred_emc_reg_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         "sip_message_threshold_for_transport_change_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[] =
+        "usat_reg_event_download_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT[] = "volte_hys_time_sec_int";
 
 const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =

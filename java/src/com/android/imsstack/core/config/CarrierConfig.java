@@ -125,8 +125,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "update_registration_with_rat_change_int_array";
         public static final String KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL =
                 KEY_PREFIX + "unsubscribe_registration_event_package_bool";
-        public static final String KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL =
-                KEY_PREFIX + "registration_event_for_cat_required_bool";
         public static final String KEY_PREFERRED_IMS_DSCP_INT =
                 KEY_PREFIX + "preferred_ims_dscp_int";
         public static final String KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT =
@@ -574,6 +572,8 @@ public class CarrierConfig {
                 "roaming_preferred_emc_reg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
+        public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
+                "usat_reg_event_download_policy_int";
         public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
 
         public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =

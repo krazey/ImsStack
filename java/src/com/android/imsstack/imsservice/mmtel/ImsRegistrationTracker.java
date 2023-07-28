@@ -36,6 +36,9 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.Usat;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -680,6 +683,21 @@ public class ImsRegistrationTracker {
         }
 
         @Override
+        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class,
+                    mContext.getSlotId());
+            UsatInterface usat = sim.getUsatInterface();
+
+            if (usat != null && usat.isServiceAvailable(
+                    Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS)) {
+                UsatBasedRegEvent event = new UsatBasedRegEvent();
+                event.mRegEventDownloadCmd = usat.createRegEventDownloadCommand(
+                        statusCode, impus, event);
+                usat.sendCommand(event.mRegEventDownloadCmd);
+            }
+        }
+
+        @Override
         public void onImsServiceStarted(int slotId) {
             logi("onImsServiceStarted: slotId=" + slotId + ", mySlotId=" + mContext.getSlotId());
 
@@ -838,6 +856,17 @@ public class ImsRegistrationTracker {
             mFeatureTags.put(FeatureTagMask.CHATBOT_ROLE, "+g.gsma.rcs.isbot");
             mFeatureTags.put(FeatureTagMask.PRESENCE,
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"");
+        }
+
+        private class UsatBasedRegEvent implements Usat.Listener {
+            public Usat.RegEventDownloadCommand mRegEventDownloadCmd = null;
+
+            UsatBasedRegEvent() {}
+
+            @Override
+            public void onCommandResponse(Usat.CommandResponse response) {
+                // Do nothing.
+            }
         }
     }
 }

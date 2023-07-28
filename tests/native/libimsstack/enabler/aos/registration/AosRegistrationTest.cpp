@@ -262,6 +262,8 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(
             AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_NotSupportErrMessage);
     FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_DuplicateReason);
+    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_RegEventChange_UnconditionalDownload);
+    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload);
     FRIEND_TEST(AosRegistrationTest, Registration_Updated);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_CallEndByReregErr);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming);
@@ -4044,6 +4046,66 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_Duplica
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES))
+            .Times(0);
+    m_pTestAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+}
+
+TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_UnconditionalDownload)
+{
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+
+    m_pTestAosRegistration->m_nAuthChallengeCount = 0;
+
+    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(SipStatusCode::SC_403));
+
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    ImsList<AString> objImpus;
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, objImpus))
+            .Times(1);
+    m_pTestAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+}
+
+TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload)
+{
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+
+    m_pTestAosRegistration->m_nAuthChallengeCount = 0;
+
+    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(SipStatusCode::SC_403));
+
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
+
+    ImsList<AString> objImpus;
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, objImpus))
             .Times(0);
     m_pTestAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
 }
