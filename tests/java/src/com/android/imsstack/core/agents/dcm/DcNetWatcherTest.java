@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +52,7 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
@@ -90,6 +92,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
     @Mock TelephonyInterface mMockTelephonyInterface;
+    @Mock ConfigInterface mMockConfigInterface;
     @Mock SystemInterface mMockSystemInterface;
     @Mock AosFactory mMockAosFactory;
     @Mock NativeStateInterface mMockNativeStateInterface;
@@ -116,6 +119,8 @@ public class DcNetWatcherTest extends ImsStackTest {
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                ConfigInterface.class, mMockConfigInterface, SLOT_0);
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
@@ -153,12 +158,14 @@ public class DcNetWatcherTest extends ImsStackTest {
                 | ImsPhoneStateListener.LISTEN_SERVICE_STATE
                 | ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE);
         verify(mMockPhoneStateInterface).addNotifier(mMockPhoneStateNotifier);
+        verify(mMockConfigInterface).addListener(any(ConfigInterface.Listener.class));
     }
 
     @Test
     public void testCleanup() {
         mDcNetWatcher.cleanup();
 
+        verify(mMockConfigInterface).removeListener(any(ConfigInterface.Listener.class));
         verify(mMockPhoneStateInterface).removeNotifier(mMockPhoneStateNotifier);
         verify(mMockPhoneStateNotifier).setListener(null);
         verify(mContext).unregisterReceiver(any());
@@ -1142,6 +1149,20 @@ public class DcNetWatcherTest extends ImsStackTest {
                 ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0);
         assertEquals(ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION,
                 mDcNetWatcher.getNrRegistrationInfo());
+    }
+
+    @Test
+    public void testOnCarrierConfigChanged() throws Exception {
+        int subId = 1;
+        ArgumentCaptor<ConfigInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mMockConfigInterface).addListener(listenerCaptor.capture());
+
+        ConfigInterface.Listener listener = listenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT_0, subId);
+
+        // Called once in init() and again in onCarrierConfigChanged().
+        verify(mMockDcSetting, times(2)).getImsSupportedRats();
     }
 
     @Test

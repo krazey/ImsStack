@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -248,7 +249,7 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
+        verify(mMockISystem, never()).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
@@ -284,7 +285,7 @@ public class ApnXcapTest {
     }
 
     @Test
-    public void testAirplaneModeChanged_invalid() throws Exception {
+    public void testAirplaneModeChanged_InvalidCase() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
         mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
@@ -300,29 +301,45 @@ public class ApnXcapTest {
         mApnXcap.sendMessage(msg2);
         mTestableLooper.processAllMessages();
 
-        verify(mConnectivityManager, times(0)).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManager, never()).unregisterNetworkCallback(mMockNetworkCallback);
     }
 
     @Test
     public void testHandleDataConnectionFailed() throws Exception {
         int failureCause = 33;
 
-        // if apn is not requested, ignore event
-        assertEquals(EApnReqState.APN_REQUEST_IDLE, mApnXcap.getApnReqState());
-        mApnXcap.sendEmptyMessage(Apn.EVENT_DATA_CONNECTION_FAILED);
-        mTestableLooper.processAllMessages();
-
         // if apn has been requested before, notify data connection state change
         mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-        mApnXcap.setDataState(TelephonyManager.DATA_CONNECTING);
-
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
         msg.obj = failureCause;
         mApnXcap.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher, times(1)).notifyPdnConnectionFailed(EApnType.XCAP, failureCause);
+        verify(mMockIDcNetWatcher).notifyPdnConnectionFailed(EApnType.XCAP, failureCause);
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_InvalidCase() throws Exception {
+        int failureCause = 33;
+
+        // if apn is not requested, ignore event
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_IDLE);
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg1.obj = failureCause;
+        mApnXcap.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        // if msg.obj is null, ignore event
+        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        Message msg2 = Message.obtain();
+        msg2.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg2.obj = null;
+        mApnXcap.sendMessage(msg2);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIDcNetWatcher, never()).notifyPdnConnectionFailed(EApnType.XCAP, failureCause);
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

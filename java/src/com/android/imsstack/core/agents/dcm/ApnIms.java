@@ -402,17 +402,12 @@ public class ApnIms extends Apn {
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");
 
-            if (msg == null) {
+            if (msg == null || msg.obj == null) {
                 return;
             }
 
             if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
                 ImsLog.w("apn is not requested, ignore event");
-                return;
-            }
-
-            if (msg.obj == null) {
-                ImsLog.w(mSlotId, "msg.obj is null");
                 return;
             }
 
