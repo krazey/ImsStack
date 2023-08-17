@@ -25,6 +25,7 @@ import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.RESULT_SUCCESS;
 import static com.android.imsstack.imsservice.mmtel.sms.SmsUtils.SMSRL_RESULT_INVALID_STATE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,9 +55,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 public class SmsRLStateMachineTest {
-
     private static final int SLOT_ID = 0;
     private CarrierConfig mMockCarrierConfig;
     private ConfigInterface mMockConfigInterface;
@@ -73,13 +75,15 @@ public class SmsRLStateMachineTest {
     private String mDestinationAddress = "0987654321";
     private String mPsiSmsc = "+19037029920";
     private String mSmsc = "07912160130300F4";
-    SmsRLStateMachine mSmsRLStateMachine;
+    TestSmsRLStateMachine mSmsRLStateMachine;
     private SmsRLStateMachine.SmsRLState mCurrentState;
     private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
     private int mToken = 1;
     private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+
+    private static Semaphore sSemaphore = new Semaphore(0);
 
     @Before
     public void setUp() {
@@ -100,7 +104,7 @@ public class SmsRLStateMachineTest {
         when(mMockCarrierConfig.getInt(
                 CarrierConfigManager.ImsSms.KEY_SMS_TR2_TIMER_MILLIS_INT))
                 .thenReturn(SmsUtils.TIMER_TR2);
-        mSmsRLStateMachine = new SmsRLStateMachine(mToken, mMessageType,
+        mSmsRLStateMachine = new TestSmsRLStateMachine(mToken, mMessageType,
                 mMtsController, mContext, mListener, mPsiSmsc, mDestinationAddress);
     }
 
@@ -173,6 +177,7 @@ public class SmsRLStateMachineTest {
         Assert.assertNotNull(mHandler);
         Assert.assertNotNull(mSmsRLStateMachine.mTR2TimerHandler);
         mHandler.post(()->mSmsRLStateMachine.mTR2TimerHandler.run());
+        assertTrue(waitForEvent(sSemaphore, 1));
         verify(mListener, Mockito.timeout(100).times(0)).notifyRLReportIndication(mToken,
                 mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
@@ -187,6 +192,7 @@ public class SmsRLStateMachineTest {
         Assert.assertNotNull(mSmsRLStateMachine.mTR1TimerHandler);
 
         mHandler.post(()->mSmsRLStateMachine.mTR1TimerHandler.run());
+        assertTrue(waitForEvent(sSemaphore, 1));
         verify(mListener, Mockito.timeout(100).times(1)).notifyRLReportIndication(mToken,
                 mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
@@ -456,6 +462,44 @@ public class SmsRLStateMachineTest {
         verify(mListener, times(1)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                                  ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
                                  SmsManager.RESULT_NETWORK_ERROR, 0);
+    }
+
+    private static class TestSmsRLStateMachine extends SmsRLStateMachine {
+        TestSmsRLStateMachine(int token, int messageType, MtsController mtsController,
+                ImsCallContext context, SmsRelayLayer.Listener listener, String psiSmsc,
+                String destinationAddress) {
+            super(token, messageType, mtsController, context, listener, psiSmsc,
+                destinationAddress);
+        }
+
+        protected Runnable mTR1TimerHandler = new Runnable() {
+            @Override
+            public void run() {
+                onTR1TimerExpired();
+                sSemaphore.release();
+            }
+        };
+
+        protected Runnable mTR2TimerHandler = new Runnable() {
+            @Override
+            public void run() {
+                onTR2TimerExpired();
+                sSemaphore.release();
+            }
+        };
+    }
+
+    private boolean waitForEvent(Semaphore semaphore, int expectedNumberOfEvents) {
+        for (int i = 0; i < expectedNumberOfEvents; i++) {
+            try {
+                if (!semaphore.tryAcquire(2000, TimeUnit.MILLISECONDS)) {
+                    return false;
+                }
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @After
