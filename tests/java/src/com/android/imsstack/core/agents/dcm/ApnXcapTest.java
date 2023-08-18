@@ -110,7 +110,7 @@ public class ApnXcapTest {
         assertTrue(mApnXcap.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnXcap.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnXcap.getDataState());
-        verify(mConnectivityManager, times(1)).requestNetwork(
+        verify(mConnectivityManager).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
 
         // return true without request to connect because request is already done
@@ -127,17 +127,18 @@ public class ApnXcapTest {
 
         // handle request to disconnect if request to connect is done
         mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnXcap.mDataState = TelephonyManager.DATA_CONNECTED;
         mApnXcap.sendEmptyMessageDelayed(Apn.EVENT_WAITING_IPV6_ADDRESS,
                 mApnXcap.OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL);
 
         assertTrue(mApnXcap.disconnect());
-        verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
         assertEquals(EApnReqState.APN_REQUEST_IDLE, mApnXcap.getApnReqState());
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnXcap.getDataState());
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
 
         mTestableLooper.processAllMessages();
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
@@ -170,9 +171,9 @@ public class ApnXcapTest {
         mTestableLooper.processAllMessages();
 
         assertEquals(TelephonyManager.DATA_CONNECTED, mApnXcap.getDataState());
-        verify(mMockIDcNetWatcher, times(1)).notifyResult(
+        verify(mMockIDcNetWatcher).notifyResult(
                 EApnType.XCAP, EDataState.DATA_STATE_CONNECTED);
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
 
@@ -199,7 +200,7 @@ public class ApnXcapTest {
                 EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
         verify(mMockISystem, times(2)).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
-        verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
     }
 
     @Test
@@ -217,7 +218,7 @@ public class ApnXcapTest {
         mTestableLooper.processAllMessages();
 
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
 
@@ -232,9 +233,9 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher, times(1)).notifyResult(
+        verify(mMockIDcNetWatcher).notifyResult(
                 EApnType.XCAP, EDataState.DATA_STATE_IP_CHANGED);
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
@@ -265,7 +266,7 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_WAITING_IPV6_ADDRESS);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
 
@@ -281,11 +282,11 @@ public class ApnXcapTest {
         mApnXcap.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
     }
 
     @Test
-    public void testAirplaneModeChanged_InvalidCase() throws Exception {
+    public void testAirplaneModeChanged_invalidCase() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
         mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
@@ -320,7 +321,7 @@ public class ApnXcapTest {
     }
 
     @Test
-    public void testHandleDataConnectionFailed_InvalidCase() throws Exception {
+    public void testHandleDataConnectionFailed_invalidCase() throws Exception {
         int failureCause = 33;
 
         // if apn is not requested, ignore event

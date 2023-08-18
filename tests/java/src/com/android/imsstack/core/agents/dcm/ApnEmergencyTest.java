@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -139,7 +138,13 @@ public class ApnEmergencyTest {
 
     @Test
     public void testGetApn() throws Exception {
+        // when the mApnString is null
         assertEquals(EApnType.EMERGENCY.getString(), mApnEmergency.getApn());
+
+        // when the mApnString is not null
+        String newApnString = "NEWAPN";
+        mApnEmergency.mApnString = newApnString;
+        assertEquals(newApnString, mApnEmergency.getApn());
     }
 
     @Test
@@ -214,7 +219,7 @@ public class ApnEmergencyTest {
         mApnEmergency.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
+        verify(mMockISystem, never()).notifyDataConnectionStateChanged(
                 EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
@@ -247,7 +252,7 @@ public class ApnEmergencyTest {
     }
 
     @Test
-    public void testHandleDataConnectionFailed_InvalidCase() throws Exception {
+    public void testHandleDataConnectionFailed_invalidCase() throws Exception {
         int failureCause = 33;
         replaceInstance(Apn.class, "mDcSettings", mApnEmergency, mMockIDcSettings);
         when(mMockIDcSettings.isPermanentFailure(EApnType.EMERGENCY, failureCause))
