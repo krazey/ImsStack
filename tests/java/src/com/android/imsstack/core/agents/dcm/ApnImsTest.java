@@ -18,9 +18,11 @@ package com.android.imsstack.core.agents.dcm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,6 +38,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ImsTrafficInterface;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -70,6 +75,9 @@ public class ApnImsTest {
     @Mock private IAosInfo mMockIAosInfo;
     @Mock private IAosRegistration mMockIAosReg;
     @Mock private ISystem mMockISystem;
+    @Mock private ImsTrafficInterface mMockImsTrafficInterface;
+    @Mock private SubsInfoInterface mMockSubsInfoInterface;
+    @Mock private RuntimeException mMockRuntimeException;
 
     private Context mContext;
     private TestableLooper mTestableLooper;
@@ -124,6 +132,20 @@ public class ApnImsTest {
     }
 
     @Test
+    public void testConnect_imsOff() throws Exception {
+        AgentFactory.getInstance()
+                .setAgent(SubsInfoInterface.class, mMockSubsInfoInterface, SLOT_0);
+
+        // If IMS is not enabled, do not handle connect request and return false
+        when(mMockSubsInfoInterface.isImsEnabled()).thenReturn(false);
+        assertFalse(mApnIms.connect());
+        verify(mConnectivityManager, never()).requestNetwork(
+                any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
+
+        AgentFactory.getInstance().setAgent(SubsInfoInterface.class, null, SLOT_0);
+    }
+
+    @Test
     public void testDisconnect() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnIms, mMockNetworkCallback);
 
@@ -133,6 +155,7 @@ public class ApnImsTest {
 
         // handle request to disconnect if request to connect is done
         mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnIms.mDataState = TelephonyManager.DATA_CONNECTED;
 
         assertTrue(mApnIms.disconnect());
         verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
@@ -145,7 +168,13 @@ public class ApnImsTest {
 
     @Test
     public void testGetApn() throws Exception {
+        // when the mApnString is null
         assertEquals(EApnType.IMS.getString(), mApnIms.getApn());
+
+        // when the mApnString is not null
+        String newApnString = "NEWAPN";
+        mApnIms.mApnString = newApnString;
+        assertEquals(newApnString, mApnIms.getApn());
     }
 
     @Test
@@ -210,7 +239,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testRegisterDefaultNetworkCallback_CrossSimDisabled() throws Exception {
+    public void testRegisterDefaultNetworkCallback_crossSimDisabled() throws Exception {
         when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(false);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
 
@@ -220,7 +249,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testRegisterDefaultNetworkCallback_AlreadyRegistered() throws Exception {
+    public void testRegisterDefaultNetworkCallback_alreadyRegistered() throws Exception {
         when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
 
@@ -229,6 +258,17 @@ public class ApnImsTest {
         mApnIms.registerDefaultNetworkCallback();
         verify(mConnectivityManager)
                 .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testRegisterDefaultNetworkCallback_runtimeException() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+        doThrow(mMockRuntimeException).when(mConnectivityManager)
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+
+        mApnIms.registerDefaultNetworkCallback();
+        verify(mMockRuntimeException).getMessage();
     }
 
     @Test
@@ -248,6 +288,18 @@ public class ApnImsTest {
         mApnIms.unregisterDefaultNetworkCallback();
         verify(mConnectivityManager)
                 .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testUnRegisterDefaultNetworkCallback_runtimeException() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+        mApnIms.registerDefaultNetworkCallback();
+        doThrow(mMockRuntimeException).when(mConnectivityManager)
+                .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+
+        mApnIms.unregisterDefaultNetworkCallback();
+        verify(mMockRuntimeException).getMessage();
     }
 
     @Test
@@ -325,6 +377,7 @@ public class ApnImsTest {
 
     @Test
     public void testHandleIpcanCategory() throws Exception {
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, mMockImsTrafficInterface);
         replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
 
         mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
@@ -333,19 +386,24 @@ public class ApnImsTest {
         verify(mMockISystem).notifyDataConnectionIpcanChanged(
                 mApnIms.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
         verify(mMockIDcNetWatcher).getNetworkType();
+        verify(mMockImsTrafficInterface).setWlan(true, SLOT_0);
+
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
     }
 
     @Test
     public void testUpdateCarrierConfig() throws Exception {
-        int[] configNoVopsRequired = {CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING};
+        int[] configNoVopsRequired = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME,
+                CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING};
         when(mMockIDcSettings.isImsPdnRequestWithoutMmtel()).thenReturn(false);
         when(mMockIDcSettings.getImsPdnEnabledInNoVopsSupport()).thenReturn(configNoVopsRequired);
         mApnIms.mImsPdnRequestWithoutMmtel = true;
-        mApnIms.mNoVopsRequired = mApnIms.HOME_NETWORK;
+        mApnIms.mNoVopsRequired = 0;
 
         assertTrue(mApnIms.updateCarrierConfig());
         assertEquals(false, mApnIms.mImsPdnRequestWithoutMmtel);
-        assertEquals(mApnIms.ROAMING_NETWORK, mApnIms.mNoVopsRequired);
+        assertNotEquals(0, mApnIms.mNoVopsRequired & mApnIms.HOME_NETWORK);
+        assertNotEquals(0, mApnIms.mNoVopsRequired & mApnIms.ROAMING_NETWORK);
 
         replaceInstance(Apn.class, "mDcSettings", mApnIms, null);
         assertFalse(mApnIms.updateCarrierConfig());
@@ -388,7 +446,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleIpChanged_DifferentIp() throws Exception {
+    public void testHandleIpChanged_differentIp() throws Exception {
         replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
         when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("1.2.3.4");
         when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
@@ -408,7 +466,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleIpChanged_SameIp() throws Exception {
+    public void testHandleIpChanged_sameIp() throws Exception {
         replaceInstance(Apn.class, "mDcApn", mApnIms, mMockIDcApn);
         when(mMockIDcApn.getCachedLocalAddress(EApnType.IMS.getType())).thenReturn("0.0.0.0");
         when(mMockIDcApn.getLocalAddress(EApnType.IMS.getType(), 0)).thenReturn("0.0.0.0");
@@ -457,7 +515,7 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleDataConnectionFailed_InvalidCase() throws Exception {
+    public void testHandleDataConnectionFailed_invalidCase() throws Exception {
         int failureCause = 33;
         when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
                 .thenReturn(true);

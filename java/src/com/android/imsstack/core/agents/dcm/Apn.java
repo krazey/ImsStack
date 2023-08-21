@@ -689,7 +689,7 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    private boolean isAllSimAbsentOrLocked() {
+    protected boolean isAllSimAbsentOrLocked() {
         boolean allSimAbsentOrLocked = true;
         int activeSimCount = MSimUtils.getActiveSimCount();
 

@@ -227,7 +227,7 @@ public class ApnIms extends Apn {
             try {
                 cm.registerDefaultNetworkCallback(mDefaultNetworkCallback);
             } catch (RuntimeException e) {
-                ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.toString());
+                ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.getMessage());
                 mDefaultNetworkCallback = null;
             }
         }
@@ -246,7 +246,7 @@ public class ApnIms extends Apn {
             try {
                 cm.unregisterNetworkCallback(mDefaultNetworkCallback);
             } catch (RuntimeException e) {
-                ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.toString());
+                ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.getMessage());
             }
         }
         mDefaultNetworkCallback = null;
