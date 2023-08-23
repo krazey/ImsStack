@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
@@ -68,18 +69,18 @@ public class NativeStateAgentTest {
 
         mContextFixture = new ContextFixture();
         Context context = mContextFixture.getTestDouble();
+        AppContext.init(context);
         TelephonyManager tm = context.getSystemService(TelephonyManager.class);
         when(tm.getSupportedModemCount()).thenReturn(1);
-        AppContext.init(context);
         ServiceCaps.setServiceCapabilities(SLOT0, false, false, true);
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryState);
         AgentFactory.getInstance().setAgent(CellInfoInterface.class, mCellInfoInterface, SLOT0);
         DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
+        mTestableLooper = new TestableLooper(Looper.getMainLooper());
 
-        mNativeStateAgent = new NativeStateAgent(SLOT0);
+        mNativeStateAgent = new NativeStateAgent(SLOT0, Looper.getMainLooper());
         mNativeStateAgent.init(context);
         mNativeStateAgent.addListener(mNativeStateListener);
     }
