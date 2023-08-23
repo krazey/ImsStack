@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -28,6 +29,7 @@ import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -42,8 +44,13 @@ public class NativeStateAgent implements NativeStateInterface {
     private boolean mServiceReady;
 
     public NativeStateAgent(int slotId) {
+        this(slotId, AppContext.getInstance().getMainLooper());
+    }
+
+    @VisibleForTesting
+    protected NativeStateAgent(int slotId, Looper looper) {
         mSlotId = slotId;
-        mHandler = new Handler(AppContext.getInstance().getMainLooper());
+        mHandler = new Handler(looper);
     }
 
     @Override
