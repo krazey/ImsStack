@@ -17,6 +17,7 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.PhoneNumberUtils;
@@ -32,9 +33,12 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SimUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class provides the implementation of USAT functions to interwork with the UICC.
@@ -77,6 +81,19 @@ public class UsatAgent extends Handler implements UsatInterface {
     private static final int TAG_SMS_PP_DOWNLOAD = 0xD1;
     /** SMS TPDU: 0x0B or 0x8B */
     private static final int TAG_SMS_TPDU = 0x0B;
+
+    /** Event download: 0xD6 */
+    private static final int TAG_EVENT_DOWNLOAD = 0xD6;
+    /** Event list: 0x19 or 0x99 */
+    private static final int TAG_EVENT_LIST = 0x19;
+    /** Ims registration event: 0x17 */
+    private static final int EVENT_IMS_REGISTRATION = 0x17;
+    /** IMPU list: 0x80 or 0x77 */
+    private static final int TAG_IMPU_LIST = 0x77;
+    /** IMS status code: 0x80 or 0x78 */
+    private static final int TAG_IMS_STATUS_CODE = 0x78;
+    /** URI TLV: 0x80 */
+    private static final int TAG_URI_TLV = 0x80;
 
     static final class DataObject {
         public int tag;
@@ -177,6 +194,12 @@ public class UsatAgent extends Handler implements UsatInterface {
     }
 
     @Override
+    public Usat.RegEventDownloadCommand createRegEventDownloadCommand(
+            int statusCode, @NonNull Set<Uri> impus, Usat.Listener listener) {
+        return new Usat.RegEventDownloadCommand(getNewCommandId(), listener, statusCode, impus);
+    }
+
+    @Override
     public void cancelCommand(Usat.Command command) {
         if (command == null) {
             // Do nothing.
@@ -237,6 +260,9 @@ public class UsatAgent extends Handler implements UsatInterface {
                 break;
             case Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP:
                 handleSmsPpDownloadCommand((Usat.SmsPpDownloadCommand) cmd);
+                break;
+            case Usat.SERVICE_REGISTRATION_EVENT_DOWNLOAD:
+                handleRegEventDownloadCommand((Usat.RegEventDownloadCommand) cmd);
                 break;
             default:
                 ImsLog.d(getSlotId(), "USAT: unknown command - " + cmd);
@@ -798,6 +824,170 @@ public class UsatAgent extends Handler implements UsatInterface {
         }
 
         return SimUtils.hexStringToBytes(sb.toString());
+    }
+
+    /**
+     * Handles the registration event download command.
+     *
+     * @param cmd The registration event download command.
+     */
+    private void handleRegEventDownloadCommand(final Usat.RegEventDownloadCommand cmd) {
+        ImsLog.d(getSlotId(), "USAT: handleRegEventDownloadCommand");
+
+        String encodedCommand = encodeCommandForRegEventDownload(cmd);
+        String response = "";
+
+        if (encodedCommand != null) {
+            response = sendEnvelopeWithStatus(encodedCommand);
+        }
+
+        UsatResult result = createUsatResult(response);
+
+        if (ImsLog.DBG) {
+            ImsLog.d(getSlotId(), "USAT: reg-event-download - encodedCommand=" + encodedCommand
+                    + ", response=" + response + ", result=" + result);
+        }
+
+        if (!result.isOk()) {
+            ImsLog.w(getSlotId(), "USAT: reg-event-download failed - " + result);
+        }
+
+        Usat.CommandResponse cmdResponse = new Usat.CommandResponse(cmd,
+                result.isOk() ? Usat.RESULT_REGISTRATION_EVENT_OK
+                        : Usat.RESULT_REGISTRATION_EVENT_ERROR);
+        if (cmdResponse != null) {
+            notifyCommandResponse(cmdResponse);
+        } else {
+            ImsLog.i(getSlotId(), "USAT: reg-event-download command aborted");
+        }
+    }
+
+    /**
+     * Encodes the registration event download command to be sent to the UICC.
+     *
+     * @param cmd The registration event download command.
+     * @return A hexadecimal string format of this command.
+     */
+    private String encodeCommandForRegEventDownload(Usat.RegEventDownloadCommand cmd) {
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        /**
+         * Event download tag (Table 7.17 of TS101.220 : 0xD6)
+         */
+        buffer.write(TAG_EVENT_DOWNLOAD);
+
+        /**
+         * Length (A+B+C) or (A+B+D)
+         *     A: Event list
+         *     B: Device identities
+         *     C: IMPU list
+         *     D: IMS status code
+         */
+        buffer.write(0x00); // place holder
+
+        writeEventList(buffer, EVENT_IMS_REGISTRATION);
+
+        writeDeviceIdentities(buffer, DEVICE_IDENTITY_NETWORK, DEVICE_IDENTITY_UICC);
+
+        int statusCode = cmd.getStatusCode();
+        if (statusCode == 200) {
+            try {
+                writeImpuList(buffer, cmd.getImpus());
+            } catch (IOException e) {
+                ImsLog.e(getSlotId(), "USAT: " + e);
+                return null;
+            }
+        } else {
+            writeImsStatusCode(buffer, statusCode);
+        }
+
+        byte[] data = buffer.toByteArray();
+
+        // Adjust the length field of BER-TLV data object.
+        data = refineBerTlvDataObject(data);
+
+        return SimUtils.bytesToHexString(data);
+    }
+
+    /**
+     * Writes the event list.
+     *     Event list tag (Table 7.23 of TS101.220 : 0x19 or 0x99)
+     *     Length (0x01)
+     *     Event value (8.25 of TS131.111 : 0x17)
+     *
+     * @param buffer The output stream to be written.
+     * @param event The event value to be written.
+     */
+    private static void writeEventList(ByteArrayOutputStream buffer, int event) {
+        buffer.write(TAG_EVENT_LIST); // 0x19
+        buffer.write(0x01);
+        buffer.write(event);
+    }
+
+    /**
+     * Writes the IMPU list.
+     *     IMPU list tag (Table 7.23 of TS101.220 : 0x80 or 0x77)
+     *     Length
+     *     URI TLV tag (8.111 of TS131.111 : 0x80)
+     *     URI TLV length
+     *     IMPU list
+     *
+     * @param buffer The output stream to be written.
+     * @param impus The set of IMPU to be written.
+     * @throws IOException  if an I/O error occurs.
+     */
+    private static void writeImpuList(ByteArrayOutputStream buffer, Set<Uri> impus)
+            throws IOException {
+        ByteArrayOutputStream bufferUriTlv = new ByteArrayOutputStream();
+        for (Uri impu : impus) {
+            writeUriTlv(bufferUriTlv, impu);
+        }
+
+        buffer.write(TAG_IMPU_LIST); // 0x77
+        buffer.write(bufferUriTlv.size());
+        buffer.write(bufferUriTlv.toByteArray());
+    }
+
+    /**
+     * Writes the URI TLV.
+     *
+     * @param buffer The output stream to be written.
+     * @param uri The URI to be written.
+     * @throws IOException if an I/O error occurs.
+     */
+    private static void writeUriTlv(ByteArrayOutputStream buffer, Uri uri) throws IOException {
+        buffer.write(TAG_URI_TLV); // 0x80
+
+        byte[] uriBytes = uri.toString().getBytes(StandardCharsets.UTF_8);
+        buffer.write(uriBytes.length); // URI TLV length
+        buffer.write(uriBytes);
+    }
+
+    /**
+     * Writes the IMS status code.
+     *     Status Code (8.111 of TS131.111)
+     *         IMS Status-code Tag (Table 7.23 of TS101.220 : 0x80 or 0x78)
+     *         Length
+     *         IMS Status-code
+     * @param buffer The output stream to be written.
+     * @param code The IMS status code to be written.
+     */
+    private static void writeImsStatusCode(ByteArrayOutputStream buffer, int code) {
+        buffer.write(TAG_IMS_STATUS_CODE);
+
+        String codeStr = String.valueOf(code);
+        if (TextUtils.isEmpty(codeStr)) {
+            buffer.write(0);
+            return;
+        }
+
+        int codeLength = codeStr.length();
+        buffer.write(codeLength);
+
+        for (int i = 0; i < codeLength; i++) {
+            buffer.write(codeStr.charAt(i));
+        }
     }
 
     /**

@@ -17,12 +17,14 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.IntDef;
+import android.net.Uri;
 
 import com.android.imsstack.util.ImsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * This interface provides the definition of command and constant values to manage and control
@@ -34,18 +36,24 @@ public interface Usat {
     // but converted to the zero-based value here.
     /** Call control by USIM: 30th bit in UST */
     int SERVICE_CALL_CONTROL = 29;
-    /** MO short message control by USIM: 31th bit in UST */
+    /** MO short message control by USIM: 31st bit in UST */
     int SERVICE_MO_SMS_CONTROL = 30;
     /** Data download via SMS-PP: 28th bit in UST */
     int SERVICE_DATA_DOWNLOAD_VIA_SMS_PP = 27;
-    /** Media type support: 103th bit in UST */
+    /** Media type support: 103rd bit in UST */
     int SERVICE_MEDIA_TYPE_SUPPORT = 102;
+    /** Support of UICC access to IMS: 95th bit in UST */
+    int SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS = 94;
+    /** Registration event download : There is no bit assigned to UST */
+    int SERVICE_REGISTRATION_EVENT_DOWNLOAD = 200;
 
     @IntDef(value = {
         SERVICE_CALL_CONTROL,
         SERVICE_MO_SMS_CONTROL,
         SERVICE_DATA_DOWNLOAD_VIA_SMS_PP,
-        SERVICE_MEDIA_TYPE_SUPPORT
+        SERVICE_MEDIA_TYPE_SUPPORT,
+        SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS,
+        SERVICE_REGISTRATION_EVENT_DOWNLOAD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceType {}
@@ -94,13 +102,18 @@ public interface Usat {
     /** Result for SERVICE_DATA_DOWNLOAD_VIA_SMS_PP */
     int RESULT_DATA_DOWNLOAD_OK = 11;
     int RESULT_DATA_DOWNLOAD_ERROR = 12;
+    /** Result for SERVICE_REGISTRATION_EVENT_DOWNLOAD */
+    int RESULT_REGISTRATION_EVENT_OK = 13;
+    int RESULT_REGISTRATION_EVENT_ERROR = 14;
 
     @IntDef(value = {
         RESULT_ALLOWED,
         RESULT_NOT_ALLOWED,
         RESULT_ALLOWED_WITH_MODIFICATION,
         RESULT_DATA_DOWNLOAD_OK,
-        RESULT_DATA_DOWNLOAD_ERROR
+        RESULT_DATA_DOWNLOAD_ERROR,
+        RESULT_REGISTRATION_EVENT_OK,
+        RESULT_REGISTRATION_EVENT_ERROR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
@@ -142,7 +155,9 @@ public interface Usat {
          * @return The service type. Valid values are
          *         {@link #SERVICE_CALL_CONTROL},
          *         {@link #SERVICE_MO_SMS_CONTROL},
-         *         {@link #SERVICE_DATA_DOWNLOAD_VIA_SMS_PP}.
+         *         {@link #SERVICE_DATA_DOWNLOAD_VIA_SMS_PP},
+         *         {@link #SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS},
+         *         {@link #SERVICE_REGISTRATION_EVENT_DOWNLOAD}.
          */
         public @ServiceType int getServiceType() {
             return mServiceType;
@@ -390,6 +405,47 @@ public interface Usat {
                     .append(", uriTruncated=").append(mUriTruncated)
                     .append(", tpdu=").append((mTpdu != null) ? mTpdu.length : 0)
                     .append(" origAddress=").append(ImsLog.hiddenString(mOriginatingAddress))
+                    .append(" ]").toString();
+        }
+    }
+
+    /**
+     * USAT command for IMS Registration event download.
+     */
+    class RegEventDownloadCommand extends Command {
+        private final int mStatusCode;
+        private final Set<Uri> mImpus;
+
+        RegEventDownloadCommand(int cid, Listener listener, int statusCode, Set<Uri> impus) {
+            super(cid, SERVICE_REGISTRATION_EVENT_DOWNLOAD, listener);
+            mStatusCode = statusCode;
+            mImpus = impus;
+        }
+
+        /**
+         * Returns registration status code.
+         *
+         * @return The IMS registration status code.
+         */
+        public int getStatusCode() {
+            return mStatusCode;
+        }
+
+        /**
+         * Returns set of IMPU.
+         *
+         * @return Set of IMPU.
+         */
+        public Set<Uri> getImpus() {
+            return mImpus;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.RegEventDownloadCommand: ")
+                    .append(super.toString())
+                    .append(", StatusCode=").append(mStatusCode)
+                    .append(", Impus=").append(ImsLog.hiddenString(mImpus.toString()))
                     .append(" ]").toString();
         }
     }

@@ -22,11 +22,13 @@ import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPAB
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM;
 
+import android.annotation.NonNull;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkSpecifier;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -53,6 +55,7 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Set;
 
 public class SscServiceState {
     // internal events
@@ -821,6 +824,11 @@ public class SscServiceState {
 
         @Override
         public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+            // do nothing
+        }
+
+        @Override
+        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus){
             // do nothing
         }
 

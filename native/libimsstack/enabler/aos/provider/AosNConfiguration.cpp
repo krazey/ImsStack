@@ -333,11 +333,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsExtraRegErrRetryCntSharedForRegAndS
     return m_objExtraRegErr.bExtraRegErrRetryCntSharedForRegAndSub;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegistrationEventForCatRequired() const
-{
-    return m_objCarrierConfig.bRegistrationEventForCatRequired;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyCallbackModeSupported() const
 {
     return m_objCarrierConfig.bEmergencyCallbackModeSupported;
@@ -507,6 +502,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRoamingPreferredEmcReg() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
 {
     return m_objAsset.nSipMessageThresholdForTransportChange;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUsatRegEventDownloadPolicy() const
+{
+    return m_objAsset.nUsatRegEventDownloadPolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetVolteHysTime() const
@@ -1175,8 +1175,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 
     /* carrier_config */
     /// ims.
-    m_objCarrierConfig.bRegistrationEventForCatRequired =
-            piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL);
     m_objCarrierConfig.bUnsubscribeRegistrationEventPackage =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL);
     m_objCarrierConfig.nIsimIndexForImpu =
@@ -1307,6 +1305,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
+    m_objAsset.nUsatRegEventDownloadPolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);
 
     m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(

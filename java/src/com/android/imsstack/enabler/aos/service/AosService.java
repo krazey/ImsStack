@@ -636,15 +636,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    private void onRegEventStateChanged(int statusCode, Set<Uri> impus) {
+        for (IAosRegistrationListener l : mAosRegistationListeners) {
+            l.notifyRegEventStateChanged(statusCode, impus);
+        }
+    }
+
     private void onAosIsimStateChanged(int state) {
         for (IAosInfoListener l : mAosInfoListeners) {
             l.notifyAosIsimStateChanged(state);
         }
-    }
-
-    @SuppressWarnings("unused")
-    private void onRegEventStateChanged(int state) {
-        // TODO : FIX
     }
 
     @SuppressWarnings("unused")
@@ -730,8 +731,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         });
     }
 
-    private void NotifyAosIsimStateChanged(int state) {
-        ImsLog.d(mSlotId, "NotifyAosIsimStateChanged :: state(" + state + ")");
+    private void notifyAosIsimStateChanged(int state) {
+        ImsLog.d(mSlotId, "notifyAosIsimStateChanged :: state(" + state + ")");
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -740,17 +741,18 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         });
     }
 
-    private void NotifyRegEventStateChanged(int state) {
-        ImsLog.d(mSlotId, "NotifyRegEventStateChanged :: state(" + state + ")");
+    private void notifyRegEventStateChanged(int statusCode, Set<Uri> impus) {
+        ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode + "), IMPU: "
+                + impus.toString());
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                onRegEventStateChanged(state);
+                onRegEventStateChanged(statusCode, impus);
             }
         });
     }
 
-    private void RequestPhoneNumberRetry(int command) {
+    private void requestPhoneNumberRetry(int command) {
         ImsLog.d(mSlotId, "RequestPhoneNumberRetry :: command(" + command + ")");
         mHandler.post(new Runnable() {
             @Override
@@ -760,7 +762,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         });
     }
 
-    private void RequestWifiService(int command) {
+    private void requestWifiService(int command) {
         ImsLog.d(mSlotId, "RequestWifiService :: command(" + command + ")");
         mHandler.post(new Runnable() {
             @Override
@@ -945,27 +947,34 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     break;
                 }
 
-                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE: {
-                    int state = parcel.readInt();
-                    NotifyAosIsimStateChanged(state);
+                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE: {
+                    int statusCode = parcel.readInt();
+
+                    Set<Uri> impus = new ArraySet<>();
+                    int count = parcel.readInt();
+                    for (int i = 0; i < count; i++) {
+                        impus.add(Uri.parse(parcel.readString()));
+                    }
+
+                    notifyRegEventStateChanged(statusCode, impus);
                     break;
                 }
 
-                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE: {
+                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE: {
                     int state = parcel.readInt();
-                    NotifyRegEventStateChanged(state);
+                    notifyAosIsimStateChanged(state);
                     break;
                 }
 
                 case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY: {
                     int command = parcel.readInt();
-                    RequestPhoneNumberRetry(command);
+                    requestPhoneNumberRetry(command);
                     break;
                 }
 
                 case IIAosService.N2J_REQUEST_WIFI_SERVICE: {
                     int command = parcel.readInt();
-                    RequestWifiService(command);
+                    requestWifiService(command);
                     break;
                 }
 

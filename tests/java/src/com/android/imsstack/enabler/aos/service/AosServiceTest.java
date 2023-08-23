@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Looper;
 import android.os.Parcel;
 import android.telephony.SubscriptionManager;
@@ -76,6 +77,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -984,6 +987,26 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void jniImsListenerProxy_notifyRegEventState() {
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_REG_EVENT_STATE);
+        parcel.writeInt(200); // statusCode
+        parcel.writeInt(2); // count
+        parcel.writeString("sip:test1@ims.com");
+        parcel.writeString("sip:test2@ims.com");
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.mNativeListener;
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        Set<Uri> impus = Set.of(Uri.parse("sip:test1@ims.com"), Uri.parse("sip:test2@ims.com"));
+
+        verify(mMockAosRegistrationListener).notifyRegEventStateChanged(200, impus);
+    }
+
+    @Test
     public void jniImsListenerProxy_notifyAosIsimState() {
         mAosService.addListener(mMockAosInfoListener);
 
@@ -996,21 +1019,6 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         verify(mMockAosInfoListener).notifyAosIsimStateChanged(IAosInfoListener.IsimState.VALID);
-    }
-
-    @Test
-    public void jniImsListenerProxy_notifyRegEventState() {
-        mAosService.addListener(mMockAosRegistrationListener);
-
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(IIAosService.N2J_NOTIFY_REG_EVENT_STATE);
-        parcel.writeInt(0); // state
-        parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
-        jniImsListener.onMessage(parcel);
-        processAllMessages();
-
-        // TODO: No implementation
     }
 
     @Test

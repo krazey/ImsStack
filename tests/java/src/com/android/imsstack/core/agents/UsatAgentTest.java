@@ -26,6 +26,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.net.Uri;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -45,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class UsatAgentTest {
@@ -52,7 +54,7 @@ public class UsatAgentTest {
     private static final int SLOT0 = 0;
     private static final int[] SUB_ID = { 1 };
     private static final byte[] USIM_SERVICE_TABLE =
-            SimUtils.hexStringToBytes("000000FF0000000000000000FF");
+            SimUtils.hexStringToBytes("000000FF00000000000000F0FF");
     private static final String SEND_ENVELOPE_OK = "9000";
     private static final String SEND_ENVELOPE_ERROR = "9300";
     /** MO SMS control */
@@ -159,6 +161,20 @@ public class UsatAgentTest {
 
     @Test
     @SmallTest
+    public void createRegEventDownloadCommand() {
+        Set<Uri> impus = Set.of(Uri.parse("sip:test1@ims.com"), Uri.parse("sip:test2@ims.com"));
+
+        Usat.RegEventDownloadCommand cmd = mUsatAgent.createRegEventDownloadCommand(
+                200, impus, mListener);
+
+        assertNotEquals(0, cmd.getCid());
+        assertEquals(Usat.SERVICE_REGISTRATION_EVENT_DOWNLOAD, cmd.getServiceType());
+        assertEquals(200, cmd.getStatusCode());
+        assertTrue(impus.equals(cmd.getImpus()));
+    }
+
+    @Test
+    @SmallTest
     public void isServiceAvailable_noUsimServiceTable() {
         when(mSimInterface.getUsimServiceTable()).thenReturn(null);
 
@@ -166,6 +182,7 @@ public class UsatAgentTest {
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_REGISTRATION_EVENT_DOWNLOAD));
     }
 
     @Test
@@ -177,6 +194,7 @@ public class UsatAgentTest {
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
         assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+        assertFalse(mUsatAgent.isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS));
     }
 
     @Test
@@ -188,6 +206,7 @@ public class UsatAgentTest {
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL));
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_DATA_DOWNLOAD_VIA_SMS_PP));
         assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_MEDIA_TYPE_SUPPORT));
+        assertTrue(mUsatAgent.isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS));
     }
 
     @Test
@@ -326,6 +345,50 @@ public class UsatAgentTest {
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_NOT_ALLOWED, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
+    }
+
+    @Test
+    @SmallTest
+    public void sendCommand_regEventDownloadAllowed() {
+        doReturn(SEND_ENVELOPE_OK).when(mTelephonyManager).sendEnvelopeWithStatus(any());
+
+        Set<Uri> impus = Set.of(Uri.parse("sip:test1@ims.com"), Uri.parse("sip:test2@ims.com"));
+
+        Usat.RegEventDownloadCommand cmd = mUsatAgent.createRegEventDownloadCommand(
+                200, impus, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+        processAllMessages();
+
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_REGISTRATION_EVENT_OK, cmdResponse.getResult());
+        assertEquals(cmd, cmdResponse.getCommand());
+    }
+
+    @Test
+    @SmallTest
+    public void sendCommand_regEventDownloadNotAllowed() {
+        doReturn(SEND_ENVELOPE_ERROR).when(mTelephonyManager).sendEnvelopeWithStatus(any());
+
+        Set<Uri> impus = Set.of(Uri.parse("sip:test1@ims.com"), Uri.parse("sip:test2@ims.com"));
+
+        Usat.RegEventDownloadCommand cmd = mUsatAgent.createRegEventDownloadCommand(
+                200, impus, mListener);
+        ArgumentCaptor<Usat.CommandResponse> cmdResponseCaptor =
+                ArgumentCaptor.forClass(Usat.CommandResponse.class);
+
+        mUsatAgent.sendCommand(cmd);
+        processAllMessages();
+
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
+
+        Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
+        assertEquals(Usat.RESULT_REGISTRATION_EVENT_ERROR, cmdResponse.getResult());
         assertEquals(cmd, cmdResponse.getCommand());
     }
 

@@ -84,7 +84,6 @@ public:
     IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const override;
     IMS_BOOL IsExtraReregErrInRoamingAsFailureHandled() const override;
     IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const override;
-    IMS_BOOL IsRegistrationEventForCatRequired() const override;
     IMS_BOOL IsEmergencyCallbackModeSupported() const override;
     IMS_BOOL IsEmergencySmsOverImsSupported() const override;
     IMS_BOOL IsContactUriValidationChecked() const override;
@@ -117,6 +116,7 @@ public:
     IMS_SINT32 GetRegOutOfServicePolicy() const override;
     IMS_SINT32 GetRoamingPreferredEmcReg() const override;
     IMS_SINT32 GetSipMessageThresholdForTransportChange() const override;
+    IMS_SINT32 GetUsatRegEventDownloadPolicy() const override;
     IMS_SINT32 GetVolteHysTime() const override;
     IMS_SINT32 GetRegRetrySip305CodePolicy() const override;
     IMS_SINT32 GetReregRetrySip305CodePolicy() const override;

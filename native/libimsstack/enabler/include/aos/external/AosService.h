@@ -81,22 +81,19 @@ public:
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const ImsList<AString>& objFeatureTags) override;
-
     IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const ImsList<AString>& objFeatureTags) override;
-
     IMS_BOOL NotifyDeregistered(IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
     IMS_BOOL NotifyTechnologyChangeFailed(
             IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
-
     IMS_BOOL NotifyAosIsimState(IN AosIsimState eState) override;
-    IMS_BOOL NotifyRegEventState(IN AosRegEvent eState) override;
+    IMS_BOOL NotifyRegEventState(IN IMS_UINT32 nStatusCode,
+            IN const ImsList<AString>& objImpus = ImsList<AString>()) override;
     IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
-
     ImsMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
     IMS_BOOL IsSupportCapabilitiesForNetwork(

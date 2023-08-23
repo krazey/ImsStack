@@ -142,24 +142,33 @@ IMS_BOOL JniAosServiceThread::NotifyCapabilitiesUpdateFailed(
 }
 
 PUBLIC
+IMS_BOOL JniAosServiceThread::NotifyRegEventState(
+        IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus)
+{
+    IMS_TRACE_D("NotifyRegEventState", 0, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_REG_EVENT_STATE);
+    objParcel.writeInt32(nStatusCode);
+
+    IMS_UINT32 nCount = objImpus.GetSize();
+    objParcel.writeInt32(nCount);
+
+    for (IMS_UINT32 i = 0; i < nCount; ++i)
+    {
+        objParcel.writeString16(String16(objImpus.GetAt(i).GetStr()));
+    }
+
+    return SendData2Java(objParcel);
+}
+
+PUBLIC
 IMS_BOOL JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
 {
     IMS_TRACE_D("NotifyAosIsimState", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_AOS_ISIM_STATE);
-    objParcel.writeInt32(nState);
-
-    return SendData2Java(objParcel);
-}
-
-PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyRegEventState(IN IMS_UINT32 nState)
-{
-    IMS_TRACE_D("NotifyRegEventState", 0, 0, 0);
-
-    Parcel objParcel;
-    objParcel.writeInt32(IIAosService::N2J_NOTIFY_REG_EVENT_STATE);
     objParcel.writeInt32(nState);
 
     return SendData2Java(objParcel);

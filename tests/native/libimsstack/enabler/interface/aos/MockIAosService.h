@@ -92,7 +92,8 @@ public:
                     IN AosReasonCode eReason),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyAosIsimState, (IN AosIsimState eState), (override));
-    MOCK_METHOD(IMS_BOOL, NotifyRegEventState, (IN AosRegEvent eState), (override));
+    MOCK_METHOD(IMS_BOOL, NotifyRegEventState,
+            (IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus), (override));
     MOCK_METHOD(IMS_BOOL, RequestPhoneNumberRetry, (IN AosPhoneNumberRetryCommand eCommand),
             (override));
     MOCK_METHOD(IMS_BOOL, RequestWifiService, (IN IMS_BOOL bIsOn), (override));

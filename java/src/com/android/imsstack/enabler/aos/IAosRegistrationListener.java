@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import android.annotation.NonNull;
 import android.net.Uri;
 
 import java.util.Set;
@@ -74,6 +75,15 @@ public interface IAosRegistrationListener {
      * @param reason Reason for update failure. See {@link CapabilityReason}.
      */
     void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
+
+    /**
+     * This method is called to notify changes in the registration event state.
+     * The provided {@code impus} is applicable only when the {@code statusCode} is 200.
+     *
+     * @param statusCode IMS registration status code.
+     * @param impus Set of IMPU.
+     */
+    void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus);
 
     /**
      * Regsitration State

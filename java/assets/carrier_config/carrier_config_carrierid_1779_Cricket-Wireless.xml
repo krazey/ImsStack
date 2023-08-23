@@ -41,8 +41,6 @@
     </int-array>
     <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
     <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
-
-    <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
     <int name="ims.isim_index_for_impu_int" value="0"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">

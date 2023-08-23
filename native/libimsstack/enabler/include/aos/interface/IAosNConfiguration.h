@@ -360,14 +360,6 @@ public:
     virtual IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const = 0;
 
     /**
-     * @brief Returns whether Registration event for CAT(Card Application Toolkit) is supported or
-     *        not
-     *
-     * @return IMS_BOOL Return whether to be applied or not
-     */
-    virtual IMS_BOOL IsRegistrationEventForCatRequired() const = 0;
-
-    /**
      * @brief Returns Flag specifying whether UE should enter Emergency CallBack Mode (ECBM)
      *        after emergency call is ended.
      *
@@ -696,6 +688,23 @@ public:
      * @return IMS_SINT32 Return the threshold size of SIP message
      */
     virtual IMS_SINT32 GetSipMessageThresholdForTransportChange() const = 0;
+
+    /**
+     * @brief Indicate the USAT IMS registration event download policy.
+     *
+     *        Specify the support policy of USAT IMS registration event download
+     *        TS 131.111 7.5.21 describes about the USAT IMS registration event download
+     *        and the conditions to be notified to UICC when an IMS registration event occurs.
+     *        This asset indicates whether USAT IMS registration event download is supported,
+     *        and if so, whether to check the precondition before notifying.
+     *        Possible values are,
+     *        CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD
+     *        CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD
+     *        CarrierConfig::Assets::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD
+     *
+     * @return IMS_SINT32 Returns registration event download policy for USAT.
+     */
+    virtual IMS_SINT32 GetUsatRegEventDownloadPolicy() const = 0;
 
     /**
      * @brief Get the VoLTE Hysteresis time.

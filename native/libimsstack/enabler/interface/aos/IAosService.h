@@ -29,7 +29,6 @@ enum class AosReasonCode;
 enum class AosNetworkType;
 enum class AosCapability;
 enum class AosIsimState;
-enum class AosRegEvent;
 enum class AosPhoneNumberRetryCommand;
 enum class AosRegRequestType;
 enum class AosPcscfOrder;
@@ -189,10 +188,11 @@ public:
      * Notify the application that Reg event state.
      * AosService(Native) -> AosService(Java)
      *
-     * @param nState is type of AosRegEvent.
-     * @see enum class AosRegEvent
+     * @param nStatusCode is IMS registration status code.
+     * @param objImpus is list of IMPUs.
      */
-    virtual IMS_BOOL NotifyRegEventState(IN AosRegEvent eState) = 0;
+    virtual IMS_BOOL NotifyRegEventState(IN IMS_UINT32 nStatusCode,
+            IN const ImsList<AString>& objImpus = ImsList<AString>()) = 0;
 
     /**
      * Request the application to phone number retry.
@@ -362,15 +362,6 @@ enum class AosIsimState
     VALID = 1,
     REFRESH_STARTED = 2,
     REFRESH_COMPLETE = 3
-};
-
-/**
- * Reg event state
- */
-enum class AosRegEvent
-{
-    ACTIVE = 1,
-    INVALID = 2
 };
 
 /**

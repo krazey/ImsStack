@@ -16,6 +16,11 @@
 
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
+import android.net.Uri;
+
+import java.util.Set;
+
 /**
  * This interface provides the operations for USAT functions to interwork with the UICC.
  */
@@ -27,7 +32,9 @@ public interface UsatInterface {
      *                    {@link #SERVICE_CALL_CONTROL},
      *                    {@link #SERVICE_MO_SMS_CONTROL},
      *                    {@link #SERVICE_DATA_DOWNLOAD_VIA_SMS_PP},
-     *                    {@link #SERVICE_MEDIA_TYPE_SUPPORT}.
+     *                    {@link #SERVICE_MEDIA_TYPE_SUPPORT},
+     *                    {@link #SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS},
+     *                    {@link #SERVICE_REGISTRATION_EVENT_DOWNLOAD}.
      *
      * @return true if the specified service is available or false otherwise.
      */
@@ -94,6 +101,18 @@ public interface UsatInterface {
     Usat.SmsPpDownloadCommand createSmsPpDownloadCommand(
             String rpOriginatingAddress, boolean uriTruncated, byte[] tpdu,
             String originatingAddress, Usat.Listener listener);
+
+    /**
+     * Creates a USAT command for IMS registration event download.
+     *
+     * @param statusCode IMS registration status code.
+     * @param impus Set of IMPU.
+     * @param listener The listener for receiving the response.
+     *
+     * @return A USAT command for registration event download.
+     */
+    Usat.RegEventDownloadCommand createRegEventDownloadCommand(
+            int statusCode, @NonNull Set<Uri> impus, Usat.Listener listener);
 
     /**
      * Cancels the given command that was previously sent and has not received

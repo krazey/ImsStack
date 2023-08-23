@@ -93,13 +93,11 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(10000, pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
-    EXPECT_FALSE(pAosNConfiguration->IsRegistrationEventForCatRequired());
     EXPECT_FALSE(pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, pAosNConfiguration->GetPreferredImsDscp());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED,
             pAosNConfiguration->GetRegistrationPreferredAccessTypeFeatureTag());
-
     EXPECT_FALSE(pAosNConfiguration->IsGeolocationPidfSupported(1));
     EXPECT_EQ(0, pAosNConfiguration->GetImsIdentityPriority().GetSize());
     EXPECT_EQ(0, pAosNConfiguration->GetRegPermanentErrCode().GetSize());
@@ -294,11 +292,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     /* carrier_config */
     /// ims.
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_FOR_CAT_REQUIRED_BOOL, IMS_FALSE))
-            .Times(2)
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(
                     CarrierConfig::Ims::KEY_UNSUBSCRIBE_REGISTRATION_EVENT_PACKAGE_BOOL, IMS_FALSE))
             .Times(2)
@@ -414,7 +407,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1000, pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
-    EXPECT_FALSE(pAosNConfiguration->IsRegistrationEventForCatRequired());
     EXPECT_FALSE(pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, pAosNConfiguration->GetPreferredImsDscp());
@@ -473,7 +465,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1000, pAosNConfiguration->GetEmergencyRegistrationTimerMillis());
     // KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT
 
-    EXPECT_FALSE(pAosNConfiguration->IsRegistrationEventForCatRequired());
     EXPECT_FALSE(pAosNConfiguration->IsUnSubscription());
     EXPECT_EQ(1, pAosNConfiguration->GetIsimIndexForImpu());
     EXPECT_EQ(CarrierConfig::Ims::PREFERRED_DSCP_NONE, pAosNConfiguration->GetPreferredImsDscp());
@@ -660,6 +651,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT, -1))
+            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT, -1))
             .WillOnce(Return(60));
 
@@ -816,6 +810,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
             pAosNConfiguration->GetRoamingPreferredEmcReg());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
+    EXPECT_EQ(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD,
+            pAosNConfiguration->GetUsatRegEventDownloadPolicy());
     EXPECT_EQ(60, pAosNConfiguration->GetVolteHysTime());
 
     ImsVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();

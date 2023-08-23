@@ -40,7 +40,6 @@ public:
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             bEmergencyCallbackModeSupported(IMS_FALSE),
-            bRegistrationEventForCatRequired(IMS_FALSE),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
@@ -105,7 +104,6 @@ public:
     IMS_BOOL bEmergencyCallbackModeSupported;
 
     /// carrier_config - ims
-    IMS_BOOL bRegistrationEventForCatRequired;
     IMS_BOOL bUnsubscribeRegistrationEventPackage;
     /// carrier_config - imsemergency.
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;

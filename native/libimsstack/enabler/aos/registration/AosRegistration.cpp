@@ -4509,6 +4509,30 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessIpVersionChange()
     return IMS_TRUE;
 }
 
+PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
+{
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_piContext->GetSlotId())->GetUsatRegEventDownloadPolicy();
+    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD)
+    {
+        return;
+    }
+
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
+    if (piService == IMS_NULL)
+    {
+        return;
+    }
+
+    if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD)
+    {
+        piService->NotifyRegEventState((nStatusCode <= SipStatusCode::SC_INVALID)
+                        ? SipStatusCode::SC_INVALID
+                        : nStatusCode);
+    }
+
+    // Notice : Handling for USAT_REG_EVENT_CONDITIONAL_DOWNLOAD has not yet been considered.
+}
+
 PROTECTED VIRTUAL void AosRegistration::RecordImpu()
 {
     if (m_eRegType != AosRegistrationType::NORMAL)
@@ -4811,6 +4835,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
 
     IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
     ProcessRequiredWfcErrMessage(nStatusCode);
+    ProcessRegEventChange(nStatusCode);
 
     switch (nReason)
     {
