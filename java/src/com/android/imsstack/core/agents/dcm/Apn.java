@@ -220,17 +220,12 @@ public abstract class Apn extends Handler implements IApn {
         // Apn class provide simple event pumping table through "registerHandler" api
         // for derived classes
         MsgProcInterface msgProcess = mMapMsgHandler.get(msg.what);
-
-        if (msgProcess == null) {
-            ImsLog.w(mSlotId, "Apn :: no proc - apn=" + mType + ", msg=" + msg.what
+        if (msgProcess != null) {
+            ImsLog.i(mSlotId, "Apn :: apn=" + mType + ", msg=" + msg.what
                     + ", proc=" + sEventToString.get(msg.what));
-            return;
+
+            msgProcess.procMsg(msg);
         }
-
-        ImsLog.i(mSlotId, "Apn :: apn=" + mType + ", msg=" + msg.what
-                + ", proc=" + sEventToString.get(msg.what));
-
-        msgProcess.procMsg(msg);
     }
 
     @Override
