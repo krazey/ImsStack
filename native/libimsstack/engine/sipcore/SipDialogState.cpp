@@ -1621,7 +1621,8 @@ void SipDialogState::UpdateSessionId(IN const SipMessageInfo& objMsgInfo)
 
     if (SipStack::IsValidHeader(pSipHdr))
     {
-        m_strSessionId = SipStack::GetUnknownHeaderBody(pSipHdr);
+        m_strSessionId = pSipHdr->GetValue();
+        IMS_TRACE_I("DialogState: Session-ID (%s)", m_strSessionId.GetStr(), 0, 0);
     }
 
     SipStack::FreeHeaderEx(pSipHdr);
