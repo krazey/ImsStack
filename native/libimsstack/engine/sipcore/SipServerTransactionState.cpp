@@ -1094,7 +1094,7 @@ IMS_BOOL SipServerTransactionState::InitResponse(
         SipDialogState* pDState = m_pDialogEx->GetDialogState();
         AString strSessionId = pDState->GetSessionId();
 
-        if (strSessionId.GetLength() == 0)
+        if (strSessionId.GetLength() == 0 && objMethod.Equals(SipMethod::INVITE))
         {
             strSessionId = SipUtils::GenerateSessionId(GetSlotId(), pDState->GetCallId());
         }
@@ -1102,13 +1102,13 @@ IMS_BOOL SipServerTransactionState::InitResponse(
         if (strSessionId.GetLength() > 0)
         {
             const AString SESSION_ID(SipHeaderName::SESSION_ID);
-            SipHeaderBase* pstSessionId =
+            SipHeaderBase* pSessionId =
                     SipStack::DecodeHeader(ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
 
-            if (pstSessionId != IMS_NULL)
+            if (pSessionId != IMS_NULL)
             {
-                (void)SipStack::SetUnknownHeader(pstSessionId, SESSION_ID, pOutSipMsg);
-                SipStack::FreeHeaderEx(pstSessionId);
+                (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, pOutSipMsg);
+                SipStack::FreeHeaderEx(pSessionId);
             }
         }
     }

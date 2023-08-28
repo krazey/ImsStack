@@ -1461,21 +1461,32 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN const SipMethod& 
             SipStack::FreeHeaderEx(pSipHdr);
 
             // HEADER_REQ_SESSION-ID
-            if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()))
+            if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()) &&
+                    objMethod.Equals(SipMethod::INVITE))
             {
-                AString strSessionId = SipUtils::GenerateSessionId(GetSlotId(), strCallId);
+                const AString SESSION_ID(SipHeaderName::SESSION_ID);
+                SipHeaderBase* pSessionId = SipStack::GetUnknownHeader(m_pSipMsg, SESSION_ID);
 
-                if (strSessionId.GetLength() > 0)
+                if (pSessionId == IMS_NULL)
                 {
-                    const AString SESSION_ID(SipHeaderName::SESSION_ID);
-                    SipHeaderBase* pSessionId =
-                            SipStack::DecodeHeader(ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
+                    AString strSessionId = SipUtils::GenerateSessionId(GetSlotId(), strCallId);
 
-                    if (pSessionId != IMS_NULL)
+                    if (strSessionId.GetLength() > 0)
                     {
-                        (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, m_pSipMsg);
-                        SipStack::FreeHeaderEx(pSessionId);
+                        pSessionId = SipStack::DecodeHeader(
+                                ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
+
+                        if (pSessionId != IMS_NULL)
+                        {
+                            (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, m_pSipMsg);
+                            SipStack::FreeHeaderEx(pSessionId);
+                        }
                     }
+                }
+                else
+                {
+                    // Enabler or Core Engine sets the Session-ID header, so do not modify it.
+                    SipStack::FreeHeaderEx(pSessionId);
                 }
             }
         }
