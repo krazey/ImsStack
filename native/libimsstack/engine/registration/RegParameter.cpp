@@ -26,7 +26,6 @@
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/SubscriberTracker.h"
@@ -344,7 +343,7 @@ IMS_RESULT RegParameter::FormHeaders(
         }
 
         piSipMsg->AddHeader(ISipHeader::REQUIRE, Sip::STR_SEC_AGREE);
-        piSipMsg->AddHeader(ISipHeader::UNKNOWN, Sip::STR_SEC_AGREE, SipHeaderName::PROXY_REQUIRE);
+        piSipMsg->AddHeader(ISipHeader::PROXY_REQUIRE, Sip::STR_SEC_AGREE);
     }
 
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), pStateTracker->GetSipProfile()))
@@ -374,11 +373,11 @@ IMS_RESULT RegParameter::FormHeaders(
     }
 
     // Add a User-Agent if configurable
-    if (!piSipMsg->IsHeaderPresent(ISipHeader::UNKNOWN, SipHeaderName::USER_AGENT))
+    if (!piSipMsg->IsHeaderPresent(ISipHeader::USER_AGENT))
     {
         if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), pStateTracker->GetSipProfile()))
         {
-            UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, pStateTracker->GetSipProfile(),
+            UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, pStateTracker->GetSipProfile(),
                     AString::ConstNull(), pStateTracker->GetIpAddress(), GetSlotId(), piSipMsg);
         }
     }

@@ -35,7 +35,6 @@
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipFeatures.h"
-#include "SipHeaderName.h"
 #include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 
@@ -299,16 +298,8 @@ IMS_RESULT Reference::Refer(IN IMS_BOOL bImplicitSubscription)
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
 
         // Refer-Sub header : "true" / "false"
-        if (bImplicitSubscription)
-        {
-            piSipMsg->SetHeader(
-                    ISipHeader::UNKNOWN, TextParser::STR_SMALL_TRUE, SipHeaderName::REFER_SUB);
-        }
-        else
-        {
-            piSipMsg->SetHeader(
-                    ISipHeader::UNKNOWN, TextParser::STR_SMALL_FALSE, SipHeaderName::REFER_SUB);
-        }
+        piSipMsg->SetHeader(ISipHeader::REFER_SUB,
+                bImplicitSubscription ? TextParser::STR_SMALL_TRUE : TextParser::STR_SMALL_FALSE);
     }
 
     // Try to send a SUBSCRIBE request to the network
@@ -564,16 +555,8 @@ IMS_RESULT Reference::ReferEx(IN IMS_BOOL bImplicitSubscription,
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, "norefersub");
 
         // Refer-Sub header : "true" / "false"
-        if (bImplicitSubscription)
-        {
-            piSipMsg->SetHeader(
-                    ISipHeader::UNKNOWN, TextParser::STR_SMALL_TRUE, SipHeaderName::REFER_SUB);
-        }
-        else
-        {
-            piSipMsg->SetHeader(
-                    ISipHeader::UNKNOWN, TextParser::STR_SMALL_FALSE, SipHeaderName::REFER_SUB);
-        }
+        piSipMsg->SetHeader(ISipHeader::REFER_SUB,
+                bImplicitSubscription ? TextParser::STR_SMALL_TRUE : TextParser::STR_SMALL_FALSE);
     }
 
     // Try to send a SUBSCRIBE request to the network

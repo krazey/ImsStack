@@ -50,7 +50,6 @@
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipFactory.h"
-#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
@@ -3050,8 +3049,7 @@ IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piScc)
     if (m_pRegFlow->GetSessionId().GetLength() > 0)
     {
         // Set Session-ID header
-        if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, m_pRegFlow->GetSessionId(),
-                    SipHeaderName::SESSION_ID) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::SESSION_ID, m_pRegFlow->GetSessionId()) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting Session-ID failed", 0, 0, 0);
             return IMS_FAILURE;
@@ -3127,8 +3125,7 @@ void Registration::SetNextNonce(IN ISipMessage* piSipMsg)
         return;
     }
 
-    AString strAuthenticationInfo =
-            piSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::AUTHENTICATION_INFO);
+    AString strAuthenticationInfo = piSipMsg->GetHeader(ISipHeader::AUTHENTICATION_INFO);
 
     if (strAuthenticationInfo.GetLength() == 0)
     {

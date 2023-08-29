@@ -219,7 +219,6 @@ GLOBAL IMS_CHAR GetCompactHeaderName(
         IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull());
 GLOBAL const IMS_CHAR* GetHeaderName(
         IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull());
-GLOBAL const IMS_CHAR* GetHeaderNameFromType(IN IMS_SINT32 nType);
 GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName);
 
 GLOBAL SipAddrSpec* GetAddrSpec(IN SipHeaderBase* pHeader);
@@ -258,8 +257,6 @@ GLOBAL IMS_SINT32 GetStatusCode(IN ::SipMessage* pMessage);
 GLOBAL SipStatusCode GetStatusCodeEx(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL GetSubscriptionStateHeader(
         IN ::SipMessage* pMessage, OUT AString& strSubsState, OUT IMS_SINT32* pnExpires = IMS_NULL);
-GLOBAL SipHeaderBase* GetUnknownHeader(
-        IN ::SipMessage* pMessage, IN const AString& strName, IN IMS_UINT32 nIndex = 0);
 GLOBAL AString GetUnknownHeaderName(IN const SipHeaderBase* pHeader);
 GLOBAL AString GetUnknownHeaderBody(IN const SipHeaderBase* pHeader);
 GLOBAL AString GetViaBranchParameter(IN ::SipMessage* pMessage);
@@ -312,9 +309,6 @@ GLOBAL IMS_BOOL SetRequestLine(
 GLOBAL IMS_BOOL SetRequestUri(IN SipAddrSpec* pAddrSpec, IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL SetStatusLine(IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase,
         IN_OUT ::SipMessage*& pMessage);
-GLOBAL IMS_BOOL SetUnknownHeader(
-        IN SipHeaderBase* pHeader, IN const AString& strName, IN_OUT ::SipMessage*& pMessage);
-
 GLOBAL IMS_BOOL UpdateSentProtocol(IN ::SipMessage* pMessage, IN const AString& strSentProtocol);
 
 // APIs for bad header control

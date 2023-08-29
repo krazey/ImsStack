@@ -16,17 +16,14 @@
 #include "ServiceMemory.h"
 
 #include "SipHeader.h"
-#include "SipHeaderName.h"
 #include "SipPrivate.h"
 #include "SipUnknownHeaders.h"
 
 PUBLIC
 SipUnknownHeaders::Header::Header(IN const AString& strName_) :
         strCompactName(AString::ConstNull()),
-        strName(AString::ConstNull())
+        strName(strName_)
 {
-    // Headers with a compact form : Subject (s), Identity (y), Identity-Info (n)
-    SetName(strName_);
 }
 
 PUBLIC
@@ -68,61 +65,6 @@ IMS_BOOL SipUnknownHeaders::Header::Equals(IN const AString& strName) const
     }
 
     return this->strName.EqualsIgnoreCase(strName);
-}
-
-PRIVATE
-void SipUnknownHeaders::Header::SetName(IN const AString& strName)
-{
-    // Headers with a compact form : Subject (s), Identity (y), Identity-Info (n)
-
-    if (strName.EqualsIgnoreCase(SipHeaderName::CF_SUBJECT))
-    {
-        this->strCompactName = strName;
-        this->strName = SipHeaderName::SUBJECT;
-    }
-    else if (strName.EqualsIgnoreCase(SipHeaderName::CF_IDENTITY))
-    {
-        this->strCompactName = strName;
-        this->strName = SipHeaderName::IDENTITY;
-    }
-    else if (strName.EqualsIgnoreCase(SipHeaderName::CF_IDENTITY_INFO))
-    {
-        this->strCompactName = strName;
-        this->strName = SipHeaderName::IDENTITY_INFO;
-    }
-    else
-    {
-        switch (strName[0])
-        {
-            case 's':  // FALL-THROUGH
-            case 'S':
-                if (strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
-                {
-                    this->strCompactName = SipHeaderName::CF_SUBJECT;
-                }
-
-                this->strName = strName;
-                break;
-
-            case 'i':  // FALL-THROUGH
-            case 'I':
-                if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY))
-                {
-                    this->strCompactName = SipHeaderName::CF_IDENTITY;
-                }
-                else if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY_INFO))
-                {
-                    this->strCompactName = SipHeaderName::CF_IDENTITY_INFO;
-                }
-
-                this->strName = strName;
-                break;
-
-            default:
-                this->strName = strName;
-                break;
-        }
-    }
 }
 
 PUBLIC

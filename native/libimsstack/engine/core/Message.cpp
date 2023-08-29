@@ -21,7 +21,6 @@
 #include "ISipConnection.h"
 #include "ISipHeader.h"
 #include "Message.h"
-#include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
@@ -506,10 +505,11 @@ IMS_BOOL Message::CreateBodyParts()
 }
 
 PRIVATE GLOBAL IMS_BOOL Message::IsInaccessibleHeader(
-        IN IMS_SINT32 nHType, IN const AString& strHName)
+        IN IMS_SINT32 nHType, IN const AString& /*strHName*/)
 {
     switch (nHType)
     {
+        case ISipHeader::AUTHENTICATION_INFO:  // FALL-THROUGH
         case ISipHeader::AUTHORIZATION:        // FALL-THROUGH
         case ISipHeader::MAX_FORWARDS:         // FALL-THROUGH
         case ISipHeader::MIN_EXPIRES:          // FALL-THROUGH
@@ -522,19 +522,6 @@ PRIVATE GLOBAL IMS_BOOL Message::IsInaccessibleHeader(
         case ISipHeader::SERVICE_ROUTE:        // FALL-THROUGH
         case ISipHeader::VIA:
             return IMS_TRUE;
-        case ISipHeader::UNKNOWN:
-            switch (strHName[0])
-            {
-                case 'a':
-                case 'A':
-                    if (strHName.EqualsIgnoreCase(SipHeaderName::AUTHENTICATION_INFO))
-                        return IMS_TRUE;
-                    break;
-
-                default:
-                    break;
-            }
-            break;
         default:
             break;
     }

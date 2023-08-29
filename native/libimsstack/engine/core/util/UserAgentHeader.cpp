@@ -27,11 +27,11 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN const AString& strName,
+PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN IMS_SINT32 nHeaderType,
         IN const SipProfile* pProfile, IN const AString& /*strServiceId*/,
         IN const IpAddress& /*objIpAddr*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSipMsg)
 {
-    if (strName.GetLength() == 0)
+    if (nHeaderType != ISipHeader::USER_AGENT && nHeaderType != ISipHeader::SERVER)
     {
         return;
     }
@@ -58,9 +58,10 @@ PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN const AString& strName,
         return;
     }
 
-    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strUaString, strName) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(nHeaderType, strUaString) != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Setting %s header failed", strName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Setting %s header failed",
+                (nHeaderType == ISipHeader::USER_AGENT ? "User-Agent" : "Server"), 0, 0);
         return;
     }
 }

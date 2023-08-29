@@ -96,6 +96,51 @@ PUBLIC GLOBAL const IMS_CHAR* SipHeader::NAME[] = {
         SipHeaderName::RESOURCE_PRIORITY,
         SipHeaderName::ACCEPT_RESOURCE_PRIORITY,
         SipHeaderName::DATE,
+        SipHeaderName::ACCEPT_ENCODING,
+        SipHeaderName::ACCEPT_LANGUAGE,
+        SipHeaderName::ALERT_INFO,
+        SipHeaderName::ANSWER_MODE,
+        SipHeaderName::AUTHENTICATION_INFO,
+        SipHeaderName::CALL_INFO,
+        SipHeaderName::CONTENT_LANGUAGE,
+        SipHeaderName::ERROR_INFO,
+        SipHeaderName::FLOW_TIMER,
+        SipHeaderName::IDENTITY,
+        SipHeaderName::IDENTITY_INFO,
+        SipHeaderName::IN_REPLY_TO,
+        SipHeaderName::ORGANIZATION,
+        SipHeaderName::P_ANSWER_STATE,
+        SipHeaderName::PERMISSION_MISSING,
+        SipHeaderName::P_MEDIA_AUTHORIZATION,
+        SipHeaderName::P_PROFILE_KEY,
+        SipHeaderName::P_REFUSED_URI_LIST,
+        SipHeaderName::PRIORITY,
+        SipHeaderName::PRIV_ANSWER_MODE,
+        SipHeaderName::PROXY_REQUIRE,
+        SipHeaderName::P_SERVED_USER,
+        SipHeaderName::P_USER_DATABASE,
+        SipHeaderName::REASON,
+        SipHeaderName::REFER_SUB,
+        SipHeaderName::REPLY_TO,
+        SipHeaderName::RESPONSE_KEY,
+        SipHeaderName::SERVER,
+        SipHeaderName::SUBJECT,
+        SipHeaderName::SUPPRESS_IF_MATCH,
+        SipHeaderName::TARGET_DIALOG,
+        SipHeaderName::TRIGGER_CONSENT,
+        SipHeaderName::USER_AGENT,
+        SipHeaderName::FEATURE_CAPS,
+        SipHeaderName::GEOLOCATION,
+        SipHeaderName::GEOLOCATION_ERROR,
+        SipHeaderName::GEOLOCATION_ROUTING,
+        SipHeaderName::INFO_PACKAGE,
+        SipHeaderName::MAX_BREADTH,
+        SipHeaderName::P_ASSERTED_SERVICE,
+        SipHeaderName::POLICY_CONTACT,
+        SipHeaderName::POLICY_ID,
+        SipHeaderName::P_PREFERRED_SERVICE,
+        SipHeaderName::RECV_INFO,
+        SipHeaderName::SESSION_ID,
         IMS_NULL,
 };
 // clang-format on
@@ -112,7 +157,7 @@ SipHeader::SipHeader() :
 PUBLIC
 SipHeader::SipHeader(IN IMS_SINT32 nType) :
         m_nType(nType),
-        m_strName(SipStack::GetHeaderNameFromType(nType)),
+        m_strName(SipStack::GetHeaderName(nType)),
         m_strBody(AString::ConstNull()),
         m_pAddress(IMS_NULL)
 {
@@ -143,7 +188,7 @@ SipHeader::SipHeader(IN const SipHeaderBase* pSipHdr) :
     }
     else
     {
-        m_strName = SipStack::GetHeaderNameFromType(m_nType);
+        m_strName = SipStack::GetHeaderName(m_nType);
     }
 
     SipStack::EncodeHeaderBody(pSipHdr, IMS_FALSE, m_strBody);
@@ -339,34 +384,15 @@ PUBLIC VIRTUAL IMS_RESULT SipHeader::GetParameterNames(OUT ImsList<AString>& obj
 
 PUBLIC VIRTUAL IMS_SINT32 SipHeader::GetValueInt() const
 {
-    switch (m_nType)
+    IMS_BOOL bOk = IMS_FALSE;
+    IMS_SINT32 nValue = INVALID_INT;
+
+    if (IsHeaderBodyDigitFormat(m_nType))
     {
-        case ISipHeader::CONTENT_LENGTH:   // FALL-THROUGH
-        case ISipHeader::EXPIRES_SEC:      // FALL-THROUGH
-        case ISipHeader::EXPIRES_ANY:      // FALL-THROUGH
-        case ISipHeader::MIN_EXPIRES:      // FALL-THROUGH
-        case ISipHeader::MAX_FORWARDS:     // FALL-THROUGH
-        case ISipHeader::MIN_SE:           // FALL-THROUGH
-        case ISipHeader::RETRY_AFTER_SEC:  // FALL-THROUGH
-        case ISipHeader::RETRY_AFTER_ANY:  // FALL-THROUGH
-        case ISipHeader::RSEQ:             // FALL-THROUGH
-        case ISipHeader::SESSION_EXPIRES:
-        {
-            IMS_BOOL bOk = IMS_FALSE;
-            IMS_SINT32 nValue = m_strBody.ToInt32(&bOk);
-
-            if (!bOk)
-            {
-                break;
-            }
-
-            return nValue;
-        }
-        default:
-            break;
+        nValue = m_strBody.ToInt32(&bOk);
     }
 
-    return (-1);
+    return bOk ? nValue : INVALID_INT;
 }
 
 PUBLIC VIRTUAL void SipHeader::RemoveParameter(IN const AString& strName)
@@ -430,26 +456,13 @@ PUBLIC VIRTUAL IMS_RESULT SipHeader::SetParameter(
 
 PUBLIC VIRTUAL IMS_RESULT SipHeader::SetValueInt(IN IMS_SINT32 nValue)
 {
-    switch (m_nType)
+    if (IsHeaderBodyDigitFormat(m_nType))
     {
-        case ISipHeader::CONTENT_LENGTH:  // FALL-THROUGH
-        case ISipHeader::EXPIRES_SEC:     // FALL-THROUGH
-        case ISipHeader::EXPIRES_ANY:     // FALL-THROUGH
-        case ISipHeader::MIN_EXPIRES:     // FALL-THROUGH
-        case ISipHeader::MAX_FORWARDS:    // FALL-THROUGH
-        case ISipHeader::MIN_SE:          // FALL-THROUGH
-        case ISipHeader::RSEQ:            // FALL-THROUGH
-        case ISipHeader::SESSION_EXPIRES:
+        if (nValue >= 0)
         {
-            if (nValue >= 0)
-            {
-                m_strBody.SetNumber(nValue);
-            }
-
+            m_strBody.SetNumber(nValue);
             return IMS_SUCCESS;
         }
-        default:
-            break;
     }
 
     return IMS_FAILURE;
@@ -608,4 +621,26 @@ IMS_BOOL SipHeader::ParseUnknownBody(IN const AString& strBody)
     m_strBody = strBody.GetSubStr(0, nSemiColon).Trim();
 
     return IMS_TRUE;
+}
+
+PRIVATE GLOBAL IMS_BOOL SipHeader::IsHeaderBodyDigitFormat(IN IMS_SINT32 nType)
+{
+    switch (nType)
+    {
+        case ISipHeader::CONTENT_LENGTH:   // FALL-THROUGH
+        case ISipHeader::EXPIRES_SEC:      // FALL-THROUGH
+        case ISipHeader::EXPIRES_ANY:      // FALL-THROUGH
+        case ISipHeader::MIN_EXPIRES:      // FALL-THROUGH
+        case ISipHeader::MAX_FORWARDS:     // FALL-THROUGH
+        case ISipHeader::MIN_SE:           // FALL-THROUGH
+        case ISipHeader::RETRY_AFTER_SEC:  // FALL-THROUGH
+        case ISipHeader::RETRY_AFTER_ANY:  // FALL-THROUGH
+        case ISipHeader::RSEQ:             // FALL-THROUGH
+        case ISipHeader::SESSION_EXPIRES:  // FALL-THROUGH
+        case ISipHeader::FLOW_TIMER:       // FALL-THROUGH
+        case ISipHeader::MAX_BREADTH:
+            return IMS_TRUE;
+        default:
+            return IMS_FALSE;
+    }
 }

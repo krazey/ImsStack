@@ -36,7 +36,6 @@
 #include "SipDebug.h"
 #include "SipFactoryProxy.h"
 #include "SipFeatures.h"
-#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipRoutingRejectNotifier.h"
@@ -1309,12 +1308,12 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SetServerHeader(
 
     if (SipConfigProxy::IsUserAgentSetByContext(nSlotId, pProfile))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::SERVER, pProfile, AString::ConstNull(), objIpAddr,
-                nSlotId, piSipMsg);
+        UserAgentHeader::SetHeader(
+                ISipHeader::SERVER, pProfile, AString::ConstNull(), objIpAddr, nSlotId, piSipMsg);
     }
     else
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, pProfile, AString::ConstNull(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, pProfile, AString::ConstNull(),
                 objIpAddr, nSlotId, piSipMsg);
     }
 }

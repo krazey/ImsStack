@@ -35,9 +35,6 @@ private:
         inline void Clear() { objBodys.Clear(); }
         IMS_BOOL Equals(IN const AString& strName) const;
 
-    private:
-        void SetName(IN const AString& strName);
-
     public:
         AString strCompactName;
         AString strName;

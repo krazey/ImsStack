@@ -80,6 +80,7 @@ public:
 private:
     IMS_BOOL Decode(IN const AString& strBody, IN IMS_BOOL bParseParameter = IMS_TRUE);
     IMS_BOOL ParseUnknownBody(IN const AString& strBody);
+    static IMS_BOOL IsHeaderBodyDigitFormat(IN IMS_SINT32 nType);
 
 public:
     static const IMS_CHAR* NAME[];

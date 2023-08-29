@@ -31,6 +31,7 @@
 #include "SipConfigProxy.h"
 #include "SipFactory.h"
 #include "SipFeatures.h"
+#include "SipHeaderName.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -446,7 +447,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
     // If runtime condition is required, then use SipProfile.
     IMS_BOOL bCniHeaderRequired =
             SipConfigProxy::IsCellularNetworkInfoHeaderRequired(nSlotId, IMS_NULL /*pSipProfile*/);
-    const AString strHeaderName("Cellular-Network-Info");
+    const AString strHeaderName(SipHeaderName::CELLULAR_NETWORK_INFO);
 
     if (!bCniHeaderRequired)
     {

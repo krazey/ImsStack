@@ -36,7 +36,6 @@
 #include "Service.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
@@ -417,7 +416,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
     // Sets User-Agent header field
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetSipProfile(), GetServiceId(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetSipProfile(), GetServiceId(),
                 GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
@@ -448,8 +447,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
         if (!objSecurityVerifys.IsEmpty())
         {
             piSipMsg->AddHeader(ISipHeader::REQUIRE, Sip::STR_SEC_AGREE);
-            piSipMsg->AddHeader(
-                    ISipHeader::UNKNOWN, Sip::STR_SEC_AGREE, SipHeaderName::PROXY_REQUIRE);
+            piSipMsg->AddHeader(ISipHeader::PROXY_REQUIRE, Sip::STR_SEC_AGREE);
         }
     }
     // }
@@ -611,7 +609,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
     // Sets User-Agent header field
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetSipProfile(), GetServiceId(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetSipProfile(), GetServiceId(),
                 GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
@@ -652,8 +650,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
         if (!objSecurityVerifys.IsEmpty())
         {
             piSipMsg->AddHeader(ISipHeader::REQUIRE, Sip::STR_SEC_AGREE);
-            piSipMsg->AddHeader(
-                    ISipHeader::UNKNOWN, Sip::STR_SEC_AGREE, SipHeaderName::PROXY_REQUIRE);
+            piSipMsg->AddHeader(ISipHeader::PROXY_REQUIRE, Sip::STR_SEC_AGREE);
         }
     }
     // }
@@ -842,12 +839,12 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piS
     {
         if (SipConfigProxy::IsUserAgentSetByContext(GetSlotId(), GetSipProfile()))
         {
-            UserAgentHeader::SetHeader(SipHeaderName::SERVER, GetSipProfile(), GetServiceId(),
+            UserAgentHeader::SetHeader(ISipHeader::SERVER, GetSipProfile(), GetServiceId(),
                     GetIpAddress(), GetSlotId(), piSipMsg);
         }
         else
         {
-            UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetSipProfile(), GetServiceId(),
+            UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetSipProfile(), GetServiceId(),
                     GetIpAddress(), GetSlotId(), piSipMsg);
         }
     }

@@ -19,7 +19,6 @@
 #include "SipDialogSharedState.h"
 #include "SipDialogState.h"
 #include "SipFeatures.h"
-#include "SipHeaderName.h"
 #include "SipMessage.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
@@ -780,11 +779,10 @@ IMS_BOOL SipDialogState::InitRequest(IN const SipMethod& objMethod, IN_OUT ::Sip
     // HEADER_REQ_SESSION-ID
     if (m_strSessionId.GetLength() > 0)
     {
-        const AString SESSION_ID(SipHeaderName::SESSION_ID);
+        pSipHdr = SipStack::DecodeHeader(
+                ISipHeader::SESSION_ID, AString::ConstNull(), m_strSessionId);
 
-        pSipHdr = SipStack::DecodeHeader(ISipHeader::UNKNOWN, SESSION_ID, m_strSessionId);
-
-        (void)SipStack::SetUnknownHeader(pSipHdr, SESSION_ID, pSipMsg);
+        (void)SipStack::SetHeader(pSipHdr, pSipMsg);
         SipStack::FreeHeaderEx(pSipHdr);
     }
 
@@ -1616,8 +1614,7 @@ void SipDialogState::UpdateSessionId(IN const SipMessageInfo& objMsgInfo)
         return;
     }
 
-    SipHeaderBase* pSipHdr =
-            SipStack::GetUnknownHeader(objMsgInfo.GetMessage(), SipHeaderName::SESSION_ID);
+    SipHeaderBase* pSipHdr = SipStack::GetHeader(objMsgInfo.GetMessage(), ISipHeader::SESSION_ID);
 
     if (SipStack::IsValidHeader(pSipHdr))
     {

@@ -19,7 +19,6 @@
 
 #include "ISipHeader.h"
 #include "ISipMessage.h"
-#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "TriggerPoint.h"
@@ -725,7 +724,7 @@ PRIVATE GLOBAL IMS_BOOL TriggerPoint::IsParameterComparisonRequired(IN const ISi
     if ((piHeader->GetType() == ISipHeader::ACCEPT_CONTACT) ||
             (piHeader->GetType() == ISipHeader::CONTACT_ANY) ||
             (piHeader->GetType() == ISipHeader::CONTACT_NORMAL) ||
-            piHeader->GetName().Equals(SipHeaderName::FEATURE_CAPS))
+            (piHeader->GetType() == ISipHeader::FEATURE_CAPS))
     {
         return IMS_TRUE;
     }

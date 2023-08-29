@@ -6483,7 +6483,7 @@ IMS_RESULT Session::SendRequestForRefresh(IN IMS_SINT32 nMethod /*= SipMethod::I
     // User-Agent : configuration options ?
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetService()->GetSipProfile(),
                 GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
@@ -6568,7 +6568,7 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
     // Sets User-Agent header field
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetService()->GetSipProfile(),
                 GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
@@ -6586,13 +6586,12 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
         }
 
         // Sets Proxy-Require header fields from the previous INVITE request
-        ImsList<AString> objProxyRequires = pMessage->GetMessage()->GetHeaders(
-                ISipHeader::UNKNOWN, SipHeaderName::PROXY_REQUIRE);
+        ImsList<AString> objProxyRequires =
+                pMessage->GetMessage()->GetHeaders(ISipHeader::PROXY_REQUIRE);
 
         for (IMS_UINT32 i = 0; i < objProxyRequires.GetSize(); ++i)
         {
-            piSipMsg->AddHeader(
-                    ISipHeader::UNKNOWN, objProxyRequires.GetAt(i), SipHeaderName::PROXY_REQUIRE);
+            piSipMsg->AddHeader(ISipHeader::PROXY_REQUIRE, objProxyRequires.GetAt(i));
         }
     }
 
@@ -6723,7 +6722,7 @@ IMS_RESULT Session::SendRequestToCancel()
     // Sets User-Agent header field
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), GetService()->GetSipProfile()))
     {
-        UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT, GetService()->GetSipProfile(),
+        UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, GetService()->GetSipProfile(),
                 GetService()->GetServiceId(), GetService()->GetIpAddress(), GetSlotId(), piSipMsg);
     }
 
@@ -7162,12 +7161,11 @@ void Session::SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest)
 
     if ((piPrevSipMsg != IMS_NULL) && (piNextSipMsg != IMS_NULL))
     {
-        const AString strReasonHeaderName(SipHeaderName::REASON);
-        AString strReason = piPrevSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strReasonHeaderName);
+        AString strReason = piPrevSipMsg->GetHeader(ISipHeader::REASON);
 
         if (strReason.GetLength() > 0)
         {
-            piNextSipMsg->SetHeader(ISipHeader::UNKNOWN, strReason, strReasonHeaderName);
+            piNextSipMsg->SetHeader(ISipHeader::REASON, strReason);
         }
 
         if (m_piReasonHeaderSetter != IMS_NULL)

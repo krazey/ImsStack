@@ -27,7 +27,7 @@ public:
     UserAgentHeader() = delete;
 
 public:
-    static void SetHeader(IN const AString& strName, IN const SipProfile* pProfile,
+    static void SetHeader(IN IMS_SINT32 nHeaderType, IN const SipProfile* pProfile,
             IN const AString& strServiceId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nSlotId,
             IN_OUT ISipMessage*& piSipMsg);
 };

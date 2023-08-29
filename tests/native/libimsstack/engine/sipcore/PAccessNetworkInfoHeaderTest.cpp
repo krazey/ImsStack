@@ -30,6 +30,7 @@
 #include "MockISipMessage.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "SipFactory.h"
+#include "SipHeaderName.h"
 #include "SipProfile.h"
 #include "SipRtConfig.h"
 
@@ -270,7 +271,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     SipRtConfig::Header objCniHeader;
 
-    objCniHeader.strName = "Cellular-Network-Info";
+    objCniHeader.strName = SipHeaderName::CELLULAR_NETWORK_INFO;
     objCniHeader.strParameter = "\\2023-03-05T13%3A15%3A32Z\\";
 
     piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objCniHeader);

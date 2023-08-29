@@ -91,29 +91,27 @@ public:
     static const IMS_CHAR ACCEPT_RESOURCE_PRIORITY[];
     static const IMS_CHAR DATE[];
 
-    // Unknown header types in the current stack release
     static const IMS_CHAR ACCEPT_ENCODING[];
     static const IMS_CHAR ACCEPT_LANGUAGE[];
     static const IMS_CHAR ALERT_INFO[];
     static const IMS_CHAR ANSWER_MODE[];  // RFC 5373
     static const IMS_CHAR AUTHENTICATION_INFO[];
     static const IMS_CHAR CALL_INFO[];
-    static const IMS_CHAR CONTENT_DESCRIPTION[];
-    static const IMS_CHAR CONTENT_ID[];
     static const IMS_CHAR CONTENT_LANGUAGE[];
-    static const IMS_CHAR CONTENT_TRANSFER_ENCODING[];
-    static const IMS_CHAR DIVERSION[];  // RFC 7544 (Mapping of Diversion and History-Info)
     static const IMS_CHAR ERROR_INFO[];
     static const IMS_CHAR FEATURE_CAPS[];         // RFC 6809 (for Proxy, Registrar, B2BUA)
     static const IMS_CHAR FLOW_TIMER[];           // RFC 5626
     static const IMS_CHAR GEOLOCATION[];          // RFC 6442
+    static const IMS_CHAR GEOLOCATION_ERROR[];    // RFC 6442
     static const IMS_CHAR GEOLOCATION_ROUTING[];  // RFC 6442
     static const IMS_CHAR IDENTITY[];             // RFC 4474, Compact Form : y
     static const IMS_CHAR IDENTITY_INFO[];        // RFC 4474, Compact Form : n
     static const IMS_CHAR IN_REPLY_TO[];
     static const IMS_CHAR INFO_PACKAGE[];
+    static const IMS_CHAR MAX_BREADTH[];  // RFC 5393
     static const IMS_CHAR ORGANIZATION[];
     static const IMS_CHAR P_ANSWER_STATE[];         // RFC 4964
+    static const IMS_CHAR P_ASSERTED_SERVICE[];     // RFC 6050
     static const IMS_CHAR P_MEDIA_AUTHORIZATION[];  // RFC 3313
     static const IMS_CHAR P_PREFERRED_SERVICE[];    // RFC 6050
     static const IMS_CHAR P_PROFILE_KEY[];          // RFC 5002
@@ -138,6 +136,14 @@ public:
     static const IMS_CHAR TARGET_DIALOG[];      // RFC 4538, "tdialog" option-tag
     static const IMS_CHAR TRIGGER_CONSENT[];    // RFC 5360
     static const IMS_CHAR USER_AGENT[];
+
+    // Unknown header types in the current stack release
+    static const IMS_CHAR CELLULAR_NETWORK_INFO[];
+    static const IMS_CHAR CONTENT_DESCRIPTION[];
+    static const IMS_CHAR CONTENT_ID[];
+    static const IMS_CHAR CONTENT_TRANSFER_ENCODING[];
+    static const IMS_CHAR DIVERSION[];  // RFC 7544 (Mapping of Diversion and History-Info)
+    static const IMS_CHAR RESPONSE_SOURCE[];
 
     // Compact form: u, i, m, e, l, c, e, f, d, a, j, b, r, x, k, t, v, y, n, s
     static const IMS_CHAR CF_ALLOW_EVENTS;

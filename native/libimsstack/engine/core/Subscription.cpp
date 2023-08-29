@@ -26,7 +26,6 @@
 #include "Service.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "SubscriberRefreshHelper.h"
 #include "SubscriberState.h"

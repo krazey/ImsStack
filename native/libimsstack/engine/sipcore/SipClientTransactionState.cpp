@@ -26,7 +26,6 @@
 #include "SipDialogEx.h"
 #include "SipFactoryProxy.h"
 #include "SipFeatures.h"
-#include "SipHeaderName.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
@@ -1409,7 +1408,7 @@ IMS_BOOL SipClientTransactionState::InitAck(
     }
 
     // Sets User-Agent header if it is present in the previous request
-    pPrevSipHdr = SipStack::GetUnknownHeader(m_pLastSipMsg, SipHeaderName::USER_AGENT);
+    pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::USER_AGENT);
 
     if (SipStack::IsValidHeader(pPrevSipHdr))
     {
@@ -1464,8 +1463,7 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN const SipMethod& 
             if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()) &&
                     objMethod.Equals(SipMethod::INVITE))
             {
-                const AString SESSION_ID(SipHeaderName::SESSION_ID);
-                SipHeaderBase* pSessionId = SipStack::GetUnknownHeader(m_pSipMsg, SESSION_ID);
+                SipHeaderBase* pSessionId = SipStack::GetHeader(m_pSipMsg, ISipHeader::SESSION_ID);
 
                 if (pSessionId == IMS_NULL)
                 {
@@ -1474,11 +1472,11 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN const SipMethod& 
                     if (strSessionId.GetLength() > 0)
                     {
                         pSessionId = SipStack::DecodeHeader(
-                                ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
+                                ISipHeader::SESSION_ID, AString::ConstNull(), strSessionId);
 
                         if (pSessionId != IMS_NULL)
                         {
-                            (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, m_pSipMsg);
+                            (void)SipStack::SetHeader(pSessionId, m_pSipMsg);
                             SipStack::FreeHeaderEx(pSessionId);
                         }
                     }

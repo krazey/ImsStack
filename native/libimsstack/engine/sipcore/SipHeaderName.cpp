@@ -80,23 +80,18 @@ PUBLIC GLOBAL const IMS_CHAR SipHeaderName::RESOURCE_PRIORITY[] = "Resource-Prio
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ACCEPT_RESOURCE_PRIORITY[] = "Accept-Resource-Priority";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::DATE[] = "Date";
 
-// Unknown header types in the current stack release
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ACCEPT_ENCODING[] = "Accept-Encoding";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ACCEPT_LANGUAGE[] = "Accept-Language";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ALERT_INFO[] = "Alert-Info";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ANSWER_MODE[] = "Answer-Mode";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::AUTHENTICATION_INFO[] = "Authentication-Info";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CALL_INFO[] = "Call-Info";
-PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_DESCRIPTION[] = "Content-Description";
-PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_ID[] = "Content-ID";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_LANGUAGE[] = "Content-Language";
-PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_TRANSFER_ENCODING[] =
-        "Content-Transfer-Encoding";
-PUBLIC GLOBAL const IMS_CHAR SipHeaderName::DIVERSION[] = "Diversion";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ERROR_INFO[] = "Error-Info";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::FEATURE_CAPS[] = "Feature-Caps";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::FLOW_TIMER[] = "Flow-Timer";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::GEOLOCATION[] = "Geolocation";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::GEOLOCATION_ERROR[] = "Geolocation-Error";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::GEOLOCATION_ROUTING[] = "Geolocation-Routing";
 // Compact Form : y
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IDENTITY[] = "Identity";
@@ -104,8 +99,10 @@ PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IDENTITY[] = "Identity";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IDENTITY_INFO[] = "Identity-Info";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IN_REPLY_TO[] = "In-Reply-To";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::INFO_PACKAGE[] = "Info-Package";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::MAX_BREADTH[] = "Max-Breadth";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ORGANIZATION[] = "Organization";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::P_ANSWER_STATE[] = "P-Answer-State";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::P_ASSERTED_SERVICE[] = "P-Asserted-Service";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::P_MEDIA_AUTHORIZATION[] = "P-Media-Authorization";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::P_PREFERRED_SERVICE[] = "P-Preferred-Service";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::P_PROFILE_KEY[] = "P-Profile-Key";
@@ -131,6 +128,15 @@ PUBLIC GLOBAL const IMS_CHAR SipHeaderName::SUPPRESS_IF_MATCH[] = "Suppress-If-M
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::TARGET_DIALOG[] = "Target-Dialog";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::TRIGGER_CONSENT[] = "Trigger-Consent";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::USER_AGENT[] = "User-Agent";
+
+// Unknown header types in the current stack release
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CELLULAR_NETWORK_INFO[] = "Cellular-Network-Info";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_DESCRIPTION[] = "Content-Description";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_ID[] = "Content-ID";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CONTENT_TRANSFER_ENCODING[] =
+        "Content-Transfer-Encoding";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::DIVERSION[] = "Diversion";
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::RESPONSE_SOURCE[] = "Response-Source";
 
 // Compact form: u, i, m, e, l, c, o, f, d, a, j, b, r, x, k, t, v, y, n, s
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::CF_ALLOW_EVENTS = 'u';

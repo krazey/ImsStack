@@ -18,7 +18,6 @@
 #include "IOnSipErrorListener.h"
 #include "SipConnection.h"
 #include "SipFactoryProxy.h"
-#include "SipHeaderName.h"
 #include "SipIpSecState.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
@@ -457,23 +456,24 @@ IMS_BOOL SipConnection::IsCommaSeparatedListHeader(IN IMS_SINT32 nHType, IN cons
 
     switch (nHType)
     {
+        case ISipHeader::AUTHENTICATION_INFO:  // FALL-THROUGH
         case ISipHeader::AUTHORIZATION:        // FALL-THROUGH
         case ISipHeader::PROXY_AUTHORIZATION:  // FALL-THROUGH
         case ISipHeader::WWW_AUTHENTICATE:     // FALL-THROUGH
         case ISipHeader::PROXY_AUTHENTICATE:   // FALL-THROUGH
         case ISipHeader::DATE:
             return IMS_FALSE;
-
         default:
             return IMS_TRUE;
     }
 }
 
 PRIVATE
-IMS_BOOL SipConnection::IsInaccessibleHeader(IN IMS_SINT32 nHType, IN const AString& strHName)
+IMS_BOOL SipConnection::IsInaccessibleHeader(IN IMS_SINT32 nHType, IN const AString& /*strHName*/)
 {
     switch (nHType)
     {
+        case ISipHeader::AUTHENTICATION_INFO:  // FALL-THROUGH
         case ISipHeader::AUTHORIZATION:        // FALL-THROUGH
         case ISipHeader::CALL_ID:              // FALL-THROUGH
         case ISipHeader::CSEQ:                 // FALL-THROUGH
@@ -488,17 +488,6 @@ IMS_BOOL SipConnection::IsInaccessibleHeader(IN IMS_SINT32 nHType, IN const AStr
         case ISipHeader::VIA:                  // FALL-THROUGH
         case ISipHeader::WWW_AUTHENTICATE:
             return IMS_TRUE;
-
-        case ISipHeader::UNKNOWN:
-            if ((strHName[0] == 'A') || (strHName[0] == 'a'))
-            {
-                if (strHName.EqualsIgnoreCase(SipHeaderName::AUTHENTICATION_INFO))
-                {
-                    return IMS_TRUE;
-                }
-            }
-            return IMS_FALSE;
-
         default:
             return IMS_FALSE;
     }

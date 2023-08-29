@@ -1453,40 +1453,7 @@ GLOBAL const IMS_CHAR* GetHeaderName(
         return IMS_NULL;
     }
 
-    switch (nType)
-    {
-        case SipHeaderBase::UNKNOWN:
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_SUBJECT))
-                return SipHeaderName::SUBJECT;
-            else if (strName.EqualsIgnoreCase(SipHeaderName::CF_IDENTITY))
-                return SipHeaderName::IDENTITY;
-            else if (strName.EqualsIgnoreCase(SipHeaderName::CF_IDENTITY_INFO))
-                return SipHeaderName::IDENTITY_INFO;
-            else
-                return strName.GetStr();
-        default:
-            break;
-    }
-
-    return SipHeader::NAME[nType];
-}
-
-GLOBAL const IMS_CHAR* GetHeaderNameFromType(IN IMS_SINT32 nType)
-{
-    if ((nType <= ISipHeader::INVALID) || (nType >= ISipHeader::ANY))
-    {
-        return "";
-    }
-
-    switch (nType)
-    {
-        case ISipHeader::UNKNOWN:
-            // FIXME
-            return "";
-
-        default:
-            return SipHeader::NAME[nType];
-    }
+    return (nType != ISipHeader::UNKNOWN) ? SipHeader::NAME[nType] : strName.GetStr();
 }
 
 GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
@@ -1653,6 +1620,10 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             {
                 nType = SipHeaderBase::FLOW_TIMER;
             }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::FEATURE_CAPS))
+            {
+                nType = SipHeaderBase::FEATURE_CAPS;
+            }
         }
         break;
 
@@ -1748,6 +1719,10 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             else if (strName.EqualsIgnoreCase(SipHeaderName::MIN_EXPIRES))
             {
                 nType = SipHeaderBase::MIN_EXPIRES;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::MAX_BREADTH))
+            {
+                nType = SipHeaderBase::MAX_BREADTH;
             }
         }
         break;
@@ -1860,6 +1835,22 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             else if (strName.EqualsIgnoreCase(SipHeaderName::PROXY_REQUIRE))
             {
                 nType = SipHeaderBase::PROXY_REQUIRE;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::P_ASSERTED_SERVICE))
+            {
+                nType = SipHeaderBase::P_ASSERTED_SERVICE;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::P_PREFERRED_SERVICE))
+            {
+                nType = SipHeaderBase::P_PREFERRED_SERVICE;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::POLICY_CONTACT))
+            {
+                nType = SipHeaderBase::POLICY_CONTACT;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::POLICY_ID))
+            {
+                nType = SipHeaderBase::POLICY_ID;
             }
         }
         break;
@@ -1986,6 +1977,10 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             else if (strName.EqualsIgnoreCase(SipHeaderName::SUPPRESS_IF_MATCH))
             {
                 nType = SipHeaderBase::SUPPRESS_IF_MATCH;
+            }
+            else if (strName.EqualsIgnoreCase(SipHeaderName::SESSION_ID))
+            {
+                nType = SipHeaderBase::SESSION_ID;
             }
         }
         break;
@@ -2941,13 +2936,6 @@ GLOBAL IMS_BOOL GetSubscriptionStateHeader(IN ::SipMessage* pMessage, OUT AStrin
     return IMS_TRUE;
 }
 
-GLOBAL SipHeaderBase* GetUnknownHeader(
-        IN ::SipMessage* pMessage, IN const AString& strName, IN IMS_UINT32 nIndex /*= 0*/)
-{
-    IMS_SINT32 nType = SipGetHdrType(strName.GetStr());
-    return GetHeader(pMessage, nType, nIndex);
-}
-
 GLOBAL AString GetUnknownHeaderName(IN const SipHeaderBase* pHeader)
 {
     SIPStackError(EERR_NOERR);
@@ -3840,19 +3828,6 @@ GLOBAL IMS_BOOL SetStatusLine(IN IMS_SINT32 nStatusCode, IN const AString& strRe
     pMessage->SetStatusLine(pStatusLine);
 
     return IMS_TRUE;
-}
-
-GLOBAL IMS_BOOL SetUnknownHeader(
-        IN SipHeaderBase* pHeader, IN const AString& strName, IN_OUT ::SipMessage*& pMessage)
-{
-    if (pHeader == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    pHeader->SetHdrType(SipGetHdrType(strName.GetStr()));
-
-    return SetHeader(pHeader, pMessage);
 }
 
 GLOBAL IMS_BOOL IsMessageBodyCompressed(IN ::SipMessage* pMessage)

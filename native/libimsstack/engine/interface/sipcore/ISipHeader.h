@@ -124,7 +124,7 @@ public:
      * except for returning an integer value for the header value.
      *
      * @return If the header value without header parameters, returns the header body field.\n
-     *         If the value can't have an integer value, returns -1.
+     *         If the value can't have an integer value, returns {@code INVALID_INT}.
      */
     virtual IMS_SINT32 GetValueInt() const = 0;
 
@@ -233,6 +233,11 @@ public:
     virtual AString ToStringWithoutName() const = 0;
 
 public:
+    enum
+    {
+        INVALID_INT = -1
+    };
+
     /// Type of SIP header (defined headers)
     enum
     {
@@ -307,6 +312,51 @@ public:
         RESOURCE_PRIORITY,
         ACCEPT_RESOURCE_PRIORITY,
         DATE,
+        ACCEPT_ENCODING,
+        ACCEPT_LANGUAGE,
+        ALERT_INFO,
+        ANSWER_MODE,
+        AUTHENTICATION_INFO,
+        CALL_INFO,
+        CONTENT_LANGUAGE,
+        ERROR_INFO,
+        FLOW_TIMER,
+        IDENTITY,
+        IDENTITY_INFO,
+        IN_REPLY_TO,
+        ORGANIZATION,
+        P_ANSWER_STATE,
+        PERMISSION_MISSING,
+        P_MEDIA_AUTHORIZATION,
+        P_PROFILE_KEY,
+        P_REFUSED_URI_LIST,
+        PRIORITY,
+        PRIV_ANSWER_MODE,
+        PROXY_REQUIRE,
+        P_SERVED_USER,
+        P_USER_DATABASE,
+        REASON,
+        REFER_SUB,
+        REPLY_TO,
+        RESPONSE_KEY,
+        SERVER,
+        SUBJECT,
+        SUPPRESS_IF_MATCH,
+        TARGET_DIALOG,
+        TRIGGER_CONSENT,
+        USER_AGENT,
+        FEATURE_CAPS,
+        GEOLOCATION,
+        GEOLOCATION_ERROR,
+        GEOLOCATION_ROUTING,
+        INFO_PACKAGE,
+        MAX_BREADTH,
+        P_ASSERTED_SERVICE,
+        POLICY_CONTACT,
+        POLICY_ID,
+        P_PREFERRED_SERVICE,
+        RECV_INFO,
+        SESSION_ID,
         ANY
     };
 };

@@ -24,7 +24,6 @@
 #include "SipDialogEx.h"
 #include "SipFactoryProxy.h"
 #include "SipFeatures.h"
-#include "SipHeaderName.h"
 #include "SipHeaderUtils.h"
 #include "SipManager.h"
 #include "SipMessage.h"
@@ -509,23 +508,23 @@ void SipServerTransactionState::RejectRequest(
 
         if (strUaString.GetLength() > 0)
         {
-            AString strHName;
+            IMS_SINT32 nHeaderType;
 
             if (SipConfigProxy::IsUserAgentSetByContext(GetSlotId(), GetSipProfile()))
             {
-                strHName = SipHeaderName::SERVER;
+                nHeaderType = ISipHeader::SERVER;
             }
             else
             {
-                strHName = SipHeaderName::USER_AGENT;
+                nHeaderType = ISipHeader::USER_AGENT;
             }
 
             SipHeaderBase* pUserAgentHdr =
-                    SipStack::DecodeHeader(ISipHeader::UNKNOWN, strHName, strUaString);
+                    SipStack::DecodeHeader(nHeaderType, AString::ConstNull(), strUaString);
 
             if (pUserAgentHdr != IMS_NULL)
             {
-                (void)SipStack::SetUnknownHeader(pUserAgentHdr, strHName, m_pSipMsg);
+                (void)SipStack::SetHeader(pUserAgentHdr, m_pSipMsg);
                 SipStack::FreeHeaderEx(pUserAgentHdr);
             }
         }
@@ -1101,13 +1100,12 @@ IMS_BOOL SipServerTransactionState::InitResponse(
 
         if (strSessionId.GetLength() > 0)
         {
-            const AString SESSION_ID(SipHeaderName::SESSION_ID);
-            SipHeaderBase* pSessionId =
-                    SipStack::DecodeHeader(ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
+            SipHeaderBase* pSessionId = SipStack::DecodeHeader(
+                    ISipHeader::SESSION_ID, AString::ConstNull(), strSessionId);
 
             if (pSessionId != IMS_NULL)
             {
-                (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, pOutSipMsg);
+                (void)SipStack::SetHeader(pSessionId, pOutSipMsg);
                 SipStack::FreeHeaderEx(pSessionId);
             }
         }

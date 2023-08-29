@@ -32,7 +32,6 @@
 #include "RegSubscription.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
@@ -1259,15 +1258,15 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
         if (SipConfigProxy::IsUserAgentSetByContext(
                     GetSlotId(), m_pRegStateTracker->GetSipProfile()))
         {
-            UserAgentHeader::SetHeader(SipHeaderName::SERVER, m_pRegStateTracker->GetSipProfile(),
+            UserAgentHeader::SetHeader(ISipHeader::SERVER, m_pRegStateTracker->GetSipProfile(),
                     AString::ConstNull(), m_pRegStateTracker->GetIpAddress(), GetSlotId(),
                     piSipMsg);
         }
         else
         {
-            UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT,
-                    m_pRegStateTracker->GetSipProfile(), AString::ConstNull(),
-                    m_pRegStateTracker->GetIpAddress(), GetSlotId(), piSipMsg);
+            UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, m_pRegStateTracker->GetSipProfile(),
+                    AString::ConstNull(), m_pRegStateTracker->GetIpAddress(), GetSlotId(),
+                    piSipMsg);
         }
     }
 
@@ -1493,9 +1492,9 @@ IMS_BOOL RegSubscription::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
         // Add a User-Agent if configurable
         if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
         {
-            UserAgentHeader::SetHeader(SipHeaderName::USER_AGENT,
-                    m_pRegStateTracker->GetSipProfile(), AString::ConstNull(),
-                    m_pRegStateTracker->GetIpAddress(), GetSlotId(), piSipMsg);
+            UserAgentHeader::SetHeader(ISipHeader::USER_AGENT, m_pRegStateTracker->GetSipProfile(),
+                    AString::ConstNull(), m_pRegStateTracker->GetIpAddress(), GetSlotId(),
+                    piSipMsg);
         }
 
         IMS_BOOL bIsContactGruu = IMS_FALSE;
@@ -1892,7 +1891,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     if (!objSecurityVerifys.IsEmpty())
     {
         piSipMsg->AddHeader(ISipHeader::REQUIRE, Sip::STR_SEC_AGREE);
-        piSipMsg->AddHeader(ISipHeader::UNKNOWN, Sip::STR_SEC_AGREE, SipHeaderName::PROXY_REQUIRE);
+        piSipMsg->AddHeader(ISipHeader::PROXY_REQUIRE, Sip::STR_SEC_AGREE);
     }
     // }
 
