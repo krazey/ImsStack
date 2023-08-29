@@ -897,7 +897,7 @@ PRIVATE void MtsMessageController::CleanMtsMessageWithInReplyTo(IN IPageMessage*
     ISipMessage* piCurrentSipMessage =
             piCurrentMessage != IMS_NULL ? piCurrentMessage->GetMessage() : IMS_NULL;
     AString strInReplyTo = piCurrentSipMessage != IMS_NULL
-            ? piCurrentSipMessage->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::IN_REPLY_TO)
+            ? piCurrentSipMessage->GetHeader(ISipHeader::IN_REPLY_TO)
             : AString::ConstEmpty();
 
     if (strInReplyTo.GetLength() <= 0)
