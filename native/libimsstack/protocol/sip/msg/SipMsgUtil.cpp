@@ -428,10 +428,6 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
     {
         return SipHeaderBase::RETRY_AFTER_SEC;
     }
-    else if (SipPf_Strnicmp(pszRcvdHdrName, "Feature-Caps", SIP_12) == SIP_ZERO)
-    {
-        return SipHeaderBase::UNKNOWN;
-    }
 
     if (s_pHdrLenRecord == SIP_NULL)
     {
