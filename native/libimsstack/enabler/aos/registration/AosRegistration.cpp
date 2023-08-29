@@ -5837,7 +5837,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
     // Set Geolocation header
     AString strGeolocation;
     strGeolocation.Sprintf("<cid:%s>", strNewContentId.GetStr());
-    piSipMsg->SetHeader(ISipHeader::UNKNOWN, strGeolocation, "Geolocation");
+    piSipMsg->SetHeader(ISipHeader::GEOLOCATION, strGeolocation);
 
     return IMS_TRUE;
 }
@@ -6012,8 +6012,8 @@ void AosRegistration::UpdateCallingNumberVerification()
         }
 
         IMS_BOOL bIsFeatureIncluded = m_pUtil->IsParameterIncluded(
-                m_piRegistration->GetPreviousResponse(), ISipHeader::UNKNOWN,
-                AosString::STR_FEATURE_CAPS, AosString::STR_VERSTAT_FEATURE);
+                m_piRegistration->GetPreviousResponse(), ISipHeader::FEATURE_CAPS,
+                AosString::STR_VERSTAT_FEATURE);
 
         if (bIsFeatureIncluded)
         {
