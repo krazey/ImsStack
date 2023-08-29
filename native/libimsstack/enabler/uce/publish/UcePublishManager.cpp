@@ -1238,7 +1238,7 @@ IPublishResponseData* UcePublishManager::GetPublishResponseData(ISipMessage* piM
     pPublishResponseData->m_nResponseCode = piMessage->GetStatusCode();
     pPublishResponseData->m_strReason = piMessage->GetReasonPhrase();
 
-    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::REASON);
     if (objReasonHeaders.IsEmpty())
     {
         return pPublishResponseData;
@@ -1710,7 +1710,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         return IMS_TRUE;
     }
 
-    ImsList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::REASON);
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
