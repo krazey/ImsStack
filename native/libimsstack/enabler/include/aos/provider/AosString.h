@@ -24,7 +24,6 @@ public:
     static const IMS_CHAR STR_SEC_AGREE[];
     static const IMS_CHAR STR_APPLICATION[];
     static const IMS_CHAR STR_3GPP_IMS_XML[];
-    static const IMS_CHAR STR_FEATURE_CAPS[];
     static const IMS_CHAR STR_VERSTAT_FEATURE[];
     static const IMS_CHAR STR_USSI_FEATURE[];
     static const IMS_CHAR STR_RTT_FEATURE[];

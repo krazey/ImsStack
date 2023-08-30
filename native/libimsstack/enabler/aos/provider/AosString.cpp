@@ -18,7 +18,6 @@
 const IMS_CHAR AosString::STR_SEC_AGREE[] = "sec-agree";
 const IMS_CHAR AosString::STR_APPLICATION[] = "application";
 const IMS_CHAR AosString::STR_3GPP_IMS_XML[] = "3gpp-ims+xml";
-const IMS_CHAR AosString::STR_FEATURE_CAPS[] = "Feature-Caps";
 const IMS_CHAR AosString::STR_VERSTAT_FEATURE[] = "+g.3gpp.verstat";
 const IMS_CHAR AosString::STR_USSI_FEATURE[] = "+g.3gpp.nw-init-ussi";
 const IMS_CHAR AosString::STR_RTT_FEATURE[] = "text";
