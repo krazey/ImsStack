@@ -1166,7 +1166,7 @@ IMS_BOOL UceSubscribe::SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPM
         piSIPMessage->SetHeader(ISipHeader::PRIVACY, "id");
         piSIPMessage->SetHeader(ISipHeader::FROM, "Anonymous <sip:anonymous@anonymous.invalid>");
     }
-    piSIPMessage->AddHeader(ISipHeader::UNKNOWN, "gzip", "Accept-Encoding");
+    piSIPMessage->AddHeader(ISipHeader::ACCEPT_ENCODING, "gzip");
     piSIPMessage->AddHeader(ISipHeader::EXPIRES_ANY, "0");
     // Accept
     piSIPMessage->AddHeader(ISipHeader::ACCEPT, "application/pidf+xml");
@@ -1199,7 +1199,7 @@ void UceSubscribe::SetHeaderForListSubscription(
         piSIPMessage->SetHeader(ISipHeader::PRIVACY, "id");
         piSIPMessage->SetHeader(ISipHeader::FROM, "Anonymous <sip:anonymous@anonymous.invalid>");
     }
-    piSIPMessage->AddHeader(ISipHeader::UNKNOWN, "gzip", "Accept-Encoding");
+    piSIPMessage->AddHeader(ISipHeader::ACCEPT_ENCODING, "gzip");
     AString strToHeaderRequestUri = "<" + strListSubscriptionRequestUri + ">";
     piSIPMessage->SetHeader(ISipHeader::TO, strToHeaderRequestUri);
     piSIPMessage->AddHeader(ISipHeader::REQUIRE, "recipient-list-subscribe");
@@ -1328,7 +1328,7 @@ ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(ISipMessage* piMe
     pSubscribeResponseData->m_nResponseCode = piMessage->GetStatusCode();
     pSubscribeResponseData->m_strReason = piMessage->GetReasonPhrase();
 
-    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::REASON);
     if (objReasonHeaders.IsEmpty())
     {
         return pSubscribeResponseData;
@@ -1379,7 +1379,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
         IMS_TRACE_I("ReasonPhrase:Not Authorized for presence", 0, 0, 0);
         return IMS_FALSE;
     }
-    ImsList<AString> objReasonList = piSIPMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonList = piSIPMessage->GetHeaders(ISipHeader::REASON);
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present", 0, 0, 0);
