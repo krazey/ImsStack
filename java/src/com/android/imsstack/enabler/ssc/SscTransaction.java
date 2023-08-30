@@ -388,6 +388,11 @@ public class SscTransaction {
     }
 
     @VisibleForTesting
+    protected Thread getTransactionThread() {
+        return mSscTransactionThread;
+    }
+
+    @VisibleForTesting
     protected SscXmlGov getSscXmlGov() {
         return SscXmlGov.getInstance(mSlotId);
     }
