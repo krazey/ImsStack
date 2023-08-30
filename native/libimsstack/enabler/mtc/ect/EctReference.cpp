@@ -24,7 +24,6 @@
 #include "ISipMessage.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"

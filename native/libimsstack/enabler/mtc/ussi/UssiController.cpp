@@ -56,8 +56,8 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
 {
     IMS_BOOL bResult = IMS_TRUE;
 
-    if (!objMessageUtils.ContainsValue(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
-                ISipHeader::UNKNOWN, UssiConstants::HEADER_RECVINFO))
+    if (!objMessageUtils.ContainsValue(
+                piMessage, UssiConstants::HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO))
     {
         bResult = IMS_FALSE;
     }
@@ -117,8 +117,7 @@ IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServer
         ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
         if (piSipMessage)
         {
-            ImsList<AString> lstHeaders =
-                    piSipMessage->GetHeaders(ISipHeader::UNKNOWN, SipHeaderName::INFO_PACKAGE);
+            ImsList<AString> lstHeaders = piSipMessage->GetHeaders(ISipHeader::INFO_PACKAGE);
             for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
             {
                 if (lstHeaders.GetAt(i).Contains(UssiConstants::HEADER_USSD_PACKAGE))
@@ -332,8 +331,8 @@ PRIVATE
 IMS_RESULT UssiController::SetRecvInfoHeader(IN IMessage* piMessage)
 {
     IMS_TRACE_D("SetRecvInfoHeader", 0, 0, 0);
-    return m_objContext.GetMessageUtils().AddValueIfNotExists(piMessage,
-            UssiConstants::HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, SipHeaderName::RECV_INFO);
+    return m_objContext.GetMessageUtils().AddValueIfNotExists(
+            piMessage, UssiConstants::HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO);
 }
 
 PRIVATE

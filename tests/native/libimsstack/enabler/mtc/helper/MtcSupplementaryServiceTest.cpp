@@ -442,8 +442,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCw)
 {
-    EXPECT_CALL(objMockISipMessage,
-            IsHeaderPresent(ISipHeader::UNKNOWN, AString(SipHeaderName::ALERT_INFO)))
+    EXPECT_CALL(objMockISipMessage, IsHeaderPresent(ISipHeader::ALERT_INFO, AString::ConstNull()))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 

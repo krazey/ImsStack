@@ -33,7 +33,6 @@ public:
     static const IMS_CHAR ELEMENT_LANGUAGE_EN[];
 
     static const IMS_CHAR HEADER_USSD_PACKAGE[];
-    static const IMS_CHAR HEADER_RECVINFO[];
     static const IMS_CHAR HEADER_APPLICATION_SDP[];
     static const IMS_CHAR HEADER_APPLICATION_IMSXML[];
     static const IMS_CHAR HEADER_APPLICATION_USSD[];

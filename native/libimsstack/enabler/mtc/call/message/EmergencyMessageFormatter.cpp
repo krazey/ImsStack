@@ -28,7 +28,6 @@
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
-#include "sipcore/SipHeaderName.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -241,8 +240,7 @@ void EmergencyMessageFormatter::SetRecvInfoHeader()
     }
 
     m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
-            MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY, ISipHeader::UNKNOWN,
-            SipHeaderName::RECV_INFO);
+            MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY, ISipHeader::RECV_INFO);
 }
 
 /* -------------------------------------------------------------------------------------------------

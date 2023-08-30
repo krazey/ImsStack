@@ -254,8 +254,8 @@ IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
 {
-    if (m_objContext.GetMessageUtils().IsHeaderPresent(
-                piMessage, ISipHeader::UNKNOWN, SipHeaderName::ALERT_INFO) == IMS_FALSE)
+    if (m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::ALERT_INFO) ==
+            IMS_FALSE)
     {
         return IMS_FALSE;
     }

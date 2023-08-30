@@ -514,10 +514,9 @@ TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 
     // No FeatureCaps in INVITE case
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    const AString strFeatureCaps(SipHeaderName::FEATURE_CAPS);
     ON_CALL(objMockMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
-                    ISipHeader::UNKNOWN, strFeatureCaps))
+                    ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objFeatureCaps, AddFeature(_, _, _, _)).Times(0);
     pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
@@ -532,11 +531,9 @@ TEST_F(MessageFormatterTest, AddSrvccFeatureByPrAnswerMessage)
     MockIFeatureCaps objFeatureCaps;
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-
-    const AString strFeatureCaps(SipHeaderName::FEATURE_CAPS);
     ON_CALL(objMockMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
-                    ISipHeader::UNKNOWN, strFeatureCaps))
+                    ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objFeatureCaps,
             AddFeature(SRVCC_FEATURE_A, AString::ConstEmpty(), SipMethod::INVITE,
@@ -789,16 +786,13 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersB
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
 {
-    const AString strReasonHeaderName(SipHeaderName::REASON);
     const AString strCarrierSpecificHeader(MessageUtil::STR_REASON_USER_SESSIONEXPIRED);
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strReasonHeaderValue("USER;text=\"Session Expired\"");
     MockISipMessage objMessage;
-    EXPECT_CALL(
-            objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderValue, strReasonHeaderName))
-            .Times(2);
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderValue, _)).Times(2);
     pFormatter->ReasonHeaderSetter_SetHeader(
             &objMessage, ISession::TERMINATION_REASON_REFRESH_TIMEOUT);
     pFormatter->ReasonHeaderSetter_SetHeader(
@@ -821,7 +815,6 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwCo
 
 TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrConfiguration)
 {
-    const AString strReasonHeaderName(SipHeaderName::REASON);
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
             .WillByDefault(Return(IMS_TRUE));
@@ -832,13 +825,9 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrCon
     const AString strByeCauseNormal("normal");
     const AString strByeCauseNoUpd("no_upd");
     MockISipMessage objMessage;
-    EXPECT_CALL(objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderSip, strReasonHeaderName))
-            .Times(2);
-    EXPECT_CALL(
-            objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderUser, strReasonHeaderName))
-            .Times(1);
-    EXPECT_CALL(objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderEtc, strReasonHeaderName))
-            .Times(7);
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderSip, _)).Times(2);
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderUser, _)).Times(1);
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::REASON, strReasonHeaderEtc, _)).Times(7);
     EXPECT_CALL(
             objMessage, AddHeader(ISipHeader::UNKNOWN, strByeCauseNormal, strCarrierSpecificHeader))
             .Times(8);

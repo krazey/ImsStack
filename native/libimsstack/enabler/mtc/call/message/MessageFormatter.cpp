@@ -38,7 +38,6 @@
 #include "helper/MtcSupplementaryService.h"
 #include "sipcore/Sip.h"
 #include "sipcore/SipAddress.h"
-#include "sipcore/SipHeaderName.h"
 #include "sipcore/SipProfile.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/CallComposerUtil.h"
@@ -86,8 +85,7 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
         if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
                 (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
         {
-            piSipMsg->AddHeader(
-                    ISipHeader::UNKNOWN, "USER;text=\"Session Expired\"", SipHeaderName::REASON);
+            piSipMsg->AddHeader(ISipHeader::REASON, "USER;text=\"Session Expired\"");
         }
     }
 
@@ -97,21 +95,21 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
         if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
                 (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
         {
-            piSipMsg->AddHeader(ISipHeader::UNKNOWN,
-                    "SIP; cause=103; text=\"Session-Expire\"; fc=9602", SipHeaderName::REASON);
+            piSipMsg->AddHeader(
+                    ISipHeader::REASON, "SIP; cause=103; text=\"Session-Expire\"; fc=9602");
             piSipMsg->AddHeader(ISipHeader::UNKNOWN, "no_upd", MessageUtil::STR_P_SKT_BYE_CAUSE);
         }
         else
         {
             if (nTerminationReason == ISession::TERMINATION_REASON_USER_ACTION)
             {
-                piSipMsg->AddHeader(ISipHeader::UNKNOWN,
-                        "USER; cause=101;text=\"USER triggered\"; fc=9501", SipHeaderName::REASON);
+                piSipMsg->AddHeader(
+                        ISipHeader::REASON, "USER; cause=101;text=\"USER triggered\"; fc=9501");
             }
             else
             {
-                piSipMsg->AddHeader(ISipHeader::UNKNOWN,
-                        "ETC; cause=104; text=\"Unknown\"; fc=9999", SipHeaderName::REASON);
+                piSipMsg->AddHeader(
+                        ISipHeader::REASON, "ETC; cause=104; text=\"Unknown\"; fc=9999");
             }
 
             piSipMsg->AddHeader(ISipHeader::UNKNOWN, "normal", MessageUtil::STR_P_SKT_BYE_CAUSE);
@@ -424,8 +422,8 @@ IFeatureCaps* MessageFormatter::GetIFeatureCaps()
 PRIVATE
 void MessageFormatter::SetPPreferredServiceHeader()
 {
-    m_objContext.GetMessageUtils().SetHeader(m_piNextMessage, Const3GPP::ICSI_MMTEL,
-            ISipHeader::UNKNOWN, SipHeaderName::P_PREFERRED_SERVICE);
+    m_objContext.GetMessageUtils().SetHeader(
+            m_piNextMessage, Const3GPP::ICSI_MMTEL, ISipHeader::P_PREFERRED_SERVICE);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -480,22 +478,22 @@ void MessageFormatter::AddSrvccFeature()
         return;
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_A, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_B, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_M, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
@@ -513,20 +511,20 @@ void MessageFormatter::SetSrvccContactParameter()
         return;
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_A, 0);
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_B, 0);
     }
 
-    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
-                MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(
+                piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_M, 0);
     }
@@ -631,9 +629,8 @@ void MessageFormatter::SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo)
         return;
     }
 
-    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
-            MessageUtil::STR_ALERT_URN_CALL_WAITING, ISipHeader::UNKNOWN,
-            SipHeaderName::ALERT_INFO);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            m_piNextMessage, MessageUtil::STR_ALERT_URN_CALL_WAITING, ISipHeader::ALERT_INFO);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -647,7 +644,7 @@ void MessageFormatter::SetReasonHeader(IN const AString& strReason)
     }
 
     m_objContext.GetMessageUtils().AddValueIfNotExists(
-            m_piNextMessage, strReason, ISipHeader::UNKNOWN, SipHeaderName::REASON);
+            m_piNextMessage, strReason, ISipHeader::REASON);
 }
 
 /* -------------------------------------------------------------------------------------------------

@@ -39,7 +39,6 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/ISipHeader.h"
-#include "sipcore/SipHeaderName.h"
 #include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>

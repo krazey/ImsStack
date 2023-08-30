@@ -27,7 +27,6 @@ PUBLIC GLOBAL const IMS_CHAR UssiConstants::ELEMENT_ALERTING_PATTERN[] = "alerti
 PUBLIC GLOBAL const IMS_CHAR UssiConstants::ELEMENT_LANGUAGE_EN[] = "en";
 
 PUBLIC GLOBAL const IMS_CHAR UssiConstants::HEADER_USSD_PACKAGE[] = "g.3gpp.ussd";
-PUBLIC GLOBAL const IMS_CHAR UssiConstants::HEADER_RECVINFO[] = "Recv-Info";
 PUBLIC GLOBAL const IMS_CHAR UssiConstants::HEADER_APPLICATION_SDP[] = "application/sdp";
 PUBLIC GLOBAL const IMS_CHAR UssiConstants::HEADER_APPLICATION_IMSXML[] =
         "application/3gpp-ims+xml";

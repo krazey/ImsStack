@@ -36,7 +36,6 @@
 #include "sipcore/ISipHeader.h"
 #include "sipcore/ISipMessage.h"
 #include "sipcore/MockISipMessage.h"
-#include "sipcore/SipHeaderName.h"
 #include "sipcore/SipMethod.h"
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
@@ -125,10 +124,9 @@ protected:
         ON_CALL(objISession, GetNextRequest()).WillByDefault(Return(&objIMessage));
 
         AString strHeaderValue(UssiConstants::HEADER_USSD_PACKAGE);
-        AString strHeaderName(SipHeaderName::RECV_INFO);
         ON_CALL(objMessageUtils,
                 AddValueIfNotExists(
-                        &objIMessage, strHeaderValue, ISipHeader::UNKNOWN, strHeaderName))
+                        &objIMessage, strHeaderValue, ISipHeader::RECV_INFO, AString::ConstNull()))
                 .WillByDefault(Return(IMS_SUCCESS));
 
         AString strEmptyHeaderName;

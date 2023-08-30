@@ -669,10 +669,8 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
 TEST_F(MessageUtilsTest, GetCauseFromReasonHeader)
 {
     ImsList<AString> objHeaders;
-    AString strReasonHeaderName = "Reason";
     objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(objHeaders));
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     EXPECT_EQ(objMessageUtils.GetCauseFromReasonHeader(piMessage), 603);
 
@@ -684,10 +682,8 @@ TEST_F(MessageUtilsTest, GetCauseAndTextFromReasonHeader)
 {
     ReasonHeaderValue objValue;
     ImsList<AString> objHeaders;
-    AString strReasonHeaderName = "Reason";
     objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(objHeaders));
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, 603);
@@ -1167,9 +1163,8 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 
     // GetHeader for Session-ID
     ImsList<AString> objSessionIdHeaders;
-    objSessionIdHeaders.Append("sessionid123456");
-    AString strSessionId("Session-ID");
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strSessionId))
+    objSessionIdHeaders.Append("abcdef123456");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(objSessionIdHeaders));
 
     AString strEmptyContentId;
@@ -1189,7 +1184,7 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     AString strEntry("entry uri=\"<sip:someUri?Call-ID=someCallId>&amp;");
     strEntry += "From=%3Csip%3AsomeFrom%3E%3Btag%3Dfromtag&amp;";
     strEntry += "To=%3Csip%3AsomeTo%3E%3Btag%3Dtotag&amp;";
-    strEntry += "Session-ID=sessionid123456\"";
+    strEntry += "Session-ID=abcdef123456\"";
     strEntry += " cp:copyControl=\"to\"";
     objResourceList.Append(strEntry);
 

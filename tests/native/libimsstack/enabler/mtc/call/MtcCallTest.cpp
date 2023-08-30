@@ -253,10 +253,9 @@ TEST_F(MtcCallTest, HandleIncomingCallsState)
 TEST_F(MtcCallTest, HandleIncomingCallsStateForUssi)
 {
     MockISipMessage objUssiSipMessage;
-    AString strRecvInfo(UssiConstants::HEADER_RECVINFO);
     ImsList<AString> lstRecvInfoHeaders;
     lstRecvInfoHeaders.Append(UssiConstants::HEADER_USSD_PACKAGE);
-    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::UNKNOWN, strRecvInfo))
+    ON_CALL(objUssiSipMessage, GetHeaders(ISipHeader::RECV_INFO, _))
             .WillByDefault(Return(lstRecvInfoHeaders));
     ImsList<AString> lstAcceptHeaders;
     lstAcceptHeaders.Append(UssiConstants::HEADER_APPLICATION_USSDXML);

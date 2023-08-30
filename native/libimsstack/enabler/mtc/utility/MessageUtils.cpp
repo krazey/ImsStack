@@ -672,7 +672,7 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
 {
     ReasonHeaderValue objValue;
 
-    ImsList<AString> lstHeaders = GetHeaders(piMessage, ISipHeader::UNKNOWN, SipHeaderName::REASON);
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, ISipHeader::REASON);
     if (lstHeaders.IsEmpty())
     {
         return objValue;
@@ -1510,8 +1510,7 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     strEntryUri.Append(strToPart);
 
     const IMessage* piInitialInvite = objSession.GetPreviousRequest(IMessage::SESSION_START);
-    AString strSessionId =
-            GetHeader(piInitialInvite, ISipHeader::UNKNOWN, SipHeaderName::SESSION_ID);
+    AString strSessionId = GetHeader(piInitialInvite, ISipHeader::SESSION_ID);
     if (strSessionId.GetLength() > 0)
     {
         strEntryUri.Append("&amp;Session-ID=");

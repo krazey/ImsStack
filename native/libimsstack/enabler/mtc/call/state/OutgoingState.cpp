@@ -25,7 +25,6 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
-#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"

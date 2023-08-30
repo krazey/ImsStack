@@ -23,7 +23,6 @@
 #include "ISipServerConnection.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
-#include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
@@ -65,8 +64,7 @@ IMS_BOOL CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoRecei
         return IMS_FALSE;
     }
 
-    ImsList<AString> lstHeaders =
-            piSipMessage->GetHeaders(ISipHeader::UNKNOWN, SipHeaderName::INFO_PACKAGE);
+    ImsList<AString> lstHeaders = piSipMessage->GetHeaders(ISipHeader::INFO_PACKAGE);
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
         if (lstHeaders.GetAt(i).Contains(MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY))

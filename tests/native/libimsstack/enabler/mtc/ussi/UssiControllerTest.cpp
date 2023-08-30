@@ -41,7 +41,6 @@ using ::testing::ReturnRef;
 
 LOCAL const AString HEADER_APPLICATION_USSDXML(UssiConstants::HEADER_APPLICATION_USSDXML);
 LOCAL const AString HEADER_USSD_PACKAGE(UssiConstants::HEADER_USSD_PACKAGE);
-LOCAL const AString HEADER_RECVINFO(UssiConstants::HEADER_RECVINFO);
 LOCAL const AString HEADER_MULTIPART_MIXED(UssiConstants::HEADER_MULTIPART_MIXED);
 LOCAL const AString HEADER_RENDER_HANDLING(UssiConstants::HEADER_RENDER_HANDLING);
 LOCAL const AString HEADER_APPLICATION_SDP(UssiConstants::HEADER_APPLICATION_SDP);
@@ -204,8 +203,7 @@ TEST_F(UssiControllerTest, IsUssiInfoReceivedReturnsFalseIfNoPackageHeaderExist)
     ImsList<AString> lstHeaders;
     AString strNoPackageHeader("no package header");
     lstHeaders.Append(strNoPackageHeader);
-    const AString strInfoPackage(SipHeaderName::INFO_PACKAGE);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strInfoPackage))
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::INFO_PACKAGE, _))
             .WillByDefault(Return(lstHeaders));
     EXPECT_FALSE(objUssiController.IsUssiInfoReceived(&objSipServerConnection));
 }
@@ -214,8 +212,7 @@ TEST_F(UssiControllerTest, IsUssiInfoReceivedReturnsTrueIfPackageHeaderExists)
 {
     ImsList<AString> lstHeaders;
     lstHeaders.Append(HEADER_USSD_PACKAGE);
-    const AString strInfoPackage(SipHeaderName::INFO_PACKAGE);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strInfoPackage))
+    ON_CALL(objSipMessage, GetHeaders(ISipHeader::INFO_PACKAGE, _))
             .WillByDefault(Return(lstHeaders));
     EXPECT_TRUE(objUssiController.IsUssiInfoReceived(&objSipServerConnection));
 }
@@ -349,9 +346,8 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesUssiErrorIfUssiDataIsError)
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsRecvInfo)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_FAILURE));
 
     const AString strAnyUssdString("anyUssdString");
@@ -360,9 +356,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsRecvInfo)
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationSdpHeaderFails)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -374,9 +369,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationSdp
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationImsxmlHeaderFails)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -391,9 +385,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationIms
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationUssdxmlHeaderFails)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -411,9 +404,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndApplicationUss
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndMultipartMixedHeaderFails)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -434,9 +426,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsAcceptHeaderAndMultipartMixed
 
 TEST_F(UssiControllerTest, FormStartUssiRequestSetsContentType)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -499,9 +490,8 @@ TEST_F(UssiControllerTest, FormStartUssiRequestSetsBodyPart)
 
 TEST_F(UssiControllerTest, FormAcceptUssiSetsRecvInfo)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_FAILURE));
 
     EXPECT_EQ(IMS_FAILURE, objUssiController.FormAcceptUssi());
@@ -509,9 +499,8 @@ TEST_F(UssiControllerTest, FormAcceptUssiSetsRecvInfo)
 
 TEST_F(UssiControllerTest, FormAcceptUssiSetsAcceptHeaderAndFails)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     EXPECT_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(&objMessage, HEADER_APPLICATION_SDP, ISipHeader::ACCEPT, _))
@@ -522,9 +511,8 @@ TEST_F(UssiControllerTest, FormAcceptUssiSetsAcceptHeaderAndFails)
 
 TEST_F(UssiControllerTest, FormAcceptUssiSetsAcceptHeader)
 {
-    const AString strRecvInfo(SipHeaderName::RECV_INFO);
     ON_CALL(objMessageUtils,
-            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, strRecvInfo))
+            AddValueIfNotExists(&objMessage, HEADER_USSD_PACKAGE, ISipHeader::RECV_INFO, _))
             .WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, ISipHeader::ACCEPT, _))
             .WillByDefault(Return(IMS_SUCCESS));

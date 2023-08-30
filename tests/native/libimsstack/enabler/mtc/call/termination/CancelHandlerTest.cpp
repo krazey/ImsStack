@@ -22,7 +22,6 @@
 #include "core/MockIMessage.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
-#include "sipcore/SipHeaderName.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
