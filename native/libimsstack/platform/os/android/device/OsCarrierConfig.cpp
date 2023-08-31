@@ -241,7 +241,7 @@ PUBLIC VIRTUAL AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
 
     String8 str8(out);
 
-    return AString(str8.string());
+    return AString(str8.c_str());
 }
 
 PUBLIC VIRTUAL ImsVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
@@ -320,7 +320,7 @@ PUBLIC VIRTUAL ImsVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_C
     {
         const String16& str16 = out.at(i);
         String8 str8(str16);
-        objStrArray.Push(AString(str8.string()));
+        objStrArray.Push(AString(str8.c_str()));
     }
 
     return objStrArray;

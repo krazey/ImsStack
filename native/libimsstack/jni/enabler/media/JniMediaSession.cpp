@@ -369,6 +369,5 @@ void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const Parcel& objPar
 PRIVATE
 void JniMediaSession::ConvertString(IN const String16& strSource, OUT AString& strDest)
 {
-    String8 str8(strSource);
-    strDest = str8.string();
+    strDest = String8(strSource).c_str();
 }
