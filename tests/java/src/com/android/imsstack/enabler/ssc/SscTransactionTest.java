@@ -55,7 +55,9 @@ import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
@@ -67,12 +69,16 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import java.io.StringReader;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+
 @RunWith(JUnit4.class)
 public class SscTransactionTest {
+    @Rule public Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
+
     private static final int SLOT_0 = 0;
 
     private FakeSscTransaction mSscTransaction;
@@ -292,6 +298,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscXui).getXui(eq(SLOT_0), eq(null));
 
@@ -304,6 +311,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscUrl).getQueryUri(any(), anyString());
 
@@ -329,6 +337,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscAuthAgent, atLeast(1)).isCredentialInfoUpdated();
         verify(mMockSscHttpConnectionGov).sendRequest(eq(SLOT_0),
@@ -363,6 +372,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscAuthAgent, atLeast(1)).isCredentialInfoUpdated();
         verify(mMockSscHttpConnectionGov, atLeast(1)).sendRequest(SLOT_0,
@@ -385,6 +395,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -403,6 +414,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -419,6 +431,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -440,6 +453,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -459,6 +473,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -476,6 +491,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -497,6 +513,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
@@ -517,7 +534,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTED);
-        sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "");
@@ -536,6 +553,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscXmlGov).createXmlStream(eq(updateData));
 
@@ -558,6 +576,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
                 mDefaultRequestUri, mDefaultXui, xmlBody);
@@ -582,6 +601,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
                 mDefaultRequestUri, mDefaultXui, xmlBody);
@@ -603,6 +623,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(insertData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
                 mDefaultRequestUri, mDefaultXui, xmlBody);
@@ -628,6 +649,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
                 mDefaultRequestUri, mDefaultXui, xmlBody);
@@ -658,6 +680,7 @@ public class SscTransactionTest {
 
         mSscTransaction.startPutTransaction(updateData);
         sleepToWaitThreadRun();
+        waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_PUT,
                 requestUri, sipXui, xmlBody);
@@ -744,7 +767,22 @@ public class SscTransactionTest {
     }
 
     private void sleepToWaitThreadRun() {
-        android.os.SystemClock.sleep(50);
+        while (mSscTransaction.getTransactionThread().isAlive()
+                && mSscTransaction.getTransactionHandler() == null) {
+            android.os.SystemClock.sleep(50);
+        }
+    }
+
+    /*
+     * transaction is processed in an other thread. It should wait the thread to be finished when
+     * there is a message in the transaction handler.
+     */
+    private void waitThreadWorkFinished() {
+        try {
+            mSscTransaction.getTransactionThread().join();
+        } catch (InterruptedException e) {
+            // do nothing
+        }
     }
 
     private SscServiceData parseXmlStream(SscData data) {
