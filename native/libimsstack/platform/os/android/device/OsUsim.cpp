@@ -367,7 +367,7 @@ PROTECTED VIRTUAL void OsUsim::System_NotifyEvent(
         case NOTIFICATION_USIM_AUTH:
         {
             android::String8 strResponse(pParcel->readString16());
-            AString strAuth(strResponse.string());
+            AString strAuth(strResponse.c_str());
 
             OsUsimAuthResponseParam* pParam = new OsUsimAuthResponseParam();
 
