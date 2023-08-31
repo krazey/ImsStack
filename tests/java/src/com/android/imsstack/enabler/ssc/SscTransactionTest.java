@@ -74,7 +74,6 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-
 @RunWith(JUnit4.class)
 public class SscTransactionTest {
     @Rule public Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
@@ -252,10 +251,6 @@ public class SscTransactionTest {
             ConnectionListener connectionListener = mConnectionListenerCaptor.getValue();
             if (connectionListener != null) {
                 connectionListener.onConnectionSetupPrepared(); // 1st
-                Handler handler = mSscTransaction.getTransactionHandler();
-                assertNotNull(handler);
-                assertEquals(true, handler.hasMessages(SscTransaction.EVENT_SEND_HTTP_REQUEST));
-                handler.removeMessages(SscTransaction.EVENT_SEND_HTTP_REQUEST);
                 connectionListener.onConnectionSetupPrepared(); // 2nd
             }
             return null;
@@ -265,9 +260,9 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        Handler handler = mSscTransaction.getTransactionHandler();
-        assertNotNull(handler);
-        assertEquals(false, handler.hasMessages(SscTransaction.EVENT_SEND_HTTP_REQUEST));
+        // sendRequest must be called only once
+        verify(mMockSscHttpConnectionGov)
+                .sendRequest(anyInt(), anyInt(), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -524,16 +519,19 @@ public class SscTransactionTest {
         SscServiceQueryData queryData = getQueryData(SscConstant.CONDITION_CFU);
 
         when(mMockSscConnection.isConnected()).thenReturn(false, true);
-        when(mMockSscConnection.connect()).thenReturn(true);
         when(mMockSscHttpConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
                 mDefaultRequestUri, mDefaultXui, "")).thenReturn(httpSuccessResponse);
         when(mMockSscHttpConnectionGov.getInputStream(eq(SLOT_0))).thenReturn(getInputStream());
         when(mMockSscXmlGov.parseXmlStream(eq(queryData), any()))
                 .thenReturn(parseXmlStream(queryData));
+        doAnswer((Answer<Boolean>) (invocation) -> {
+            mSscTransaction.getTransactionHandler()
+                    .sendEmptyMessage(SscNetConnection.EVENT_PDN_CONNECTED);
+            return true;
+        }).when(mMockSscConnection).connect();
 
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
-        triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTED);
         waitThreadWorkFinished();
 
         verify(mMockSscHttpConnectionGov).sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET,
