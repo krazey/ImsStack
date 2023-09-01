@@ -383,7 +383,7 @@ PRIVATE
 void JniMtcCall::SendUssd(IN const android::Parcel& objParcel)
 {
     android::String8 str8(objParcel.readString16());
-    AString strUssd = str8.string();
+    AString strUssd = str8.c_str();
     m_objCallController.SendUssd(m_nCallKey, strUssd);
 }
 

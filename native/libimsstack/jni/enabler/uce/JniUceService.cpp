@@ -165,7 +165,7 @@ void JniUceService::SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel)
 
     String16 str16PidfXml = pParcel.readString16();
     String8 str8PidfXml(str16PidfXml);
-    AString pidfXml = str8PidfXml.string();
+    AString pidfXml = str8PidfXml.c_str();
 
     // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 extended = pParcel.readInt32();
@@ -176,7 +176,7 @@ void JniUceService::SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel)
     {
         String16 str16ETag = pParcel.readString16();
         String8 str8ETag(str16ETag);
-        eTag = str8ETag.string();
+        eTag = str8ETag.c_str();
     }
 
     pJniUce->SendPublishCmd(key, extended, capability, pidfXml, eTag);
@@ -191,7 +191,7 @@ void JniUceService::SendSingleSubscribeCmd(IUceJni* pJniUce, const Parcel& pParc
 
     String16 str16User = pParcel.readString16();
     String8 str8User(str16User);
-    AString user = str8User.string();
+    AString user = str8User.c_str();
 
     pJniUce->SendSingleSubscribeCmd(key, user);
 }
@@ -209,7 +209,7 @@ void JniUceService::SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel
     {
         String16 str16User = pParcel.readString16();
         String8 str8User(str16User);
-        AString szUser = str8User.string();
+        AString szUser = str8User.c_str();
         userList.Append(szUser);
     }
 
@@ -223,7 +223,7 @@ void JniUceService::SendOptionsCmd(IUceJni* pJniUce, const Parcel& pParcel)
 
     String16 str16RemoteUri = pParcel.readString16();
     String8 str8RemoteUri(str16RemoteUri);
-    AString remoteUri = str8RemoteUri.string();
+    AString remoteUri = str8RemoteUri.c_str();
 
     IMS_UINT32 myCaps = pParcel.readInt32();
 
@@ -241,7 +241,7 @@ void JniUceService::SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel)
     String16 str16Reason = pParcel.readString16();
     String8 str8Reason(str16Reason);
 
-    AString reason = str8Reason.string();
+    AString reason = str8Reason.c_str();
 
     IMS_UINT32 myCaps = pParcel.readInt32();
 

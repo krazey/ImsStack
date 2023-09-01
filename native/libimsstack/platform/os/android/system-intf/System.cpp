@@ -697,7 +697,7 @@ IMS_SINT32 System::GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
         {
             String16 str16Address = out.readString16();
             String8 str8Address(str16Address);
-            AString strAddress(str8Address.string());
+            AString strAddress(str8Address.c_str());
             objAccessNetInfo.AddElement(strAddress);
         }
         return 1;
@@ -734,7 +734,7 @@ AStringArray System::GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS
         {
             String16 str16Temp = out.readString16();
             String8 str8Temp(str16Temp);
-            AString strAddress(str8Temp.string());
+            AString strAddress(str8Temp.c_str());
             objLanInfo.AddElement(strAddress);
         }
 
@@ -881,7 +881,7 @@ AString System::GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
         String16 str16Apn = out.readString16();
         String8 str8Apn(str16Apn);
 
-        return AString(str8Apn.string());
+        return AString(str8Apn.c_str());
     }
 
     return AString::ConstNull();
@@ -923,7 +923,7 @@ AStringArray System::GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpV
         {
             String16 str16Address = out.readString16();
             String8 str8Address(str16Address);
-            objIpAddrs.AddElement(AString(str8Address.string()));
+            objIpAddrs.AddElement(AString(str8Address.c_str()));
         }
 
         return objIpAddrs;
@@ -957,7 +957,7 @@ AString System::GetIfaceName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
     {
         String16 str16Iface = out.readString16();
         String8 str8Iface(str16Iface);
-        return AString(str8Iface.string());
+        return AString(str8Iface.c_str());
     }
 
     return AString::ConstNull();
@@ -993,7 +993,7 @@ AString System::GetLocalAddress(
         String16 str16Ip = out.readString16();
         String8 str8Ip(str16Ip);
 
-        return AString(str8Ip.string());
+        return AString(str8Ip.c_str());
     }
 
     return AString::ConstNull();
@@ -1026,7 +1026,7 @@ AStringArray System::GetPcscfAddresses(
         {
             String16 str16Address = out.readString16();
             String8 str8Address(str16Address);
-            objPcscfAddresses.AddElement(AString(str8Address.string()));
+            objPcscfAddresses.AddElement(AString(str8Address.c_str()));
         }
 
         return objPcscfAddresses;
@@ -1143,7 +1143,7 @@ IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString
         String16 str16Value = out.readString16();
         String8 str8Value(str16Value);
 
-        strValue = AString(str8Value.string());
+        strValue = AString(str8Value.c_str());
 
         return 1;
     }
@@ -1207,7 +1207,7 @@ AString System::GetPrivateProperty(
         String16 str16 = out.readString16();
         String8 str8(str16);
 
-        return AString(str8.string());
+        return AString(str8.c_str());
     }
 
     return AString::ConstNull();
@@ -1375,7 +1375,7 @@ IMS_SINT32 System::GetLastKnownLocation(
         {
             String16 str16Address = out.readString16();
             String8 str8Address(str16Address);
-            AString strLocationParam(str8Address.string());
+            AString strLocationParam(str8Address.c_str());
             objLocationInfo.AddElement(strLocationParam);
         }
         return 1;
@@ -1519,7 +1519,7 @@ IMS_SINT32 System::GetString(
     {
         String16 str16 = out.readString16();
         String8 str8(str16);
-        strValue = AString(str8.string());
+        strValue = AString(str8.c_str());
         return 1;
     }
 
@@ -1848,7 +1848,7 @@ void System::NotifyCallCategory(
         String16 str16Number = in.readString16();
         String8 str8Number(str16Number);
 
-        strNumber = str8Number.string();
+        strNumber = str8Number.c_str();
         nLParam = reinterpret_cast<IMS_UINTP>(strNumber.GetStr());
     }
     else
