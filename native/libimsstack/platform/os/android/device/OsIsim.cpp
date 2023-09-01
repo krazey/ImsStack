@@ -821,7 +821,7 @@ PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
             pParam->m_nIndex = pParcel->readInt32();
 
             android::String8 strRecord(pParcel->readString16());
-            pParam->m_objRecord.Append(reinterpret_cast<const IMS_BYTE*>(strRecord.string()),
+            pParam->m_objRecord.Append(reinterpret_cast<const IMS_BYTE*>(strRecord.c_str()),
                     static_cast<IMS_SINT32>(strRecord.size()));
 
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
@@ -830,7 +830,7 @@ PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
         case NOTIFICATION_ISIM_AUTH:
         {
             android::String8 strResponse(pParcel->readString16());
-            AString strAuth(strResponse.string());
+            AString strAuth(strResponse.c_str());
             strAuth = AString::FromBase64(strAuth);
 
             OsIsimAuthResponseParam* pParam = new OsIsimAuthResponseParam();
@@ -841,7 +841,7 @@ PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
                     static_cast<IMS_SINT32>(strAuth.GetLength()));
 
             IMS_TRACE_D("ISIM :: Auth - owner=%" PFLS_x ", res=%s", pParam->m_nOwner,
-                    strResponse.string(), 0);
+                    strResponse.c_str(), 0);
 
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
@@ -850,7 +850,7 @@ PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
         {
             // SIM state is notified when receiving the intent
             android::String8 strTmpState(pParcel->readString16());
-            AString strState(strTmpState.string(), strTmpState.length());
+            AString strState(strTmpState.c_str(), strTmpState.length());
 
             IMS_TRACE_I("ISIM :: SIM state (%s)", strState.GetStr(), 0, 0);
 

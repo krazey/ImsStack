@@ -153,11 +153,11 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
     IMS_BOOL bEmergency = objParcel.readBool();
-    AString strContent = AString::FromBase64(strEncodedPdu.string());
+    AString strContent = AString::FromBase64(strEncodedPdu.c_str());
     // This object will be deleted by MtsMessageController after being used.
     ByteArray* pContent = new ByteArray(reinterpret_cast<const IMS_BYTE*>(strContent.GetStr()),
             static_cast<IMS_SINT32>(strContent.GetLength()));
-    AString strAddress = strAddress_.string();
+    AString strAddress = strAddress_.c_str();
 
     SmsFormatType eSmsFormat;
     if (nSmsFormat_ == (IMS_UINT32)SmsFormatType::SMSFORMAT_3GPP)
