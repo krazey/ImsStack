@@ -30,8 +30,7 @@ using namespace android;
 
 PUBLIC GLOBAL void JniMtcUtils::ConvertString(IN const String16& strSource, OUT AString& strDest)
 {
-    String8 str8(strSource);
-    strDest = str8.string();
+    strDest = String8(strSource).c_str();
 }
 
 PUBLIC GLOBAL CallType JniMtcUtils::ReadCallType(IN const android::Parcel& objParcel)
