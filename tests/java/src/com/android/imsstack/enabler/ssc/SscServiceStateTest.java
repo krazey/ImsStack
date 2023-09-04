@@ -82,7 +82,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -231,7 +233,7 @@ public class SscServiceStateTest {
         assertTrue(((Handler) mSscServiceState.mHandler)
                 .hasMessages(SscServiceState.EVENT_UT_CAPABILITY_CHANGED));
 
-        processDelayedMessage();
+        processAllMessages();
         verifyNoMoreInteractions(mMockUtInterface);
     }
 
@@ -254,7 +256,7 @@ public class SscServiceStateTest {
 
         mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
         mSscServiceState.init();
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface).onServiceStateChanged();
         verify(mMockDcNetWatcher).registerForAirplaneModeChanged(mSscServiceState.mHandler,
@@ -300,12 +302,12 @@ public class SscServiceStateTest {
 
         mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
         mSscServiceState.init();
-        processDelayedMessage();
+        processAllMessages();
         mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM;
         mSscServiceState.mUtAvailability = true;
 
         mSscServiceState.deInit();
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscServiceState.mHandler);
@@ -347,11 +349,11 @@ public class SscServiceStateTest {
 
         mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
         mSscServiceState.init();
-        processDelayedMessage();
+        processAllMessages();
         verify(mMockUtInterface).onServiceStateChanged();
 
         mSscServiceState.deInit();
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
@@ -371,7 +373,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testIsUtAvailable() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
 
         mSscServiceState.mUtAvailability = false;
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -382,7 +384,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testChangeCapabilities_utEnabled() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsUtFeatureEnabled = false;
         mSscServiceState.mUtAvailability = false;
 
@@ -392,7 +394,7 @@ public class SscServiceStateTest {
         disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -401,7 +403,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testChangeCapabilities_utDisabled() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsUtFeatureEnabled = true;
         mSscServiceState.mUtAvailability = true;
 
@@ -411,7 +413,7 @@ public class SscServiceStateTest {
         disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_UT, REGISTRATION_TECH_LTE));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -420,14 +422,14 @@ public class SscServiceStateTest {
 
     @Test
     public void testChangeCapabilities_noUtCapability() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
 
         ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
         ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
         enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -438,7 +440,7 @@ public class SscServiceStateTest {
     public void testChangeCapabilities_crossSimEnabled() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = false;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
         mSscServiceState.mUtAvailability = false;
@@ -450,7 +452,7 @@ public class SscServiceStateTest {
         disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -461,7 +463,7 @@ public class SscServiceStateTest {
     public void testChangeCapabilities_crossSimDisabled() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
         mSscServiceState.mUtAvailability = true;
@@ -473,7 +475,7 @@ public class SscServiceStateTest {
         disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_CROSS_SIM));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -484,14 +486,14 @@ public class SscServiceStateTest {
     public void testChangeCapabilities_noCrossSimCapability() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
 
         ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
         ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
         enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
 
         mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -500,7 +502,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSetErrorResponseCode_codeNoneBlock() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         int[] emptyBlockErrorCodes = {};
         int errorCode = 403;
         when(mMockCarrierConfig.getIntArray(
@@ -523,7 +525,7 @@ public class SscServiceStateTest {
         int errorCode = 480;
         when(mMockCarrierConfig.getIntArray(Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
                 .thenReturn(tempBlockErrorCodes);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setErrorResponseCode(errorCode);
@@ -541,7 +543,7 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY))
                 .thenReturn(permBlockErrorCodes);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setErrorResponseCode(errorCode);
@@ -558,7 +560,7 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY))
                 .thenReturn(tempBlockSmCodes);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setPdnConnectionFailed(smCause);
@@ -576,7 +578,7 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY))
                 .thenReturn(permBlockSmCodes);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setPdnConnectionFailed(smCause);
@@ -588,7 +590,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSetDnsQueryFailed() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setDnsQueryFailed(true);
@@ -608,7 +610,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSetGbaRequestFailed() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setGbaRequestFailed(true);
@@ -628,7 +630,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSetPdnConnectionTimeout() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setPdnConnectionTimeout(true);
@@ -649,7 +651,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSetSocketConnectionExpired() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         assertEquals(true, mSscServiceState.isUtAvailable());
 
         mSscServiceState.setSocketConnectionExpired(true);
@@ -674,7 +676,7 @@ public class SscServiceStateTest {
         int errorCode = 480;
         when(mMockCarrierConfig.getIntArray(Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY))
                 .thenReturn(tempBlockErrorCodes);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.setErrorResponseCode(errorCode);
         mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT
@@ -690,7 +692,7 @@ public class SscServiceStateTest {
 
         TimerInterface.Listener listener = listenerCaptor.getValue();
         listener.onTimerExpired(mTimerId);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(3)).onServiceStateChanged();
@@ -699,7 +701,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_airplaneModeOn() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
                 | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM;
@@ -707,7 +709,7 @@ public class SscServiceStateTest {
         when(mMockDcNetWatcher.isAirplaneMode()).thenReturn(true);
 
         sendMessage(SscServiceState.EVENT_AIRPLANE_MODE_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -716,7 +718,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_airplaneModeOff() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         int permanentBlockReasons = SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
                 | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM;
@@ -725,7 +727,7 @@ public class SscServiceStateTest {
         when(mMockDcNetWatcher.isAirplaneMode()).thenReturn(false);
 
         sendMessage(SscServiceState.EVENT_AIRPLANE_MODE_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(permanentBlockReasons, mSscServiceState.mUtBlockReason);
         verifyNoMoreInteractions(mMockUtInterface);
@@ -734,7 +736,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_wifiStateChangedConnectedWhenUtOverWifiSupported() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
@@ -743,7 +745,7 @@ public class SscServiceStateTest {
         when(mMockWifiInterface.isWifiConnected()).thenReturn(true);
 
         ((WifiInterface.Listener) mSscServiceState.mWifiListener).onWifiConnectionStateChanged();
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -752,7 +754,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_wifiStateChangedToDisconnectedWhenUtOverWifiSupported() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
@@ -761,7 +763,7 @@ public class SscServiceStateTest {
         when(mMockWifiInterface.isWifiConnected()).thenReturn(false);
 
         ((WifiInterface.Listener) mSscServiceState.mWifiListener).onWifiConnectionStateChanged();
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -770,7 +772,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_wifiStateChangedToConnectedWhenUtOverWifiNotSupported() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
@@ -779,7 +781,7 @@ public class SscServiceStateTest {
         when(mMockWifiInterface.isWifiConnected()).thenReturn(true);
 
         ((WifiInterface.Listener) mSscServiceState.mWifiListener).onWifiConnectionStateChanged();
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -788,12 +790,12 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_serviceStateChangedToInService() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_IN_SERVICE);
 
         sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -802,12 +804,12 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_serviceStateChangedToOutOfService() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
 
         sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -816,7 +818,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_dataRatChangedToValidRat() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
@@ -824,7 +826,7 @@ public class SscServiceStateTest {
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
 
         sendMessage(SscServiceState.EVENT_DATA_RAT_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -833,7 +835,7 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscServiceStateHandler_dataRatChangedToInvalidRat() {
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
@@ -841,7 +843,7 @@ public class SscServiceStateTest {
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
 
         sendMessage(SscServiceState.EVENT_DATA_RAT_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -853,12 +855,12 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL)).thenReturn(false);
         when(mMockDcNetWatcher.isRoaming()).thenReturn(false);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
 
         when(mMockDcNetWatcher.isRoaming()).thenReturn(true);
         sendMessage(SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -869,7 +871,7 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL))
                 .thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM;
         mSscServiceState.mUtAvailability = false;
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(SLOT_0);
@@ -878,7 +880,7 @@ public class SscServiceStateTest {
         when(mMockSimInterface.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
 
         ((Sim.Listener) mSscServiceState.mSimStateListener).onSimCardStateChanged();
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         assertEquals(false, authAgent.isCredentialInfoUpdated());
@@ -925,7 +927,7 @@ public class SscServiceStateTest {
 
         mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
         mSscServiceState.init();
-        processDelayedMessage();
+        processAllMessages();
 
         assertEquals(false, mSscServiceState.isUtAvailable());
         when(mMockCarrierConfig.getBoolean(
@@ -947,7 +949,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = true;
         ((ConfigInterface.Listener) mSscServiceState.mCarrierConfigListener)
                 .onCarrierConfigChanged(SLOT_0, SUB_ID_0);
-        processDelayedMessage();
+        processAllMessages();
 
         // Listeners are registered only once during init(). Not in onCarrierConfigChanged()
         verify(mMockWifiInterface, never()).addListener(mSscServiceState.mWifiListener);
@@ -976,12 +978,12 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
         mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -993,11 +995,11 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
 
         mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -1009,11 +1011,11 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
 
         mSscServiceState.mRegiStateListener.notifyRegistering(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1024,12 +1026,12 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1041,12 +1043,12 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = true;
 
         mSscServiceState.mRegiStateListener.notifyDeregistered(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1059,9 +1061,9 @@ public class SscServiceStateTest {
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
 
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0, null);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
     }
@@ -1071,10 +1073,10 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
 
         mSscServiceState.mRegiStateListener.notifyAssociatedUriChanged(null);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
     }
@@ -1084,10 +1086,10 @@ public class SscServiceStateTest {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL)).thenReturn(true);
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
 
         mSscServiceState.mRegiStateListener.notifyCapabilitiesUpdateFailed(0, 0, 0);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
     }
@@ -1103,7 +1105,7 @@ public class SscServiceStateTest {
         mSscServiceState.mMobileDataStateListener.mMobileDataState = true;
 
         mSscServiceState.mMobileDataStateListener.onUserMobileDataStateChanged(false);
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1120,7 +1122,7 @@ public class SscServiceStateTest {
         mSscServiceState.mMobileDataStateListener.mMobileDataState = false;
 
         mSscServiceState.mMobileDataStateListener.onUserMobileDataStateChanged(false);
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.mMobileDataStateListener.getUserMobileDataState());
@@ -1130,7 +1132,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onLostWhileCrossSimDataAvailable() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
         mSscServiceState.mUtAvailability = true;
@@ -1138,8 +1140,7 @@ public class SscServiceStateTest {
 
         Network network = Mockito.mock(Network.class);
         mSscServiceState.mCrossSimDataStateListener.onLost(network);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1150,7 +1151,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onLostWhileCrossSimDataUnavailable() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
         mSscServiceState.mUtAvailability = true;
@@ -1158,8 +1159,7 @@ public class SscServiceStateTest {
 
         Network network = Mockito.mock(Network.class);
         mSscServiceState.mCrossSimDataStateListener.onLost(network);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(true, mSscServiceState.isUtAvailable()); // mUtAvailability not changed
@@ -1170,7 +1170,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onCapabilitiesChangedWithoutCellularTransportType() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
         mSscServiceState.mUtAvailability = false;
@@ -1180,8 +1180,7 @@ public class SscServiceStateTest {
         NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder().build();
         mSscServiceState.mCrossSimDataStateListener
                 .onCapabilitiesChanged(network, networkCapabilities);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1192,7 +1191,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onCapabilitiesChangedWithoutNetworkSpecifier() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
         mSscServiceState.mUtAvailability = false;
@@ -1203,8 +1202,7 @@ public class SscServiceStateTest {
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
         mSscServiceState.mCrossSimDataStateListener
                 .onCapabilitiesChanged(network, networkCapabilities);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1215,7 +1213,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onCapabilitiesChangedWithSamSubscriptionId() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
         mSscServiceState.mUtAvailability = false;
@@ -1228,8 +1226,7 @@ public class SscServiceStateTest {
                 .build();
         mSscServiceState.mCrossSimDataStateListener
                 .onCapabilitiesChanged(network, networkCapabilities);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.isUtAvailable());
@@ -1240,7 +1237,7 @@ public class SscServiceStateTest {
     public void testCrossSimDataStateListener_onCapabilitiesChangedWhenCrossSimAvailable() {
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL)).thenReturn(true);
-        mSscServiceState = createAndInitSscServiceState();
+        createAndInitSscServiceState();
         mSscServiceState.mIsCrossSimFeatureEnabled = true;
         mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
         mSscServiceState.mUtAvailability = false;
@@ -1253,8 +1250,7 @@ public class SscServiceStateTest {
                 .build();
         mSscServiceState.mCrossSimDataStateListener
                 .onCapabilitiesChanged(network, networkCapabilities);
-        mLooper.processAllMessages();
-        processDelayedMessage();
+        processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
@@ -1267,17 +1263,31 @@ public class SscServiceStateTest {
     }
 
     private void processDelayedMessage() {
-        mLooper.moveTimeForward(2000);
-        mLooper.processAllMessages();
+        mLooper.moveTimeForward(1000);
+        while (!mLooper.getLooper().getQueue().isIdle()) {
+            mLooper.processAllMessages();
+            android.os.SystemClock.sleep(50);
+        }
     }
 
-    private SscServiceState createAndInitSscServiceState() {
-        SscServiceState sscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
-        sscServiceState.init();
+    private void processAllMessages() {
+        final CountDownLatch lock = new CountDownLatch(1);
+        ((Handler) mSscServiceState.mHandler).postDelayed(lock::countDown, 1500L);
+        while (lock.getCount() > 0) {
+            try {
+                processDelayedMessage();
+                lock.await(10L, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                // do nothing
+            }
+        }
+    }
 
-        processDelayedMessage();
+    private void createAndInitSscServiceState() {
+        mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
+        mSscServiceState.init();
+
+        processAllMessages();
         verify(mMockUtInterface).onServiceStateChanged();
-
-        return sscServiceState;
     }
 }
