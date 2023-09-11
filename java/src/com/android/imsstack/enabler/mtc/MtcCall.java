@@ -843,6 +843,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         // Store the call type of this call
         setCallType(callType);
+        setRemoteNumber(callee);
 
         Parcel parcel = Parcel.obtain();
 
@@ -2243,6 +2244,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
             logi("INCOMING_CALL_RECEIVED");
             setDetails(Details.ON_PRE_INCOMING, false);
+            setRemoteNumber(incomingCall.callerPartyNum);
             updateCallExtras(incomingCall);
 
             mCT.updateCallState(

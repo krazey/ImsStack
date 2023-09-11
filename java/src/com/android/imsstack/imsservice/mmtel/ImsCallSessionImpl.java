@@ -139,6 +139,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     protected ImsCallSessionImpl mTransferTargetSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private CallReasonInfo mCacheCallReasonInfo = null;
+    private boolean mIsE2eeCallInfoNotified = false;
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
@@ -3363,6 +3364,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallback.invokeSuppServiceReceived(ImsCallSessionImpl.this,
                         ImsSuppServiceUtils.MO.getCallIsWaiting());
             }
+
+            notifyE2eeCallInfo(suppInfo, mCall.getRemoteNumber());
         }
 
         @Override
@@ -3420,6 +3423,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_ESTABLISHED);
+
+            notifyE2eeCallInfo(suppInfo, mCall.getRemoteNumber());
 
             // FIXME: If the call setup failure is not a re-dial case,
             // we need to call the callSessionTerminated() to adapt the original Android Framework.
@@ -4267,6 +4272,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCT.updateCallState(ImsCallSessionImpl.this,
                     CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
+
+            notifyE2eeCallInfo(incomingCall.suppInfo, mCall.getRemoteNumber());
         }
 
         @Override
@@ -4808,6 +4815,30 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO);
         mProposedCallProfile.setCallerNumberVerificationStatus(
                 ImsCallProfile.VERIFICATION_STATUS_NOT_VERIFIED);
+    }
+
+    private void notifyE2eeCallInfo(SuppInfo suppInfo, String remoteNumber) {
+        if (mIsE2eeCallInfoNotified) {
+            return;
+        }
+
+        log("notifyE2eeCallInfo");
+        SuppInfo.SuppService suppSessionId = suppInfo.getService(
+                SuppInfo.TYPE_SESSION_ID);
+        String sessionId = suppSessionId == null ? "" : suppSessionId.strValue;
+
+        if (sessionId.isEmpty()) {
+            return;
+        }
+
+        ImsE2eeNotifier notifier = new ImsE2eeNotifier.Builder(mCallContext.getSlotId())
+                .setImsCallSessionId(getCallId())
+                .setLocalSessionId(sessionId.getBytes())
+                .setRemoteSessionId(sessionId.getBytes())
+                .setRemotePhoneNumber(remoteNumber)
+                .build();
+        notifier.notifyE2eeCallInfo();
+        mIsE2eeCallInfoNotified = true;
     }
 
     private class MtcConferenceListenerProxy extends MtcConference.Listener

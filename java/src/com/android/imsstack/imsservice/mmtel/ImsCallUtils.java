@@ -236,6 +236,7 @@ public class ImsCallUtils {
 
         // String extra information
         profile.setCallExtra(ImsCallProfile.EXTRA_OI, incomingCall.callerPartyNum);
+
         // For child number
         if (!TextUtils.isEmpty(incomingCall.calleePartyNum)) {
             profile.setCallExtra(ImsCallProfile.EXTRA_CHILD_NUMBER, incomingCall.calleePartyNum);

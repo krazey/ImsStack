@@ -101,8 +101,10 @@ public class Call implements Closeable {
      *  call_connection_id : Call connection identifier to identify a specific call,
      *      and it's set to the lowest number among unused numbersby ascending order.
      *      It's started with 1 if there is no calls.
+     * remote_number : Literally the number of peer.
      */
     public static final String EXTRA_CALL_CONNECTION_ID = "call_connection_id";
+    public static final String EXTRA_REMOTE_NUMBER = "remote_number";
 
     protected static final int UPDATE_STATE_IDLE = 0;
     protected static final int UPDATE_STATE_SENT = 1;
@@ -280,6 +282,21 @@ public class Call implements Closeable {
 
     public int getCallConnectionId() {
         return getCallExtraInt(EXTRA_CALL_CONNECTION_ID, 0);
+    }
+
+    /**
+     * Sets the number of peer.
+     */
+    public void setRemoteNumber(String remoteNumber) {
+        setCallExtra(EXTRA_REMOTE_NUMBER, remoteNumber);
+    }
+
+
+    /**
+     * Gets the number of peer.
+     */
+    public String getRemoteNumber() {
+        return getCallExtra(EXTRA_REMOTE_NUMBER, "");
     }
 
     public void terminate(int reason, boolean immediateCallback) {
