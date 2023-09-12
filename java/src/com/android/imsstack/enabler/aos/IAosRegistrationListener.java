@@ -77,6 +77,19 @@ public interface IAosRegistrationListener {
     void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
 
     /**
+     * This method is called when capabilities are changed from
+     * {@link com.android.imsstack.enabler.aos.service.AosService}.
+     *
+     * @param pairs An instance of {@link IAosRegistration.CapabilityPairs},
+     *              representing a pair of capabilities and network types.
+     *              The {@code pairs} contains all enabled capabilities
+     *              for each network type.
+     * @see IAosRegistrationListener.Capability
+     * @see IAosRegistrationListener.NetworkType
+     */
+    void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs);
+
+    /**
      * This method is called to notify changes in the registration event state.
      * The provided {@code impus} is applicable only when the {@code statusCode} is 200.
      *
@@ -86,7 +99,7 @@ public interface IAosRegistrationListener {
     void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus);
 
     /**
-     * Regsitration State
+     * Registration State
      */
     class RegistrationState {
         public static final int DEREGISTERED = 0;
@@ -104,6 +117,23 @@ public interface IAosRegistrationListener {
         public static final int CROSS_SIM = 2;
         public static final int NR = 3;
         public static final int UTRAN = 4;
+
+        public static String toString(int networkType) {
+            switch (networkType) {
+                case LTE:
+                    return "LTE";
+                case IWLAN:
+                    return "IWLAN";
+                case CROSS_SIM:
+                    return "CROSS_SIM";
+                case NR:
+                    return "NR";
+                case UTRAN:
+                    return "UTRAN";
+                default:
+                    return "NONE";
+            }
+        }
     }
 
     /**
@@ -119,6 +149,21 @@ public interface IAosRegistrationListener {
         public static final int CALL_COMPOSER = 1 << 4;
         public static final int OPTIONS_UCE = 1 << 5;
         public static final int PRESENCE_UCE = 1 << 6;
+
+        public static String toString(int capabilities) {
+            StringBuilder sb = new StringBuilder("[");
+
+            appendToken(sb, capabilities, VOICE, "voice");
+            appendToken(sb, capabilities, VIDEO, "video");
+            appendToken(sb, capabilities, UT, "ut");
+            appendToken(sb, capabilities, SMS, "sms");
+            appendToken(sb, capabilities, CALL_COMPOSER, "call_composer");
+            appendToken(sb, capabilities, OPTIONS_UCE, "options_uce");
+            appendToken(sb, capabilities, PRESENCE_UCE, "presence_uce");
+            sb.append("]");
+
+            return sb.toString();
+        }
     }
 
     /**
@@ -154,8 +199,58 @@ public interface IAosRegistrationListener {
         public static final int CHATBOT_VERSION_V2_SUPPORTED = 0x00200000;
         public static final int CHATBOT_ROLE = 0x00400000;
         public static final int PRESENCE = 0x00800000;
+
         /// ALL
         public static final int ALL = 0xFFFFFFFF;
+
+        public static String toString(int feature) {
+            StringBuilder sb = new StringBuilder("[");
+
+            appendToken(sb, feature, MMTEL, "mmtel");
+            appendToken(sb, feature, VIDEO, "video");
+            appendToken(sb, feature, TEXT, "text");
+            appendToken(sb, feature, USSI, "ussi");
+            appendToken(sb, feature, VERSTAT, "verstat");
+            appendToken(sb, feature, SMSIP, "smsip");
+            appendToken(sb, feature, STANDALONE_MSG, "standalone_msg");
+            appendToken(sb, feature, CHAT_IM, "chat_im");
+            appendToken(sb, feature, CHAT_SESSION, "chat_session");
+            appendToken(sb, feature, FILE_TRANSFER, "file_transfer");
+            appendToken(sb, feature, FILE_TRANSFER_VIA_SMS, "file_transfer_via_sms");
+            appendToken(sb, feature, CALL_COMPOSER_ENRICHED_CALLING,
+                    "call_composer_enriched_calling");
+            appendToken(sb, feature, CALL_COMPOSER_VIA_TELEPHONY, "call_composer_via_telephony");
+            appendToken(sb, feature, POST_CALL, "post_call");
+            appendToken(sb, feature, SHARED_MAP, "shared_map");
+            appendToken(sb, feature, SHARED_SKETCH, "shared_sketch");
+            appendToken(sb, feature, GEO_PUSH, "geo_push");
+            appendToken(sb, feature, GEO_PUSH_VIA_SMS, "geo_push_via_sms");
+            appendToken(sb, feature, CHATBOT_COMMUNICATION_USING_SESSION,
+                    "chatbot_communication_using_session");
+            appendToken(sb, feature, CHATBOT_COMMUNICATION_USING_STANDALONE_MSG,
+                    "chatbot_communication_using_standalone_msg");
+            appendToken(sb, feature, CHATBOT_VERSION_SUPPORTED, "chatbot_version_supported");
+            appendToken(sb, feature, CHATBOT_VERSION_V2_SUPPORTED, "chatbot_version_v2_supported");
+            appendToken(sb, feature, CHATBOT_ROLE, "chatbot_role");
+            appendToken(sb, feature, PRESENCE, "presence");
+            sb.append("]");
+
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Appends the specified token to the StringBuilder if the specified bitmask is set.
+     *
+     * @param sb       The StringBuilder to which the token should be appended.
+     * @param bitmasks The bitmasks to check.
+     * @param bitmask  The bitmask to compare against.
+     * @param token    The token to append.
+     */
+    private static void appendToken(StringBuilder sb, int bitmasks, int bitmask, String token) {
+        if ((bitmasks & bitmask) != 0) {
+            sb.append(token).append(" ");
+        }
     }
 
     // TODO : need to check this class.
@@ -244,6 +339,49 @@ public interface IAosRegistrationListener {
          * Service unavailable; IMS is not registered
          */
         public static final int CODE_LOCAL_NOT_REGISTERED = 17;
+
+        public static String toString(int reasonCode) {
+            switch (reasonCode) {
+                case CODE_UNSPECIFIED:
+                    return "CODE_UNSPECIFIED";
+                case CODE_PLMN_BLOCK:
+                    return "CODE_PLMN_BLOCK";
+                case CODE_PLMN_BLOCK_WITH_TIMEOUT:
+                    return "CODE_PLMN_BLOCK_WITH_TIMEOUT";
+                case CODE_REGISTRATION_ERROR:
+                    return "CODE_REGISTRATION_ERROR";
+                case CODE_REGISTRATION_ERROR_WFC_REG_403:
+                    return "CODE_REGISTRATION_ERROR_WFC_REG_403";
+                case CODE_REGISTRATION_ERROR_WFC_REG_500:
+                    return "CODE_REGISTRATION_ERROR_WFC_REG_500";
+                case CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY:
+                    return "CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY";
+                case CODE_REGISTRATION_ERROR_WFC_SUB_403:
+                    return "CODE_REGISTRATION_ERROR_WFC_SUB_403";
+                case CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED:
+                    return "CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED";
+                case CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES:
+                    return "CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES";
+                case CODE_LOCAL_POWER_OFF:
+                    return "CODE_LOCAL_POWER_OFF";
+                case CODE_LOCAL_LOW_BATTERY:
+                    return "CODE_LOCAL_LOW_BATTERY";
+                case CODE_LOCAL_NETWORK_NO_SERVICE:
+                    return "CODE_LOCAL_NETWORK_NO_SERVICE";
+                case CODE_LOCAL_NETWORK_NO_LTE_COVERAGE:
+                    return "CODE_LOCAL_NETWORK_NO_LTE_COVERAGE";
+                case CODE_LOCAL_NETWORK_ROAMING:
+                    return "CODE_LOCAL_NETWORK_ROAMING";
+                case CODE_LOCAL_NETWORK_IP_CHANGED:
+                    return "CODE_LOCAL_NETWORK_IP_CHANGED";
+                case CODE_LOCAL_SERVICE_UNAVAILABLE:
+                    return "CODE_LOCAL_SERVICE_UNAVAILABLE";
+                case CODE_LOCAL_NOT_REGISTERED:
+                    return "CODE_LOCAL_NOT_REGISTERED";
+                default:
+                    return "Unknown";
+            }
+        }
     }
 
     /**

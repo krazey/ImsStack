@@ -40,6 +40,7 @@
     <uses-permission android:name="android.permission.LOCATION_BYPASS"/>
     <uses-permission android:name="android.permission.MANAGE_USERS"/>
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -93,6 +94,18 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.TEST_CONFIG_MENU" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:permission="com.android.imsstack.permission.IMS"
+            android:name=".test.DebugScreen"
+            android:label="Debug Screen"
+            android:resizeableActivity="true"
+            android:process="com.android.imsstack"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.imsstack.action.DEBUG_SCREEN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

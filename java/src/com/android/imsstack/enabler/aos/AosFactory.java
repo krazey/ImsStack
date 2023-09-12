@@ -17,6 +17,7 @@ package com.android.imsstack.enabler.aos;
 
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -31,11 +32,14 @@ public class AosFactory {
     private static AosFactory sFactory = null;
 
     @VisibleForTesting
-    public Map<Integer, AosService> mAosServices =
+    public final Map<Integer, AosService> mAosServices =
             new HashMap<Integer, AosService>(MSimUtils.getSupportedSimCount());
     @VisibleForTesting
-    protected Map<Integer, AosSettingService> mAosSettingServices =
+    protected final Map<Integer, AosSettingService> mAosSettingServices =
             new HashMap<Integer, AosSettingService>(MSimUtils.getSupportedSimCount());
+    @VisibleForTesting
+    protected final Map<Integer, AosDebug> mAosDebugs =
+            new HashMap<Integer, AosDebug>(MSimUtils.getSupportedSimCount());
 
     public static AosFactory getInstance() {
         if (sFactory == null) {
@@ -55,10 +59,22 @@ public class AosFactory {
         AosSettingService aosSettingService = new AosSettingService(slotId);
         aosSettingService.init();
         mAosSettingServices.put(slotId, aosSettingService);
+
+        if (isDebugScreenEnabled(slotId)) {
+            AosDebug aosDebug = new AosDebug(slotId);
+            aosDebug.init();
+            mAosDebugs.put(slotId, aosDebug);
+        }
     }
 
     public synchronized void cleanup(int slotId) {
         ImsLog.d(slotId, "");
+
+        AosDebug aosDebug = mAosDebugs.get(slotId);
+        if (aosDebug != null) {
+            aosDebug.cleanup();
+            mAosDebugs.remove(slotId);
+        }
 
         AosSettingService aosSettingService = mAosSettingServices.get(slotId);
         if (aosSettingService != null) {
@@ -115,5 +131,26 @@ public class AosFactory {
      */
     public synchronized IAosInfo getAosInfo(int slotId) {
         return mAosServices.get(slotId);
+    }
+
+    /**
+     * Returns IAosDebug.
+     *
+     * @param slotId The slot-id
+     * @return Returns the interface of AosDebug.
+     */
+    public synchronized IAosDebug getAosDebug(int slotId) {
+        return mAosDebugs.get(slotId);
+    }
+
+    /**
+     * Checks whether the debug screen is enabled.
+     *
+     * @param slotId The slot-id
+     * @return {@code true} if the debug screen is enabled, {@code false} otherwise.
+     */
+    private static boolean isDebugScreenEnabled(int slotId) {
+        return ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, false, slotId);
     }
 }

@@ -683,6 +683,11 @@ public class ImsRegistrationTracker {
         }
 
         @Override
+        public void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
+            // Do nothing.
+        }
+
+        @Override
         public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class,
                     mContext.getSlotId());

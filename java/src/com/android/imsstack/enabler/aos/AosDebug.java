@@ -1,0 +1,1262 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.imsstack.enabler.aos;
+
+import android.annotation.NonNull;
+import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.icu.text.SimpleDateFormat;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
+import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthCdma;
+import android.telephony.CellSignalStrengthGsm;
+import android.telephony.CellSignalStrengthLte;
+import android.telephony.CellSignalStrengthNr;
+import android.telephony.CellSignalStrengthWcdma;
+import android.telephony.DataSpecificRegistrationInfo;
+import android.telephony.NetworkRegistrationInfo;
+import android.telephony.PreciseDataConnectionState;
+import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
+import android.telephony.VopsSupportInfo;
+import android.telephony.data.ApnSetting;
+import android.widget.Toast;
+
+import com.android.imsstack.R;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.IPhoneStateNotifier;
+import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.NativeStateInterface;
+import com.android.imsstack.core.agents.PhoneStateInterface;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.core.carrier.CarrierInfo;
+import com.android.imsstack.core.carrier.ImsCarrierResolver;
+import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.test.DebugScreen;
+import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
+import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * This class updates and manages information to be displayed on the debug screen.
+ * It registers and unregisters listeners to receive the information.
+ */
+public class AosDebug implements IAosDebug {
+
+    private static final int DEBUG_AIRPLANE_MODE_CHANGED = 1000;
+    private static final int DEBUG_SUBSCRIPTION_CHANGED = 1001;
+    private static final int DEBUG_SIGNALSTRENGTHS_CHANGED = 1002;
+    private static final int DEBUG_WIFI_CONNECTIVITY_CHANGED = 1003;
+    private static final int DEBUG_SERVICE_STATE_CHANGED = 1004;
+    private static final int DEBUG_PRECISE_DATA_CONNECTION_CHANGED = 1005;
+    private static final int DEBUG_NOTIFY_REGISTERED = 1006;
+    private static final int DEBUG_NOTIFY_DEREGISTERED = 1007;
+    private static final int DEBUG_NOTIFY_CAPABILITIES_UPDATED = 1008;
+    private static final String NOTIFICATION_CHANNEL_ID_DEBUG = "notification_channel_id_debug";
+    private static final int NOTIFICATION_ID_DEBUG = 0;
+    public static final int REQUEST_CODE_DEBUG = 1;
+    private final int mSlotId;
+    @VisibleForTesting
+    protected Context mContext;
+    @VisibleForTesting
+    protected DebugData mDebugData;
+    @VisibleForTesting
+    protected Handler mHandler;
+    @VisibleForTesting
+    protected DebugBroadcastReceiver mDebugBroadcastReceiver;
+    @VisibleForTesting
+    protected SignalStrengthsListener mSignalStrengthsListener;
+    private ConnectivityCallback mConnectivityCallback;
+    private DebugImsPhoneStateListener mImsPhoneStateListener;
+    @VisibleForTesting
+    protected RegistrationListener mRegistrationListener;
+    @VisibleForTesting
+    protected IAosRegistration mAosRegistration;
+    private NotificationManager mNotificationManager;
+    private NativeStateListener mNativeStateListener;
+    private Sim.Listener mSimListener;
+    private int mSubId = MSimUtils.INVALID_SUB_ID;
+    private String mOperator = DebugData.STR_EMPTY;
+    private String mCountry = DebugData.STR_EMPTY;
+
+    private static final int INVALID_RSSI = -127;
+
+    public AosDebug(int slotId) {
+        mSlotId = slotId;
+    }
+
+    @Override
+    public void init() {
+        logi(mSlotId, "init");
+
+        mContext = AppContext.getInstance();
+        mDebugData = new DebugData();
+        updateCarrierInfo();
+
+        HandlerThread thread = new HandlerThread(AosDebug.class.getName());
+        thread.start();
+        mHandler = new DebugHandler(thread.getLooper());
+
+        mNativeStateListener = new NativeStateListener();
+        mNativeStateListener.register();
+
+        mSimListener = new Sim.Listener() {
+            @Override
+            public void onSimStateChanged() {
+                Message.obtain(mHandler, DEBUG_SUBSCRIPTION_CHANGED).sendToTarget();
+            }
+        };
+
+        SimInterface si = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (si != null) {
+            si.addListener(mSimListener);
+        }
+
+        mAosRegistration = AosFactory.getInstance().getAosRegistration(mSlotId);
+        if (mAosRegistration != null) {
+            mRegistrationListener = new RegistrationListener();
+            mAosRegistration.addListener(mRegistrationListener);
+        }
+
+        mDebugBroadcastReceiver = new DebugBroadcastReceiver();
+        mContext.registerReceiver(mDebugBroadcastReceiver,
+                mDebugBroadcastReceiver.getFilter(), null, mHandler);
+
+        mSubId = MSimUtils.getSubId(mSlotId);
+        mDebugData.putInt(DebugData.KEY_SUB_ID, mSubId);
+
+        mSignalStrengthsListener = new SignalStrengthsListener();
+        mSignalStrengthsListener.register();
+
+        mConnectivityCallback = new ConnectivityCallback();
+        mConnectivityCallback.register();
+
+        mImsPhoneStateListener = new DebugImsPhoneStateListener();
+        mImsPhoneStateListener.setListener();
+    }
+
+    @Override
+    public void cleanup() {
+        logi(mSlotId, "cleanup");
+
+        if (mImsPhoneStateListener != null) {
+            mImsPhoneStateListener.removeListener();
+            mImsPhoneStateListener = null;
+        }
+
+        if (mConnectivityCallback != null) {
+            mConnectivityCallback.unregister();
+            mConnectivityCallback = null;
+        }
+
+        if (mSignalStrengthsListener != null) {
+            mSignalStrengthsListener.unregister();
+            mSignalStrengthsListener = null;
+        }
+
+        if (mDebugBroadcastReceiver != null) {
+            mContext.unregisterReceiver(mDebugBroadcastReceiver);
+            mDebugBroadcastReceiver = null;
+        }
+
+        if (mAosRegistration != null) {
+            if (mRegistrationListener != null) {
+                mAosRegistration.removeListener(mRegistrationListener);
+                mRegistrationListener = null;
+            }
+            mAosRegistration = null;
+        }
+
+        if (mSimListener != null) {
+            SimInterface si = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            if (si != null) {
+                si.removeListener(mSimListener);
+            }
+            mSimListener = null;
+        }
+
+        if (mNativeStateListener != null) {
+            mNativeStateListener.unregister();
+            mNativeStateListener = null;
+        }
+
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
+        }
+
+        mDebugData = null;
+        mNotificationManager = null;
+        mContext = null;
+    }
+
+    @Override
+    public void showOrDismissNotification(Activity activity) {
+        if (mNotificationManager == null) {
+            mNotificationManager = mContext.getSystemService(NotificationManager.class);
+        }
+
+        boolean isEnabled = ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, mSlotId);
+        logi(mSlotId, "showOrDismissNotification - is enabled: " + isEnabled);
+        if (!isEnabled) {
+            dismissNotification();
+            return;
+        }
+
+        // When Activity is null, it is called internally.
+        // In this case, the permission check is skipped.
+        if (activity == null || checkPermission()) {
+            createNotificationChannel();
+            sendNotification();
+        } else {
+            requestPermission(activity);
+        }
+    }
+
+    private void dismissNotification() {
+        if (mNotificationManager != null) {
+            mNotificationManager.cancel(NOTIFICATION_ID_DEBUG + mSlotId);
+            mNotificationManager.deleteNotificationChannel(
+                    NOTIFICATION_CHANNEL_ID_DEBUG + mSlotId);
+        }
+    }
+
+    @Override
+    public void notifyPermissionsResult(
+            int requestCode, String[] permissions, int[] grantResults, Activity activity) {
+        logi(mSlotId, "notifyPermissionsResult");
+
+        if (requestCode == REQUEST_CODE_DEBUG && grantResults.length > 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handlePermissionGranted();
+            } else {
+                handlePermissionDenied(activity);
+            }
+        }
+    }
+
+    private void handlePermissionGranted() {
+        createNotificationChannel();
+        sendNotification();
+    }
+
+    private void handlePermissionDenied(Activity activity) {
+        Toast.makeText(activity, "Notification permission was denied!", Toast.LENGTH_SHORT).show();
+        ImsPrivateProperties.Persistent.setBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, false, mSlotId);
+    }
+
+    @Override
+    public String getDebugMessage() {
+        StringBuilder sb = new StringBuilder(512);
+        appendMessage(sb, "Last Update Time", getCurrentTime() + "\n");
+
+        // IMS
+        appendMessage(sb, "SlotId/SubId", mSlotId + "/" + mDebugData.get(DebugData.KEY_SUB_ID));
+        appendMessage(sb, "Operator/Country", mOperator + "/" + mCountry);
+
+        if (DebugData.STR_IMS_REGISTERED.equals(mDebugData.get(DebugData.KEY_REGISTER))) {
+            appendMessage(sb, "IMS Status", DebugData.STR_IMS_REGISTERED
+                    + "(" + mDebugData.get(DebugData.KEY_REGISTER_TIME) + ")");
+            appendMessage(sb, "Registered FeatureTag", mDebugData.get(DebugData.KEY_FEATURES));
+        } else {
+            appendMessage(sb, "IMS Status", DebugData.STR_IMS_DEREGISTERED
+                    + "(" + mDebugData.get(DebugData.KEY_DEREGISTER_TIME) + ")");
+            appendMessage(sb, "Deregistered Reason",
+                    mDebugData.get(DebugData.KEY_DEREGISTER_REASON));
+        }
+
+        appendMessage(sb, "Registered Network",
+                mDebugData.get(DebugData.KEY_REGISTERED_NETWORK_TYPE));
+        appendMessage(sb, "Capabilities", "");
+        sb.append(mDebugData.get(DebugData.KEY_CAPABILITIES)).append("\n");
+
+        // Data Connection
+        sb.append(" # Data Connection #\n");
+        String dataConnectionState = mDebugData.get(DebugData.KEY_DATA_CONNECTION_STATE);
+        appendMessage(sb, "Connection State", dataConnectionState);
+
+        if (!dataConnectionState.equals(getDataStateToString(TelephonyManager.DATA_DISCONNECTED))
+                && !dataConnectionState.equals(DebugData.STR_EMPTY)) {
+            appendMessage(sb, "Network Type", mDebugData.get(DebugData.KEY_NETWORK_TYPE));
+            appendMessage(sb, "IP Addresses", "");
+            sb.append(" -" + mDebugData.get(DebugData.KEY_IP_ADDRESSES));
+            appendMessage(sb, "Interface Name", mDebugData.get(DebugData.KEY_INTERFACE_NAME));
+            appendMessage(sb, "MTU", mDebugData.get(DebugData.KEY_MTU));
+            appendMessage(sb, "APN Name/Entry", mDebugData.get(DebugData.KEY_APN_NAME) + "/"
+                    + mDebugData.get(DebugData.KEY_APN_ENTRY_NAME));
+            appendMessage(sb, "APN Types", mDebugData.get(DebugData.KEY_APN_TYPES));
+            appendMessage(sb, "P-CSCF", mDebugData.get(DebugData.KEY_PCSCF_ADDRESSES));
+            appendMessage(sb, "Reg State (Voice/Data)",
+                    mDebugData.get(DebugData.KEY_SERVICE_STATE) + "/"
+                            + mDebugData.get(DebugData.KEY_DATA_REG_STATE));
+
+            String cellularDataRAT = mDebugData.get(DebugData.KEY_CELLULAR_DATA_RAT);
+            if (cellularDataRAT.equals(getNetworkTypeToString(TelephonyManager.NETWORK_TYPE_LTE))) {
+                appendMessage(sb, "LTE Attach Type",
+                        mDebugData.get(DebugData.KEY_LTE_ATTACH_TYPE));
+            }
+
+            appendMessage(sb, "Roaming State", mDebugData.get(DebugData.KEY_ROAMING_STATE));
+            appendMessage(sb, "Roaming Type(Voice/Data)",
+                    mDebugData.get(DebugData.KEY_VOICE_ROAMING_TYPE) + "/"
+                            + mDebugData.get(DebugData.KEY_DATA_ROAMING_TYPE));
+            appendMessage(sb, "RAT (Voice/Data)", mDebugData.get(DebugData.KEY_VOICE_RAT)
+                    + "/" + cellularDataRAT);
+            appendMessage(sb, "Network Operator", mDebugData.get(DebugData.KEY_NETWORK_OPERATOR)
+                    + "(" + mDebugData.get(DebugData.KEY_NETWORK_OPERATOR_NUMERIC) + ")");
+            appendMessage(sb, "VOPS", mDebugData.get(DebugData.KEY_NETWORK_SUPPORT_VOPS));
+            appendMessage(sb, "EMCBS", mDebugData.get(DebugData.KEY_NETWORK_SUPPORT_EMCBS));
+
+            StringBuilder sbSignal = new StringBuilder();
+            String rsri = mDebugData.get(DebugData.KEY_UTRAN_RSRI);
+            String rscp = mDebugData.get(DebugData.KEY_UTRAN_RSCP);
+            String rsrp = mDebugData.get(DebugData.KEY_EUTRAN_RSRP);
+            String rsrq = mDebugData.get(DebugData.KEY_EUTRAN_RSRQ);
+            String ssrsrp = mDebugData.get(DebugData.KEY_NGRAN_SSRSRP);
+            String ssrsrq = mDebugData.get(DebugData.KEY_NGRAN_SSRSRQ);
+
+            if (!rsri.equals(DebugData.STR_EMPTY) || !rscp.equals(DebugData.STR_EMPTY)) {
+                appendMessage(sbSignal, " -UTRAN(RSRI/RSCP)", rsri + " dBm/" + rscp + " dBm");
+            }
+            if (!rsrp.equals(DebugData.STR_EMPTY) || !rsrq.equals(DebugData.STR_EMPTY)) {
+                appendMessage(sbSignal, " -EUTRN(RSRP/RSRQ)", rsrp + " dBm/" + rsrq + " dB");
+            }
+            if (!ssrsrp.equals(DebugData.STR_EMPTY) || !ssrsrq.equals(DebugData.STR_EMPTY)) {
+                appendMessage(sbSignal,
+                        " -NGRAN(SSRSRP/SSRSRQ)", ssrsrp + " dBm/" + ssrsrq + " dB");
+            }
+
+            if (sbSignal.length() > 0) {
+                sb.append(" Signal Strength\n");
+                sb.append(sbSignal);
+            }
+        }
+
+        // WiFi
+        sb.append("\n# WiFi #\n");
+        String wifiConnectionState = mDebugData.get(DebugData.KEY_WIFI_CONNECTION_STATE);
+        appendMessage(sb, "Connection State", wifiConnectionState);
+
+        if (wifiConnectionState.equals(DebugData.STR_CONNECTED)) {
+            appendMessage(sb, "Addresses", mDebugData.get(DebugData.KEY_WIFI_ADDRESSES));
+            appendMessage(sb, "Interface name", mDebugData.get(DebugData.KEY_WIFI_INTERFACE_NAME));
+            appendMessage(sb, "RSSI", mDebugData.get(DebugData.KEY_WIFI_RSSI));
+            appendMessage(sb, "BSSID/SSID", mDebugData.get(DebugData.KEY_WIFI_BSSID) + "/"
+                    + mDebugData.get(DebugData.KEY_WIFI_SSID));
+            appendMessage(sb, "MAC Address", mDebugData.get(DebugData.KEY_WIFI_MAC_ADDRESS));
+        }
+
+        return sb.toString();
+    }
+
+    private void appendMessage(StringBuilder sb, String key, String value) {
+        sb.append(" ").append(key).append(": ").append(value).append("\n");
+    }
+
+    private void updateCarrierInfo() {
+        SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(mSlotId);
+        if (cid != null) {
+            ImsCarrierResolver.Carrier c = ImsCarrierResolver.getCarrierFromCarrierId(cid);
+            mOperator = c.getOperator();
+            mCountry = c.getCountry();
+        }
+    }
+
+    private boolean checkPermission() {
+        return mContext.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void createNotificationChannel() {
+        if (mNotificationManager != null) {
+            String channelId = NOTIFICATION_CHANNEL_ID_DEBUG + mSlotId;
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Register Notification",
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.enableVibration(true);
+            channel.setDescription("ImsStack debug channel");
+            mNotificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void sendNotification() {
+        if (mNotificationManager != null) {
+            Notification.Builder nb = getNotificationBuilder();
+            int notificationId = NOTIFICATION_ID_DEBUG + mSlotId;
+            mNotificationManager.notify(notificationId, nb.build());
+        }
+    }
+
+    private Notification.Builder getNotificationBuilder() {
+        updateCarrierInfo();
+
+        Intent intent = new Intent(mContext, DebugScreen.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(MSimUtils.EXTRA_KEY_SLOT_ID, mSlotId);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                mContext, NOTIFICATION_ID_DEBUG + mSlotId, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        String content =
+                (mDebugData.get(DebugData.KEY_REGISTER).equals(DebugData.STR_IMS_REGISTERED))
+                        ? DebugData.STR_IMS_REGISTERED + "-"
+                        + mDebugData.get(DebugData.KEY_REGISTERED_NETWORK_TYPE) + "\n"
+                        + mDebugData.get(DebugData.KEY_FEATURES) : DebugData.STR_IMS_DEREGISTERED;
+
+        return new Notification.Builder(mContext, NOTIFICATION_CHANNEL_ID_DEBUG + mSlotId)
+                .setContentTitle("[" + (mSlotId + 1) + "]" + mOperator + "/" + mCountry)
+                .setContentText(content)
+                .setSmallIcon(R.drawable.ic_notification_ims)
+                .setOngoing(true)
+                .setContentIntent(pendingIntent);
+    }
+
+    private void requestPermission(Activity activity) {
+        if (activity != null) {
+            activity.requestPermissions(
+                    new String[] {android.Manifest.permission.POST_NOTIFICATIONS},
+                    REQUEST_CODE_DEBUG);
+        }
+    }
+
+    private static String getCurrentTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+                java.util.Locale.getDefault()).format(System.currentTimeMillis());
+    }
+
+    private String getCapabilitiesListToString(IAosRegistration.CapabilityPairs pairs) {
+        if (pairs == null) {
+            return DebugData.STR_EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Integer, Integer> entry : pairs.getCapabilities().entrySet()) {
+            sb.append("  -")
+                    .append(IAosRegistrationListener.NetworkType.toString(entry.getKey()));
+            sb.append(": ")
+                    .append(IAosRegistrationListener.Capability.toString(entry.getValue()))
+                    .append("\n");
+        }
+        return sb.toString();
+    }
+
+    private void updateNetworkType(int networkType) {
+        mDebugData.put(DebugData.KEY_REGISTERED_NETWORK_TYPE,
+                IAosRegistrationListener.NetworkType.toString(networkType));
+    }
+
+    private void updateRegisteredData(int networkType, int featureTagBits) {
+        mDebugData.put(DebugData.KEY_REGISTER, DebugData.STR_IMS_REGISTERED);
+        mDebugData.put(DebugData.KEY_REGISTER_TIME, getCurrentTime());
+        updateNetworkType(networkType);
+        mDebugData.put(DebugData.KEY_FEATURES,
+                IAosRegistrationListener.FeatureTagMask.toString(featureTagBits));
+        showOrDismissNotification(null);
+    }
+
+    private void updateDeregisterData(int networkType, int reason) {
+        mDebugData.put(DebugData.KEY_REGISTER, DebugData.STR_IMS_DEREGISTERED);
+        mDebugData.put(DebugData.KEY_DEREGISTER_TIME, getCurrentTime());
+        updateNetworkType(networkType);
+        mDebugData.put(DebugData.KEY_FEATURES, IAosRegistrationListener.FeatureTagMask.toString(
+                IAosRegistrationListener.FeatureTagMask.NONE));
+        mDebugData.put(DebugData.KEY_DEREGISTER_REASON,
+                IAosRegistrationListener.ReasonCode.toString(reason));
+
+        showOrDismissNotification(null);
+    }
+
+    private void selfCheckDebugNotification() {
+        logi(mSlotId, "selfCheckDebugNotification");
+        showOrDismissNotification(null);
+    }
+
+    private void updateSubscription() {
+        SimInterface si = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (si == null || !si.isSimLoadCompleted()) {
+            return;
+        }
+
+        int subId = si.getSubId();
+        if (mSubId == subId || subId == MSimUtils.INVALID_SUB_ID) {
+            return;
+        }
+
+        mSubId = subId;
+        logd(mSlotId, "updateSubscription :: subId=" + subId);
+        mDebugData.putInt(DebugData.KEY_SUB_ID, mSubId);
+
+        if (mSignalStrengthsListener == null) {
+            mSignalStrengthsListener = new SignalStrengthsListener();
+        } else {
+            mSignalStrengthsListener.unregister();
+        }
+
+        mSignalStrengthsListener.register();
+    }
+
+    private void updateSignalStrengthData(CellSignalStrength cs, int network) {
+
+        switch (network) {
+            case AccessNetworkType.UTRAN:
+                mDebugData.put(DebugData.KEY_UTRAN_RSRI, getSignalStrength(
+                        DebugData.KEY_UTRAN_RSRI, cs));
+                mDebugData.put(DebugData.KEY_UTRAN_RSCP, getSignalStrength(
+                        DebugData.KEY_UTRAN_RSCP, cs));
+                break;
+            case AccessNetworkType.EUTRAN:
+                mDebugData.put(DebugData.KEY_EUTRAN_RSRP, getSignalStrength(
+                        DebugData.KEY_EUTRAN_RSRP, cs));
+                mDebugData.put(DebugData.KEY_EUTRAN_RSRQ, getSignalStrength(
+                        DebugData.KEY_EUTRAN_RSRQ, cs));
+                break;
+            case AccessNetworkType.NGRAN:
+                mDebugData.put(DebugData.KEY_NGRAN_SSRSRP, getSignalStrength(
+                        DebugData.KEY_NGRAN_SSRSRP, cs));
+                mDebugData.put(DebugData.KEY_NGRAN_SSRSRQ, getSignalStrength(
+                        DebugData.KEY_NGRAN_SSRSRQ, cs));
+                break;
+            default:
+                logd(mSlotId, "Network = " + network + " not handled.");
+                break;
+        }
+    }
+
+    private String getSignalStrength(int type, CellSignalStrength css) {
+        int ss = Integer.MAX_VALUE;
+
+        if (css instanceof CellSignalStrengthWcdma
+                && (type == DebugData.KEY_UTRAN_RSRI || type == DebugData.KEY_UTRAN_RSCP)) {
+            ss = (type == DebugData.KEY_UTRAN_RSRI)
+                    ? ((CellSignalStrengthWcdma) css).getRssi()
+                    : ((CellSignalStrengthWcdma) css).getRscp();
+        } else if (css instanceof CellSignalStrengthLte
+                && (type == DebugData.KEY_EUTRAN_RSRP || type == DebugData.KEY_EUTRAN_RSRQ)) {
+            ss = (type == DebugData.KEY_EUTRAN_RSRP)
+                    ? ((CellSignalStrengthLte) css).getRsrp()
+                    : ((CellSignalStrengthLte) css).getRsrq();
+        } else if (css instanceof CellSignalStrengthNr
+                && (type == DebugData.KEY_NGRAN_SSRSRP || type == DebugData.KEY_NGRAN_SSRSRQ)) {
+            ss = (type == DebugData.KEY_NGRAN_SSRSRP)
+                    ? ((CellSignalStrengthNr) css).getSsRsrp()
+                    : ((CellSignalStrengthNr) css).getSsRsrq();
+        }
+
+        return (ss != Integer.MAX_VALUE) ? String.valueOf(ss) : DebugData.STR_EMPTY;
+    }
+
+    private void updateServiceState(int state) {
+        String text;
+
+        switch (state) {
+            case ServiceState.STATE_IN_SERVICE:
+                text = "In Service";
+                break;
+            case ServiceState.STATE_OUT_OF_SERVICE:
+                text = "Out of Service";
+                break;
+            case ServiceState.STATE_EMERGENCY_ONLY:
+                text = "Emergency call only";
+                break;
+            case ServiceState.STATE_POWER_OFF:
+                text = "Radio off";
+                break;
+            default:
+                text = DebugData.STR_EMPTY;
+                break;
+        }
+
+        mDebugData.put(DebugData.KEY_SERVICE_STATE, text);
+    }
+
+    private void updateVoiceRat(ServiceState ss) {
+        NetworkRegistrationInfo nri =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_CS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        mDebugData.put(DebugData.KEY_VOICE_RAT,
+                getNetworkTypeToString((nri == null)
+                        ? TelephonyManager.NETWORK_TYPE_UNKNOWN
+                                : nri.getAccessNetworkTechnology()));
+    }
+
+    private void updateDataRegState(ServiceState ss) {
+        final NetworkRegistrationInfo iwlanRegInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+        final NetworkRegistrationInfo wwanRegInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        int nriState = NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+
+        if (iwlanRegInfo == null || !iwlanRegInfo.isNetworkRegistered()) {
+            nriState =
+                    (wwanRegInfo != null)
+                            ? wwanRegInfo.getNetworkRegistrationState()
+                            : NetworkRegistrationInfo
+                                    .REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+        } else if (wwanRegInfo != null && !wwanRegInfo.isNetworkRegistered()) {
+            nriState = iwlanRegInfo.getNetworkRegistrationState();
+        } else if (wwanRegInfo != null) {
+            nriState = wwanRegInfo.getNetworkRegistrationState();
+        }
+
+        String text = DebugData.STR_EMPTY;
+        if (ss.getState() == ServiceState.STATE_POWER_OFF) {
+            text = "Radio off";
+        } else if (nriState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME
+                || nriState == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
+            text = "In Service";
+        } else if (wwanRegInfo != null && wwanRegInfo.isEmergencyEnabled()) {
+            text = "Emergency call only";
+        }
+
+        mDebugData.put(DebugData.KEY_DATA_REG_STATE, text);
+    }
+
+    private void updateCellularDataRat() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+
+        mDebugData.put(DebugData.KEY_CELLULAR_DATA_RAT,
+                getNetworkTypeToString((telephony != null)
+                        ? telephony.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN));
+    }
+
+    private void updateNetworkOperator(ServiceState ss) {
+        mDebugData.put(DebugData.KEY_NETWORK_OPERATOR, ss.getOperatorAlphaLong());
+    }
+
+    private void updateOperatorNumeric(ServiceState ss) {
+        String numeric = ss.getOperatorNumeric();
+        mDebugData.put(DebugData.KEY_NETWORK_OPERATOR_NUMERIC,
+                (numeric != null) ? numeric : DebugData.STR_EMPTY);
+    }
+
+    private void updateRoamingState(ServiceState ss) {
+        mDebugData.put(DebugData.KEY_ROAMING_STATE, (ss.getRoaming() ? "Roaming" : "Not Roaming"));
+    }
+
+    private void updateVoiceRoamingType(ServiceState ss) {
+        NetworkRegistrationInfo regState =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_CS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        mDebugData.put(DebugData.KEY_VOICE_ROAMING_TYPE, (regState == null)
+                ? getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING)
+                : getRoamingTypeToString(regState.getRoamingType()));
+    }
+
+    private void updateDataRoamingType(ServiceState ss) {
+        NetworkRegistrationInfo regState =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        mDebugData.put(DebugData.KEY_DATA_ROAMING_TYPE, (regState == null)
+                ? getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING)
+                : getRoamingTypeToString(regState.getRoamingType()));
+    }
+
+    private void updateNetworkFeature(ServiceState ss) {
+        NetworkRegistrationInfo regInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (regInfo == null) {
+            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, DebugData.STR_EMPTY);
+            return;
+        }
+
+        DataSpecificRegistrationInfo dsrInfo = regInfo.getDataSpecificInfo();
+        if (dsrInfo != null) {
+            VopsSupportInfo vsi = dsrInfo.getVopsSupportInfo();
+            if (vsi != null) {
+                mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS,
+                        (vsi.isVopsSupported()) ? "Support" : "Not Support");
+                mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS,
+                        (vsi.isEmergencyServiceSupported()) ? "Support" : "Not Support");
+            }
+
+            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, (dsrInfo.getLteAttachResultType()
+                    == DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_COMBINED)
+                    ? "Combined" : "EPS Only");
+        }
+    }
+
+    private void updatePreciseDataConnectionStateDate(PreciseDataConnectionState pdc) {
+        mDebugData.put(DebugData.KEY_DATA_CONNECTION_STATE, getDataStateToString(pdc.getState()));
+        mDebugData.put(DebugData.KEY_NETWORK_TYPE, getNetworkTypeToString(pdc.getNetworkType()));
+
+        ApnSetting as = pdc.getApnSetting();
+        mDebugData.put(DebugData.KEY_APN_NAME,
+                (as != null) ? as.getApnName() : DebugData.STR_EMPTY);
+        mDebugData.put(DebugData.KEY_APN_TYPES,
+                (as != null) ? as.getApnTypes().toString() : DebugData.STR_EMPTY);
+        mDebugData.put(DebugData.KEY_APN_ENTRY_NAME,
+                (as != null) ? as.getEntryName() : DebugData.STR_EMPTY);
+
+        LinkProperties lp = pdc.getLinkProperties();
+        mDebugData.put(DebugData.KEY_IP_ADDRESSES,
+                (lp != null) ? lp.getAddresses().toString() : DebugData.STR_EMPTY);
+        mDebugData.put(DebugData.KEY_INTERFACE_NAME,
+                (lp != null) ? lp.getInterfaceName() : DebugData.STR_EMPTY);
+        mDebugData.put(DebugData.KEY_MTU,
+                (lp != null) ? String.valueOf(lp.getMtu()) : DebugData.STR_EMPTY);
+        mDebugData.put(DebugData.KEY_PCSCF_ADDRESSES,
+                (lp != null) ? lp.getPcscfServers().toString() : DebugData.STR_EMPTY);
+    }
+
+    private static String getNetworkTypeToString(int type) {
+        switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                return "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+                return "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return "HSPA";
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+                return "CDMA";
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+                return "CDMA - EvDo rev. 0";
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+                return "CDMA - EvDo rev. A";
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                return "CDMA - EvDo rev. B";
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return "CDMA - 1xRTT";
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return "LTE";
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+                return "CDMA - eHRPD";
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+                return "iDEN";
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+                return "HSPA+";
+            case TelephonyManager.NETWORK_TYPE_GSM:
+                return "GSM";
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return "TD_SCDMA";
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return "IWLAN";
+            case TelephonyManager.NETWORK_TYPE_LTE_CA:
+                return "LTE_CA";
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return "NR";
+            default:
+                return DebugData.STR_EMPTY;
+        }
+    }
+
+    private static String getDataStateToString(int state) {
+        switch (state) {
+            case TelephonyManager.DATA_DISCONNECTED:
+                return "DISCONNECTED";
+            case TelephonyManager.DATA_CONNECTING:
+                return "CONNECTING";
+            case TelephonyManager.DATA_CONNECTED:
+                return "CONNECTED";
+            case TelephonyManager.DATA_SUSPENDED:
+                return "SUSPENDED";
+            case TelephonyManager.DATA_DISCONNECTING:
+                return "DISCONNECTING";
+            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
+                return "HANDOVER IN PROGRESS";
+            default:
+                return DebugData.STR_EMPTY;
+        }
+    }
+
+    private static String getRoamingTypeToString(int type) {
+        switch (type) {
+            case ServiceState.ROAMING_TYPE_NOT_ROAMING:
+                return "Not Roaming";
+            case ServiceState.ROAMING_TYPE_DOMESTIC:
+                return "Domestic";
+            case ServiceState.ROAMING_TYPE_INTERNATIONAL:
+                return "International";
+            default:
+                return DebugData.STR_EMPTY;
+        }
+    }
+
+    private static void logi(int slotId, String s) {
+        ImsLog.i(slotId, "[Debug] " + s);
+    }
+
+    private static void logd(int slotId, String s) {
+        ImsLog.d(slotId, "[Debug] " + s);
+    }
+
+    @VisibleForTesting
+    protected int getSlotId(int subId) {
+        return MSimUtils.getSlotId(subId);
+    }
+
+    private final class NativeStateListener implements NativeStateInterface.Listener {
+        @Override
+        public void onNativeServiceReady() {
+            logi(mSlotId, "NativeState: service ready.");
+            selfCheckDebugNotification();
+        }
+
+        public void register() {
+            NativeStateInterface nsi = getNativeStateInterface();
+            if (nsi != null) {
+                nsi.addListener(this);
+            }
+        }
+
+        public void unregister() {
+            NativeStateInterface nsi = getNativeStateInterface();
+            if (nsi != null) {
+                nsi.removeListener(this);
+            }
+        }
+
+        private NativeStateInterface getNativeStateInterface() {
+            return AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        }
+    }
+
+    private class DebugImsPhoneStateListener implements ImsPhoneStateListener {
+        private IPhoneStateNotifier mNotifier;
+        private PhoneStateInterface mPhoneState;
+
+        DebugImsPhoneStateListener() {}
+
+        public void removeListener() {
+            if (mNotifier != null) {
+                if (mPhoneState != null) {
+                    mPhoneState.removeNotifier(mNotifier);
+                }
+
+                mNotifier.setListener(null);
+                mNotifier = null;
+                mPhoneState = null;
+            }
+        }
+
+        public void setListener() {
+            mPhoneState = AgentFactory.getInstance().getAgent(PhoneStateInterface.class, mSlotId);
+
+            if (mPhoneState != null) {
+                mNotifier = mPhoneState.createNotifier(this, mHandler.getLooper());
+                mNotifier.setEvents(LISTEN_SERVICE_STATE | LISTEN_PRECISE_DATA_CONNECTION_STATE);
+
+                mPhoneState.addNotifier(mNotifier);
+            }
+        }
+
+        @Override
+        public void onServiceStateChanged(ServiceState ss) {
+            Message.obtain(mHandler, DEBUG_SERVICE_STATE_CHANGED, ss).sendToTarget();
+        }
+
+        @Override
+        public void onPreciseDataConnectionStateChanged(
+                PreciseDataConnectionState dataConnectionState) {
+            Message.obtain(mHandler, DEBUG_PRECISE_DATA_CONNECTION_CHANGED,
+                    dataConnectionState).sendToTarget();
+        }
+    }
+
+    @VisibleForTesting
+    protected final class ConnectivityCallback
+            extends ConnectivityManager.NetworkCallback {
+
+        private LinkProperties mLinkProperties;
+        private NetworkCapabilities mNetworkCapabilities;
+        private boolean mIsConnected = false;
+
+        @Override
+        public void onAvailable(Network network) {
+            mIsConnected = true;
+            Message.obtain(mHandler, DEBUG_WIFI_CONNECTIVITY_CHANGED, network).sendToTarget();
+        }
+
+        @Override
+        public void onLost(Network network) {
+            Message.obtain(mHandler, DEBUG_WIFI_CONNECTIVITY_CHANGED, null).sendToTarget();
+            ImsLog.i("Wifi#onLost: network=" + network);
+            removeConnectivityInfo();
+        }
+
+        @Override
+        public void onLinkPropertiesChanged(@NonNull Network network,
+                @NonNull LinkProperties linkProperties) {
+            mLinkProperties = linkProperties;
+            Message.obtain(mHandler, DEBUG_WIFI_CONNECTIVITY_CHANGED, network).sendToTarget();
+        }
+
+        @Override
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {
+            mNetworkCapabilities = networkCapabilities;
+            Message.obtain(mHandler, DEBUG_WIFI_CONNECTIVITY_CHANGED, network).sendToTarget();
+        }
+
+        public LinkProperties getLinkProperties() {
+            return mLinkProperties;
+        }
+
+        public NetworkCapabilities getNetworkCapabilities() {
+            return mNetworkCapabilities;
+        }
+
+        public boolean isConnected() {
+            return mIsConnected;
+        }
+
+        private void removeConnectivityInfo() {
+            mIsConnected = false;
+            mLinkProperties = null;
+            mNetworkCapabilities = null;
+        }
+
+        public void register() {
+            ConnectivityManager cm = getConnectivityManager();
+            if (cm != null) {
+                NetworkRequest nr = new NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
+
+                cm.registerNetworkCallback(nr, this, mHandler);
+            }
+        }
+
+        public void unregister() {
+            ConnectivityManager cm = getConnectivityManager();
+            if (cm != null) {
+                cm.unregisterNetworkCallback(this);
+            }
+        }
+
+        private ConnectivityManager getConnectivityManager() {
+            return mContext.getSystemService(ConnectivityManager.class);
+        }
+    }
+
+    @VisibleForTesting
+    protected final class SignalStrengthsListener extends TelephonyCallback implements
+            TelephonyCallback.SignalStrengthsListener {
+
+        SignalStrengthsListener() {}
+
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            Message.obtain(mHandler,
+                    DEBUG_SIGNALSTRENGTHS_CHANGED, signalStrength).sendToTarget();
+        }
+
+        public void register() {
+            if (mSubId == MSimUtils.INVALID_SUB_ID) {
+                return;
+            }
+
+            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
+            if (tm != null) {
+                tm.registerTelephonyCallback(mHandler::post, this);
+            }
+        }
+
+        public void unregister() {
+            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
+            if (tm != null) {
+                tm.unregisterTelephonyCallback(this);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    protected final class DebugBroadcastReceiver extends BroadcastReceiver {
+
+        public DebugBroadcastReceiver() {}
+
+        public IntentFilter getFilter() {
+            return new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        }
+
+        @Override
+        public synchronized void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            logi(mSlotId, ImsLog.lastSubString(action, "."));
+
+            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
+                Message.obtain(mHandler, DEBUG_AIRPLANE_MODE_CHANGED).sendToTarget();
+            }
+        }
+    }
+
+    private final class RegistrationListener implements IAosRegistrationListener {
+
+        @Override
+        public void notifyRegistered(int networkType, int featureTagBits,
+                java.util.Set<String> featureTags) {
+            logi(mSlotId, "notifyRegistered - networkType:" + networkType
+                    + ", featureTagBits:" + featureTagBits + ", featureTags:" + featureTags);
+            Message.obtain(mHandler,
+                    DEBUG_NOTIFY_REGISTERED, networkType, featureTagBits).sendToTarget();
+        }
+
+        @Override
+        public void notifyDeregistered(int networkType, int reason, String message) {
+            logi(mSlotId, "notifyDeregistered - networkType:" + networkType
+                    + ", reason:" + reason + "message:" + message);
+            Message.obtain(mHandler,
+                    DEBUG_NOTIFY_DEREGISTERED, networkType, reason).sendToTarget();
+        }
+
+        @Override
+        public void notifyRegistering(int networkType, int featureTagBits,
+                java.util.Set<String> featureTags) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyAssociatedUriChanged(android.net.Uri[] uris) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
+            Message.obtain(mHandler,
+                    DEBUG_NOTIFY_CAPABILITIES_UPDATED, pairs).sendToTarget();
+        }
+
+        @Override
+        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
+            // Do nothing.
+        }
+    }
+
+    private final class DebugHandler extends Handler {
+        private DebugHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg != null) {
+                logi(mSlotId, "handleMessage :: msg= " + msg.what);
+
+                switch (msg.what) {
+                    case DEBUG_AIRPLANE_MODE_CHANGED:
+                        handleAirplaneModeChanged();
+                        break;
+                    case DEBUG_SUBSCRIPTION_CHANGED:
+                        handleSubscriptionChanged();
+                        break;
+                    case DEBUG_SIGNALSTRENGTHS_CHANGED:
+                        handleSignalStrengthsChanged(msg);
+                        break;
+                    case DEBUG_WIFI_CONNECTIVITY_CHANGED:
+                        handleWifiConnectivityChanged(msg);
+                        break;
+                    case DEBUG_SERVICE_STATE_CHANGED:
+                        handleServiceStateChanged(msg);
+                        break;
+                    case DEBUG_PRECISE_DATA_CONNECTION_CHANGED:
+                        handlePreciseDataConnectionChanged(msg);
+                        break;
+                    case DEBUG_NOTIFY_REGISTERED:
+                        handleNotifyRegistered(msg);
+                        break;
+                    case DEBUG_NOTIFY_DEREGISTERED:
+                        handleNotifyDeregistered(msg);
+                        break;
+                    case DEBUG_NOTIFY_CAPABILITIES_UPDATED:
+                        handleNotifyCapabilitiesUpdated(msg);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void handleAirplaneModeChanged() {
+            mDebugData.clear();
+        }
+
+        private void handleSubscriptionChanged() {
+            updateSubscription();
+            updateCarrierInfo();
+            selfCheckDebugNotification();
+        }
+
+        private void handleSignalStrengthsChanged(Message msg) {
+            List<CellSignalStrength> cellSignalStrengths =
+                    ((SignalStrength) msg.obj).getCellSignalStrengths();
+
+            for (CellSignalStrength cs : cellSignalStrengths) {
+                if (cs.isValid()) {
+                    updateSignalStrengthData(cs, getAccessNetworkType(cs));
+                }
+            }
+        }
+
+        private int getAccessNetworkType(CellSignalStrength cs) {
+            if (cs instanceof CellSignalStrengthNr) {
+                return AccessNetworkType.NGRAN;
+            } else if (cs instanceof CellSignalStrengthLte) {
+                return AccessNetworkType.EUTRAN;
+            } else if (cs instanceof CellSignalStrengthWcdma) {
+                return AccessNetworkType.UTRAN;
+            } else if (cs instanceof CellSignalStrengthCdma) {
+                return AccessNetworkType.CDMA2000;
+            } else if (cs instanceof CellSignalStrengthGsm) {
+                return AccessNetworkType.GERAN;
+            } else {
+                return AccessNetworkType.UNKNOWN;
+            }
+        }
+
+        private void handleWifiConnectivityChanged(Message msg) {
+            if (msg == null || !mConnectivityCallback.isConnected()) {
+                clearWifiConnectivityData();
+                return;
+            }
+
+            mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, DebugData.STR_CONNECTED);
+
+            LinkProperties lp = mConnectivityCallback.getLinkProperties();
+            String addresses = (lp != null) ? lp.getAddresses().toString() : DebugData.STR_EMPTY;
+            String interfaceName = (lp != null) ? lp.getInterfaceName() : DebugData.STR_EMPTY;
+            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, addresses);
+            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, interfaceName);
+
+            NetworkCapabilities capabilities = mConnectivityCallback.getNetworkCapabilities();
+            if (capabilities != null) {
+                WifiInfo wifiInfo = (WifiInfo) capabilities.getTransportInfo();
+                int rssi = (wifiInfo != null) ? wifiInfo.getRssi() : INVALID_RSSI;
+                String bssId = (wifiInfo != null) ? wifiInfo.getBSSID() : "";
+                String ssId = (wifiInfo != null) ? wifiInfo.getSSID() : "";
+                String macAddress = (wifiInfo != null) ? wifiInfo.getMacAddress() : "";
+
+                mDebugData.put(DebugData.KEY_WIFI_RSSI, rssi + " dBm");
+                mDebugData.put(DebugData.KEY_WIFI_BSSID, (bssId.length() != 0)
+                        ? bssId : DebugData.STR_EMPTY);
+                mDebugData.put(DebugData.KEY_WIFI_SSID, (ssId.length() != 0)
+                        ? ssId : DebugData.STR_EMPTY);
+                mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS,
+                        (macAddress.length() != 0) ? macAddress : DebugData.STR_EMPTY);
+            }
+        }
+
+        private void clearWifiConnectivityData() {
+            mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, DebugData.STR_DISCONNECTED);
+            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_WIFI_RSSI, INVALID_RSSI + " dBm");
+            mDebugData.put(DebugData.KEY_WIFI_BSSID, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_WIFI_SSID, DebugData.STR_EMPTY);
+            mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS, DebugData.STR_EMPTY);
+        }
+
+        private void handleServiceStateChanged(Message msg) {
+            ServiceState ss = (ServiceState) msg.obj;
+
+            updateServiceState(ss.getState());
+            updateVoiceRat(ss);
+            updateDataRegState(ss);
+            updateCellularDataRat();
+            updateNetworkOperator(ss);
+            updateOperatorNumeric(ss);
+            updateRoamingState(ss);
+            updateVoiceRoamingType(ss);
+            updateDataRoamingType(ss);
+            updateNetworkFeature(ss);
+        }
+
+        private void handlePreciseDataConnectionChanged(Message msg) {
+            PreciseDataConnectionState pdc = (PreciseDataConnectionState) msg.obj;
+            updatePreciseDataConnectionStateDate(pdc);
+        }
+
+        private void handleNotifyRegistered(Message msg) {
+            updateRegisteredData(msg.arg1, msg.arg2);
+        }
+
+        private void handleNotifyDeregistered(Message msg) {
+            updateDeregisterData(msg.arg1, msg.arg2);
+        }
+
+        private void handleNotifyCapabilitiesUpdated(Message msg) {
+            mDebugData.put(DebugData.KEY_CAPABILITIES,
+                    getCapabilitiesListToString((IAosRegistration.CapabilityPairs) msg.obj));
+        }
+    }
+}

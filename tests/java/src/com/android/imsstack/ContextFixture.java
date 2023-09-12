@@ -317,6 +317,8 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.APP_OPS_SERVICE;
             } else if (serviceClass == TelecomManager.class) {
                 return Context.TELECOM_SERVICE;
+            } else if (serviceClass == NotificationManager.class) {
+                return Context.NOTIFICATION_SERVICE;
             } else if (serviceClass == UserManager.class) {
                 return Context.USER_SERVICE;
             } else if (serviceClass == ConnectivityManager.class) {

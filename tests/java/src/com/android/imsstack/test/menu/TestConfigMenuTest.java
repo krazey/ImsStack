@@ -276,6 +276,16 @@ public class TestConfigMenuTest {
 
             assertTrue(listener.onPreferenceChange(preference, "0"));
             // Expected: no actions.
+
+            preference = (ListPreference)
+                    mTestConfigMenu.findPreference(TestConfigMenu.KEY_TEST_DEBUG_SCREEN);
+
+            assertNotNull(preference);
+
+            listener = preference.getOnPreferenceChangeListener();
+
+            assertTrue(listener.onPreferenceChange(preference, "0"));
+            // Expected: no actions.
         });
     }
 

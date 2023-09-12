@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.test.menu;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -33,6 +34,7 @@ import com.android.imsstack.R;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.test.DebugScreen;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -55,6 +57,7 @@ public class TestConfigMenu extends PreferenceActivity {
     protected static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
     protected static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
     protected static final String KEY_TEST_CLEAR_CONFIG = "test_clear_config";
+    protected static final String KEY_TEST_DEBUG_SCREEN = "test_debug_screen";
 
     // Sub-tree for test_subscriber
     protected static final String KEY_SUBSCRIBER_HOME_DOMAIN_NAME = "subscriber_home_domain_name";
@@ -85,6 +88,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private EditTextPreference mLogOptions;
     private ListPreference mRestartImsStack;
     private ListPreference mClearTestConfig;
+    private ListPreference mDebugScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -283,6 +287,13 @@ public class TestConfigMenu extends PreferenceActivity {
             mClearTestConfig.setValue("");
             mClearTestConfig.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
+
+        mDebugScreen = (ListPreference) findPreference(KEY_TEST_DEBUG_SCREEN);
+
+        if (mDebugScreen != null) {
+            mDebugScreen.setValue("");
+            mDebugScreen.setOnPreferenceChangeListener(new ListItemChangeListener());
+        }
     }
 
     private ImsMmTelManager getImsMmTelManager() {
@@ -431,6 +442,13 @@ public class TestConfigMenu extends PreferenceActivity {
                 if ("1".equals(value)) {
                     ImsPrivateProperties.Persistent.removeTestProperties(mSlotId);
                     ImsLog.d(mSlotId, "TestConfig: test config cleared.");
+                }
+            } else if (KEY_TEST_DEBUG_SCREEN.equals(preference.getKey())) {
+                if ("1".equals(value)) {
+                    Intent intent = new Intent(AppContext.getInstance(), DebugScreen.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.putExtra(MSimUtils.EXTRA_KEY_SLOT_ID, mSlotId);
+                    startActivity(intent);
                 }
             } else if (KEY_TEST_IMS_DEREGISTER.equals(preference.getKey())) {
                 ImsLog.d(mSlotId, "TestConfig: " + preference.getKey() + "=" + value);

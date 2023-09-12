@@ -323,6 +323,12 @@ public final class ImsPrivateProperties {
         public static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
 
         /**
+         * A flag specifying whether a debug screen is enabled or not.
+         * Value : boolean (true / false)
+         */
+        public static final String KEY_TEST_DEBUG_SCREEN_ENABLED = "test_debug_screen_enabled";
+
+        /**
          * A flag specifying whether test-mode is enabled or not.
          * Value : boolean (true / false)
          */
@@ -429,6 +435,7 @@ public final class ImsPrivateProperties {
             KEY_CARRIER_SIGNAL_PCO_TEST,
             KEY_TEST_IMS_DISABLED,
             KEY_TEST_DEBUG_ENABLED,
+            KEY_TEST_DEBUG_SCREEN_ENABLED,
             KEY_TEST_TESTMODE_ENABLED,
             KEY_USE_PREDEFINED_UA_STRING,
             KEY_CONFIG_NR_DUPLEX_MODE,
