@@ -20,6 +20,7 @@
 #include "ServiceTimer.h"
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
+#include "ImsIdentity.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -134,6 +135,21 @@ protected:
     {
         PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->GetPhoneNumber(
                 strPhoneNumber);
+    }
+
+    virtual inline AString GetTemporaryPublicUserId()
+    {
+        return ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId);
+    }
+
+    virtual inline AString GetTemporaryPrivateUserId()
+    {
+        return ImsIdentity::CreateTemporaryPrivateUserId(m_nSlotId);
+    }
+
+    virtual inline AString GetTemporaryHomeDomainName()
+    {
+        return ImsIdentity::CreateTemporaryHomeDomainName(m_nSlotId);
     }
 
     // IAosNConfigurationListener

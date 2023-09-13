@@ -660,7 +660,7 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     A_IMS_TRACE_I(AOSTAG, "GetTemporaryImpu", 0, 0, 0);
 
     // create IMPU
-    AString strImpu = ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId);
+    AString strImpu(GetTemporaryPublicUserId());
     if (strImpu.GetLength() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "CreateTemporaryPublicUserId fails", 0, 0, 0);
@@ -668,7 +668,7 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     }
 
     // create IMPI
-    AString strImpi(ImsIdentity::CreateTemporaryPrivateUserId(m_nSlotId));
+    AString strImpi(GetTemporaryPrivateUserId());
     if (strImpi.GetLength() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "CreateTemporaryPrivateUserId fails", 0, 0, 0);
@@ -676,7 +676,7 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     }
 
     // create HomeDomain
-    AString strHdn(ImsIdentity::CreateTemporaryHomeDomainName(m_nSlotId));
+    AString strHdn(GetTemporaryHomeDomainName());
     if (strHdn.GetLength() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "CreateTemporaryHomeDomainName fails", 0, 0, 0);

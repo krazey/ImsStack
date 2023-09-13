@@ -46,6 +46,9 @@ class TestAosSubscriberManager : public AosSubscriberManager
 {
 public:
     AString m_strPhoneNumber;
+    AString m_strTemporaryPublicUserId;
+    AString m_strTemporaryPrivateUserId;
+    AString m_strTemporaryHomeDomainName;
 
 public:
     inline explicit TestAosSubscriberManager(IN IMS_SINT32 nSlotId) :
@@ -57,6 +60,12 @@ public:
     {
         strPhoneNumber = m_strPhoneNumber;
     }
+
+    inline AString GetTemporaryPublicUserId() override { return m_strTemporaryPublicUserId; }
+
+    inline AString GetTemporaryPrivateUserId() override { return m_strTemporaryPrivateUserId; }
+
+    inline AString GetTemporaryHomeDomainName() override { return m_strTemporaryHomeDomainName; }
 
     FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsProvisionedForNormalType);
     FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsNotProvisionedForNormalType);
@@ -100,7 +109,21 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, GetImpuFromIsim_LimitedAdminSmsMode_ValidImpuIsOne);
     FRIEND_TEST(AosSubscriberManagerTest, GetImpuFromIsim_LimitedAdminSmsMode_InvalidPrimaryImpu);
     FRIEND_TEST(AosSubscriberManagerTest, GetImpuFromIsim_LimitedAdminSmsMode_ImpuIsSipUri);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ImpuLengthZero);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ImpuIsInvalid);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ImpiIsInvalid);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_HomeDomainNameIsInvalid);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impu);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impi);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_HomeDomainName);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_PhoneContext);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthUserName);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthRealm);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_ServerScscf);
+    FRIEND_TEST(AosSubscriberManagerTest,
+            GetTemporaryImpu_ConfigurableUpdateFailed_WriteProvisioningSubscriber);
+    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithWritable);
+    FRIEND_TEST(
+            AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithoutWritable);
     FRIEND_TEST(AosSubscriberManagerTest, UpdateImsIdentity_PriorityIsim_UpdateFail);
     FRIEND_TEST(AosSubscriberManagerTest, UpdateImsIdentity_PriorityUsim_UpdateFail);
     FRIEND_TEST(AosSubscriberManagerTest, UpdateImsIdentity_UpdateSuccess);
@@ -862,10 +885,487 @@ TEST_F(AosSubscriberManagerTest, GetImpuFromIsim_LimitedAdminSmsMode_ImpuIsSipUr
     EXPECT_TRUE(m_pTestAosSubscriberManager->GetImpuFromIsim(objOutPuids));
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpuLengthZero)
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpuIsInvalid)
 {
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString::ConstNull();
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_TRUE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
     AStringArray objPuids;
     EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpiIsInvalid)
+{
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_PUID");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString::ConstNull();
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_TRUE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_HomeDomainNameIsInvalid)
+{
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString::ConstNull();
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_TRUE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impu)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impi)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_HomeDomainName)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_PhoneContext)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthUserName)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _)).Times(0);
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthRealm)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _)).Times(0);
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_ServerScscf)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest,
+        GetTemporaryImpu_ConfigurableUpdateFailed_WriteProvisioningSubscriber)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    AStringArray objPuids;
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithWritable)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    AStringArray objPuids;
+    EXPECT_TRUE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithoutWritable)
+{
+    // Set IMPU, IMPI, HDN
+    m_pTestAosSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_IMPU");
+    m_pTestAosSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
+    m_pTestAosSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
+
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    EXPECT_FALSE(m_pTestAosSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+
+    // Set IConfigurable
+    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .Times(1)
+            .WillRepeatedly(Return(&m_objMockIConfigurable));
+
+    m_pTestAosSubscriberManager->SetSubscriberConfig(
+            static_cast<ISubscriberConfig*>(&m_objMockISubscriberConfig));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPU_0, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_IMPI, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_PHONE_CONTEXT, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_USERNAME, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_AUTH_REALM, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SERVER_SCSCF, _))
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(
+            m_objMockIConfigurable, Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER, _))
+            .Times(0);
+
+    AStringArray objPuids;
+    EXPECT_TRUE(m_pTestAosSubscriberManager->GetTemporaryImpu(objPuids, IMS_FALSE));
 }
 
 TEST_F(AosSubscriberManagerTest, ProcessFallbackToImsiBasedIsim_NotSupportIsimFallback)
