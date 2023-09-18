@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -116,7 +117,8 @@ public class SimAgentTest {
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mNativeStateInterface, SLOT0);
 
-        mSimAgent = new SimAgent(SLOT0);
+        mTestableLooper = new TestableLooper(Looper.getMainLooper());
+        mSimAgent = new SimAgent(SLOT0, Looper.getMainLooper());
         mSimAgent.init(mContext);
     }
 
@@ -480,7 +482,6 @@ public class SimAgentTest {
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
         when(mTelephonyManager.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mSimAgent.updateSimState();
         mSimAgent.readIsimFileAttributes(Sim.ISIM_FILE_ID_DOMAIN);
@@ -521,7 +522,6 @@ public class SimAgentTest {
         when(mTelephonyManager.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED);
         int index = 0;
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mSimAgent.updateSimState();
         mSimAgent.readIsimRecord(Sim.ISIM_FILE_ID_DOMAIN, index);
@@ -563,7 +563,6 @@ public class SimAgentTest {
         when(mTelephonyManager.getIccAuthentication(
                 eq(Sim.APP_TYPE_ISIM), eq(TelephonyManager.AUTHTYPE_EAP_AKA), eq(nonce)))
                 .thenReturn(response);
-        mTestableLooper = new TestableLooper(mSimAgent.getAuthLooper());
         mSimAgent.requestSimAuthentication(Sim.APP_TYPE_ISIM, nonce, owner);
         processAllMessages();
 
@@ -580,7 +579,6 @@ public class SimAgentTest {
         when(mTelephonyManager.getIccAuthentication(
                 eq(Sim.APP_TYPE_USIM), eq(TelephonyManager.AUTHTYPE_EAP_AKA), eq(nonce)))
                 .thenReturn(response);
-        mTestableLooper = new TestableLooper(mSimAgent.getAuthLooper());
         mSimAgent.requestSimAuthentication(Sim.APP_TYPE_USIM, nonce, owner);
         processAllMessages();
 

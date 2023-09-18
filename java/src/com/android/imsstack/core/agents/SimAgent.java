@@ -33,7 +33,6 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -80,7 +79,6 @@ public class SimAgent implements SimInterface {
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private final SimHandler mSimHandler;
     private final SimStateReceiver mSimStateReceiver;
-    private final MessageExecutor mAuthExecutor;
     /** USIM states */
     private int mSimCardState = Sim.STATE_UNKNOWN;
     private int mSimState = Sim.STATE_UNKNOWN;
@@ -98,11 +96,15 @@ public class SimAgent implements SimInterface {
     private NativeStateInterface.Listener mNativeStateListener;
 
     public SimAgent(int slotId) {
+        this(slotId, AppContext.getInstance().getMainLooper());
+    }
+
+    @VisibleForTesting
+    public SimAgent(int slotId, @NonNull Looper looper) {
         mSlotId = slotId;
-        mSimHandler = new SimHandler();
+        mSimHandler = new SimHandler(looper);
         mSimStateReceiver = new SimStateReceiver();
         mUsatAgent = new UsatAgent(this);
-        mAuthExecutor = new MessageExecutor(SimAgent.class.getSimpleName());
     }
 
     @Override
@@ -310,16 +312,11 @@ public class SimAgent implements SimInterface {
     public void requestSimAuthentication(@Sim.AppType int appType, String nonce, long owner) {
         final AuthEvent event = new AuthEvent(appType, nonce, owner);
 
-        mAuthExecutor.execute(()-> {
+        mSimHandler.post(()-> {
             handleRequestSimAuthentication(event);
         });
     }
     //// }
-
-    @VisibleForTesting
-    public Looper getAuthLooper() {
-        return mAuthExecutor.getLooper();
-    }
 
     private void handleRequestSimAuthentication(AuthEvent event) {
         String response = "";
@@ -715,8 +712,8 @@ public class SimAgent implements SimInterface {
     }
 
     private final class SimHandler extends Handler {
-        SimHandler() {
-            super(AppContext.getInstance().getMainLooper());
+        SimHandler(@NonNull Looper looper) {
+            super(looper);
         }
 
         @Override
