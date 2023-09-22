@@ -131,7 +131,6 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
     bUpdate |= UpdateDualNumber(piMessage);
     bUpdate |= UpdateCallingNumVerification(piMessage);
     bUpdate |= UpdateCallComposerElements(piMessage);
-    bUpdate |= UpdateSessionId(piMessage);
 
     IMS_TRACE_I("UpdateService : [%s]", _TRACE_B_(bUpdate), 0, 0);
     return bUpdate;
@@ -343,19 +342,6 @@ IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMess
     }
 
     return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN IMessage* piMessage)
-{
-    AString strSessionId =
-            m_objContext.GetMessageUtils().GetHeaderValue(piMessage, ISipHeader::SESSION_ID);
-    if (strSessionId.GetLength() > 0)
-    {
-        Add(SuppType::SESSION_ID, strSessionId);
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
 }
 
 PUBLIC
