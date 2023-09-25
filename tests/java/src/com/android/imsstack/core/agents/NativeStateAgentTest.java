@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
@@ -43,12 +43,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class NativeStateAgentTest {
     private static final int SLOT0 = 0;
 
@@ -66,7 +66,7 @@ public class NativeStateAgentTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
+        mTestableLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
         Context context = mContextFixture.getTestDouble();
         AppContext.init(context);
@@ -78,9 +78,8 @@ public class NativeStateAgentTest {
         AgentFactory.getInstance().setAgent(BatteryStateInterface.class, mBatteryState);
         AgentFactory.getInstance().setAgent(CellInfoInterface.class, mCellInfoInterface, SLOT0);
         DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
-        mTestableLooper = new TestableLooper(Looper.getMainLooper());
 
-        mNativeStateAgent = new NativeStateAgent(SLOT0, Looper.getMainLooper());
+        mNativeStateAgent = new NativeStateAgent(SLOT0, mTestableLooper.getLooper());
         mNativeStateAgent.init(context);
         mNativeStateAgent.addListener(mNativeStateListener);
     }
@@ -92,11 +91,7 @@ public class NativeStateAgentTest {
             mNativeStateAgent.cleanup();
             mNativeStateAgent = null;
         }
-
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
+        mTestableLooper = null;
 
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(CellInfoInterface.class, null, SLOT0);
