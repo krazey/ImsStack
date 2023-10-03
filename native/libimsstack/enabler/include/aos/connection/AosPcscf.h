@@ -18,7 +18,6 @@
 
 #include "ITimer.h"
 #include "IpAddress.h"
-#include "interface/IAosNConfiguration.h"
 #include "interface/IAosPcscf.h"
 #include "IEventListener.h"
 #include "provider/AosStaticProfile.h"
@@ -271,9 +270,9 @@ protected:
     IAosAppContext* m_piAppContext;
     IAosPcscfListener* m_piListener;
     ITimer* m_piDnsQueryRetryTimer;
-    IAosNConfiguration* m_piAosNConfig;
 
     AosRegistrationType m_eRegType;
+    IMS_SINT32 m_nSlotId;
     IMS_UINT32 m_nChangedType;
 
     IMS_BOOL m_bIsConfigured;
@@ -289,8 +288,5 @@ protected:
     ImsList<RetryHost*> m_objRetryHostList;
 
     AString m_strTag;
-
-protected:
-    friend class AosPcscfTest;
 };
 #endif  // AOS_PCSCF_H_

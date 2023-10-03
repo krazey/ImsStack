@@ -36,10 +36,14 @@ public:
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
-    MOCK_METHOD(IMS_SINT32, GetHostByName,
-            (IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
-                    IN IMS_SINT32 nIpVersion),
-            (override));
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
+            IN IMS_SINT32 nIpVersion = 0) override
+    {
+        return GetHostByNameInternal(strHostName, &objIps, nIpVersion);
+    }
+    MOCK_METHOD(IMS_SINT32, GetHostByNameInternal,
+            (IN const AString& strHostName, OUT ImsList<IpAddress>* objIps,
+                    IN IMS_SINT32 nIpVersion));
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
     MOCK_METHOD(IMS_BOOL, IsIpv6Preferred, (), (override));

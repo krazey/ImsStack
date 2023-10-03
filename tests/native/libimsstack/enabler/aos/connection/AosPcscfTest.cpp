@@ -18,7 +18,10 @@
 #include <gmock/gmock.h>
 
 #include "connection/AosPcscf.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
 #include "ServerAddress.h"
+#include "TestTimerService.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConnection.h"
@@ -26,108 +29,93 @@
 #include "interface/MockIAosPcscf.h"
 #include "interface/MockIAosSubscriber.h"
 #include "interface/MockIAosRegistration.h"
+#include "provider/AosProvider.h"
 #include "../../../config/interface/common/MockISubscriberConfig.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SetArgPointee;
 
 const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
 
-class AosPcscfTest : public ::testing::Test
+class TestAosPcscf : public AosPcscf
 {
 public:
-    AosPcscf* m_pAosPcscf;
     AStringArray m_objPcscfAddressPreset;
     ImsList<IMS_SINT32> m_objPcscfPortPreset;
 
-    MockIAosAppContext m_objMockIAosAppContext;
-    MockIAosConnection m_objMockIAosConnection;
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    MockIAosSubscriber m_objMockIAosSubscriber;
-    MockISubscriberConfig m_objMockISubscriberConfig;
-
-protected:
-    virtual void SetUp() override
+public:
+    TestAosPcscf(IN IAosAppContext* piAppContext) :
+            AosPcscf(piAppContext)
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(SLOT_ID));
-
-        const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosConnection));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosSubscriber));
-
-        EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(-1))
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockISubscriberConfig));
-
-        m_pAosPcscf = new AosPcscf(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
-        ASSERT_TRUE(m_pAosPcscf != nullptr);
     }
 
-    virtual void TearDown() override
-    {
-        if (m_pAosPcscf)
-        {
-            delete m_pAosPcscf;
-        }
-    }
+    FRIEND_TEST(AosPcscfTest, Init_UpdateRegType);
+    FRIEND_TEST(AosPcscfTest, CleanUp_ResetVariable);
+    FRIEND_TEST(AosPcscfTest, ConfigureWithIpVersion_DoNotProcessDiscoveryForInvalidLocalAddress);
+    FRIEND_TEST(AosPcscfTest, ConfigureWithIpVersion_ProcessDiscoveryForValidLocalAddress);
+    FRIEND_TEST(AosPcscfTest, ConfigureWithoutIpVersion_TryProcessDiscoveryForEachIpVerion);
+    FRIEND_TEST(AosPcscfTest, SetAndCheckConfigured);
+    FRIEND_TEST(AosPcscfTest, IsAsyncDnsDiscoveryWhenRcsRegType);
+    FRIEND_TEST(AosPcscfTest, IsNotSinglePcoSchemeWhenInvalidSubscriber);
+    FRIEND_TEST(AosPcscfTest, IsNotSinglePcoSchemeWhenTwoDiscoveryMethod);
+    FRIEND_TEST(AosPcscfTest, IsSinglePcoSchemeWhenSinglePcoDiscoveryMethod);
+    FRIEND_TEST(AosPcscfTest, GetPcscfs_ReturnPcscfAddressSet);
+    FRIEND_TEST(AosPcscfTest, GetPcscfsPorts_ReturnPcscfPortSet);
+    FRIEND_TEST(AosPcscfTest, UpdatePcscfs_ReplaceWithNewPcscfs);
+    FRIEND_TEST(AosPcscfTest, HasPcscf_ReturnWhetherPcscfExist);
+    FRIEND_TEST(AosPcscfTest, GetPcscfCount);
+    FRIEND_TEST(AosPcscfTest, RemoveCurrentPcscf);
+    FRIEND_TEST(AosPcscfTest, ManageValidPcscf);
+    FRIEND_TEST(AosPcscfTest, ManageTriedPcscf);
+    FRIEND_TEST(AosPcscfTest, IncreaseCurrentPcscfTriedCount);
+    FRIEND_TEST(AosPcscfTest, ResetCurrentPcscfTriedCount);
+    FRIEND_TEST(AosPcscfTest, ResetAllPcscfTriedCount);
+    FRIEND_TEST(AosPcscfTest, GetCurrentPcscf);
+    FRIEND_TEST(AosPcscfTest, GetCurrentIndex);
+    FRIEND_TEST(AosPcscfTest, IsFirstPcscf);
+    FRIEND_TEST(AosPcscfTest, GetFirstPcscf);
+    FRIEND_TEST(AosPcscfTest, HasNextPcscf);
+    FRIEND_TEST(AosPcscfTest, GetNextPcscf);
+    FRIEND_TEST(AosPcscfTest, SetFirstPcscfIndex_UdateCurrentPcscIndexAsZero);
+    FRIEND_TEST(AosPcscfTest, CheckAndProcessChangeFromPco_NotHandledCases);
+    FRIEND_TEST(AosPcscfTest, CheckAndProcessChangeFromPco_ReorderIfCurrentPcscfExist);
+    FRIEND_TEST(AosPcscfTest, CheckAndProcessChangeFromPco_DifferentIfCurrentPcscfNotExist);
+    FRIEND_TEST(AosPcscfTest, SetListener);
+    FRIEND_TEST(AosPcscfTest, GetChangedPcscfs);
+    FRIEND_TEST(AosPcscfTest, ProcessDiscovery_PcoMethod);
+    FRIEND_TEST(AosPcscfTest, ProcessDiscovery_ConfigMethod);
+    FRIEND_TEST(AosPcscfTest, GetNextDiscoveryMethod);
+    FRIEND_TEST(AosPcscfTest, GetFromConf_FailureCases);
+    FRIEND_TEST(AosPcscfTest, ProcessDnsQuery);
+    FRIEND_TEST(AosPcscfTest, StartTimer);
+    FRIEND_TEST(AosPcscfTest, StartTimer_FailureCases);
+    FRIEND_TEST(AosPcscfTest, StopTimer);
+    FRIEND_TEST(AosPcscfTest, TimerExpired_FailureCases);
+    FRIEND_TEST(AosPcscfTest, ProcessDnsRetryTimerExpired_RetrySucceeded);
+    FRIEND_TEST(AosPcscfTest, ProcessDnsRetryTimerExpired_RetryWithOtherIpType);
+    FRIEND_TEST(AosPcscfTest, TimerToStringForInvalidType);
 
-    void Initialize() { m_pAosPcscf->Init(); }
-
-    void CleanUp() { m_pAosPcscf->CleanUp(); }
-
-    void SetRegType(IN AosRegistrationType RegType) { m_pAosPcscf->m_eRegType = RegType; }
-
-    void SetNConfig(IN IAosNConfiguration* piNc) { m_pAosPcscf->m_piAosNConfig = piNc; }
-
-    void SetConfigured(IN IMS_BOOL bConfigured) { m_pAosPcscf->SetConfigured(bConfigured); }
-
-    void SetCurrentPcscfIndex(IN IMS_UINT32 nIndex) { m_pAosPcscf->m_nCurrentPcscfIndex = nIndex; }
-
-    void SetPcscfs()
+    void PreparePcscfPreset()
     {
         AString strPcscfs = "0.0.0.1, 0.0.0.2, 0.0.0.3";
         m_objPcscfAddressPreset = strPcscfs.Split(',');
         for (int i = 0; i < m_objPcscfAddressPreset.GetCount(); i++)
         {
             m_objPcscfPortPreset.Append(5060 + i);
-            m_pAosPcscf->AddPcscf(
-                    m_objPcscfAddressPreset.GetElementAt(i), m_objPcscfPortPreset.GetAt(i));
+            AddPcscf(m_objPcscfAddressPreset.GetElementAt(i), m_objPcscfPortPreset.GetAt(i));
         }
     }
-
-    IMS_BOOL SetDnsQueryTimerExpired()
-    {
-        if (m_pAosPcscf->m_piDnsQueryRetryTimer != IMS_NULL)
-        {
-            m_pAosPcscf->Timer_TimerExpired(m_pAosPcscf->m_piDnsQueryRetryTimer);
-            return IMS_TRUE;
-        }
-        else
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    void NotifyResult() { m_pAosPcscf->m_piListener->Pcscf_NotifyResult(IMS_TRUE); }
 
     IMS_BOOL IsValidPcscf(IN IMS_UINT32 nIndex)
     {
-        if (nIndex < m_pAosPcscf->m_objPcscfList.GetSize())
+        if (nIndex < m_objPcscfList.GetSize())
         {
-            Pcscf* pPcscf = m_pAosPcscf->m_objPcscfList.GetAt(nIndex);
+            Pcscf* pPcscf = m_objPcscfList.GetAt(nIndex);
             return pPcscf->IsAvailable();
         }
 
@@ -136,9 +124,9 @@ protected:
 
     IMS_BOOL IsTriedPcscf(IN IMS_UINT32 nIndex)
     {
-        if (nIndex < m_pAosPcscf->m_objPcscfList.GetSize())
+        if (nIndex < m_objPcscfList.GetSize())
         {
-            Pcscf* pPcscf = m_pAosPcscf->m_objPcscfList.GetAt(nIndex);
+            Pcscf* pPcscf = m_objPcscfList.GetAt(nIndex);
             return pPcscf->IsTried();
         }
 
@@ -146,294 +134,253 @@ protected:
     }
 };
 
-TEST_F(AosPcscfTest, Configure_GetFromPco)
+class AosPcscfTest : public ::testing::Test
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .Times(2)
-            .WillOnce(ReturnRef(IpAddress::ANY))
-            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
+public:
+    inline AosPcscfTest() :
+            m_pTestTimerService(new TestTimerService()),
+            m_objMockITimer(m_pTestTimerService->GetMockTimer())
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, m_pTestTimerService);
+    }
+    inline virtual ~AosPcscfTest()
+    {
+        delete m_pTestTimerService;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(m_objPcscfAddressPreset));
+    TestAosPcscf* m_pTestAosPcscf;
+    TestTimerService* m_pTestTimerService;
 
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddress())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(nullptr));
+    IAosNConfiguration* m_piAosNConfiguration;
+    ImsVector<IMS_SINT32> m_objDiscoveryMethods;
 
+    MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosConnection m_objMockIAosConnection;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfPort())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(5060));
+    MockIAosPcscfListener objMockIAosPcscfListener;
+    MockIAosRegistration objMockIAosRegistration;
+    MockIAosSubscriber m_objMockIAosSubscriber;
+    MockISubscriberConfig m_objMockISubscriberConfig;
+    MockITimer& m_objMockITimer;
 
-    SetPcscfs();
+protected:
+    virtual void SetUp() override
+    {
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(
+                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration), SLOT_ID);
 
-    // valid local address type but invalid address
-    m_pAosPcscf->Configure(IpAddress::IPV4);
-    EXPECT_FALSE(m_pAosPcscf->IsConfigured());
+        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId()).WillRepeatedly(ReturnRef(PROFILE_ID));
+        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosNConfiguration, GetPcscfPort()).WillByDefault(Return(5060));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&objMockIAosRegistration));
+        ON_CALL(m_objMockIAosAppContext, GetSubscriber())
+                .WillByDefault(Return(&m_objMockIAosSubscriber));
+        ON_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(_))
+                .WillByDefault(Return(&m_objMockISubscriberConfig));
+        ON_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
+                .WillByDefault(ReturnRef(m_objDiscoveryMethods));
 
-    // valid local address type and valid address
-    m_pAosPcscf->Configure(IpAddress::IPV4);
-    EXPECT_TRUE(m_pAosPcscf->IsConfigured());
+        m_pTestAosPcscf = new TestAosPcscf(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+    }
+
+    virtual void TearDown() override
+    {
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+        m_objDiscoveryMethods.Clear();
+
+        if (m_pTestAosPcscf)
+        {
+            delete m_pTestAosPcscf;
+        }
+    }
+};
+
+TEST_F(AosPcscfTest, Init_UpdateRegType)
+{
+    EXPECT_CALL(objMockIAosRegistration, GetRegType())
+            .WillRepeatedly(Return(AosRegistrationType::FAKE));
+
+    m_pTestAosPcscf->Init();
+
+    EXPECT_EQ(m_pTestAosPcscf->m_eRegType, AosRegistrationType::FAKE);
 }
 
-TEST_F(AosPcscfTest, Configure_GetFromConf)
+TEST_F(AosPcscfTest, CleanUp_ResetVariable)
+{
+    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+    m_pTestAosPcscf->SetConfigured(IMS_TRUE);
+
+    m_pTestAosPcscf->CleanUp();
+
+    EXPECT_EQ(m_pTestAosPcscf->m_piListener, nullptr);
+    EXPECT_FALSE(m_pTestAosPcscf->IsConfigured());
+}
+
+TEST_F(AosPcscfTest, ConfigureWithIpVersion_DoNotProcessDiscoveryForInvalidLocalAddress)
+{
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_)).WillOnce(ReturnRef(IpAddress::ANY));
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(0);
+
+    m_pTestAosPcscf->Configure(IpAddress::IPV4);
+
+    EXPECT_FALSE(m_pTestAosPcscf->m_bOtherIpTypeRequired);
+}
+
+TEST_F(AosPcscfTest, ConfigureWithIpVersion_ProcessDiscoveryForValidLocalAddress)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .Times(1)
             .WillOnce(ReturnRef(IpAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(1);
 
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
+    m_pTestAosPcscf->Configure(IpAddress::IPV4);
 
-    const AString strAddress = AString("0.0.0.4");
-    ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    ImsVector<ServerAddress*> objPcscfAddresses;
-    objPcscfAddresses.Add(pSa);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfAddresses));
-
-    // unknown local address type
-    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
-    EXPECT_TRUE(m_pAosPcscf->IsConfigured());
-
-    if (pSa)
-    {
-        delete pSa;
-    }
+    EXPECT_FALSE(m_pTestAosPcscf->m_bOtherIpTypeRequired);
 }
 
-TEST_F(AosPcscfTest, Configure_GetFromConf_TryOtherIpType)
+TEST_F(AosPcscfTest, ConfigureWithoutIpVersion_TryProcessDiscoveryForEachIpVerion)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IpAddress::IPv6LOOPBACK));
+    AStringArray objEmptyPcscfSet;
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::UNKNOWN))
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillOnce(ReturnRef(IpAddress::IPv6LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(objEmptyPcscfSet));
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillOnce(ReturnRef(objEmptyPcscfSet));
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
 
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
-
-    const AString strAddress = AString("0.0.0.4");
-    ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    ImsVector<ServerAddress*> objPcscfAddresses;
-    objPcscfAddresses.Add(pSa);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfAddresses));
-
-    // unknown local address type
-    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
-    EXPECT_TRUE(m_pAosPcscf->IsConfigured());
-
-    if (pSa)
-    {
-        delete pSa;
-    }
+    m_pTestAosPcscf->Configure();
 }
 
-TEST_F(AosPcscfTest, Configure_ProcessDnsQuery)
+TEST_F(AosPcscfTest, SetAndCheckConfigured)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
+    m_pTestAosPcscf->SetConfigured(IMS_TRUE);
+    EXPECT_TRUE(m_pTestAosPcscf->IsConfigured());
 
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
-
-    const AString strAddress = AString("aaa.bbb.ccc");
-    ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    ImsVector<ServerAddress*> objPcscfAddresses;
-    objPcscfAddresses.Add(pSa);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfAddresses));
-
-    EXPECT_CALL(m_objMockIAosConnection, GetHostByName(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(-1));
-
-    // unknown local address type
-    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
-    EXPECT_FALSE(m_pAosPcscf->IsConfigured());
-    EXPECT_TRUE(SetDnsQueryTimerExpired());
-
-    if (pSa)
-    {
-        delete pSa;
-    }
+    m_pTestAosPcscf->SetConfigured(IMS_FALSE);
+    EXPECT_FALSE(m_pTestAosPcscf->IsConfigured());
 }
 
-TEST_F(AosPcscfTest, FailToFindDiscoveryMethod)
+TEST_F(AosPcscfTest, IsAsyncDnsDiscoveryWhenRcsRegType)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
-    EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(IAosSubscriber::FAKE))
-            .Times(2)
-            .WillOnce(Return(nullptr))
-            .WillOnce(Return(&m_objMockISubscriberConfig));
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
+    m_pTestAosPcscf->m_eRegType = AosRegistrationType::NORMAL;
+    EXPECT_FALSE(m_pTestAosPcscf->IsAsyncDnsDiscovery());
 
-    SetRegType(AosRegistrationType::FAKE);
-    m_pAosPcscf->Configure(IpAddress::IPV4);
-    m_pAosPcscf->Configure(IpAddress::IPV4);
-
-    EXPECT_FALSE(m_pAosPcscf->IsConfigured());
+    m_pTestAosPcscf->m_eRegType = AosRegistrationType::RCS;
+    EXPECT_TRUE(m_pTestAosPcscf->IsAsyncDnsDiscovery());
 }
 
-TEST_F(AosPcscfTest, IsConfigured)
-{
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosRegistration));
-    EXPECT_CALL(objMockIAosRegistration, GetRegType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(AosRegistrationType::NORMAL));
-
-    SetConfigured(IMS_TRUE);
-    EXPECT_TRUE(m_pAosPcscf->IsConfigured());
-    CleanUp();
-    EXPECT_FALSE(m_pAosPcscf->IsConfigured());
-}
-
-TEST_F(AosPcscfTest, IsAsyncDnsDiscovery)
-{
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&objMockIAosRegistration));
-    EXPECT_CALL(objMockIAosRegistration, GetRegType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(AosRegistrationType::NORMAL));
-
-    SetRegType(AosRegistrationType::RCS);
-    EXPECT_TRUE(m_pAosPcscf->IsAsyncDnsDiscovery());
-    Initialize();
-    EXPECT_FALSE(m_pAosPcscf->IsAsyncDnsDiscovery());
-}
-
-TEST_F(AosPcscfTest, IsSinglePcoScheme_EmptyDiscoveryMethod)
-{
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
-
-    objDiscoveryMethods.RemoveAt(0);
-    EXPECT_FALSE(m_pAosPcscf->IsSinglePcoScheme());
-}
-
-TEST_F(AosPcscfTest, IsSinglePcoScheme_InvalidSubscriber)
+TEST_F(AosPcscfTest, IsNotSinglePcoSchemeWhenInvalidSubscriber)
 {
     EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(IAosSubscriber::FAKE))
             .WillOnce(Return(nullptr));
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
+    m_pTestAosPcscf->m_eRegType = AosRegistrationType::FAKE;
 
-    SetRegType(AosRegistrationType::FAKE);
-    EXPECT_FALSE(m_pAosPcscf->IsSinglePcoScheme());
+    EXPECT_FALSE(m_pTestAosPcscf->IsSinglePcoScheme());
 }
 
-TEST_F(AosPcscfTest, IsSinglePcoScheme)
+TEST_F(AosPcscfTest, IsNotSinglePcoSchemeWhenTwoDiscoveryMethod)
 {
-    ImsVector<IMS_SINT32> objDiscoveryMethods;
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
-    objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objDiscoveryMethods));
-
-    EXPECT_FALSE(m_pAosPcscf->IsSinglePcoScheme());
-    objDiscoveryMethods.RemoveAt(0);
-    EXPECT_TRUE(m_pAosPcscf->IsSinglePcoScheme());
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
+    EXPECT_FALSE(m_pTestAosPcscf->IsSinglePcoScheme());
 }
 
-TEST_F(AosPcscfTest, GetPcscfs)
+TEST_F(AosPcscfTest, IsNotSinglePcoSchemeWhenEmptyDiscoveryMethod)
 {
-    SetPcscfs();
-    AStringArray objGetPcscfs = m_pAosPcscf->GetPcscfs();
+    m_objDiscoveryMethods.Clear();
+    EXPECT_FALSE(m_pTestAosPcscf->IsSinglePcoScheme());
+}
+
+TEST_F(AosPcscfTest, IsSinglePcoSchemeWhenSinglePcoDiscoveryMethod)
+{
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
+    EXPECT_TRUE(m_pTestAosPcscf->IsSinglePcoScheme());
+}
+
+TEST_F(AosPcscfTest, GetPcscfs_ReturnPcscfAddressSet)
+{
+    m_pTestAosPcscf->PreparePcscfPreset();
+    AStringArray objGetPcscfs = m_pTestAosPcscf->GetPcscfs();
     for (int i = 0; i < objGetPcscfs.GetCount(); i++)
     {
-        EXPECT_EQ(objGetPcscfs.GetElementAt(i), m_objPcscfAddressPreset.GetElementAt(i));
+        EXPECT_EQ(objGetPcscfs.GetElementAt(i),
+                m_pTestAosPcscf->m_objPcscfAddressPreset.GetElementAt(i));
     }
 }
 
-TEST_F(AosPcscfTest, GetPcscfsPorts)
+TEST_F(AosPcscfTest, GetPcscfsPorts_ReturnPcscfPortSet)
 {
-    SetPcscfs();
-    ImsList<IMS_SINT32> objGetPcscfsPorts = m_pAosPcscf->GetPcscfsPorts();
+    m_pTestAosPcscf->PreparePcscfPreset();
+    ImsList<IMS_SINT32> objGetPcscfsPorts = m_pTestAosPcscf->GetPcscfsPorts();
     for (int i = 0; i < objGetPcscfsPorts.GetSize(); i++)
     {
-        EXPECT_EQ(objGetPcscfsPorts.GetAt(i), m_objPcscfPortPreset.GetAt(i));
+        EXPECT_EQ(objGetPcscfsPorts.GetAt(i), m_pTestAosPcscf->m_objPcscfPortPreset.GetAt(i));
     }
 }
 
-TEST_F(AosPcscfTest, UpdatePcscfs)
+TEST_F(AosPcscfTest, UpdatePcscfs_ReplaceWithNewPcscfs)
 {
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfPort())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(5060));
-
-    SetPcscfs();
-    AString strNewPcscfs = "0.0.0.3, 0.0.0.4";
+    AString strNewPcscfs = "0.0.0.4, 0.0.0.5, 0.0.0.4, 0.0.0.5";
     AStringArray objNewPcscfs = strNewPcscfs.Split(',');
-    m_pAosPcscf->UpdatePcscfs(objNewPcscfs, m_objPcscfPortPreset);
+    ImsList<IMS_SINT32> objNewPorts;
+    objNewPorts.Append(5000);
 
-    AStringArray objGetPcscfs = m_pAosPcscf->GetPcscfs();
+    m_pTestAosPcscf->UpdatePcscfs(objNewPcscfs, objNewPorts);
+
+    AStringArray objGetPcscfs = m_pTestAosPcscf->GetPcscfs();
+    ImsList<IMS_SINT32> objGetPcscfsPorts = m_pTestAosPcscf->GetPcscfsPorts();
+
+    // last new Pcscf is ignored because same address and port is in the list
+    EXPECT_EQ(objGetPcscfs.GetCount(), 3);
     for (int i = 0; i < objGetPcscfs.GetCount(); i++)
     {
         EXPECT_EQ(objGetPcscfs.GetElementAt(i), objNewPcscfs.GetElementAt(i));
+        if (i < objNewPorts.GetSize())
+        {
+            EXPECT_EQ(objGetPcscfsPorts.GetAt(i), 5000);
+        }
+        else
+        {
+            EXPECT_EQ(objGetPcscfsPorts.GetAt(i), 5060);
+        }
     }
 }
 
-TEST_F(AosPcscfTest, HasPcscf)
+TEST_F(AosPcscfTest, HasPcscf_ReturnWhetherPcscfExist)
 {
-    SetPcscfs();
-    EXPECT_TRUE(m_pAosPcscf->HasPcscf(m_objPcscfAddressPreset.GetCount() - 1));
-    EXPECT_FALSE(m_pAosPcscf->HasPcscf(m_objPcscfAddressPreset.GetCount()));
+    m_pTestAosPcscf->PreparePcscfPreset();
+    EXPECT_TRUE(m_pTestAosPcscf->HasPcscf(m_pTestAosPcscf->m_objPcscfAddressPreset.GetCount() - 1));
+    EXPECT_FALSE(m_pTestAosPcscf->HasPcscf(m_pTestAosPcscf->m_objPcscfAddressPreset.GetCount()));
 }
 
 TEST_F(AosPcscfTest, GetPcscfCount)
 {
-    SetPcscfs();
-    EXPECT_EQ(m_pAosPcscf->GetPcscfCount(), m_objPcscfAddressPreset.GetCount());
+    m_pTestAosPcscf->PreparePcscfPreset();
+    EXPECT_EQ(
+            m_pTestAosPcscf->GetPcscfCount(), m_pTestAosPcscf->m_objPcscfAddressPreset.GetCount());
 }
 
 TEST_F(AosPcscfTest, RemoveCurrentPcscf)
 {
-    SetPcscfs();
-    m_objPcscfAddressPreset.RemoveElementAt(m_pAosPcscf->GetCurrentIndex());
-    m_pAosPcscf->RemoveCurrentPcscf();
+    m_pTestAosPcscf->PreparePcscfPreset();
+    m_pTestAosPcscf->m_objPcscfAddressPreset.RemoveElementAt(m_pTestAosPcscf->GetCurrentIndex());
 
-    AStringArray objGetPcscfs = m_pAosPcscf->GetPcscfs();
+    m_pTestAosPcscf->RemoveCurrentPcscf();
+
+    AStringArray objGetPcscfs = m_pTestAosPcscf->GetPcscfs();
     for (int i = 0; i < objGetPcscfs.GetCount(); i++)
     {
-        EXPECT_EQ(objGetPcscfs.GetElementAt(i), m_objPcscfAddressPreset.GetElementAt(i));
+        EXPECT_EQ(objGetPcscfs.GetElementAt(i),
+                m_pTestAosPcscf->m_objPcscfAddressPreset.GetElementAt(i));
     }
 }
 
@@ -441,265 +388,533 @@ TEST_F(AosPcscfTest, ManageValidPcscf)
 {
     IMS_UINT32 nUnavailableTimeSec = 5;
 
-    SetPcscfs();
-    EXPECT_TRUE(IsValidPcscf(m_pAosPcscf->GetCurrentIndex()));
+    m_pTestAosPcscf->PreparePcscfPreset();
+    EXPECT_TRUE(m_pTestAosPcscf->IsValidPcscf(m_pTestAosPcscf->GetCurrentIndex()));
 
-    m_pAosPcscf->SetCurrentPcscfInvalid(IMS_TRUE, nUnavailableTimeSec);
-    EXPECT_FALSE(IsValidPcscf(m_pAosPcscf->GetCurrentIndex()));
+    // Set with timer
+    m_pTestAosPcscf->SetCurrentPcscfInvalid(IMS_TRUE, nUnavailableTimeSec);
+    EXPECT_FALSE(m_pTestAosPcscf->IsValidPcscf(m_pTestAosPcscf->GetCurrentIndex()));
 
-    m_pAosPcscf->SetAllPcscfValid();
-    EXPECT_TRUE(IsValidPcscf(m_pAosPcscf->GetCurrentIndex()));
+    m_pTestAosPcscf->SetAllPcscfValid();
+    EXPECT_TRUE(m_pTestAosPcscf->IsValidPcscf(m_pTestAosPcscf->GetCurrentIndex()));
+
+    // Set without timer
+    m_pTestAosPcscf->SetCurrentPcscfInvalid();
+    EXPECT_FALSE(m_pTestAosPcscf->IsValidPcscf(m_pTestAosPcscf->GetCurrentIndex()));
 }
 
 TEST_F(AosPcscfTest, ManageTriedPcscf)
 {
-    SetPcscfs();
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
-    {
-        EXPECT_FALSE(m_pAosPcscf->IsAllPcscfTried());
-        EXPECT_FALSE(IsTriedPcscf(i));
-        SetCurrentPcscfIndex(i);
-        m_pAosPcscf->SetCurrentPcscfTried();
-        EXPECT_TRUE(IsTriedPcscf(i));
-    }
-    EXPECT_TRUE(m_pAosPcscf->IsAllPcscfTried());
+    m_pTestAosPcscf->PreparePcscfPreset();
+    AStringArray objPcscfs = m_pTestAosPcscf->GetPcscfs();
 
-    m_pAosPcscf->ResetAllPcscfTried();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
+    EXPECT_FALSE(m_pTestAosPcscf->IsAllPcscfTried());
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
     {
-        EXPECT_FALSE(IsTriedPcscf(i));
+        m_pTestAosPcscf->m_nCurrentPcscfIndex = nIndex;
+        EXPECT_FALSE(m_pTestAosPcscf->IsTriedPcscf(nIndex));
+        m_pTestAosPcscf->SetCurrentPcscfTried();
+        EXPECT_TRUE(m_pTestAosPcscf->IsTriedPcscf(nIndex));
+    }
+    EXPECT_TRUE(m_pTestAosPcscf->IsAllPcscfTried());
+
+    m_pTestAosPcscf->ResetAllPcscfTried();
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
+    {
+        EXPECT_FALSE(m_pTestAosPcscf->IsTriedPcscf(nIndex));
+    }
+}
+
+TEST_F(AosPcscfTest, IncreaseCurrentPcscfTriedCount)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
+            .Times(3)
+            .WillOnce(Return(0))
+            .WillRepeatedly(Return(2));
+    m_pTestAosPcscf->PreparePcscfPreset();
+
+    // do NOT increase if configured retry count is zero
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    m_pTestAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    // increase tried count of current pcscf
+    m_pTestAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    // do NOT handle invalid Pcscf index
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = m_pTestAosPcscf->GetPcscfCount();
+    m_pTestAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 0);
+}
+
+TEST_F(AosPcscfTest, ResetCurrentPcscfTriedCount)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
+            .WillOnce(Return(2))
+            .WillOnce(Return(0))
+            .WillOnce(Return(2));
+    m_pTestAosPcscf->PreparePcscfPreset();
+
+    // increase tried count of current pcscf
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    m_pTestAosPcscf->IncreaseCurrentPcscfTriedCount();
+
+    // do NOT reset if configured retry count is zero
+    m_pTestAosPcscf->ResetCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    // reset tried count of current pcscf
+    m_pTestAosPcscf->ResetCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 0);
+}
+
+TEST_F(AosPcscfTest, ResetAllPcscfTriedCount)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(2));
+    m_pTestAosPcscf->PreparePcscfPreset();
+    AStringArray objPcscfs = m_pTestAosPcscf->GetPcscfs();
+
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
+    {
+        m_pTestAosPcscf->m_nCurrentPcscfIndex = nIndex;
+        EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 0);
+        m_pTestAosPcscf->IncreaseCurrentPcscfTriedCount();
+        EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 1);
+    }
+
+    // do NOT reset if configured retry count is zero
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+
+    m_pTestAosPcscf->ResetAllPcscfTriedCount();
+
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
+    {
+        m_pTestAosPcscf->m_nCurrentPcscfIndex = nIndex;
+        EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 1);
+    }
+
+    // reset tried count of all pcscf
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(2));
+
+    m_pTestAosPcscf->ResetAllPcscfTriedCount();
+
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
+    {
+        m_pTestAosPcscf->m_nCurrentPcscfIndex = nIndex;
+        EXPECT_EQ(m_pTestAosPcscf->GetCurrentPcscfTriedCount(), 0);
     }
 }
 
 TEST_F(AosPcscfTest, GetCurrentPcscf)
 {
-    AString objPcscf;
-    IMS_UINT32 nPort;
-    SetPcscfs();
+    AString objPcscfAddress;
+    IMS_UINT32 nPcscfPort;
 
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
-    {
-        SetCurrentPcscfIndex(i);
-        EXPECT_TRUE(m_pAosPcscf->GetCurrentPcscf(objPcscf, nPort));
-        EXPECT_EQ(objPcscf, m_objPcscfAddressPreset.GetElementAt(i));
-        EXPECT_EQ(nPort, m_objPcscfPortPreset.GetAt(i));
-    }
+    // update current port as 5060 if it is 0
+    m_pTestAosPcscf->AddPcscf(AString("0.0.0.1"), 0);
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    EXPECT_TRUE(m_pTestAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
+    EXPECT_EQ(objPcscfAddress, AString("0.0.0.1"));
+    EXPECT_EQ(nPcscfPort, 5060);
 
-    SetCurrentPcscfIndex(objPcscfs.GetCount());
-    EXPECT_FALSE(m_pAosPcscf->GetCurrentPcscf(objPcscf, nPort));
+    // get current Pcscf successfully
+    m_pTestAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
+    m_pTestAosPcscf->m_nCurrentPcscfIndex++;
+    EXPECT_TRUE(m_pTestAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
+    EXPECT_EQ(objPcscfAddress, AString("0.0.0.2"));
+    EXPECT_EQ(nPcscfPort, 5061);
+
+    // return false for Pcscf of index is null
+    m_pTestAosPcscf->m_objPcscfList.Append(nullptr);
+    m_pTestAosPcscf->m_nCurrentPcscfIndex++;
+    EXPECT_FALSE(m_pTestAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
+
+    // return false for Pcscf index larger than the Pcscf list size
+    m_pTestAosPcscf->m_nCurrentPcscfIndex++;
+    EXPECT_FALSE(m_pTestAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
 }
 
 TEST_F(AosPcscfTest, GetCurrentIndex)
 {
-    SetPcscfs();
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
+    m_pTestAosPcscf->PreparePcscfPreset();
+    AStringArray objPcscfs = m_pTestAosPcscf->GetPcscfs();
+    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
     {
-        SetCurrentPcscfIndex(i);
-        EXPECT_EQ(m_pAosPcscf->GetCurrentIndex(), i);
+        m_pTestAosPcscf->m_nCurrentPcscfIndex = nIndex;
+        EXPECT_EQ(m_pTestAosPcscf->GetCurrentIndex(), nIndex);
     }
 }
 
 TEST_F(AosPcscfTest, IsFirstPcscf)
 {
-    SetCurrentPcscfIndex(0);
-    EXPECT_TRUE(m_pAosPcscf->IsFirstPcscf());
-    SetCurrentPcscfIndex(1);
-    EXPECT_FALSE(m_pAosPcscf->IsFirstPcscf());
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    EXPECT_TRUE(m_pTestAosPcscf->IsFirstPcscf());
+
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 1;
+    EXPECT_FALSE(m_pTestAosPcscf->IsFirstPcscf());
 }
 
 TEST_F(AosPcscfTest, GetFirstPcscf)
 {
-    AString objPcscf;
-    IMS_UINT32 nPort;
+    AString objPcscfAddress;
+    IMS_UINT32 nPcscfPort;
 
-    EXPECT_FALSE(m_pAosPcscf->GetFirstPcscf(objPcscf, nPort));
-    SetPcscfs();
-    EXPECT_TRUE(m_pAosPcscf->GetFirstPcscf(objPcscf, nPort));
-    EXPECT_EQ(objPcscf, m_objPcscfAddressPreset.GetElementAt(0));
-    EXPECT_EQ(nPort, m_objPcscfPortPreset.GetAt(0));
+    // return false if Pcscf list is empty
+    EXPECT_FALSE(m_pTestAosPcscf->GetFirstPcscf(objPcscfAddress, nPcscfPort));
+
+    // return false if first Pcscf is null
+    m_pTestAosPcscf->m_objPcscfList.Append(nullptr);
+    EXPECT_FALSE(m_pTestAosPcscf->GetFirstPcscf(objPcscfAddress, nPcscfPort));
+    m_pTestAosPcscf->m_objPcscfList.Clear();
+
+    // get first Pcscf successfully
+    m_pTestAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    EXPECT_TRUE(m_pTestAosPcscf->GetFirstPcscf(objPcscfAddress, nPcscfPort));
+    EXPECT_EQ(objPcscfAddress, AString("0.0.0.1"));
+    EXPECT_EQ(nPcscfPort, 5060);
+    EXPECT_EQ(m_pTestAosPcscf->m_nCurrentPcscfIndex, 0);
 }
 
 TEST_F(AosPcscfTest, HasNextPcscf)
 {
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
+            .Times(2)
+            .WillOnce(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC))
+            .WillOnce(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
 
-    EXPECT_FALSE(m_pAosPcscf->HasNextPcscf());
-    SetPcscfs();
-    EXPECT_TRUE(m_pAosPcscf->HasNextPcscf());
-}
+    // return false if Pcscf list is empty
+    EXPECT_FALSE(m_pTestAosPcscf->HasNextPcscf());
 
-TEST_F(AosPcscfTest, GetNextPcscfIndex)
-{
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
+    // return true If there is an available Pcscf after the current Pcscf index
+    m_pTestAosPcscf->PreparePcscfPreset();
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    EXPECT_TRUE(m_pTestAosPcscf->HasNextPcscf());
 
-    EXPECT_LT(m_pAosPcscf->GetNextPcscfIndex(), 0);
-    SetPcscfs();
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
-    {
-        SetCurrentPcscfIndex(i);
-        EXPECT_GE(m_pAosPcscf->GetNextPcscfIndex(), 0);
-    }
+    // return false If there is no available Pcscf after the current Pcscf index
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = m_pTestAosPcscf->GetPcscfCount();
+    EXPECT_FALSE(m_pTestAosPcscf->HasNextPcscf());
+
+    // if DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF is configured, check whole Pcscf list
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = m_pTestAosPcscf->GetPcscfCount();
+    EXPECT_TRUE(m_pTestAosPcscf->HasNextPcscf());
 }
 
 TEST_F(AosPcscfTest, GetNextPcscf)
 {
-    AString objPcscf;
-    IMS_UINT32 nPort;
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
+    AString objPcscfAddress;
+    IMS_UINT32 nPcscfPort;
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    m_pTestAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pTestAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
 
-    EXPECT_FALSE(m_pAosPcscf->GetNextPcscf(objPcscf, nPort));
-    SetPcscfs();
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
-    for (int i = 0; i < objPcscfs.GetCount(); i++)
-    {
-        EXPECT_TRUE(m_pAosPcscf->GetNextPcscf(objPcscf, nPort));
-        EXPECT_EQ(objPcscf, m_objPcscfAddressPreset.GetElementAt(m_pAosPcscf->GetCurrentIndex()));
-        EXPECT_EQ(nPort, m_objPcscfPortPreset.GetAt(m_pAosPcscf->GetCurrentIndex()));
-    }
+    // return true if there is an available Pcscf after the current Pcscf index
+    EXPECT_TRUE(m_pTestAosPcscf->GetNextPcscf(objPcscfAddress, nPcscfPort));
+    EXPECT_EQ(objPcscfAddress, AString("0.0.0.2"));
+    EXPECT_EQ(nPcscfPort, 5061);
+
+    // return false if there is no available Pcscf after the current Pcscf index
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = m_pTestAosPcscf->GetPcscfCount();
+    EXPECT_FALSE(m_pTestAosPcscf->GetNextPcscf(objPcscfAddress, nPcscfPort));
 }
 
-TEST_F(AosPcscfTest, SetFirstPcscfIndex)
+TEST_F(AosPcscfTest, SetFirstPcscfIndex_UdateCurrentPcscIndexAsZero)
 {
-    m_pAosPcscf->SetFirstPcscfIndex();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentIndex(), 0);
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 3;
+    m_pTestAosPcscf->SetFirstPcscfIndex();
+    EXPECT_EQ(m_pTestAosPcscf->GetCurrentIndex(), 0);
 }
 
-TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_Reorder)
+TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_NotHandledCases)
 {
-    AString strNewPcscfs = "0.0.0.4, 0.0.0.1";
+    m_pTestAosPcscf->PreparePcscfPreset();
+
+    // return false if fail to get current Pcscf
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = m_pTestAosPcscf->GetPcscfCount();
+    EXPECT_FALSE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+
+    // return false if current Pcscf address is invalid
+    m_pTestAosPcscf->AddPcscf(AString("InvalidAddress"), 5060);
+    EXPECT_FALSE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+    m_pTestAosPcscf->RemoveCurrentPcscf();
+
+    // return false if Pcscf list is not changed
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 0;
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
+            .WillOnce(ReturnRef(m_pTestAosPcscf->m_objPcscfAddressPreset));
+    EXPECT_FALSE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+
+    // return false if new Pcscf list is empty
+    AStringArray objEmptyArray;
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_)).WillOnce(ReturnRef(objEmptyArray));
+    EXPECT_FALSE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+}
+
+TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_ReorderIfCurrentPcscfExist)
+{
+    m_pTestAosPcscf->PreparePcscfPreset();
+    AString strNewPcscfs = "0.0.0.4, 0.0.0.2, 0.0.0.5";
     AStringArray objNewPcscfs = strNewPcscfs.Split(',');
     EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objNewPcscfs));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddress())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(nullptr));
-
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfPort())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(5060));
-
-    SetPcscfs();
-    EXPECT_TRUE(m_pAosPcscf->CheckAndProcessChangeFromPco());
-    EXPECT_EQ(m_pAosPcscf->GetChangedType(), IAosPcscf::TYPE_CHANGED_REORDER);
+    m_pTestAosPcscf->m_nCurrentPcscfIndex = 1;
+    EXPECT_TRUE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+    EXPECT_EQ(m_pTestAosPcscf->GetChangedType(), IAosPcscf::TYPE_CHANGED_REORDER);
+    EXPECT_EQ(m_pTestAosPcscf->m_nCurrentPcscfIndex, 0);
 }
 
-TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_Different)
+TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_DifferentIfCurrentPcscfNotExist)
 {
+    m_pTestAosPcscf->PreparePcscfPreset();
     AString strNewPcscfs = "0.0.0.4, 0.0.0.5";
     AStringArray objNewPcscfs = strNewPcscfs.Split(',');
     EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objNewPcscfs));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddress())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(nullptr));
-
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfPort())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(5060));
-
-    SetPcscfs();
-    EXPECT_TRUE(m_pAosPcscf->CheckAndProcessChangeFromPco());
-    EXPECT_EQ(m_pAosPcscf->GetChangedType(), IAosPcscf::TYPE_CHANGED_DIFFERENT);
+    EXPECT_TRUE(m_pTestAosPcscf->CheckAndProcessChangeFromPco());
+    EXPECT_EQ(m_pTestAosPcscf->GetChangedType(), IAosPcscf::TYPE_CHANGED_DIFFERENT);
+    EXPECT_EQ(m_pTestAosPcscf->m_nCurrentPcscfIndex, 0);
 }
 
 TEST_F(AosPcscfTest, SetListener)
 {
-    MockIAosPcscfListener objMockIAosPcscfListener;
-    EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(_)).Times(1);
-
-    m_pAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
-    NotifyResult();
+    EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE)).Times(1);
+    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+    m_pTestAosPcscf->m_piListener->Pcscf_NotifyResult(IMS_TRUE);
 }
 
-TEST_F(AosPcscfTest, Get_Reset_IncreaseCurrentPcscfTriedCount)
+TEST_F(AosPcscfTest, GetChangedPcscfs)
 {
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+    AString strNewPcscfs = "0.0.0.4, 0.0.0.0, 0.0.0.4, ::1, invalidAddress";
+    AStringArray objPcscfPreset = strNewPcscfs.Split(',');
+    AStringArray objChangedPcscfs;
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
             .Times(AnyNumber())
-            .WillRepeatedly(Return(2));
+            .WillRepeatedly(ReturnRef(objPcscfPreset));
 
-    SetPcscfs();
-    SetCurrentPcscfIndex(0);
+    // return true if there is available new Pcscf
+    EXPECT_TRUE(m_pTestAosPcscf->GetChangedPcscfs(objChangedPcscfs, IpAddress::IPV4));
+    EXPECT_EQ(objChangedPcscfs.GetCount(), 1);
 
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
-
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 2);
-
-    m_pAosPcscf->ResetCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-
-    SetCurrentPcscfIndex(3);
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    // return false if new Pcscf list is empty
+    objPcscfPreset.RemoveAllElements();
+    EXPECT_FALSE(m_pTestAosPcscf->GetChangedPcscfs(objChangedPcscfs, IpAddress::IPV4));
 }
 
-TEST_F(AosPcscfTest, ResetAllPcscfTriedCount)
+TEST_F(AosPcscfTest, ProcessDiscovery_PcoMethod)
 {
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    SetNConfig(&m_objMockIAosNConfiguration);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
+    AString strAddress = AString("0.0.0.4");
+    ServerAddress* pSa = new ServerAddress(strAddress, 5060);
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddress())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(2));
+            .WillRepeatedly(Return(pSa));
+    AString strPcscfs = "0.0.0.4, 0.0.0.0, 0.0.0.4, ::1, invalidAddress";
+    AStringArray objPcscfPreset = strPcscfs.Split(',');
+    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(objPcscfPreset));
 
-    SetPcscfs();
+    m_pTestAosPcscf->ProcessDiscovery(IpAddress::IPV4);
+    EXPECT_TRUE(m_pTestAosPcscf->IsConfigured());
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfCount(), 1);
+}
 
-    SetCurrentPcscfIndex(0);
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+TEST_F(AosPcscfTest, ProcessDiscovery_ConfigMethod)
+{
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
+    ImsVector<ServerAddress*> objPcscfAddresses;
+    AString strAddresses = AString(", 0.0.0.4, 0.0.0.4, ::1, hostName");
+    AStringArray objPcscfAddress = strAddresses.Split(',');
+    for (int i = 0; i < objPcscfAddress.GetCount(); i++)
+    {
+        ServerAddress* pSa = new ServerAddress(objPcscfAddress.GetElementAt(i), 0);
+        objPcscfAddresses.Add(pSa);
+    }
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPcscfAddresses));
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(-1));
 
-    SetCurrentPcscfIndex(1);
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+    // success to configure Pcscf in SubscriberConfig
+    m_pTestAosPcscf->ProcessDiscovery(IpAddress::IPV4);
+    EXPECT_TRUE(m_pTestAosPcscf->IsConfigured());
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfCount(), 1);
+    m_pTestAosPcscf->CleanAll();
 
-    SetCurrentPcscfIndex(2);
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+    // start TIMER_DNS_QUERY_RETRY when fail to DNS query
+    objPcscfAddresses.Clear();
+    objPcscfAddresses.Add(new ServerAddress(AString("hostName"), 0));
+    m_pTestAosPcscf->ProcessDiscovery(IpAddress::IPV4);
+    EXPECT_FALSE(m_pTestAosPcscf->IsConfigured());
+    m_pTestAosPcscf->CleanAll();
+}
 
-    m_pAosPcscf->ResetAllPcscfTriedCount();
+TEST_F(AosPcscfTest, GetNextDiscoveryMethod)
+{
+    IMS_SINT32 nDiscoveryMethod;
+    m_pTestAosPcscf->m_eRegType = AosRegistrationType::FAKE;
+    EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(IAosSubscriber::FAKE))
+            .Times(AnyNumber())
+            .WillOnce(Return(nullptr))
+            .WillRepeatedly(Return(&m_objMockISubscriberConfig));
 
-    SetCurrentPcscfIndex(0);
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    // return false if SubscriberConfig is null
+    EXPECT_FALSE(m_pTestAosPcscf->GetNextDiscoveryMethod(nDiscoveryMethod));
 
-    SetCurrentPcscfIndex(1);
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    // return false if there is no configured method
+    EXPECT_FALSE(m_pTestAosPcscf->GetNextDiscoveryMethod(nDiscoveryMethod));
 
-    SetCurrentPcscfIndex(2);
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    // return true if there is configured method
+    m_objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
+    EXPECT_TRUE(m_pTestAosPcscf->GetNextDiscoveryMethod(nDiscoveryMethod));
+
+    // return false if there is no more configured method
+    EXPECT_FALSE(m_pTestAosPcscf->GetNextDiscoveryMethod(nDiscoveryMethod));
+}
+
+TEST_F(AosPcscfTest, GetFromConf_FailureCases)
+{
+    ImsVector<ServerAddress*> objPcscfAddresses;
+    EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(_))
+            .WillOnce(Return(nullptr))
+            .WillOnce(Return(&m_objMockISubscriberConfig));
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objPcscfAddresses));
+
+    // return false if SubscriberConfig is null
+    EXPECT_FALSE(m_pTestAosPcscf->GetFromConf(IpAddress::IPV4));
+
+    // return false if pre-configured Pcscf list is empty
+    EXPECT_FALSE(m_pTestAosPcscf->GetFromConf(IpAddress::IPV4));
+}
+
+TEST_F(AosPcscfTest, ProcessDnsQuery)
+{
+    ImsList<IpAddress> objIpas;
+    objIpas.Append(IpAddress(AString("0.0.0.4")));
+    objIpas.Append(IpAddress(AString("fe80::1")));
+    objIpas.Append(IpAddress::ANY);
+    objIpas.Append(IpAddress(AString("0.0.0.4")));
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+            .WillOnce(DoAll(SetArgPointee<1>(objIpas), Return(1)));
+
+    EXPECT_TRUE(m_pTestAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfCount(), 1);
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfs().GetElementAt(0), AString("0.0.0.4"));
+}
+
+TEST_F(AosPcscfTest, StartTimer)
+{
+    // re-start if the timer is already running
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(2);
+
+    // start timer
+    m_pTestAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+
+    // restart timer
+    m_pTestAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+    m_pTestAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
+}
+
+TEST_F(AosPcscfTest, StartTimer_FailureCases)
+{
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
+
+    // do NOT start timer when duration is zero
+    m_pTestAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 0);
+
+    // do NOT start timer for invalid timer type
+    m_pTestAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100, 10);
+}
+
+TEST_F(AosPcscfTest, StopTimer)
+{
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(1);
+
+    // do NOT stop timer if there is no running timer
+    m_pTestAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
+
+    // do NOT stop timer for invalid timer type
+    m_pTestAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+    m_pTestAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100);
+
+    // stop timer
+    m_pTestAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
+}
+
+TEST_F(AosPcscfTest, TimerExpired_FailureCases)
+{
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(0);
+
+    // do NOT handle timer expired event when the timer is null
+    m_pTestAosPcscf->Timer_TimerExpired(nullptr);
+}
+
+TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetrySucceeded)
+{
+    ImsList<IpAddress> objIpas;
+    objIpas.Append(IpAddress(AString("0.0.0.4")));
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+            .WillOnce(Return(-1))
+            .WillOnce(DoAll(SetArgPointee<1>(objIpas), Return(1)));
+    EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE)).Times(1);
+    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+
+    // DnsRetryTimer is started when the first DNS query fails
+    EXPECT_FALSE(m_pTestAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));
+    EXPECT_NE(m_pTestAosPcscf->m_piDnsQueryRetryTimer, nullptr);
+
+    // invoke ProcessDnsRetryTimerExpired when the DnsRetryTimer is expired
+    m_pTestAosPcscf->Timer_TimerExpired(m_pTestAosPcscf->m_piDnsQueryRetryTimer);
+    EXPECT_TRUE(m_pTestAosPcscf->IsConfigured());
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfCount(), 1);
+    EXPECT_EQ(m_pTestAosPcscf->GetPcscfs().GetElementAt(0), AString("0.0.0.4"));
+}
+
+TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetryWithOtherIpType)
+{
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(-1));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillOnce(ReturnRef(IpAddress::IPv6LOOPBACK));
+
+    // DnsRetryTimer is started when the first DNS query fails
+    EXPECT_FALSE(m_pTestAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));
+    EXPECT_NE(m_pTestAosPcscf->m_piDnsQueryRetryTimer, nullptr);
+
+    // when the DnsRetryTimer is expired perform PCSCF discovery again in the following order
+    // 1. retry DNS query once more
+    // 2. invoke ProcessDiscovery using IP type of RetryHost
+    // 3. invoke ProcessDiscovery using other IP type
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(2);
+    m_pTestAosPcscf->m_bOtherIpTypeRequired = true;
+    m_pTestAosPcscf->Timer_TimerExpired(m_pTestAosPcscf->m_piDnsQueryRetryTimer);
+}
+
+TEST_F(AosPcscfTest, TimerToStringForInvalidType)
+{
+    EXPECT_EQ(m_pTestAosPcscf->TimerToString(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100),
+            "__INVALID__");
 }

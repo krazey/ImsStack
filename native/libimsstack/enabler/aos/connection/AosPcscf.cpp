@@ -45,8 +45,8 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         m_piListener(IMS_NULL),
         m_piDnsQueryRetryTimer(IMS_NULL),
-        m_piAosNConfig(IMS_NULL),
         m_eRegType(AosRegistrationType::NORMAL),
+        m_nSlotId(piAppContext->GetSlotId()),
         m_nChangedType(TYPE_CHANGED_DIFFERENT),
         m_bIsConfigured(IMS_FALSE),
         m_nCurrentPcscfIndex(0),
@@ -54,7 +54,7 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_bOtherIpTypeRequired(IMS_FALSE),
         m_nDiscoveryMethodIndex(0)
 {
-    m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
+    m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
 
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosPcscf = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosPcscf), this);
@@ -71,7 +71,6 @@ PROTECTED VIRTUAL void AosPcscf::Init()
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
     m_eRegType = m_piAppContext->GetRegistration()->GetRegType();
-    m_piAosNConfig = GET_N_CONFIG(m_piAppContext->GetSlotId());
 }
 
 PROTECTED VIRTUAL void AosPcscf::CleanUp()
@@ -194,16 +193,16 @@ PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
 {
     ClearPcscfList();
 
-    IMS_SINT32 nPort = GetDefaultPcscfPort();
+    IMS_SINT32 nDefaultPort = GetDefaultPcscfPort();
+    for (IMS_UINT32 nIndex = objPorts.GetSize(); nIndex < objPcscfs.GetCount(); nIndex++)
+    {
+        objPorts.Append(nDefaultPort);
+    }
 
-    for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
+    for (IMS_UINT32 nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
     {
         IpAddress objIpa(objPcscfs.GetElementAt(nAt));
-
-        if ((objPorts.GetSize() != 0) && (objPorts.GetAt(static_cast<IMS_UINT32>(nAt)) != IMS_NULL))
-        {
-            nPort = objPorts.GetAt(static_cast<IMS_UINT32>(nAt));
-        }
+        IMS_SINT32 nPort = objPorts.GetAt(nAt);
 
         if (!IsSamePcscf(objIpa, nPort))
         {
@@ -458,7 +457,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
         }
     }
 
-    if (m_piAosNConfig->GetRegRetryDefaultPolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetryDefaultPolicy() ==
             CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF)
     {
         for (int nAt = 0; nAt <= m_nCurrentPcscfIndex; nAt++)
@@ -485,11 +484,6 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UI
     }
 
     Pcscf* pPcscf = m_objPcscfList.GetAt(nNextPcscfIndex);
-    if (pPcscf == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
     objPcscf = pPcscf->GetAddress();
     nPort = pPcscf->GetPort();
     m_nCurrentPcscfIndex = nNextPcscfIndex;
@@ -903,7 +897,7 @@ PROTECTED VIRTUAL const ISubscriberConfig* AosPcscf::GetSubscriberConfig(
 
 PROTECTED VIRTUAL IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
 {
-    return m_piAosNConfig->GetPcscfPort();
+    return GET_N_CONFIG(m_nSlotId)->GetPcscfPort();
 }
 
 PROTECTED VIRTUAL void AosPcscf::CleanAll()
@@ -958,7 +952,7 @@ PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
 PROTECTED
 void AosPcscf::PrintPcscfs()
 {
-    if (Configuration::GetInstance()->IsServerInfoHiddenInLog(m_piAppContext->GetSlotId()))
+    if (Configuration::GetInstance()->IsServerInfoHiddenInLog(m_nSlotId))
     {
         return;
     }
@@ -1180,11 +1174,11 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPor
 PRIVATE
 IMS_BOOL AosPcscf::IsRegRetryCountOnSinglePcscfConfigured()
 {
-    return (m_piAosNConfig->GetRegRetryCountOnSinglePcscf() > 0);
+    return (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountOnSinglePcscf() > 0);
 }
 
 PRIVATE
 IMS_BOOL AosPcscf::IsRegRetryCountPerPcscfConfigured()
 {
-    return (m_piAosNConfig->GetRegRetryCountPerPcscf() > 0);
+    return (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountPerPcscf() > 0);
 }
