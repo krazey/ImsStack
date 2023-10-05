@@ -16,6 +16,7 @@
 #ifndef XML_API_PARSER_H_
 #define XML_API_PARSER_H_
 
+#include "libxml/parser.h"
 #include "libxml/xpath.h"
 
 extern xmlDocPtr XmlApi_ReadMemory(
