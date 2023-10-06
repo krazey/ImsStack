@@ -175,7 +175,7 @@ TEST_F(TextConfigurationTest, GetConfigTextDscp)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetTextDscp(), nTextDscp << 2);
+    EXPECT_EQ(m_pConfig->GetTextDscp(), nTextDscp);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextCodecEmptyRedundantEnabled)

@@ -80,7 +80,6 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
     m_nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT, DEFAULT_VIDEO_DSCP);
-    m_nVideoDscp = m_nVideoDscp << 2;
 
     m_nVideoSendPeriodicSpsPps =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT,

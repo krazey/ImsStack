@@ -71,7 +71,6 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
     m_nTextDscp = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP);
-    m_nTextDscp = m_nTextDscp << 2;
 
     m_bTextCodecEmptyRedundantEnabled = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL, DEFAULT_EMPTY_REDUNDANT);

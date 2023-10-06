@@ -192,7 +192,7 @@ TEST_F(AudioConfigurationTest, GetRtpDscp)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtpDscp(), nAudioRtpDscp << 2);
+    EXPECT_EQ(m_pConfig->GetRtpDscp(), nAudioRtpDscp);
 }
 
 TEST_F(AudioConfigurationTest, GetJitterBufferSize)

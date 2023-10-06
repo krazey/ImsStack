@@ -100,7 +100,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
      */
     m_nAudioRtpDscp =
             piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT, DEFAULT_AUDIO_DSCP);
-    m_nAudioRtpDscp = m_nAudioRtpDscp << 2;
 
     ImsVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
