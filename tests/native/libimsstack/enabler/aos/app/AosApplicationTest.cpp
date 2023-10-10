@@ -1872,15 +1872,34 @@ TEST_F(AosApplicationTest, Callback)
     // mobile network type is LTE
     m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .WillOnce(Return(NW_REPORT_RADIO_LTE))
-            .WillOnce(Return(NW_REPORT_RADIO_NR));
+            .WillOnce(Return(NW_REPORT_RADIO_LTE));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_EPS_FALLBACK_STARTED, _)).Times(1);
     m_pTestAosApplication->NetTracker_StatusChanged();
 
     // mobile network type is NR
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillOnce(Return(NW_REPORT_RADIO_NR));
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
             .Times(1);
+    m_pTestAosApplication->NetTracker_StatusChanged();
+
+    // mobile network type is NR again while m_nLteAttachState is IMS_LTE_INFO_COMBINED_ATTACHED
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillOnce(Return(NW_REPORT_RADIO_NR));
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
+            .Times(1);
+    m_pTestAosApplication->NetTracker_StatusChanged();
+
+    // mobile network type is NR again while m_nLteAttachState is not IMS_LTE_INFO_COMBINED_ATTACHED
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_EPS_ONLY_ATTACHED);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillOnce(Return(NW_REPORT_RADIO_NR));
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE))
+            .Times(0);
     m_pTestAosApplication->NetTracker_StatusChanged();
 
     // TEST_F : NConfiguration_NotifyConfigChanged

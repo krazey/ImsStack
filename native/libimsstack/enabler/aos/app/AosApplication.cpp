@@ -2890,8 +2890,19 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
 
     IMS_UINT32 nNewRat = m_piContext->GetNetTracker()->GetMobileNetworkType();
 
-    if (nNewRat == NW_REPORT_RADIO_NOSRV || m_nRat == nNewRat)
+    if (nNewRat == NW_REPORT_RADIO_NOSRV)
     {
+        return;
+    }
+
+    if (m_nRat == nNewRat)
+    {
+        if (nNewRat == NW_REPORT_RADIO_NR && m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED)
+        {
+            // Set the 5GS flag, which may have been changed by LTE info during RAT guard timer.
+            m_piRegistration->RequestCmd(
+                    IAosRegistration::CMD_SET_EPS_5GS_ONLY, IAosRegistration::REASON_SET_ENABLE);
+        }
         return;
     }
 
