@@ -60,6 +60,8 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+static const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
+
 class OutgoingStateTest : public ::testing::Test
 {
 public:
@@ -554,6 +556,8 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesSendStartedToUi)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, GetHeader(_, _, _)).WillByDefault(Return(AString("id")));
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::SESSION_ID, _))
+            .WillByDefault(Return(SESSION_ID));
     ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, SendAck).Times(1).WillOnce(Return(IMS_SUCCESS));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_200));
@@ -565,6 +569,8 @@ TEST_F(OutgoingStateTest, SessionStartedInvokesSendStartedToUi)
     EXPECT_CALL(objPreconditionManager, OnCallEstablished(&objSession));
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionStarted(&objSession));
+
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
 TEST_F(OutgoingStateTest, SessionStartedInvokesStartWatchdogIfSupportedAndSdpAnswerIncluded)
@@ -1293,6 +1299,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::SESSION_ID, _))
+            .WillByDefault(Return(SESSION_ID));
     EXPECT_CALL(objMediaManager, UpdatePemType(&objSession, &objMessage));
 
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
@@ -1301,6 +1309,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedInvokesSendProgressi
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0));
+
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
 TEST_F(OutgoingStateTest, SessionRprReceivedStopsTimers)
@@ -1482,6 +1492,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
             .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::SESSION_ID, _))
+            .WillByDefault(Return(SESSION_ID));
 
     ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
 
@@ -1490,6 +1502,8 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
     EXPECT_CALL(objUiNotifier, SendProgressing());
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+
+    EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
 TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogIfSupportedAndSdpAnswerIncluded)

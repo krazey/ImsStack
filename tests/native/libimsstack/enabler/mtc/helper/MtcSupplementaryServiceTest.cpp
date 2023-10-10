@@ -34,6 +34,8 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+static const IMS_CHAR SESSION_ID[] = "f81d4fae7dec11d0a76500a0c91e6bf6";
+
 namespace android
 {
 
@@ -558,6 +560,18 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
     EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
     // TODO: Location is hard to test now
     EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
+}
+
+TEST_F(MtcSupplementaryServiceTest, UpdateSessionId)
+{
+    ImsList<AString> lstSessionIds;
+    lstSessionIds.Append(SESSION_ID);
+    ON_CALL(objMockISipMessage, GetHeaders(ISipHeader::SESSION_ID, AString::ConstNull()))
+            .WillByDefault(Return(lstSessionIds));
+
+    pMtcSupplementaryService->UpdateSessionId(&objMockIMessage);
+
+    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
 }  // namespace android

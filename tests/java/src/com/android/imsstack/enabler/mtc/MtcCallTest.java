@@ -406,6 +406,7 @@ public class MtcCallTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(IUMtcCall.CALLTYPE_VT, mTestMtcCall.getCallType());
+        assertEquals(mCallee, mTestMtcCall.getRemoteNumber());
         assertEquals(IUMtcCall.START, mCommand);
         verify(mCT, times(1)).updateCallState(
                 eq(mTestMtcCall), eq(CallTracker.CALL_EVENT_ESTABLISHING), eq(null));
