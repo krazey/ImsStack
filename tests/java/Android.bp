@@ -37,7 +37,7 @@ android_test {
         "androidx.test.rules",
         "mockito-target",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "testables",
