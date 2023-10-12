@@ -27,8 +27,8 @@ cc_test {
     cflags: [
         "-Wno-unused-parameter",
     ],
-    include_dirs: [
-        "packages/modules/ImsStack/tests/native/libimsstack/enabler/interface/sipcontroller",
+    header_libs: [
+        "libimsstack_test_enabler_headers",
     ],
     test_config: "ImsStackNativeEnablerSncTests.xml",
 }

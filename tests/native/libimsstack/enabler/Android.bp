@@ -28,6 +28,16 @@ cc_library_headers {
     ],
 }
 
+cc_library_headers {
+    name: "libimsstack_test_enabler_include_headers",
+    export_include_dirs: [
+        "include/aos",
+        "include/media",
+        "include/mtc",
+        "include/mts",
+    ],
+}
+
 cc_defaults {
     name: "imsstack_native_test_enabler_defaults",
     defaults: [
