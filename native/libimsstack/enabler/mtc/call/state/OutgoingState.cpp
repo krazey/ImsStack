@@ -152,6 +152,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::PROVISIONAL_RESPONSE, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
+    m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
 
     if (m_objContext.GetCallInfo().bConference)
     {
@@ -440,6 +441,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     }
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
+    m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
 
     // TODO: move to SessionAlerting
     if (nStatusCode == SipStatusCode::SC_199)
@@ -504,6 +506,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
     }
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
+    m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
 
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_START, nIndex);

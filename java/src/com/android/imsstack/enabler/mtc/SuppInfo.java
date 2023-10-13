@@ -63,6 +63,7 @@ public class SuppInfo implements Parcelable {
     public static final int TYPE_CALL_COMPOSER_LOCATION_LONG = 23;      // String (from double)
     public static final int TYPE_CALL_COMPOSER_PICTURE_URL = 24;        // String
     public static final int TYPE_CALL_COMPOSER_IS_BUSINESS = 25;        // boolean
+    public static final int TYPE_SESSION_ID = 26;                       // String
 
     // CallerID
     public static final int CALLERID_NONE = 0;

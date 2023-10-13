@@ -44,6 +44,7 @@ android_test {
         "truth-prebuilt",
         // TODO: move this to libs after API review
         "ImsMediaFramework",
+        "imsstack-prebuilt",
     ],
 
     platform_apis: true,

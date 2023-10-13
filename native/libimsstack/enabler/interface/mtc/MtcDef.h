@@ -145,6 +145,7 @@ enum class SuppType
     CALL_COMPOSER_LOCATION_LONG = 23,
     CALL_COMPOSER_PICTURE_URL = 24,
     CALL_COMPOSER_IS_BUSINESS = 25,
+    SESSION_ID = 26,
 };
 
 enum class OipType
