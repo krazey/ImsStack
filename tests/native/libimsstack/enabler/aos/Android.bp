@@ -24,8 +24,8 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-    include_dirs: [
-        "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/aos",
+    header_libs: [
+        "libimsstack_test_enabler_include_headers",
     ],
     cflags: [
         "-Wno-unused-parameter",
