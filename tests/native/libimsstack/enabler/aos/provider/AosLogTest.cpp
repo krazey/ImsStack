@@ -130,6 +130,7 @@ public:
 
         MSG_REG_REQUIRED_WITH_WAIT_TIME,
         MSG_REG_REQUIRED_WITH_NEXT_PCSCF,
+        MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
         MSG_REG_REINITIATE_WITH_REG_STATE,
         MSG_REG_TERMINATED_BY_NOTIFY,
 
@@ -346,6 +347,9 @@ TEST(AosLogTest, RegMessageToString)
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
                          RegistrationLogTest::MSG_REG_REQUIRED_WITH_NEXT_PCSCF),
             "MSG_REG_REQUIRED_WITH_NEXT_PCSCF");
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
+                         RegistrationLogTest::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF),
+            "MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
                          RegistrationLogTest::MSG_REG_REINITIATE_WITH_REG_STATE),
             "MSG_REG_REINITIATE_WITH_REG_STATE");

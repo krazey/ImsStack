@@ -21,10 +21,12 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "CarrierConfig.h"
+#include "Configuration.h"
 #include "IImsRadio.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
 #include "IRegistration.h"
+#include "SipConfigProxy.h"
 #include "SipStatusCode.h"
 #include "ISipHeader.h"
 #include "IAosService.h"
@@ -497,9 +499,31 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_423(IN IMS_BO
     return IMS_TRUE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed)
+{
+    IMS_SINT32 nRetryAfter =
+            AosUtil::GetInstance()->GetRetryAfterValue(m_piRegSubscription->GetPreviousResponse());
+
+    IMS_SINT32 nTimerF = SipConfigProxy::GetTimerValueF(m_piContext->GetSlotId(), IMS_NULL,
+            Configuration::GetInstance()->GetSipConfig(m_piContext->GetSlotId())->GetSipConfigV(),
+            IMS_TRUE);
+
+    A_IMS_TRACE_I(
+            AOSTAG, "ProcessFailureResponse_503 :: TF (%d), RA (%d)", nTimerF, nRetryAfter, 0);
+
+    if (nRetryAfter <= 0 || (nRetryAfter * 1000) > nTimerF)
+    {
+        A_IMS_TRACE_I(AOSTAG, "request initial registration with available next pcscf", 0, 0, 0);
+        SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed)
 {
-    IMS_TRACE_I("ProcessFailureResponse_504", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "ProcessFailureResponse_504", 0, 0, 0);
 
     ISipMessage* piMsg = IMS_NULL;
     piMsg = m_piRegSubscription->GetPreviousResponse();
@@ -509,7 +533,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
 
     if (AosUtil::GetInstance()->IsInitialRegistrationRequired(piMsg))
     {
-        IMS_TRACE_I("Request initial registration", 0, 0, 0);
+        A_IMS_TRACE_I(AOSTAG, "Request initial registration", 0, 0, 0);
         SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED);
         return IMS_TRUE;
     }
@@ -517,7 +541,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter(IN IMS_BOOL bIsRefreshed)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed)
 {
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
                                   ->IsExtraRegErrRetryCntSharedForRegAndSubRequired();
@@ -530,7 +554,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter(IN IMS_B
         if (bIncreseRetryCount == IMS_FALSE)
         {
             m_bIsErrChecked = IMS_TRUE;
-            IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
+            A_IMS_TRACE_I(AOSTAG, "request initial registration with next pcscf", 0, 0, 0);
             SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_NEXT_PCSCF);
             return IMS_TRUE;
         }
@@ -556,7 +580,8 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
             {
                 m_bIsErrChecked = IMS_TRUE;
                 m_nRetryCountSubTerminated++;
-                IMS_TRACE_I("Subscription terminated count: %d", m_nRetryCountSubTerminated, 0, 0);
+                A_IMS_TRACE_I(AOSTAG, "Subscription terminated count: %d",
+                        m_nRetryCountSubTerminated, 0, 0);
                 if (m_nRetryCountSubTerminated < nSize)
                 {
                     return IMS_FALSE;
@@ -564,7 +589,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
                 else
                 {
                     m_nRetryCountSubTerminated = 0;
-                    IMS_TRACE_I("Request terminating its subscription", 0, 0, 0);
+                    A_IMS_TRACE_I(AOSTAG, "Request terminating its subscription", 0, 0, 0);
                     RequestCommand(REASON_SUB_TERMINATED, CMD_SUB_TERMINATED);
                     return IMS_TRUE;
                 }
@@ -592,7 +617,8 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
             {
                 m_bIsErrChecked = IMS_TRUE;
                 m_nRetryCountRegRequired++;
-                IMS_TRACE_I("Registration required count: %d", m_nRetryCountRegRequired, 0, 0);
+                A_IMS_TRACE_I(
+                        AOSTAG, "Registration required count: %d", m_nRetryCountRegRequired, 0, 0);
                 if (m_nRetryCountRegRequired < nSize)
                 {
                     return IMS_FALSE;
@@ -600,7 +626,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
                 else
                 {
                     m_nRetryCountRegRequired = 0;
-                    IMS_TRACE_I("Request initial registration", 0, 0, 0);
+                    A_IMS_TRACE_I(AOSTAG, "Request initial registration", 0, 0, 0);
                     SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED);
                     return IMS_TRUE;
                 }
@@ -625,7 +651,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
                     ((nStatusCode / 100) == objErrRegRequiredWithNextPcscf.GetAt(i)))
             {
                 m_bIsErrChecked = IMS_TRUE;
-                IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
+                A_IMS_TRACE_I(AOSTAG, "request initial registration with next pcscf", 0, 0, 0);
                 SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_NEXT_PCSCF);
                 return IMS_TRUE;
             }
@@ -654,7 +680,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
                     ((nStatusCode / 100) == objErrRegRequiredInWifi.GetAt(i)))
             {
                 m_bIsErrChecked = IMS_TRUE;
-                IMS_TRACE_I("Request initial registration", 0, 0, 0);
+                A_IMS_TRACE_I(AOSTAG, "Request initial registration", 0, 0, 0);
 
                 if (IsWfcErrorMessageSupportedWithStateChecked(
                             CarrierConfig::Assets::WFC_ERROR_SUB_403))
@@ -686,7 +712,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 n
                     ((nStatusCode / 100) == objErrResubStopped.GetAt(i)))
             {
                 m_bIsErrChecked = IMS_TRUE;
-                IMS_TRACE_I("nothing to do until expiration time", 0, 0, 0);
+                A_IMS_TRACE_I(AOSTAG, "nothing to do until expiration time", 0, 0, 0);
                 return IMS_TRUE;
             }
         }
@@ -700,7 +726,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
 {
     m_bIsErrChecked = IMS_FALSE;
 
-    if ((IsRetryActionDueToRetrycounter(bIsRefreshed) == IMS_TRUE) ||
+    if ((IsRetryActionDueToRetryCounter(bIsRefreshed) == IMS_TRUE) ||
             ((!m_bIsErrChecked) && (IsSubscriptionTerminated(nStatusCode) == IMS_TRUE)) ||
             ((!m_bIsErrChecked) &&
                     (IsInitialRegistrationRequired(nStatusCode, bIsRefreshed) == IMS_TRUE)) ||
@@ -716,6 +742,13 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     else if ((!m_bIsErrChecked) && (nStatusCode == SipStatusCode::SC_423))
     {
         if (ProcessFailureResponse_423(bIsRefreshed))
+        {
+            return IMS_TRUE;
+        }
+    }
+    else if ((!m_bIsErrChecked) && (nStatusCode == SipStatusCode::SC_503))
+    {
+        if (ProcessFailureResponse_503(bIsRefreshed))
         {
             return IMS_TRUE;
         }
@@ -787,7 +820,7 @@ PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
 PROTECTED VIRTUAL void AosSubscription::RequestCommand(
         IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand)
 {
-    IMS_TRACE_I("RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
+    A_IMS_TRACE_I(AOSTAG, "RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
 
     IMS_BOOL bIsRegRequired =
@@ -812,7 +845,6 @@ PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SIN
     }
 
     SetState(STATE_SUBSTOP);
-
     SetRetryTimer((nStatusCode != 0) ? IMS_TRUE : IMS_FALSE);
 }
 

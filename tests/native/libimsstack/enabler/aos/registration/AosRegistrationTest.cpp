@@ -83,6 +83,7 @@ enum
 
     MSG_REG_REQUIRED_WITH_WAIT_TIME,
     MSG_REG_REQUIRED_WITH_NEXT_PCSCF,
+    MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
     MSG_REG_REINITIATE_WITH_REG_STATE,
     MSG_REG_TERMINATED_BY_NOTIFY,
 
@@ -1987,6 +1988,15 @@ TEST_F(AosRegistrationTest, OnMessage)
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
     m_pTestAosRegistration->OnMessage(objMsg);
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+
+    // MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF - ProcessRegRequiredWithAvailableNextPcscf(true)
+    // Just call it for line coverage
+    // There is the separate test function for ProcessRegRequiredWithAvailableNextPcscf()
+    objMsg.nMSG = MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF;
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+    m_pTestAosRegistration->OnMessage(objMsg);
 
     // MSG_REG_TERMINATED_BY_NOTIFY - ProcessRegTerminatedByNotify
     objMsg.nMSG = MSG_REG_TERMINATED_BY_NOTIFY;

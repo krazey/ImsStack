@@ -21,7 +21,6 @@
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
-#include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosSubscriptionListener.h"
 #include "interface/MockIAosTransaction.h"
@@ -34,13 +33,13 @@
 
 #include "CarrierConfig.h"
 #include "IImsRadio.h"
-#include "IRegContact.h"
 #include "IRegSubscription.h"
 #include "ISipHeader.h"
 #include "SipAddress.h"
 #include "SipMessageBodyPart.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnection.h"
+#include "private/ConfigurationManager.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "registration/AosSubscription.h"
@@ -98,6 +97,8 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ConfigurationManager::GetInstance()->Initialize();
+
         m_pAosStaticProfile = new AosStaticProfile();
         m_pMockAosAppContext = new MockAosAppContext(m_pAosStaticProfile);
 
@@ -154,6 +155,8 @@ protected:
 
     virtual void TearDown() override
     {
+        ConfigurationManager::GetInstance()->DestroyConfigs();
+
         AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetService(m_pOriginAosService, SLOT_ID);
         AosProvider::GetInstance()->SetRetryRepository(m_pOriginAosRetryRepository, SLOT_ID);
@@ -352,7 +355,7 @@ TEST_F(AosSubscriptionTest, AosSubscriptionStart_CheckRadioTrue)
     EXPECT_FALSE(m_pAosSubscription->Start(IMS_TRUE));
 }
 
-TEST_F(AosSubscriptionTest, IsRetryActionDueToRetrycounter)
+TEST_F(AosSubscriptionTest, IsRetryActionDueToRetryCounter)
 {
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillOnce(Return(IMS_TRUE))
@@ -377,7 +380,7 @@ TEST_F(AosSubscriptionTest, IsRetryActionDueToRetrycounter)
             Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
             .Times(2);
 
-    EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetrycounter(IMS_FALSE));
+    EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_FALSE));
 
     SetTerminated(IMS_FALSE);
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
@@ -385,9 +388,9 @@ TEST_F(AosSubscriptionTest, IsRetryActionDueToRetrycounter)
                     AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED))
             .Times(1);
 
-    EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetrycounter(IMS_TRUE));
+    EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_TRUE));
 
-    EXPECT_FALSE(m_pAosSubscription->IsRetryActionDueToRetrycounter(IMS_TRUE));
+    EXPECT_FALSE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_TRUE));
 }
 
 TEST_F(AosSubscriptionTest, CheckSubscriptionTerminated)
@@ -624,7 +627,7 @@ TEST_F(AosSubscriptionTest, CheckIsReSubscriptionStopped)
 
 TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
 {
-    // IsRetryActionDueToRetrycounter() - 1st: true, others: false
+    // IsRetryActionDueToRetryCounter() - 1st: true, others: false
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
@@ -755,6 +758,40 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
 
     // nStatusCode == SipStatusCode::SC_423 nMinTime : 0;
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(423, IMS_FALSE));
+
+    // nStatusCode == SipStatusCode::SC_503 No Retry-After;
+    SetState(AosSubscription::STATE_SUBREFRESHING);
+    SetTerminated(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, IMS_FALSE))
+            .Times(2);
+
+    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(503));
+
+    AString strRetryAfter = AString::ConstNull();
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillOnce(Return(strRetryAfter));
+
+    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
+
+    // nStatusCode == SipStatusCode::SC_503 Retry-After > TimerF(default 128);
+    SetState(AosSubscription::STATE_SUBREFRESHING);
+    SetTerminated(IMS_FALSE);
+    strRetryAfter = AString("600");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillOnce(Return(strRetryAfter));
+
+    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
+
+    // nStatusCode == SipStatusCode::SC_503 Retry-After <= TimerF(default 128);
+    SetState(AosSubscription::STATE_SUBREFRESHING);
+    SetTerminated(IMS_FALSE);
+    strRetryAfter = AString("60");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillOnce(Return(strRetryAfter));
+
+    EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
 
     // nStatusCode == SipStatusCode::SC_504;
     ImsList<ISipMessageBodyPart*> objBodyParts;
@@ -1250,7 +1287,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode_Done)
     EXPECT_CALL(m_objMockIRegSubscription, GetPreviousResponse())
             .WillRepeatedly(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
 
-    // IsRetryActionDueToRetrycounter() - true;
+    // IsRetryActionDueToRetryCounter() - true;
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillOnce(Return(IMS_TRUE));
 
@@ -1267,7 +1304,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode_Done)
 TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode)
 {
     // ProcessStartFailed_StatusCode - m_pAosSubscription->SetRetryTimer(IMS_FALSE);
-    // IsRetryActionDueToRetrycounter - FALSE
+    // IsRetryActionDueToRetryCounter - FALSE
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .Times(3)
             .WillRepeatedly(Return(IMS_FALSE));
@@ -1364,7 +1401,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode_Done)
     EXPECT_CALL(m_objMockIRegSubscription, GetPreviousResponse())
             .WillRepeatedly(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
 
-    // IsRetryActionDueToRetrycounter() - true;
+    // IsRetryActionDueToRetryCounter() - true;
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .WillOnce(Return(IMS_TRUE));
 
@@ -1380,7 +1417,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode_Done)
 
 TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode)
 {
-    // IsRetryActionDueToRetrycounter - FALSE
+    // IsRetryActionDueToRetryCounter - FALSE
     EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .Times(2)
             .WillRepeatedly(Return(IMS_FALSE));

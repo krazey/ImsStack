@@ -80,10 +80,11 @@ protected:
 
     virtual IMS_BOOL SendSubscribe();
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed);
 
 public:
-    virtual IMS_BOOL IsRetryActionDueToRetrycounter(IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequired(
             IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
@@ -184,6 +185,7 @@ public:
         CMD_NONE = 0,
         CMD_REG_REQUIRED,
         CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
+        CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
         CMD_REG_REQUIRED_WITH_SUB_403_MSG,
         CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
         CMD_REG_TERMINATED,
