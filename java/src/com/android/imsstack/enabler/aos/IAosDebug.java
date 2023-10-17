@@ -21,12 +21,60 @@ import android.app.Activity;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * This class provides an interface for using AosDebug functions.
  */
 public interface IAosDebug {
+
+    int[] sUnClearableKeys = {
+        DebugData.KEY_SUB_ID,
+        DebugData.KEY_REGISTER,
+        DebugData.KEY_REGISTER_TIME,
+        DebugData.KEY_DEREGISTER_TIME,
+        DebugData.KEY_DEREGISTER_REASON,
+        DebugData.KEY_REGISTERED_NETWORK_TYPE,
+        DebugData.KEY_FEATURES,
+        DebugData.KEY_CAPABILITIES
+    };
+
+    int[] sClearableKeys = {
+        DebugData.KEY_DATA_CONNECTION_STATE,
+        DebugData.KEY_IP_ADDRESSES,
+        DebugData.KEY_INTERFACE_NAME,
+        DebugData.KEY_MTU,
+        DebugData.KEY_NETWORK_TYPE,
+        DebugData.KEY_APN_NAME,
+        DebugData.KEY_APN_TYPES,
+        DebugData.KEY_APN_ENTRY_NAME,
+        DebugData.KEY_PCSCF_ADDRESSES,
+        DebugData.KEY_SERVICE_STATE,
+        DebugData.KEY_DATA_REG_STATE,
+        DebugData.KEY_VOICE_RAT,
+        DebugData.KEY_CELLULAR_DATA_RAT,
+        DebugData.KEY_LTE_ATTACH_TYPE,
+        DebugData.KEY_ROAMING_STATE,
+        DebugData.KEY_VOICE_ROAMING_TYPE,
+        DebugData.KEY_DATA_ROAMING_TYPE,
+        DebugData.KEY_NETWORK_OPERATOR,
+        DebugData.KEY_NETWORK_OPERATOR_NUMERIC,
+        DebugData.KEY_NETWORK_SUPPORT_VOPS,
+        DebugData.KEY_NETWORK_SUPPORT_EMCBS,
+        DebugData.KEY_UTRAN_RSRI,
+        DebugData.KEY_UTRAN_RSCP,
+        DebugData.KEY_EUTRAN_RSRP,
+        DebugData.KEY_EUTRAN_RSRQ,
+        DebugData.KEY_NGRAN_SSRSRP,
+        DebugData.KEY_NGRAN_SSRSRQ,
+        DebugData.KEY_WIFI_CONNECTION_STATE,
+        DebugData.KEY_WIFI_ADDRESSES,
+        DebugData.KEY_WIFI_INTERFACE_NAME,
+        DebugData.KEY_WIFI_RSSI,
+        DebugData.KEY_WIFI_BSSID,
+        DebugData.KEY_WIFI_SSID,
+        DebugData.KEY_WIFI_MAC_ADDRESS
+    };
+
     /**
      * Initializes the AosDebug object.
      *
@@ -126,86 +174,21 @@ public interface IAosDebug {
         private final Map<Integer, String> mDebugData;
 
         public DebugData() {
-            mDebugData = new LinkedHashMap<Integer, String>();
-            mDebugData.put(DebugData.KEY_SUB_ID, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_REGISTER, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_REGISTER_TIME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DEREGISTER_TIME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DEREGISTER_REASON, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_REGISTERED_NETWORK_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_FEATURES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_CAPABILITIES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DATA_CONNECTION_STATE, STR_DISCONNECTED);
-            mDebugData.put(DebugData.KEY_IP_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_INTERFACE_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_MTU, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_TYPES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_ENTRY_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_PCSCF_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_SERVICE_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DATA_REG_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_VOICE_RAT, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_CELLULAR_DATA_RAT, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_ROAMING_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_VOICE_ROAMING_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DATA_ROAMING_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_OPERATOR, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_OPERATOR_NUMERIC, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_UTRAN_RSRI, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_UTRAN_RSCP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_EUTRAN_RSRP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_EUTRAN_RSRQ, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NGRAN_SSRSRP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NGRAN_SSRSRQ, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, STR_DISCONNECTED);
-            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_RSSI, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_BSSID, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_SSID, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS, STR_EMPTY);
+            mDebugData = new LinkedHashMap<>();
+            for (int i = 0; i < sUnClearableKeys.length; i++) {
+                mDebugData.put(sUnClearableKeys[i], STR_EMPTY);
+            }
+
+            clear();
         }
 
         public void clear() {
+            for (int i = 0; i < sClearableKeys.length; i++) {
+                mDebugData.put(sClearableKeys[i], STR_EMPTY);
+            }
+
             mDebugData.put(DebugData.KEY_DATA_CONNECTION_STATE, STR_DISCONNECTED);
-            mDebugData.put(DebugData.KEY_IP_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_INTERFACE_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_MTU, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_TYPES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_APN_ENTRY_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_PCSCF_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_SERVICE_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DATA_REG_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_VOICE_RAT, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_CELLULAR_DATA_RAT, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_ROAMING_STATE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_VOICE_ROAMING_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_DATA_ROAMING_TYPE, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_OPERATOR, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_OPERATOR_NUMERIC, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_UTRAN_RSRI, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_UTRAN_RSCP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_EUTRAN_RSRP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_EUTRAN_RSRQ, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NGRAN_SSRSRP, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NGRAN_SSRSRQ, STR_EMPTY);
             mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, STR_DISCONNECTED);
-            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_RSSI, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_BSSID, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_SSID, STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS, STR_EMPTY);
         }
 
         public void put(Integer key, String data) {
@@ -218,40 +201,6 @@ public interface IAosDebug {
 
         public String get(Integer key) {
             return mDebugData.getOrDefault(key, STR_EMPTY);
-        }
-
-        public Map<Integer, String> getDebugData() {
-            return mDebugData;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (!(o instanceof DebugData)) {
-                return false;
-            }
-
-            DebugData that = (DebugData) o;
-
-            if (this.getDebugData().size() != that.getDebugData().size()) {
-                return false;
-            }
-
-            return this.getDebugData().entrySet().stream().allMatch(
-                    e -> e.getValue().equals(that.getDebugData().get(e.getKey())));
-        }
-
-        @Override
-        public int hashCode() {
-            int code = 0;
-            for (Map.Entry<Integer, String> entry : this.getDebugData().entrySet()) {
-                code += Objects.hash(entry.getKey(), entry.getValue());
-            }
-
-            return code;
         }
     }
 }
