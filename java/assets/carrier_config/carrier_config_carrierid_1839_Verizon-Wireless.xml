@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <!-- Ims General -->
+    <boolean name="support_emergency_sms_over_ims_bool" value="true"/>
+    <boolean name="carrier_wfc_ims_available_bool" value="true"/>
+    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
+    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <boolean name="allow_sip_instance_parameter_in_contact_for_non_register_request_bool" value="true"/>
+    <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
+    <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
+    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <boolean name="support_local_session_timer_bool" value="true"/>
+    <boolean name="support_ecbm_for_volte_bool" value="true"/>
+    <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
+    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
+
+    <!-- Aos -->
+    <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
+    <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
+    <int name="ims.preferred_ims_dscp_int" value="2"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+    <int-array name="ims.registration_permanent_error_code_int_array" num="4">
+        <item value="400"/>
+        <item value="402"/>
+        <item value="421"/>
+        <item value="484"/>
+    </int-array>
+    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <boolean name="imssms.support_limited_admin_sms_mode_bool" value="true"/>
+
+    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
+    <boolean name="reg_contact_validation_bool" value="true"/>
+    <boolean name="request_ims_pdn_without_mmtel_bool" value="true"/>
+    <boolean name="required_cdmaless_feature_tag_bool" value="true"/>
+    <boolean name="required_volte_block_by_ssac_bool" value="true"/>
+    <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
+    <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
+    <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
+    <int name="ims_establishment_time_sec_int" value="120"/>
+    <int name="reg_actual_wait_time_policy_int" value="3"/>
+    <int name="reg_pcscf_update_policy_int" value="1"/>
+    <int name="reg_retry_503_policy_int" value="0"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
+    <int name="volte_hys_time_sec_int" value="60"/>
+    <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
+    <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
+        <item value="2"/>
+    </int-array>
+    <int-array name="sub_err_code_for_stopping_by_expiration_time_int_array" num="3">
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+    </int-array>
+
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <pbundle name="extra_reg_err_bundle">
+        <int name="extra_reg_err_final_type_int" value="2"/>
+        <int name="extra_reg_err_policy_int" value="2"/>
+        <int-array name="extra_reg_err_code_for_update_int_array" num="2">
+            <item value="403"/>
+            <item value="404"/>
+        </int-array>
+        <int-array name="extra_reg_err_code_int_array" num="4">
+            <item value="0"/>
+            <item value="2"/>
+            <item value="403"/>
+            <item value="404"/>
+        </int-array>
+        <int-array name="extra_reg_err_wait_time_sec_int_array" num="1">
+            <item value="30"/>
+        </int-array>
+    </pbundle>
+    <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
+    <pbundle name="notify_terminated_for_init_reg_bundle">
+        <int name="notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
+        <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="4">
+            <item value="1"/>
+            <item value="2"/>
+            <item value="3"/>
+            <item value="5"/>
+        </int-array>
+        <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="2">
+            <item value="2"/>
+            <item value="5"/>
+        </int-array>
+    </pbundle>
+    <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
+    <pbundle name="reg_err_code_with_ra_time_bundle">
+        <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="true"/>
+        <int-array name="reg_err_code_with_ra_time_int_array" num="5">
+            <item value="480"/>
+            <item value="486"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="600"/>
+        </int-array>
+        <int-array name="reg_err_code_with_ra_time_for_update_int_array" num="5">
+            <item value="480"/>
+            <item value="486"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="600"/>
+        </int-array>
+    </pbundle>
+    <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
+    <pbundle name="reg_retry_interval_bundle">
+        <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="6">
+            <item value="0"/>
+            <item value="0"/>
+            <item value="15"/>
+            <item value="0"/>
+            <item value="0"/>
+            <item value="0"/>
+        </int-array>
+        <int-array name="reg_retry_interval_sec_int_array" num="6">
+            <item value="30"/>
+            <item value="30"/>
+            <item value="60"/>
+            <item value="120"/>
+            <item value="480"/>
+            <item value="900"/>
+        </int-array>
+    </pbundle>
+    <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
+    <pbundle name="sub_err_code_for_terminated_bundle">
+        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="2"/>
+        <int-array name="sub_err_code_for_terminated_int_array" num="4">
+            <item value="400"/>
+            <item value="403"/>
+            <item value="404"/>
+            <item value="420"/>
+        </int-array>
+    </pbundle>
+
+    <!-- MTC default -->
+    <int name="ims.request_uri_type_int" value="0"/>
+    <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="false"/>
+    <boolean name="stop_ringback_timer_by_183_with_sdp_body_bool" value="true"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
+    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="6000"/>
+    <int name="imsvoice.ringing_timer_millis_int" value="55000"/>
+    <int name="imsvoice.ringback_timer_millis_int" value="60000"/>
+    <int name="imsvoice.18x_timer_millis_int" value="32000"/>
+    <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+    <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="600"/>
+    <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
+    <int name="imsvoice.session_refresher_type_int" value="0"/>
+    <int name="imsvoice.session_refresh_method_int" value="1"/>
+    <int name="imsvoice.session_expires_timer_sec_int" value="300"/>
+    <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
+    <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="5"/>
+    <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
+    <int name="imsvoice.call_max_count_int" value="2"/>
+    <int name="imsvt.convert_remote_response_timer_millis_int" value="60000"/>
+    <int name="imsvt.convert_user_response_timer_millis_int" value="55000"/>
+    <int name="sip_status_code_for_rejecting_call_type_change_int" value="603"/>
+    <boolean name="set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="true"/>
+    <boolean name="check_server_outage_reason_for_vxlte_call_bool" value="true"/>
+    <string-array name="carrier_specific_sip_headers_string_array" num="3">
+        <item value="P-Com.ServiceType"/>
+        <item value="P-Com.E911ServiceType"/>
+        <item value="Reason.User.SessionExpired"/>
+    </string-array>
+    <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="true"/>
+    <boolean name="support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
+    <int name="oip_type_for_unavailable_int" value="1"/>
+    <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
+    <int name="media_type_for_offerless_reinvite_int" value="1"/>
+    <boolean name="support_video_call_only_in_vops_off_status_bool" value="true"/>
+    <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>
+    <boolean name="support_canid_info_bool" value="true"/>
+    <boolean name="ignore_180_after_183_response_bool" value="false"/>
+    <int name="imsvt.policy_for_text_with_video_int" value="0"/>
+    <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
+    <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
+    <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
+    <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
+    <int name="maximum_wait_timer_for_geolocation_pidf_info_millis_int" value="2000"/>
+    <int-array name="vilte_to_volte_retry_failure_response_code_int_array" num="0"></int-array>
+    <boolean name="enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="imsvoice.policy_qos_precondition_mechanism_while_call_modification_int" value="0"/>
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+    <boolean name="use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
+    <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
+    <int name="eps_fallback_watchdog_time_millis_int" value="6000"/>
+    <int name="send_udp_keep_alive_interval_time_millis_int" value="2000"/>
+    <int name="call_reject_code_for_not_acceptable_call_type_int" value="603"/>
+    <boolean name="one_way_video_call_by_local_end_supported_bool" value="false"/>
+    <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
+    <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
+    <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
+    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="1"/>
+    <boolean name="check_ui_condition_for_incoming_resume_bool" value="true"/>
+
+    <!-- MTC terminate reason -->
+    <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">USER;text=&quot;User Triggered&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">USER;text=&quot;User Triggered&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_rtp_timeout_string">USER;text=&quot;RTP-RTCP Timeout&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_media_bearer_loss_string">USER;text=&quot;Media bearer loss&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_sip_timeout_string">USER;text=&quot;SIP timeout - no ACK&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">USER;text=&quot;SIP response time-out&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_call_setup_timeout_string">USER;text=&quot;Call-setup time-out&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string">USER;text=&quot;New Dialog Established&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">USER;text=&quot;Session Expired&quot;</string>
+    <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string">USER;text=&quot;Far Device Joined N-way Call&quot;</string>
+
+    <!-- MTC reject phrase -->
+    <string name="imsvoice.call_reject_reason_phrase_user_reject_string">Call Rejected By User</string>
+    <!-- TODO: need to check requirement - On active 1X call -->
+    <string name="imsvoice.call_reject_reason_phrase_on_cscall_string">On active 1X call</string>
+    <string name="imsvoice.call_reject_reason_phrase_on_connecting_call_string">Establishing Another Call</string>
+    <string name="imsvoice.call_reject_reason_phrase_exceeds_max_call_count_string">Already On Two Calls</string>
+    <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string">No Answer</string>
+    <!-- TODO: need to check requirement - Video Upgrade Request In Progress -->
+    <string name="imsvoice.call_reject_reason_phrase_on_converting_string">Video Upgrade Request In Progress</string>
+    <!-- TODO: need to check requirement - Codec not supported -->
+    <string name="imsvoice.call_reject_reason_phrase_negotiation_failure_string">Codec not supported</string>
+    <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string">VoWiFi OFF</string>
+
+    <!-- MTC conference call -->
+    <string name="imsvoice.conference_factory_uri_string">sip:confserver@vzims.com</string>
+    <int name="imsvoice.conference_subscribe_type_int" value="0"/>
+    <boolean name="check_conference_event_package_version_bool" value="true"/>
+    <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
+    <int name="conference_drop_refer_to_uri_source_type_int" value="1"/>
+    <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
+    <boolean name="video_hold_with_direction_inactive_bool" value="true"/>
+    <boolean name="text_hold_with_direction_inactive_bool" value="true"/>
+    <boolean name="incoming_resume_event_support_bool" value="true"/>
+    <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
+    <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="0"/>
+
+    <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
+
+    <!-- MTC emergency call -->
+    <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
+    <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
+    <int name="emergency_rtt_guard_timer_millis_int" value="-1"/>
+    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+
+    <!-- Mts -->
+    <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>
+    <boolean name="sms_allow_imsi_based_sip_uri_bool" value="true"/>
+    <int name="sms_policy_for_503_response_int" value="5"/>
+
+    <!-- Uce -->
+    <int name="imsuce.expire_value_publish_sec_int" value="1200"/>
+    <int name="imsuce.extended_expire_value_publish_sec_int" value="86400"/>
+    <int name="imsuce.publish_refresh_ratio_int" value="90"/>
+    <int name="imsuce.expire_value_list_subscribe_sec_int" value="30"/>
+    <int name="imsuce.anonymous_fetch_method_int" value="1"/>
+    <int-array name="imsuce.immediately_retry_publish_response_int_array" num="1">
+        <item value="412"/>
+    </int-array>
+    <int-array name="imsuce.variable_time_retry_publish_response_int_array" num="5">
+        <item value="408"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="603"/>
+        <item value="0"/>
+    </int-array>
+    <int-array name="imsuce.variable_time_retry_publish_response_time_sec_int_array" num="5">
+        <item value="60"/>
+        <item value="120"/>
+        <item value="240"/>
+        <item value="480"/>
+        <item value="21600"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+
+    <!-- Media -->
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="109"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="104"/>
+            <item value="110"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="3">
+            <item value="102"/>
+            <item value="108"/>
+            <item value="106"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="100"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="109">
+            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="4"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
+            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle name="104">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+        <pbundle name="110">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle name="102">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+        <pbundle name="108">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+        </pbundle>
+        <pbundle name="106">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="imsvt.h264_payload_type_int_array" num="1">
+            <item value="121"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvt.h264_payload_description_bundle">
+        <pbundle name="121">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="240"/>
+                <item value="320"/>
+            </int-array>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
+    </pbundle>
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="425"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
+    <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
+    <boolean name="audio_evs_support_bool" value="true"/>
+    <boolean name="audio_bw_nego_option_bool" value="true"/>
+    <int name="audio_maxred_int" value="-1"/>
+    <int name="audio_ptime_millis_int" value="20"/>
+    <int name="audio_maxptime_millis_int" value="240"/>
+    <boolean name="audio_show_codec_attribute_modeset_bool" value="true"/>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="38"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="800"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2400"/>
+    <boolean name="audio_rtcpxr_enable_bool" value="true"/>
+    <boolean name="audio_rtcpxr_statistics_bool" value="true"/>
+    <boolean name="audio_rtcpxr_voip_metrics_bool" value="true"/>
+    <boolean name="audio_rtcpxr_packet_loss_rle_bool" value="false"/>
+    <boolean name="audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <int name="video_cvo_value_int" value="4"/>
+    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
+    <boolean name="video_avpf_enable_bool" value="true"/>
+    <int name="imsvt.video_avpf_feature_int" value="30"/>
+    <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
+        <item value="send [x=240,y=320] recv [x=240,y=320] "/>
+    </string-array>
+    <int-array name="imsvt.video_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <boolean name="text_codec_empty_redundant_bool" value="false"/>
+    <int name="text_codec_redundancy_level_int" value="3"/>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
+    <int name="text_rtcp_inactivity_timer_millis_int" value="-1"/>
+
+</carrier_config>

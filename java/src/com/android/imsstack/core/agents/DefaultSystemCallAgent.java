@@ -1,0 +1,178 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.core.agents;
+
+import com.android.imsstack.system.DefaultSystemCallInterface;
+import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.DeviceUtils;
+
+/**
+ * An agent class to handle the default system calls.
+ */
+public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
+
+    public DefaultSystemCallAgent() {
+        SystemInterface.getInstance().setSystemCallInterface(this);
+    }
+
+    /**
+     * Destroys this agent - clean up the internal resources.
+     */
+    public void destroy() {
+        SystemInterface.getInstance().setSystemCallInterface(null);
+    }
+
+    /**
+     * Sets the device stay on until timer expired.
+     *
+     * @param timeoutMillis The timeout value in milli-seconds.
+     */
+    @Override
+    public void acquireWakeLock(int timeoutMillis) {
+        WakeLockInterface wakeLock = AgentFactory.getInstance().getAgent(WakeLockInterface.class);
+        if (wakeLock != null) {
+            wakeLock.acquireForNative(timeoutMillis);
+        }
+    }
+
+    /**
+     * Starts a timer with the specified duration for the native service.
+     *
+     * @param tid The timer id to be started.
+     * @param duration The timer duration as milli-seconds.
+     * @return {@code true} if a timer is successfully started, {@code false} otherwise.
+     */
+    @Override
+    public boolean startTimer(long tid, long duration) {
+        TimerAgent ta = (TimerAgent) AgentFactory.getInstance().getAgent(TimerInterface.class);
+        if (ta != null) {
+            return ta.startNativeTimer(tid, duration);
+        }
+        return false;
+    }
+
+    /**
+     * Stops the specified timer for the native service.
+     *
+     * @param tid The timer id to be stopped.
+     */
+    @Override
+    public void stopTimer(long tid) {
+        TimerAgent ta = (TimerAgent) AgentFactory.getInstance().getAgent(TimerInterface.class);
+        if (ta != null) {
+            ta.stopNativeTimer(tid);
+        }
+    }
+
+    /**
+     * Returns the current battery level.
+     *
+     * @return The current battery level.
+     */
+    @Override
+    public int getBatteryLevel() {
+        BatteryStateInterface bs = AgentFactory.getInstance().getAgent(BatteryStateInterface.class);
+        if (bs != null) {
+            return bs.getBatteryLevel();
+        }
+        return BatteryStateInterface.INVALID_BATTERY_LEVEL;
+    }
+
+    /**
+     * Returns the Wi-Fi interface.
+     *
+     * @return A WifiInterface object.
+     */
+    @Override
+    public WifiInterface getWifiInterface() {
+        return AgentFactory.getInstance().getAgent(WifiInterface.class);
+    }
+
+    /**
+     * Returns the current device name.
+     *
+     * @return A device name.
+     */
+    @Override
+    public String getDeviceName() {
+        return DeviceUtils.getDeviceName();
+    }
+
+    /**
+     * Returns the external storage path.
+     *
+     * @return An external storage path.
+     */
+    @Override
+    public String getExternalStoragePath() {
+        return DeviceUtils.getExternalStoragePath();
+    }
+
+    /**
+     * Returns a string value from the specified preference file for a specified slot.
+     * If {@code fileName} is empty, then returns a string value from the default preference file.
+     *
+     * @param fileName The shared preference file name.
+     * @param key The key to retrieve.
+     * @param slotId The slot-id to find a correct file.
+     * @return A string value.
+     */
+    @Override
+    public String getPreference(String fileName, String key, int slotId) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference != null) {
+            return preference.getString(fileName, key, slotId);
+        }
+        return null;
+    }
+
+    /**
+     * Puts a string value to the specified preference file for a specified slot.
+     * If {@code fileName} is empty, then puts a string value to the default preference file.
+     *
+     * @param fileName The shared preference file name.
+     * @param key The key to update.
+     * @param value The string value.
+     * @param slotId The slot-id to find a correct file.
+     * @return {@code true} if the key and value is successfully set, {@code false} otherwise.
+     */
+    @Override
+    public boolean setPreference(String fileName, String key, String value, int slotId) {
+        PreferenceInterface preference =
+                AgentFactory.getInstance().getAgent(PreferenceInterface.class);
+        if (preference != null) {
+            return preference.putString(fileName, key, value, slotId);
+        }
+        return false;
+    }
+
+    /**
+     * Sets the traffic priority for a specified slot.
+     *
+     * @param priorityType The priority type of the traffic.
+     * @param slotId The slot-id to be set.
+     */
+    @Override
+    public void setTrafficPriority(int priorityType, int slotId) {
+        ImsTrafficInterface traffic =
+                AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+        if (traffic != null) {
+            traffic.setTrafficPriority(priorityType, slotId);
+        }
+    }
+}

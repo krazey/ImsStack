@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef UDP_KEEP_ALIVE_SENDER_H_
+#define UDP_KEEP_ALIVE_SENDER_H_
+
+#include "ITimer.h"
+#include "ImsTypeDef.h"
+#include "sipcore/ISipKeepAliveHelper.h"
+
+class IMtcCallContext;
+class MtcConfigurationProxy;
+
+class UdpKeepAliveSender : public ITimerListener
+{
+public:
+    explicit UdpKeepAliveSender(IN IMtcCallContext& objContext);
+    virtual ~UdpKeepAliveSender();
+    UdpKeepAliveSender(IN const UdpKeepAliveSender&) = delete;
+    UdpKeepAliveSender& operator=(IN const UdpKeepAliveSender&) = delete;
+
+    static IMS_BOOL IsRequired(IN const MtcConfigurationProxy& objConfigProxy);
+
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+    virtual void Start();
+    virtual void Stop();
+
+private:
+    void SetTransportInfo();
+    void SendDummyPacket();
+    void StopTimer();
+
+    IMtcCallContext& m_objContext;
+    ITimer* m_piTimer;
+    ISipKeepAliveHelper* m_pKeepAliveHelper;
+};
+
+#endif

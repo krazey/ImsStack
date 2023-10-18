@@ -1,0 +1,222 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MTC_CALL_STATE_H_
+#define MTC_CALL_STATE_H_
+
+#include "ISessionListener.h"
+#include "ImsList.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
+#include "MtcDef.h"
+#include "base/IMessageMediator.h"
+#include "call/IMtcCall.h"
+#include "call/block/IMtcBlockChecker.h"
+#include "call/state/IMtcCallState.h"
+#include "helper/IMtcAosStateListener.h"
+#include "ussi/UssiDef.h"
+
+class AString;
+class IMessage;
+class IMtcCallContext;
+class IMtcSession;
+class IReference;
+class ISession;
+class ISipClientConnection;
+class ISipConnection;
+class ISipServerConnection;
+class MtcSession;
+enum class QosLossPolicy;
+struct CallReasonInfo;
+struct ConfUser;
+struct MediaInfo;
+
+class MtcCallState : public IMtcCallState
+{
+public:
+    MtcCallState(IN CallStateName eStateName, IN IMtcCallContext& objContext);
+    virtual ~MtcCallState();
+    MtcCallState(IN const MtcCallState&) = delete;
+    MtcCallState& operator=(IN const MtcCallState&) = delete;
+
+    void OnEnter() override;
+    void OnExit() override;
+    inline CallStateName GetStateName() const override { return m_eStateName; }
+
+    CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<ConfUser*>& lstUsers) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN const ImsList<ConfUser*>& lstUsers) override;
+    CallStateName HandleIncoming(IN ISession* piSession) override;
+    CallStateName HandleUserAlert() override;
+    CallStateName Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName Reject(IN const CallReasonInfo& objReason) override;
+    CallStateName Hold(IN MediaInfo& objMediaInfo) override;
+    CallStateName Resume(IN MediaInfo& objMediaInfo) override;
+    CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName RejectResume(IN const CallReasonInfo& objReason) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
+    CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+
+    CallStateName HandleIncomingUssi(IN ISession* piSession) override;
+    CallStateName OnUssiAttached() override;
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName UssiStarted(IN ISession* piSession) override;
+    CallStateName TerminateUssi(IN const CallReasonInfo& objReason) override;
+    CallStateName UssiTerminated(IN ISession* piSession) override;
+
+    CallStateName SendUssd(IN const AString& strUssd) override;
+    CallStateName UssiInfoReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+    CallStateName NotifyResponseToUssiInfo(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    CallStateName NotifyErrorToUssiInfo(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
+    CallStateName SessionAlerting(IN ISession* piSession) override;
+    CallStateName SessionReferenceReceived(
+            IN ISession* piSession, IN IReference* piReference) override;
+    CallStateName SessionStarted(IN ISession* piSession) override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName SessionUpdated(IN ISession* piSession) override;
+    CallStateName SessionUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionCancelDelivered(IN ISession* piSession) override;
+    CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionForkedResponseReceived(
+            IN ISession* piSession, IN ISession* piForkedSession) override;
+    CallStateName SessionPrackDelivered(IN ISession* piSession) override;
+    CallStateName SessionPrackDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionPrackReceived(IN ISession* piSession) override;
+    CallStateName SessionProvisionalResponseReceived(
+            IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName SessionRprDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionRprReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName SessionTransactionReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+
+    CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
+    CallStateName Refresh_NotifyTerminated() override;
+    CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
+
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+
+    CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
+
+    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
+
+    CallStateName OnInternalFailure() override;
+    CallStateName OnAttached() override;
+
+    CallStateName ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    CallStateName Error_NotifyError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
+    CallStateName OnReceivingMediaDataStarted(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
+    CallStateName OnReceivingMediaDataFailed(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
+    CallStateName OnVideoLowestBitRate() override;
+    CallStateName OnReceivingNetworkToneStarted() override;
+    CallStateName OnReceivingNetworkToneFailed() override;
+    CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName OnSrvccStateUpdated(IN SrvccState eState) override;
+    CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+
+    enum TimerType
+    {
+        TIMER_MO_100_WAIT,
+        TIMER_MO_18X_WAIT,
+        TIMER_MO_NOANSWER,
+        TIMER_MT_ALERTING,
+
+        TIMER_GLARE_CONDITION,
+
+        TIMER_CONVERT_USER_RESPONSE,
+        TIMER_CONVERT_REMOTE_RESPONSE,
+
+        TIMER_E911_LTE_OPEN,
+        TIMER_E911_WIFI_OPEN,
+        TIMER_E911_LTE_START,
+        TIMER_E911_WIFI_START,
+    };
+
+protected:
+    inline virtual CallStateName HandleSrvccStarted() { return GetStateName(); }
+    virtual CallStateName SendUpdateBySrvcc(IN UpdateType eType);
+    virtual CallStateName HandleAosConnected();
+    virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
+
+    void HandleTerminate(IN const CallReasonInfo& objReason) const;
+    void NotifyHoldResumeState();
+
+    ISession* GetISession();
+
+    void InitMediaSession();
+    IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
+    void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
+
+    IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
+    CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
+
+    void SendIncomingUpdateToUi(IN CallType eCallType);
+
+    IMS_BOOL IsRprSupported() const;
+    IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
+    IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
+    static IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage);
+    IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
+
+    // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?
+    void StartTimer(IN IMS_UINT32 nType) const;
+    void StopTimer(IN IMS_UINT32 nType) const;
+    IMS_SINT32 GetTimeInMilliseconds(IN IMS_UINT32 nType) const;
+
+    void SendInfoForUssi(
+            IN const AString& strUssdString, IN UssiError eErrorCode = UssiError::CODE_NONE);
+    static void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
+            IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
+
+    IMS_BOOL IsCallEndNeededByAudioInactivity(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
+    CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
+    IMS_BOOL IsNeedToIgnoreStartFailure() const;
+    void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
+    static IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason);
+
+    IMS_BOOL IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const;
+
+    IMtcCallContext& m_objContext;
+
+private:
+    const CallStateName m_eStateName;
+};
+
+#endif

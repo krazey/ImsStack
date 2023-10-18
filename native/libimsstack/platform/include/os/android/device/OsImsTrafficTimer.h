@@ -1,0 +1,50 @@
+
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef OS_IMS_TRAFFIC_TIMER_H_
+#define OS_IMS_TRAFFIC_TIMER_H_
+
+#include "ITimer.h"
+#include "IImsTrafficTimer.h"
+
+class OsImsTrafficTimer : public IImsTrafficTimer, public ITimerListener
+{
+public:
+    OsImsTrafficTimer(IN IMS_SINT32 nSlot, IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
+    virtual ~OsImsTrafficTimer();
+
+    OsImsTrafficTimer(IN const OsImsTrafficTimer&) = delete;
+    OsImsTrafficTimer& operator=(IN const OsImsTrafficTimer&) = delete;
+
+public:
+    // IImsTrafficTimer class
+    void Start() override;
+    void Stop() override;
+    void SetListener(IN IImsTrafficTimerListener* piListener) override;
+
+    // ITimerListener class
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
+private:
+    IMS_SINT32 m_nSlotId;
+    IMS_UINT32 m_nType;
+    IMS_UINT32 m_nDuration;
+
+    ITimer* m_piTimer;
+    IImsTrafficTimerListener* m_piTrafficListener;
+};
+
+#endif

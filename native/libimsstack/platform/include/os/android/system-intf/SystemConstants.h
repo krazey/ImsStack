@@ -1,0 +1,228 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SYSTEM_CONSTANTS_H_
+#define SYSTEM_CONSTANTS_H_
+
+// For legacy IMS system interface
+enum IMS_SYSTEM_ENTYPE
+{
+    IMS_SYSTEM_INVALID = -1,
+
+    IMS_SYSTEM_TIMER_EXPIRED = 0,
+
+    IMS_SYSTEM_BATTERY_CHANGED,
+
+    IMS_SYSTEM_REBOOTED,
+    IMS_SYSTEM_BOOT_COMPLETED,
+    IMS_SYSTEM_AIRPLANE_MODE_CHANGED,
+
+    IMS_SYSTEM_WIFI_STATE_CHANGED,
+    IMS_SYSTEM_WIFI_CONNECTION_STATE_CHANGED,
+
+    IMS_SYSTEM_RADIOTECH_STATE_CHANGED,
+    IMS_SYSTEM_SERVICE_STATE_CHANGED,
+
+    IMS_SYSTEM_DATACONNECTION_FAILED,
+    IMS_SYSTEM_DATACONNECTION_STATE_CHANGED,
+    IMS_SYSTEM_DATACONNECTION_IPCAN_CHANGED,
+    IMS_SYSTEM_DATA_ACTIVITY,
+
+    IMS_SYSTEM_PHONE_STATE_CHANGED,
+    IMS_SYSTEM_CSCALL_STATE_CHANGED,
+
+    IMS_SYSTEM_CONFIGURATION_CHANGED,
+
+    IMS_SYSTEM_VOICE_RADIOTECH_STATE_CHANGED,
+
+    IMS_SYSTEM_MAX
+};
+
+////
+// Refers to com.android.imsstack.system.SystemConstants class.
+////
+class SystemConstants
+{
+public:
+    ////
+    // Category for system interface.
+    ////
+    static const IMS_UINT32 CATEGORY_BASE = 0x00000000;
+    static const IMS_UINT32 CATEGORY_NETWORK = 0x00010000;
+    static const IMS_UINT32 CATEGORY_WIFI = 0x00020000;
+    static const IMS_UINT32 CATEGORY_CALL = 0x00040000;
+    static const IMS_UINT32 CATEGORY_POWER = 0x00080000;
+    static const IMS_UINT32 CATEGORY_TIMER = 0x00100000;
+    static const IMS_UINT32 CATEGORY_CONFIG = 0x00200000;
+    static const IMS_UINT32 CATEGORY_EVENT = 0x00400000;
+    static const IMS_UINT32 CATEGORY_ISIM = 0x00800000;
+    static const IMS_UINT32 CATEGORY_USIM = 0x01000000;
+    static const IMS_UINT32 CATEGORY_RADIO = 0x02000000;
+    ////
+    // Methods for the system information's notification (Java to Native)
+    ////
+    static const IMS_UINT32 NOTIFY_AIRPLANE_MODE_CHANGED = CATEGORY_NETWORK + 1;
+    static const IMS_UINT32 NOTIFY_TIMER_EXPIRED = CATEGORY_TIMER + 2;
+    static const IMS_UINT32 NOTIFY_BATTERY_LEVEL_CHANGED = CATEGORY_POWER + 3;
+    static const IMS_UINT32 NOTIFY_DATA_CONNECTION_FAILED = CATEGORY_NETWORK + 4;
+    static const IMS_UINT32 NOTIFY_DATA_CONNECTION_STATE_CHANGED = CATEGORY_NETWORK + 5;
+    static const IMS_UINT32 NOTIFY_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 6;
+    static const IMS_UINT32 NOTIFY_SERVICE_STATE_CHANGED = CATEGORY_NETWORK + 7;
+    static const IMS_UINT32 NOTIFY_VOICE_CALL_STATE_CHANGED = CATEGORY_CALL + 8;
+    static const IMS_UINT32 NOTIFY_WIFI_STATE_CHANGED = CATEGORY_WIFI + 9;
+    static const IMS_UINT32 NOTIFY_WIFI_CONNECTION_STATE_CHANGED = CATEGORY_WIFI + 10;
+    static const IMS_UINT32 NOTIFY_CONFIGURATION_CHANGED = CATEGORY_CONFIG + 11;
+    static const IMS_UINT32 NOTIFY_EVENT = CATEGORY_EVENT + 12;
+    static const IMS_UINT32 NOTIFY_ISIM_EVENT = CATEGORY_ISIM + 13;
+    static const IMS_UINT32 NOTIFY_USIM_EVENT = CATEGORY_USIM + 14;
+    static const IMS_UINT32 NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 15;
+    static const IMS_UINT32 NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 16;
+    static const IMS_UINT32 NOTIFY_RADIO_EVENT = CATEGORY_RADIO + 17;
+
+    ////
+    // Methods for the system access (Native to Java)
+    ////
+
+    ////
+    // Power-related information
+    ////
+    static const IMS_UINT32 GET_BATTERY_LEVEL = CATEGORY_BASE + 1;
+
+    ////
+    // Device & UICC-related information
+    ////
+    static const IMS_UINT32 GET_DEVICE_ID = CATEGORY_BASE + 101;
+    static const IMS_UINT32 GET_DEVICE_NAME = CATEGORY_BASE + 102;
+    static const IMS_UINT32 GET_DEVICE_SOFTWARE_VERSION = CATEGORY_BASE + 103;
+    static const IMS_UINT32 GET_EXTERNAL_STORAGE_PATH = CATEGORY_BASE + 104;
+    static const IMS_UINT32 GET_PHONE_NUMBER = CATEGORY_BASE + 105;
+    static const IMS_UINT32 GET_SUBSCRIBER_ID = CATEGORY_BASE + 106;
+    static const IMS_UINT32 GET_SIM_MCC = CATEGORY_BASE + 107;
+    static const IMS_UINT32 GET_SIM_MNC = CATEGORY_BASE + 108;
+    static const IMS_UINT32 GET_SIM_COUNTRY_ISO = CATEGORY_BASE + 109;
+    static const IMS_UINT32 GET_NETWORK_COUNTRY_ISO = CATEGORY_BASE + 110;
+
+    // For UICC (ISIM), Virtual SIM
+    static const IMS_UINT32 GET_ISIM_STATE = CATEGORY_BASE + 151;
+    static const IMS_UINT32 READ_ISIM_FILE_ATTR = CATEGORY_BASE + 152;
+    static const IMS_UINT32 READ_ISIM_RECORD = CATEGORY_BASE + 153;
+    static const IMS_UINT32 REQUEST_ISIM_AUTH = CATEGORY_BASE + 154;
+    static const IMS_UINT32 REQUEST_USIM_AUTH = CATEGORY_BASE + 155;
+
+    ////
+    // Call-related information
+    ////
+    static const IMS_UINT32 GET_CS_CALL_STATE = CATEGORY_BASE + 201;
+    static const IMS_UINT32 IS_EMERGENCY_NUMBER = CATEGORY_BASE + 202;
+    static const IMS_UINT32 GET_TTY_MODE = CATEGORY_BASE + 203;
+    static const IMS_UINT32 GET_RTT_MODE = CATEGORY_BASE + 204;
+    static const IMS_UINT32 GET_CS_CALL_STATE_IN_OTHER_SLOT = CATEGORY_BASE + 205;
+
+    ////
+    // Network-related information (mobile)
+    ////
+    static const IMS_UINT32 GET_NETWORK_TYPE = CATEGORY_BASE + 401;
+    static const IMS_UINT32 GET_ROAMING_STATE = CATEGORY_BASE + 402;
+    static const IMS_UINT32 GET_SERVICE_STATE = CATEGORY_BASE + 403;
+    static const IMS_UINT32 GET_ACCESS_NETWORK_INFO = CATEGORY_BASE + 404;
+    static const IMS_UINT32 REQUEST_NETWORK = CATEGORY_BASE + 405;
+    static const IMS_UINT32 RELEASE_NETWORK = CATEGORY_BASE + 406;
+    static const IMS_UINT32 GET_APN_NAME = CATEGORY_BASE + 407;
+    static const IMS_UINT32 GET_DATA_CONNECTION_STATE = CATEGORY_BASE + 408;
+    static const IMS_UINT32 GET_LOCAL_ADDRESS = CATEGORY_BASE + 409;
+    static const IMS_UINT32 GET_PCSCF_ADDRESSES = CATEGORY_BASE + 410;
+    static const IMS_UINT32 GET_IPCAN_CATEGORY = CATEGORY_BASE + 411;
+    static const IMS_UINT32 IS_IMS_VOICE_CALL_SUPPORTED = CATEGORY_BASE + 412;
+    static const IMS_UINT32 GET_IFACE_NAME = CATEGORY_BASE + 413;
+    static const IMS_UINT32 GET_LAST_ACCESS_NETWORK_INFO = CATEGORY_BASE + 414;
+    static const IMS_UINT32 GET_IFACE_ID = CATEGORY_BASE + 415;
+    static const IMS_UINT32 GET_HOST_BY_NAME = CATEGORY_BASE + 416;
+    static const IMS_UINT32 IS_IMS_EMERGENCY_CALL_SUPPORTED = CATEGORY_BASE + 417;
+    static const IMS_UINT32 GET_VOICE_NETWORK_TYPE = CATEGORY_BASE + 418;
+    static const IMS_UINT32 IS_LTE_EMERGENCY_ONLY = CATEGORY_BASE + 419;
+    static const IMS_UINT32 IS_MOBILE_DATA_ENABLED = CATEGORY_BASE + 420;
+    static const IMS_UINT32 GET_MOCN_PLMN_INFO = CATEGORY_BASE + 421;
+    static const IMS_UINT32 GET_VOICE_SERVICE_STATE = CATEGORY_BASE + 422;
+    static const IMS_UINT32 GET_VOICE_ROAMING_TYPE = CATEGORY_BASE + 423;
+    static const IMS_UINT32 GET_DATA_ROAMING_TYPE = CATEGORY_BASE + 424;
+    static const IMS_UINT32 GET_MTU = CATEGORY_BASE + 425;
+    static const IMS_UINT32 IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 426;
+    static const IMS_UINT32 BIND_SOCKET = CATEGORY_BASE + 427;
+    static const IMS_UINT32 IS_IPV6_PREFERRED = CATEGORY_BASE + 428;
+
+    ////
+    // WiFi-related information
+    ////
+    static const IMS_UINT32 GET_WIFI_BSS_ID = CATEGORY_BASE + 501;
+    static const IMS_UINT32 GET_WIFI_CONNECTION_STATE = CATEGORY_BASE + 502;
+    static const IMS_UINT32 GET_WIFI_STATE = CATEGORY_BASE + 503;
+    static const IMS_UINT32 GET_WIFI_SSID = CATEGORY_BASE + 504;
+
+    ////
+    // Timer APIs
+    ////
+    static const IMS_UINT32 SET_TIMER = CATEGORY_BASE + 601;
+    static const IMS_UINT32 KILL_TIMER = CATEGORY_BASE + 602;
+
+    ////
+    // Configuration-related information
+    ////
+    static const IMS_UINT32 GET_PREFERENCE = CATEGORY_BASE + 701;
+    static const IMS_UINT32 SET_PREFERENCE = CATEGORY_BASE + 702;
+    static const IMS_UINT32 GET_PRIVATE_PROPERTY = CATEGORY_BASE + 704;
+    static const IMS_UINT32 SET_PRIVATE_PROPERTY = CATEGORY_BASE + 705;
+    static const IMS_UINT32 GET_CARRIER_CONFIG = CATEGORY_BASE + 706;
+
+    ////
+    // Event control (from native to java)
+    ////
+    static const IMS_UINT32 SEND_EVENT = CATEGORY_BASE + 801;
+    static const IMS_UINT32 SET_EVENT = CATEGORY_BASE + 802;
+    static const IMS_UINT32 RESET_EVENT = CATEGORY_BASE + 803;
+
+    ////
+    // WFC information
+    ////
+    static const IMS_UINT32 IS_WFC_ENABLED = CATEGORY_BASE + 1101;
+    static const IMS_UINT32 GET_WFC_PREFERENCES = CATEGORY_BASE + 1102;
+    static const IMS_UINT32 IS_WFC_PROVISIONED = CATEGORY_BASE + 1103;
+    static const IMS_UINT32 GET_WFC_ADDRESS_ID = CATEGORY_BASE + 1104;
+
+    ////
+    // Location
+    ////
+    static const IMS_UINT32 START_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1201;
+    static const IMS_UINT32 STOP_LISTENING_FOR_LOCATION = CATEGORY_BASE + 1202;
+    static const IMS_UINT32 GET_LAST_KNOWN_LOCATION = CATEGORY_BASE + 1203;
+    static const IMS_UINT32 START_INSTANT_LOCATION_UPDATE = CATEGORY_BASE + 1204;
+
+    ////
+    // Ims radio interface
+    ////
+    static const IMS_UINT32 START_IMS_TRAFFIC = CATEGORY_BASE + 1301;
+    static const IMS_UINT32 STOP_IMS_TRAFFIC = CATEGORY_BASE + 1302;
+    static const IMS_UINT32 TRIGGER_EPS_FALLBACK = CATEGORY_BASE + 1303;
+    static const IMS_UINT32 SET_TRAFFIC_PRIORITY = CATEGORY_BASE + 1304;
+
+    ////
+    // IpSec
+    ////
+    static const IMS_UINT32 ADD_IPSEC_SA_PARAMETER = CATEGORY_BASE + 1501;
+    static const IMS_UINT32 REMOVE_IPSEC_SA_PARAMETER = CATEGORY_BASE + 1502;
+    static const IMS_UINT32 APPLY_IPSEC_SA = CATEGORY_BASE + 1503;
+    static const IMS_UINT32 REMOVE_IPSEC_SA = CATEGORY_BASE + 1504;
+};
+
+#endif

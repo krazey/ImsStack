@@ -1,0 +1,93 @@
+{
+    // For presubmit test group.
+    "presubmit": [
+        {
+            "name": "ImsStackJavaTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.LargeTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
+        },
+        {
+            "name": "ImsStackNativeTests"
+        }
+    ],
+
+    // For postsubmit test group.
+    "postsubmit": [
+        {
+            "name": "ImsStackJavaTests"
+        },
+        {
+            "name": "ImsStackNativeTests"
+        }
+    ],
+
+    // For ImsStack test group.
+    "ImsStack-alltests": [
+        {
+            "name": "ImsStackJavaTests"
+        },
+        {
+            "name": "ImsStackNativeTests"
+        }
+    ],
+
+    // For junit test group.
+    "ImsStack-javatests": [
+        {
+            "name": "ImsStackJavaTests"
+        }
+    ],
+
+    // For gtest test group.
+    "ImsStack-nativetests": [
+        {
+            "name": "ImsStackNativeConfigTests"
+        },
+        {
+            "name": "ImsStackNativeEnablerTests"
+        },
+        {
+            "name": "ImsStackNativeEngineTests"
+        },
+        {
+            "name": "ImsStackNativeJniTests"
+        },
+        {
+            "name": "ImsStackNativeMainTests"
+        },
+        {
+            "name": "ImsStackNativePlatformTests"
+        },
+        {
+            "name": "ImsStackNativeProtocolTests"
+        },
+
+        // protocol
+        {
+            "name": "ImsStackNativeProtocolSdpTests"
+        },
+        {
+            "name": "ImsStackNativeProtocolSipTests"
+        },
+
+        // enabler
+        {
+            "name": "ImsStackNativeEnablerAosTests"
+        },
+        {
+            "name": "ImsStackNativeEnablerMediaTests"
+        },
+        {
+            "name": "ImsStackNativeEnablerMtcTests"
+        },
+        {
+            "name": "ImsStackNativeEnablerMtsTests"
+        }
+    ]
+}

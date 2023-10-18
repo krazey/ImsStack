@@ -1,0 +1,44 @@
+/**
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ServiceTrace.h"
+#include "config/CodecPcmConfig.h"
+
+__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+
+PUBLIC
+CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
+        CodecConfig(nType_, nPayloadTypeNum_)
+{
+    IMS_TRACE_D("+CodecPcmConfig Type[%d]", nType_, 0, 0);
+}
+
+PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()
+{
+    IMS_TRACE_D("~CodecPcmConfig", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+{
+    (void)piCc;
+    (void)nCodecIdx;
+    return IMS_TRUE;
+}
+
+PUBLIC VIRTUAL void CodecPcmConfig::ToDebugString() const
+{
+    CodecConfig::ToDebugString();
+}

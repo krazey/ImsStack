@@ -1,0 +1,118 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.enabler.ssc.data;
+
+import com.android.imsstack.enabler.ssc.SscConstant;
+
+import java.util.ArrayList;
+
+public class SscRuleData {
+    private String mRuleId = null;
+    private int mSsCondition = -1;
+    private int mState = SscConstant.STATUS_DISABLE;
+    private int mServiceClass = 0;
+    private String mForwardToNumber = null;
+
+    protected ArrayList<SscRuleElement> mRuleConditionList;
+    protected ArrayList<SscRuleElement> mRuleActionList;
+
+    public SscRuleData() {
+    }
+
+    public String getRuleId() {
+        return mRuleId;
+    }
+
+    public void setRuleId(String id) {
+        mRuleId = id;
+    }
+
+    public int getSsCondition() {
+        return mSsCondition;
+    }
+
+    public void setSsCondition(int condition) {
+        mSsCondition = condition;
+    }
+
+    public int getState() {
+        return mState;
+    }
+
+    public void setState(int state) {
+        mState = state;
+    }
+
+    public int getServiceClass() {
+        return mServiceClass;
+    }
+
+    public void setServiceClass(int serviceClass) {
+        mServiceClass = serviceClass;
+    }
+
+    public void addServiceClass(int serviceClass) {
+        mServiceClass |= serviceClass;
+    }
+
+    public void setForwardToNumber(String number) {
+        mForwardToNumber = number;
+    }
+
+    public String getForwardToNumber() {
+        return mForwardToNumber;
+    }
+
+    public ArrayList<SscRuleElement> getConditionList() {
+        return mRuleConditionList;
+    }
+
+    public void setConditionList(ArrayList<SscRuleElement> list) {
+        mRuleConditionList = list;
+    }
+
+    public ArrayList<SscRuleElement> getActionList() {
+        return mRuleActionList;
+    }
+
+    public void setActionList(ArrayList<SscRuleElement> list) {
+        mRuleActionList = list;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Rule ID : ").append(mRuleId).append(", Status : ").append(mState)
+                .append(", target number : ").append(mForwardToNumber).append(", ServiceClass :")
+                .append(mServiceClass).append("\n");
+
+        if (mRuleConditionList != null && mRuleConditionList.size() > 0) {
+            sb.append("<< Condition >>\n");
+            for (SscRuleElement rule : mRuleConditionList) {
+                sb.append(rule.toString());
+            }
+        }
+
+        if (mRuleActionList != null && mRuleActionList.size() > 0) {
+            sb.append("<<  Action  >>\n");
+            for (SscRuleElement rule : mRuleActionList) {
+                sb.append(rule.toString());
+            }
+        }
+
+        return sb.toString();
+    }
+}

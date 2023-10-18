@@ -1,0 +1,144 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ImsIpSecType.h"
+#include "ImsStrLib.h"
+#include "ServiceMemory.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
+#include "ServiceUtil.h"
+#include "network/OsIpSecSa.h"
+
+__IMS_TRACE_TAG_ADAPT__;
+
+class OsIpSecSaPrivate
+{
+public:
+    inline OsIpSecSaPrivate() :
+            m_objSrcIp(IpAddress::IPv6NONE),
+            m_nSrcPort(0),
+            m_objDstIp(IpAddress::IPv6NONE),
+            m_nDstPort(0),
+            m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP),
+            m_nSpi(0),
+            m_nMode(IpSecType::MODE_TRANSPORT),
+            m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
+            m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO),
+            m_objAuthKey(ByteArray::ConstNull()),
+            m_objEncryptionKey(ByteArray::ConstNull()),
+            m_strAuthHexKey(AString::ConstNull()),
+            m_strEncryptionHexKey(AString::ConstNull())
+    {
+    }
+    inline ~OsIpSecSaPrivate() {}
+
+public:
+    IpAddress m_objSrcIp;
+    IMS_UINT32 m_nSrcPort;
+    IpAddress m_objDstIp;
+    IMS_UINT32 m_nDstPort;
+    IMS_UINT32 m_nSecurityProtocol;
+    IMS_UINT32 m_nSpi;
+    IMS_UINT32 m_nMode;
+    IMS_UINT32 m_nAuthAlgorithm;
+    IMS_UINT32 m_nEncryptionAlgorithm;
+    ByteArray m_objAuthKey;
+    ByteArray m_objEncryptionKey;
+    AString m_strAuthHexKey;
+    AString m_strEncryptionHexKey;
+};
+
+PUBLIC
+OsIpSecSa::OsIpSecSa() :
+        m_pIpSecSaP(new OsIpSecSaPrivate())
+{
+}
+
+PUBLIC VIRTUAL OsIpSecSa::~OsIpSecSa()
+{
+    if (m_pIpSecSaP != IMS_NULL)
+    {
+        delete m_pIpSecSaP;
+        m_pIpSecSaP = IMS_NULL;
+    }
+}
+
+PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+        IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol,
+        IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode, IN IMS_UINT32 nAuthAlgorithm,
+        IN IMS_UINT32 nEncryptionAlgorithm, IN const ByteArray& objAuthKey,
+        IN const ByteArray& objEncryptionKey)
+{
+    m_pIpSecSaP->m_objSrcIp = objSrcIp;
+    m_pIpSecSaP->m_nSrcPort = nSrcPort;
+    m_pIpSecSaP->m_objDstIp = objDstIp;
+    m_pIpSecSaP->m_nDstPort = nDstPort;
+    m_pIpSecSaP->m_nSecurityProtocol = nSecurityProtocol;
+    m_pIpSecSaP->m_nSpi = nSpi;
+    m_pIpSecSaP->m_nMode = nMode;
+    m_pIpSecSaP->m_nAuthAlgorithm = nAuthAlgorithm;
+    m_pIpSecSaP->m_nEncryptionAlgorithm = nEncryptionAlgorithm;
+    m_pIpSecSaP->m_objAuthKey = objAuthKey;
+    m_pIpSecSaP->m_objEncryptionKey = objEncryptionKey;
+}
+
+PUBLIC VIRTUAL void OsIpSecSa::DoneSa()
+{
+    IMS_TRACE_D("IPSEC-SA done.", 0, 0, 0);
+}
+
+PUBLIC
+IMS_UINT32 OsIpSecSa::GetSpi() const
+{
+    return m_pIpSecSaP->m_nSpi;
+}
+
+PUBLIC
+void OsIpSecSa::DisplayInfo()
+{
+    if (IMS_UTIL_SYS_PROP_IS_USER_MODE())
+    {
+        return;
+    }
+
+    AString strLog;
+
+    IMS_TRACE_D("IPSEC-SA-INFO(spi|s-ip|d-ip|sec-proto|algo-auth|algo-enc|ik|ck)", 0, 0, 0);
+
+    strLog.Sprintf("IMS_SA=0x%x|%s|%s|%d|%d|%d|na|na", m_pIpSecSaP->m_nSpi,
+            m_pIpSecSaP->m_objSrcIp.ToString().GetStr(),
+            m_pIpSecSaP->m_objDstIp.ToString().GetStr(), m_pIpSecSaP->m_nSecurityProtocol,
+            m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm);
+
+    IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
+}
+
+PUBLIC
+IpSecSaParameter OsIpSecSa::CreateSaParameter(IN IMS_SINT32 nId) const
+{
+    ByteArray objAuthKey(m_pIpSecSaP->m_objAuthKey);
+
+    if (m_pIpSecSaP->m_nAuthAlgorithm == IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+    {
+        const IMS_BYTE byExtra[4] = {0, 0, 0, 0};
+        objAuthKey.Append(byExtra, 4);
+    }
+
+    IpSecSaParameter objSaParam(nId, m_pIpSecSaP->m_nSecurityProtocol,
+            m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm, objAuthKey,
+            m_pIpSecSaP->m_objEncryptionKey);
+
+    return objSaParam;
+}

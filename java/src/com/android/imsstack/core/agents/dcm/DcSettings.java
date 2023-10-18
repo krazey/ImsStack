@@ -1,0 +1,201 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.core.agents.dcm;
+
+import android.content.Context;
+import android.telephony.CarrierConfigManager;
+
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.agents.dcmif.IDcSettings;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
+
+/**
+ * This class provide interface to get carrier configurations
+ */
+public class DcSettings implements IDcSettings {
+    private final int mSlotId;
+
+    public DcSettings(int slotId) {
+        mSlotId = slotId;
+    }
+
+    @Override
+    public void init(Context context) {
+    }
+
+    @Override
+    public void cleanup() {
+    }
+
+    @Override
+    public boolean isRoamingAllowed() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config == null) {
+            return true;
+        }
+
+        return config.getBoolean(
+                CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, true);
+    }
+
+    @Override
+    public boolean isVopsRequired() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        return (config == null) ? false : !config.getBoolean(
+                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
+    }
+
+    @Override
+    public boolean isImsPdnRequestWithoutMmtel() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        return (config == null) ? false : config.getBoolean(
+                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
+    }
+
+    @Override
+    public int[] getImsPdnEnabledInNoVopsSupport() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            int[] noVopsRequired = config.getIntArray(
+                    CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
+            if (noVopsRequired != null) {
+                return noVopsRequired;
+            } else {
+                ImsLog.w(mSlotId, "noVopsRequired is null");
+            }
+        } else {
+            ImsLog.w(mSlotId, "config is null");
+        }
+        return new int[]{};
+    }
+
+    @Override
+    public int[] getImsSupportedRats() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            int[] supportedRats = config.getIntArray(
+                    CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
+            if (supportedRats != null) {
+                return supportedRats;
+            } else {
+                ImsLog.w(mSlotId, "supportedRats is null");
+            }
+        } else {
+            ImsLog.w(mSlotId, "config is null");
+        }
+        return new int[]{};
+    }
+
+    @Override
+    public boolean isCrossSimEnabledByPlatform() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getBoolean(CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL,
+                    false);
+        }
+        return false;
+    }
+
+    @Override
+    public int getPreferredIpVersion() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Assets.IPV6_PREFERRED);
+        }
+
+        return CarrierConfig.Assets.IPV6_PREFERRED;
+    }
+
+    @Override
+    public int getEmergencyPreferredIpVersion() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Assets.IPV6_PREFERRED);
+        }
+        return CarrierConfig.Assets.IPV6_PREFERRED;
+    }
+
+    @Override
+    public boolean isPermanentFailure(EApnType apnType, int causeCode) {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            int[] permanentFailure = null;
+
+            if (apnType == EApnType.IMS) {
+                permanentFailure = config.getIntArray(
+                        CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+            } else {
+                return false;
+            }
+
+            if (permanentFailure != null) {
+                for (int i = 0; i < permanentFailure.length; i++) {
+                    if (permanentFailure[i] == causeCode) {
+                        ImsLog.w(mSlotId, "permanent failure cause " + causeCode);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isCdmalessFeatureTagRequired() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getBoolean(CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL,
+                    false);
+        }
+        return false;
+    }
+
+    @VisibleForTesting
+    protected IDcNetWatcher getDcNetWatcher(int slotId) {
+        return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);
+    }
+
+    /**
+     * Gets the CarrierConfig for the specified slot.
+     *
+     * @param slotId The slot-id to be retrieved.
+     * @return The CarrierConfig instance.
+     */
+    @VisibleForTesting
+    protected CarrierConfig getCarrierConfig(int slotId) {
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, slotId);
+        return (config != null) ? config.getCarrierConfig() : null;
+    }
+}

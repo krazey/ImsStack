@@ -1,0 +1,101 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef OS_NETWORK_CONSTANTS_H_
+#define OS_NETWORK_CONSTANTS_H_
+
+enum
+{
+    NET_CONNECTED = 100,
+    NET_DISCONNECTED,
+    NET_TERMINATED
+};
+
+enum
+{
+    DATA_INVALID = -1,
+    DATA_DISCONNECTED = 0,
+    DATA_CONNECTING,
+    DATA_CONNECTED,
+    DATA_SUSPENDED,
+    DATA_CONNECT_FAILED,
+    DATA_IPCHANGED,
+    DATA_PCSCF_CHANGED,
+    DATA_MAX
+};
+
+// This emum is synced with TelephonyManager.java
+enum
+{
+    RADIOTECH_TYPE_INVALID = -1,
+    RADIOTECH_TYPE_UNKNOWN = 0,
+    RADIOTECH_TYPE_GPRS = 1,
+    RADIOTECH_TYPE_EDGE = 2,
+    RADIOTECH_TYPE_UMTS = 3,
+    RADIOTECH_TYPE_CDMA = 4,    // Not used
+    RADIOTECH_TYPE_EVDO_0 = 5,  // Not used
+    RADIOTECH_TYPE_EVDO_A = 6,  // Not used
+    RADIOTECH_TYPE_1xRTT = 7,   // Not used
+    RADIOTECH_TYPE_HSDPA = 8,
+    RADIOTECH_TYPE_HSUPA = 9,
+    RADIOTECH_TYPE_HSPA = 10,
+    RADIOTECH_TYPE_IDEN = 11,
+    RADIOTECH_TYPE_EVDO_B = 12,  // Not used
+    RADIOTECH_TYPE_LTE = 13,
+    RADIOTECH_TYPE_EHRPD = 14,
+    RADIOTECH_TYPE_HSPAP = 15,
+    RADIOTECH_TYPE_GSM = 16,
+    RADIOTECH_TYPE_TD_SCDMA = 17,
+    RADIOTECH_TYPE_IWLAN = 18,
+    RADIOTECH_TYPE_LTE_CA = 19,
+    RADIOTECH_TYPE_NR = 20,
+    RADIOTECH_TYPE_MAX,
+};
+
+enum
+{
+    STATE_INVALID = -1,
+    STATE_IN_SERVICE = 0,
+    STATE_OUT_OF_SERVICE = 1,
+    STATE_EMERGENCY_ONLY = 2,
+    STATE_POWER_OFF = 3,
+    STATE_MAX,
+};
+
+// Synced with WifiInterface
+enum
+{
+    WIFI_STATE_DISABLED = 0,
+    WIFI_STATE_ENABLED = 1
+};
+
+enum
+{
+    WIFI_CONNECTION_STATE_DISCONNECTED = 0,
+    WIFI_CONNECTION_STATE_CONNECTED = 1
+};
+
+// Synced with DcNetWatcher.java
+enum
+{
+    RADIO_TECH_UNKNOWN = 0,
+    RADIO_TECH_EHRPD = 1,
+    RADIO_TECH_GSM = 2,
+    RADIO_TECH_WCDMA = 3,
+    RADIO_TECH_LTE = 4,
+    RADIO_TECH_NR = 5
+};
+
+#endif

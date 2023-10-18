@@ -1,0 +1,68 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MOCK_CONFERENCE_FACTORY_H_
+#define MOCK_CONFERENCE_FACTORY_H_
+
+#include "ImsList.h"
+#include "conferencecall/ConferenceFactory.h"
+#include <gmock/gmock.h>
+
+class CallConnectionIdManager;
+class ConferenceEventNotifier;
+class ConferenceInfo;
+class ConferenceInfoUpdater;
+class ConferenceOperationQueue;
+class ConferenceParticipantList;
+class ConferenceSubscription;
+class IConferenceReference;
+class IConferenceReferenceListener;
+class IConferenceSubscriptionListener;
+class IMtcCallContext;
+class IMtcContext;
+
+class MockConferenceFactory : public ConferenceFactory
+{
+public:
+    explicit MockConferenceFactory(IN IMtcContext& objContext) :
+            ConferenceFactory(objContext)
+    {
+    }
+    virtual ~MockConferenceFactory(){};
+
+    MOCK_METHOD(ConferenceSubscription*, CreateSubscription,
+            (IN CallKey nConfCallKey, IN ConferenceParticipantList& objList,
+                    IN IConferenceSubscriptionListener& objListener),
+            (override));
+    MOCK_METHOD(IConferenceReference*, CreateReference,
+            (IN CallKey nConfCallKey, IN ConfUser* pConfUser,
+                    IN IConferenceReferenceListener& objListener),
+            (override));
+    MOCK_METHOD(IConferenceReference*, CreateReference,
+            (IN CallKey nConfCallKey, IN ImsList<ConfUser*>& objConfUsers,
+                    IN IConferenceReferenceListener& objListener),
+            (override));
+    MOCK_METHOD(ConferenceParticipantList*, CreateParticipantList, (), (override));
+    MOCK_METHOD(ConferenceOperationQueue*, CreateOperationQueue, (), (override));
+    MOCK_METHOD(ConferenceEventNotifier*, CreateEventNotifier,
+            (IN IMtcCallContext& objConfCallContext,
+                    IN CallConnectionIdManager& objConnectionIdManager),
+            (override));
+    MOCK_METHOD(ConferenceInfoUpdater*, CreateInfoUpdater, (), (override));
+    MOCK_METHOD(ConferenceInfo*, CreateInfo, (), (override));
+};
+
+#endif

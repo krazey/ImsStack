@@ -1,0 +1,109 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// Do not add additional include paths with three depths.
+cc_library_headers {
+    name: "libimsstack_enabler_headers",
+    export_include_dirs: [
+        "interface",
+        "interface/aos",
+        "interface/media",
+        "interface/mtc",
+        "interface/mts",
+        "interface/sipcontroller",
+        "interface/uce",
+    ],
+}
+
+// main: load all eanblers.
+cc_library_headers {
+    name: "libimsstack_enabler_loader_headers",
+    export_include_dirs: [
+        "interface",
+        "interface/loader",
+    ],
+}
+
+// Jni to native Enabler
+cc_library_headers {
+    name: "libimsstack_enabler_mts_headers",
+    export_include_dirs: [
+        "include/mts",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_enabler_sipcontroller_headers",
+    export_include_dirs: [
+        "include/sipcontroller",
+    ],
+}
+
+cc_library_static {
+    name:"libimsstack-enabler",
+    defaults: [
+        "imsstack_native_defaults",
+    ],
+    srcs: [
+        "**/*.cpp",
+    ],
+    header_libs: [
+        "libimsmedia_config_headers",
+        "libimsstack_config_headers",
+        "libimsstack_enabler_headers",
+        "libimsstack_enabler_loader_headers",
+        "libimsstack_engine_headers",
+        "libimsstack_platform_headers",
+        "libimsstack_protocol_headers",
+    ] + [
+        "libimsstack_jni_mtc_headers",
+        "libimsstack_jni_mts_headers",
+        "libimsstack_jni_media_headers",
+        "libimsstack_jni_aos_headers",
+        "libimsstack_jni_uce_headers",
+        "libimsstack_jni_sipcontroller_headers",
+    ],
+    include_dirs: [
+        "system/libbase/include",
+    ],
+    local_include_dirs: [
+        "include",
+        "include/aos",
+        "include/config",
+        "include/internal",
+        "include/loader",
+        "include/media",
+        "include/mtc",
+        "include/mts",
+        "include/sipcontroller",
+        "include/uce",
+    ],
+    // For unit-test
+    export_include_dirs: [
+        "include",
+        "include/aos",
+        "include/config",
+        "include/internal",
+        "include/loader",
+        "include/media",
+        "include/mtc",
+        "include/mts",
+        "include/sipcontroller",
+        "include/uce",
+    ],
+}
