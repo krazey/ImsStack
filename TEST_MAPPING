@@ -27,8 +27,8 @@
         }
     ],
 
-    // For ImsStack test group.
-    "ImsStack-alltests": [
+    // ImsStack all unit tests.
+    "ImsStack-all": [
         {
             "name": "ImsStackJavaTests"
         },
@@ -37,15 +37,34 @@
         }
     ],
 
-    // For junit test group.
-    "ImsStack-javatests": [
+    // ImsStack java unit tests.
+    "ImsStack-java": [
         {
             "name": "ImsStackJavaTests"
         }
     ],
 
-    // For gtest test group.
-    "ImsStack-nativetests": [
+    // ImsStack java unit tests excluding "LargeTest" annotation.
+    "ImsStack-java-exclude-largetest": [
+        {
+            "name": "ImsStackJavaTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.LargeTest"
+                }
+            ]
+        }
+    ],
+
+    // ImsStack native unit tests.
+    "ImsStack-native": [
+        {
+            "name": "ImsStackNativeTests"
+        }
+    ],
+
+    // ImsStack native unit tests for MmTel feature.
+    "ImsStack-native-mmtel": [
         {
             "name": "ImsStackNativeConfigTests"
         },
