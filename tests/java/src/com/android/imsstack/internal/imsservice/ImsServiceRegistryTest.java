@@ -27,7 +27,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.telephony.ims.feature.MmTelFeature;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.base.AppContext;
 

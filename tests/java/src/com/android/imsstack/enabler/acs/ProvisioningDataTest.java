@@ -24,9 +24,9 @@ import static org.mockito.Mockito.doReturn;
 
 import android.content.Context;
 import android.os.Environment;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.enabler.acs.impl.ProvisioningData;
 
@@ -41,7 +41,8 @@ import java.util.Arrays;
 
 public class ProvisioningDataTest {
     private static final String TAG = ProvisioningData.class.getSimpleName();
-    private static final File FILE_DESCRIPTOR = InstrumentationRegistry.getContext().getFilesDir();
+    private static final File FILE_DESCRIPTOR =
+            InstrumentationRegistry.getInstrumentation().getContext().getFilesDir();
     // path : /storage/emulated/0/Download
     private static final String FILE_DESCRIPTOR_EXTERNAL =
             Environment.getExternalStorageDirectory() + "/Download";

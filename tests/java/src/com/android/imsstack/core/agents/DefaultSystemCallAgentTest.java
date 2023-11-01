@@ -28,7 +28,8 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.system.SystemInterface;

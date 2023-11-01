@@ -45,8 +45,9 @@ import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;

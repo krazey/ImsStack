@@ -21,7 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import android.content.Context;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.internal.util.test.FakeSettingsProvider;

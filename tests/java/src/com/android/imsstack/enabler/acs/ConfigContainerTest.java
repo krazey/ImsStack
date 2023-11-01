@@ -21,10 +21,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.doReturn;
 
 import android.content.Context;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.enabler.acs.impl.ConfigContainer;
 
@@ -77,7 +77,8 @@ public class ConfigContainerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        doReturn(InstrumentationRegistry.getContext().getFilesDir()).when(mContext).getFilesDir();
+        doReturn(InstrumentationRegistry.getInstrumentation().getContext().getFilesDir())
+                .when(mContext).getFilesDir();
     }
 
     @After

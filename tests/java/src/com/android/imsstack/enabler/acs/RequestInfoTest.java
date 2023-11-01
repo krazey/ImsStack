@@ -23,8 +23,9 @@ import static org.mockito.Mockito.doReturn;
 
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.acs.impl.RequestInfo;
 

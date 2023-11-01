@@ -30,7 +30,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.acs.impl.CallbackManager;
 import com.android.imsstack.enabler.acs.impl.IAcServiceImplCallback;

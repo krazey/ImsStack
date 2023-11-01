@@ -32,7 +32,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Handler;
 import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.acs.impl.HttpResponse;
 import com.android.imsstack.enabler.acs.impl.HttpResponseForCellular;

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.acs.impl.HttpResponse;
 import com.android.imsstack.enabler.acs.impl.HttpTransaction;

@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.util.IoUtils;
 
