@@ -99,6 +99,7 @@ public:
 
     // Test
     void SetISipConfigV(IN ISipConfigV* piSipConfigV);
+    void SetWifiTest(IN IMS_BOOL bEnabled);
 
 private:
     // ( 2^24 * BaseTime ) MUST be bigger than MaxTime

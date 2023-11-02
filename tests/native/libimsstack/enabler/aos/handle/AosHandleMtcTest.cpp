@@ -669,6 +669,19 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListIdle));
 }
 
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_WifiTest)
+{
+    IMS_BOOL bIsWifiTest = AosUtil::GetInstance()->IsWifiTest();
+    AosUtil::GetInstance()->SetWifiTest(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(0);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType()).Times(0);
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    AosUtil::GetInstance()->SetWifiTest(bIsWifiTest);
+}
+
 TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test1)
 {
     // Test1: Srv In, Network changed to LTE, Suspended with SUSPEND_NO_LTE_COVERAGE
@@ -1264,14 +1277,25 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
 }
 
+TEST_F(AosHandleMtcTest, CheckSuspended_WifiTest)
+{
+    IMS_BOOL bIsWifiTest = AosUtil::GetInstance()->IsWifiTest();
+    AosUtil::GetInstance()->SetWifiTest(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker()).Times(0);
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(0);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType()).Times(0);
+
+    CheckSuspended();
+
+    AosUtil::GetInstance()->SetWifiTest(bIsWifiTest);
+}
+
 TEST_F(AosHandleMtcTest, CheckSuspended_Test1)
 {
     // Test1: suspended, valid network(LTE)
     // Expectation: set SUSPEND_NO_SERVICE
 
-    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -1291,9 +1315,6 @@ TEST_F(AosHandleMtcTest, CheckSuspended_Test2)
     // Test2: suspended, invalid network(GSM)
     // Expectation: set SUSPEND_NO_SERVICE
 
-    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -1314,9 +1335,6 @@ TEST_F(AosHandleMtcTest, CheckSuspended_Test3)
     // Test3: not suspended, valid network(LTE)
     // Expectation: no suspended reason
 
-    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));

@@ -60,8 +60,6 @@ protected:
             delete pAosUtil;
         }
     }
-
-    void SetWiFiTest(IN IMS_BOOL bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
 };
 
 TEST_F(AosUtilTest, GetResponseCode)
@@ -399,8 +397,8 @@ TEST_F(AosUtilTest, checkNetworkType)
 
 TEST_F(AosUtilTest, checkSet)
 {
-    SetWiFiTest(IMS_TRUE);
+    pAosUtil->SetWifiTest(IMS_TRUE);
     EXPECT_TRUE(pAosUtil->IsWifiTest());
-    SetWiFiTest(IMS_FALSE);
+    pAosUtil->SetWifiTest(IMS_FALSE);
     EXPECT_FALSE(pAosUtil->IsWifiTest());
 }

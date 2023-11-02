@@ -33,6 +33,7 @@
 #include "interface/IAosRegStateManager.h"
 #include "provider/AosProvider.h"
 #include "provider/AosString.h"
+#include "provider/AosUtil.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
@@ -4629,7 +4630,12 @@ TEST_F(AosHandleTest, Is3G_Test)
 
 TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 {
+    IMS_BOOL bIsWifiTest = AosUtil::GetInstance()->IsWifiTest();
+    AosUtil::GetInstance()->SetWifiTest(IMS_TRUE);
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
+    AosUtil::GetInstance()->SetWifiTest(bIsWifiTest);
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
+
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
 
     m_pAosHandle->Event_NotifyEvent(
@@ -4656,6 +4662,10 @@ TEST_F(AosHandleTest, Event_NotifyEvent_InvalidEvent)
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)
 {
+    IMS_BOOL bIsWifiTest = AosUtil::GetInstance()->IsWifiTest();
+    AosUtil::GetInstance()->SetWifiTest(IMS_TRUE);
+    m_pAosHandle->RegistrationControl_NotifyCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
+    AosUtil::GetInstance()->SetWifiTest(bIsWifiTest);
     m_pAosHandle->RegistrationControl_NotifyCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
 }
 

@@ -676,3 +676,9 @@ void AosUtil::SetISipConfigV(IN ISipConfigV* piSipConfigV)
 {
     m_piSipConfigV = piSipConfigV;
 }
+
+PUBLIC
+void AosUtil::SetWifiTest(IN IMS_BOOL bEnabled)
+{
+    m_bIsWifiTest = bEnabled;
+}
