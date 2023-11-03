@@ -96,7 +96,7 @@ public:
     enum
     {
         TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONITION,
+        TIMER_MSG_CONDITION,
         TIMER_REG_STOP,
         TIMER_REG_BLOCKED,
         TIMER_APP_ACTIVATED,
@@ -312,8 +312,8 @@ TEST(AosLogTest, AppTimerToString)
 {
     EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_RECONFIG_GUARD),
             "TIMER_RECONFIG_GUARD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_MSG_CONITION),
-            "TIMER_MSG_CONITION");
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_MSG_CONDITION),
+            "TIMER_MSG_CONDITION");
     EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_REG_STOP),
             "TIMER_REG_STOP");
     EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_REG_BLOCKED),

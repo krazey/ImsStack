@@ -92,7 +92,7 @@ public:
     enum
     {
         TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONITION,
+        TIMER_MSG_CONDITION,
         TIMER_REG_STOP,
         TIMER_REG_BLOCKED,
         TIMER_APP_ACTIVATED,
@@ -367,8 +367,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
         case ApplicationLog::TIMER_RECONFIG_GUARD:
             return "TIMER_RECONFIG_GUARD";
 
-        case ApplicationLog::TIMER_MSG_CONITION:
-            return "TIMER_MSG_CONITION";
+        case ApplicationLog::TIMER_MSG_CONDITION:
+            return "TIMER_MSG_CONDITION";
 
         case ApplicationLog::TIMER_REG_STOP:
             return "TIMER_REG_STOP";

@@ -485,7 +485,7 @@ IMS_BOOL AosApplication::IsTimerRunning(IN IMS_UINT32 nType) const
         return (m_piReconfigTimer != IMS_NULL);
     }
 
-    if (nType == TIMER_MSG_CONITION)
+    if (nType == TIMER_MSG_CONDITION)
     {
         return (m_piMsgConditionTimer != IMS_NULL);
     }
@@ -780,7 +780,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached()
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsConditionTimerSkippedDueToTimer()
 {
-    return IsTimerRunning(TIMER_MSG_CONITION);
+    return IsTimerRunning(TIMER_MSG_CONDITION);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange()
@@ -839,6 +839,16 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
 }
 
 PROTECTED VIRTUAL void AosApplication::ClearConnection() {}
+
+PROTECTED VIRTUAL void AosApplication::ClearConnector()
+{
+    if (m_pConnector != IMS_NULL)
+    {
+        m_pConnector->SetListener(IMS_NULL);
+        m_pConnector->CleanUp();
+        delete m_pConnector;
+    }
+}
 
 PROTECTED VIRTUAL IMS_UINT32 AosApplication::GetReportState()
 {
@@ -1163,7 +1173,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
 
     if (IsRegRecoveryHeld())
     {
-        A_IMS_TRACE_I(APPID, "ProcessPcscfRecovery :: recover is holded", 0, 0, 0);
+        A_IMS_TRACE_I(APPID, "ProcessPcscfRecovery :: recover is held", 0, 0, 0);
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
         m_nRecoverReason = nReason;
         return;
@@ -1975,7 +1985,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessStateStart(IN IMS_UINT32 nTime /* 
         return;
     }
 
-    StartTimer(TIMER_MSG_CONITION, nTime);
+    StartTimer(TIMER_MSG_CONDITION, nTime);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegControlEvent(
@@ -2536,7 +2546,7 @@ PROTECTED VIRTUAL void AosApplication::StartTimer(IN IMS_UINT32 nType, IN IMS_UI
             ppiTimer = &m_piReconfigTimer;
             break;
 
-        case TIMER_MSG_CONITION:
+        case TIMER_MSG_CONDITION:
             ppiTimer = &m_piMsgConditionTimer;
             break;
 
@@ -2591,7 +2601,7 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
             ppiTimer = &m_piReconfigTimer;
             break;
 
-        case TIMER_MSG_CONITION:
+        case TIMER_MSG_CONDITION:
             ppiTimer = &m_piMsgConditionTimer;
             break;
 
@@ -2642,7 +2652,7 @@ PROTECTED VIRTUAL void AosApplication::ClearTimers()
     */
     if (m_piMsgConditionTimer != IMS_NULL)
     {
-        StopTimer(TIMER_MSG_CONITION);
+        StopTimer(TIMER_MSG_CONDITION);
     }
 
     if (m_piRegStopTimer != IMS_NULL)
@@ -3004,7 +3014,7 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
 
     if (piTimer == m_piMsgConditionTimer)
     {
-        StopTimer(TIMER_MSG_CONITION);
+        StopTimer(TIMER_MSG_CONDITION);
         ProcessStateStart();
         return;
     }
@@ -3247,12 +3257,7 @@ PROTECTED VIRTUAL void AosApplication::CleanUp()
 
     RemoveEventListener();
 
-    if (m_pConnector != IMS_NULL)
-    {
-        m_pConnector->SetListener(IMS_NULL);
-        m_pConnector->CleanUp();
-        delete m_pConnector;
-    }
+    ClearConnector();
 
     if (m_pCondition != IMS_NULL)
     {

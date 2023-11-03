@@ -142,6 +142,7 @@ protected:
     // Clean
     virtual void CleanAll(IN IMS_UINT32 nOffReason = AosReason::NONE);
     virtual void ClearConnection();
+    virtual void ClearConnector();
 
     virtual IMS_UINT32 GetReportState();
 
@@ -348,7 +349,7 @@ protected:
     enum
     {
         TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONITION,
+        TIMER_MSG_CONDITION,
         TIMER_REG_STOP,
         TIMER_REG_BLOCKED,
         TIMER_APP_ACTIVATED,
