@@ -17,28 +17,84 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "../../../engine/interface/sipcore/MockISipKeepAliveHelper.h"
 #include "provider/AosKeepAlive.h"
 #include "provider/MockAosKeepAlive.h"
 
+using ::testing::_;
+
 const IMS_SINT32 SLOT_ID = 0;
-enum
+
+class TestAosKeepAlive : public AosKeepAlive
 {
-    TIMER_KEEP_ALIVE = 0,
-    TIMER_PONG_WAIT
+public:
+    inline explicit TestAosKeepAlive(IN IMS_SINT32 nSlotId) :
+            AosKeepAlive(nSlotId)
+    {
+    }
+
+    inline void SetKeepAliveHelper(IN ISipKeepAliveHelper* piKeepAliveHelper)
+    {
+        m_piKeepAliveHelper = piKeepAliveHelper;
+    }
+
+    // TEST : SetListener
+    FRIEND_TEST(AosKeepAliveTest, SucceedsSetListener);
+    // TEST : Start
+    FRIEND_TEST(AosKeepAliveTest, SetCheckingPongTrue);
+    FRIEND_TEST(AosKeepAliveTest, SetCheckingPongFalse);
+    FRIEND_TEST(AosKeepAliveTest, SetCheckingPongFalseWhenShortRepeatTime);
+    FRIEND_TEST(AosKeepAliveTest, StartWithKeepAliveHelper);
+    FRIEND_TEST(AosKeepAliveTest, StartWithoutKeepAliveHelper);
+    // TEST : Stop
+    FRIEND_TEST(AosKeepAliveTest, SucceedsClearKeepAliveTime);
+    // TEST : SetTransport
+    FRIEND_TEST(AosKeepAliveTest, SucceedsSetTransport);
+    // TEST : SendPing
+    FRIEND_TEST(AosKeepAliveTest, SucceedsSendPing);
+    // TEST : ProcessKeepAliveTimerExpired
+    FRIEND_TEST(AosKeepAliveTest, StartPongWaitTimerWhenPoingChecked);
+    FRIEND_TEST(AosKeepAliveTest, DoesNotStartPongWaitTimerWhenPoingNotChecked);
+    // TEST : ProcessPongWaitTimerExpired
+    FRIEND_TEST(AosKeepAliveTest, InvokesDetectedFlowFailed);
+    FRIEND_TEST(AosKeepAliveTest, DoesNotInvokesDetectedFlowFailedWhenListenerIsNull);
+    // TEST : StartTimer
+    FRIEND_TEST(AosKeepAliveTest, StartKeepAliveTimer);
+    FRIEND_TEST(AosKeepAliveTest, StartPongWaitTimer);
+    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenDurationIsZero);
+    FRIEND_TEST(AosKeepAliveTest, StartTimerAfterStopWhenSameTimerIsRunning);
+    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStartTimerWithInvalidTimer);
+    // TEST : StopTimer
+    FRIEND_TEST(AosKeepAliveTest, StopKeepAliveTimer);
+    FRIEND_TEST(AosKeepAliveTest, StopPongWaitTimer);
+    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithoutTimer);
+    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithInvalidTimer);
+    // TEST : ClearTimer
+    FRIEND_TEST(AosKeepAliveTest, ClearTimerWhenTimersAreSet);
+    // TEST : KeepAliveHelper_PongReceived
+    FRIEND_TEST(AosKeepAliveTest, StopPongWaitTimerWhenPongReceived);
+    // TEST : Timer_TimerExpired
+    FRIEND_TEST(AosKeepAliveTest, InvokesSendPacketWhenKeepaliveTimerExpired);
+    FRIEND_TEST(AosKeepAliveTest, InvokesDetectedFlowFailedWhenPongWaitTimerExpired);
+    FRIEND_TEST(AosKeepAliveTest, DoesNotInvokesAnyTimerExpiredProcessWhenTimerIsNull);
+    // TEST : TimerToString
+    FRIEND_TEST(AosKeepAliveTest, ReturnsTimerString);
 };
 
 class AosKeepAliveTest : public ::testing::Test
 {
 public:
-    AosKeepAlive* m_pAosKeepAlive;
+    TestAosKeepAlive* m_pAosKeepAlive;
+    MockISipKeepAliveHelper m_objMockSipKeepAliveHelper;
+    MockIAosKeepAliveListener m_objMockIAosKeepAliveListener;
 
 protected:
     virtual void SetUp() override
     {
-        m_pAosKeepAlive = new AosKeepAlive(SLOT_ID);
+        m_pAosKeepAlive = new TestAosKeepAlive(SLOT_ID);
         ASSERT_TRUE(m_pAosKeepAlive != nullptr);
 
-        SetKeepAliveHelper(IMS_NULL);
+        m_pAosKeepAlive->SetKeepAliveHelper(&m_objMockSipKeepAliveHelper);
     }
 
     virtual void TearDown() override
@@ -48,154 +104,356 @@ protected:
             delete m_pAosKeepAlive;
         }
     }
-
-    IMS_UINT32 GetKeepAliveTime() { return m_pAosKeepAlive->m_nKeepAliveTime; }
-
-    void SetKeepAliveHelper(IN ISipKeepAliveHelper* piKeepAliveHelper)
-    {
-        m_pAosKeepAlive->m_piKeepAliveHelper = piKeepAliveHelper;
-    }
-
-    IMS_BOOL IsActive_KeepAliveTimer() { return (m_pAosKeepAlive->m_piKeepAliveTimer != IMS_NULL); }
-
-    IMS_BOOL IsActive_PongWaitTimer() { return (m_pAosKeepAlive->m_piPongWaitTimer != IMS_NULL); }
-
-    ITimer* GetKeepAliverTimer() { return m_pAosKeepAlive->m_piKeepAliveTimer; }
-
-    ITimer* GetPongWaitTimer() { return m_pAosKeepAlive->m_piPongWaitTimer; }
-
-    void ProcessPongWaitTimerExpired() { m_pAosKeepAlive->ProcessPongWaitTimerExpired(); }
-
-    void SetCheckingPong(IN IMS_BOOL bCheck) { m_pAosKeepAlive->SetCheckingPong(bCheck); }
-
-    IMS_BOOL IsPongChecked() { return m_pAosKeepAlive->IsPongChecked(); }
-
-    void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
-    {
-        m_pAosKeepAlive->StartTimer(nType, nDuration);
-    }
-
-    void ClearTimer() { m_pAosKeepAlive->ClearTimer(); }
-
-    void ProcessKeepAliveTimerExpired() { m_pAosKeepAlive->ProcessKeepAliveTimerExpired(); }
-
-    void KeepAliveHelper_PongReceived() { m_pAosKeepAlive->KeepAliveHelper_PongReceived(); }
-
-    void Timer_TimerExpired(IN ITimer* piTimer) { m_pAosKeepAlive->Timer_TimerExpired(piTimer); }
-
-    const IMS_CHAR* TimerToString(IN IMS_UINT32 nType)
-    {
-        return m_pAosKeepAlive->TimerToString(nType);
-    }
 };
 
-TEST_F(AosKeepAliveTest, SetListener)
+TEST_F(AosKeepAliveTest, SucceedsSetListener)
 {
-    MockIAosKeepAliveListener objMockIAosKeepAliveListener;
-    EXPECT_CALL(objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(1);
+    // GIVEN
+    EXPECT_EQ(m_pAosKeepAlive->m_piListener, nullptr);
 
+    // WHEN
     m_pAosKeepAlive->SetListener(
-            static_cast<IAosKeepAliveListener*>(&objMockIAosKeepAliveListener));
+            static_cast<IAosKeepAliveListener*>(&m_objMockIAosKeepAliveListener));
 
-    ProcessPongWaitTimerExpired();
+    // THEN
+    EXPECT_NE(m_pAosKeepAlive->m_piListener, nullptr);
 }
 
-TEST_F(AosKeepAliveTest, Start_CheckingPongTrue)
+TEST_F(AosKeepAliveTest, SetCheckingPongTrue)
 {
-    SetCheckingPong(IMS_FALSE);
+    // GIVEN
+    m_pAosKeepAlive->SetCheckingPong(IMS_FALSE);
+    EXPECT_FALSE(m_pAosKeepAlive->IsPongChecked());
+
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
+
+    // WHEN
     m_pAosKeepAlive->Start(20000, IMS_TRUE);
 
-    EXPECT_TRUE(IsPongChecked());
+    // THEN
+    EXPECT_TRUE(m_pAosKeepAlive->IsPongChecked());
 }
 
-TEST_F(AosKeepAliveTest, Start_CheckingPongFalse)
+TEST_F(AosKeepAliveTest, SetCheckingPongFalse)
 {
-    SetCheckingPong(IMS_TRUE);
+    // GIVEN
+    m_pAosKeepAlive->SetCheckingPong(IMS_TRUE);
+    EXPECT_TRUE(m_pAosKeepAlive->IsPongChecked());
+
+    // WHEN
     m_pAosKeepAlive->Start(20000, IMS_FALSE);
 
-    EXPECT_FALSE(IsPongChecked());
+    // THEN
+    EXPECT_FALSE(m_pAosKeepAlive->IsPongChecked());
 }
 
-TEST_F(AosKeepAliveTest, Stop)
+TEST_F(AosKeepAliveTest, SetCheckingPongFalseWhenShortRepeatTime)
 {
-    SetCheckingPong(IMS_FALSE);
-    m_pAosKeepAlive->Start(20000, IMS_TRUE);
+    // GIVEN
+    m_pAosKeepAlive->SetCheckingPong(IMS_FALSE);
+    EXPECT_FALSE(m_pAosKeepAlive->IsPongChecked());
 
-    EXPECT_EQ(GetKeepAliveTime(), 20000);
+    // WHEN
+    m_pAosKeepAlive->Start(5000, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(m_pAosKeepAlive->IsPongChecked());
+}
+
+TEST_F(AosKeepAliveTest, SucceedsClearKeepAliveTime)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_)).Times(1);
+
+    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
+
+    // WHEN
     m_pAosKeepAlive->Stop();
-    EXPECT_EQ(GetKeepAliveTime(), 0);
+
+    // THEN
+    EXPECT_EQ(m_pAosKeepAlive->m_nKeepAliveTime, 0);
 }
 
-TEST_F(AosKeepAliveTest, SetTransport_KeepAliveHelperIsNull)
+TEST_F(AosKeepAliveTest, SucceedsSetTransport)
 {
-    EXPECT_FALSE(m_pAosKeepAlive->SetTransport(
-            IpAddress("127.0.0.1"), 1234, IpAddress("127.0.0.2"), 5678, 1));
+    // GIVEN
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetTransportTupleS(_, _, _)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetTransportTupleD(_, _)).Times(1);
+
+    // WHEN
+    m_pAosKeepAlive->SetTransport(IpAddress("127.0.0.1"), 1234, IpAddress("127.0.0.2"), 5678, 1);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosKeepAliveTest, ProcessKeepAliveTimerExpired_IsPongChecked)
+TEST_F(AosKeepAliveTest, SucceedsSendPing)
 {
-    m_pAosKeepAlive->Start(20000, IMS_TRUE);
-    ClearTimer();
+    // GIVEN
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
 
-    EXPECT_FALSE(IsActive_KeepAliveTimer());
-    EXPECT_FALSE(IsActive_PongWaitTimer());
-    ProcessKeepAliveTimerExpired();
+    // WHEN
+    m_pAosKeepAlive->SendPing();
 
-    EXPECT_TRUE(IsActive_KeepAliveTimer());
-    EXPECT_TRUE(IsActive_PongWaitTimer());
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosKeepAliveTest, ProcessKeepAliveTimerExpired_IsNotPongChecked)
+TEST_F(AosKeepAliveTest, StartPongWaitTimerWhenPoingChecked)
 {
-    m_pAosKeepAlive->Start(20000, IMS_FALSE);
-    ClearTimer();
+    // GIVEN
+    m_pAosKeepAlive->SetCheckingPong(IMS_TRUE);
+    m_pAosKeepAlive->ClearTimer();
+    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
 
-    EXPECT_FALSE(IsActive_KeepAliveTimer());
-    EXPECT_FALSE(IsActive_PongWaitTimer());
-    ProcessKeepAliveTimerExpired();
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
 
-    EXPECT_TRUE(IsActive_KeepAliveTimer());
-    EXPECT_FALSE(IsActive_PongWaitTimer());
+    // WHEN
+    m_pAosKeepAlive->ProcessKeepAliveTimerExpired();
+
+    // THEN
+    EXPECT_TRUE(m_pAosKeepAlive->m_piKeepAliveTimer);
+    EXPECT_TRUE(m_pAosKeepAlive->m_piPongWaitTimer);
 }
 
-TEST_F(AosKeepAliveTest, KeepAliveHelper_PongReceived)
+TEST_F(AosKeepAliveTest, DoesNotStartPongWaitTimerWhenPoingNotChecked)
 {
-    StartTimer(TIMER_PONG_WAIT, 1000);
-    EXPECT_TRUE(IsActive_PongWaitTimer());
+    // GIVEN
+    m_pAosKeepAlive->SetCheckingPong(IMS_FALSE);
+    m_pAosKeepAlive->ClearTimer();
+    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
 
-    KeepAliveHelper_PongReceived();
-    EXPECT_FALSE(IsActive_PongWaitTimer());
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
+
+    // WHEN
+    m_pAosKeepAlive->ProcessKeepAliveTimerExpired();
+
+    // THEN
+    EXPECT_TRUE(m_pAosKeepAlive->m_piKeepAliveTimer);
+    EXPECT_FALSE(m_pAosKeepAlive->m_piPongWaitTimer);
 }
 
-TEST_F(AosKeepAliveTest, Timer_TimerExpired_KeepAliveTimer)
+TEST_F(AosKeepAliveTest, InvokesDetectedFlowFailed)
 {
-    m_pAosKeepAlive->Start(20000, IMS_TRUE);
-
-    Timer_TimerExpired(GetKeepAliverTimer());
-
-    EXPECT_TRUE(IsActive_KeepAliveTimer());
-    EXPECT_TRUE(IsActive_PongWaitTimer());
-}
-
-TEST_F(AosKeepAliveTest, Timer_TimerExpired_PongWaitTimer)
-{
-    m_pAosKeepAlive->Start(20000, IMS_TRUE);
-
-    MockIAosKeepAliveListener objMockIAosKeepAliveListener;
-    EXPECT_CALL(objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(1);
-
+    // GIVEN
     m_pAosKeepAlive->SetListener(
-            static_cast<IAosKeepAliveListener*>(&objMockIAosKeepAliveListener));
+            static_cast<IAosKeepAliveListener*>(&m_objMockIAosKeepAliveListener));
 
-    Timer_TimerExpired(GetPongWaitTimer());
+    EXPECT_CALL(m_objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(1);
 
-    EXPECT_FALSE(IsActive_KeepAliveTimer());
-    EXPECT_FALSE(IsActive_PongWaitTimer());
+    // WHEN
+    m_pAosKeepAlive->ProcessPongWaitTimerExpired();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosKeepAliveTest, TimerToString)
+TEST_F(AosKeepAliveTest, DoesNotInvokesDetectedFlowFailedWhenListenerIsNull)
 {
-    EXPECT_STREQ(TimerToString(TIMER_KEEP_ALIVE), "TIMER_KEEP_ALIVE");
-    EXPECT_STREQ(TimerToString(TIMER_PONG_WAIT), "TIMER_PONG_WAIT");
-    EXPECT_STREQ(TimerToString(-1), "__INVALID__");
+    // GIVEN
+    m_pAosKeepAlive->SetListener(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(0);
+
+    // WHEN
+    m_pAosKeepAlive->ProcessPongWaitTimerExpired();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosKeepAliveTest, StartKeepAliveTimer)
+{
+    // GIVEN
+
+    // WHEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
+
+    // THEN
+    EXPECT_NE(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, StartPongWaitTimer)
+{
+    // GIVEN
+
+    // WHEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_PONG_WAIT, 1000);
+
+    // THEN
+    EXPECT_NE(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, ReturnsFalseWhenDurationIsZero)
+{
+    // GIVEN
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 0);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosKeepAliveTest, StartTimerAfterStopWhenSameTimerIsRunning)
+{
+    // GIVEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
+
+    // WHEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
+
+    // THEN
+    EXPECT_NE(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, ReturnsFalseWhenStartTimerWithInvalidTimer)
+{
+    // GIVEN
+    IMS_UINT32 TIMER_INVALID_TYPE = 999;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosKeepAlive->StartTimer(TIMER_INVALID_TYPE, 1000);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosKeepAliveTest, StopKeepAliveTimer)
+{
+    // GIVEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
+
+    // WHEN
+    m_pAosKeepAlive->StopTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE);
+
+    // THEN
+    EXPECT_EQ(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, StopPongWaitTimer)
+{
+    // GIVEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_PONG_WAIT, 1000);
+
+    // WHEN
+    m_pAosKeepAlive->StopTimer(TestAosKeepAlive::TIMER_PONG_WAIT);
+
+    // THEN
+    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithoutTimer)
+{
+    // GIVEN
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosKeepAlive->StopTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithInvalidTimer)
+{
+    // GIVEN
+    IMS_UINT32 TIMER_INVALID_TYPE = 999;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosKeepAlive->StopTimer(TIMER_INVALID_TYPE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosKeepAliveTest, ClearTimerWhenTimersAreSet)
+{
+    // GIVEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_PONG_WAIT, 1000);
+
+    // WHEN
+    m_pAosKeepAlive->ClearTimer();
+
+    // THEN
+    EXPECT_EQ(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, StopPongWaitTimerWhenPongReceived)
+{
+    // GIVEN
+    m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_PONG_WAIT, 1000);
+
+    // WHEN
+    m_pAosKeepAlive->KeepAliveHelper_PongReceived();
+
+    // THEN
+    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+}
+
+TEST_F(AosKeepAliveTest, InvokesSendPacketWhenKeepaliveTimerExpired)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(2);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
+
+    m_pAosKeepAlive->Start(20000, IMS_TRUE);
+
+    // WHEN
+    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->m_piKeepAliveTimer);
+
+    // THEN : GIVEN conditions should be met.
+    //     If SendPacket(_) is not invoked as a result of calling Timer_TimerExpired,
+    //     it occurs only once.
+}
+
+TEST_F(AosKeepAliveTest, InvokesDetectedFlowFailedWhenPongWaitTimerExpired)
+{
+    // GIVEN
+    m_pAosKeepAlive->SetListener(
+            static_cast<IAosKeepAliveListener*>(&m_objMockIAosKeepAliveListener));
+
+    EXPECT_CALL(m_objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(1);
+
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
+
+    m_pAosKeepAlive->Start(20000, IMS_TRUE);
+
+    // WHEN
+    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->m_piPongWaitTimer);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosKeepAliveTest, DoesNotInvokesAnyTimerExpiredProcessWhenTimerIsNull)
+{
+    // GIVEN
+    m_pAosKeepAlive->SetListener(
+            static_cast<IAosKeepAliveListener*>(&m_objMockIAosKeepAliveListener));
+
+    EXPECT_CALL(m_objMockIAosKeepAliveListener, KeepAlive_DetectedFlowFailed()).Times(0);
+
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, SendPacket(_)).Times(1);
+    EXPECT_CALL(m_objMockSipKeepAliveHelper, Destroy()).Times(1);
+
+    m_pAosKeepAlive->Start(20000, IMS_TRUE);
+
+    // WHEN
+    m_pAosKeepAlive->Timer_TimerExpired(IMS_NULL);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosKeepAliveTest, ReturnsTimerString)
+{
+    EXPECT_STREQ(
+            m_pAosKeepAlive->TimerToString(TestAosKeepAlive::TIMER_KEEP_ALIVE), "TIMER_KEEP_ALIVE");
+    EXPECT_STREQ(
+            m_pAosKeepAlive->TimerToString(TestAosKeepAlive::TIMER_PONG_WAIT), "TIMER_PONG_WAIT");
+    EXPECT_STREQ(m_pAosKeepAlive->TimerToString(-1), "__INVALID__");
 }

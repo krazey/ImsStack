@@ -53,10 +53,7 @@ PUBLIC VIRTUAL AosKeepAlive::~AosKeepAlive()
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosKeepAlive = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosKeepAlive), this);
 
-    if (m_piKeepAliveHelper != IMS_NULL)
-    {
-        m_piKeepAliveHelper->Destroy();
-    }
+    m_piKeepAliveHelper->Destroy();
 }
 
 PUBLIC
@@ -70,10 +67,7 @@ void AosKeepAlive::Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong /*
 {
     A_IMS_TRACE_I(AOSTAG, "Start :: keep alive time(%d)", nRepeatTime, 0, 0);
 
-    if (m_piKeepAliveHelper != IMS_NULL)
-    {
-        m_piKeepAliveHelper->SetListener(this);
-    }
+    m_piKeepAliveHelper->SetListener(this);
 
     SendPing();
 
@@ -96,58 +90,43 @@ void AosKeepAlive::Stop()
 {
     A_IMS_TRACE_I(AOSTAG, "Stop", 0, 0, 0);
 
-    if (m_piKeepAliveHelper != IMS_NULL)
-    {
-        m_piKeepAliveHelper->SetListener(IMS_NULL);
-    }
+    m_piKeepAliveHelper->SetListener(IMS_NULL);
 
     m_nKeepAliveTime = 0;
     ClearTimer();
 }
 
 PUBLIC
-IMS_BOOL AosKeepAlive::SetTransport(IN const IpAddress& objSourceIpAddress,
-        IN IMS_SINT32 nSourcePort, IN const IpAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
+void AosKeepAlive::SetTransport(IN const IpAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
+        IN const IpAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
         IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
 {
-    if (m_piKeepAliveHelper == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
     m_piKeepAliveHelper->SetTransportTupleS(objSourceIpAddress, nSourcePort, nProtocol);
     m_piKeepAliveHelper->SetTransportTupleD(objDestIpAddress, nDestPort);
-
-    return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosKeepAlive::SendPing()
 {
     A_IMS_TRACE_I(AOSTAG, "SendPing", 0, 0, 0);
-
-    if (m_piKeepAliveHelper == IMS_NULL)
-    {
-        return;
-    }
 
     static const ByteArray objCrlf("\r\n\r\n");
     m_piKeepAliveHelper->SendPacket(objCrlf);
 }
 
-PRIVATE
+PROTECTED
 void AosKeepAlive::SetCheckingPong(IN IMS_BOOL bCheck)
 {
     m_bIsPongChecked = bCheck;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosKeepAlive::IsPongChecked() const
 {
     return m_bIsPongChecked;
 }
 
-PRIVATE
+PROTECTED
 void AosKeepAlive::ProcessKeepAliveTimerExpired()
 {
     A_IMS_TRACE_D(AOSTAG, "ProcessKeepAliveTimerExpired", 0, 0, 0);
@@ -163,7 +142,7 @@ void AosKeepAlive::ProcessKeepAliveTimerExpired()
     SendPing();
 }
 
-PRIVATE
+PROTECTED
 void AosKeepAlive::ProcessPongWaitTimerExpired()
 {
     A_IMS_TRACE_I(AOSTAG, "ProcessPongWaitTimerExpired", 0, 0, 0);
@@ -176,12 +155,12 @@ void AosKeepAlive::ProcessPongWaitTimerExpired()
     }
 }
 
-PRIVATE
-void AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
+PROTECTED
+IMS_BOOL AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     if (nDuration == 0)
     {
-        return;
+        return IMS_FALSE;
     }
 
     ITimer** ppiTimer = IMS_NULL;
@@ -197,7 +176,7 @@ void AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
             break;
 
         default:
-            return;
+            return IMS_FALSE;
     }
 
     if (*ppiTimer != IMS_NULL)
@@ -206,10 +185,11 @@ void AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
     }
 
     *ppiTimer = AosUtil::GetInstance()->StartTimer(nDuration, this, TimerToString(nType));
+    return IMS_TRUE;
 }
 
-PRIVATE
-void AosKeepAlive::StopTimer(IN IMS_UINT32 nType)
+PROTECTED
+IMS_BOOL AosKeepAlive::StopTimer(IN IMS_UINT32 nType)
 {
     ITimer** ppiTimer = IMS_NULL;
 
@@ -224,18 +204,19 @@ void AosKeepAlive::StopTimer(IN IMS_UINT32 nType)
             break;
 
         default:
-            return;
+            return IMS_FALSE;
     }
 
     if (*ppiTimer == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     AosUtil::GetInstance()->StopTimer(*ppiTimer, TimerToString(nType));
+    return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosKeepAlive::ClearTimer()
 {
     if (m_piKeepAliveTimer != IMS_NULL)
@@ -249,14 +230,14 @@ void AosKeepAlive::ClearTimer()
     }
 }
 
-PRIVATE VIRTUAL void AosKeepAlive::KeepAliveHelper_PongReceived()
+PROTECTED VIRTUAL void AosKeepAlive::KeepAliveHelper_PongReceived()
 {
     A_IMS_TRACE_I(AOSTAG, "KeepAliveHelper_PongReceived", 0, 0, 0);
 
     StopTimer(TIMER_PONG_WAIT);
 }
 
-PRIVATE VIRTUAL void AosKeepAlive::Timer_TimerExpired(IN ITimer* piTimer)
+PROTECTED VIRTUAL void AosKeepAlive::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -276,7 +257,7 @@ PRIVATE VIRTUAL void AosKeepAlive::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-PRIVATE GLOBAL const IMS_CHAR* AosKeepAlive::TimerToString(IN IMS_UINT32 nType)
+PROTECTED GLOBAL const IMS_CHAR* AosKeepAlive::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
