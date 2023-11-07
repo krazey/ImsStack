@@ -31,6 +31,7 @@
 #include "../../interface/aos/MockIImsAosMonitor.h"
 
 #include "app/MockAosAppContext.h"
+#include "connection/MockAosConnector.h"
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
 #include "interface/MockIAosCallTracker.h"
@@ -161,36 +162,6 @@ private:
     IMS_BOOL m_bReady;
 };
 
-class TestAosConnector : public AosConnector
-{
-    inline explicit TestAosConnector(IN IAosAppContext* piAppContext) :
-            AosConnector(piAppContext),
-            m_bIsPdnDeactivationRequired(IMS_FALSE)
-    {
-    }
-
-    friend class AosApplicationTest;
-
-public:
-    inline IMS_BOOL Start() override { return IMS_TRUE; }
-    inline void Stop() override
-    {
-        if (m_piConnection != IMS_NULL)
-        {
-            m_piConnection->Deactivate();
-        }
-    }
-    inline void Stop(IN IMS_SINT32 /* nDelayTimeSec */) override {}
-    inline void SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired) override
-    {
-        m_bIsPdnDeactivationRequired = bIsRequired;
-    }
-    inline IMS_BOOL IsPdnDeactivationRequired() override { return m_bIsPdnDeactivationRequired; }
-
-private:
-    IMS_BOOL m_bIsPdnDeactivationRequired;
-};
-
 class AppTestAosRegistration : public AosRegistration
 {
     inline AppTestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
@@ -299,7 +270,6 @@ class AosApplicationTest : public ::testing::Test
 public:
     TestAosApplication* m_pTestAosApplication;
     TestAosCondition* m_pTestAosCondition;
-    TestAosConnector* m_pTestAosConnector;
     AosStaticProfile* m_pAosStaticProfile;
 
     IAosCallTracker* m_piAosCallTracker;
@@ -309,6 +279,7 @@ public:
     IAosService* m_piAosService;
     IAosRetryRepository* m_piAosRetryRepository;
 
+    MockAosConnector m_objMockAosConnector;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosBlock m_objMockIAosBlock;
     MockIAosCallTracker m_objMockIAosCallTracker;
@@ -480,9 +451,7 @@ protected:
                 new TestAosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
         m_pTestAosApplication->SetAosCondition(m_pTestAosCondition);
 
-        m_pTestAosConnector =
-                new TestAosConnector(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
-        m_pTestAosApplication->SetAosConnector(m_pTestAosConnector);
+        m_pTestAosApplication->SetAosConnector(&m_objMockAosConnector);
 
         m_pTestAosApplication->SetAosRegistration(
                 static_cast<IAosRegistration*>(&m_objMockIAosRegistration));
@@ -496,11 +465,6 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetLocationStarter(m_piAosLocationStarter, SLOT_ID);
         AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
-
-        if (m_pTestAosConnector)
-        {
-            delete m_pTestAosConnector;
-        }
 
         if (m_pTestAosCondition)
         {
@@ -1144,7 +1108,7 @@ TEST_F(AosApplicationTest, StateMachinePreProcess)
     EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosConnection, GetState())
             .WillOnce(Return(IAosConnection::STATE_ACTIVATING));
-    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(1);
+    EXPECT_CALL(m_objMockAosConnector, Stop()).Times(1);
     EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
 
     // STATE_NOTREADY, AosBlock with invalid UICC, IMS PDN connected
@@ -1931,17 +1895,13 @@ TEST_F(AosApplicationTest, Callback)
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::IMS_SERVICE);
     // eCause is PDN_CAPABILITY_CHANGED - eType is STOP
     m_pTestAosApplication->SetImsCall(IMS_TRUE);
-    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_FALSE);
+    EXPECT_CALL(m_objMockAosConnector, SetPdnDeactivationRequired(IMS_TRUE));
     m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
             AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
-    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_TRUE);
-
     m_pTestAosApplication->SetImsCall(IMS_FALSE);
-    m_pTestAosConnector->SetPdnDeactivationRequired(IMS_FALSE);
-    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_FALSE);
+    EXPECT_CALL(m_objMockAosConnector, SetPdnDeactivationRequired(IMS_TRUE));
     m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
             AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
-    EXPECT_EQ(m_pTestAosConnector->IsPdnDeactivationRequired(), IMS_TRUE);
     // eCause is DATA - eType is START
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::START, AosPcscfOrder::CURRENT, AosControlCause::DATA);

@@ -37,6 +37,7 @@ class AosConnector :
 {
 public:
     explicit AosConnector(IN IAosAppContext* piAppContext);
+    inline explicit AosConnector(){};
     virtual ~AosConnector();
 
     virtual IMS_BOOL Start();
@@ -193,6 +194,5 @@ protected:
 
 protected:
     friend class AosApplication;
-    friend class AosConnectorTest;
 };
 #endif  // AOS_CONNECTOR_H_

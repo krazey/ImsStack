@@ -212,7 +212,7 @@ public:
     AosStaticProfile* m_pAosStaticProfile;
     IAosNConfiguration* m_piAosNConfiguration;
 
-    MockAosConnector* m_pMockAosConnector;
+    MockAosConnector m_objMockAosConnector;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosBlock m_objMockIAosBlock;
     MockIAosCallTracker m_objMockIAosCallTracker;
@@ -331,10 +331,8 @@ protected:
                 new TestAosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
         m_pTestAosEApplication->SetAosCondition(m_pTestAosCondition);
 
-        m_pMockAosConnector =
-                new MockAosConnector(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
-        m_pTestAosEApplication->SetAosConnector(m_pMockAosConnector);
-        EXPECT_CALL(*m_pMockAosConnector, Stop()).Times(AnyNumber());
+        m_pTestAosEApplication->SetAosConnector(&m_objMockAosConnector);
+        EXPECT_CALL(m_objMockAosConnector, Stop()).Times(AnyNumber());
 
         m_pTestAosEApplication->SetAosRegistration(
                 static_cast<IAosRegistration*>(&m_objMockIAosRegistration));
@@ -348,11 +346,6 @@ protected:
     virtual void TearDown() override
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
-
-        if (m_pMockAosConnector)
-        {
-            delete m_pMockAosConnector;
-        }
 
         if (m_pTestAosCondition)
         {
@@ -447,7 +440,7 @@ TEST_F(AosEApplicationTest, ProcessRegStart)
     EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
             .Times(AnyNumber())
             .WillRepeatedly(Return(1000));
-    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosConnector, IsReady()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosRegistration, Start()).Times(1);
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
@@ -455,8 +448,8 @@ TEST_F(AosEApplicationTest, ProcessRegStart)
     m_pTestAosEApplication->StopTimer(TIMER_APP_CONNECTED);
 
     // STATE_CONNECTING - Connector::IsReady() return false
-    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(*m_pMockAosConnector, Start()).Times(AnyNumber());
+    EXPECT_CALL(m_objMockAosConnector, IsReady()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockAosConnector, Start()).Times(AnyNumber());
     EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
     EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
     EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
@@ -702,13 +695,13 @@ TEST_F(AosEApplicationTest, ProcessRegBlockedTimerExpired)
 {
     // STATE_CONNECTING - Connector::IsReady() return IMS_TRUE
     m_pTestAosEApplication->StartTimer(TIMER_REG_BLOCKED, 8000);
-    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosConnector, IsReady()).WillOnce(Return(IMS_TRUE));
     m_pTestAosEApplication->ProcessRegBlockedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_REG_BLOCKED));
 
     // STATE_CONNECTING - Connector::IsReady() return false
     m_pTestAosEApplication->StartTimer(TIMER_REG_BLOCKED, 8000);
-    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockAosConnector, IsReady()).WillOnce(Return(IMS_FALSE));
     m_pTestAosEApplication->ProcessRegBlockedTimerExpired();
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_REG_BLOCKED));
 }

@@ -278,8 +278,9 @@ IMS_BOOL AosConnector::IsPcoWaitingRequired() const
 PROTECTED
 IMS_BOOL AosConnector::IsCarrierSignalPcoEnabled() const
 {
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
     return (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
-                    ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, 0) == 1);
+                    ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, nSlotId) == 1);
 }
 
 PROTECTED

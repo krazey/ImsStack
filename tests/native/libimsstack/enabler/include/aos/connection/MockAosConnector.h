@@ -38,6 +38,10 @@ public:
             AosConnector(piAppContext)
     {
     }
+    MockAosConnector() :
+            AosConnector()
+    {
+    }
     ~MockAosConnector() {}
     MOCK_METHOD(IMS_BOOL, Start, (), (override));
     MOCK_METHOD(void, Stop, (), (override));
