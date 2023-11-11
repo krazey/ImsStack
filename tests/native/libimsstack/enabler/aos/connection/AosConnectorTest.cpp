@@ -148,29 +148,25 @@ public:
 class AosConnectorTest : public ::testing::Test
 {
 public:
-    inline AosConnectorTest() :
-            m_pTestUtilService(new TestUtilService())
+    inline AosConnectorTest()
     {
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_UTIL, m_pTestUtilService);
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration(SLOT_ID);
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration), SLOT_ID);
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
         m_piAosService = AosProvider::GetInstance()->GetService(SLOT_ID);
-        AosProvider::GetInstance()->SetService(
-                static_cast<IAosService*>(&m_objMockIAosService), SLOT_ID);
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService, SLOT_ID);
     }
     inline virtual ~AosConnectorTest()
     {
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetService(m_piAosService, SLOT_ID);
     }
 
     TestAosConnector* m_pTestAosConnector;
-    TestUtilService* m_pTestUtilService;
+    TestUtilService m_objUtilService;
 
     AStringArray m_objPcscfs;
     IAosNConfiguration* m_piAosNConfiguration;
@@ -202,8 +198,7 @@ protected:
                 .WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
         ON_CALL(m_objMockIAosPcscf, GetPcscfs()).WillByDefault(ReturnRef(m_objPcscfs));
 
-        m_pTestAosConnector =
-                new TestAosConnector(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pTestAosConnector = new TestAosConnector(&m_objMockIAosAppContext);
         m_pTestAosConnector->SetListener(&m_objMockIAosConnectorListener);
     }
 
@@ -371,7 +366,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForIpv6)
 TEST_F(AosConnectorTest, StateChangedToActive_WaitForPco)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(1));
@@ -391,7 +386,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForPendingProcess)
 {
     m_pTestAosConnector->m_nPendingFeature = AosConnector::PENDING_PCSCF_CONFIG_READY;
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(0));
@@ -405,7 +400,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForPendingProcess)
 TEST_F(AosConnectorTest, StateChangedToActive_WaitForPcscfConfigureIfPcscfConfigureFail)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(0));
@@ -428,7 +423,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_Activated)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(0));
@@ -779,7 +774,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForPco)
 {
     m_pTestAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pTestAosConnector->m_nPendingFeature = AosConnector::PENDING_IPV6_DELAY;
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(1));
@@ -800,7 +795,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForDataConnection)
     m_pTestAosConnector->SetDataConnected(IMS_FALSE);
     m_pTestAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pTestAosConnector->m_nPendingFeature = AosConnector::PENDING_IPV6_DELAY;
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(0));
@@ -819,7 +814,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_ProcessCheckingPcscfAndIpa)
     m_pTestAosConnector->SetDataConnected(IMS_TRUE);
     m_pTestAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pTestAosConnector->m_nPendingFeature = AosConnector::PENDING_IPV6_DELAY;
-    ON_CALL(m_pTestUtilService->GetMockPrivateProperty(),
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
             GetPersistentInt(
                     Eq(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST), Eq(SLOT_ID)))
             .WillByDefault(Return(0));

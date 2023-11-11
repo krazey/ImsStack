@@ -138,20 +138,18 @@ class AosPcscfTest : public ::testing::Test
 {
 public:
     inline AosPcscfTest() :
-            m_pTestTimerService(new TestTimerService()),
-            m_objMockITimer(m_pTestTimerService->GetMockTimer())
+            m_objMockITimer(m_objTimerService.GetMockTimer())
     {
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, m_pTestTimerService);
+                PlatformContext::SERVICE_TIMER, &m_objTimerService);
     }
     inline virtual ~AosPcscfTest()
     {
-        delete m_pTestTimerService;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 
     TestAosPcscf* m_pTestAosPcscf;
-    TestTimerService* m_pTestTimerService;
+    TestTimerService m_objTimerService;
 
     IAosNConfiguration* m_piAosNConfiguration;
     ImsVector<IMS_SINT32> m_objDiscoveryMethods;
@@ -169,11 +167,10 @@ protected:
     virtual void SetUp() override
     {
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration), SLOT_ID);
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId()).WillRepeatedly(ReturnRef(PROFILE_ID));
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosNConfiguration, GetPcscfPort()).WillByDefault(Return(5060));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
@@ -186,7 +183,7 @@ protected:
         ON_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
                 .WillByDefault(ReturnRef(m_objDiscoveryMethods));
 
-        m_pTestAosPcscf = new TestAosPcscf(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pTestAosPcscf = new TestAosPcscf(&m_objMockIAosAppContext);
     }
 
     virtual void TearDown() override
@@ -213,7 +210,7 @@ TEST_F(AosPcscfTest, Init_UpdateRegType)
 
 TEST_F(AosPcscfTest, CleanUp_ResetVariable)
 {
-    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+    m_pTestAosPcscf->SetListener(&objMockIAosPcscfListener);
     m_pTestAosPcscf->SetConfigured(IMS_TRUE);
 
     m_pTestAosPcscf->CleanUp();
@@ -697,7 +694,7 @@ TEST_F(AosPcscfTest, CheckAndProcessChangeFromPco_DifferentIfCurrentPcscfNotExis
 TEST_F(AosPcscfTest, SetListener)
 {
     EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE)).Times(1);
-    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+    m_pTestAosPcscf->SetListener(&objMockIAosPcscfListener);
     m_pTestAosPcscf->m_piListener->Pcscf_NotifyResult(IMS_TRUE);
 }
 
@@ -879,7 +876,7 @@ TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetrySucceeded)
             .WillOnce(Return(-1))
             .WillOnce(DoAll(SetArgPointee<1>(objIpas), Return(1)));
     EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE)).Times(1);
-    m_pTestAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
+    m_pTestAosPcscf->SetListener(&objMockIAosPcscfListener);
 
     // DnsRetryTimer is started when the first DNS query fails
     EXPECT_FALSE(m_pTestAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));

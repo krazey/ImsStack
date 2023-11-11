@@ -33,6 +33,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
 const IMS_UINT32 TIMER_DURATION_FIVE_SEC = 5;
 
 class AosNetTrackerTest : public ::testing::Test
@@ -52,39 +53,24 @@ public:
 protected:
     virtual void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(SLOT_ID));
-
-        const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
 
         objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN);
         objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN);
         objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
         objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
         objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetSupportedRats())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objRats));
+        ON_CALL(m_objMockIAosNConfiguration, GetSupportedRats()).WillByDefault(ReturnRef(objRats));
+        ON_CALL(m_objMockIAosNConfiguration, GetSupportedRoamingRats())
+                .WillByDefault(ReturnRef(objRats));
+        ON_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
+                .WillByDefault(ReturnRef(objRats));
 
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetSupportedRoamingRats())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objRats));
-
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objRats));
-
-        m_pAosNetTracker =
-                new AosNetTracker(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
-        ASSERT_TRUE(m_pAosNetTracker != nullptr);
+        m_pAosNetTracker = new AosNetTracker(&m_objMockIAosAppContext);
+        m_pAosNetTracker->SetListener(&m_objMockIAosNetTrackerListener);
 
         InitObject();
     }
@@ -311,7 +297,7 @@ TEST_F(AosNetTrackerTest, IsEmergencyLteAttach)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     EXPECT_TRUE(m_pAosNetTracker->IsEmergencyLteAttach());
     EXPECT_FALSE(m_pAosNetTracker->IsEmergencyLteAttach());
 }
@@ -366,42 +352,31 @@ TEST_F(AosNetTrackerTest, IsImsVoiceCallSupported)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     EXPECT_TRUE(m_pAosNetTracker->IsImsVoiceCallSupported());
     EXPECT_FALSE(m_pAosNetTracker->IsImsVoiceCallSupported());
 }
 
-TEST_F(AosNetTrackerTest, SetListener)
+TEST_F(AosNetTrackerTest, SetListener_NotAddNullOrSameListenerAgain)
 {
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(0);
 
-    // do not handle invalid listener
-    m_pAosNetTracker->SetListener(nullptr);
+    // not set invalid listener
+    m_pAosNetTracker->SetListener(IMS_NULL);
 
-    // set listenr
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
-
-    // do not set same listenr agaiin
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    // not set same listenr agaiin
+    m_pAosNetTracker->SetListener(&m_objMockIAosNetTrackerListener);
 }
 
 TEST_F(AosNetTrackerTest, RemoveListener)
 {
-    // Invoke listener only when setting it
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
-
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
     EXPECT_EQ(GetListenerSize(), 1);
 
-    // do not handle invalid listener
+    // not remove invalid listener
     m_pAosNetTracker->RemoveListener(nullptr);
     EXPECT_EQ(GetListenerSize(), 1);
 
-    m_pAosNetTracker->RemoveListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    m_pAosNetTracker->RemoveListener(&m_objMockIAosNetTrackerListener);
     EXPECT_EQ(GetListenerSize(), 0);
 
     NotifyStatusChanged();
@@ -425,7 +400,7 @@ TEST_F(AosNetTrackerTest, GetMobileVoiceServiceState)
 {
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceServiceType())
             .WillOnce(Return(NW_REPORT_SRV_SRV));
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceServiceState(), NW_REPORT_SRV_SRV);
 }
 
@@ -437,7 +412,7 @@ TEST_F(AosNetTrackerTest, GetMobileVoiceNetworkType)
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceNetworkType(), NW_REPORT_RADIO_NOSRV);
     UpdateNetworkStatus();
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceNetworkType(), NW_REPORT_RADIO_LTE);
@@ -490,45 +465,21 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_FromOtherNetworkWatcher)
 {
     MockINetworkWatcher objOtherMockINetworkWatcher;
 
-    // Do not handle because it is invoked from the other NetworkWatcher
+    // not handle because it is invoked from the other NetworkWatcher
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _)).Times(0);
     EXPECT_CALL(objOtherMockINetworkWatcher, GetNetServiceType(_, _)).Times(0);
 
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
 
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&objOtherMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&objOtherMockINetworkWatcher);
 }
 
 TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithSrvInGuardTime)
 {
-    // 1. Set Listener, 2. Notify RAT change from WCDM to LTE, 3. Notify Voice RAT from NOSRV to LTE
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(3);
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
-            .WillOnce(Return(NW_REPORT_SRV_SRV));
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
-            .WillOnce(Return(NW_REPORT_RADIO_LTE));
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
-            .WillOnce(Return(NW_REPORT_RADIO_LTE));
-
-    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
-    SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
-    m_pAosNetTracker->SetSrvInGuardTime(TIMER_DURATION_FIVE_SEC);
-
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-}
-
-TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithoutGuardTime)
-{
-    // 1. Set Listener, 2. Notify RAT change from WCDM to LTE
+    // 1. Notify RAT change from WCDM to LTE, 2. Notify Voice RAT from NOSRV to LTE
     EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
@@ -540,18 +491,35 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithoutGuardTime)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
+    m_pAosNetTracker->SetSrvInGuardTime(TIMER_DURATION_FIVE_SEC);
 
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
+}
+
+TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithoutGuardTime)
+{
+    // notify RAT change from WCDM to LTE
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
+            .WillOnce(Return(NW_REPORT_SRV_SRV));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
+            .WillOnce(Return(NW_REPORT_RADIO_LTE));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
+            .WillOnce(Return(NW_REPORT_RADIO_LTE));
+
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
+    SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
+
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
 }
 
 TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_NoChanges)
 {
-    // Set Listener but do not notify because there are no changes
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+    // not notify because there are no changes
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(0);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
@@ -562,18 +530,15 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_NoChanges)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
 
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
 }
 
 TEST_F(AosNetTrackerTest, ProcessNetworkChanged_NoChanges)
 {
-    // Set Listener but do not notify because there are no changes
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+    // not notify because there are no changes
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(0);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_SRV_SRV));
@@ -587,27 +552,23 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_NoChanges)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
 
     // with FEATURE_IN_GUARD
     m_pAosNetTracker->SetSrvInGuardTime(TIMER_DURATION_FIVE_SEC);
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetSrvInGuardTime(0);
 
     // with FEATURE_RAT_GUARD
     m_pAosNetTracker->SetRatGuardTime(TIMER_DURATION_FIVE_SEC);
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetRatGuardTime(0);
 }
 
 TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithSrvInGuardTime)
 {
-    // Set Listener and do not notify any more
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
+    // not notify any more
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(0);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
@@ -618,21 +579,18 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithSrvInGuardTime
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_LTE, IMS_FALSE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetSrvInGuardTime(TIMER_DURATION_FIVE_SEC);
 
     // Do not notify because service status is changed with FEATURE_IN_GUARD
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
     EXPECT_TRUE(m_pAosNetTracker->IsServiceTimerRunning());
 }
 
 TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithRatGuardTime)
 {
-    // 1. Set Listener, 2. Notify service status change
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify service status change
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
@@ -643,19 +601,37 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithRatGuardTime)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetRatGuardTime(TIMER_DURATION_FIVE_SEC);
 
-    // Notify status change because service status is changed without FEATURE_IN_GUARD
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    // notify status change because service status is changed without FEATURE_IN_GUARD
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
 }
 
 TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithSrvOutGuardTime)
 {
-    // Set Listener and do not notify any more
+    // not notify because service status is changed with FEATURE_IN_GUARD
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(0);
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
+            .WillOnce(Return(NW_REPORT_SRV_NOSRV));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
+            .WillOnce(Return(NW_REPORT_RADIO_LTE));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
+            .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
+
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
+    SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
+    m_pAosNetTracker->SetSrvOutGuardTime(TIMER_DURATION_FIVE_SEC);
+
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
+    EXPECT_TRUE(m_pAosNetTracker->IsServiceTimerRunning());
+}
+
+TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithRatGuardTime)
+{
+    // notify service status change because service status is changed without FEATURE_OUT_GUARD
     EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_NOSRV));
@@ -667,78 +643,44 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithSrvOutGuardTim
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
-    m_pAosNetTracker->SetSrvOutGuardTime(TIMER_DURATION_FIVE_SEC);
-
-    // Do not notify because service status is changed with FEATURE_IN_GUARD
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    EXPECT_TRUE(m_pAosNetTracker->IsServiceTimerRunning());
-}
-
-TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithRatGuardTime)
-{
-    // 1. Set Listener, 2. Notify service status change
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
-            .WillOnce(Return(NW_REPORT_SRV_NOSRV));
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
-            .WillOnce(Return(NW_REPORT_RADIO_LTE));
-    EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
-            .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
-
-    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
-    SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetRatGuardTime(TIMER_DURATION_FIVE_SEC);
 
-    // Notify status change because service status is changed without FEATURE_OUT_GUARD
-    m_pAosNetTracker->NetworkWatcher_NotifyStatus(
-            static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->NetworkWatcher_NotifyStatus(&m_objMockINetworkWatcher);
 }
 
 TEST_F(AosNetTrackerTest, WifiWatcher_NotifyStateChanged_FromOtherWifiWatcher)
 {
     MockIWifiWatcher objOtherMockIWifiWatcher;
 
-    // Do not handle because it is invoked from the other WifiWatcher
+    // not handle because it is invoked from the other WifiWatcher
     EXPECT_CALL(m_objMockIWifiWatcher, GetState()).Times(0);
     EXPECT_CALL(objOtherMockIWifiWatcher, GetState()).Times(0);
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    SetWifiWatcher(&m_objMockIWifiWatcher);
 
-    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(
-            static_cast<IWifiWatcher*>(&objOtherMockIWifiWatcher));
+    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(&objOtherMockIWifiWatcher);
 }
 
 TEST_F(AosNetTrackerTest, WifiWatcher_NotifyStateChanged)
 {
-    // 1. Set Listener, 2. Notify STATE_CONNECTED, 3. Notify STATE_DISCONNECTED
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(3);
+    // 1. Notify STATE_CONNECTED, 2. Notify STATE_DISCONNECTED
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(2)
             .WillOnce(Return(IWifiWatcher::STATE_CONNECTED))
             .WillOnce(Return(IWifiWatcher::STATE_DISCONNECTED));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetWifiWatcher(&m_objMockIWifiWatcher);
 
-    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(
-            static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
-    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(
-            static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(&m_objMockIWifiWatcher);
+    m_pAosNetTracker->WifiWatcher_NotifyStateChanged(&m_objMockIWifiWatcher);
 }
 
 TEST_F(AosNetTrackerTest, NConfiguration_NotifyConfigChanged)
 {
-    // 1. Set Listener, 2. carrier configuration for supported RAT is changed
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify carrier configuration for supported RAT is changed
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_SRV_SRV));
@@ -757,17 +699,15 @@ TEST_F(AosNetTrackerTest, NConfiguration_NotifyConfigChanged)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_FALSE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
 
     m_pAosNetTracker->NConfiguration_NotifyConfigChanged();
 }
 
 TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)
 {
-    // 1. Set Listener, 2. ProcessNetworkChanged
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // ProcessNetworkChanged
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
@@ -778,9 +718,7 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     m_pAosNetTracker->SetRatGuardTime(TIMER_DURATION_FIVE_SEC);
 
     m_pAosNetTracker->Event_NotifyEvent(
@@ -789,8 +727,8 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)
 
 TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithoutGuardTime)
 {
-    // 1. Set Listener, 2. Notify change of roaming state
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify change of roaming state
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
             .WillOnce(Return(NW_REPORT_SRV_SRV));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
@@ -801,9 +739,7 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithoutGuardTime)
     IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
 
     m_pAosNetTracker->Event_NotifyEvent(
             IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_OFF, IMS_ROAMING_STATE_ON);
@@ -811,11 +747,9 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithoutGuardTime)
 
 TEST_F(AosNetTrackerTest, NotifyInGuardTimerExpired)
 {
-    // 1. Set Listener, 2. Notify timer is expired
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify timer is expired
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
 
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
     StartTimer(AosNetTracker::TIMER_IN_GUARD, TIMER_DURATION_FIVE_SEC);
 
     NotifyTimerExpired(AosNetTracker::TIMER_IN_GUARD);
@@ -823,11 +757,9 @@ TEST_F(AosNetTrackerTest, NotifyInGuardTimerExpired)
 
 TEST_F(AosNetTrackerTest, NotifyOutGuardTimerExpired)
 {
-    // 1. Set Listener, 2. Notify timer is expired
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify timer is expired
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
 
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
     StartTimer(AosNetTracker::TIMER_OUT_GUARD, TIMER_DURATION_FIVE_SEC);
 
     NotifyTimerExpired(AosNetTracker::TIMER_OUT_GUARD);
@@ -835,11 +767,9 @@ TEST_F(AosNetTrackerTest, NotifyOutGuardTimerExpired)
 
 TEST_F(AosNetTrackerTest, NotifyRatGuardTimerExpired)
 {
-    // 1. Set Listener, 2. Notify timer is expired
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify timer is expired
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
 
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
     StartTimer(AosNetTracker::TIMER_RAT_GUARD, TIMER_DURATION_FIVE_SEC);
 
     NotifyTimerExpired(AosNetTracker::TIMER_RAT_GUARD);
@@ -847,11 +777,9 @@ TEST_F(AosNetTrackerTest, NotifyRatGuardTimerExpired)
 
 TEST_F(AosNetTrackerTest, NotifyVoiceRatGuardTimerExpired)
 {
-    // 1. Set Listener, 2. Notify timer is expired
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    // notify timer is expired
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
 
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
     StartTimer(AosNetTracker::TIMER_VOICE_RAT_GUARD, TIMER_DURATION_FIVE_SEC);
 
     NotifyTimerExpired(AosNetTracker::TIMER_VOICE_RAT_GUARD);
@@ -867,24 +795,18 @@ TEST_F(AosNetTrackerTest, HandleInvalidTimer)
 
 TEST_F(AosNetTrackerTest, AosConnection_StateChanged)
 {
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillOnce(Return(IMS_FALSE));
-
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
 
     NotifyConnectionStateChanged(IAosConnection::STATE_ACTIVE);
 }
 
 TEST_F(AosNetTrackerTest, AosConnection_IpcanCatChanged)
 {
-    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(1);
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
-
-    m_pAosNetTracker->SetListener(
-            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
 
     // notify that EPDG is enabled
     NotifyIpcanChanged();
@@ -950,7 +872,7 @@ TEST_F(AosNetTrackerTest, AosConnection_ConnectionFailed)
 
 TEST_F(AosNetTrackerTest, IsRoaming)
 {
-    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    SetNetworkWatcher(&m_objMockINetworkWatcher);
     EXPECT_CALL(m_objMockINetworkWatcher, GetRoamingState())
             .Times(2)
             .WillOnce(Return(1))

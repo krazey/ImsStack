@@ -106,9 +106,6 @@ protected:
     IMS_SINT32 m_nPcoValue;
     static const IMS_SINT32 PCO_INVALID_VALUE = -1;
     static const IMS_SINT32 PCO_LIMITED_SERVICE_VALUE = 5;
-
-protected:
-    friend class AosConnectionTest;
 };
 
 #endif  // AOS_CONNECTION_H_
