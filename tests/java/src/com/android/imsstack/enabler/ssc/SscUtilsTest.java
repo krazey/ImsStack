@@ -390,7 +390,24 @@ public class SscUtilsTest {
     }
 
     @Test
+    public void getUriFromNumer_invalidCfTargetUriType() {
+        final int invalidUriType = -1;
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .thenReturn(invalidUriType);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
+
+        assertEquals("1234567890", uri);
+    }
+
+    @Test
     public void getUriFromNumer_telWithLocalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
 
@@ -400,13 +417,42 @@ public class SscUtilsTest {
     }
 
     @Test
+    public void getUriFromNumer_sipWithLocalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .thenReturn(SscConfig.URI_TYPE_SIP);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
+
+        assertEquals("sip:1234567890;phone-context=operator.com@operator.com;user=phone", uri);
+    }
+
+    @Test
     public void getUriFromNumer_telWithInternationalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "+1234567890");
 
         assertEquals("tel:+1234567890", uri);
+    }
+
+    @Test
+    public void getUriFromNumer_sipWithInternationalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .thenReturn(SscConfig.URI_TYPE_SIP);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "+1234567890");
+
+        assertEquals("sip:+1234567890@operator.com;user=phone", uri);
     }
 
     @Test

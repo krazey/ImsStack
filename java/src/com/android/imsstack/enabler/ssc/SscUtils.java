@@ -193,26 +193,27 @@ public class SscUtils {
             number =  "0" + number.substring(ccToRemove.length());
         }
 
-        final String format = SscConfig.getTargetAddrScheme(slotId);
-        ImsLog.d("number : " + number + ", format : " + format + ", domain : " + domain);
+        final int uriType = SscConfig.getUriTypeForCfTargetNumber(slotId);
+        ImsLog.d("number : " + number + ", uriType : " + uriType + ", domain : " + domain);
 
         // IR92 2.2.3 Addressing
         String uri;
-        if ("sip".equalsIgnoreCase(format)) {
+        if (uriType == SscConfig.URI_TYPE_TEL) {
+            uri = "tel:" + number;
+            // local numbering
+            if (!number.startsWith("+")) {
+                uri += ";phone-context=" + domain;
+            }
+        } else if (uriType == SscConfig.URI_TYPE_SIP) {
             uri = "sip:" + number;
             // local numbering
             if (!number.startsWith("+")) {
                 uri += ";phone-context=" + domain;
             }
             uri += "@" + domain + ";user=phone";
-        } else if ("tel".equalsIgnoreCase(format)) {
-            uri = "tel:" + number;
-            // local numbering
-            if (!number.startsWith("+")) {
-                uri += ";phone-context=" + domain;
-            }
         } else {
-            uri = number;
+            ImsLog.w("Uri type is wrong");
+            return number;
         }
 
         ImsLog.d("uri is " + uri);
