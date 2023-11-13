@@ -641,15 +641,16 @@
     <int name="ut_oir_network_default_operation_int" value="0"/>
     <boolean name="ut_oir_tir_always_temporary_mode_bool" value="true"/>
     <int name="ut_temporary_block_timer_with_any_reason_sec_int" value="10"/>
-    <string name="ut_target_address_phone_context_string"></string>
-    <string name="ut_target_address_country_code_replace_to_zero_string"></string>
-    <string name="ut_target_address_zero_replace_to_country_code_string"></string>
+    <string name="ut_target_address_phone_context_string">""</string>
+    <string name="ut_target_address_country_code_replace_to_zero_string">""</string>
+    <string name="ut_target_address_zero_replace_to_country_code_string">""</string>
     <int name="ut_xcap_apn_inactivity_timer_sec_int" value="120"/>
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="false"/>
     <boolean name="ut_omit_namespace_of_document_element_bool" value="false"/>
     <boolean name="ut_omit_namespace_ss_bool" value="false"/>
     <boolean name="ut_omit_namespace_cp_bool" value="false"/>
     <boolean name="ut_insert_new_rule_bool" value="false"/>
+    <int name="ut_uri_type_for_cf_target_number" value="0"/>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>

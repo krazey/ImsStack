@@ -84,6 +84,9 @@ public final class SscConfig {
     public static final int SERVICE_TYPE_ACR =
             CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_ACR; // 20
 
+    public static final int URI_TYPE_TEL = 0;
+    public static final int URI_TYPE_SIP = 1;
+
     @IntDef(prefix = {"SERVICE_TYPE_"}, value = {
             SERVICE_TYPE_INVALID,
             SERVICE_TYPE_CW,
@@ -320,6 +323,10 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL);
     }
 
+    static int getUriTypeForCfTargetNumber(int slotId) {
+        return getInt(slotId, CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);
@@ -405,11 +412,5 @@ public final class SscConfig {
 
             return value == responseCode;
         });
-    }
-
-    // Temporary APIs
-    static String getTargetAddrScheme(int slotId) {
-        // TODO: Is this function really needed?
-        return "tel";
     }
 }
