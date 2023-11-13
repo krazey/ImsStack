@@ -20,6 +20,9 @@ android_test {
     name: "ImsStackJavaTests",
     manifest: "AndroidManifest.xml",
 
+    defaults: [
+        "imsstack_mockito_target_extended_defaults",
+    ],
     srcs: [
         ":imsstack_java_srcs",
         ":imsstack_aidl_srcs",
@@ -36,15 +39,14 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "frameworks-base-testutils",
+        "imsstack-prebuilt",
         "imsstack-res",
-        "mockito-target",
-        "mockito-target-extended-minus-junit4",
+        "junit",
         "platform-test-annotations",
         "testables",
         "truth",
         // TODO: move this to libs after API review
         "ImsMediaFramework",
-        "imsstack-prebuilt",
     ],
 
     platform_apis: true,
