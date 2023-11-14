@@ -39,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class SscHttpConnectionGovTest {
@@ -49,7 +50,7 @@ public class SscHttpConnectionGovTest {
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
     @Mock private SscHttpConnection mMockSscHttpConnection;
-    @Mock private HashMap<Integer, ISscHttpConnection> mMockSscHttpConnections;
+    @Mock private Map<Integer, ISscHttpConnection> mMockSscHttpConnections;
 
     @Before
     public void setup() {

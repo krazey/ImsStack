@@ -94,7 +94,7 @@ public class HttpResponseHandlerTest {
         // msg what: REQUEST_DONE, arg1: RESULT_TYPE_INTERNAL_ERROR
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         verify(mHandler, times(1))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(RESULT_TYPE_INTERNAL_ERROR, captor.getValue().arg1);
         verifyNoMoreInteractions(mHandler);
@@ -113,7 +113,7 @@ public class HttpResponseHandlerTest {
         // msg what: REQUEST_DONE, arg1: 200, obj : AC_DATA_PARTIAL
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         verify(mHandler, times(1))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(200, captor.getValue().arg1);
         assertEquals(AC_DATA_PARTIAL.length(), ((byte[]) captor.getValue().obj).length);
@@ -126,7 +126,7 @@ public class HttpResponseHandlerTest {
 
         // msg what: REQUEST_HTTPS
         verify(mHandler, times(2))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_HTTPS, captor.getValue().what);
         verifyNoMoreInteractions(mHandler);
 
@@ -135,7 +135,7 @@ public class HttpResponseHandlerTest {
 
         // msg what: REQUEST_DONE, arg1: RESULT_TYPE_INTERNAL_ERROR
         verify(mHandler, times(3))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(RESULT_TYPE_INTERNAL_ERROR, captor.getValue().arg1);
         assertNull(captor.getValue().obj);
@@ -148,7 +148,7 @@ public class HttpResponseHandlerTest {
 
         // msg what: REQUEST_DONE, arg1: RESULT_TYPE_INTERNAL_ERROR
         verify(mHandler, times(4))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(RESULT_TYPE_INTERNAL_ERROR, captor.getValue().arg1);
 
@@ -167,7 +167,7 @@ public class HttpResponseHandlerTest {
         // msg what: REQUEST_DONE, arg1: 500
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         verify(mHandler, atLeast(1))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(500, captor.getValue().arg1);
 
@@ -184,7 +184,7 @@ public class HttpResponseHandlerTest {
         // msg what: REQUEST_DONE, arg1: 503, arg2 : 0
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         verify(mHandler, times(1))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(503, captor.getValue().arg1);
         assertEquals(0, captor.getValue().arg2);
@@ -197,7 +197,7 @@ public class HttpResponseHandlerTest {
 
         // msg what: REQUEST_DONE, arg1: 503, arg2 : 1000
         verify(mHandler, times(2))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_DONE, captor.getValue().what);
         assertEquals(503, captor.getValue().arg1);
         assertEquals(1000, captor.getValue().arg2);
@@ -220,7 +220,7 @@ public class HttpResponseHandlerTest {
         // msg what: REQUEST_NON_CELLULAR
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
         verify(mHandler, times(1))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_NON_CELLULAR, captor.getValue().what);
 
         verifyNoMoreInteractions(mHandler);
@@ -231,7 +231,7 @@ public class HttpResponseHandlerTest {
 
         // msg what: REQUEST_NON_CELLULAR
         verify(mHandler, times(2))
-                .sendMessageAtTime(captor.capture(), anyLong());
+                .sendMessageDelayed(captor.capture(), anyLong());
         assertEquals(REQUEST_NON_CELLULAR, captor.getValue().what);
 
         verify(mHttpResponse, times(2)).getCookies();

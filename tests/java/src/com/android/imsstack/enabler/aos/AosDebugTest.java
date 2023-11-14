@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
@@ -59,6 +60,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+import android.util.Singleton;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
@@ -269,10 +271,13 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
-    public void testShowOrDismissNotificationPermissionGranted() {
+    public void testShowOrDismissNotificationPermissionGranted() throws Exception {
         // GIVEN
         mFakeAosDebug.mIsDebugScreenEnabled = true;
         mFakeAosDebug.mIsGranted = true;
+        // Restore the ActivityManager to create a real PendingIntent.
+        restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
+        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.showOrDismissNotification(mMockActivity);
@@ -329,10 +334,13 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
-    public void testNotifyPermissionsResultPermissionGranted() {
+    public void testNotifyPermissionsResultPermissionGranted() throws Exception {
         // GIVEN
         int requestCode = FakeAosDebug.REQUEST_CODE_DEBUG;
         int[] grantResults = new int[]{ PackageManager.PERMISSION_GRANTED };
+        // Restore the ActivityManager to create a real PendingIntent.
+        restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
+        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.notifyPermissionsResult(requestCode, new String[]{}, grantResults,
@@ -543,10 +551,13 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
-    public void testNativeStateListenerOnNativeServiceReady() {
+    public void testNativeStateListenerOnNativeServiceReady() throws Exception {
         // GIVEN
         mFakeAosDebug.mIsDebugScreenEnabled = true;
         mFakeAosDebug.mIsGranted = false;
+        // Restore the ActivityManager to create a real PendingIntent.
+        restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
+        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.mNativeStateListener.onNativeServiceReady();

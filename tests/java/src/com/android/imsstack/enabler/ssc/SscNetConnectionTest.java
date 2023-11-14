@@ -19,7 +19,6 @@ package com.android.imsstack.enabler.ssc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -70,7 +69,7 @@ public class SscNetConnectionTest {
     @Mock private Handler mMockSscTransactionHandler;
     @Mock private SscServiceState mMockSscServiceState;
 
-    @Captor ArgumentCaptor<Message> mMessageCaptor;
+    @Captor ArgumentCaptor<Integer> mMessageCaptor;
     @Captor ArgumentCaptor<ApnStateListener> mApnStateListenerCaptor;
 
     @Before
@@ -306,10 +305,9 @@ public class SscNetConnectionTest {
 
         apnStateListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
 
-        verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
-        Message msg = mMessageCaptor.getValue();
-        assertNotNull(msg);
-        assertEquals(SscNetConnection.EVENT_PDN_IPCAN_CHANGED, msg.what);
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
+        int msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_IPCAN_CHANGED, msg);
     }
 
     @Test
@@ -332,10 +330,9 @@ public class SscNetConnectionTest {
                 eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class));
         assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
-        verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
-        Message msg = mMessageCaptor.getValue();
-        assertNotNull(msg);
-        assertEquals(SscNetConnection.EVENT_PDN_CONNECTED, msg.what);
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
+        int msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_CONNECTED, msg);
     }
 
     @Test
@@ -357,10 +354,9 @@ public class SscNetConnectionTest {
                 eq(SscNetConnection.DISCONNECTION_DELAY), any(TimerInterface.Listener.class));
         assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
-        verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
-        Message msg = mMessageCaptor.getValue();
-        assertNotNull(msg);
-        assertEquals(SscNetConnection.EVENT_PDN_DISCONNECTED, msg.what);
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
+        int msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_DISCONNECTED, msg);
     }
 
     @Test
@@ -377,10 +373,9 @@ public class SscNetConnectionTest {
         triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, ar);
 
         verify(mMockSscServiceState).setPdnConnectionFailed(smCause);
-        verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
-        Message msg = mMessageCaptor.getValue();
-        assertNotNull(msg);
-        assertEquals(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, msg.what);
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
+        int msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, msg);
 
         verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
@@ -396,10 +391,9 @@ public class SscNetConnectionTest {
 
         triggerEventHandler(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, null);
 
-        verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
-        Message msg = mMessageCaptor.getValue();
-        assertNotNull(msg);
-        assertEquals(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, msg.what);
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
+        int msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, msg);
 
         verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));

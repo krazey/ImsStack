@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -688,7 +687,7 @@ public class SscTransactionTest {
     }
 
     private void verifyTransactionSuccess(int requestedEventNum, int requestType) {
-        verify(mMockCallbackHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
+        verify(mMockCallbackHandler).sendMessage(mMessageCaptor.capture());
 
         Message msg = mMessageCaptor.getValue();
         assertNotNull(msg);
@@ -713,7 +712,7 @@ public class SscTransactionTest {
 
     private void verifyTransactionFailure(int requestedEventNum, boolean xcapTrafficNotified,
             boolean isErrorPhraseExist) {
-        verify(mMockCallbackHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
+        verify(mMockCallbackHandler).sendMessage(mMessageCaptor.capture());
 
         Message msg = mMessageCaptor.getValue();
         assertNotNull(msg);

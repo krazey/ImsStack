@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
@@ -246,7 +247,7 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void getServiceState_telephonyManagerIsNull() {
-        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(null);
+        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
 
         ServiceState ss = mDcUtils.getServiceState();
 

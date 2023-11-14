@@ -30,12 +30,11 @@
         android:debuggable="true">
         <uses-library android:name="android.test.runner" />
         <service
-            android:name = ".imsservice.ImsService"
+            android:name = "com.android.imsstack.imsservice.ImsServiceTest$TestImsService"
             android:exported="true"
             android:persistent="true"
             android:singleUser="true"
-            android:permission="android.permission.BIND_IMS_SERVICE"
-            android:process="com.android.imsstack">
+            android:permission="android.permission.BIND_IMS_SERVICE">
             <meta-data android:name="android.telephony.ims.MMTEL_FEATURE"
                        android:value="true"/>
             <meta-data android:name="android.telephony.ims.EMERGENCY_MMTEL_FEATURE"
