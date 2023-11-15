@@ -29,17 +29,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,8 +54,6 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class CarrierInfoTest {
     private static final int MAX_SIM_SLOT = 2;
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1 };
     private static final int SIM_CARRIER_ID = 100;
     private static final int SIM_SPECIFIC_CARRIER_ID = 101;
     private static final String SIM_MCC = "001";
@@ -72,32 +69,31 @@ public class CarrierInfoTest {
     private static final String TEST_COUNTRY = "COM";
 
     @Mock private SharedPreferences mSp;
-    private ContextFixture mContextFixture;
-    private TelephonyManager mTelephonyManager;
+
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private CarrierInfo mCi;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        doReturn(mSp).when(context).getSharedPreferences(anyString(), anyInt());
-        SubscriptionManager sm = context.getSystemService(SubscriptionManager.class);
-        when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-        mTelephonyManager = context.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
-        when(mTelephonyManager.getSimSerialNumber()).thenReturn(SIM_ICCID);
-        when(mTelephonyManager.getSimCarrierId()).thenReturn(SIM_CARRIER_ID);
-        when(mTelephonyManager.getSimSpecificCarrierId()).thenReturn(SIM_SPECIFIC_CARRIER_ID);
-        when(mTelephonyManager.getSimOperator()).thenReturn(SIM_OPERATOR);
-        when(mTelephonyManager.getSubscriberId()).thenReturn(SIM_IMSI);
-        when(mTelephonyManager.getGroupIdLevel1()).thenReturn(SIM_GID1);
-        when(mTelephonyManager.getSimOperatorName()).thenReturn(SIM_OPERATOR_NAME);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
 
-        AppContext.init(context);
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
+
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
+        when(mTelephonyManagerProxy.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
+        when(mTelephonyManagerProxy.getSimSerialNumber()).thenReturn(SIM_ICCID);
+        when(mTelephonyManagerProxy.getSimCarrierId()).thenReturn(SIM_CARRIER_ID);
+        when(mTelephonyManagerProxy.getSimSpecificCarrierId()).thenReturn(SIM_SPECIFIC_CARRIER_ID);
+        when(mTelephonyManagerProxy.getSimOperator()).thenReturn(SIM_OPERATOR);
+        when(mTelephonyManagerProxy.getSubscriberId()).thenReturn(SIM_IMSI);
+        when(mTelephonyManagerProxy.getGroupIdLevel1()).thenReturn(SIM_GID1);
+        when(mTelephonyManagerProxy.getSimOperatorName()).thenReturn(SIM_OPERATOR_NAME);
 
         mCi = new CarrierInfo();
     }
@@ -105,8 +101,10 @@ public class CarrierInfoTest {
     @After
     public void tearDown() throws Exception {
         mCi = null;
-        mContextFixture = null;
-        AppContext.deinit();
+        mSp = null;
+        mTelephonyManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -209,11 +207,11 @@ public class CarrierInfoTest {
     @Test
     @SmallTest
     public void testGetCarrierIdFromSimWhenTelephonyManagerNull() {
-        SubscriptionManager sm =
-                AppContext.getInstance().getSystemService(SubscriptionManager.class);
-        when(sm.getSubscriptionIds(anyInt())).thenReturn(new int[] { MSimUtils.INVALID_SUB_ID });
+        SubscriptionManagerProxy smp =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+        when(smp.getSubscriptionId(anyInt())).thenReturn(MSimUtils.INVALID_SUB_ID);
 
-        SimCarrierId simCarrierId = mCi.getCarrierIdFromSim(SLOT0);
+        SimCarrierId simCarrierId = mCi.getCarrierIdFromSim(TestAppContext.SLOT0);
 
         assertEquals(simCarrierId, new SimCarrierId.Builder().build());
     }
@@ -226,7 +224,7 @@ public class CarrierInfoTest {
 
         when(mSp.edit()).thenReturn(editor);
 
-        CarrierInfo.setSimOperatorCountry(null, null, null, SLOT0);
+        CarrierInfo.setSimOperatorCountry(null, null, null, TestAppContext.SLOT0);
         verify(editor, times(3)).putString(anyString(), valueCaptor.capture());
 
         List<String> values = valueCaptor.getAllValues();
@@ -244,7 +242,7 @@ public class CarrierInfoTest {
 
         when(mSp.edit()).thenReturn(editor);
 
-        CarrierInfo.setSimOperatorCountry("", "", "", SLOT0);
+        CarrierInfo.setSimOperatorCountry("", "", "", TestAppContext.SLOT0);
         verify(editor, times(3)).putString(anyString(), valueCaptor.capture());
 
         List<String> values = valueCaptor.getAllValues();
@@ -262,7 +260,8 @@ public class CarrierInfoTest {
 
         when(mSp.edit()).thenReturn(editor);
 
-        CarrierInfo.setSimOperatorCountry(TEST_OPERATOR, TEST_OPERATOR_SUB, TEST_COUNTRY, SLOT0);
+        CarrierInfo.setSimOperatorCountry(
+                TEST_OPERATOR, TEST_OPERATOR_SUB, TEST_COUNTRY, TestAppContext.SLOT0);
         verify(editor, times(3)).putString(anyString(), valueCaptor.capture());
 
         List<String> values = valueCaptor.getAllValues();
@@ -274,10 +273,10 @@ public class CarrierInfoTest {
 
     private void initCarrierIdsFor(int testSimState) {
         if (MAX_SIM_SLOT == 1) {
-            when(mTelephonyManager.getSimApplicationState())
+            when(mTelephonyManagerProxy.getSimApplicationState())
                     .thenReturn(TelephonyManager.SIM_STATE_ABSENT, testSimState);
         } else {
-            when(mTelephonyManager.getSimApplicationState())
+            when(mTelephonyManagerProxy.getSimApplicationState())
                     .thenReturn(TelephonyManager.SIM_STATE_ABSENT,
                             TelephonyManager.SIM_STATE_ABSENT, testSimState);
         }

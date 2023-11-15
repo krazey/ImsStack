@@ -32,6 +32,7 @@ import android.util.SparseArray;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
@@ -152,8 +153,9 @@ public class DcUtils implements IDcUtils {
     */
     @Override
     public boolean isMobileDataEnabled() {
-        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
-        return (tm != null) ? tm.isDataEnabled() : false;
+        TelephonyManagerProxy tmp =
+                AppContext.getTelephonyManagerProxy(MSimUtils.getSubId(mSlotId));
+        return tmp.isDataEnabled();
     }
 
     @Override
@@ -163,14 +165,13 @@ public class DcUtils implements IDcUtils {
 
     @VisibleForTesting
     protected ServiceState getServiceState() {
-        final TelephonyManager tm;
+        final TelephonyManagerProxy tmp;
         if (MSimUtils.isMultiSimEnabled()) {
-            tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
+            tmp = AppContext.getTelephonyManagerProxy(MSimUtils.getSubId(mSlotId));
         } else {
-            tm = AppContext.getTelephonyManager();
+            tmp = AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
         }
-
-        return (tm != null) ? tm.getServiceState() : null;
+        return tmp.getServiceState();
     }
 
     @VisibleForTesting

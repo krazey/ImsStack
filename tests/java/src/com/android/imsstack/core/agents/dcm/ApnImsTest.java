@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
+import android.os.Handler;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
@@ -124,8 +125,8 @@ public class ApnImsTest {
         assertTrue(mApnIms.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnIms.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnIms.getDataState());
-        verify(mConnectivityManager).requestNetwork(
-                any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager).requestNetwork(any(NetworkRequest.class),
+                any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
 
         // return true without request to connect because request is already done
         assertTrue(mApnIms.connect());
@@ -202,8 +203,8 @@ public class ApnImsTest {
 
         verify(mConnectivityManager)
                 .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
-        verify(mConnectivityManager, times(2))
-                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager, times(2)).registerDefaultNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
     }
 
     @Test
@@ -256,8 +257,8 @@ public class ApnImsTest {
         // do not invoke registerDefaultNetworkCallback if it has registered networkCallback once
         mApnIms.registerDefaultNetworkCallback();
         mApnIms.registerDefaultNetworkCallback();
-        verify(mConnectivityManager)
-                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager).registerDefaultNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
     }
 
     @Test
@@ -265,7 +266,8 @@ public class ApnImsTest {
         when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
         doThrow(mMockRuntimeException).when(mConnectivityManager)
-                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+                .registerDefaultNetworkCallback(
+                        any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
 
         mApnIms.registerDefaultNetworkCallback();
         verify(mMockRuntimeException).getMessage();
@@ -282,8 +284,8 @@ public class ApnImsTest {
                 .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
 
         mApnIms.registerDefaultNetworkCallback();
-        verify(mConnectivityManager)
-                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager).registerDefaultNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
 
         mApnIms.unregisterDefaultNetworkCallback();
         verify(mConnectivityManager)

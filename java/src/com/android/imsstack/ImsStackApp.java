@@ -28,6 +28,8 @@ import android.util.SparseArray;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
@@ -351,10 +353,9 @@ public class ImsStackApp extends Application {
     }
 
     private void displayCarrierConfigs(int phoneId, int subId) {
-        CarrierConfigManager ccm = getSystemService(CarrierConfigManager.class);
-        PersistableBundle b = (ccm != null)
-                ? ccm.getConfigForSubId(subId)
-                : CarrierConfigManager.getDefaultConfig();
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        PersistableBundle b = ccmp.getConfigForSubId(subId);
 
         boolean voLteEnabled = b.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL);
         boolean vtEnabled = b.getBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL);
@@ -369,15 +370,15 @@ public class ImsStackApp extends Application {
 
         Log.i(TAG, "CarrierConfig(" + phoneId + ") - voLteEnabled=" + voLteEnabled
                 + ", vtEnabled=" + vtEnabled + ", wfcEnabled=" + wfcEnabled
-                + ", identifiedCarrier=" + CarrierConfigManager.isConfigForIdentifiedCarrier(b));
+                + ", identifiedCarrier=" + ccmp.isConfigForIdentifiedCarrier(b));
         Log.i(TAG, "Device(" + phoneId + ") - voLteEnabled=" + deviceVoLteEnabled
                 + ", vtEnabled=" + deviceVtEnabled + ", wfcEnabled=" + deviceWfcEnabled);
     }
 
     private boolean isCarrierConfigLoaded(int subId) {
-        CarrierConfigManager ccm = getSystemService(CarrierConfigManager.class);
-        PersistableBundle b = (ccm != null) ? ccm.getConfigForSubId(subId) : null;
-        return CarrierConfigManager.isConfigForIdentifiedCarrier(b);
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        return ccmp.isConfigForIdentifiedCarrier(ccmp.getConfigForSubId(subId));
     }
 
     private static ImsCarrierResolver.Carrier resolveImsCarrier(int slotId, int subId,
@@ -403,17 +404,12 @@ public class ImsStackApp extends Application {
     }
 
     private static int getSimState(int slotId, int subId) {
-        if (!MSimUtils.isValidSubId(subId)) {
+        if (!MSimUtils.isUsableSubId(subId)) {
             subId = MSimUtils.getSubId(slotId);
         }
 
-        TelephonyManager tm = AppContext.getTelephonyManager(subId);
-
-        if (tm != null) {
-            return Sim.getSimStateFromTelephonySimState(tm.getSimApplicationState());
-        }
-
-        return Sim.STATE_INVALID;
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+        return Sim.getSimStateFromTelephonySimState(tmp.getSimApplicationState());
     }
 
     private static int refineSimState(int simState) {

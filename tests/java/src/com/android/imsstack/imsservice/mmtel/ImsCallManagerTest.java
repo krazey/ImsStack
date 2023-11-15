@@ -39,6 +39,7 @@ import android.telephony.ims.SrvccCall;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.MtcApp;
@@ -52,12 +53,15 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RunWith(JUnit4.class)
 public class ImsCallManagerTest {
     protected Context mMockContext;
     private IMmTelCallListener mMockIMmTelCallListener;
@@ -72,11 +76,15 @@ public class ImsCallManagerTest {
     private ImsCallManager.MtcAppCallListenerProxy mMtcAppCallListenerProxy;
     private ImsCallManager.MtcAppCallListenerProxy mMtcAppCallListenerProxyNull;
     private ImsCallManager.ImsCallTracker mImsCallTracker;
+    private TestAppContext mTestAppContext;
 
     @Before
     public void setUp() {
         mMockContext = Mockito.spy(ApplicationProvider.getApplicationContext());
         mMockCallContext = Mockito.mock(ImsCallContext.class);
+
+        mTestAppContext = new TestAppContext(mMockContext);
+        mTestAppContext.setUp();
 
         MessageExecutor mExecutor = new MessageExecutor(ImsCallManager.class.getSimpleName());
         when(mMockCallContext.getExecutor()).thenReturn(mExecutor);
@@ -103,6 +111,8 @@ public class ImsCallManagerTest {
         mImsCallManager = null;
         mImsCallTracker = null;
         mImsCallManagernull = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test

@@ -327,7 +327,7 @@ public class ApnTest {
         mApn.registerCallback(Apn.ImsNetworkCallback.EVENT_LOST);
 
         verify(mConnectivityManager).registerNetworkCallback(
-                eq(nr), eq(mMockNetworkMonitoringCallback));
+                eq(nr), eq(mMockNetworkMonitoringCallback), eq(mApn));
         verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
         assertTrue(mApn.mIsMonitoringCallbackRegistered);
     }
@@ -345,7 +345,7 @@ public class ApnTest {
         mApn.registerCallback(Apn.ImsNetworkCallback.EVENT_LOST);
 
         verify(mConnectivityManager).registerNetworkCallback(
-                eq(nr), eq(mMockNetworkMonitoringCallback));
+                eq(nr), eq(mMockNetworkMonitoringCallback), eq(mApn));
         verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
         assertTrue(mApn.mIsMonitoringCallbackRegistered);
     }
@@ -363,7 +363,7 @@ public class ApnTest {
         mApn.registerCallback(Apn.ImsNetworkCallback.EVENT_LOST);
 
         verify(mConnectivityManager).registerNetworkCallback(
-                eq(nr), eq(mMockNetworkMonitoringCallback));
+                eq(nr), eq(mMockNetworkMonitoringCallback), eq(mApn));
         verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
         assertTrue(mApn.mIsMonitoringCallbackRegistered);
     }
@@ -389,7 +389,7 @@ public class ApnTest {
         NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
 
         mApn.requestNetwork();
-        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback));
+        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));
     }
 
     @Test
@@ -402,7 +402,7 @@ public class ApnTest {
         NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
 
         mApn.requestNetwork();
-        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback));
+        verify(mConnectivityManager).requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));
     }
 
     @Test
@@ -415,7 +415,8 @@ public class ApnTest {
         NetworkRequest nrEmergency = nrbEmergency
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS).build();
         mApn.requestNetwork();
-        verify(mConnectivityManager).requestNetwork(eq(nrEmergency), eq(mMockNetworkCallback));
+        verify(mConnectivityManager)
+                .requestNetwork(eq(nrEmergency), eq(mMockNetworkCallback), eq(mApn));
 
         mApn.mType = EApnType.XCAP;
         NetworkRequest.Builder nrbXcap = new NetworkRequest.Builder();
@@ -423,7 +424,7 @@ public class ApnTest {
         NetworkRequest nrXcap = nrbXcap
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP).build();
         mApn.requestNetwork();
-        verify(mConnectivityManager).requestNetwork(eq(nrXcap), eq(mMockNetworkCallback));
+        verify(mConnectivityManager).requestNetwork(eq(nrXcap), eq(mMockNetworkCallback), eq(mApn));
 
         mApn.mType = EApnType.INTERNET;
         NetworkRequest.Builder nrbInternet = new NetworkRequest.Builder();
@@ -431,7 +432,8 @@ public class ApnTest {
         NetworkRequest nrInternet = nrbInternet
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
         mApn.requestNetwork();
-        verify(mConnectivityManager).requestNetwork(eq(nrInternet), eq(mMockNetworkCallback));
+        verify(mConnectivityManager)
+                .requestNetwork(eq(nrInternet), eq(mMockNetworkCallback), eq(mApn));
     }
 
     @Test
@@ -493,7 +495,7 @@ public class ApnTest {
         NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
 
         verify(mConnectivityManager).registerNetworkCallback(
-                eq(nr), eq(mMockNetworkMonitoringCallback));
+                eq(nr), eq(mMockNetworkMonitoringCallback), eq(mApn));
         verify(mMockNetworkMonitoringCallback).setEvents(Apn.ImsNetworkCallback.EVENT_LOST);
         assertTrue(mApn.mIsMonitoringCallbackRegistered);
     }

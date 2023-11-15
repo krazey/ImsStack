@@ -32,8 +32,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.telecom.Connection.RttModifyStatus;
 import android.telephony.PreciseCallState;
 import android.telephony.ims.ImsCallProfile;
@@ -126,10 +124,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession = new TestImsCallSessionImpl(mMockCallContext, mMockCallTracker,
                 mMockMtcCall, mCallId, mImsCallProfile, true, mMockImsCallSessionCallback);
 
-        MessageExecutor mExecutor = new MessageExecutor(Looper.myLooper());
-        when(mMockCallContext.getExecutor()).thenReturn(mExecutor);
-        Handler handler = new MessageExecutor(ImsCallUtils.class.getSimpleName());
-        when(mMockCallContext.getCallHandler()).thenReturn(handler);
+        MessageExecutor executor = new MessageExecutor(mTestableLooper.getLooper());
+        when(mMockCallContext.getExecutor()).thenReturn(executor);
+        when(mMockCallContext.getCallHandler()).thenReturn(executor);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
                 MSimUtils.DEFAULT_SLOT_ID);

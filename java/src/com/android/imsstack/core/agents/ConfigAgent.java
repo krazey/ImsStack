@@ -22,11 +22,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
@@ -254,26 +255,21 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle getCarrierConfig(int subId) {
-        CarrierConfigManager ccm =
-                AppContext.getInstance().getSystemService(CarrierConfigManager.class);
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
         PersistableBundle configs = new PersistableBundle();
+        // If an invalid subId is used, this bundle will contain default values.
+        PersistableBundle b = ccmp.getConfigForSubId(subId);
 
-        if (ccm != null) {
-            // If an invalid subId is used, this bundle will contain default values.
-            PersistableBundle b = ccm.getConfigForSubId(subId);
+        // IMS common configuration from all the carrier configs.
+        for (String key : CarrierConfig.IMS_COMMON_KEYS) {
+            addConfig(key, b, configs);
+        }
 
-            if (b != null) {
-                // IMS common configuration from all the carrier configs.
-                for (String key : CarrierConfig.IMS_COMMON_KEYS) {
-                    addConfig(key, b, configs);
-                }
-
-                // IMS configuration with the IMS prefix from all the carrier configs.
-                for (String key : b.keySet()) {
-                    if (isKeyForIms(key)) {
-                        addConfig(key, b, configs);
-                    }
-                }
+        // IMS configuration with the IMS prefix from all the carrier configs.
+        for (String key : b.keySet()) {
+            if (isKeyForIms(key)) {
+                addConfig(key, b, configs);
             }
         }
 
@@ -337,8 +333,8 @@ public class ConfigAgent implements ConfigInterface {
                 return null;
             }
 
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            int mccMncCarrierId = (tm != null) ? tm.getCarrierIdFromSimMccMnc() : 0;
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            int mccMncCarrierId = tmp.getCarrierIdFromSimMccMnc();
             int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                     ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
             int specificCarrierId = (testCarrierId > 0) ? testCarrierId : id.getSpecificCarrierId();

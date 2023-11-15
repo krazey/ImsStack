@@ -17,6 +17,7 @@
 package com.android.imsstack.imsservice.uce;
 
 import android.annotation.NonNull;
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ImsFeature;
@@ -25,6 +26,8 @@ import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.IndentingPrintWriter;
@@ -127,25 +130,23 @@ public class RcsFeatureImpl extends RcsFeature {
     }
 
     private int getCapabilities() {
-        CarrierConfigManager cfgManager = (CarrierConfigManager)
-                mContext.getSystemService(mContext.CARRIER_CONFIG_SERVICE);
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        PersistableBundle b = ccmp.getConfigForSubId(mIContext.getSubId());
         int capabilities = RcsImsCapabilities.CAPABILITY_TYPE_NONE;
-        if (cfgManager != null) {
-            boolean isPresenceEnabled = cfgManager.getConfigForSubId(mIContext.getSubId()).
-                    getBoolean(
-                            CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL);
-            if (isPresenceEnabled) {
-                logi("getCapabilities presence");
-                capabilities = RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE;
-                return capabilities;
-            }
-            boolean isCapOptionEnabled = cfgManager.getConfigForSubId(mIContext.getSubId()).
-                    getBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
-            if (isCapOptionEnabled) {
-                logi("getCapabilities Option");
-                capabilities = RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE;
-                return capabilities;
-            }
+        boolean isPresenceEnabled =
+                b.getBoolean(CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL);
+        if (isPresenceEnabled) {
+            logi("getCapabilities presence");
+            capabilities = RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE;
+            return capabilities;
+        }
+        boolean isCapOptionEnabled =
+                b.getBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
+        if (isCapOptionEnabled) {
+            logi("getCapabilities Option");
+            capabilities = RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE;
+            return capabilities;
         }
         return capabilities;
     }

@@ -63,6 +63,8 @@ import com.android.imsstack.R;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
@@ -1100,26 +1102,20 @@ public class AosDebug implements IAosDebug {
         }
 
         public void register() {
-            ConnectivityManager cm = getConnectivityManager();
-            if (cm != null) {
-                NetworkRequest nr = new NetworkRequest.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                        .build();
+            ConnectivityManagerProxy cmp =
+                    AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+            NetworkRequest nr = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .build();
 
-                cm.registerNetworkCallback(nr, this, mHandler);
-            }
+            cmp.registerNetworkCallback(nr, this, mHandler);
         }
 
         public void unregister() {
-            ConnectivityManager cm = getConnectivityManager();
-            if (cm != null) {
-                cm.unregisterNetworkCallback(this);
-            }
-        }
-
-        private ConnectivityManager getConnectivityManager() {
-            return mContext.getSystemService(ConnectivityManager.class);
+            ConnectivityManagerProxy cmp =
+                    AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+            cmp.unregisterNetworkCallback(this);
         }
     }
 
@@ -1140,17 +1136,13 @@ public class AosDebug implements IAosDebug {
                 return;
             }
 
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.registerTelephonyCallback(mHandler::post, this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.registerTelephonyCallback(mHandler::post, this);
         }
 
         public void unregister() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.unregisterTelephonyCallback(this);
         }
     }
 

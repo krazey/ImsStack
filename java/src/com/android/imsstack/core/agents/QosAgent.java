@@ -17,7 +17,6 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
-import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.QosCallback;
@@ -31,6 +30,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -312,13 +312,7 @@ public class QosAgent {
     }
 
     private Network getNetworkForIpAddress(InetAddress addr) {
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return null;
-        }
-
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         List<Network> networks = getAllNetworks(mSlotId);
 
         if (networks.isEmpty()) {
@@ -327,7 +321,7 @@ public class QosAgent {
         }
 
         for (Network network : networks) {
-            LinkProperties lp = cm.getLinkProperties(network);
+            LinkProperties lp = cmp.getLinkProperties(network);
 
             if (lp == null) {
                 continue;
@@ -344,31 +338,22 @@ public class QosAgent {
     }
 
     private void registerQosCallback(Network network, DatagramSocket socket, QosCallback callback) {
-
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         ImsLog.d(mSlotId, "registerQosCallback" + callback);
         try {
-            if (cm != null) {
-                QosSocketInfo socketInfo = new QosSocketInfo(network, socket);
-                cm.registerQosCallback(
-                        socketInfo, AppContext.getInstance().getMainExecutor(), callback);
-            }
+            QosSocketInfo socketInfo = new QosSocketInfo(network, socket);
+            cmp.registerQosCallback(
+                    socketInfo, AppContext.getInstance().getMainExecutor(), callback);
         } catch (Throwable t) {
             ImsLog.e(mSlotId, "registerQosCallback: " + t.toString());
         }
     }
 
     private void unregisterQosCallback(QosCallback callback) {
-
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         ImsLog.d(mSlotId, "unregisterQosCallback" + callback);
         try {
-            if (cm != null) {
-                cm.unregisterQosCallback(callback);
-            }
+            cmp.unregisterQosCallback(callback);
         } catch (Throwable t) {
             ImsLog.e(mSlotId, "unregisterQosCallback: " + t.toString());
         }
@@ -406,5 +391,9 @@ public class QosAgent {
         }
 
         return allNetworks;
+    }
+
+    private static ConnectivityManagerProxy getConnectivityManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
     }
 }

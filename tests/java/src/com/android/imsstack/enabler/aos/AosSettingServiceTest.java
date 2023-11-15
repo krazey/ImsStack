@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,12 +30,12 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -56,16 +57,9 @@ import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class AosSettingServiceTest {
-    private static final int MAX_SIM_SLOT = 1;
-    private static final int SLOT_0 = 0;
-    private static final int SLOT_1 = 1;
-    private static final int SUB_ID_0 = 1;
-    private static final int SUB_ID_1 = 2;
-    private static final int[] SUB_IDS = { SUB_ID_0 };
-
     private Context mContext;
-    private SubscriptionManager mSubscriptionManager;
-    private TelephonyManager mTelephonyManager;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private AosSettingService mAosSettingService;
 
     @Mock SimInterface mMockSimInterface;
@@ -80,31 +74,27 @@ public class AosSettingServiceTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = new ContextFixture().getTestDouble();
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
-        mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
-        when(mSubscriptionManager.getSubscriptionIds(SLOT_0)).thenReturn(SUB_IDS);
-
-        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
-
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         AgentFactory.getInstance().setAgent(
-                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
+                SimInterface.class, mMockSimInterface, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, TestAppContext.SLOT0);
+        when(mMockSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_1);
 
-        mAosSettingService = new AosSettingService(SLOT_0);
+        mAosSettingService = new AosSettingService(TestAppContext.SLOT0);
         mAosSettingService.init();
     }
 
     @After
     public void tearDown() throws Exception {
         mAosSettingService.cleanup();
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
-        AppContext.deinit();
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -115,7 +105,7 @@ public class AosSettingServiceTest {
         verify(mContext).registerReceiver(mAosSettingService.mIntentReceiverListener,
                 mAosSettingService.mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
         verify(mMockSimInterface).addListener(any(Sim.Listener.class));
-        verify(mTelephonyManager).registerTelephonyCallback(
+        verify(mTelephonyManagerProxy).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mAosSettingService.mUserMobileDataStateListener);
     }
@@ -128,7 +118,7 @@ public class AosSettingServiceTest {
 
         mAosSettingService.cleanup();
 
-        verify(mTelephonyManager).unregisterTelephonyCallback(callback);
+        verify(mTelephonyManagerProxy).unregisterTelephonyCallback(callback);
         verify(mMockSimInterface).removeListener(any(Sim.Listener.class));
         verify(mContext).unregisterReceiver(receiver);
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
@@ -137,7 +127,7 @@ public class AosSettingServiceTest {
     @Test
     public void nativeStateListener_onNativeServiceReady() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
         ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
         verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
@@ -151,7 +141,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateNotChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
 
         Message msg = Message.obtain(mAosSettingService.mHandler,
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, false);
@@ -163,7 +153,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
 
         Message msg = Message.obtain(mAosSettingService.mHandler,
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, true);
@@ -175,7 +165,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_shutDown() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
 
         Message msg = Message.obtain(mAosSettingService.mHandler, AosSettingService.EVENT_SHUTDOWN);
         mAosSettingService.mHandler.handleMessage(msg);
@@ -189,11 +179,12 @@ public class AosSettingServiceTest {
         verify(mMockSimInterface).addListener(captor.capture());
         Sim.Listener simListener = captor.getValue();
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
         // Ignored because SimInterface is null.
         simListener.onSimStateChanged();
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                SimInterface.class, mMockSimInterface, TestAppContext.SLOT0);
         when(mMockSimInterface.isSimLoadCompleted()).thenReturn(false);
         // Ignored because SIM state is not fully loaded.
         simListener.onSimStateChanged();
@@ -202,12 +193,12 @@ public class AosSettingServiceTest {
         when(mMockSimInterface.isSimLoadCompleted()).thenReturn(true);
         simListener.onSimStateChanged();
 
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
+        when(mMockSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_2);
         // Different subscription
         simListener.onSimStateChanged();
 
-        verify(mTelephonyManager).unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mTelephonyManager)
+        verify(mTelephonyManagerProxy).unregisterTelephonyCallback(any(TelephonyCallback.class));
+        verify(mTelephonyManagerProxy, times(2))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
     }
 

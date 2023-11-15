@@ -63,8 +63,8 @@ import android.telephony.data.ApnSetting;
 import android.util.Singleton;
 
 import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
@@ -91,13 +91,9 @@ import java.util.concurrent.CountDownLatch;
 
 @RunWith(JUnit4.class)
 public class AosDebugTest extends ImsStackTest {
-
-    private static final int SLOT_0 = 0;
-    private static final int SUB_ID_0 = 0;
-    private static final int SUB_ID_1 = 1;
-    private static final int[] SUB_IDS = { SUB_ID_0 };
     private static final String TEST_VALUE = "TEST_VALUE";
 
+    private TestAppContext mTestAppContext;
     private FakeAosDebug mFakeAosDebug;
 
     @Mock Activity mMockActivity;
@@ -113,40 +109,36 @@ public class AosDebugTest extends ImsStackTest {
     @Mock SimInterface mMockSimInterface;
     @Mock TelephonyInterface mMockTelephonyInterface;
 
-
     @Before
     public void setup() throws Exception {
-
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
-
-        // Member variable of ImsStackTest
-        when(mSubscriptionManager.getSubscriptionIds(SLOT_0)).thenReturn(SUB_IDS);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
         // AgentFactory
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
+        AgentFactory.getInstance().setAgent(
+                SimInterface.class, mMockSimInterface, TestAppContext.SLOT0);
+        when(mMockSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_1);
 
-        AgentFactory.getInstance()
-                .setAgent(PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                PhoneStateInterface.class, mMockPhoneStateInterface, TestAppContext.SLOT0);
         when(mMockPhoneStateInterface.createNotifier(
                 any(ImsPhoneStateListener.class), any(Looper.class)))
                 .thenReturn(mMockIPhoneStateNotifier);
 
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, mMockNativeStateInterface,
-                SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, TestAppContext.SLOT0);
 
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class, mMockTelephonyInterface,
-                SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                TelephonyInterface.class, mMockTelephonyInterface, TestAppContext.SLOT0);
 
         // AosFactory
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
+        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mMockAosService);
 
         // FakeAosDebug
-        mFakeAosDebug = new FakeAosDebug(SLOT_0);
+        mFakeAosDebug = new FakeAosDebug(TestAppContext.SLOT0);
         mFakeAosDebug.mNotificationManager = mMockNotificationManager;
         mFakeAosDebug.mSignalStrengthsListener = mMockSignalStrengthsListener;
         mFakeAosDebug.mConnectivityCallback = mMockConnectivityCallback;
@@ -162,14 +154,15 @@ public class AosDebugTest extends ImsStackTest {
         }
         super.tearDown();
 
-        AosFactory.getInstance().mAosServices.remove(SLOT_0);
+        AosFactory.getInstance().mAosServices.remove(TestAppContext.SLOT0);
 
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
 
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -641,13 +634,13 @@ public class AosDebugTest extends ImsStackTest {
     public void testUpdateSubscriptionSuccess() {
         // GIVEN
         when(mMockSimInterface.isSimLoadCompleted()).thenReturn(true);
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
+        when(mMockSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_2);
 
         // WHEN
         mFakeAosDebug.updateSubscription();
 
         // THEN
-        assertEquals(String.valueOf(SUB_ID_1),
+        assertEquals(String.valueOf(TestAppContext.SUB_ID_2),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
 
         verify(mMockSignalStrengthsListener, times(1)).unregister();
@@ -664,7 +657,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.updateSubscription();
 
         // THEN
-        assertEquals(String.valueOf(SUB_ID_0),
+        assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
 
         verify(mMockSignalStrengthsListener, never()).unregister();
@@ -681,7 +674,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.updateSubscription();
 
         // THEN
-        assertEquals(String.valueOf(SUB_ID_0),
+        assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
 
         verify(mMockSimInterface, never()).getSubId();
@@ -693,13 +686,13 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdateSubscriptionSimInterfaceIsNull() {
         // GIVEN
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
 
         // WHEN
         mFakeAosDebug.updateSubscription();
 
         // THEN
-        assertEquals(String.valueOf(SUB_ID_0),
+        assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
 
         verify(mMockSimInterface, never()).isSimLoadCompleted();
@@ -1157,7 +1150,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdateCellularDataRatWithoutTelephonyInterface() {
         // GIVEN
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, TestAppContext.SLOT0);
 
         // WHEN
         mFakeAosDebug.updateCellularDataRat();

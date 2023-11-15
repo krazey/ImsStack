@@ -17,18 +17,16 @@ package com.android.imsstack.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * This class provides the wrapper APIs for Android Platform.
  */
 public final class SystemUtils {
-    /** Pattern of UTC time format. */
-    public static final String UTC_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-
     /**
      * Performs the message digest and converts it to the hexa-decimal string.
      *
@@ -61,9 +59,9 @@ public final class SystemUtils {
      * @return A UTC time format string.
      */
     public static String getUtcTimeFormat(long millis) {
-        SimpleDateFormat sdf = new SimpleDateFormat(UTC_TIME_FORMAT, Locale.US);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return sdf.format(new Date(millis)) + "Z";
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        ZonedDateTime dateTime = Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC"));
+        return dateTime.format(dtf);
     }
 
     /**

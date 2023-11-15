@@ -29,6 +29,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.util.Pair;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
@@ -323,18 +324,17 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     private void checkHalVersion() {
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        if (tm != null) {
-            try {
-                Pair<Integer, Integer> halVersion = tm.getHalVersion(
-                        TelephonyManager.HAL_SERVICE_IMS);
-                if (halVersion.equals(TelephonyManager.HAL_VERSION_UNKNOWN)
-                        || halVersion.equals(TelephonyManager.HAL_VERSION_UNSUPPORTED)) {
-                    mIsImsHalSupported = false;
-                }
-            } catch (IllegalStateException e) {
-                ImsLog.e("checkHalVersion: " + e.toString());
+        TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        try {
+            Pair<Integer, Integer> halVersion = tmp.getHalVersion(
+                    TelephonyManager.HAL_SERVICE_IMS);
+            if (halVersion.equals(TelephonyManager.HAL_VERSION_UNKNOWN)
+                    || halVersion.equals(TelephonyManager.HAL_VERSION_UNSUPPORTED)) {
+                mIsImsHalSupported = false;
             }
+        } catch (IllegalStateException e) {
+            ImsLog.e("checkHalVersion: " + e.toString());
         }
     }
 

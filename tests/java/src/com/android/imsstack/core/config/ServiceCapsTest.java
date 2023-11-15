@@ -22,16 +22,16 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,97 +41,77 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ServiceCapsTest {
-    private static final int SLOT0 = 0;
-    private static final int SUB_ID = 1;
-
-    private ContextFixture mContextFixture;
-    private Context mContext;
     private PersistableBundle mConfigBundle;
+    private TestAppContext mTestAppContext;
 
     @Before
     public void setUp() {
-        mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        when(mContext.getResources().getBoolean(anyInt())).thenReturn(true);
         mConfigBundle = new PersistableBundle();
-        CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
-        when(ccm.getConfigForSubId(eq(SUB_ID), any())).thenReturn(mConfigBundle);
+        mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
+        mTestAppContext.setUp();
+        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
+        CarrierConfigManagerProxy ccmp =
+                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        when(ccmp.getConfigForSubId(eq(TestAppContext.SUB_ID_1), any())).thenReturn(mConfigBundle);
     }
 
     @After
-    public  void tearDown() {
+    public void tearDown() {
         ServiceCaps.clear();
         mConfigBundle = null;
-        mContext = null;
-        mContextFixture = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void testGetServiceCaps() {
-        ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
+        ServiceCaps sc = ServiceCaps.getServiceCaps(TestAppContext.SLOT0);
 
         assertNotNull(sc);
         assertFalse(sc.isVoLteEnabled());
         assertFalse(sc.isVtEnabled());
         assertFalse(sc.isWfcEnabled());
         assertNotNull(sc.toString());
-        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isVtEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isWfcEnabledByPlatform(SLOT0));
+        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(TestAppContext.SLOT0));
+        assertFalse(ServiceCaps.isVtEnabledByPlatform(TestAppContext.SLOT0));
+        assertFalse(ServiceCaps.isWfcEnabledByPlatform(TestAppContext.SLOT0));
     }
 
     @Test
     @SmallTest
     public void testUpdateServiceCapabilitiesWhenCarrierConfigEnabled() {
         setUpServiceCapabilities(true);
-        ServiceCaps.updateServiceCapabilities(mContext, SLOT0, SUB_ID);
-        ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
+        ServiceCaps.updateServiceCapabilities(
+                mTestAppContext.getContext(), TestAppContext.SLOT0, TestAppContext.SUB_ID_1);
+        ServiceCaps sc = ServiceCaps.getServiceCaps(TestAppContext.SLOT0);
 
         assertNotNull(sc);
         assertTrue(sc.isVoLteEnabled());
         assertTrue(sc.isVtEnabled());
         assertTrue(sc.isWfcEnabled());
         assertNotNull(sc.toString());
-        assertTrue(ServiceCaps.isVoLteEnabledByPlatform(SLOT0));
-        assertTrue(ServiceCaps.isVtEnabledByPlatform(SLOT0));
-        assertTrue(ServiceCaps.isWfcEnabledByPlatform(SLOT0));
+        assertTrue(ServiceCaps.isVoLteEnabledByPlatform(TestAppContext.SLOT0));
+        assertTrue(ServiceCaps.isVtEnabledByPlatform(TestAppContext.SLOT0));
+        assertTrue(ServiceCaps.isWfcEnabledByPlatform(TestAppContext.SLOT0));
     }
 
     @Test
     @SmallTest
     public void testUpdateServiceCapabilitiesWhenCarrierConfigDisabled() {
         setUpServiceCapabilities(false);
-        ServiceCaps.updateServiceCapabilities(mContext, SLOT0, SUB_ID);
-        ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
+        ServiceCaps.updateServiceCapabilities(
+                mTestAppContext.getContext(), TestAppContext.SLOT0, TestAppContext.SUB_ID_1);
+        ServiceCaps sc = ServiceCaps.getServiceCaps(TestAppContext.SLOT0);
 
         assertNotNull(sc);
         assertFalse(sc.isVoLteEnabled());
         assertFalse(sc.isVtEnabled());
         assertFalse(sc.isWfcEnabled());
         assertNotNull(sc.toString());
-        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isVtEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isWfcEnabledByPlatform(SLOT0));
-    }
-
-    @Test
-    @SmallTest
-    public void testUpdateServiceCapabilitiesWithIllegalStateException() {
-        CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
-        doThrow(new IllegalStateException("Carrier config loader is not available."))
-                .when(ccm).getConfigForSubId(eq(SUB_ID), any());
-        ServiceCaps.updateServiceCapabilities(mContext, SLOT0, SUB_ID);
-        ServiceCaps sc = ServiceCaps.getServiceCaps(SLOT0);
-
-        assertNotNull(sc);
-        assertFalse(sc.isVoLteEnabled());
-        assertFalse(sc.isVtEnabled());
-        assertFalse(sc.isWfcEnabled());
-        assertNotNull(sc.toString());
-        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isVtEnabledByPlatform(SLOT0));
-        assertFalse(ServiceCaps.isWfcEnabledByPlatform(SLOT0));
+        assertFalse(ServiceCaps.isVoLteEnabledByPlatform(TestAppContext.SLOT0));
+        assertFalse(ServiceCaps.isVtEnabledByPlatform(TestAppContext.SLOT0));
+        assertFalse(ServiceCaps.isWfcEnabledByPlatform(TestAppContext.SLOT0));
     }
 
     private void setUpServiceCapabilities(boolean enabled) {

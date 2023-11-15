@@ -75,6 +75,7 @@ android_app {
         "--auto-add-overlay",
     ],
     static_libs:[
+        "androidx.annotation_annotation",
         // TODO: move this to libs after API review
         "ImsMediaFramework",
         "imsstack-prebuilt",

@@ -17,7 +17,6 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.location.Address;
@@ -30,6 +29,7 @@ import android.telephony.ServiceState;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SensorManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.carrier.CarrierInfo;
@@ -1330,13 +1330,10 @@ public class LocationAgent implements LocationInterface {
         }
 
         try {
-            SensorManager sensorManager =
-                    AppContext.getInstance().getSystemService(SensorManager.class);
-
-            if (sensorManager != null) {
-                Sensor sigMotion = sensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-                sensorManager.requestTriggerSensor(mSmdListener, sigMotion);
-            }
+            SensorManagerProxy smp =
+                    AppContext.getInstance().getSystemServiceProxy(SensorManagerProxy.class);
+            Sensor sigMotion = smp.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+            smp.requestTriggerSensor(mSmdListener, sigMotion);
         } catch (Throwable t) {
             t.printStackTrace();
             return false;
@@ -1360,13 +1357,10 @@ public class LocationAgent implements LocationInterface {
         }
 
         mIsSmdRequested = false;
-        SensorManager sensorManager =
-                AppContext.getInstance().getSystemService(SensorManager.class);
-
-        if (sensorManager != null) {
-            Sensor sigMotion = sensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-            sensorManager.cancelTriggerSensor(mSmdListener, sigMotion);
-        }
+        SensorManagerProxy smp =
+                AppContext.getInstance().getSystemServiceProxy(SensorManagerProxy.class);
+        Sensor sigMotion = smp.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+        smp.cancelTriggerSensor(mSmdListener, sigMotion);
     }
 
     private Location updateCurrentTimeFromCachedTime(Location currentLocation) {

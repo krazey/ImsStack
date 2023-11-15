@@ -27,6 +27,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.ImsLog;
@@ -998,8 +999,8 @@ public class UsatAgent extends Handler implements UsatInterface {
      */
     private @NonNull String sendEnvelopeWithStatus(String content) {
         int subId = MSimUtils.getSubId(getSlotId());
-        TelephonyManager tm = AppContext.getTelephonyManager(subId);
-        return (tm != null) ? tm.sendEnvelopeWithStatus(content) : "";
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+        return tmp.sendEnvelopeWithStatus(content);
     }
 
     /**

@@ -21,10 +21,10 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -1289,15 +1289,17 @@ public class CarrierConfig {
 
     private static String getImei(int slotId) {
         final String emptyImei = "000000000000000";
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        String imei = (tm != null) ? tm.getImei(slotId) : null;
+        TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        String imei = tmp.getImei(slotId);
         return TextUtils.isEmpty(imei) ? emptyImei : imei;
     }
 
     private static String getImeiSv(int slotId) {
         final String emptyImeiWithoutCheckDigit = "00000000000000";
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        String imei = (tm != null) ? tm.getImei(slotId) : null;
+        TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        String imei = tmp.getImei(slotId);
 
         if (TextUtils.isEmpty(imei)) {
             imei = emptyImeiWithoutCheckDigit;
@@ -1305,7 +1307,7 @@ public class CarrierConfig {
             imei = imei.substring(0, imei.length() - 1);
         }
 
-        String sv = (tm != null) ? tm.getDeviceSoftwareVersion(slotId) : null;
+        String sv = tmp.getDeviceSoftwareVersion(slotId);
 
         if (TextUtils.isEmpty(sv)) {
             sv = "00";

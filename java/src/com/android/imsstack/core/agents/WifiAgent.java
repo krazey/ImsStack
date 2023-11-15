@@ -30,6 +30,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
@@ -327,54 +328,49 @@ public class WifiAgent implements WifiInterface {
     }
 
     private void registerNetworkCallback() {
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            if (mNetworkCallback == null) {
-                mNetworkCallback = new ConnectivityManager.NetworkCallback(
-                        ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
-                    @Override
-                    public void onLost(@NonNull Network network) {
-                        ImsLog.i("Wifi#onLost: network=" + network);
-                        setWifiConnected(false);
-                        mNetwork = null;
-                        mLinkProperties = null;
-                        mWifiInfo = null;
-                    }
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
 
-                    @Override
-                    public void onLinkPropertiesChanged(@NonNull Network network,
-                            @NonNull LinkProperties linkProperties) {
-                        ImsLog.i("Wifi#onLinkPropertiesChanged: network=" + network);
-                        mNetwork = network;
-                        mLinkProperties = linkProperties;
-                        setWifiConnected(true);
-                    }
+        if (mNetworkCallback == null) {
+            mNetworkCallback = new ConnectivityManager.NetworkCallback(
+                    ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+                @Override
+                public void onLost(@NonNull Network network) {
+                    ImsLog.i("Wifi#onLost: network=" + network);
+                    setWifiConnected(false);
+                    mNetwork = null;
+                    mLinkProperties = null;
+                    mWifiInfo = null;
+                }
 
-                    @Override
-                    public void onCapabilitiesChanged(@NonNull Network network,
-                            @NonNull NetworkCapabilities networkCapabilities) {
-                        ImsLog.d("Wifi#onCapabilitiesChanged: network=" + network);
-                        mWifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
-                    }
-                };
-            }
+                @Override
+                public void onLinkPropertiesChanged(@NonNull Network network,
+                        @NonNull LinkProperties linkProperties) {
+                    ImsLog.i("Wifi#onLinkPropertiesChanged: network=" + network);
+                    mNetwork = network;
+                    mLinkProperties = linkProperties;
+                    setWifiConnected(true);
+                }
 
-            NetworkRequest networkRequest = new NetworkRequest.Builder()
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .build();
-            cm.registerNetworkCallback(networkRequest, mNetworkCallback, mHandler);
+                @Override
+                public void onCapabilitiesChanged(@NonNull Network network,
+                        @NonNull NetworkCapabilities networkCapabilities) {
+                    ImsLog.d("Wifi#onCapabilitiesChanged: network=" + network);
+                    mWifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+                }
+            };
         }
+
+        NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build();
+        cmp.registerNetworkCallback(networkRequest, mNetworkCallback, mHandler);
     }
 
     private void unregisterNetworkCallback() {
         if (mNetworkCallback != null) {
-            ConnectivityManager cm =
-                    AppContext.getInstance().getSystemService(ConnectivityManager.class);
-            if (cm != null) {
-                cm.unregisterNetworkCallback(mNetworkCallback);
-            }
+            ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+            cmp.unregisterNetworkCallback(mNetworkCallback);
             mNetworkCallback = null;
         }
 
@@ -382,6 +378,10 @@ public class WifiAgent implements WifiInterface {
         mNetwork = null;
         mLinkProperties = null;
         mWifiInfo = null;
+    }
+
+    private static ConnectivityManagerProxy getConnectivityManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
     }
 
     private class WifiBroadcastReceiver extends BroadcastReceiver {

@@ -25,11 +25,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
@@ -201,14 +202,16 @@ public class SimAgent implements SimInterface {
 
     @Override
     public String getSmscAddress() {
-        SmsManager sm = getSmsManager(getSlotId(), getSubId());
+        SmsManagerProxy smp = getSmsManagerProxy(getSlotId(), getSubId());
 
         try {
-            return (sm != null) ? sm.getSmscAddress() : null;
+            if (smp != null) {
+                return smp.getSmscAddress();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     @Override
@@ -320,10 +323,10 @@ public class SimAgent implements SimInterface {
 
     private void handleRequestSimAuthentication(AuthEvent event) {
         String response = "";
-        TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
-        if (tm != null) {
-            response = tm.getIccAuthentication(event.appType,
+        if (tmp != null) {
+            response = tmp.getIccAuthentication(event.appType,
                     TelephonyManager.AUTHTYPE_EAP_AKA, event.nonce);
         }
 
@@ -479,10 +482,10 @@ public class SimAgent implements SimInterface {
     }
 
     private void loadSimRecords() {
-        TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
-        if (tm != null) {
-            String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_USIM);
+        if (tmp != null) {
+            String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_USIM);
 
             mUst = SimUtils.hexStringToBytes(serviceTable);
 
@@ -529,13 +532,13 @@ public class SimAgent implements SimInterface {
 
     @VisibleForTesting
     protected void updateSimState() {
-        TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
         int telephonyCardState = Sim.STATE_INVALID;
         int telephonySimState = Sim.STATE_INVALID;
 
-        if (tm != null) {
-            telephonyCardState = tm.getSimCardState();
-            telephonySimState = tm.getSimApplicationState();
+        if (tmp != null) {
+            telephonyCardState = tmp.getSimCardState();
+            telephonySimState = tmp.getSimApplicationState();
         }
 
         int simCardState = Sim.getSimCardStateFromTelephonySimState(telephonyCardState);
@@ -576,15 +579,15 @@ public class SimAgent implements SimInterface {
     }
 
     private void loadIsimRecords() {
-        TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
-        if (tm != null) {
-            String serviceTable = tm.getSimServiceTable(Sim.APP_TYPE_ISIM);
+        if (tmp != null) {
+            String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_ISIM);
             mIsimIst = SimUtils.hexStringToBytes(serviceTable);
-            mIsimDomain = tm.getIsimDomain();
+            mIsimDomain = tmp.getIsimDomain();
 
             try {
-                mIsimImpi = tm.getImsPrivateUserIdentity();
+                mIsimImpi = tmp.getImsPrivateUserIdentity();
             } catch (RuntimeException e) {
                 ImsLog.w(getSlotId(), "[SIM] Reading IMPI failed: " + e.toString());
                 mIsimImpi = null;
@@ -592,7 +595,7 @@ public class SimAgent implements SimInterface {
 
             List<Uri> uris = Collections.emptyList();
             try {
-                uris = tm.getImsPublicUserIdentities();
+                uris = tmp.getImsPublicUserIdentities();
             } catch (RuntimeException e) {
                 ImsLog.w(getSlotId(), "[SIM] Reading IMPU failed: " + e.toString());
             }
@@ -664,9 +667,9 @@ public class SimAgent implements SimInterface {
             if (isimState == Sim.ISIM_STATE_REFRESH_STARTED) {
                 newIsimState = Sim.ISIM_STATE_REFRESH_COMPLETED;
             } else {
-                TelephonyManager tm = getTelephonyManager(getSlotId(), getSubId());
+                TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
 
-                if (tm != null && tm.isApplicationOnUicc(Sim.APP_TYPE_ISIM)) {
+                if (tmp != null && tmp.isApplicationOnUicc(Sim.APP_TYPE_ISIM)) {
                     newIsimState = Sim.ISIM_STATE_LOADED;
                 } else {
                     newIsimState = Sim.ISIM_STATE_NOT_PRESENT;
@@ -749,22 +752,18 @@ public class SimAgent implements SimInterface {
         }
     }
 
-    private static SmsManager getSmsManager(int slotId, int subId) {
+    private static SmsManagerProxy getSmsManagerProxy(int slotId, int subId) {
         if (!MSimUtils.isValidSubId(subId)) {
             subId = MSimUtils.getSubId(slotId);
         }
-
-        SmsManager sm = AppContext.getInstance().getSystemService(SmsManager.class);
-        return (sm != null)
-                ? (MSimUtils.isValidSubId(subId) ? sm.createForSubscriptionId(subId) : null)
-                : null;
+        return MSimUtils.isValidSubId(subId) ? AppContext.getSmsManagerProxy(subId) : null;
     }
 
-    private static TelephonyManager getTelephonyManager(int slotId, int subId) {
+    private static TelephonyManagerProxy getTelephonyManagerProxy(int slotId, int subId) {
         if (!MSimUtils.isValidSubId(subId)) {
             subId = MSimUtils.getSubId(slotId);
         }
-        return MSimUtils.isValidSubId(subId) ? AppContext.getTelephonyManager(subId) : null;
+        return MSimUtils.isValidSubId(subId) ? AppContext.getTelephonyManagerProxy(subId) : null;
     }
 
     private static ISystem getSystem(int slotId) {

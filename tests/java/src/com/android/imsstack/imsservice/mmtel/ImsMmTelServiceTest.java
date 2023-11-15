@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -125,7 +126,8 @@ public class ImsMmTelServiceTest extends ImsStackTest {
                 .getInstance(MSimUtils.DEFAULT_SLOT_ID).getMmTelFeatureRegistry();
         mMockTelephonyManager = mContextFixture.getTestDouble()
                 .getSystemService(TelephonyManager.class);
-        when(AppContext.getTelephonyManager(0)).thenReturn(mMockTelephonyManager);
+        when(mMockTelephonyManager.createForSubscriptionId(anyInt()))
+                .thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(1);
         UtFactory.getInstance().setUtInterfaceForSlot(0, mMockUtInterface);
     }

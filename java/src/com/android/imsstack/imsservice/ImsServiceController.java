@@ -17,9 +17,9 @@
 package com.android.imsstack.imsservice;
 
 import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.RcsFeature;
 
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
@@ -49,7 +49,7 @@ public class ImsServiceController {
     private ImsServiceController(Context context) {
         logi("ImsServiceController");
 
-        int simCount = getSimCount(context);
+        int simCount = MSimUtils.getSupportedSimCount();
 
         mMmTelServices = new ImsMmTelService[simCount];
         mRcsFeature = new RcsFeatureImpl[simCount];
@@ -129,14 +129,6 @@ public class ImsServiceController {
 
     public static synchronized ImsServiceController getInstance() {
         return sImsServiceController;
-    }
-
-    public static int getSimCount(Context c) {
-        TelephonyManager tm = c.getSystemService(TelephonyManager.class);
-
-        int count = (tm != null) ? tm.getActiveModemCount() : 1;
-
-        return (count == 0) ? 1 : count;
     }
 
     public static synchronized boolean isReady() {

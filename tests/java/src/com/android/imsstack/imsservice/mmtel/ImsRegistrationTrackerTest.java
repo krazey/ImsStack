@@ -129,7 +129,7 @@ public class ImsRegistrationTrackerTest {
         mMmTelCapabilities = new MmTelFeature.MmTelCapabilities(0);
         mTelephonyManager = mContextFixture.getTestDouble()
                 .getSystemService(TelephonyManager.class);
-        when(AppContext.getTelephonyManager(0)).thenReturn(mTelephonyManager);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
         when(mTelephonyManager.isDataEnabled()).thenReturn(true);
     }
 

@@ -16,6 +16,7 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,6 +24,7 @@ import android.location.LocationRequest;
 import android.util.ArraySet;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.LocationManagerProxy;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -237,8 +239,8 @@ public final class LocationApi {
         }
     }
 
-    private static LocationManager getLocationManager() {
-        return AppContext.getInstance().getSystemService(LocationManager.class);
+    private static LocationManagerProxy getLocationManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(LocationManagerProxy.class);
     }
 
     private static void log(String s) {
@@ -323,14 +325,10 @@ public final class LocationApi {
 
     private static class LocationManagerApi {
         public static boolean isProviderEnabled(String provider) {
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                return lm.isProviderEnabled(provider);
+                return lmp.isProviderEnabled(provider);
             } catch (Exception e) {
                 loge(e.toString());
             }
@@ -339,14 +337,11 @@ public final class LocationApi {
         }
 
         public static Location getLastKnownLocation(String provider) {
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return null;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                return lm.getLastKnownLocation(provider);
+                return lmp.getLastKnownLocation(
+                        provider, new LastLocationRequest.Builder().build());
             } catch (Exception e) {
                 loge(e.toString());
             }
@@ -372,15 +367,11 @@ public final class LocationApi {
                 return false;
             }
 
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
                 logi("LM :: requestLocationUpdates - " + request);
-                lm.requestLocationUpdates(provider, request, executor, listener);
+                lmp.requestLocationUpdates(provider, request, executor, listener);
                 return true;
             } catch (SecurityException e) {
                 loge("Location update request is failed; ignore - " + e);
@@ -394,14 +385,12 @@ public final class LocationApi {
         }
 
         public static void removeUpdates(LocationListener listener) {
-            LocationManager lm = getLocationManager();
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
-            if (lm != null) {
-                try {
-                    lm.removeUpdates(listener);
-                } catch (Exception e) {
-                    loge(e.toString());
-                }
+            try {
+                lmp.removeUpdates(listener);
+            } catch (Exception e) {
+                loge(e.toString());
             }
         }
     }

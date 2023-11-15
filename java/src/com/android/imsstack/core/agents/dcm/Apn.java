@@ -34,7 +34,9 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
@@ -334,22 +336,16 @@ public abstract class Apn extends Handler implements IApn {
                 + ", APNState= " + mAPNState;
     }
 
-    // Private/Protected methods ---------------------------------
-    //---------------------------------------------------------------------
     protected void registerCallback(int events) {
-        ImsLog.i(mSlotId, "type = " + mType.getString());
+        ImsLog.i(mSlotId, "Apn=" + mType.getString() + ", events=" + events);
 
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-
-        if ((cm == null) || (events == 0)) {
+        if (events == 0) {
             return;
         }
 
-        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
-        NetworkRequest nr = null;
-
-        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         if (MSimUtils.isMultiSimEnabled()) {
             mSubId = MSimUtils.getSubId(mSlotId);
@@ -359,6 +355,7 @@ public abstract class Apn extends Handler implements IApn {
                     .setSubscriptionId(mSubId).build());
         }
 
+        NetworkRequest nr = null;
         if (mType.getType() == DcConstants.TYPE_IMS) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
         } else if (mType.getType() == DcConstants.TYPE_INTERNET) {
@@ -378,26 +375,20 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (nr != null) {
-            cm.registerNetworkCallback(nr, mNetworkMonitoringCallback);
+            cmp.registerNetworkCallback(nr, mNetworkMonitoringCallback, this);
             mIsMonitoringCallbackRegistered = true;
         }
     }
 
     protected void unregisterCallback() {
-        ImsLog.i(mSlotId, "type = " + mType.getString());
-
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return;
-        }
+        ImsLog.i(mSlotId, "Apn=" + mType.getString());
 
         if (mNetworkMonitoringCallback != null) {
             mIsMonitoringCallbackRegistered = false;
 
+            ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
             try {
-                cm.unregisterNetworkCallback(mNetworkMonitoringCallback);
+                cmp.unregisterNetworkCallback(mNetworkMonitoringCallback);
             } catch (IllegalArgumentException e) {
                 ImsLog.e("" + e);
             }
@@ -405,18 +396,10 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void requestNetwork() {
-        ImsLog.i(mSlotId, "type = " + mType.getString());
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return;
-        }
-
-        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
-        NetworkRequest nr = null;
-
-        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        ImsLog.i(mSlotId, "Apn=" + mType.getString());
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+        NetworkRequest.Builder nrb = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         if (MSimUtils.isMultiSimEnabled()) {
             boolean setSubId = true;
@@ -434,6 +417,7 @@ public abstract class Apn extends Handler implements IApn {
             }
         }
 
+        NetworkRequest nr = null;
         if (mType.getType() == DcConstants.TYPE_IMS) {
             if (mIsMmtelRequired) {
                 nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
@@ -453,23 +437,17 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (nr != null) {
-            cm.requestNetwork(nr, mNetworkCallback);
+            cmp.requestNetwork(nr, mNetworkCallback, this);
         }
     }
 
     protected void releaseNetwork() {
-        ImsLog.d(mSlotId, "type = " + mType.getString());
-
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return;
-        }
+        ImsLog.d(mSlotId, "Apn=" + mType.getString());
 
         if (mNetworkCallback != null) {
+            ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
             try {
-                cm.unregisterNetworkCallback(mNetworkCallback);
+                cmp.unregisterNetworkCallback(mNetworkCallback);
             } catch (IllegalArgumentException e) {
                 ImsLog.e("" + e);
             }
@@ -700,6 +678,10 @@ public abstract class Apn extends Handler implements IApn {
         return allSimAbsentOrLocked;
     }
 
+    protected static ConnectivityManagerProxy getConnectivityManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+    }
+
     /**
      * This class is for network callback interface
      */
@@ -907,12 +889,8 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         protected void cacheLinkProperties(Network network) {
-            ConnectivityManager cm = (mContext == null) ? null :
-                    mContext.getSystemService(ConnectivityManager.class);
-
-            if (cm != null) {
-                mCachedLinkProperties = cm.getLinkProperties(network);
-            }
+            ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+            mCachedLinkProperties = cmp.getLinkProperties(network);
         }
 
         protected void clearLinkProperties() {

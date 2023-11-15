@@ -23,10 +23,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -135,19 +135,15 @@ public class AosSettingService {
     private void setListener(UserMobileDataStateListener listener) {
         ImsLog.d(mSlotId, "");
 
-        TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
-        if (tm != null) {
-            tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
-        }
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
+        tmp.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
     }
 
     private void removeListener(UserMobileDataStateListener listener) {
         ImsLog.d(mSlotId, "");
 
-        TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
-        if (tm != null) {
-            tm.unregisterTelephonyCallback(listener);
-        }
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
+        tmp.unregisterTelephonyCallback(listener);
     }
 
     private void updateSubscription() {

@@ -40,6 +40,7 @@ import android.util.ArrayMap;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcm.DcUtils;
@@ -269,22 +270,20 @@ public class CellInfoAgent implements CellInfoInterface {
         int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
         List<CellInfo> cellInfos = null;
         if (MSimUtils.isValidSubId(subId)) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                cellInfos = tm.getAllCellInfo();
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            cellInfos = tmp.getAllCellInfo();
 
-                if (cellInfos == null || cellInfos.isEmpty()) {
-                    if (mCellInfoCallback == null) {
-                        mCellInfoCallback = new TelephonyManager.CellInfoCallback() {
-                            @Override
-                            public void onCellInfo(@NonNull List<CellInfo> cellInfo) {
-                                ImsLog.d(mSlotId, "onCellInfo");
-                                updateAllCellInfo(cellInfo);
-                            }
-                        };
-                    }
-                    tm.requestCellInfoUpdate(mCellInfoHandler::post, mCellInfoCallback);
+            if (cellInfos == null || cellInfos.isEmpty()) {
+                if (mCellInfoCallback == null) {
+                    mCellInfoCallback = new TelephonyManager.CellInfoCallback() {
+                        @Override
+                        public void onCellInfo(@NonNull List<CellInfo> cellInfo) {
+                            ImsLog.d(mSlotId, "onCellInfo");
+                            updateAllCellInfo(cellInfo);
+                        }
+                    };
                 }
+                tmp.requestCellInfoUpdate(mCellInfoHandler::post, mCellInfoCallback);
             }
         }
         return (cellInfos != null) ? cellInfos : Collections.emptyList();
@@ -579,17 +578,13 @@ public class CellInfoAgent implements CellInfoInterface {
         }
 
         public void register() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.registerTelephonyCallback(mCellInfoHandler::post, this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.registerTelephonyCallback(mCellInfoHandler::post, this);
         }
 
         public void unregister() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.unregisterTelephonyCallback(this);
         }
 
         @Override

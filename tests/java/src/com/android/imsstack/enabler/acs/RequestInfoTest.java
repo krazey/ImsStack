@@ -22,11 +22,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 
 import android.os.Build;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.enabler.acs.impl.RequestInfo;
 
 import org.junit.After;
@@ -56,16 +56,15 @@ public class RequestInfoTest {
 
     private RequestInfo mRequestInfo;
 
-    @Mock
-    TelephonyManager mTelephonyManager;
+    @Mock private TelephonyManagerProxy mTelephonyManagerProxy;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        doReturn(MCCMNC).when(mTelephonyManager).getSimOperator();
-        doReturn(IMSI).when(mTelephonyManager).getSubscriberId();
-        doReturn(IMEI).when(mTelephonyManager).getImei(anyInt());
+        doReturn(MCCMNC).when(mTelephonyManagerProxy).getSimOperator();
+        doReturn(IMSI).when(mTelephonyManagerProxy).getSubscriberId();
+        doReturn(IMEI).when(mTelephonyManagerProxy).getImei(anyInt());
 
     }
 
@@ -141,7 +140,7 @@ public class RequestInfoTest {
         AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
                 VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
         RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
+                mSlotId, mSubId, acServiceClientInfo, mTelephonyManagerProxy);
 
         String acVersion = "100";
         String rcsProfile = "UP_1.0";
@@ -183,7 +182,7 @@ public class RequestInfoTest {
         AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
                 VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
         RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
+                mSlotId, mSubId, acServiceClientInfo, mTelephonyManagerProxy);
 
         String acVersion = "300";
         // default value
@@ -217,7 +216,7 @@ public class RequestInfoTest {
         AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
                 VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
         RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
+                mSlotId, mSubId, acServiceClientInfo, mTelephonyManagerProxy);
 
         mRequestInfo = requestInfoBuilder.build();
 
@@ -252,7 +251,7 @@ public class RequestInfoTest {
         AcServiceClientInfo acServiceClientInfo = new AcServiceClientInfo(
                 VERSION, PROFILE, CLIENT_VENDOR, CLIENT_VERSION, ENABLED_BY_USER);
         RequestInfo.RequestInfoBuilder requestInfoBuilder = new RequestInfo.RequestInfoBuilder(
-                mSlotId, mSubId, acServiceClientInfo, mTelephonyManager);
+                mSlotId, mSubId, acServiceClientInfo, mTelephonyManagerProxy);
         return requestInfoBuilder.build();
     }
 }

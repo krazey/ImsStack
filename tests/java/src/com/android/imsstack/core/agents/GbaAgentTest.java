@@ -68,12 +68,12 @@ public class GbaAgentTest {
     @Captor ArgumentCaptor<TelephonyManager.BootstrapAuthenticationCallback> mCallbackCaptor;
 
     @Before
-    public void setup() {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         android.content.Context context = new ContextFixture().getTestDouble();
         AppContext.init(context);
-        mTelephonyManager = AppContext.getTelephonyManager();
+        mTelephonyManager = context.getSystemService(TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
 
         doAnswer((Answer<Void>) (invocation) -> {

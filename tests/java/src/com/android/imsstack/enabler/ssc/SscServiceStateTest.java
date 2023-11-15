@@ -228,8 +228,8 @@ public class SscServiceStateTest {
         verify(mMockTelephonyManager).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
-        verify(mMockConnectivityManager)
-                .registerDefaultNetworkCallback(mSscServiceState.mCrossSimDataStateListener);
+        verify(mMockConnectivityManager).registerDefaultNetworkCallback(
+                mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
         assertTrue(((Handler) mSscServiceState.mHandler)
                 .hasMessages(SscServiceState.EVENT_UT_CAPABILITY_CHANGED));
 
@@ -275,8 +275,8 @@ public class SscServiceStateTest {
         verify(mMockTelephonyManager, never()).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
-        verify(mMockConnectivityManager, never())
-                .registerDefaultNetworkCallback(mSscServiceState.mCrossSimDataStateListener);
+        verify(mMockConnectivityManager, never()).registerDefaultNetworkCallback(
+                mSscServiceState.mCrossSimDataStateListener, mSscServiceState.mHandler);
     }
 
     @Test
@@ -958,8 +958,8 @@ public class SscServiceStateTest {
         verify(mMockAosService, times(1)).addListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManager, times(1)).registerTelephonyCallback(any(Executor.class),
                 any(SscMobileDataStateListener.class));
-        verify(mMockConnectivityManager, times(1))
-                .registerDefaultNetworkCallback(any(SscCrossSimDataStateListener.class));
+        verify(mMockConnectivityManager, times(1)).registerDefaultNetworkCallback(
+                any(SscCrossSimDataStateListener.class), any(Handler.class));
 
         verify(mMockWifiInterface).removeListener(any(WifiInterface.Listener.class));
         verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);

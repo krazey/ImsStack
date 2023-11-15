@@ -26,7 +26,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.ImsRtt;
 import android.telephony.CarrierConfigManager.ImsVoice;
 import android.telephony.CarrierConfigManager.ImsVt;
-import android.telephony.ims.ImsManager;
 import android.telephony.ims.ProvisioningManager;
 import android.util.SparseArray;
 import android.view.Window;
@@ -37,6 +36,8 @@ import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ProvisioningManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -527,27 +528,24 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
                             + subId + ", status=" + provisioningStatus);
 
-                    ImsManager imsMngr =
-                            AppContext.getInstance().getSystemService(ImsManager.class);
+                    ImsManagerProxy imp =
+                            AppContext.getInstance().getSystemServiceProxy(ImsManagerProxy.class);
+                    try {
+                        ProvisioningManagerProxy pmp = imp.getProvisioningManagerProxy(subId);
 
-                    if (imsMngr != null) {
-                        try {
-                            ProvisioningManager pm = imsMngr.getProvisioningManager(subId);
-
-                            if (pm != null) {
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS,
-                                        provisioningStatus);
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VT_PROVISIONING_STATUS,
-                                        provisioningStatus);
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE,
-                                        provisioningStatus);
-                            }
-                        } catch (Throwable t) {
-                            ImsLog.e(mSlotId, "setProvisioningValue: " + t);
+                        if (pmp != null) {
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS,
+                                    provisioningStatus);
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VT_PROVISIONING_STATUS,
+                                    provisioningStatus);
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE,
+                                    provisioningStatus);
                         }
+                    } catch (Throwable t) {
+                        ImsLog.e(mSlotId, "setProvisioningValue: " + t);
                     }
                 }
             }
@@ -556,7 +554,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private class ConfigListener {
+    private static class ConfigListener {
         protected final int mConfigType;
 
         ConfigListener(int configType) {

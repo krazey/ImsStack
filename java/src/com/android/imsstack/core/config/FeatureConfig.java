@@ -22,6 +22,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.util.ImsLog;
 
 /**
@@ -55,18 +56,10 @@ public final class FeatureConfig {
     }
 
     public static synchronized void init(int slotId) {
-        CarrierConfigManager ccm = AppContext.getInstance().getSystemService(
-                CarrierConfigManager.class);
-
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
         // If an invalid subId is used, this bundle will contain default values.
-        PersistableBundle config = (ccm != null)
-                ? ccm.getConfigForSubId(MSimUtils.getSubId(slotId)) : null;
-
-        if (config == null) {
-            initUnavailable(slotId);
-            return;
-        }
-
+        PersistableBundle config = ccmp.getConfigForSubId(MSimUtils.getSubId(slotId));
         ArrayMap<String, Integer> features = new ArrayMap<>();
         boolean available;
         StringBuilder sb = new StringBuilder();

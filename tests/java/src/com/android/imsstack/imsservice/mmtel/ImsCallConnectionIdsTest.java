@@ -17,6 +17,8 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
 
+import com.android.imsstack.base.TestAppContext;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,43 +29,46 @@ import org.junit.runners.JUnit4;
 public class ImsCallConnectionIdsTest {
     private ImsCallConnectionIds mImsCallConnectionIds;
     private int mCcId = 0;
-    private static final int SLOT_0 = 0;
-    private static final int SLOT_1 = 1;
     private static final int CONNECTION_ID_1 = 1;
     private static final int CONNECTION_ID_2 = 2;
 
+    private TestAppContext mTestAppContext;
 
     @Before
     public void setUp() throws Exception {
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
         mImsCallConnectionIds = new ImsCallConnectionIds();
     }
 
     @Test
     public void test_callConnectionIds() {
-        mCcId = ImsCallConnectionIds.getNewId(SLOT_0);
-        ImsCallConnectionIds.add(SLOT_0, mCcId);
+        mCcId = ImsCallConnectionIds.getNewId(TestAppContext.SLOT0);
+        ImsCallConnectionIds.add(TestAppContext.SLOT0, mCcId);
         assertEquals(CONNECTION_ID_1, mCcId);
 
-        int ccId = ImsCallConnectionIds.getNewId(SLOT_0);
-        ImsCallConnectionIds.add(SLOT_0, ccId);
+        int ccId = ImsCallConnectionIds.getNewId(TestAppContext.SLOT0);
+        ImsCallConnectionIds.add(TestAppContext.SLOT0, ccId);
         assertEquals(CONNECTION_ID_2, ccId);
 
-        ImsCallConnectionIds.remove(SLOT_0, mCcId);
-        assertEquals(ImsCallConnectionIds.getNewId(SLOT_0), CONNECTION_ID_1);
+        ImsCallConnectionIds.remove(TestAppContext.SLOT0, mCcId);
+        assertEquals(ImsCallConnectionIds.getNewId(TestAppContext.SLOT0), CONNECTION_ID_1);
 
-        ImsCallConnectionIds.add(SLOT_1, mCcId);
+        ImsCallConnectionIds.add(TestAppContext.SLOT1, mCcId);
         assertEquals(CONNECTION_ID_1, mCcId);
 
-        ImsCallConnectionIds.removeAll(SLOT_0);
-        assertEquals(ImsCallConnectionIds.getNewId(SLOT_0), CONNECTION_ID_1);
+        ImsCallConnectionIds.removeAll(TestAppContext.SLOT0);
+        assertEquals(ImsCallConnectionIds.getNewId(TestAppContext.SLOT0), CONNECTION_ID_1);
 
-        ImsCallConnectionIds.removeAll(SLOT_1);
-        assertEquals(ImsCallConnectionIds.getNewId(SLOT_1), CONNECTION_ID_1);
+        ImsCallConnectionIds.removeAll(TestAppContext.SLOT1);
+        assertEquals(ImsCallConnectionIds.getNewId(TestAppContext.SLOT1), CONNECTION_ID_1);
     }
 
     @After
     public void tearDown() throws Exception {
-        mImsCallConnectionIds.removeAll(SLOT_0);
-        mImsCallConnectionIds.removeAll(SLOT_1);
+        mImsCallConnectionIds.removeAll(TestAppContext.SLOT0);
+        mImsCallConnectionIds.removeAll(TestAppContext.SLOT1);
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 }

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -75,7 +76,8 @@ public class ImsServiceManagerTest extends ImsStackTest {
 
         mMockTelephonyManager = mContextFixture.getTestDouble()
                 .getSystemService(TelephonyManager.class);
-        when(AppContext.getTelephonyManager()).thenReturn(mMockTelephonyManager);
+        when(mMockTelephonyManager.createForSubscriptionId(anyInt()))
+                .thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(1);
 
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);

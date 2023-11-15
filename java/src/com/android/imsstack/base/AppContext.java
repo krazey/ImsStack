@@ -20,7 +20,9 @@ import android.content.ContextWrapper;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.telephony.TelephonyManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.imsstack.util.MessageExecutor;
 
@@ -36,16 +38,19 @@ public final class AppContext extends ContextWrapper {
     private final HandlerThread mMainHandlerThread =
             new HandlerThread(AppContext.class.getSimpleName());
     private final MessageExecutor mMainExecutor;
+    private SystemServiceProxy mSystemServiceProxy;
 
     private AppContext(Context context) {
         super(context);
         mMainHandlerThread.start();
         mMainHandler = new Handler(mMainHandlerThread.getLooper());
         mMainExecutor = new MessageExecutor(mMainHandlerThread.getLooper());
+        mSystemServiceProxy = new SystemServiceProxyImpl(context);
     }
 
     private void releaseInstance() {
         mMainHandlerThread.quit();
+        mSystemServiceProxy = null;
     }
 
     /**
@@ -67,23 +72,6 @@ public final class AppContext extends ContextWrapper {
             sAppContext.releaseInstance();
             sAppContext = null;
         }
-    }
-
-    /**
-     * Returns the Telephony Manager that is running as a system service.
-     */
-    public static TelephonyManager getTelephonyManager() {
-        return (sAppContext != null) ? sAppContext.getSystemService(TelephonyManager.class) : null;
-    }
-
-    /**
-     * Returns the Telephony Manager with the specified subscription.
-     *
-     * @param subId The subscription id.
-     */
-    public static TelephonyManager getTelephonyManager(int subId) {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.createForSubscriptionId(subId) : null;
     }
 
     /**
@@ -122,6 +110,40 @@ public final class AppContext extends ContextWrapper {
     }
 
     /**
+     * Creates a new {@link TelephonyManagerProxy} object pinned to the given {@code subId}.
+     *
+     * @return A {@link TelephonyManagerProxy} object that uses the given {@code subId}.
+     */
+    public static @NonNull TelephonyManagerProxy getTelephonyManagerProxy(int subId) {
+        TelephonyManagerProxy tmp = getInstance()
+                .getSystemServiceProxy(TelephonyManagerProxy.class);
+        return tmp.createForSubscriptionId(subId);
+    }
+
+    /**
+     * Creates a new {@link SystemServiceProxy.SmsManagerProxy} object pinned to the given
+     * {@code subId}.
+     *
+     * @return A {@link SystemServiceProxy.SmsManagerProxy} object that uses the given
+     *         {@code subId}.
+     */
+    public static @NonNull SystemServiceProxy.SmsManagerProxy getSmsManagerProxy(int subId) {
+        SystemServiceProxy.SmsManagerProxy smp = getInstance()
+                .getSystemServiceProxy(SystemServiceProxy.SmsManagerProxy.class);
+        return smp.createForSubscriptionId(subId);
+    }
+
+    /**
+     * Returns a specific system service corresponding to the given class.
+     *
+     * @param clazz A requested class name.
+     * @return A system service object corresponding to the given class.
+     */
+    public @NonNull <T> T getSystemServiceProxy(Class<T> clazz) {
+        return mSystemServiceProxy.getSystemService(clazz);
+    }
+
+    /**
      * Returns the main executor for ImsStack.
      */
     public Executor getMainExecutor() {
@@ -140,5 +162,13 @@ public final class AppContext extends ContextWrapper {
      */
     public Looper getMainLooper() {
         return mMainHandlerThread.getLooper();
+    }
+
+    /**
+     * Sets the fake {@link SystemServiceProxy} object for a test purpose.
+     */
+    @VisibleForTesting
+    public void setSystemServiceProxy(SystemServiceProxy systemServiceProxy) {
+        mSystemServiceProxy = systemServiceProxy;
     }
 }

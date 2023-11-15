@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.os.AsyncResult;
+import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -110,8 +111,8 @@ public class ApnXcapTest {
         assertTrue(mApnXcap.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnXcap.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnXcap.getDataState());
-        verify(mConnectivityManager).requestNetwork(
-                any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager).requestNetwork(any(NetworkRequest.class),
+                any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
 
         // return true without request to connect because request is already done
         assertTrue(mApnXcap.connect());

@@ -15,11 +15,10 @@
  */
 package com.android.imsstack.base;
 
-import android.annotation.NonNull;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 
 /**
  * This class provides the utility APIs to control the multi-sim.
@@ -35,36 +34,11 @@ public final class MSimUtils {
     // Intent extra: Hidden menu
     public static final String EXTRA_KEY_SLOT_ID = "SLOT_ID";
 
-    /**
-     * An interface for accessing the {@link SubscriptionManager} for testing.
-     */
-    @VisibleForTesting
-    public interface SubscriptionManagerProxy {
-        /**
-         * Returns a default data subscription id.
-         */
-        int getDefaultDataSubscriptionId();
-
-        /**
-         * Returns the slot index for the given subscription id.
-         *
-         * @param subId The subscription id.
-         */
-        int getSlotIndex(int subId);
-    }
-
-    private static SubscriptionManagerProxy sSubscriptionManagerProxy = null;
-
-    /** Sets the {@link SubscriptionManagerProxy} instance for testing. */
-    @VisibleForTesting
-    public static void setSubscriptionManagerProxy(
-            SubscriptionManagerProxy subscriptionManagerProxy) {
-        sSubscriptionManagerProxy = subscriptionManagerProxy;
-    }
-
     /** Returns the default data subscription id. */
     public static int getDefaultDataSubId() {
-        return getSubscriptionManagerProxy().getDefaultDataSubscriptionId();
+        SubscriptionManagerProxy smp =
+                AppContext.getInstance().getSystemServiceProxy(SubscriptionManagerProxy.class);
+        return smp.getDefaultDataSubscriptionId();
     }
 
     /** Returns the default subscription id that can be used by ImsStack. */
@@ -80,8 +54,7 @@ public final class MSimUtils {
      * Returns the number of logical SIMs currently configured to be activated.
      */
     public static int getActiveSimCount() {
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        return (tm != null) ? tm.getActiveModemCount() : 1;
+        return getTelephonyManagerProxy().getActiveModemCount();
     }
 
     /**
@@ -92,8 +65,7 @@ public final class MSimUtils {
      * {@link #getActiveSimCount} returns 1 while this API returns 2.
      */
     public static int getSupportedSimCount() {
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        return (tm != null) ? tm.getSupportedModemCount() : getActiveSimCount();
+        return getTelephonyManagerProxy().getSupportedModemCount();
     }
 
     /** Returns the phone id from the specified subscription id. */
@@ -103,7 +75,8 @@ public final class MSimUtils {
 
     /** Returns the phone id from the specified subscription id. */
     public static int getPhoneId(int subId, int defaultPhoneId) {
-        int slotId = getSubscriptionManagerProxy().getSlotIndex(subId);
+        SubscriptionManagerProxy smp = getSubscriptionManagerProxy();
+        int slotId = smp.getSlotIndex(subId);
 
         if (slotId < DEFAULT_PHONE_ID || slotId >= getActiveSimCount()) {
             // Set the phoneId as a default
@@ -115,24 +88,17 @@ public final class MSimUtils {
 
     /** Returns a string representing the SIM state. */
     public static String getSimState(int slotId) {
-        TelephonyManager tm = AppContext.getTelephonyManager();
-
-        if (tm == null) {
-            return "UNKNOWN";
-        }
-
-        int simState = tm.getSimState(slotId);
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        int simState = tmp.getSimState(slotId);
 
         if (simState == TelephonyManager.SIM_STATE_READY) {
             int subId = MSimUtils.getSubId(slotId);
-            tm = AppContext.getTelephonyManager(subId);
+            tmp = AppContext.getTelephonyManagerProxy(subId);
 
-            if (tm != null) {
-                int simAppState = tm.getSimApplicationState();
+            int simAppState = tmp.getSimApplicationState();
 
-                if (simAppState == TelephonyManager.SIM_STATE_LOADED) {
-                    simState = TelephonyManager.SIM_STATE_LOADED;
-                }
+            if (simAppState == TelephonyManager.SIM_STATE_LOADED) {
+                simState = TelephonyManager.SIM_STATE_LOADED;
             }
         }
 
@@ -166,20 +132,13 @@ public final class MSimUtils {
 
     /** Returns the subscription id from the specified phone id. */
     public static int getSubId(int phoneId) {
-        SubscriptionManager sm =
-                AppContext.getInstance().getSystemService(SubscriptionManager.class);
-        int[] subIds = (sm != null) ? sm.getSubscriptionIds(phoneId) : null;
-        if ((subIds != null) && (subIds.length > 0)) {
-            return subIds[0];
-        }
-
-        return INVALID_SUB_ID;
+        return getSubscriptionManagerProxy().getSubscriptionId(phoneId);
     }
 
     /** Checks whether SIM card is present or not. */
     public static boolean hasIccCard(int slotId) {
-        TelephonyManager tm = AppContext.getTelephonyManager(getSubId(slotId));
-        return (tm != null) ? tm.hasIccCard() : false;
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(getSubId(slotId));
+        return tmp.hasIccCard();
     }
 
     /** Checks if the multiple IMS is capable when the multiple SIMs support. */
@@ -192,27 +151,22 @@ public final class MSimUtils {
         return getActiveSimCount() > 1;
     }
 
-    /** Checks if the specified subscription id is valid or not. */
-    public static boolean isValidSubId(int subId) {
-        return SubscriptionManager.isUsableSubscriptionId(subId);
+    /** Checks if the specified subscription id is usable or not. */
+    public static boolean isUsableSubId(int subId) {
+        return getSubscriptionManagerProxy().isUsableSubscriptionId(subId);
     }
 
-    @NonNull
-    private static SubscriptionManagerProxy getSubscriptionManagerProxy() {
-        if (sSubscriptionManagerProxy == null) {
-            sSubscriptionManagerProxy = new SubscriptionManagerProxy() {
-                @Override
-                public int getDefaultDataSubscriptionId() {
-                    return SubscriptionManager.getDefaultDataSubscriptionId();
-                }
+    /** Checks if the specified subscription id is valid or not. */
+    public static boolean isValidSubId(int subId) {
+        return getSubscriptionManagerProxy().isValidSubscriptionId(subId);
+    }
 
-                @Override
-                public int getSlotIndex(int subId) {
-                    return SubscriptionManager.getSlotIndex(subId);
-                }
-            };
-        }
-        return sSubscriptionManagerProxy;
+    private static SubscriptionManagerProxy getSubscriptionManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(SubscriptionManagerProxy.class);
+    }
+
+    private static TelephonyManagerProxy getTelephonyManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
     }
 
     private MSimUtils() {}

@@ -18,10 +18,10 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.net.Uri;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
@@ -263,17 +263,13 @@ public class SmsRelayLayer {
     protected String getPSIValue() {
         try {
             synchronized (mLock) {
-                String psiValue = null;
-                SmsManager sm = AppContext.getInstance().getSystemService(SmsManager.class);
-                Uri psiUri = null;
-                if (sm != null) {
-                    psiUri = sm.getSmscIdentity();
-                    psiValue = psiUri.toString();
-                }
-                return psiValue;
+                SmsManagerProxy smp =
+                        AppContext.getInstance().getSystemServiceProxy(SmsManagerProxy.class);
+                Uri psi = smp.getSmscIdentity();
+                return psi.toString();
             }
         } catch (RuntimeException e) {
-            loge("SendRPMessage Failed: " + e.getMessage());
+            loge("getPSIValue: " + e.getMessage());
             return null;
         }
     }

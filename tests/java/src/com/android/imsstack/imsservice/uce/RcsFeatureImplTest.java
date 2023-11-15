@@ -20,12 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
-import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsRcsManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
@@ -36,8 +35,8 @@ import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.imsstack.base.AppContext;
-import com.android.imsstack.enabler.IContext;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
 import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
 import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
@@ -58,24 +57,19 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
-    private TestRcsFeatureImpl mFeature;
-    public static final int STATE_READY = 2;
-    private int mSlotId = 1;
-    private int mTestSubId = 1;
-    private MessageExecutor mExecutor = null;
+    private static final int STATE_READY = 2;
 
-    @Mock
-    IContext mIContext;
-    @Mock
-    Context mContextMock;
-    @Mock protected Context mMockContext;
+    @Mock private Context mMockContext;
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
-    @Mock protected CarrierConfigManager mMockCarrierConfigManager;
-    @Mock protected SubscriptionManager mMockSubscriptionManager;
     @Mock private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
     @Mock private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
     @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
     @Mock private IUceApi mUceApi;
+
+    private MessageExecutor mExecutor = null;
+    private ImsContext mImsContext;
+    private TestAppContext mTestAppContext;
+    private TestRcsFeatureImpl mFeature;
 
     private static class CapabilityCallback extends IImsCapabilityCallback.Stub {
         boolean mIsOnCapabilitiesStatusChanged = false;
@@ -105,11 +99,12 @@ public class RcsFeatureImplTest {
         MockitoAnnotations.initMocks(this);
         mExecutor = new MessageExecutor(RcsFeatureImplTest.class.getSimpleName());
         mMockContext = Mockito.spy(ApplicationProvider.getApplicationContext());
+        mTestAppContext = new TestAppContext(mMockContext);
+        mTestAppContext.setUp();
 
-        mIContext = new ImsContext(mContextMock, mExecutor, mSlotId);
-        AppContext.init(mMockContext);
-        mFeature = new TestRcsFeatureImpl(mIContext);
-        mFeature.initialize(mMockContext, mSlotId);
+        mImsContext = new ImsContext(mMockContext, mExecutor, TestAppContext.SLOT0);
+        mFeature = new TestRcsFeatureImpl(mImsContext);
+        mFeature.initialize(mMockContext, TestAppContext.SLOT0);
         mFeature.setFeatureState(STATE_READY);
     }
 
@@ -151,21 +146,10 @@ public class RcsFeatureImplTest {
         //Carrier Configuration stubbing
         mCapabilityExchangeEventListener = Mockito.mock(CapabilityExchangeEventListener.class);
 
-        mMockCarrierConfigManager =  Mockito.mock(CarrierConfigManager.class);
-        mMockSubscriptionManager = Mockito.mock(SubscriptionManager.class);
-
-        Mockito.when(mMockContext.getSystemService(SubscriptionManager.class))
-                .thenReturn(mMockSubscriptionManager);
-
-        Mockito.when(mMockContext.getSystemService(CarrierConfigManager.class))
-                .thenReturn(mMockCarrierConfigManager);
-
-        Mockito.when(mMockSubscriptionManager.getSubscriptionIds(anyInt()))
-                .thenReturn(new int[]{1});
-        Mockito.doReturn(1).when(Mockito.mock(IContext.class)).getSubId();
-
         PersistableBundle bundle = new PersistableBundle();
-        Mockito.doReturn(bundle).when(mMockCarrierConfigManager).getConfigForSubId(mTestSubId);
+        CarrierConfigManagerProxy ccmp =
+                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        when(ccmp.getConfigForSubId(anyInt())).thenReturn(bundle);
 
         // CapabilityChangeRequest can not be mocked It is a final class.
         CapabilityChangeRequest request =  new CapabilityChangeRequest();
@@ -183,16 +167,14 @@ public class RcsFeatureImplTest {
 
     @After
     public void tearDown() {
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @After
     public void cleanUp() {
         mFeature = null;
-        mContextMock = null;
         mCapabilityExchangeEventListener = null;
-        mMockCarrierConfigManager = null;
-        mMockSubscriptionManager = null;
 
         if (mExecutor != null) {
             mExecutor.getLooper().quit();
@@ -201,15 +183,15 @@ public class RcsFeatureImplTest {
     }
 
     class TestRcsFeatureImpl extends RcsFeatureImpl {
-        TestRcsFeatureImpl(IContext iContext) {
-            super(iContext);
+        TestRcsFeatureImpl(ImsContext imsContext) {
+            super(imsContext);
         }
 
         @Override
         public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
                 CapabilityExchangeEventListener listener) {
-            return new RcsCapExchangeImpl(mCapabilityExchangeEventListener, mSlotId,
-                    mContext, mUceApi, mRcsCapSubscribeResponseCallBack,
+            return new RcsCapExchangeImpl(mCapabilityExchangeEventListener, TestAppContext.SLOT0,
+                    mMockContext, mUceApi, mRcsCapSubscribeResponseCallBack,
                     mRcsCapOptionsResponseCallBack, mRcsCapPublishResponseCallBack);
         }
     }

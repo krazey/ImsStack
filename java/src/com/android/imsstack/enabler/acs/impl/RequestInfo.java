@@ -19,10 +19,10 @@ package com.android.imsstack.enabler.acs.impl;
 import android.annotation.NonNull;
 import android.os.Build;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.enabler.acs.AcServiceClientInfo;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -337,12 +337,12 @@ public class RequestInfo {
          */
         RequestInfoBuilder(int slotId, int subId,
                 @NonNull AcServiceClientInfo acServiceClientInfo) {
-            this(slotId, subId, acServiceClientInfo, AppContext.getTelephonyManager(subId));
+            this(slotId, subId, acServiceClientInfo, AppContext.getTelephonyManagerProxy(subId));
         }
 
         @VisibleForTesting
         public RequestInfoBuilder(int slotId, int subId, AcServiceClientInfo acServiceClientInfo,
-                TelephonyManager tm) {
+                TelephonyManagerProxy tmp) {
             mSlotId = slotId;
             mSubId = subId;
 
@@ -358,22 +358,19 @@ public class RequestInfo {
 
             String mcc = "";
             String mnc = "";
-            String imsi = "";
-            String imei = "";
-            if (tm != null) {
-                String mccMnc = tm.getSimOperator();
-                if (!TextUtils.isEmpty(mccMnc)) {
-                    try {
-                        mcc = mccMnc.substring(0, 3);
-                        mnc = mccMnc.substring(3);
+            String mccMnc = tmp.getSimOperator();
+            if (!TextUtils.isEmpty(mccMnc)) {
+                try {
+                    mcc = mccMnc.substring(0, 3);
+                    mnc = mccMnc.substring(3);
 
-                    } catch (NumberFormatException e) {
-                        ImsLog.e(e.getMessage());
-                    }
+                } catch (NumberFormatException e) {
+                    ImsLog.e(e.getMessage());
                 }
-                imsi = tm.getSubscriberId();
-                imei = tm.getImei(mSlotId);
             }
+            String imsi = tmp.getSubscriberId();
+            String imei = tmp.getImei(mSlotId);
+
             setMccMnc(mcc, mnc);
             setImsi(imsi);
             setImei(imei);

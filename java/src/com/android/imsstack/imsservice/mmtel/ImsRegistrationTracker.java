@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -35,6 +34,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.SimInterface;
@@ -367,11 +367,11 @@ public class ImsRegistrationTracker {
     }
 
     private boolean isMobileDataEnabled() {
-        TelephonyManager tm = AppContext.getTelephonyManager(mContext.getSubId());
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mContext.getSubId());
         if (isRoaming()) {
-            return tm.isDataRoamingEnabled() && tm.isDataEnabled();
+            return tmp.isDataRoamingEnabled() && tmp.isDataEnabled();
         }
-        return tm.isDataEnabled();
+        return tmp.isDataEnabled();
     }
 
     private boolean isVoiceRoaming() {

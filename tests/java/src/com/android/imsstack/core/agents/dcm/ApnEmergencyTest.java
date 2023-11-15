@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
+import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -109,7 +110,8 @@ public class ApnEmergencyTest {
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnEmergency.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnEmergency.getDataState());
         verify(mConnectivityManager).requestNetwork(
-                any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
+                any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class),
+                any(Handler.class));
 
         // return true without request to connect because request is already done
         assertTrue(mApnEmergency.connect());

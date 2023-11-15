@@ -28,6 +28,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -45,12 +46,13 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsFeatureManagerTest {
+    private TestAppContext mTestAppContext;
     private ImsFeatureManager mFeatureManager;
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities;
     private ImsRegistrationTracker mRegTracker;
     private IAosRegistrationListener mAosRegListener;
     private MockContentResolver mContentResolver;
-    MockIAosRegistration mAosReg;
+    private MockIAosRegistration mAosReg;
 
     @Mock Context mContext;
     @Mock IBaseContext mMockBaseContext;
@@ -61,6 +63,8 @@ public class ImsFeatureManagerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
         mContentResolver = new MockContentResolver();
         when(mMockContext.getContext()).thenReturn(mContext);
@@ -79,6 +83,8 @@ public class ImsFeatureManagerTest {
     public void tearDown() {
         mFeatureManager.dispose();
         mContentResolver = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test

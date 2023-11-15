@@ -27,16 +27,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +46,6 @@ import java.util.Arrays;
 
 @RunWith(JUnit4.class)
 public class CarrierConfigTest {
-    private static final int SLOT0 = 0;
     private static final int SIP_18X_TIMER_MILLIS = 32000;
     private static final int[] PCSCF_DISCOVERY_METHOD_LIST = { 0, 1 };
     private static final String CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING =
@@ -106,7 +103,7 @@ public class CarrierConfigTest {
     @Test
     @SmallTest
     public void testSetConfig() {
-        mCarrierConfig.setConfig(createBundle(), SLOT0);
+        mCarrierConfig.setConfig(createBundle(), TestAppContext.SLOT0);
 
         assertNotNull(mCarrierConfig.getConfig());
         assertTrue(mCarrierConfig.isVoLteProvisioningRequired());
@@ -130,13 +127,13 @@ public class CarrierConfigTest {
     @Test
     @SmallTest
     public void testSetConfigForUserAgent() {
-        ContextFixture contextFixture = new ContextFixture();
-        AppContext.init(contextFixture.getTestDouble());
-        TelephonyManager telephonyManager =
-                contextFixture.getTestDouble().getSystemService(TelephonyManager.class);
-        when(telephonyManager.getImei(eq(SLOT0)))
+        TestAppContext testAppContext = new TestAppContext();
+        testAppContext.setUp();
+        TelephonyManagerProxy tmp =
+                testAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(tmp.getImei(eq(TestAppContext.SLOT0)))
                 .thenReturn("000000000000001", "000000000000001", null, null, null, null);
-        when(telephonyManager.getDeviceSoftwareVersion(eq(SLOT0))).thenReturn("01", null, "1");
+        when(tmp.getDeviceSoftwareVersion(eq(TestAppContext.SLOT0))).thenReturn("01", null, "1");
 
         try {
             PersistableBundle b = new PersistableBundle();
@@ -144,7 +141,7 @@ public class CarrierConfigTest {
                     "#MANUFACTURER#_#MODEL#_Android#AV#_#BUILD#_#IMEI#_#IMEISV#_#TEST#");
 
             // IMEI: not empty, SV: not empty
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             String userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
@@ -153,7 +150,7 @@ public class CarrierConfigTest {
             assertTrue(userAgent.endsWith("TEST"));
 
             // IMEI: empty, SV: empty
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
@@ -162,7 +159,7 @@ public class CarrierConfigTest {
             assertTrue(userAgent.endsWith("TEST"));
 
             // IMEI: empty, SV: not empty (1 character)
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
@@ -170,23 +167,12 @@ public class CarrierConfigTest {
             assertFalse(userAgent.contains("#"));
             assertTrue(userAgent.endsWith("TEST"));
 
-            contextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
-
-            // IMEI: empty, SV: empty when TelephonyManager is null
-            mCarrierConfig.setConfig(b, SLOT0);
-
-            userAgent = mCarrierConfig.getString(
-                    CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
-            assertNotNull(userAgent);
-            assertFalse(userAgent.contains("#"));
-            assertTrue(userAgent.endsWith("TEST"));
-
-            verify(telephonyManager, times(6)).getImei(anyInt());
-            verify(telephonyManager, times(3)).getDeviceSoftwareVersion(anyInt());
+            verify(tmp, times(6)).getImei(anyInt());
+            verify(tmp, times(3)).getDeviceSoftwareVersion(anyInt());
 
             // Use a default UA string
             b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, "IMS-client");
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
@@ -194,7 +180,7 @@ public class CarrierConfigTest {
 
             // Empty UA string
             b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, "");
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
@@ -202,14 +188,14 @@ public class CarrierConfigTest {
 
             // Null UA string
             b.putString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING, null);
-            mCarrierConfig.setConfig(b, SLOT0);
+            mCarrierConfig.setConfig(b, TestAppContext.SLOT0);
 
             userAgent = mCarrierConfig.getString(
                     CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
             assertNull(userAgent);
         } finally {
-            AppContext.deinit();
-            contextFixture = null;
+            testAppContext.tearDown();
+            testAppContext = null;
         }
     }
 
@@ -398,7 +384,7 @@ public class CarrierConfigTest {
         p.recycle();
         p = Parcel.obtain();
 
-        mCarrierConfig.setConfig(createBundle(), SLOT0);
+        mCarrierConfig.setConfig(createBundle(), TestAppContext.SLOT0);
         mCarrierConfig.writeToParcel(p);
 
         // Greater than length field (4 bytes)

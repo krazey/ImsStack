@@ -26,7 +26,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
@@ -41,8 +40,8 @@ import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 
 import org.junit.After;
@@ -51,43 +50,51 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 
 @RunWith(JUnit4.class)
-public class DcUtilsTest extends ImsStackTest {
-    private static final int SLOT_ID = 0;
+public class DcUtilsTest {
+    @Mock private ServiceState mServiceState;
+    @Mock private SharedPreferences mSp;
 
-    @Mock SharedPreferences mSp;
-    DcUtils mDcUtils;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
+    private DcUtils mDcUtils;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp(getClass().getSimpleName());
+        MockitoAnnotations.initMocks(this);
 
-        when(mTelephonyManager.getServiceState()).thenReturn(mServiceState);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
 
-        AppContext.init(mContext);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.getServiceState()).thenReturn(mServiceState);
 
-        mDcUtils = new DcUtils(SLOT_ID);
-        mDcUtils.init(mContext);
+        mDcUtils = new DcUtils(TestAppContext.SLOT0);
+        mDcUtils.init(mTestAppContext.getContext());
     }
 
     @After
     public void tearDown() throws Exception {
-        AppContext.deinit();
         if (mDcUtils != null) {
             mDcUtils.cleanup();
             mDcUtils = null;
         }
 
-        super.tearDown();
+        mServiceState = null;
+        mSp = null;
+        mTelephonyManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void getAccessNetworkInfo_serviceStateNull() {
-        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(null);
+        when(mTelephonyManagerProxy.getServiceState()).thenReturn(null);
 
         IDcUtils.AccessNetworkInfo ani =
                 mDcUtils.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
@@ -109,7 +116,8 @@ public class DcUtilsTest extends ImsStackTest {
             ServiceState.DUPLEX_MODE_TDD
         };
 
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         for (int i = 0; i < testNetworkTypes.length; ++i) {
             NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkTypes[i]);
@@ -157,7 +165,8 @@ public class DcUtilsTest extends ImsStackTest {
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkType);
 
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         IDcUtils.AccessNetworkInfo ani = mDcUtils.getAccessNetworkInfo(testNetworkType);
 
@@ -226,15 +235,8 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void isMobileDataEnabled() {
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(null);
-        assertEquals(false, mDcUtils.isMobileDataEnabled());
-
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.isDataEnabled()).thenReturn(false);
-        assertEquals(false, mDcUtils.isMobileDataEnabled());
-
-        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
-        assertEquals(true, mDcUtils.isMobileDataEnabled());
+        mDcUtils.isMobileDataEnabled();
+        verify(mTelephonyManagerProxy).isDataEnabled();
     }
 
     @Test
@@ -246,32 +248,22 @@ public class DcUtilsTest extends ImsStackTest {
 
     @Test
     @SmallTest
-    public void getServiceState_telephonyManagerIsNull() {
-        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
-
-        ServiceState ss = mDcUtils.getServiceState();
-
-        assertNull(ss);
-    }
-
-    @Test
-    @SmallTest
     public void getServiceState_singleSim() {
         ServiceState ss = mDcUtils.getServiceState();
 
-        verify(mTelephonyManager, never()).createForSubscriptionId(anyInt());
+        verify(mTelephonyManagerProxy, never()).createForSubscriptionId(anyInt());
         assertEquals(mServiceState, ss);
     }
 
     @Test
     @SmallTest
     public void getServiceState_multiSim() {
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSupportedModemCount()).thenReturn(2);
 
         ServiceState ss = mDcUtils.getServiceState();
 
-        verify(mTelephonyManager).createForSubscriptionId(anyInt());
+        verify(mTelephonyManagerProxy).createForSubscriptionId(anyInt());
         assertEquals(mServiceState, ss);
     }
 
@@ -365,7 +357,8 @@ public class DcUtilsTest extends ImsStackTest {
         mDcUtils.storeAccessNetworkInfoToCache(TelephonyManager.NETWORK_TYPE_NR,
                 new String[] {"310"});
 
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
@@ -376,7 +369,8 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void getAccessNetworkInfoForNr_nrAccessNetworkInfo() {
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(
                 TelephonyManager.NETWORK_TYPE_NR);

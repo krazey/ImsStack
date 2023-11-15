@@ -33,10 +33,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -567,12 +568,10 @@ public class SscServiceState {
         }
 
         if (subId != MSimUtils.INVALID_SUB_ID) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                mMobileDataStateListener = new SscMobileDataStateListener();
-                tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
-                        mMobileDataStateListener);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            mMobileDataStateListener = new SscMobileDataStateListener();
+            tmp.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
+                    mMobileDataStateListener);
         }
     }
 
@@ -582,11 +581,9 @@ public class SscServiceState {
         }
 
         if (subId != MSimUtils.INVALID_SUB_ID) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(mMobileDataStateListener);
-                mMobileDataStateListener = null;
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            tmp.unregisterTelephonyCallback(mMobileDataStateListener);
+            mMobileDataStateListener = null;
         }
     }
 
@@ -595,15 +592,13 @@ public class SscServiceState {
             return;
         }
 
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            try {
-                mCrossSimDataStateListener = new SscCrossSimDataStateListener();
-                cm.registerDefaultNetworkCallback(mCrossSimDataStateListener);
-            } catch (Exception e) {
-                ImsLog.e(mSlotId, e.toString());
-            }
+        ConnectivityManagerProxy cmp =
+                AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+        try {
+            mCrossSimDataStateListener = new SscCrossSimDataStateListener();
+            cmp.registerDefaultNetworkCallback(mCrossSimDataStateListener, mHandler);
+        } catch (Exception e) {
+            ImsLog.e(mSlotId, e.toString());
         }
     }
 
@@ -612,15 +607,13 @@ public class SscServiceState {
             return;
         }
 
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            try {
-                cm.unregisterNetworkCallback(mCrossSimDataStateListener);
-                mCrossSimDataStateListener = null;
-            } catch (Exception e) {
-                ImsLog.e(mSlotId, e.toString());
-            }
+        ConnectivityManagerProxy cmp =
+                AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+        try {
+            cmp.unregisterNetworkCallback(mCrossSimDataStateListener);
+            mCrossSimDataStateListener = null;
+        } catch (Exception e) {
+            ImsLog.e(mSlotId, e.toString());
         }
     }
 
@@ -880,6 +873,7 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "Cross SIM data not available : " + network);
 
             mCrossSimDataAvailable = false;
+            // TODO: call handleUtFeatureCapabilityChanged here.
             mHandler.sendEmptyMessage(EVENT_CROSS_SIM_DATA_STATE_CHANGED);
         }
 
@@ -893,6 +887,7 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "network = " + network + ", capabilities = " + capabilities);
 
             mCrossSimDataAvailable = isAvailable;
+            // TODO: call handleUtFeatureCapabilityChanged here.
             mHandler.sendEmptyMessage(EVENT_CROSS_SIM_DATA_STATE_CHANGED);
         }
 

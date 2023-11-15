@@ -39,6 +39,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.MediaTestUtils;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
@@ -74,6 +75,7 @@ public class MtcCallTest extends ImsStackTest {
     @Mock private MtcJniProxy mMtcJniProxy;
     @Mock private MtcCall mConferenceMtcCall;
     @Captor ArgumentCaptor<JniImsListener> mJNIImsListenerCaptor;
+
     private int mCommand;
     private boolean mClearInterface;
     private String mCcid;
@@ -135,6 +137,7 @@ public class MtcCallTest extends ImsStackTest {
         mClearInterface = false;
         mCcid = "mCcid";
         MockitoAnnotations.initMocks(this);
+        AppContext.init(mContext);
 
         doReturn((long) 1).when(mMtcJniProxy).getJniInterfaceAndSetListener(
                     anyInt(), anyInt(), any());
@@ -155,6 +158,7 @@ public class MtcCallTest extends ImsStackTest {
         mTestMtcCall = null;
         mTestMtcCallWithMockJniProxy = null;
         super.tearDown();
+        AppContext.deinit();
     }
 
     public void sendMessageToJniListener(int command) {

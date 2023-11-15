@@ -15,12 +15,12 @@
  */
 package com.android.imsstack.core.carrier;
 
-import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
@@ -101,31 +101,31 @@ public final class CarrierInfo {
      */
     public static SimCarrierId getCarrierIdFromSim(int slotId) {
         SimCarrierId.Builder builder = new SimCarrierId.Builder();
-        TelephonyManager tm = getTelephonyManager(slotId);
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy(slotId);
 
-        if (tm != null) {
-            int simState = Sim.getSimStateFromTelephonySimState(tm.getSimApplicationState());
+        if (tmp != null) {
+            int simState = Sim.getSimStateFromTelephonySimState(tmp.getSimApplicationState());
 
             if (simState == Sim.STATE_LOCKED) {
-                builder.setIccId(tm.getSimSerialNumber());
+                builder.setIccId(tmp.getSimSerialNumber());
                 builder.setSimState(SimCarrierId.SIM_LOCKED);
             } else if (simState == Sim.STATE_LOADED) {
                 int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                         ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, slotId);
-                builder.setCarrierId((testCarrierId > 0) ? testCarrierId : tm.getSimCarrierId());
-                builder.setSpecificCarrierId(tm.getSimSpecificCarrierId());
+                builder.setCarrierId((testCarrierId > 0) ? testCarrierId : tmp.getSimCarrierId());
+                builder.setSpecificCarrierId(tmp.getSimSpecificCarrierId());
 
-                String simOperator = tm.getSimOperator();
+                String simOperator = tmp.getSimOperator();
 
                 if (simOperator != null && simOperator.length() >= 3) {
                     builder.setMcc(emptyIfNull(simOperator.substring(0, 3)));
                     builder.setMnc(emptyIfNull(simOperator.substring(3)));
                 }
 
-                builder.setImsi(emptyIfNull(tm.getSubscriberId()));
-                builder.setGid1(emptyIfNull(tm.getGroupIdLevel1()));
-                builder.setSpn(emptyIfNull(tm.getSimOperatorName()));
-                builder.setIccId(emptyIfNull(tm.getSimSerialNumber()));
+                builder.setImsi(emptyIfNull(tmp.getSubscriberId()));
+                builder.setGid1(emptyIfNull(tmp.getGroupIdLevel1()));
+                builder.setSpn(emptyIfNull(tmp.getSimOperatorName()));
+                builder.setIccId(emptyIfNull(tmp.getSimSerialNumber()));
                 builder.setSimState(SimCarrierId.SIM_LOADED);
             }
         }
@@ -154,17 +154,17 @@ public final class CarrierInfo {
                 country, slotId);
     }
 
-    private static TelephonyManager getTelephonyManager(int slotId) {
+    private static TelephonyManagerProxy getTelephonyManagerProxy(int slotId) {
         if (MSimUtils.isMultiSimEnabled()) {
             int subId = MSimUtils.getSubId(slotId);
             if (MSimUtils.isValidSubId(subId)) {
-                return AppContext.getTelephonyManager(subId);
+                return AppContext.getTelephonyManagerProxy(subId);
             }
 
             return null;
         }
 
-        return AppContext.getTelephonyManager();
+        return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
     }
 
     private static String emptyIfNull(String s) {

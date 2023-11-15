@@ -26,6 +26,7 @@ import android.util.Base64;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.concurrent.CancellationException;
@@ -111,9 +112,9 @@ public class GbaAgent implements GbaInterface {
         }
 
         CompletableFuture<GbaCredentials> credentialsFuture = new CompletableFuture<>();
-
-        TelephonyManager tm = getTelephonyManager();
-        tm.bootstrapAuthenticationRequest(appType, nafUri, uspi.build(), forceBootStrapping,
+        int subId = MSimUtils.getSubId(mSlotId);
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+        tmp.bootstrapAuthenticationRequest(appType, nafUri, uspi.build(), forceBootStrapping,
                 getExecutor(),
                 new TelephonyManager.BootstrapAuthenticationCallback() {
                     @Override
@@ -164,10 +165,5 @@ public class GbaAgent implements GbaInterface {
         String scheme = isTls ? "https" : "http";
         String authority = nafPrefix + "@" + nafFqdn;
         return new Uri.Builder().scheme(scheme).encodedAuthority(authority).build();
-    }
-
-    private TelephonyManager getTelephonyManager() {
-        int subId = MSimUtils.getSubId(mSlotId);
-        return AppContext.getTelephonyManager(subId);
     }
 }

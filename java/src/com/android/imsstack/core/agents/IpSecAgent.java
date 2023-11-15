@@ -18,7 +18,6 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.util.SparseArray;
 
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.util.ImsLog;
@@ -60,7 +59,7 @@ public class IpSecAgent implements IpSecInterface {
 
         connector = new IpSecConnector(param);
 
-        if (!connector.init(AppContext.getInstance())) {
+        if (!connector.init()) {
             ImsLog.e(mSlotId, "[IpSec] Creating IpSecConnector failed.");
             return SystemCallInterface.RESULT_ERROR;
         }
@@ -77,7 +76,7 @@ public class IpSecAgent implements IpSecInterface {
         if (connector != null) {
             ImsLog.d(mSlotId, "[IpSec] remove: " + connector.getSaParameter().toString());
             connector.markAsRemoved();
-            connector.close(AppContext.getInstance());
+            connector.close();
             mConnectors.remove(ipSecId);
             return;
         }
@@ -90,7 +89,7 @@ public class IpSecAgent implements IpSecInterface {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
-            if (!connector.applySa(AppContext.getInstance(), spi, intFd, socketFd)) {
+            if (!connector.applySa(spi, intFd, socketFd)) {
                 return SystemCallInterface.RESULT_ERROR;
             }
 
@@ -105,7 +104,7 @@ public class IpSecAgent implements IpSecInterface {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
-            connector.removeSa(AppContext.getInstance(), spi, intFd, socketFd);
+            connector.removeSa(spi, intFd, socketFd);
 
             if (connector.isRemoved()) {
                 if (connector.isAllSocketsDetached()) {

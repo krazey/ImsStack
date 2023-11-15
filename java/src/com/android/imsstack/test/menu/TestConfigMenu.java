@@ -22,10 +22,6 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.telephony.SubscriptionManager;
-import android.telephony.ims.ImsException;
-import android.telephony.ims.ImsManager;
-import android.telephony.ims.ImsMmTelManager;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
@@ -34,6 +30,8 @@ import com.android.imsstack.R;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
@@ -158,13 +156,9 @@ public class TestConfigMenu extends PreferenceActivity {
 
         if (mCrossSimEnabled != null) {
             boolean crossSimEnabled = false;
-            ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
-            if (imsMmTelMgr != null) {
-                try {
-                    crossSimEnabled = imsMmTelMgr.isCrossSimCallingEnabled();
-                } catch (ImsException exception) {
-                    // do noting
-                }
+            ImsMmTelManagerProxy imtmp = getImsMmTelManagerProxy();
+            if (imtmp != null) {
+                crossSimEnabled = imtmp.isCrossSimCallingEnabled();
             }
 
             mCrossSimEnabled.setChecked(crossSimEnabled);
@@ -296,15 +290,10 @@ public class TestConfigMenu extends PreferenceActivity {
         }
     }
 
-    private ImsMmTelManager getImsMmTelManager() {
+    private ImsMmTelManagerProxy getImsMmTelManagerProxy() {
         int subId = MSimUtils.getSubId(mSlotId);
-
-        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
-            return null;
-        }
-
-        ImsManager imsMgr = AppContext.getInstance().getSystemService(ImsManager.class);
-        return (imsMgr == null) ? null : imsMgr.getImsMmTelManager(subId);
+        ImsManagerProxy imp = AppContext.getInstance().getSystemServiceProxy(ImsManagerProxy.class);
+        return imp.getImsMmTelManagerProxy(subId);
     }
 
     private String getImsDeregisterSummary(String value) {
@@ -336,13 +325,9 @@ public class TestConfigMenu extends PreferenceActivity {
                     isValueTypeInt = true;
                     break;
                 case KEY_TEST_CROSS_SIM_ENABLED:
-                    ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
-                    if (imsMmTelMgr != null) {
-                        try {
-                            imsMmTelMgr.setCrossSimCallingEnabled(value);
-                        } catch (ImsException exception) {
-                            // do noting
-                        }
+                    ImsMmTelManagerProxy imtmp = getImsMmTelManagerProxy();
+                    if (imtmp != null) {
+                        imtmp.setCrossSimCallingEnabled(value);
                     }
                     break;
                 case KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED:

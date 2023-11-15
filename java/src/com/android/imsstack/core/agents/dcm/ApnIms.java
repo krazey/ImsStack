@@ -17,13 +17,13 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.os.Message;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
@@ -220,16 +220,14 @@ public class ApnIms extends Apn {
         }
 
         ImsLog.i(mSlotId, "registerDefaultNetworkCallback");
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            mDefaultNetworkCallback = new DefaultNetworkCallback(mSlotId, this);
-            try {
-                cm.registerDefaultNetworkCallback(mDefaultNetworkCallback);
-            } catch (RuntimeException e) {
-                ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.getMessage());
-                mDefaultNetworkCallback = null;
-            }
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+
+        mDefaultNetworkCallback = new DefaultNetworkCallback(mSlotId, this);
+        try {
+            cmp.registerDefaultNetworkCallback(mDefaultNetworkCallback, this);
+        } catch (RuntimeException e) {
+            ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.getMessage());
+            mDefaultNetworkCallback = null;
         }
     }
 
@@ -240,14 +238,11 @@ public class ApnIms extends Apn {
         }
 
         ImsLog.i(mSlotId, "unregisterDefaultNetworkCallback");
-        ConnectivityManager cm = (mContext == null) ? null :
-                mContext.getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            try {
-                cm.unregisterNetworkCallback(mDefaultNetworkCallback);
-            } catch (RuntimeException e) {
-                ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.getMessage());
-            }
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+        try {
+            cmp.unregisterNetworkCallback(mDefaultNetworkCallback);
+        } catch (RuntimeException e) {
+            ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.getMessage());
         }
         mDefaultNetworkCallback = null;
     }

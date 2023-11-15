@@ -22,6 +22,8 @@ import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -120,18 +122,9 @@ public class ServiceCaps {
      * @param subId The subscription id to be updated.
      */
     public static void updateServiceCapabilities(Context c, int slotId, int subId) {
-        CarrierConfigManager ccm = c.getSystemService(CarrierConfigManager.class);
-        PersistableBundle b;
-
-        try {
-            b = (ccm != null)
-                    ? ccm.getConfigForSubId(subId, CARRIER_CONFIG_KEYS)
-                    : CarrierConfigManager.getDefaultConfig();
-        } catch (Exception e) {
-            ImsLog.w(slotId, "updateServiceCapabilities: " + e.toString());
-            b = new PersistableBundle();
-        }
-
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        PersistableBundle b = ccmp.getConfigForSubId(subId, CARRIER_CONFIG_KEYS);
         boolean voLteEnabled = isVoLteEnabledByDevice(c, slotId)
                 && b.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL);
         boolean vtEnabled = isVtEnabledByDevice(c, slotId)

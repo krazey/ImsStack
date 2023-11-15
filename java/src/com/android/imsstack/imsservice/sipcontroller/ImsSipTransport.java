@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.sipcontroller;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.telephony.SubscriptionManager;
 import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.DelegateRequest;
@@ -30,6 +29,7 @@ import android.telephony.ims.stub.SipTransportImplBase;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
 import com.android.imsstack.imsservice.mmtel.ImsRegistrationImpl;
 import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
@@ -124,7 +124,7 @@ public class ImsSipTransport extends SipTransportImplBase {
     public void createSipDelegate(int subscriptionId, @NonNull DelegateRequest request,
             @NonNull DelegateStateCallback delegateStateCallback,
             @NonNull DelegateMessageCallback delegateMessageCallback) {
-        if (SubscriptionManager.isValidSubscriptionId(subscriptionId) == false) {
+        if (!MSimUtils.isValidSubId(subscriptionId)) {
             throw new IllegalArgumentException("Invalid subId: " + subscriptionId);
         }
         if (request == null || delegateStateCallback == null || delegateMessageCallback == null) {

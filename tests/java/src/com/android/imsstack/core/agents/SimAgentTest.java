@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -44,8 +43,9 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.SimUtils;
@@ -64,8 +64,6 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 public class SimAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1, 2 };
     private static final String UST = "86EF112C27FE01744200FF040100001E01";
     private static final byte[] UST_BYTES = SimUtils.hexStringToBytes(UST);
     private static final String IST = "E200";
@@ -78,13 +76,12 @@ public class SimAgentTest {
 
     @Mock private Sim.Listener mSimListener;
     @Mock private Sim.IsimListener mIsimListener;
-    @Mock private TelephonyManager mTelephonyManager;
+    @Mock private TelephonyManagerProxy mTelephonyManagerProxy;
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
     @Mock private NativeStateInterface mNativeStateInterface;
 
-    private Context mContext;
-    private ContextFixture mContextFixture;
+    private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
     private SimAgent mSimAgent;
 
@@ -92,35 +89,28 @@ public class SimAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
 
-        SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
-        when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-
-        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        when(tm.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(1);
-        when(mTelephonyManager.getSimServiceTable(eq(TelephonyManager.APPTYPE_USIM)))
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.getSimServiceTable(eq(TelephonyManager.APPTYPE_USIM)))
                 .thenReturn(UST);
-        when(mTelephonyManager.getSimServiceTable(eq(TelephonyManager.APPTYPE_ISIM)))
+        when(mTelephonyManagerProxy.getSimServiceTable(eq(TelephonyManager.APPTYPE_ISIM)))
                 .thenReturn(IST);
-        when(mTelephonyManager.getImsPrivateUserIdentity()).thenReturn(IMPI);
-        when(mTelephonyManager.getIsimDomain()).thenReturn(DOMAIN);
-        when(mTelephonyManager.getImsPublicUserIdentities()).thenReturn(IMPU_LIST);
-        when(mTelephonyManager.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
+        when(mTelephonyManagerProxy.getImsPrivateUserIdentity()).thenReturn(IMPI);
+        when(mTelephonyManagerProxy.getIsimDomain()).thenReturn(DOMAIN);
+        when(mTelephonyManagerProxy.getImsPublicUserIdentities()).thenReturn(IMPU_LIST);
+        when(mTelephonyManagerProxy.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
                 .thenReturn(true);
 
-        when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
+        when(mSystemInterface.getSystem(eq(TestAppContext.SLOT0))).thenReturn(mSystem);
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(
-                NativeStateInterface.class, mNativeStateInterface, SLOT0);
+                NativeStateInterface.class, mNativeStateInterface, TestAppContext.SLOT0);
 
         mTestableLooper = new TestableLooper(Looper.getMainLooper());
-        mSimAgent = new SimAgent(SLOT0, Looper.getMainLooper());
-        mSimAgent.init(mContext);
+        mSimAgent = new SimAgent(TestAppContext.SLOT0, Looper.getMainLooper());
+        mSimAgent.init(mTestAppContext.getContext());
     }
 
     @After
@@ -135,40 +125,48 @@ public class SimAgentTest {
             mTestableLooper = null;
         }
 
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
         SystemInterface.setSystemInterface(null);
         mSimListener = null;
         mIsimListener = null;
-        mTelephonyManager = null;
+        mTelephonyManagerProxy = null;
         mSystem = null;
         mSystemInterface = null;
         mNativeStateInterface = null;
-        mContextFixture = null;
-        mContext = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void testInit() {
-        assertEquals(SLOT0, mSimAgent.getSlotId());
-        assertEquals(SUB_ID[0], mSimAgent.getSubId());
+        assertEquals(TestAppContext.SLOT0, mSimAgent.getSlotId());
+        assertEquals(TestAppContext.SUB_ID_1, mSimAgent.getSubId());
         assertNotNull(mSimAgent.getUsatInterface());
     }
 
     @Test
     @SmallTest
     public void testGetSmscAddress() {
-        mContextFixture.setSystemService(Context.SMS_SERVICE, null);
+        final String smscAddress = "1234";
+        SmsManagerProxy smsManagerProxy =
+                mTestAppContext.getSystemServiceProxy(SmsManagerProxy.class);
+        when(smsManagerProxy.getSmscAddress()).thenReturn(smscAddress);
+
+        assertEquals(smscAddress, mSimAgent.getSmscAddress());
+
+        doThrow(new RuntimeException("getSmscAddress fails."))
+                .when(smsManagerProxy).getSmscAddress();
+
         assertNull(mSimAgent.getSmscAddress());
     }
 
     @Test
     @SmallTest
     public void testGetSimCardState() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT, TelephonyManager.SIM_STATE_ABSENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED, TelephonyManager.SIM_STATE_ABSENT);
 
         // SIM_STATE_PRESENT
@@ -185,9 +183,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testGetSimState() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT, TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_NOT_READY,
                         TelephonyManager.SIM_STATE_PIN_REQUIRED,
@@ -225,9 +223,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testGetSimRecords() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT, TelephonyManager.SIM_STATE_ABSENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED, TelephonyManager.SIM_STATE_ABSENT);
 
         // SIM_STATE_LOADED
@@ -244,11 +242,11 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testGetIsimRecords() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_LOADED);
@@ -271,9 +269,9 @@ public class SimAgentTest {
 
         // ISIM_STATE_LOADED and throw RuntimeException for IMPI/IMPU
         doThrow(new RuntimeException("IMPI not loaded."))
-                .when(mTelephonyManager).getImsPrivateUserIdentity();
+                .when(mTelephonyManagerProxy).getImsPrivateUserIdentity();
         doThrow(new RuntimeException("IMPU not loaded."))
-                .when(mTelephonyManager).getImsPublicUserIdentities();
+                .when(mTelephonyManagerProxy).getImsPublicUserIdentities();
         mSimAgent.updateSimState();
 
         assertNull(mSimAgent.getIsimImpi());
@@ -285,9 +283,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testGetIsimState() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT, TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_NOT_READY,
                         TelephonyManager.SIM_STATE_PIN_REQUIRED,
@@ -327,14 +325,14 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testGetIsimState_noIsimApplication() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT, TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_NOT_READY,
                         TelephonyManager.SIM_STATE_PIN_REQUIRED,
                         TelephonyManager.SIM_STATE_LOADED);
-        when(mTelephonyManager.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
+        when(mTelephonyManagerProxy.isApplicationOnUicc(eq(TelephonyManager.APPTYPE_ISIM)))
                 .thenReturn(false);
 
         // SIM_STATE_ABSENT
@@ -365,9 +363,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testIsGbaAvailable() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT, TelephonyManager.SIM_STATE_ABSENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED, TelephonyManager.SIM_STATE_ABSENT);
 
         // ISIM_STATE_LOADED
@@ -384,12 +382,12 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testAddListener() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_ABSENT,
@@ -419,12 +417,12 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testAddIsimListener() {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED,
                         TelephonyManager.SIM_STATE_ABSENT,
                         TelephonyManager.SIM_STATE_ABSENT,
@@ -455,9 +453,10 @@ public class SimAgentTest {
     public void testSimCardStateChanged() {
         mSimAgent.addListener(mSimListener);
         BroadcastReceiver receiver = getBroadcastReceiver();
-        receiver.onReceive(mContext, createSimCardStateChangedIntent(Sim.STATE_PRESENT));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createSimCardStateChangedIntent(Sim.STATE_PRESENT));
 
-        assertEquals(SUB_ID[0], mSimAgent.getSubId());
+        assertEquals(TestAppContext.SUB_ID_1, mSimAgent.getSubId());
         assertEquals(Sim.STATE_PRESENT, mSimAgent.getSimCardState());
         verify(mSimListener).onSimCardStateChanged();
     }
@@ -467,10 +466,10 @@ public class SimAgentTest {
     public void testSimApplicationStateChanged() {
         mSimAgent.addListener(mSimListener);
         BroadcastReceiver receiver = getBroadcastReceiver();
-        receiver.onReceive(mContext,
-                createSimApplicationStateChangedIntent(Sim.STATE_LOADED, SUB_ID[1]));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createSimApplicationStateChangedIntent(Sim.STATE_LOADED, TestAppContext.SUB_ID_2));
 
-        assertEquals(SUB_ID[1], mSimAgent.getSubId());
+        assertEquals(TestAppContext.SUB_ID_2, mSimAgent.getSubId());
         assertEquals(Sim.STATE_LOADED, mSimAgent.getSimState());
         assertEquals(Sim.ISIM_STATE_LOADED, mSimAgent.getIsimState());
         verify(mSimListener).onSimStateChanged();
@@ -479,9 +478,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testReadIsimFileAttributes() throws Exception {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED);
 
         mSimAgent.updateSimState();
@@ -518,9 +517,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testReadIsimRecord() throws Exception {
-        when(mTelephonyManager.getSimCardState())
+        when(mTelephonyManagerProxy.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(mTelephonyManagerProxy.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED);
         int index = 0;
 
@@ -561,7 +560,7 @@ public class SimAgentTest {
         String response = "2wgB9X9Haqnj4xA5E6y5r44SxQ7tVvwkeadzEKX0wenwECw/EUHzIDCq5P8A";
         String nonce = "EMQHeGstjjt2pkTck3aM95AQtArxaBmBAADaolOr+yoMYw==";
         long owner = 1L;
-        when(mTelephonyManager.getIccAuthentication(
+        when(mTelephonyManagerProxy.getIccAuthentication(
                 eq(Sim.APP_TYPE_ISIM), eq(TelephonyManager.AUTHTYPE_EAP_AKA), eq(nonce)))
                 .thenReturn(response);
         mSimAgent.requestSimAuthentication(Sim.APP_TYPE_ISIM, nonce, owner);
@@ -577,7 +576,7 @@ public class SimAgentTest {
         String response = "2wgB9X9Haqnj4xA5E6y5r44SxQ7tVvwkeadzEKX0wenwECw/EUHzIDCq5P8A";
         String nonce = "EMQHeGstjjt2pkTck3aM95AQtArxaBmBAADaolOr+yoMYw==";
         long owner = 1L;
-        when(mTelephonyManager.getIccAuthentication(
+        when(mTelephonyManagerProxy.getIccAuthentication(
                 eq(Sim.APP_TYPE_USIM), eq(TelephonyManager.AUTHTYPE_EAP_AKA), eq(nonce)))
                 .thenReturn(response);
         mSimAgent.requestSimAuthentication(Sim.APP_TYPE_USIM, nonce, owner);
@@ -590,9 +589,9 @@ public class SimAgentTest {
     @Test
     @SmallTest
     public void testOnNativeServiceReady() {
-        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        TelephonyManager telephonyManager = mock(TelephonyManager.class);
-        when(tm.createForSubscriptionId(anyInt())).thenReturn(telephonyManager);
+        TelephonyManagerProxy telephonyManagerProxy = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManagerProxy);
 
         ArgumentCaptor<NativeStateInterface.Listener> captor =
                 ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
@@ -603,42 +602,45 @@ public class SimAgentTest {
 
         listener.onNativeServiceReady();
 
-        verify(telephonyManager).getSimCardState();
-        verify(telephonyManager).getSimApplicationState();
+        verify(telephonyManagerProxy).getSimCardState();
+        verify(telephonyManagerProxy).getSimApplicationState();
 
-        when(tm.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getSimCardState())
+        TelephonyManagerProxy telephonyManagerProxy2 = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManagerProxy2);
+        when(telephonyManagerProxy2.getSimCardState())
                 .thenReturn(TelephonyManager.SIM_STATE_PRESENT);
-        when(mTelephonyManager.getSimApplicationState())
+        when(telephonyManagerProxy2.getSimApplicationState())
                 .thenReturn(TelephonyManager.SIM_STATE_LOADED);
         mSimAgent.updateSimState();
 
         assertTrue(mSimAgent.isSimLoaded());
 
-        when(tm.createForSubscriptionId(anyInt())).thenReturn(telephonyManager);
+        when(mTelephonyManagerProxy.createForSubscriptionId(anyInt()))
+                .thenReturn(telephonyManagerProxy);
         listener.onNativeServiceReady();
 
-        verifyNoMoreInteractions(telephonyManager);
+        verifyNoMoreInteractions(telephonyManagerProxy);
     }
 
     private Intent createSimApplicationStateChangedIntent(int state, int subId) {
         return new Intent(TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED)
                 .putExtra(TelephonyManager.EXTRA_SIM_STATE, state)
                 .putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId)
-                .putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, SLOT0);
+                .putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, TestAppContext.SLOT0);
     }
 
     private Intent createSimCardStateChangedIntent(int state) {
         return new Intent(TelephonyManager.ACTION_SIM_CARD_STATE_CHANGED)
                 .putExtra(TelephonyManager.EXTRA_SIM_STATE, state)
-                .putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, SUB_ID[0])
-                .putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, SLOT0);
+                .putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, TestAppContext.SUB_ID_1)
+                .putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, TestAppContext.SLOT0);
     }
 
     private BroadcastReceiver getBroadcastReceiver() {
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mContext).registerReceiver(receiverCaptor.capture(),
+        verify(mTestAppContext.getContext()).registerReceiver(receiverCaptor.capture(),
                 any(IntentFilter.class), any(), any(Handler.class), anyInt());
         return receiverCaptor.getValue();
     }

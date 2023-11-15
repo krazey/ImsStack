@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,8 +56,8 @@ public class SystemUtilsTest {
     @Test
     @SmallTest
     public void getUtcTimeFormat() throws Exception {
-        Date current = new Date();
-        String testResult = SystemUtils.getUtcTimeFormat(current.getTime());
+        Instant instant = Instant.now();
+        String testResult = SystemUtils.getUtcTimeFormat(instant.toEpochMilli());
         Pattern pattern = Pattern.compile(REGEX_UTC_TIME_FORMAT);
         Matcher matcher = pattern.matcher(testResult);
         assertTrue(matcher.matches());
