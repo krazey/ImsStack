@@ -24,6 +24,16 @@
 
 class MockIAosBlock : public IAosBlock {
 public:
+    MockIAosBlock()
+    {
+        ON_CALL(*this, GetBlockReasons)
+                .WillByDefault(
+                        [this](OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType)
+                        {
+                            GetBlockReasonsInternal(&objReasons, eType);
+                        });
+    }
+
     MOCK_METHOD(void, SetListener, (IN IAosBlockListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosBlockListener* piListener), (override));
     MOCK_METHOD(IMS_BOOL, SetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
@@ -37,6 +47,10 @@ public:
     MOCK_METHOD(IMS_BOOL, IsReasonBlocked, (IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled,
             IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsCleared, (IN SERVICE_TYPE eType), (override));
+
+    // Add mock method that can set OUT parameter
+    MOCK_METHOD(void, GetBlockReasonsInternal,
+            (OUT ImsList<IMS_UINT32> * objReasons, IN SERVICE_TYPE eType));
 };
 
 #endif // MOCK_I_AOS_BLOCK_H_
