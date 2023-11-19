@@ -16,13 +16,14 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import static android.provider.Settings.Global.DATA_ROAMING;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
@@ -147,8 +148,8 @@ public class ImsRegistrationTracker {
         }
 
         if (mDataRoamingSettingObserver != null) {
-            mContext.getContext().getContentResolver().unregisterContentObserver(
-                    mDataRoamingSettingObserver);
+            AppContext.getInstance().getContentProviderProxy().getGlobalSettings()
+                    .unregisterContentObserver(mDataRoamingSettingObserver);
         }
     }
 
@@ -417,9 +418,8 @@ public class ImsRegistrationTracker {
             }
         };
 
-        mContext.getContext().getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.DATA_ROAMING), true,
-                mDataRoamingSettingObserver);
+        AppContext.getInstance().getContentProviderProxy().getGlobalSettings()
+                .registerContentObserver(DATA_ROAMING, mDataRoamingSettingObserver);
     }
     /**
      * Call aos to send deregistration

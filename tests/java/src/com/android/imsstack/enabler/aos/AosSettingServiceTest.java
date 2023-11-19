@@ -93,6 +93,7 @@ public class AosSettingServiceTest {
         mAosSettingService.cleanup();
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
+        AosFactory.getInstance().mAosServices.remove(TestAppContext.SLOT0);
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }

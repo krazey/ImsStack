@@ -15,25 +15,27 @@
  */
 package com.android.imsstack.core.agents;
 
+import static android.provider.Settings.Global.DEVICE_NAME;
+
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.provider.Settings;
-import android.test.mock.MockContentResolver;
-
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
-import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,10 +50,8 @@ public class DefaultSystemCallAgentTest {
     private static final String TEST_FILE = "test_prefs";
     private static final String TEST_KEY = "test-key";
     private static final String TEST_VALUE = "test-value";
-    private static final int SLOT0 = 0;
     private static final int TEST_PRIORITY_TYPE = 1;
 
-    @Mock private Context mContext;
     @Mock private SystemInterface mSystemInterface;
     @Mock private PreferenceInterface mPreferenceInterface;
     @Mock private WakeLockInterface mWakeLockInterface;
@@ -60,13 +60,16 @@ public class DefaultSystemCallAgentTest {
     @Mock private TimerAgent mTimerAgent;
     @Mock private ImsTrafficInterface mImsTrafficInterface;
 
+    private TestAppContext mTestAppContext;
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
+
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, mPreferenceInterface);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLockInterface);
@@ -97,8 +100,8 @@ public class DefaultSystemCallAgentTest {
         mTimerAgent = null;
         mWifiInterface = null;
         mSystemInterface = null;
-        mContext = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -184,11 +187,10 @@ public class DefaultSystemCallAgentTest {
     @SmallTest
     public void testGetDeviceName() {
         String testDeviceName = "Device-A";
-        MockContentResolver contentResolver = new MockContentResolver();
-        FakeSettingsProvider settingsProvider = new FakeSettingsProvider();
-        contentResolver.addProvider(Settings.AUTHORITY, settingsProvider);
-        Settings.Global.putString(contentResolver, Settings.Global.DEVICE_NAME, testDeviceName);
-        when(mContext.getContentResolver()).thenReturn(contentResolver);
+        SettingsProxy settingsProxy = mock(SettingsProxy.class);
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(settingsProxy);
+        when(settingsProxy.getString(eq(DEVICE_NAME), anyString())).thenReturn(testDeviceName);
 
         assertEquals(testDeviceName, mDefaultSystemCallAgent.getDeviceName());
     }

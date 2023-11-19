@@ -16,6 +16,8 @@
 
 package com.android.imsstack.core.agents.dcm;
 
+import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +27,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
-import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.CallState;
 import android.telephony.DataSpecificRegistrationInfo;
@@ -35,6 +36,7 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.VopsSupportInfo;
 
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -173,7 +175,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
 
         setRatPolicy();
-        setAirplaneMode();
+        mAirplaneMode = (getAirplaneMode() == 1);
 
         mDcNetWatcherHandler = new DcNetWatcherHandler(Looper.myLooper());
 
@@ -1007,18 +1009,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         ImsLog.i(mSlotId, "mRatPolicy=" + Integer.toHexString(mRatPolicy).toUpperCase());
     }
 
-    private void setAirplaneMode() {
-        int stateFromSettings =
-                Settings.System.getInt(
-                        mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, -1);
-
-        if (stateFromSettings == 1) {
-            mAirplaneMode = true;
-        } else {
-            mAirplaneMode = false;
-        }
-    }
-
     private void handleNetworkOperatorChanged() {
         mNetworkOperatorChangedRegistrants.notifyResult(mNetworkOperator);
 
@@ -1164,6 +1154,11 @@ public class DcNetWatcher implements IDcNetWatcher {
                             : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED;
             mSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, state, 0);
         }
+    }
+
+    private static int getAirplaneMode() {
+        return AppContext.getInstance().getContentProviderProxy().getGlobalSettings()
+                .getInt(AIRPLANE_MODE_ON, -1);
     }
 
     /** This class is for receiving the airplain mode intent */
@@ -1452,11 +1447,7 @@ public class DcNetWatcher implements IDcNetWatcher {
                     return;
                 }
 
-                int stateFromSettings =
-                        Settings.System.getInt(
-                                mContext.getContentResolver(),
-                                Settings.Global.AIRPLANE_MODE_ON,
-                                -1);
+                int stateFromSettings = getAirplaneMode();
 
                 ImsLog.i(
                         mSlotId,

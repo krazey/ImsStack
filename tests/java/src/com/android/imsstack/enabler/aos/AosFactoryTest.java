@@ -85,6 +85,7 @@ public class AosFactoryTest {
     @After
     public void tearDown() {
         JniImsProxy.setJniIms(null);
+        mAosFactory.cleanup(SLOT_0);
     }
 
     @AfterClass

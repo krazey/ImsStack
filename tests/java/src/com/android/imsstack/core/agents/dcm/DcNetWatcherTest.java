@@ -16,6 +16,8 @@
 
 package com.android.imsstack.core.agents.dcm;
 
+import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -32,7 +34,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RegistrantList;
-import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -51,6 +52,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
@@ -84,8 +87,10 @@ public class DcNetWatcherTest extends ImsStackTest {
     private static final int NUM_OF_SLOT = 1;
     private static final int SLOT_0 = 0;
 
+    private TestAppContext mTestAppContext;
     private DcNetWatcher mDcNetWatcher;
 
+    @Mock SettingsProxy mSettingsProxy;
     @Mock DcSettings mMockDcSetting;
     @Mock ISystem mMockSystem;
     @Mock IAosInfo mMockAosInfo;
@@ -106,6 +111,11 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
+
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(mSettingsProxy);
 
         when(mMockSystemInterface.getSystem(SLOT_0)).thenReturn(mMockSystem);
         replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
@@ -144,6 +154,10 @@ public class DcNetWatcherTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
         DcFactory.setDcAgent(IDcSettings.class, null, SLOT_0);
+
+        mSettingsProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -1078,7 +1092,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
         replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
+        when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,
@@ -1096,7 +1110,7 @@ public class DcNetWatcherTest extends ImsStackTest {
             throws Exception {
         replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, -1);
+        when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(-1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,

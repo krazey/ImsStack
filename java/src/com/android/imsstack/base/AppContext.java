@@ -15,8 +15,11 @@
  */
 package com.android.imsstack.base;
 
+import static android.provider.Settings.Global.DEVICE_NAME;
+
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -38,6 +41,7 @@ public final class AppContext extends ContextWrapper {
     private final HandlerThread mMainHandlerThread =
             new HandlerThread(AppContext.class.getSimpleName());
     private final MessageExecutor mMainExecutor;
+    private ContentProviderProxy mContentProviderProxy;
     private SystemServiceProxy mSystemServiceProxy;
 
     private AppContext(Context context) {
@@ -45,12 +49,14 @@ public final class AppContext extends ContextWrapper {
         mMainHandlerThread.start();
         mMainHandler = new Handler(mMainHandlerThread.getLooper());
         mMainExecutor = new MessageExecutor(mMainHandlerThread.getLooper());
+        mContentProviderProxy = new ContentProviderProxyImpl(context);
         mSystemServiceProxy = new SystemServiceProxyImpl(context);
     }
 
     private void releaseInstance() {
         mMainHandlerThread.quit();
         mSystemServiceProxy = null;
+        mContentProviderProxy = null;
     }
 
     /**
@@ -144,6 +150,16 @@ public final class AppContext extends ContextWrapper {
     }
 
     /**
+     * Returns the {@link ContentProviderProxy} to access the Settings provider or
+     * register/unregister the content observer.
+     *
+     * @return The {@link ContentProviderProxy} instance.
+     */
+    public @NonNull ContentProviderProxy getContentProviderProxy() {
+        return mContentProviderProxy;
+    }
+
+    /**
      * Returns the main executor for ImsStack.
      */
     public Executor getMainExecutor() {
@@ -165,10 +181,43 @@ public final class AppContext extends ContextWrapper {
     }
 
     /**
+     * Sets the fake {@link ContentProviderProxy} object for a test purpose.
+     */
+    @VisibleForTesting
+    public void setContentProviderProxy(ContentProviderProxy contentProviderProxy) {
+        mContentProviderProxy = contentProviderProxy;
+    }
+
+    /**
      * Sets the fake {@link SystemServiceProxy} object for a test purpose.
      */
     @VisibleForTesting
     public void setSystemServiceProxy(SystemServiceProxy systemServiceProxy) {
         mSystemServiceProxy = systemServiceProxy;
+    }
+
+    /**
+     * Returns the current device name.
+     *
+     * @return A device name.
+     */
+    public static String getDeviceName() {
+        return getInstance().getContentProviderProxy().getGlobalSettings()
+                .getString(DEVICE_NAME, "");
+    }
+
+    /**
+     * Returns the external storage path.
+     *
+     * @return An external storage path.
+     */
+    public static String getExternalStoragePath() {
+        String state = Environment.getExternalStorageState();
+
+        if (!Environment.MEDIA_MOUNTED.equalsIgnoreCase(state)) {
+            return "";
+        }
+
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 }

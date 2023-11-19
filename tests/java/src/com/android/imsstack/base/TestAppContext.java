@@ -22,6 +22,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 
@@ -51,6 +52,7 @@ public class TestAppContext {
     public static final int SUB_ID_2 = 2; // For SLOT1
 
     private final Context mContext;
+    private final ContentProviderProxy mContentProviderProxy = mock(ContentProviderProxy.class);
     private final TelephonyManagerProxy mTelephonyManagerProxy = mock(TelephonyManagerProxy.class);
     private final CarrierConfigManagerProxy mCarrierConfigManagerProxy =
             mock(CarrierConfigManagerProxy.class);
@@ -78,6 +80,7 @@ public class TestAppContext {
 
     public void setUp() {
         AppContext.init(mContext);
+        AppContext.getInstance().setContentProviderProxy(mContentProviderProxy);
         AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
     }
 
@@ -89,6 +92,10 @@ public class TestAppContext {
         return mContext;
     }
 
+    public ContentProviderProxy getContentProviderProxy() {
+        return mContentProviderProxy;
+    }
+
     public SystemServiceProxy getSystemServiceProxy() {
         return mSystemServiceProxy;
     }
@@ -97,7 +104,8 @@ public class TestAppContext {
         return mSystemServiceProxy.getSystemService(clazz);
     }
 
-    public class FakeSystemServiceProxy implements SystemServiceProxy {
+    private class FakeSystemServiceProxy implements SystemServiceProxy {
+        private final PersistableBundle mCarrierConfig = mock(PersistableBundle.class);
         private final Map<Class<?>, Object> mManagerProxies = new ArrayMap<>();
 
         FakeSystemServiceProxy() {
@@ -127,6 +135,7 @@ public class TestAppContext {
             when(mSubscriptionManagerProxy.getSubscriptionId(SLOT1)).thenReturn(SUB_ID_2);
             when(mSubscriptionManagerProxy.getDefaultDataSubscriptionId())
                     .thenReturn(MSimUtils.DEFAULT_SUB_ID);
+            when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt())).thenReturn(mCarrierConfig);
             when(mSmsManagerProxy.createForSubscriptionId(anyInt())).thenReturn(mSmsManagerProxy);
             when(mImsManagerProxy.getImsMmTelManagerProxy(anyInt()))
                     .thenReturn(mImsMmTelManagerProxy);

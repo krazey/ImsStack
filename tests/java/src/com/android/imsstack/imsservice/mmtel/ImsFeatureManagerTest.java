@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Looper;
 import android.telephony.ims.feature.MmTelFeature;
-import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
@@ -51,10 +51,10 @@ public class ImsFeatureManagerTest {
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities;
     private ImsRegistrationTracker mRegTracker;
     private IAosRegistrationListener mAosRegListener;
-    private MockContentResolver mContentResolver;
     private MockIAosRegistration mAosReg;
 
     @Mock Context mContext;
+    @Mock SettingsProxy mSettingsProxy;
     @Mock IBaseContext mMockBaseContext;
     @Mock IContext mMockContext;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
@@ -66,11 +66,11 @@ public class ImsFeatureManagerTest {
         mTestAppContext = new TestAppContext(mContext);
         mTestAppContext.setUp();
 
-        mContentResolver = new MockContentResolver();
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(mSettingsProxy);
         when(mMockContext.getContext()).thenReturn(mContext);
         when(mMockBaseContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
         when(mMockContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
-        when(mContext.getContentResolver()).thenReturn(mContentResolver);
         mAosReg = new MockIAosRegistration();
         mFeatureManager = new ImsFeatureManager(mMockBaseContext, mMockFeatureCapabilityListener);
         mRegTracker = new FakeImsRegistrationTracker(mMockContext, new ImsRegistrationImpl());
@@ -82,7 +82,6 @@ public class ImsFeatureManagerTest {
     @After
     public void tearDown() {
         mFeatureManager.dispose();
-        mContentResolver = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }
