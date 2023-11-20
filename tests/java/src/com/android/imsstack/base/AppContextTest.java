@@ -15,10 +15,16 @@
  */
 package com.android.imsstack.base;
 
+import static android.provider.Settings.Global.DEVICE_NAME;
+
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +33,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 
 import org.junit.After;
@@ -42,6 +49,7 @@ public class AppContextTest {
     private static final int RUN_TASK_DELAY = 500; // milli-seconds
 
     @Mock private Context mContext;
+    @Mock private ContentProviderProxy mContentProviderProxy;
     @Mock private SystemServiceProxy mSystemServiceProxy;
     @Mock private TelephonyManagerProxy mTelephonyManagerProxy;
     @Mock private SmsManagerProxy mSmsManagerProxy;
@@ -55,16 +63,20 @@ public class AppContextTest {
                 .thenReturn(mTelephonyManagerProxy);
         when(mSystemServiceProxy.getSystemService(eq(SmsManagerProxy.class)))
                 .thenReturn(mSmsManagerProxy);
-        when(mTelephonyManagerProxy.createForSubscriptionId(eq(TestAppContext.SUB_ID_1)))
+        when(mTelephonyManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
                 .thenReturn(mTelephonyManagerProxy);
-        when(mSmsManagerProxy.createForSubscriptionId(eq(TestAppContext.SUB_ID_1)))
+        when(mSmsManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
                 .thenReturn(mSmsManagerProxy);
         AppContext.init(mContext);
     }
 
     @After
     public void tearDown() throws Exception {
+        mContentProviderProxy = null;
+        mTelephonyManagerProxy = null;
+        mSmsManagerProxy = null;
         mSystemServiceProxy = null;
+        mRunnable = null;
         mContext = null;
         AppContext.deinit();
     }
@@ -99,7 +111,7 @@ public class AppContextTest {
     @SmallTest
     public void testGetTelephonyManagerProxy() {
         AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
-        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(TestAppContext.SUB_ID_1);
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(SUB_ID_1);
         assertEquals(tmp, mTelephonyManagerProxy);
     }
 
@@ -107,7 +119,7 @@ public class AppContextTest {
     @SmallTest
     public void testGetSmsManagerProxy() {
         AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
-        SmsManagerProxy smp = AppContext.getSmsManagerProxy(TestAppContext.SUB_ID_1);
+        SmsManagerProxy smp = AppContext.getSmsManagerProxy(SUB_ID_1);
         assertEquals(smp, mSmsManagerProxy);
     }
 
@@ -153,5 +165,23 @@ public class AppContextTest {
     @SmallTest
     public void testGetMainLooper() throws Exception {
         assertNotNull(AppContext.getInstance().getMainLooper());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetDeviceName() {
+        AppContext.getInstance().setContentProviderProxy(mContentProviderProxy);
+        String testDeviceName = "Device-A";
+        SettingsProxy settingsProxy = mock(SettingsProxy.class);
+        when(mContentProviderProxy.getGlobalSettings()).thenReturn(settingsProxy);
+        when(settingsProxy.getString(eq(DEVICE_NAME), anyString())).thenReturn(testDeviceName);
+
+        assertEquals(testDeviceName, AppContext.getDeviceName());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetExternalStoragePath() {
+        assertNotNull(AppContext.getExternalStoragePath());
     }
 }

@@ -19,7 +19,6 @@ package com.android.imsstack.core.agents;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.DeviceUtils;
 
 /**
  * An agent class to handle the default system calls.
@@ -110,7 +109,7 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
      */
     @Override
     public String getDeviceName() {
-        return DeviceUtils.getDeviceName(AppContext.getInstance());
+        return AppContext.getDeviceName();
     }
 
     /**
@@ -120,7 +119,7 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
      */
     @Override
     public String getExternalStoragePath() {
-        return DeviceUtils.getExternalStoragePath();
+        return AppContext.getExternalStoragePath();
     }
 
     /**

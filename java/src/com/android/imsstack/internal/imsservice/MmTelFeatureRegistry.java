@@ -17,7 +17,6 @@
 package com.android.imsstack.internal.imsservice;
 
 import android.annotation.Nullable;
-import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
@@ -27,6 +26,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsMmTelManager;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ContentProviderProxy;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
 import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
@@ -271,35 +271,35 @@ public class MmTelFeatureRegistry {
                 };
             }
 
-            ContentResolver cr = AppContext.getInstance().getContentResolver();
+            ContentProviderProxy cpp = AppContext.getInstance().getContentProviderProxy();
 
             mAdvancedCallingSettingUri =
                     getUriFor(SubscriptionManager.ADVANCED_CALLING_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mAdvancedCallingSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mAdvancedCallingSettingUri, mSettingsObserver);
 
             mVtSettingUri = getUriFor(SubscriptionManager.VT_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVtSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVtSettingUri, mSettingsObserver);
 
             mVoWiFiSettingUri = getUriFor(SubscriptionManager.WFC_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiSettingUri, mSettingsObserver);
 
             mVoWiFiModeUri = getUriFor(SubscriptionManager.WFC_MODE_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiModeUri, mSettingsObserver);
 
             mVoWiFiRoamingSettingUri =
                     getUriFor(SubscriptionManager.WFC_ROAMING_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiRoamingSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiRoamingSettingUri, mSettingsObserver);
 
             mVoWiFiRoamingModeUri = getUriFor(SubscriptionManager.WFC_ROAMING_MODE_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiRoamingModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiRoamingModeUri, mSettingsObserver);
 
             mRttModeUri = Settings.Secure.getUriFor(RTT_MODE_SETTING);
-            cr.registerContentObserver(mRttModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mRttModeUri, mSettingsObserver);
         }
 
         private void unregisterSettingsObserver() {
             if (mSettingsObserver != null) {
-                AppContext.getInstance().getContentResolver()
+                AppContext.getInstance().getContentProviderProxy()
                         .unregisterContentObserver(mSettingsObserver);
 
                 mAdvancedCallingSettingUri = null;
@@ -671,8 +671,8 @@ public class MmTelFeatureRegistry {
     }
 
     private void updateRttMode() {
-        int rttMode = Settings.Secure.getInt(
-                AppContext.getInstance().getContentResolver(), RTT_MODE_SETTING, 0);
+        int rttMode = AppContext.getInstance().getContentProviderProxy().getSecureSettings()
+                .getInt(RTT_MODE_SETTING, 0);
 
         if (mRttMode != rttMode) {
             ImsLog.i(mSlotId, "updateRttMode: " + mRttMode + " >> " + rttMode);

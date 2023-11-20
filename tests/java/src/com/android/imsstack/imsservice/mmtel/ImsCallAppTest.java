@@ -58,7 +58,6 @@ import org.mockito.MockitoAnnotations;
 public class ImsCallAppTest {
     private ImsCallApp mImsCallApp;
     private MessageExecutor mExecutor;
-    private MockIAosRegistration mAosReg;
     ImsUtImpl mImsUtImpl;
     ImsEcbmImpl mImsEcbmImpl;
     ImsMultiEndpointImpl mMultiEndpoint;
