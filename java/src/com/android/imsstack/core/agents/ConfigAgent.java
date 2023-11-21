@@ -517,12 +517,11 @@ public class ConfigAgent implements ConfigInterface {
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_PUT);
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_APPLY);
 
-            AppContext.getInstance().registerReceiver(this, filter, null,
-                    AppContext.getInstance().getMainHandler(), Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
         public void unregister() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

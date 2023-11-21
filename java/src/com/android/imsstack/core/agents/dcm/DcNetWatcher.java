@@ -197,10 +197,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
 
         mDcNetWatcherReceiver = new DcNetWatcherReceiver();
-        mContext.registerReceiver(
-                mDcNetWatcherReceiver,
-                mDcNetWatcherReceiver.getFilter(),
-                Context.RECEIVER_EXPORTED);
+        mDcNetWatcherReceiver.register();
 
         mPhoneStateListener = new DcNetWatcherPhoneStateListener();
         mPhoneStateListener.setListener();
@@ -232,8 +229,8 @@ public class DcNetWatcher implements IDcNetWatcher {
             mPhoneStateListener = null;
         }
 
-        if (mDcNetWatcherReceiver != null && mContext != null) {
-            mContext.unregisterReceiver(mDcNetWatcherReceiver);
+        if (mDcNetWatcherReceiver != null) {
+            mDcNetWatcherReceiver.unregister();
             mDcNetWatcherReceiver = null;
         }
 
@@ -1163,14 +1160,15 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     /** This class is for receiving the airplain mode intent */
     public class DcNetWatcherReceiver extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
-
-        public DcNetWatcherReceiver() {
-            mIntentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        /** Registers the broadcast receiver. */
+        public void register() {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        /** Unregisters the broadcast receiver. */
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

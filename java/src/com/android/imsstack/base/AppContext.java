@@ -41,6 +41,7 @@ public final class AppContext extends ContextWrapper {
     private final HandlerThread mMainHandlerThread =
             new HandlerThread(AppContext.class.getSimpleName());
     private final MessageExecutor mMainExecutor;
+    private BroadcastReceiverProxy mBroadcastReceiverProxy;
     private ContentProviderProxy mContentProviderProxy;
     private SystemServiceProxy mSystemServiceProxy;
 
@@ -49,6 +50,7 @@ public final class AppContext extends ContextWrapper {
         mMainHandlerThread.start();
         mMainHandler = new Handler(mMainHandlerThread.getLooper());
         mMainExecutor = new MessageExecutor(mMainHandlerThread.getLooper());
+        mBroadcastReceiverProxy = new BroadcastReceiverProxyImpl(context, mMainHandler);
         mContentProviderProxy = new ContentProviderProxyImpl(context);
         mSystemServiceProxy = new SystemServiceProxyImpl(context);
     }
@@ -150,6 +152,16 @@ public final class AppContext extends ContextWrapper {
     }
 
     /**
+     * Returns the {@link BroadcastReceiverProxy} to register and unregister the broadcast intent
+     * receiver.
+     *
+     * @return The {@link BroadcastReceiverProxy} instance.
+     */
+    public @NonNull BroadcastReceiverProxy getBroadcastReceiverProxy() {
+        return mBroadcastReceiverProxy;
+    }
+
+    /**
      * Returns the {@link ContentProviderProxy} to access the Settings provider or
      * register/unregister the content observer.
      *
@@ -178,6 +190,14 @@ public final class AppContext extends ContextWrapper {
      */
     public Looper getMainLooper() {
         return mMainHandlerThread.getLooper();
+    }
+
+    /**
+     * Sets the fake {@link BroadcastReceiverProxy} object for a test purpose.
+     */
+    @VisibleForTesting
+    public void setBroadcastReceiverProxy(BroadcastReceiverProxy broadcastReceiverProxy) {
+        mBroadcastReceiverProxy = broadcastReceiverProxy;
     }
 
     /**

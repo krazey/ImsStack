@@ -441,12 +441,12 @@ public class TimerAgent implements TimerInterface {
             filter.addAction(ACTION_ALARM_NATIVE_TIMER);
             filter.addAction(ACTION_ALARM_TIMER);
 
-            AppContext.getInstance().registerReceiver(this, filter, null,
-                    mTimerHandler, Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mTimerHandler);
         }
 
         public void unregister() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

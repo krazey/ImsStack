@@ -52,6 +52,8 @@ public class TestAppContext {
     public static final int SUB_ID_2 = 2; // For SLOT1
 
     private final Context mContext;
+    private final BroadcastReceiverProxy mBroadcastReceiverProxy =
+            mock(BroadcastReceiverProxy.class);
     private final ContentProviderProxy mContentProviderProxy = mock(ContentProviderProxy.class);
     private final TelephonyManagerProxy mTelephonyManagerProxy = mock(TelephonyManagerProxy.class);
     private final CarrierConfigManagerProxy mCarrierConfigManagerProxy =
@@ -80,6 +82,7 @@ public class TestAppContext {
 
     public void setUp() {
         AppContext.init(mContext);
+        AppContext.getInstance().setBroadcastReceiverProxy(mBroadcastReceiverProxy);
         AppContext.getInstance().setContentProviderProxy(mContentProviderProxy);
         AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
     }
@@ -90,6 +93,10 @@ public class TestAppContext {
 
     public Context getContext() {
         return mContext;
+    }
+
+    public BroadcastReceiverProxy getBroadcastReceiverProxy() {
+        return mBroadcastReceiverProxy;
     }
 
     public ContentProviderProxy getContentProviderProxy() {
@@ -151,5 +158,9 @@ public class TestAppContext {
             }
             return (T) proxy;
         }
+    }
+
+    public <T> T getSystemService(Class<T> clazz) {
+        return mContext.getSystemService(clazz);
     }
 }

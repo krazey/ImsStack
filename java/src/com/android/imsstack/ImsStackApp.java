@@ -340,7 +340,7 @@ public class ImsStackApp extends Application {
         ImsServiceController.start(this, slotId);
 
         if (ImsTestMode.getInstance().getTestMode(slotId).isGenericTestMode()) {
-            ImsTestHelper.getInstance();
+            ImsTestHelper.getInstance().init();
         }
     }
 
@@ -489,12 +489,11 @@ public class ImsStackApp extends Application {
             filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
             filter.addAction(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
 
-            AppContext.getInstance().registerReceiver(this, filter, null,
-                    AppContext.getInstance().getMainHandler(), Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
         public void stopListening() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

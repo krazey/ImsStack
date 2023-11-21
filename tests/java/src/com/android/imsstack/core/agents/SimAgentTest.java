@@ -640,8 +640,9 @@ public class SimAgentTest {
     private BroadcastReceiver getBroadcastReceiver() {
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mTestAppContext.getContext()).registerReceiver(receiverCaptor.capture(),
-                any(IntentFilter.class), any(), any(Handler.class), anyInt());
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(receiverCaptor.capture(), any(IntentFilter.class),
+                        any(Handler.class));
         return receiverCaptor.getValue();
     }
 

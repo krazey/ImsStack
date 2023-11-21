@@ -682,17 +682,16 @@ public class SimAgent implements SimInterface {
 
     private final class SimStateReceiver extends BroadcastReceiver {
         public void register() {
-            IntentFilter intentFilter = new IntentFilter(
+            IntentFilter filter = new IntentFilter(
                     TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED);
+            filter.addAction(TelephonyManager.ACTION_SIM_CARD_STATE_CHANGED);
 
-            intentFilter.addAction(TelephonyManager.ACTION_SIM_CARD_STATE_CHANGED);
-
-            AppContext.getInstance().registerReceiver(this, intentFilter, null,
-                    mSimHandler, Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mSimHandler);
         }
 
         public void unregister() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

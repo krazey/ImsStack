@@ -387,12 +387,12 @@ public class WifiAgent implements WifiInterface {
     private class WifiBroadcastReceiver extends BroadcastReceiver {
         public void register() {
             IntentFilter filter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
-            AppContext.getInstance().registerReceiver(
-                    this, filter, null, mHandler, Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mHandler);
         }
 
         public void unregister() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

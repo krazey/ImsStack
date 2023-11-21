@@ -75,8 +75,7 @@ public class AosSettingService {
         }
 
         mIntentReceiverListener = new IntentReceiverListener();
-        AppContext.getInstance().registerReceiver(mIntentReceiverListener,
-                mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
+        mIntentReceiverListener.register();
 
         mSimListener = new Sim.Listener() {
                 @Override
@@ -113,7 +112,7 @@ public class AosSettingService {
         }
 
         if (mIntentReceiverListener != null) {
-            AppContext.getInstance().unregisterReceiver(mIntentReceiverListener);
+            mIntentReceiverListener.unregister();
             mIntentReceiverListener = null;
         }
 
@@ -248,15 +247,16 @@ public class AosSettingService {
 
     @VisibleForTesting
     protected class IntentReceiverListener extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_REBOOT);
+            filter.addAction(Intent.ACTION_SHUTDOWN);
 
-        public IntentReceiverListener() {
-            mIntentFilter.addAction(Intent.ACTION_REBOOT);
-            mIntentFilter.addAction(Intent.ACTION_SHUTDOWN);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

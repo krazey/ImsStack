@@ -18,6 +18,9 @@ package com.android.imsstack.core.agents.dcm;
 
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -28,8 +31,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -84,9 +88,6 @@ import java.util.Collections;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class DcNetWatcherTest extends ImsStackTest {
-    private static final int NUM_OF_SLOT = 1;
-    private static final int SLOT_0 = 0;
-
     private TestAppContext mTestAppContext;
     private DcNetWatcher mDcNetWatcher;
 
@@ -117,20 +118,20 @@ public class DcNetWatcherTest extends ImsStackTest {
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
 
-        when(mMockSystemInterface.getSystem(SLOT_0)).thenReturn(mMockSystem);
+        when(mMockSystemInterface.getSystem(SLOT0)).thenReturn(mMockSystem);
         replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
 
-        when(mMockAosFactory.getAosInfo(SLOT_0)).thenReturn(mMockAosInfo);
+        when(mMockAosFactory.getAosInfo(SLOT0)).thenReturn(mMockAosInfo);
         replaceInstance(AosFactory.class, "sFactory", null, mMockAosFactory);
 
         AgentFactory.getInstance().setAgent(
-                PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
+                PhoneStateInterface.class, mMockPhoneStateInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
-                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
-                TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+                TelephonyInterface.class, mMockTelephonyInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
-                ConfigInterface.class, mMockConfigInterface, SLOT_0);
+                ConfigInterface.class, mMockConfigInterface, SLOT0);
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
@@ -139,9 +140,9 @@ public class DcNetWatcherTest extends ImsStackTest {
                         AccessNetworkConstants.AccessNetworkType.IWLAN,
                         AccessNetworkConstants.AccessNetworkType.UTRAN,
                         AccessNetworkConstants.AccessNetworkType.GERAN});
-        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT_0);
+        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT0);
 
-        mDcNetWatcher = new DcNetWatcher(SLOT_0);
+        mDcNetWatcher = new DcNetWatcher(SLOT0);
         mDcNetWatcher.init(mContext);
     }
 
@@ -150,10 +151,10 @@ public class DcNetWatcherTest extends ImsStackTest {
         mDcNetWatcher.cleanup();
         super.tearDown();
 
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
-        DcFactory.setDcAgent(IDcSettings.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        DcFactory.setDcAgent(IDcSettings.class, null, SLOT0);
 
         mSettingsProxy = null;
         mTestAppContext.tearDown();
@@ -163,10 +164,10 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Test
     public void testInit() {
         verify(mMockDcSetting).getImsSupportedRats();
-        verify(mMockSystemInterface).getSystem(SLOT_0);
-        verify(mMockAosFactory).getAosInfo(SLOT_0);
+        verify(mMockSystemInterface).getSystem(SLOT0);
+        verify(mMockAosFactory).getAosInfo(SLOT0);
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
-        verify(mContext).registerReceiver(any(), any(), eq(Context.RECEIVER_EXPORTED));
+        verify(mTestAppContext.getBroadcastReceiverProxy()).registerReceiver(any(), any());
         verify(mMockPhoneStateInterface).createNotifier(any(), any(Looper.class));
         verify(mMockPhoneStateNotifier).setEvents(ImsPhoneStateListener.LISTEN_CALL_STATE
                 | ImsPhoneStateListener.LISTEN_SERVICE_STATE
@@ -182,7 +183,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockConfigInterface).removeListener(any(ConfigInterface.Listener.class));
         verify(mMockPhoneStateInterface).removeNotifier(mMockPhoneStateNotifier);
         verify(mMockPhoneStateNotifier).setListener(null);
-        verify(mContext).unregisterReceiver(any());
+        verify(mTestAppContext.getBroadcastReceiverProxy()).unregisterReceiver(any());
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
     }
 
@@ -1167,13 +1168,12 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testOnCarrierConfigChanged() throws Exception {
-        int subId = 1;
         ArgumentCaptor<ConfigInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(ConfigInterface.Listener.class);
         verify(mMockConfigInterface).addListener(listenerCaptor.capture());
 
         ConfigInterface.Listener listener = listenerCaptor.getValue();
-        listener.onCarrierConfigChanged(SLOT_0, subId);
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
 
         // Called once in init() and again in onCarrierConfigChanged().
         verify(mMockDcSetting, times(2)).getImsSupportedRats();
@@ -1207,8 +1207,12 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testOnReceive() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(captor.capture(), any(IntentFilter.class));
+        BroadcastReceiver receiver = captor.getValue();
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mContext.sendBroadcast(intent);
+        receiver.onReceive(mTestAppContext.getContext(), intent);
 
         assertEquals(true, mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
                 DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED));

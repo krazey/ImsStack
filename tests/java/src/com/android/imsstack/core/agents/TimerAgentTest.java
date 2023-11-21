@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
@@ -56,14 +57,14 @@ public class TimerAgentTest {
     private static final long SHORT_DURATION = 1000L; // 1 second
     private static final long LONG_DURATION = 10000L; // 1 second
 
-    @Mock SystemInterface mSystemInterface;
-    @Mock WakeLockInterface mWakeLock;
-    @Mock TimerInterface.Listener mTimerListener;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private WakeLockInterface mWakeLock;
+    @Mock private TimerInterface.Listener mTimerListener;
 
     private AlarmManager mAlarmManager;
     private BroadcastReceiver mTimerBroadcastReceiver;
     private ContextFixture mContextFixture;
-    private Context mContext;
+    private TestAppContext mTestAppContext;
     private TestableLooper mMainLooper;
     private TestableLooper mTimerLooper;
     private TimerAgent mTimerAgent;
@@ -73,21 +74,22 @@ public class TimerAgentTest {
         MockitoAnnotations.initMocks(this);
 
         mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        mAlarmManager = mContext.getSystemService(AlarmManager.class);
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUp();
+
+        mAlarmManager = mTestAppContext.getSystemService(AlarmManager.class);
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLock);
         mMainLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mTimerAgent = new TimerAgent();
-        mTimerAgent.init(mContext);
+        mTimerAgent.init(mTestAppContext.getContext());
         mTimerAgent.setMaxTimerId(MAX_TIMER_ID);
         mTimerLooper = new TestableLooper(mTimerAgent.getTimerLooper());
 
         ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mContext).registerReceiver(captor.capture(), any(IntentFilter.class),
-                eq(null), any(Handler.class), eq(Context.RECEIVER_EXPORTED));
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(captor.capture(), any(IntentFilter.class), any(Handler.class));
         mTimerBroadcastReceiver = captor.getValue();
     }
 
@@ -96,7 +98,8 @@ public class TimerAgentTest {
         if (mTimerAgent != null) {
             mTimerAgent.cleanup();
             mTimerAgent = null;
-            verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+            verify(mTestAppContext.getBroadcastReceiverProxy())
+                    .unregisterReceiver(any(BroadcastReceiver.class));
         }
 
         if (mMainLooper != null) {
@@ -116,8 +119,8 @@ public class TimerAgentTest {
         mSystemInterface = null;
         mTimerListener = null;
         mContextFixture = null;
-        mContext = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -272,7 +275,8 @@ public class TimerAgentTest {
     @SmallTest
     public void testNotifyTimerExpiredForLongDuration() {
         long tid = mTimerAgent.startTimer(LONG_DURATION, mTimerListener);
-        mTimerBroadcastReceiver.onReceive(mContext, TimerAgent.createIntent(tid, false, false));
+        mTimerBroadcastReceiver.onReceive(mTestAppContext.getContext(),
+                TimerAgent.createIntent(tid, false, false));
         processAllMessages();
 
         verify(mWakeLock).acquire(anyInt());
@@ -294,7 +298,7 @@ public class TimerAgentTest {
     @SmallTest
     public void testNotifyNativeTimerExpiredForLongDuration() {
         boolean result = mTimerAgent.startNativeTimer(NATIVE_TIMER_ID, LONG_DURATION);
-        mTimerBroadcastReceiver.onReceive(mContext,
+        mTimerBroadcastReceiver.onReceive(mTestAppContext.getContext(),
                 TimerAgent.createIntent(NATIVE_TIMER_ID, true, false));
 
         assertTrue(result);

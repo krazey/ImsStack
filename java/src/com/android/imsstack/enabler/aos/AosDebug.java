@@ -182,8 +182,7 @@ public class AosDebug implements IAosDebug {
         }
 
         mDebugBroadcastReceiver = createDebugBroadcastReceiver();
-        mContext.registerReceiver(mDebugBroadcastReceiver,
-                mDebugBroadcastReceiver.getFilter(), null, mHandler);
+        mDebugBroadcastReceiver.register();
 
         mSubId = MSimUtils.getSubId(mSlotId);
         mDebugData.putInt(DebugData.KEY_SUB_ID, mSubId);
@@ -218,7 +217,7 @@ public class AosDebug implements IAosDebug {
         }
 
         if (mDebugBroadcastReceiver != null) {
-            mContext.unregisterReceiver(mDebugBroadcastReceiver);
+            mDebugBroadcastReceiver.unregister();
             mDebugBroadcastReceiver = null;
         }
 
@@ -1151,8 +1150,14 @@ public class AosDebug implements IAosDebug {
 
         public DebugBroadcastReceiver() {}
 
-        public IntentFilter getFilter() {
-            return new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        public void register() {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mHandler);
+        }
+
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

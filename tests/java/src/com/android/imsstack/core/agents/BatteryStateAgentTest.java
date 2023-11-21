@@ -15,12 +15,13 @@
  */
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
@@ -42,6 +42,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.BroadcastReceiverProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
 
 import org.junit.After;
@@ -55,7 +57,6 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class BatteryStateAgentTest {
-    private static final int SLOT0 = 0;
     private static final int LOW_BATTERY_WARNING_LEVEL = 20;
     private static final int LOW_BATTERY_LEVEL = 10;
     private static final int NORMAL_BATTERY_LEVEL = 70;
@@ -64,9 +65,13 @@ public class BatteryStateAgentTest {
     @Mock private SystemInterface mSystemInterface;
     @Mock private TimerInterface mTimerInterface;
 
-    private Context mContext;
     private ContextFixture mContextFixture;
+    private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
+    private BroadcastReceiverProxy mBroadcastReceiverProxy;
+    private Intent mBatteryChangedStickyIntent;
+    private BroadcastReceiver mBatteryStateReceiver;
+    private BroadcastReceiver mBatteryChangedReceiver;
     private BatteryStateAgent mBatteryStateAgent;
 
     @Before
@@ -74,11 +79,12 @@ public class BatteryStateAgentTest {
         MockitoAnnotations.initMocks(this);
 
         mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        when(mContext.getResources().getInteger(
-                eq(com.android.internal.R.integer.config_lowBatteryWarningLevel)))
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUp();
+        mBroadcastReceiverProxy = mTestAppContext.getBroadcastReceiverProxy();
+        when(mTestAppContext.getContext().getResources()
+                .getInteger(eq(com.android.internal.R.integer.config_lowBatteryWarningLevel)))
                 .thenReturn(LOW_BATTERY_WARNING_LEVEL);
-        AppContext.init(mContext);
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(TimerInterface.class, mTimerInterface);
         when(mTimerInterface.startTimer(anyLong(), any(TimerInterface.Listener.class)))
@@ -102,26 +108,29 @@ public class BatteryStateAgentTest {
 
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
         SystemInterface.setSystemInterface(null);
+        mBatteryChangedReceiver = null;
+        mBatteryStateReceiver = null;
+        mBatteryChangedStickyIntent = null;
+        mBroadcastReceiverProxy = null;
         mContextFixture = null;
-        mContext = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void testInitWhenBatteryChargingAndPollingTimerStarts() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_CHARGING, 0, NORMAL_BATTERY_LEVEL);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryStateReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryStateReceiver(filter)), any(Handler.class));
         verify(mTimerInterface).startTimer(anyLong(), any(TimerInterface.Listener.class));
 
         mBatteryStateAgent.cleanup();
         mBatteryStateAgent = null;
 
-        verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mBroadcastReceiverProxy).unregisterReceiver(any(BroadcastReceiver.class));
         verify(mTimerInterface).stopTimer(eq(TIMER_ID));
     }
 
@@ -130,52 +139,46 @@ public class BatteryStateAgentTest {
     public void testInitWhenBatteryChargingAndBatteryLevelLow() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_CHARGING,
                 BatteryManager.BATTERY_PLUGGED_USB, LOW_BATTERY_LEVEL);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryStateReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryStateReceiver(filter)), any(Handler.class));
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
 
         mBatteryStateAgent.cleanup();
         mBatteryStateAgent = null;
 
-        verify(mContext, times(2)).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mBroadcastReceiverProxy, times(2)).unregisterReceiver(any(BroadcastReceiver.class));
     }
 
     @Test
     @SmallTest
     public void testInitWhenBatteryNotChargingAndBatteryLevelLow() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0, LOW_BATTERY_LEVEL);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryStateReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryStateReceiver(filter)), any(Handler.class));
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
     }
 
     @Test
     @SmallTest
     public void testInitWhenBatteryNotChargingAndBatteryLevelLowAndImmediatelyCleanup() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0, LOW_BATTERY_LEVEL);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
         mBatteryStateAgent.cleanup();
         mBatteryStateAgent = null;
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryStateReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
-        verify(mContext, never()).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryStateReceiver(filter)), any(Handler.class));
+        verify(mBroadcastReceiverProxy, never()).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
     }
 
     @Test
@@ -229,16 +232,18 @@ public class BatteryStateAgentTest {
     public void testHandleBatteryChanged() {
         Intent intent = setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0,
                 BatteryStateAgent.LOW_BATTERY_WARNING_LEVEL_FOR_CALL);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
-        mContext.sendBroadcast(intent);
+        setUpBatteryChangedReceiver();
+        mBatteryChangedReceiver.onReceive(mTestAppContext.getContext(), intent);
 
         verify(mSystemInterface).notifyBatteryLevelChanged(
                 eq(BatteryStateAgent.LOW_BATTERY_WARNING_LEVEL_FOR_CALL));
         verify(mSystemInterface).notifyLowBatteryState();
 
-        mContext.sendBroadcast(createIntentForBatteryChanged(
-                BatteryManager.BATTERY_STATUS_CHARGING, 0, NORMAL_BATTERY_LEVEL));
+        mBatteryChangedReceiver.onReceive(mTestAppContext.getContext(),
+                createIntentForBatteryChanged(
+                        BatteryManager.BATTERY_STATUS_CHARGING, 0, NORMAL_BATTERY_LEVEL));
 
         verify(mSystemInterface).notifyBatteryLevelChanged(eq(NORMAL_BATTERY_LEVEL));
         verify(mSystemInterface).notifyLowBatteryStateChanged();
@@ -250,17 +255,17 @@ public class BatteryStateAgentTest {
     public void testHandleBatteryLow() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0,
                 LOW_BATTERY_WARNING_LEVEL + 1);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
+        setUpBatteryStateReceiver();
 
         Intent intent = new Intent(Intent.ACTION_BATTERY_LOW);
         // registerReceiver should be called once even if the event happens twice.
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
     }
 
     @Test
@@ -268,22 +273,22 @@ public class BatteryStateAgentTest {
     public void testHandleBatteryPowerConnected() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0,
                 LOW_BATTERY_WARNING_LEVEL + 1);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
+        setUpBatteryStateReceiver();
 
         Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
         // Timer should be started once even if the event happens twice.
-        mContext.sendBroadcast(intent);
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
 
         verify(mTimerInterface).startTimer(anyLong(), any(TimerInterface.Listener.class));
 
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0, LOW_BATTERY_LEVEL);
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
     }
 
     @Test
@@ -291,23 +296,23 @@ public class BatteryStateAgentTest {
     public void testHandleBatteryPowerDisconnected() {
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0,
                 LOW_BATTERY_WARNING_LEVEL + 1);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
+        setUpBatteryStateReceiver();
 
         Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
         // Timer should be started twice if the event happens twice.
-        mContext.sendBroadcast(intent);
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
 
         verify(mTimerInterface, times(2)).startTimer(anyLong(), any(TimerInterface.Listener.class));
         verify(mTimerInterface).stopTimer(eq(TIMER_ID));
 
         setUpBatteryStates(BatteryManager.BATTERY_STATUS_DISCHARGING, 0, LOW_BATTERY_LEVEL);
-        mContext.sendBroadcast(intent);
+        mBatteryStateReceiver.onReceive(mTestAppContext.getContext(), intent);
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
 
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                argThat(filter -> matchBatteryChangedReceiver(filter)),
-                eq(null), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
     }
 
     @Test
@@ -315,9 +320,8 @@ public class BatteryStateAgentTest {
     public void testPollingTimerExpired() {
         Intent intent = setUpBatteryStates(BatteryManager.BATTERY_STATUS_CHARGING,
                 BatteryManager.BATTERY_PLUGGED_USB, NORMAL_BATTERY_LEVEL + 1);
-        mBatteryStateAgent.init(mContext);
+        mBatteryStateAgent.init(mTestAppContext.getContext());
         processAllMessages(BatteryStateAgent.DELAY_INSTALL_BATTERY_CHANGED_RECEIVER + 1);
-        mContext.sendBroadcast(intent);
 
         ArgumentCaptor<TimerInterface.Listener> captor =
                 ArgumentCaptor.forClass(TimerInterface.Listener.class);
@@ -340,9 +344,24 @@ public class BatteryStateAgentTest {
     }
 
     private Intent setUpBatteryStates(int status, int plugged, int level) {
-        Intent intent = createIntentForBatteryChanged(status, plugged, level);
-        mContext.sendStickyBroadcast(intent);
-        return intent;
+        mBatteryChangedStickyIntent = createIntentForBatteryChanged(status, plugged, level);
+        when(mBroadcastReceiverProxy.registerReceiver(eq(null), any(IntentFilter.class)))
+                .thenReturn(mBatteryChangedStickyIntent);
+        return mBatteryChangedStickyIntent;
+    }
+
+    private void setUpBatteryStateReceiver() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastReceiverProxy).registerReceiver(captor.capture(),
+                argThat(filter -> matchBatteryStateReceiver(filter)), any(Handler.class));
+        mBatteryStateReceiver = captor.getValue();
+    }
+
+    private void setUpBatteryChangedReceiver() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastReceiverProxy).registerReceiver(captor.capture(),
+                argThat(filter -> matchBatteryChangedReceiver(filter)), any(Handler.class));
+        mBatteryChangedReceiver = captor.getValue();
     }
 
     private static Intent createIntentForBatteryChanged(int status, int plugged, int level) {

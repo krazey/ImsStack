@@ -117,8 +117,8 @@ public class BatteryStateAgent implements BatteryStateInterface {
     }
 
     private void updateCurrentBatteryStates() {
-        Intent stickyIntent = AppContext.getInstance().registerReceiver(null,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_EXPORTED);
+        Intent stickyIntent = AppContext.getInstance().getBroadcastReceiverProxy()
+                .registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         updateBatteryStates(stickyIntent);
     }
 
@@ -174,9 +174,9 @@ public class BatteryStateAgent implements BatteryStateInterface {
         if (mBatteryChangedReceiverInstaller == null) {
             mBatteryChangedReceiverInstaller = () -> {
                 ImsLog.d("BatteryChangedReceiverInstaller is run...");
-                AppContext.getInstance().registerReceiver(mBatteryChangedReceiver,
-                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED), null,
-                        mHandler, Context.RECEIVER_EXPORTED);
+                AppContext.getInstance().getBroadcastReceiverProxy()
+                        .registerReceiver(mBatteryChangedReceiver,
+                                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), mHandler);
             };
             mHandler.postDelayed(mBatteryChangedReceiverInstaller,
                     DELAY_INSTALL_BATTERY_CHANGED_RECEIVER);
@@ -191,7 +191,8 @@ public class BatteryStateAgent implements BatteryStateInterface {
             if (mHandler.hasCallbacks(mBatteryChangedReceiverInstaller)) {
                 mHandler.removeCallbacks(mBatteryChangedReceiverInstaller);
             } else {
-                AppContext.getInstance().unregisterReceiver(mBatteryChangedReceiver);
+                AppContext.getInstance().getBroadcastReceiverProxy()
+                        .unregisterReceiver(mBatteryChangedReceiver);
             }
             mBatteryChangedReceiverInstaller = null;
         } else {
@@ -280,12 +281,12 @@ public class BatteryStateAgent implements BatteryStateInterface {
             filter.addAction(Intent.ACTION_POWER_CONNECTED);
             filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
-            AppContext.getInstance().registerReceiver(this, filter, null,
-                    mHandler, Context.RECEIVER_EXPORTED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mHandler);
         }
 
         public void unregister() {
-            AppContext.getInstance().unregisterReceiver(this);
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

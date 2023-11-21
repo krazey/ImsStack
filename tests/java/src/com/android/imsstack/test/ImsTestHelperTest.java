@@ -16,8 +16,11 @@
 
 package com.android.imsstack.test;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,15 +28,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
@@ -66,39 +70,52 @@ public class ImsTestHelperTest extends ImsStackTest {
     private static final String INTENT_SRVCC_TEST = "com.android.imsstack.action.INTENT_SRVCC_TEST";
     private static final String INTENT_MTC_TEST = "com.android.imsstack.action.INTENT_MTC_TEST";
     private static final String INTENT_QOS_TEST = "com.android.imsstack.action.INTENT_QOS_TEST";
-    private static final int SLOT_0 = 0;
-    @Mock private ISystem mMockSystem;
-    @Mock private AosService mMockAosService;
-    private ImsTestHelper.ImsTestHelperReceiver mImsTestHelperReceiver;
 
+    @Mock private AosService mMockAosService;
     @Mock private ImsServiceManager mImsServiceManager;
     @Mock private ImsCallApp mCallApp;
+
+    private TestAppContext mTestAppContext;
+    private BroadcastReceiver mBroadcastReceiver;
     private ImsTestHelper mImsTestHelper;
-    private SystemInterface mMockSystemInterface;
 
     @Captor ArgumentCaptor<CapabilityPairs> mChangeCapabilitiesCaptor;
 
     @Before
     public void setUp() throws Exception {
+        super.setUp(ImsTestHelperTest.class.getSimpleName());
         MockitoAnnotations.initMocks(this);
-        ContextFixture contextFixture = new ContextFixture();
-        AppContext.init(contextFixture.getTestDouble());
+
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
         ImsServiceManager.setDefault(mImsServiceManager);
-        when(mImsServiceManager.getCallApp(SLOT_0)).thenReturn(mCallApp);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
+        when(mImsServiceManager.getCallApp(SLOT0)).thenReturn(mCallApp);
+        AosFactory.getInstance().mAosServices.put(SLOT0, mMockAosService);
 
         mImsTestHelper = ImsTestHelper.getInstance();
-        mImsTestHelperReceiver = new ImsTestHelper.ImsTestHelperReceiver();
+        mImsTestHelper.init();
+
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(captor.capture(), any(IntentFilter.class));
+        mBroadcastReceiver = captor.getValue();
     }
 
     @After
     public void tearDown() throws Exception {
-        mImsTestHelper = null;
-        mImsTestHelperReceiver = null;
+        super.tearDown();
+
+        if (mImsTestHelper != null) {
+            mImsTestHelper.cleanup();
+            mImsTestHelper = null;
+        }
+
         ImsServiceManager.setDefault(null);
-        AosFactory.getInstance().mAosServices.remove(SLOT_0);
-        AppContext.deinit();
+        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        mBroadcastReceiver = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -111,7 +128,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intent.putExtra("video", "1,1,1,0");
         intent.putExtra("voice", "1,1,1,0");
         intent.putExtra("call_composer", "1,1,0,0");
-        mImsTestHelperReceiver.onReceive(mContext, intent);
+        mBroadcastReceiver.onReceive(mContext, intent);
         verify(mMockAosService).changeCapabilities(mChangeCapabilitiesCaptor.capture());
 
         CapabilityPairs capturedCapabilityPairs = mChangeCapabilitiesCaptor.getValue();
@@ -136,19 +153,23 @@ public class ImsTestHelperTest extends ImsStackTest {
     @Test
     @SmallTest
     public void sendVopsChanged() throws Exception {
-        mMockSystemInterface = Mockito.mock(SystemInterface.class);
-        when(mMockSystemInterface.getSystem(SLOT_0)).thenReturn(mMockSystem);
-        replaceInstance(SystemInterface.class, "sSystemInterface",
-                null, mMockSystemInterface);
+        SystemInterface systemInterface = Mockito.mock(SystemInterface.class);
+        ISystem system = Mockito.mock(ISystem.class);
+        SystemInterface.setSystemInterface(systemInterface);
+        when(systemInterface.getSystem(SLOT0)).thenReturn(system);
 
-        Intent intent = new Intent();
-        intent.setAction(INTENT_AOS_TEST);
-        intent.putExtra("event", "vops");
-        intent.putExtra("state", ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE);
-        mImsTestHelperReceiver.onReceive(mContext, intent);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
-                ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
-                0);
+        try {
+            Intent intent = new Intent();
+            intent.setAction(INTENT_AOS_TEST);
+            intent.putExtra("event", "vops");
+            intent.putExtra("state", ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE);
+            mBroadcastReceiver.onReceive(mContext, intent);
+            verify(system).notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
+                    ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
+                    0);
+        } finally {
+            SystemInterface.setSystemInterface(null);
+        }
     }
 
     @Test
@@ -169,8 +190,8 @@ public class ImsTestHelperTest extends ImsStackTest {
         intentQos.putExtra("result", "OK");
         intentQos.putExtra("ipaddress", "10.20.10.30");
         intentQos.putExtra("type", 10);
-        mImsTestHelperReceiver.onReceive(mContext, intentQos);
-        verify(mImsServiceManager).getCallApp(SLOT_0);
+        mBroadcastReceiver.onReceive(mContext, intentQos);
+        verify(mImsServiceManager).getCallApp(SLOT0);
     }
 
     @Test
@@ -179,8 +200,8 @@ public class ImsTestHelperTest extends ImsStackTest {
         Intent intentSrv = new Intent();
         intentSrv.setAction(INTENT_SRVCC_TEST);
         intentSrv.putExtra("type", 2);
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
-        verify(mImsServiceManager).getCallApp(SLOT_0);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
+        verify(mImsServiceManager).getCallApp(SLOT0);
     }
 
     @Test
@@ -192,28 +213,28 @@ public class ImsTestHelperTest extends ImsStackTest {
         when(mtcApp.createMtcCallAndAttach(MtcCall.FLAG_MO)).thenReturn(mtcCall);
         when(manager.getMtcApp()).thenReturn(mtcApp);
         when(mCallApp.getCallManager()).thenReturn(manager);
-        when(mImsServiceManager.getCallApp(SLOT_0)).thenReturn(mCallApp);
+        when(mImsServiceManager.getCallApp(SLOT0)).thenReturn(mCallApp);
 
         //100
         int[] extra = new int[]{16, 1, 1, 1, 1, 1};
         Intent intentSrv = new Intent();
         intentSrv.setAction(INTENT_MTC_TEST);
         intentSrv.putExtra("command", 100);
-        intentSrv.putExtra("slotid", SLOT_0);
+        intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("extras", extra);
 
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
-        verify(mImsServiceManager).getCallApp(SLOT_0);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
+        verify(mImsServiceManager).getCallApp(SLOT0);
         verify(mtcApp).openEmergencyService(anyObject(), anyInt());
 
         // 101
         intentSrv.putExtra("command", 101);
-        intentSrv.putExtra("slotid", SLOT_0);
+        intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("extras", extra);
 
         Mockito.reset(mImsServiceManager);
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
-        verify(mImsServiceManager, times(1)).getCallApp(SLOT_0);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
+        verify(mImsServiceManager, times(1)).getCallApp(SLOT0);
         verify(mtcApp, times(1)).createMtcCallAndAttach(anyInt());
 
         // 102
@@ -221,29 +242,29 @@ public class ImsTestHelperTest extends ImsStackTest {
         when(mtcApp.createMtcCallAndAttach(MtcCall.FLAG_MO)).thenReturn(mtcCall);
         when(manager.getMtcApp()).thenReturn(mtcApp);
         when(mCallApp.getCallManager()).thenReturn(manager);
-        when(mImsServiceManager.getCallApp(SLOT_0)).thenReturn(mCallApp);
+        when(mImsServiceManager.getCallApp(SLOT0)).thenReturn(mCallApp);
         intentSrv.putExtra("command", 102);
-        intentSrv.putExtra("slotid", SLOT_0);
+        intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("extras", extra);
 
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
-        verify(mImsServiceManager, times(1)).getCallApp(SLOT_0);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
+        verify(mImsServiceManager, times(1)).getCallApp(SLOT0);
         verify(mtcCall).start(anyInt(), anyString(), anyString(), anyObject(), anyObject());
 
         // 103
         Mockito.reset(mtcCall);
         intentSrv.putExtra("command", 103);
-        intentSrv.putExtra("slotid", SLOT_0);
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
+        intentSrv.putExtra("slotid", SLOT0);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
         verify(mtcCall).terminate(extra[0], true);
 
         // 104
         Mockito.reset(mtcCall);
         intentSrv.putExtra("command", 104);
-        intentSrv.putExtra("slotid", SLOT_0);
+        intentSrv.putExtra("slotid", SLOT0);
         intentSrv.putExtra("extras", extra);
 
-        mImsTestHelperReceiver.onReceive(mContext, intentSrv);
+        mBroadcastReceiver.onReceive(mContext, intentSrv);
         verify(mtcCall).close();
     }
 }

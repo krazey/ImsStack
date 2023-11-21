@@ -57,45 +57,48 @@ public final class ImsTestHelper {
 
     private static MtcCall sTempCall = null;
 
-    private Context mContext;
     private ImsTestHelperReceiver mReceiver;
 
-    public ImsTestHelper () {
-        ImsLog.d("ImsTestHelper is loaded");
-
-        mContext = AppContext.getInstance();
-        if (mContext == null) {
-            return;
-        }
-        mReceiver = new ImsTestHelperReceiver();
-        mContext.registerReceiver(mReceiver, mReceiver.getFilter(), Context.RECEIVER_EXPORTED);
-    }
-
     public static ImsTestHelper getInstance() {
-
-        if ( sImsTestHelper == null ) {
+        if (sImsTestHelper == null) {
             sImsTestHelper = new ImsTestHelper();
         }
         return sImsTestHelper;
     }
 
+    public void init() {
+        ImsLog.d("init");
+
+        if (mReceiver != null) {
+            mReceiver.unregister();
+        }
+        mReceiver = new ImsTestHelperReceiver();
+        mReceiver.register();
+    }
+
     public void cleanup() {
-        ImsLog.d("cleanup()");
+        ImsLog.d("cleanup");
+
+        if (mReceiver != null) {
+            mReceiver.unregister();
+            mReceiver = null;
+        }
     }
 
     @VisibleForTesting
     protected static class ImsTestHelperReceiver extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(INTENT_AOS_TEST);
+            filter.addAction(INTENT_SRVCC_TEST);
+            filter.addAction(INTENT_MTC_TEST);
+            filter.addAction(INTENT_QOS_TEST);
 
-        public ImsTestHelperReceiver() {
-            mIntentFilter.addAction(INTENT_AOS_TEST);
-            mIntentFilter.addAction(INTENT_SRVCC_TEST);
-            mIntentFilter.addAction(INTENT_MTC_TEST);
-            mIntentFilter.addAction(INTENT_QOS_TEST);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override
@@ -105,12 +108,12 @@ public final class ImsTestHelper {
             ImsLog.d(ImsLog.lastSubString(action, "."));
 
             if (action.equals(INTENT_AOS_TEST)) {
-                String strEvent = intent.getStringExtra("event");
-                if (strEvent.equalsIgnoreCase("capa")) {
+                String event = intent.getStringExtra("event");
+                if ("capa".equalsIgnoreCase(event)) {
                     sendCapabilitiesChanged(intent.getStringExtra("network"),
                             intent.getStringExtra("voice"), intent.getStringExtra("video"),
                             intent.getStringExtra("call_composer"));
-                } else if (strEvent.equalsIgnoreCase("vops")) {
+                } else if ("vops".equalsIgnoreCase(event)) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
             } else if (action.equals(INTENT_SRVCC_TEST)) {
@@ -284,8 +287,14 @@ public final class ImsTestHelper {
             Parcel parcel = Parcel.obtain();
             parcel.writeInt(IUMtcService.TEST_COMMAND);
             parcel.writeInt(command);
-            parcel.writeInt(extras[0]);
-            parcel.writeInt(extras[1]);
+
+            if (extras != null && extras.length > 1) {
+                parcel.writeInt(extras[0]);
+                parcel.writeInt(extras[1]);
+            } else {
+                parcel.writeInt(0);
+                parcel.writeInt(0);
+            }
 
             MtcJniProxy.getInstance().sendDataToNative(mtcApp.getJNIService(), parcel);
         }
