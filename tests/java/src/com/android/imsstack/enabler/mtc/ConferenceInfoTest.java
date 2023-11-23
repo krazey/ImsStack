@@ -89,6 +89,7 @@ public class ConferenceInfoTest {
                 mDisplayText0, mStatus0, mSIPStatusCode0, mDisconnectedCause0);
 
         assertEquals(2, mTestConferenceInfo.getUserCount());
+        assertNotNull(mTestConferenceInfo.toString());
     }
 
     @Test
@@ -129,6 +130,10 @@ public class ConferenceInfoTest {
         assertNotNull(mTestConferenceInfo.getUser("", mId0));
         assertNotNull(mTestConferenceInfo.getUser("0", mId0));
         assertNotNull(mTestConferenceInfo.getUser(mCallId0, ""));
+
+        if (mTestConferenceInfo.getUser(mCallId0, mId0) != null) {
+            assertNotNull(mTestConferenceInfo.getUser(mCallId0, mId0).toString());
+        }
     }
 
     @Test
@@ -229,6 +234,10 @@ public class ConferenceInfoTest {
     public void testUpdateUserForEntity() {
         mTestConferenceInfo.addUser(mCallId0, mId0, mUserEntity0, mEndpointEntity0,
                 mDisplayText0, mStatus0, mSIPStatusCode0, mDisconnectedCause0);
+
+        assertEquals(mStatus0, mTestConferenceInfo.getUser(mCallId0, mId0).getStatus());
+
+        mTestConferenceInfo.updateUserForEntity(null, null, ConferenceInfo.User.STATUS_CONNECTED);
 
         assertEquals(mStatus0, mTestConferenceInfo.getUser(mCallId0, mId0).getStatus());
 

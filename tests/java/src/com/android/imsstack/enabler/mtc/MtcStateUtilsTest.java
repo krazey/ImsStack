@@ -19,14 +19,47 @@ package com.android.imsstack.enabler.mtc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class MtcStateUtilsTest {
     private int mSlotId0 = 0;
+
+    @Mock private ConfigInterface mConfigInterface;
+    @Mock private CarrierConfig mCarrierConfig;
+
+    @Test
+    public void testInit() {
+        MockitoAnnotations.initMocks(this);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, mSlotId0);
+        doReturn(mCarrierConfig).when(mConfigInterface).getCarrierConfig();
+
+        MtcStateUtils.initializeImsState(null, mSlotId0, MtcStateUtils.INIT_ALL);
+        MtcStateUtils.initializeState(null, mSlotId0);
+
+        assertFalse(MtcStateUtils.isVoLteProvisioned(null, mSlotId0));
+
+        doReturn(true).when(mCarrierConfig).isVoLteProvisioningRequired();
+        MtcStateUtils.initializeImsState(null, mSlotId0, MtcStateUtils.INIT_ALL);
+        MtcStateUtils.updateVoLteProvisioned(null, mSlotId0, MtcStateUtils.STATE_ACTIVE);
+        MtcStateUtils.updateVtProvisioned(null, mSlotId0, MtcStateUtils.STATE_ACTIVE);
+        MtcStateUtils.initializeState(null, mSlotId0);
+
+        assertFalse(MtcStateUtils.isVoLteProvisioned(null, mSlotId0));
+        assertFalse(MtcStateUtils.isVtProvisioned(null, mSlotId0));
+
+        MtcStateUtils.initializeImsState(null, mSlotId0, MtcStateUtils.INIT_ALL);
+    }
 
     @Test
     public void testRegister() {
