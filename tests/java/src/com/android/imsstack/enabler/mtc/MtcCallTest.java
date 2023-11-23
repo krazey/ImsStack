@@ -34,14 +34,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.os.Looper;
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.CarrierConfigManager;
 import android.telephony.ims.RtpHeaderExtension;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.MediaTestUtils;
+import com.android.imsstack.enabler.mtc.conf.IUConf;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
@@ -56,6 +61,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Random;
 import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
@@ -74,6 +80,8 @@ public class MtcCallTest extends ImsStackTest {
     @Mock private MediaInfo mMediaInfo;
     @Mock private MtcJniProxy mMtcJniProxy;
     @Mock private MtcCall mConferenceMtcCall;
+    @Mock private ConfigInterface mConfigInterface;
+    @Mock private CarrierConfig mCarrierConfig;
     @Captor ArgumentCaptor<JniImsListener> mJNIImsListenerCaptor;
 
     private int mCommand;
@@ -111,6 +119,11 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     private class TestMtcCall extends MtcCall {
+        TestMtcCall(IBaseContext context, CallTracker ct, int callAttributes, int index,
+                String logTag) {
+            super(context, ct, callAttributes, index, logTag);
+        }
+
         TestMtcCall(IBaseContext context, CallTracker ct, int index, String logTag, Looper looper,
                 MtcConference mtcConference, MtcMediaSession mtcMediaSession,
                 MtcJniProxy mtcJniProxy, CallInfo callInfo, MediaInfo mediaInfo) {
@@ -124,6 +137,13 @@ public class MtcCallTest extends ImsStackTest {
         }
 
         @Override
+        protected void initMedia() {
+            mMediaSession = mMtcMediaSession;
+            mAudioListener = new AudioSessionListener();
+            mTextListener = new TextSessionListener();
+        }
+
+        @Override
         protected MtcCall createAndSetMtcCallForConference(
                 long jniConfCallId, CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
             return mConferenceMtcCall;
@@ -133,6 +153,7 @@ public class MtcCallTest extends ImsStackTest {
     @Before
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
+
         mCommand = mInvalidCommand;
         mClearInterface = false;
         mCcid = "mCcid";
@@ -141,6 +162,12 @@ public class MtcCallTest extends ImsStackTest {
 
         doReturn((long) 1).when(mMtcJniProxy).getJniInterfaceAndSetListener(
                     anyInt(), anyInt(), any());
+        doReturn(0).when(mBaseContext).getSlotId();
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, 0);
+        doReturn(mCarrierConfig).when(mConfigInterface).getCarrierConfig();
+        doReturn(true).when(mCarrierConfig).getBoolean(
+                CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false);
+        doReturn(Looper.myLooper()).when(mBaseContext).getCallLooper();
         doReturn(0).when(mBaseContext).getSlotId();
 
         mTestMtcJniProxy = new TestMtcJniProxy();
@@ -170,10 +197,55 @@ public class MtcCallTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(command);
+        fillInfo(parcel);
         parcel.setDataPosition(0);
         mJNIImsListenerCaptor.getValue().onMessage(parcel);
         processAllMessages();
         parcel.recycle();
+    }
+
+    private void fillInfo(Parcel parcel) {
+        Random randomGenerator = new Random();
+        parcel.writeInt(randomGenerator.ints(IUMtcCall.SERVICETYPE_NORMAL,
+                IUMtcCall.SERVICETYPE_NORMAL + 1).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(IUMtcCall.CALLTYPE_VOIP,
+                IUMtcCall.CALLTYPE_VIDEO_RTT + 1).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(0, 2).findFirst().getAsInt());
+
+        parcel.writeInt(randomGenerator.ints(MediaInfo.AUDIO_QUALITY_AMR_NB,
+                MediaInfo.AUDIO_QUALITY_MAX).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(MediaInfo.VIDEO_QUALITY_QCIF,
+                MediaInfo.VIDEO_QUALITY_NOTUSED).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(MediaInfo.DIRECTION_RECEIVE,
+                MediaInfo.DIRECTION_SEND_RECEIVE + 1).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(MediaInfo.DIRECTION_RECEIVE,
+                MediaInfo.DIRECTION_SEND_RECEIVE + 1).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(MediaInfo.DIRECTION_RECEIVE,
+                MediaInfo.DIRECTION_SEND_RECEIVE + 1).findFirst().getAsInt());
+        parcel.writeInt(randomGenerator.ints(MediaInfo.GTTMODE_FULL,
+                MediaInfo.GTTMODE_VCO + 1).findFirst().getAsInt());
+
+        parcel.writeInt(3);
+        parcel.writeInt(SuppInfo.TYPE_CALLERID);
+        parcel.writeString("");
+        parcel.writeInt(randomGenerator.ints(SuppInfo.CALLERID_NETWORK,
+                SuppInfo.CALLERID_IDENTITY + 1).findFirst().getAsInt());
+        parcel.writeInt(0);
+        parcel.writeInt(SuppInfo.TYPE_CNAP);
+        parcel.writeString("test");
+        parcel.writeInt(0);
+        parcel.writeInt(0);
+        parcel.writeInt(SuppInfo.TYPE_GTT);
+        parcel.writeString("");
+        parcel.writeInt(0);
+        parcel.writeInt(1);
     }
 
     public void sendMessageToJniListener(int command, int send) {
@@ -190,6 +262,28 @@ public class MtcCallTest extends ImsStackTest {
         mJNIImsListenerCaptor.getValue().onMessage(parcel);
         processAllMessages();
         parcel.recycle();
+    }
+
+    @Test
+    public void testConstructor() {
+        TestMtcCall MtcCallEmergency = new TestMtcCall(
+                mBaseContext, mCT, MtcCall.FLAG_EMERGENCY, 0, "");
+
+        assertTrue(MtcCallEmergency.isOnPreIncoming());
+        assertTrue(MtcCallEmergency.isEmergencyCall());
+
+        int fullAttrubutes = MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_CONFERENCE
+                | MtcCall.FLAG_WIFI_EMERGENCY | MtcCall.FLAG_VIDEO_CALL | MtcCall.FLAG_MO
+                | MtcCall.FLAG_RTT;
+
+        TestMtcCall MtcCallFullAttributes = new TestMtcCall(
+                mBaseContext, mCT, fullAttrubutes, 0, "MO");
+
+        assertTrue(MtcCallFullAttributes.hasCallExtra(MtcCall.EXTRA_E_CALL));
+        assertTrue(MtcCallFullAttributes.isMO());
+        assertTrue(MtcCallFullAttributes.isEmergencyCall());
+        assertTrue(MtcCallEmergency.equals(MtcCallEmergency));
+        assertFalse(MtcCallEmergency.equals(MtcCallFullAttributes));
     }
 
     @Test
@@ -430,8 +524,10 @@ public class MtcCallTest extends ImsStackTest {
     public void testStartConference() {
         mTestMtcCall.createNativeCallObject();
         mTestMtcCall.setListener(mListener);
+        UsersInfo usersInfo = new UsersInfo();
+        usersInfo.addUser(new UsersInfo.User());
         mTestMtcCall.startConference(
-                IUMtcCall.CALLTYPE_VOIP, new UsersInfo(), new MediaInfo(), new SuppInfo());
+                IUMtcCall.CALLTYPE_VOIP, usersInfo, new MediaInfo(), new SuppInfo());
         processAllMessages();
 
         assertEquals(true, mTestMtcCall.getCallExtraBoolean(mTestMtcCall.EXTRA_CONFERENCE, false));
@@ -835,6 +931,14 @@ public class MtcCallTest extends ImsStackTest {
                 eq(mTestMtcCallWithMockJniProxy), eq(CallTracker.CALL_EVENT_UPDATED), eq(null));
         verify(mListener, times(1)).onCallUpdated(
                 eq(mTestMtcCallWithMockJniProxy), any(), any(), any());
+
+        mTestMtcCallWithMockJniProxy.setUpdateState(MtcCall.UPDATE_STATE_ACCEPTED);
+        sendMessageToJniListener(IUMtcCall.UPDATED);
+
+        verify(mCT, times(2)).updateCallState(
+                eq(mTestMtcCallWithMockJniProxy), eq(CallTracker.CALL_EVENT_UPDATED), eq(null));
+        verify(mListener, times(2)).onCallUpdated(
+                eq(mTestMtcCallWithMockJniProxy), any(), any(), any());
     }
 
     @Test
@@ -867,6 +971,13 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testJniListenerDefaultConference() {
+        sendMessageToJniListener(IUConf.NOTIFY_USERS_INFO);
+
+        verify(mMtcConference, times(1)).handleMessage(anyInt(), any());
+    }
+
+    @Test
     public void testJniListenerIncomingResume() {
         sendMessageToJniListener(IUMtcCall.INCOMING_RESUME);
 
@@ -892,6 +1003,14 @@ public class MtcCallTest extends ImsStackTest {
         sendMessageToJniListener(IUMtcCall.ECT_COMPLETED, 0);
 
         verify(mListener, times(1)).onCallTransferFailed(eq(mTestMtcCallWithMockJniProxy), any());
+    }
+
+    @Test
+    public void testJniListenerReplacedBy() {
+        sendMessageToJniListener(IUMtcCall.REPLACED_BY);
+
+        verify(mListener, times(1)).onCallTransferReceived(eq(mTestMtcCallWithMockJniProxy), any(),
+                any(), any(), any());
     }
 
     @Test
