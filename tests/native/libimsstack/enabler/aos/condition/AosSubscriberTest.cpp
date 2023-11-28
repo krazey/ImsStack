@@ -152,7 +152,7 @@ TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerReturn)
     objPuids.AddElement(AString("PUID3"));
 
     MockIAosSubscriberManager objMockIAosSubscriberManager;
-    EXPECT_CALL(objMockIAosSubscriberManager, GetConfiguredImpus(_))
+    EXPECT_CALL(objMockIAosSubscriberManager, GetConfiguredImpus())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPuids));
 

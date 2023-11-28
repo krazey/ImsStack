@@ -49,7 +49,8 @@ public:
     void AddListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
     void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
 
-    const AStringArray& GetConfiguredImpus(IN IMS_BOOL bIsFake = IMS_FALSE) const override;
+    const AStringArray& GetConfiguredImpus() const override;
+    const AStringArray& GetConfiguredImpusForFake() const override;
     const AStringArray& GetFakeImpus() const override;
 
     const ISubscriberConfig* GetSubscriberConfig(
@@ -92,9 +93,8 @@ protected:
     IMS_UINT32 GetIsimAt() const;
 
     void ClearIsimRecovery();
-
-    IMS_BOOL ConfigureAsDefault();
-    IMS_BOOL ConfigureAsFake();
+    void ConfigureAsDefault();
+    void ConfigureAsFake();
 
     IMS_BOOL CheckIsimValues();
 

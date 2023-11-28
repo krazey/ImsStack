@@ -167,15 +167,15 @@ void AosSubscriberManager::RemoveListenerForMonitor(IN IAosSubscriberManagerList
 }
 
 PUBLIC
-const AStringArray& AosSubscriberManager::GetConfiguredImpus(
-        IN IMS_BOOL bIsFake /*= IMS_FALSE*/) const
+const AStringArray& AosSubscriberManager::GetConfiguredImpus() const
 {
-    if (bIsFake)
-    {
-        return m_objPuidsForFake;
-    }
-
     return m_objPuids;
+}
+
+PUBLIC
+const AStringArray& AosSubscriberManager::GetConfiguredImpusForFake() const
+{
+    return m_objPuidsForFake;
 }
 
 PUBLIC
@@ -383,13 +383,13 @@ void AosSubscriberManager::ClearIsimRecovery()
 }
 
 PROTECTED
-IMS_BOOL AosSubscriberManager::ConfigureAsDefault()
+void AosSubscriberManager::ConfigureAsDefault()
 {
     A_IMS_TRACE_I(AOSTAG, "ConfigureAsDefault", 0, 0, 0);
 
     if (m_piSubscriberConfig == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     if (IsIsim())
@@ -397,19 +397,19 @@ IMS_BOOL AosSubscriberManager::ConfigureAsDefault()
         if (!m_piSubscriberConfig->IsProvisioningDone())
         {
             A_IMS_TRACE_D(AOSTAG, "ConfigureAsDefault :: Provisioning is not done", 0, 0, 0);
-            return IMS_FALSE;
+            return;
         }
 
         if (!GetImpuFromIsim(m_objPuids))
         {
-            return IMS_FALSE;
+            return;
         }
     }
     else if (IsUsim())
     {
         if (!GetTemporaryImpu(m_objPuids, IMS_TRUE))
         {
-            return IMS_FALSE;
+            return;
         }
     }
     else
@@ -426,7 +426,7 @@ IMS_BOOL AosSubscriberManager::ConfigureAsDefault()
         if (strImpu.GetLength() == 0)
         {
             A_IMS_TRACE_I(AOSTAG, "Getting IMPU has failed", 0, 0, 0);
-            return IMS_FALSE;
+            return;
         }
 
         m_objPuids.AddElement(strImpu);
@@ -448,18 +448,15 @@ IMS_BOOL AosSubscriberManager::ConfigureAsDefault()
                 m_objPuids.GetElementAt(0).GetStr(), 0, 0);
 
         NotifyState(IAosSubscriber::READY);
-        return IMS_TRUE;
     }
-
-    return IMS_FALSE;
 }
 
 PROTECTED
-IMS_BOOL AosSubscriberManager::ConfigureAsFake()
+void AosSubscriberManager::ConfigureAsFake()
 {
     if (m_piSubscriberConfigFake == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     const AStringArray& objPublicUserIds = m_piSubscriberConfigFake->GetPublicUserIds();
@@ -467,7 +464,7 @@ IMS_BOOL AosSubscriberManager::ConfigureAsFake()
     if (objPublicUserIds.IsEmpty())
     {
         A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: PUIDs are empty", 0, 0, 0);
-        return IMS_FALSE;
+        return;
     }
 
     A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake", 0, 0, 0);
@@ -476,7 +473,7 @@ IMS_BOOL AosSubscriberManager::ConfigureAsFake()
     if (strImpu.GetLength() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "ConfigureAsFake :: IMPU is failed", 0, 0, 0);
-        return IMS_FALSE;
+        return;
     }
 
     m_objPuidsForFake.AddElement(strImpu);
@@ -484,8 +481,6 @@ IMS_BOOL AosSubscriberManager::ConfigureAsFake()
 
     A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: IMPU(%s) is provisioned", strImpu.GetStr(), 0, 0);
     NotifyMonitorState(IAosSubscriber::READY);
-
-    return IMS_TRUE;
 }
 
 PROTECTED

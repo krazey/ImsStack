@@ -72,9 +72,17 @@ PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piList
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetConfiguredImpus() const
 {
-    return (m_piSubscriberManager != IMS_NULL)
-            ? m_piSubscriberManager->GetConfiguredImpus(m_eRegType == AosRegistrationType::FAKE)
-            : AStringArray::ConstNull();
+    if (m_piSubscriberManager == IMS_NULL)
+    {
+        return AStringArray::ConstNull();
+    }
+
+    if (m_eRegType == AosRegistrationType::FAKE)
+    {
+        return m_piSubscriberManager->GetConfiguredImpusForFake();
+    }
+
+    return m_piSubscriberManager->GetConfiguredImpus();
 }
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetFakeImpus() const
