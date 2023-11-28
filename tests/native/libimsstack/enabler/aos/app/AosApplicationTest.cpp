@@ -552,6 +552,7 @@ TEST_F(AosApplicationTest, CreateAndDestroy)
     m_pTestAosApplication->SetAosCondition(IMS_NULL);
 
     // TEST_F : CleanUp
+    m_pTestAosApplication->m_pConnector->SetPdnDeactivationRequired(IMS_TRUE);
     m_pTestAosApplication->CleanUp();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
     piLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
@@ -645,6 +646,7 @@ TEST_F(AosApplicationTest, GetAndSet)
     m_pTestAosApplication->StartTimer(TIMER_APP_ACTIVATED, 1000);
     m_pTestAosApplication->StartTimer(TIMER_APP_CONNECTED, 1000);
     m_pTestAosApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
+    m_pTestAosApplication->StartTimer(TIMER_INVALID, 1000);
     m_pTestAosApplication->ClearTimers();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_REG_STOP));
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
@@ -765,6 +767,9 @@ TEST_F(AosApplicationTest, GetAndSet)
     EXPECT_EQ(m_pTestAosApplication->GetNetworkTypeForImsRegState(), AosNetworkType::UTRAN);
     EXPECT_EQ(m_pTestAosApplication->GetNetworkTypeForImsRegState(), AosNetworkType::UTRAN);
     EXPECT_EQ(m_pTestAosApplication->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
+
+    // TEST_F : IsRegReconfigAvailable
+    EXPECT_TRUE(m_pTestAosApplication->AosApplication::IsRegReconfigAvailable());
 }
 
 TEST_F(AosApplicationTest, Reconfig)
@@ -982,6 +987,7 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     // IsRegReconfigAvailable return false
     m_pTestAosApplication->SetRegReconfigAvailable(IMS_FALSE);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     m_pTestAosApplication->SetRegReconfigAvailable(IMS_TRUE);
@@ -1259,6 +1265,7 @@ TEST_F(AosApplicationTest, StateMachinePreProcess)
     // PreprocessStateMessage_Connection - CONNECTION_ACTIVATED
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
+            .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UPDATE_IPCAN, _))
             .Times(2);
@@ -2132,20 +2139,29 @@ TEST_F(AosApplicationTest, ImsEstablishmentStart)
     m_pTestAosApplication->ProcessImsEstablishmentStart();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
 
-    // IsImsVoiceCallSupported is false
+    // IsSupportedNetworkTypeForCellular is true, IsPlmnBlockRequired returns false
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
+    m_pTestAosApplication->SetLteExtraInfo(IMS_LTE_INFO_EXTRA_NONE);
+    m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).Times(0);
+    m_pTestAosApplication->ProcessImsEstablishmentStart();
+    EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_EPS_ONLY_ATTACHED);
+
+    // IsImsVoiceCallSupported is false
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
     EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).Times(0);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     // Blocked
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
-            .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillOnce(Return(IMS_TRUE));
     m_pTestAosApplication->ProcessImsEstablishmentStart();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
@@ -2157,9 +2173,11 @@ TEST_F(AosApplicationTest, ImsEstablishmentStart)
     m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
+    EXPECT_TRUE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
     m_pTestAosApplication->SetRat(NW_REPORT_RADIO_HSPA);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);
+    EXPECT_TRUE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+    m_pTestAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
 
     // start TIMER_IMS_ESTABLISHMENT
     m_pTestAosApplication->ProcessImsEstablishmentStart();
@@ -2388,6 +2406,14 @@ TEST_F(AosApplicationTest, Callback)
     // eCause is DATA - eType is STOP
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+    // eCause is DATA - eType is START_IMS_EST_TIMER, Establish time 0
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillOnce(Return(0));
+    m_pTestAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::START_IMS_EST_TIMER, AosPcscfOrder::CURRENT, AosControlCause::DATA);
+    // eCause is DATA - eType is START_IMS_EST_TIMER, Establish time 120
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillRepeatedly(Return(120));
+    m_pTestAosApplication->RegistrationControl_ControlRegistration(
+            AosRegRequestType::START_IMS_EST_TIMER, AosPcscfOrder::CURRENT, AosControlCause::DATA);
 
     // TEST_F : ServicePhone_LocationInfoChanged
     // IsReregRetryWithChangedCountryOnWifi return false
