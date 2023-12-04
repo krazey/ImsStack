@@ -190,7 +190,12 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, IsSipUri);
     FRIEND_TEST(AosSubscriberManagerTest, NotifyState);
     FRIEND_TEST(AosSubscriberManagerTest, NotifyMonitorState);
-    FRIEND_TEST(AosSubscriberManagerTest, NConfiguration_NotifyConfigChanged);
+    // TEST : NConfiguration_NotifyConfigChanged
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfiguration);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsSame);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration);
+
     FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_InitCompleted_IsimUsimNotSupport);
     FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_RefreshCompleted_IsimUsimNotSupport);
     FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_RefreshStarted);
@@ -1948,38 +1953,137 @@ TEST_F(AosSubscriberManagerTest, IsSipUri)
     EXPECT_TRUE(m_pSubscriberManager->IsSipUri(AString("sips:user1@ims.com")));
 }
 
-TEST_F(AosSubscriberManagerTest, NConfiguration_NotifyConfigChanged)
+TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
 {
-    // Test1: UpdateNConfiguration is false
-    EXPECT_FALSE(m_pSubscriberManager->UpdateNConfiguration());
-
-    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned());
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
 
-    m_pSubscriberManager->NConfiguration_NotifyConfigChanged();
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned());
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
-
-    // Test2: UpdateNConfiguration is true
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    EXPECT_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillRepeatedly(Return(0));
-    EXPECT_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
-            .WillRepeatedly(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objImsIdentityPriority;
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF);
-    EXPECT_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
-            .WillRepeatedly(ReturnRef(objImsIdentityPriority));
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+
+    ImsVector<IMS_SINT32> objUpdatedImsIdentityPriority;
+    objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+    objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
+
+    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
+    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    MockIAosNConfiguration objMockIAosNConfiguration;
+    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
+    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+            .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
+    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
     m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
+
+    // WHEN
     m_pSubscriberManager->NConfiguration_NotifyConfigChanged();
+
+    // THEN
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned());
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
+}
 
-    // for CleanUp()
+TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsSame)
+{
+    // GIVEN
+    m_pSubscriberManager->m_objPuids = m_objValidPuids;
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
+
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
+
+    ImsVector<IMS_SINT32> objUpdatedImsIdentityPriority;
+    objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+    objUpdatedImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
+
+    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
+    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    MockIAosNConfiguration objMockIAosNConfiguration;
+    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
+    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+            .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
+    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
+
+    m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
+
+    m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
+
+    // WHEN
+    m_pSubscriberManager->NConfiguration_NotifyConfigChanged();
+
+    // THEN
+    EXPECT_FALSE(m_pSubscriberManager->IsProvisioned());
+    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull)
+{
+    // GIVEN
+    m_pSubscriberManager->m_objPuids = m_objValidPuids;
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     m_pSubscriberManager->m_piNConfig = IMS_NULL;
+
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
+
+    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
+    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
+
+    // WHEN
+    m_pSubscriberManager->NConfiguration_NotifyConfigChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned());
+    EXPECT_NE(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration)
+{
+    // GIVEN
+    m_pSubscriberManager->m_objPuids = m_objValidPuids;
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
+
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
+    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
+
+    m_pSubscriberManager->m_nIsimIndexForImpu = 0;
+    m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
+    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    MockIAosNConfiguration objMockIAosNConfiguration;
+    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(0));
+    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+            .WillByDefault(ReturnRef(objImsIdentityPriority));
+    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
+
+    m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
+
+    m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
+
+    // WHEN
+    m_pSubscriberManager->NConfiguration_NotifyConfigChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned());
+    EXPECT_NE(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
 }
 
 TEST_F(AosSubscriberManagerTest, SubscriberConfig_InitCompleted_IsimUsimNotSupport)
