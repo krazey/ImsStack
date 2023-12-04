@@ -273,7 +273,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     /**
      * Listener interface for audio session callback
      */
-    private class AudioSessionListener extends MtcMediaSession.AudioListener {
+    protected class AudioSessionListener extends MtcMediaSession.AudioListener {
         @Override
         public void onAudioSessionOpened() {
             Message.obtain(mHandler, MSG_AUDIO_SESSION_OPENED).sendToTarget();
@@ -298,7 +298,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     /**
      * Listener interface for RTT call
      */
-    private class TextSessionListener extends MtcMediaSession.TextListener {
+    protected class TextSessionListener extends MtcMediaSession.TextListener {
         @Override
         public void onRttMessageReceived(MtcMediaSession session, String data) {
             log("onRttMessageReceived");
@@ -370,10 +370,10 @@ public class MtcCall extends Call implements ConferenceTracker {
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private final CallTracker mCT;
     private final MtcConference mConference;
-    private final MtcMediaSession mMediaSession;
+    protected MtcMediaSession mMediaSession;
     private MtcCall.Listener mListener = null;
-    private MtcCall.AudioSessionListener mAudioListener = null;
-    private MtcCall.TextSessionListener mTextListener = null;
+    protected MtcCall.AudioSessionListener mAudioListener = null;
+    protected MtcCall.TextSessionListener mTextListener = null;
     private MtcCallInfo mCallInfo = null;
     private MediaInfo mMediaInfo = null;
     private CallReasonInfo mTerminationReason = null;
@@ -425,29 +425,14 @@ public class MtcCall extends Call implements ConferenceTracker {
                     getCallType(),
                     isConference());
 
-        mMediaInfo = new MediaInfo(
-                    MediaInfo.AUDIO_QUALITY_AMR_WB,
-                    MediaInfo.VIDEO_QUALITY_NONE,
-                    MediaInfo.DIRECTION_SEND_RECEIVE,
-                    MediaInfo.DIRECTION_INVALID,
-                    MediaInfo.DIRECTION_INVALID,
-                    MediaInfo.GTTMODE_INVALID);
-
         mConference = new MtcConference(mContext.getCallLooper(), this, this);
-        mMediaSession = new MtcMediaSession(mContext, this);
-
-        mAudioListener = new AudioSessionListener();
-        mMediaSession.setAudioListener(mAudioListener);
-
-        if (CallFeature.isRttSupported(mContext.getSlotId())) {
-            mTextListener = new TextSessionListener();
-            mMediaSession.setTextListener(mTextListener);
-        }
 
         // ConferenceInfo: to manage the participants in the conference call
         if (isConference()) {
             ConferenceInfoHelper.createConferenceInfo(getCallId());
         }
+
+        initMedia();
 
         logi(toString());
     }
@@ -1271,6 +1256,26 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         // Message is not for media session.
         return false;
+    }
+
+    protected void initMedia() {
+        mMediaInfo = new MediaInfo(
+                MediaInfo.AUDIO_QUALITY_AMR_WB,
+                MediaInfo.VIDEO_QUALITY_NONE,
+                MediaInfo.DIRECTION_SEND_RECEIVE,
+                MediaInfo.DIRECTION_INVALID,
+                MediaInfo.DIRECTION_INVALID,
+                MediaInfo.GTTMODE_INVALID);
+
+        mMediaSession = new MtcMediaSession(mContext, this);
+
+        mAudioListener = new AudioSessionListener();
+        mMediaSession.setAudioListener(mAudioListener);
+
+        if (CallFeature.isRttSupported(mContext.getSlotId())) {
+            mTextListener = new TextSessionListener();
+            mMediaSession.setTextListener(mTextListener);
+        }
     }
 
     protected MtcCall createAndSetMtcCallForConference(

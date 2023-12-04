@@ -322,31 +322,6 @@ public class Call implements Closeable {
                 ((callId != 0) ? String.valueOf(callId) : null);
     }
 
-    public static long getNativeCallIdFromCallId(String callId) {
-        if (callId == null) {
-            return 0;
-        }
-
-        if (callId.isEmpty() || "0".equals(callId)) {
-            return 0;
-        }
-
-        int index = callId.lastIndexOf(":");
-
-        if (index < 0) {
-            return 0;
-        }
-
-        try {
-            String nativeCallId = callId.substring(index + 1);
-            return Long.valueOf(nativeCallId).longValue();
-        } catch (IndexOutOfBoundsException e) {
-            ImsLog.e(e.getMessage());
-        }
-
-        return 0;
-    }
-
     public static boolean isCallExtraBoolean(String name) {
         return (name.equalsIgnoreCase(EXTRA_CONFERENCE)
                 || name.equalsIgnoreCase(EXTRA_E_CALL)
