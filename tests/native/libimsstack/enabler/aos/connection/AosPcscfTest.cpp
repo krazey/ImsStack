@@ -748,7 +748,7 @@ TEST_F(AosPcscfTest, ProcessDiscovery_ConfigMethod)
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscfAddresses));
-    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByName(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(-1));
 
@@ -891,7 +891,7 @@ TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetrySucceeded)
 
 TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetryWithOtherIpType)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
+    EXPECT_CALL(m_objMockIAosConnection, GetHostByName(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(-1));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))

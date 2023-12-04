@@ -213,6 +213,7 @@ PROTECTED VIRTUAL void AosERegistration::CleanUp()
     if (m_pEModeInfo != IMS_NULL)
     {
         delete m_pEModeInfo;
+        m_pEModeInfo = IMS_NULL;
     }
 }
 
@@ -540,6 +541,7 @@ PROTECTED VIRTUAL void AosERegistration::NConfiguration_NotifyConfigChanged()
                     piService->RemoveListener(DYNAMIC_CAST(IAosEmergencyListener*, this));
                 }
                 delete m_pEModeInfo;
+                m_pEModeInfo = IMS_NULL;
             }
         }
     }
