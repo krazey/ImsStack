@@ -38,7 +38,10 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
 import com.android.imsstack.internal.ImsStackRegistry;
@@ -68,9 +71,12 @@ public class MtcAppTest extends ImsStackTest {
     @Mock private IServiceStateTracker mServiceStateTracker;
     @Mock private MtcCall mMtcCall;
     @Mock private Executor mExecutor;
+    @Mock private ConfigInterface mConfigInterface;
+    @Mock private CarrierConfig mCarrierConfig;
     @Captor ArgumentCaptor<ImsStackRegistry.ImsServiceListener> mImsServiceListenerCaptor;
     @Captor ArgumentCaptor<NativeStateInterface.Listener> mNativeStateListenerCaptor;
     int mCommand;
+    private int mSlotId0 = 0;
 
     private TestMtcJniProxy mTestMtcJniProxy;
     private TestMtcApp mTestMtcApp;
@@ -128,6 +134,7 @@ public class MtcAppTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
         AppContext.init(mContext);
 
+        doReturn(mSlotId0).when(mBaseContext).getSlotId();
         doReturn(mServiceStateTracker).when(mBaseContext).getServiceStateTracker();
 
         mTestMtcJniProxy = new TestMtcJniProxy();
@@ -146,8 +153,20 @@ public class MtcAppTest extends ImsStackTest {
     }
 
     @Test
+    public void testConstructor() {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, mSlotId0);
+        doReturn(mCarrierConfig).when(mConfigInterface).getCarrierConfig();
+        doReturn(Looper.myLooper()).when(mBaseContext).getCallLooper();
+
+        MtcApp mtcApp = new MtcApp(mBaseContext);
+
+        assertNotNull(mtcApp);
+        verify(mBaseContext, times(2)).getCallLooper();
+        verify(mBaseContext, times(1)).addImsServiceListener(any());
+    }
+
+    @Test
     public void testInitWithNativeServiceIsReady() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mNativeStateInterface).isServiceReady();
@@ -169,7 +188,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInitWithNativeServiceIsNotReadyAndFinallyReady() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(false).when(mNativeStateInterface).isServiceReady();
@@ -208,7 +226,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInitFailCommonPackageNotReady() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(false).when(mBaseContext).isImsServiceStarted();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mNativeStateInterface).isServiceReady();
@@ -227,7 +244,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInitFailNotNativeBootCompleted() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(false).when(mNativeStateInterface).isServiceReady();
@@ -250,7 +266,6 @@ public class MtcAppTest extends ImsStackTest {
     public void testClearWithoutNativeObj() {
         assertFalse(mTestMtcApp.isServiceValid());
 
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(false).when(mNativeStateInterface).isServiceReady();
@@ -270,7 +285,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testClearWithNativeObj() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(true).when(mNativeStateInterface).isServiceReady();
@@ -310,7 +324,6 @@ public class MtcAppTest extends ImsStackTest {
     public void testcreateMtcCallAndAttachWithoutJniService() {
         assertFalse(mTestMtcApp.isServiceValid());
 
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(false).when(mNativeStateInterface).isServiceReady();
@@ -369,7 +382,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testCloseWithNotBoundJniService() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(false).when(mNativeStateInterface).isServiceReady();
@@ -385,7 +397,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testCloseWithBoundJniService() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(true).when(mNativeStateInterface).isServiceReady();
@@ -437,7 +448,6 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testMsgNativeBootCompletedMsgCommonPackageReady() {
-        doReturn(0).when(mBaseContext).getSlotId();
         doReturn(true).when(mBaseContext).isImsServiceStarted();
         doReturn(mNativeStateInterface).when(mBaseContext).getNativeStateInterface();
         doReturn(true).when(mNativeStateInterface).isServiceReady();
@@ -505,6 +515,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(2)).getPendingCall(0);
 
