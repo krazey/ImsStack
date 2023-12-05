@@ -232,6 +232,7 @@ public:
     MockISubscriberInfo m_objMockISubscriberInfo;
     MockIConfigurable m_objMockIConfigurable;
     MockIAosService m_objMockIAosService;
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
 
     AStringArray m_objValidPuids;
     AStringArray m_objEmptyPuids;
@@ -1970,14 +1971,13 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
 
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
-    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+    ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+    ON_CALL(m_objMockIAosNConfiguration, GetImsIdentityPriority())
             .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
-    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
-    m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
+    ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
+    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -2007,15 +2007,14 @@ TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsS
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
 
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
-    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+    ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+    ON_CALL(m_objMockIAosNConfiguration, GetImsIdentityPriority())
             .WillByDefault(ReturnRef(objUpdatedImsIdentityPriority));
-    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
+    ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
 
-    m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
+    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
@@ -2066,15 +2065,14 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration
     m_pSubscriberManager->m_bSupportLimitedAdminSmsMode = IMS_FALSE;
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
 
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    ON_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(0));
-    ON_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+    ON_CALL(m_objMockIAosNConfiguration, GetIsimIndexForImpu()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
+    ON_CALL(m_objMockIAosNConfiguration, GetImsIdentityPriority())
             .WillByDefault(ReturnRef(objImsIdentityPriority));
-    ON_CALL(objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
+    ON_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).WillByDefault(Return());
 
-    m_pSubscriberManager->m_piNConfig = &objMockIAosNConfiguration;
+    m_pSubscriberManager->m_piNConfig = &m_objMockIAosNConfiguration;
 
     m_pSubscriberManager->SetSubscriberConfig(IMS_NULL);
 
