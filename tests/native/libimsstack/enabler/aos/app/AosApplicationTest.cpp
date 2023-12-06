@@ -1265,8 +1265,8 @@ TEST_F(AosApplicationTest, StateMachinePreProcess)
     // PreprocessStateMessage_Connection - CONNECTION_ACTIVATED
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
+            .WillOnce(Return(IMS_TRUE))
+            .WillRepeatedly(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UPDATE_IPCAN, _))
             .Times(2);
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
