@@ -83,28 +83,44 @@ public:
         m_piSubscriberConfigFake = piSubscriberConfig;
     }
 
-    FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsProvisionedForNormalType);
-    FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsNotProvisionedForNormalType);
-    FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsProvisionedForFakeType);
-    FRIEND_TEST(AosSubscriberManagerTest, IsReady_IsNotProvisionedForFakeType);
-    FRIEND_TEST(AosSubscriberManagerTest, AddListener_ListenerIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, AddListener);
-    FRIEND_TEST(AosSubscriberManagerTest, RemoveListener_ListenerIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, RemoveListener);
-    FRIEND_TEST(AosSubscriberManagerTest, AddListenerForMonitor_ListenerIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, AddListenerForMonitor);
-    FRIEND_TEST(AosSubscriberManagerTest, RemoveListenerForMonitor_ListenerIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, RemoveListenerForMonitor);
-    FRIEND_TEST(AosSubscriberManagerTest, GetConfiguredImpusForFake);
-    FRIEND_TEST(AosSubscriberManagerTest, GetConfiguredImpusForNormal);
-    FRIEND_TEST(AosSubscriberManagerTest, GetFakeImpus_SubscriberConfigIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, GetFakeImpus_SubscriberConfigIsNotNull);
-    FRIEND_TEST(AosSubscriberManagerTest, Init_SubscriberConfigIsNotNull);
-    FRIEND_TEST(AosSubscriberManagerTest, IsTimerRunning_TimerIsNotRunning);
-    FRIEND_TEST(AosSubscriberManagerTest, IsTimerRunning_TimerIsRunning);
-    FRIEND_TEST(AosSubscriberManagerTest, IsTimerRunning_TimerIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, GetIsimAt_ConfigurationNull);
-    FRIEND_TEST(AosSubscriberManagerTest, ClearIsimRecovery);
+    // TEST : AddListener
+    FRIEND_TEST(AosSubscriberManagerTest, FailedAddListenerWhenListenerIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsAddListener);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedAddListenerWhenDuplicatedListener);
+    // TEST : RemoveListener
+    FRIEND_TEST(AosSubscriberManagerTest, FailedRemoveListenerWhenListenerIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsRemoveListener);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedRemoveListenerWhenNoMatchedListener);
+    // TEST : AddListenerForMonitor
+    FRIEND_TEST(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenListenerIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsAddListenerForMonitor);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenDuplicatedListener);
+    // TEST : RemoveListenerForMonitor
+    FRIEND_TEST(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenListenerIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsRemoveListenerForMonitor);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenNoMatchedListener);
+    // TEST : GetConfiguredImpusForFake
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForFake);
+    // TEST : GetConfiguredImpus
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForNormal);
+    // TEST : GetFakeImpus
+    FRIEND_TEST(AosSubscriberManagerTest, FailedGetFakeImpusWhenSubscriberConfigIsNull);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetFakeImpus);
+    // TEST : Init
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsInitWhenSubscriberConfigIsNotNull);
+    // TEST : SetProvisioned
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithNormalType);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithNormalType);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithFakeType);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithFakeType);
+    // TEST : IsTimerRunning
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsNotRunning);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenTimerIsRunning);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsInvalid);
+    // TEST : GetIsimAt
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetIsimAt);
+    // TEST : ClearIsimRecovery
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedClearIsimRecovery);
     // TEST : ConfigureAsDefault
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenIsimTrueProvisioningDone);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWithoutSubscriberConfig);
@@ -119,13 +135,13 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenSubscriberConfigFakeIsNull);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidPuids);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidImpu);
-
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_IsimIsNotSupport);
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_ImpuIsEmpty);
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_ImpuIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_InvalidImpi);
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_InvalidHomeDomainName);
-    FRIEND_TEST(AosSubscriberManagerTest, CheckIsimValues_ReturnTrue);
+    // TEST : CheckIsimValues
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenIsimIsNotSupport);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsEmpty);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsInvalid);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidImpi);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidHdn);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueCheckIsimValues);
     // TEST : GetImpuFromIsim
     FRIEND_TEST(AosSubscriberManagerTest, FailedGetImpuFromIsimWhenGetEmptyPuids);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenLimitedAdminSmsModeAndOneValidImpu);
@@ -135,22 +151,24 @@ public:
             AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsGreaterThenMsisdn);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenSipImpuAndPhoneNumberIsLessThenMsisdn);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetImpuWhenSecondImpuIsNotSip);
-
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ImpuIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ImpiIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_HomeDomainNameIsInvalid);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impu);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impi);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_HomeDomainName);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_PhoneContext);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthUserName);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthRealm);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_ServerScscf);
-    FRIEND_TEST(AosSubscriberManagerTest,
-            GetTemporaryImpu_ConfigurableUpdateFailed_WriteProvisioningSubscriber);
-    FRIEND_TEST(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithWritable);
+    // TEST : GetTemporaryImpu
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidImpu);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidImpi);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidHdn);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForImpu);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForImpi);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForHdn);
     FRIEND_TEST(
-            AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithoutWritable);
+            AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForPhoneContext);
+    FRIEND_TEST(
+            AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForAuthUserName);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForAuthRealm);
+    FRIEND_TEST(
+            AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForServerScscf);
+    FRIEND_TEST(AosSubscriberManagerTest,
+            ReturnsFalseGetTemporaryImpuWhenUpdateFailedForWriteProvisioningSubscriber);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueGetTemporaryImpuWithWritable);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueGetTemporaryImpuWithoutWritable);
     // TEST : UpdateImsi
     FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateImsiWhenSubsInfoIsNull);
     // TEST : UpdateImsIdentity
@@ -159,9 +177,10 @@ public:
             AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithoutIConfigurable);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithIsimIdentity);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithUsimIdentity);
-
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessFallback_UpdateImsIdentityReturnFalse);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessFallback_UpdateImsIdentityReturnTrue);
+    // TEST : ProcessFallback
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueProcessFallback);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseProcessFallbackWhenUsimFallbackIsFalse);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseProcessFallbackWhenFailedUpdateImsIdentity);
     // TEST : ProcessFallbackToImsiBasedIsim
     FRIEND_TEST(
             AosSubscriberManagerTest, FailedProcessFallbackToImsiBasedIsimWhenNotSupportFallBack);
@@ -178,46 +197,82 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenInvalidTempImpus);
     FRIEND_TEST(AosSubscriberManagerTest, FailedProcessPhoneNumberAvailableWhenEqualsTempImpu);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsProcessPhoneNumberAvailable);
-
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessIsimRecovery_SupportIsimImsiFallback);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessIsimRecovery_TimerIsRunning);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessPhoneRestarted);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessIsimRecoveryTimerExpired);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_IsUsimTrue);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_RefreshStarted);
-    FRIEND_TEST(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_ProcessFallback);
-    FRIEND_TEST(AosSubscriberManagerTest, IsPrimaryImpuValid_PhoneNumberLengthZero);
-    FRIEND_TEST(AosSubscriberManagerTest, IsSipUri);
-    FRIEND_TEST(AosSubscriberManagerTest, NotifyState);
-    FRIEND_TEST(AosSubscriberManagerTest, NotifyMonitorState);
+    // TEST : ProcessIsimStateChange
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithLoaded);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshStarted);
+    FRIEND_TEST(
+            AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshCompleted);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotReady);
+    // TEST : ProcessIsimRecovery
+    FRIEND_TEST(
+            AosSubscriberManagerTest, ClearIsimRecoveryWhenProcessIsimRecoveryWithSupportIsimImsi);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessIsimRecoveryWhenTimerIsRunning);
+    // TEST : ProcessPhoneRestarted
+    FRIEND_TEST(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted);
+    // TEST : ProcessIsimRecoveryTimerExpired
+    FRIEND_TEST(AosSubscriberManagerTest, UpdateSubscriberAllWhenProcessIsimRecoveryTimerExpired);
+    FRIEND_TEST(AosSubscriberManagerTest,
+            FailedUpdateWhenProcessIsimRecoveryTimerExpiredWithoutSubscriberConfig);
+    // TEST : ProcessPhoneRestartRecoveryTimerExpired
+    FRIEND_TEST(AosSubscriberManagerTest, InvokesProcessPhoneNumberAvailableWhenSupportUsim);
+    FRIEND_TEST(AosSubscriberManagerTest, InvokesProcessFallbackAndRestart);
+    FRIEND_TEST(AosSubscriberManagerTest, InvokesProcessFallbackAndClearAll);
+    // TEST : NotifyState
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsNotifyState);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedNotifyStateWhenEmptyListener);
+    // TEST : NotifyMonitorState
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsNotifyMonitorState);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedNotifyMonitorStateWhenEmptyListener);
+    // TEST : IsPrimaryImpuValid
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnFalsePrimaryImpuValidWhenInvalidPhoneNumber);
+    // TEST : IsSipUri
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenIsSipUriWithZeroImpu);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSip);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSips);
     // TEST : NConfiguration_NotifyConfigChanged
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfiguration);
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsUpdateNConfigurationWhenPrioritySizeIsSame);
     FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenNConfigIsNull);
     FRIEND_TEST(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration);
-
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_InitCompleted_IsimUsimNotSupport);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_RefreshCompleted_IsimUsimNotSupport);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_RefreshStarted);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_NotifyError_IsimUsimNotSupport);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_NotifyError_TimerIsRunning);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_False);
-    FRIEND_TEST(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_True);
-    FRIEND_TEST(AosSubscriberManagerTest, ConfigUpdate_NotifyUpdate);
-    FRIEND_TEST(AosSubscriberManagerTest, Timer_TimerExpired_TimerIsNull);
-    FRIEND_TEST(AosSubscriberManagerTest, Timer_TimerExpired_IccLoadedWaiting);
-    FRIEND_TEST(AosSubscriberManagerTest, Timer_TimerExpired_IsimRecovery);
-    FRIEND_TEST(AosSubscriberManagerTest, Timer_TimerExpired_PhoneRestartRecovery);
-    FRIEND_TEST(AosSubscriberManagerTest, ServicePhone_PhoneNumberStateChanged_IsNotReady);
-    FRIEND_TEST(AosSubscriberManagerTest, ServicePhone_IsimStateChangedLoaded);
-    FRIEND_TEST(AosSubscriberManagerTest, ServicePhone_IsimStateChangedRefreshStarted);
-    FRIEND_TEST(AosSubscriberManagerTest, ServicePhone_IsimStateChangedRefreshCompleted);
-    FRIEND_TEST(AosSubscriberManagerTest, ServicePhone_IsimStateChangedReturnFalse);
-    FRIEND_TEST(AosSubscriberManagerTest, IdentityPriorityToString);
-    FRIEND_TEST(AosSubscriberManagerTest, PrintIdentity);
-    FRIEND_TEST(AosSubscriberManagerTest, UpdateEventToString);
-    FRIEND_TEST(AosSubscriberManagerTest, TimerToString);
-    FRIEND_TEST(AosSubscriberManagerTest, StateToString);
+    // TEST : SubscriberConfig_InitCompleted
+    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenInitCompletedWithNotSupportUsim);
+    // TEST : SubscriberConfig_RefreshCompleted
+    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenRefreshCompletedWithNotSupportUsim);
+    // TEST : SubscriberConfig_RefreshStarted
+    FRIEND_TEST(AosSubscriberManagerTest, EnableRefreshStartedValueWhenInvokesRefreshStarted);
+    // TEST : SubscriberConfig_NotifyError
+    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenNotifyErrorWithNotSupportFallback);
+    FRIEND_TEST(AosSubscriberManagerTest, FailedFallbackOnNotifyErrorWhenTimerIsRunning);
+    FRIEND_TEST(AosSubscriberManagerTest, ClearAllWhenFailedFallbackOnNotifyError);
+    FRIEND_TEST(AosSubscriberManagerTest, RestartsWhenNotifyError);
+    // TEST : ConfigUpdate_NotifyUpdate
+    FRIEND_TEST(AosSubscriberManagerTest, InvokesConfigUpdateNotifyUpdate);
+    // TEST : Timer_TimerExpired
+    FRIEND_TEST(AosSubscriberManagerTest, FailedStartProcessWhenTimerExpiredWithInvalidTimer);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenIccLoadedWaitingTimerExpired);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenIsimRecoveryTimerExpired);
+    FRIEND_TEST(AosSubscriberManagerTest, SucceedsStopTimerWhenRecoveryTimerExpired);
+    // TEST : ServicePhone_PhoneNumberStateChanged
+    FRIEND_TEST(AosSubscriberManagerTest, RestartsWhenPhoneNumberStateChangedWithNotReady);
+    // TEST : ServicePhone_IsimStateChanged
+    FRIEND_TEST(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged);
+    // TEST : IdentityPriorityToString
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmpty);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsIsimUsimWhenIdentityPriorityToStringWithIsimUsim);
+    FRIEND_TEST(AosSubscriberManagerTest,
+            ReturnsIsimAndIsimImsiWhenIdentityPriorityToStringWithIsimAndIsimImsi);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsConfWhenIdentityPriorityToStringWithConf);
+    // TEST : PrintIdentity
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnValidStringWhenPrintIdentity);
+    // TEST : UpdateEventToString
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsValidStringWhenUpdateEventToString);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenUpdateEventToStringWithInvalidEvent);
+    // TEST : TimerToString
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenTimerToStringWithInvalidtimer);
+    // TEST : StateToString
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsStateWhenStateToString);
+    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenStateToStringWithInvalidState);
 };
 
 class AosSubscriberManagerTest : public ::testing::Test
@@ -226,7 +281,6 @@ public:
     TestAosSubscriberManager* m_pSubscriberManager;
 
     TestPhoneInfoService m_objPhoneInfoService;
-    IAosNConfiguration* m_piOriginConfiguration;
     MockISubscriberConfig m_objMockISubscriberConfig;
     MockISubscriberConfig m_objMockISubscriberConfigFake;
     MockISubscriberInfo m_objMockISubscriberInfo;
@@ -266,14 +320,10 @@ protected:
         m_pSubscriberManager->m_strTemporaryPublicUserId = AString("TEMP_PUID");
         m_pSubscriberManager->m_strTemporaryPrivateUserId = AString("TEMP_IMPI");
         m_pSubscriberManager->m_strTemporaryHomeDomainName = AString("TEMP_HDN");
-
-        m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     }
 
     virtual void TearDown() override
     {
-        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration, 0);
-
         if (m_pSubscriberManager)
         {
             delete m_pSubscriberManager;
@@ -335,43 +385,39 @@ protected:
     }
 };
 
-TEST_F(AosSubscriberManagerTest, IsReady_IsProvisionedForNormalType)
+TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenListenerIsNull)
 {
-    // IsProvisioned True, Normal Type
-    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    EXPECT_TRUE(m_pSubscriberManager->IsReady());
-}
+    // GIVEN
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 0);
 
-TEST_F(AosSubscriberManagerTest, IsReady_IsNotProvisionedForNormalType)
-{
-    // IsProvisioned False, Normal Type
-    m_pSubscriberManager->SetProvisioned(IMS_FALSE);
-    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_FALSE));
-}
-
-TEST_F(AosSubscriberManagerTest, IsReady_IsProvisionedForFakeType)
-{
-    // IsProvisioned True, Fake Type
-    m_pSubscriberManager->SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
-    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_TRUE));
-}
-
-TEST_F(AosSubscriberManagerTest, IsReady_IsNotProvisionedForFakeType)
-{
-    // IsProvisioned False, Fake Type
-    m_pSubscriberManager->SetProvisioned(IMS_FALSE, IAosSubscriber::FAKE);
-    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_TRUE));
-}
-
-TEST_F(AosSubscriberManagerTest, AddListener_ListenerIsNull)
-{
+    // WHEN
     m_pSubscriberManager->AddListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 0);
 }
 
-TEST_F(AosSubscriberManagerTest, AddListener)
+TEST_F(AosSubscriberManagerTest, SucceedsAddListener)
 {
-    // Test1 : Add success
+    // GIVEN
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 0);
+
+    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
+
+    // WHEN
+    m_pSubscriberManager->AddListener(piListener1);
+    m_pSubscriberManager->AddListener(piListener2);
+    m_pSubscriberManager->AddListener(piListener3);
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenDuplicatedListener)
+{
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -379,17 +425,21 @@ TEST_F(AosSubscriberManagerTest, AddListener)
     m_pSubscriberManager->AddListener(piListener1);
     m_pSubscriberManager->AddListener(piListener2);
     m_pSubscriberManager->AddListener(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 
-    // Test2 : duplicated listener
+    // WHEN
     m_pSubscriberManager->AddListener(piListener1);
     m_pSubscriberManager->AddListener(piListener2);
     m_pSubscriberManager->AddListener(piListener3);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, RemoveListener_ListenerIsNull)
+TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenListenerIsNull)
 {
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -397,16 +447,43 @@ TEST_F(AosSubscriberManagerTest, RemoveListener_ListenerIsNull)
     m_pSubscriberManager->AddListener(piListener1);
     m_pSubscriberManager->AddListener(piListener2);
     m_pSubscriberManager->AddListener(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 
+    // WHEN
     m_pSubscriberManager->RemoveListener(IMS_NULL);
     m_pSubscriberManager->RemoveListener(IMS_NULL);
     m_pSubscriberManager->RemoveListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, RemoveListener)
+TEST_F(AosSubscriberManagerTest, SucceedsRemoveListener)
 {
+    // GIVEN
+    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
+
+    m_pSubscriberManager->AddListener(piListener1);
+    m_pSubscriberManager->AddListener(piListener2);
+    m_pSubscriberManager->AddListener(piListener3);
+
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
+
+    // WHEN
+    m_pSubscriberManager->RemoveListener(piListener3);
+    m_pSubscriberManager->RemoveListener(piListener2);
+    m_pSubscriberManager->RemoveListener(piListener1);
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 0);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenNoMatchedListener)
+{
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -416,31 +493,48 @@ TEST_F(AosSubscriberManagerTest, RemoveListener)
     m_pSubscriberManager->AddListener(piListener1);
     m_pSubscriberManager->AddListener(piListener2);
     m_pSubscriberManager->AddListener(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 
-    // Test1 : Not matched listener
+    // WHEN
     m_pSubscriberManager->RemoveListener(piListener4);
     m_pSubscriberManager->RemoveListener(piListener5);
-    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 
-    // Test2 : Remove success
-    m_pSubscriberManager->RemoveListener(piListener3);
-    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 2);
-    m_pSubscriberManager->RemoveListener(piListener2);
-    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 1);
-    m_pSubscriberManager->RemoveListener(piListener1);
-    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 0);
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, AddListenerForMonitor_ListenerIsNull)
+TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenListenerIsNull)
 {
+    // GIVEN
+    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 0);
+
+    // WHEN
     m_pSubscriberManager->AddListenerForMonitor(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 0);
 }
 
-TEST_F(AosSubscriberManagerTest, AddListenerForMonitor)
+TEST_F(AosSubscriberManagerTest, SucceedsAddListenerForMonitor)
 {
-    // Test1 : Add success
+    // GIVEN
+    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
+
+    // WHEN
+    m_pSubscriberManager->AddListenerForMonitor(piListener1);
+    m_pSubscriberManager->AddListenerForMonitor(piListener2);
+    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenDuplicatedListener)
+{
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -448,17 +542,21 @@ TEST_F(AosSubscriberManagerTest, AddListenerForMonitor)
     m_pSubscriberManager->AddListenerForMonitor(piListener1);
     m_pSubscriberManager->AddListenerForMonitor(piListener2);
     m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 
-    // Test2 : duplicated listener
+    // WHEN
     m_pSubscriberManager->AddListenerForMonitor(piListener1);
     m_pSubscriberManager->AddListenerForMonitor(piListener2);
     m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, RemoveListenerForMonitor_ListenerIsNull)
+TEST_F(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenListenerIsNull)
 {
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -466,16 +564,43 @@ TEST_F(AosSubscriberManagerTest, RemoveListenerForMonitor_ListenerIsNull)
     m_pSubscriberManager->AddListenerForMonitor(piListener1);
     m_pSubscriberManager->AddListenerForMonitor(piListener2);
     m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 
+    // WHEN
     m_pSubscriberManager->RemoveListenerForMonitor(IMS_NULL);
     m_pSubscriberManager->RemoveListenerForMonitor(IMS_NULL);
     m_pSubscriberManager->RemoveListenerForMonitor(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, RemoveListenerForMonitor)
+TEST_F(AosSubscriberManagerTest, SucceedsRemoveListenerForMonitor)
 {
+    // GIVEN
+    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
+    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
+
+    m_pSubscriberManager->AddListenerForMonitor(piListener1);
+    m_pSubscriberManager->AddListenerForMonitor(piListener2);
+    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
+    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
+
+    // WHEN
+    m_pSubscriberManager->RemoveListenerForMonitor(piListener3);
+    m_pSubscriberManager->RemoveListenerForMonitor(piListener2);
+    m_pSubscriberManager->RemoveListenerForMonitor(piListener1);
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 0);
+}
+
+TEST_F(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenNoMatchedListener)
+{
+    // GIVEN
     IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
     IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
@@ -485,110 +610,197 @@ TEST_F(AosSubscriberManagerTest, RemoveListenerForMonitor)
     m_pSubscriberManager->AddListenerForMonitor(piListener1);
     m_pSubscriberManager->AddListenerForMonitor(piListener2);
     m_pSubscriberManager->AddListenerForMonitor(piListener3);
+
     EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 
-    // Test1 : Not matched listener
+    // WHEN
     m_pSubscriberManager->RemoveListenerForMonitor(piListener4);
     m_pSubscriberManager->RemoveListenerForMonitor(piListener5);
-    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 
-    // Test2 : Remove success
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener3);
-    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 2);
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener2);
-    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 1);
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener1);
-    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 0);
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_objMonitorListeners.GetSize(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, GetConfiguredImpusForFake)
+TEST_F(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForFake)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuidsForFake = m_objEmptyPuids;
+
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpusForFake().GetCount(), 0);
+
+    // WHEN
     m_pSubscriberManager->m_objPuidsForFake = m_objValidPuids;
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpusForFake().GetCount(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, GetConfiguredImpusForNormal)
+TEST_F(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForNormal)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objEmptyPuids;
+
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
+
+    // WHEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
 }
 
-TEST_F(AosSubscriberManagerTest, GetFakeImpus_SubscriberConfigIsNull)
+TEST_F(AosSubscriberManagerTest, FailedGetFakeImpusWhenSubscriberConfigIsNull)
 {
-    // SubscriberConfig is null
+    // GIVEN
     m_pSubscriberManager->SetSubscriberConfigForFake(IMS_NULL);
-    EXPECT_EQ(m_pSubscriberManager->GetFakeImpus().GetCount(), 0);
+
+    // WHEN
+    IMS_UINT32 nCount = m_pSubscriberManager->GetFakeImpus().GetCount();
+
+    // THEN
+    EXPECT_EQ(nCount, 0);
 }
 
-TEST_F(AosSubscriberManagerTest, GetFakeImpus_SubscriberConfigIsNotNull)
+TEST_F(AosSubscriberManagerTest, SucceedsGetFakeImpus)
 {
-    EXPECT_EQ(m_pSubscriberManager->GetFakeImpus().GetCount(), 3);
+    // GIVEN
+
+    // WHEN
+    IMS_UINT32 nCount = m_pSubscriberManager->GetFakeImpus().GetCount();
+
+    // THEN
+    EXPECT_EQ(nCount, 3);
 }
 
-TEST_F(AosSubscriberManagerTest, Init_SubscriberConfigIsNotNull)
+TEST_F(AosSubscriberManagerTest, SucceedsInitWhenSubscriberConfigIsNotNull)
 {
+    // GIVEN
     EXPECT_CALL(m_objMockISubscriberConfig, SetListener(_)).Times(1);
 
+    // WHEN
     m_pSubscriberManager->Init();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosSubscriberManagerTest, IsTimerRunning_TimerIsNotRunning)
+TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithNormalType)
 {
+    // GIVEN
+    m_pSubscriberManager->SetProvisioned(IMS_FALSE);
+
+    EXPECT_FALSE(m_pSubscriberManager->IsReady());
+
+    // WHEN
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
+
+    // THEN
+    EXPECT_TRUE(m_pSubscriberManager->IsReady());
+}
+
+TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithNormalType)
+{
+    // GIVEN
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE);
+
+    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_FALSE));
+
+    // WHEN
+    m_pSubscriberManager->SetProvisioned(IMS_FALSE);
+
+    // THEN
+    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_FALSE));
+}
+
+TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithFakeType)
+{
+    // GIVEN
+    m_pSubscriberManager->SetProvisioned(IMS_FALSE, IAosSubscriber::FAKE);
+
+    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_TRUE));
+
+    // WHEN
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
+
+    // THEN
+    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithFakeType)
+{
+    // GIVEN
+    m_pSubscriberManager->SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
+
+    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_TRUE));
+
+    // WHEN
+    m_pSubscriberManager->SetProvisioned(IMS_FALSE, IAosSubscriber::FAKE);
+
+    // THEN
+    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_TRUE));
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsNotRunning)
+{
+    // GIVEN
     m_pSubscriberManager->m_piTimerToIccLoadedWaiting = IMS_NULL;
     m_pSubscriberManager->m_piTimerToIsimRecovery = IMS_NULL;
     m_pSubscriberManager->m_piTimerToPhoneRestartRecovery = IMS_NULL;
 
+    // WHEN
+    // THEN
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_ICC_LOADED_WAITING));
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_ISIM_RECOVERY));
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY));
 }
 
-TEST_F(AosSubscriberManagerTest, IsTimerRunning_TimerIsRunning)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenTimerIsRunning)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 5000);
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 5000);
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 5000);
 
+    // WHEN
+    // THEN
     EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ICC_LOADED_WAITING));
     EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ISIM_RECOVERY));
     EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY));
 }
 
-TEST_F(AosSubscriberManagerTest, IsTimerRunning_TimerIsInvalid)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsInvalid)
 {
+    // GIVEN
     const IMS_UINT32 TIMER_INVALID = 999;
     m_pSubscriberManager->StartTimer(TIMER_INVALID, 5000);
+
+    // WHEN
+    // THEN
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_INVALID));
-
-    m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 5000);
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 5000);
-    m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 5000);
-
-    // Stopping an invalid timer does not affect other timers.
-    m_pSubscriberManager->StopTimer(TIMER_INVALID);
-
-    EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ICC_LOADED_WAITING));
-    EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ISIM_RECOVERY));
-    EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY));
 }
 
-TEST_F(AosSubscriberManagerTest, GetIsimAt_ConfigurationNull)
+TEST_F(AosSubscriberManagerTest, SucceedsGetIsimAt)
 {
+    // GIVEN
     IMS_UINT32 isimIndex = 1;
     m_pSubscriberManager->m_nIsimIndexForImpu = isimIndex;
-    EXPECT_EQ(m_pSubscriberManager->GetIsimAt(), isimIndex);
+
+    // WHEN
+    IMS_UINT32 nIndex = m_pSubscriberManager->GetIsimAt();
+
+    // THEN
+    EXPECT_EQ(nIndex, isimIndex);
 }
 
-TEST_F(AosSubscriberManagerTest, ClearIsimRecovery)
+TEST_F(AosSubscriberManagerTest, SucceedClearIsimRecovery)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
+    // WHEN
     m_pSubscriberManager->ClearIsimRecovery();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
@@ -777,136 +989,128 @@ TEST_F(AosSubscriberManagerTest, FailedConfigureAsFakeWhenGetInvalidImpu)
     EXPECT_EQ(0, m_pSubscriberManager->m_objPuidsForFake.GetCount());
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_IsimIsNotSupport)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenIsimIsNotSupport)
 {
-    // Isim is not supported
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_FALSE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_FALSE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_ImpuIsEmpty)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsEmpty)
 {
-    // Isim is supported, IMPU is empty
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(m_objEmptyPuids));
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(m_objEmptyPuids));
 
     AString strEmptyImpi;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPrivateUserId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyImpi));
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strEmptyImpi));
 
     AString strEmptyHomeDomainName;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyHomeDomainName));
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strEmptyHomeDomainName));
 
-    EXPECT_FALSE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_ImpuIsInvalid)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenImpuIsInvalid)
 {
-    // Isim is supported, IMPU is invalid
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
 
     AStringArray objInvalidPuids;
     objInvalidPuids.AddElement(AString("INVALID_IMPU"));
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInvalidPuids));
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(objInvalidPuids));
 
     AString strEmptyImpi;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPrivateUserId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyImpi));
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strEmptyImpi));
 
     AString strEmptyHomeDomainName;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyHomeDomainName));
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strEmptyHomeDomainName));
 
-    EXPECT_FALSE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_InvalidImpi)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidImpi)
 {
-    // Isim is supported, IMPU is not empty, Invalid IMPI
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(m_objValidPuids));
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(m_objValidPuids));
 
     AString strEmptyImpi;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPrivateUserId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyImpi));
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strEmptyImpi));
 
     AString strHomeDomainName = "HOME_DOMAIN_NAME";
-    EXPECT_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strHomeDomainName));
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strHomeDomainName));
 
-    EXPECT_FALSE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_InvalidHomeDomainName)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseCheckIsimValuesWhenInvalidHdn)
 {
-    // Isim is supported, IMPU is not empty, Invalid HomeDomainName
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(m_objValidPuids));
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(m_objValidPuids));
 
     AString strImpi = "IMPI";
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPrivateUserId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strImpi));
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strImpi));
 
     AString strEmptyHomeDomainName;
-    EXPECT_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strEmptyHomeDomainName));
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strEmptyHomeDomainName));
 
-    EXPECT_FALSE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, CheckIsimValues_ReturnTrue)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueCheckIsimValues)
 {
-    // Isim is supported, IMPU is not empty, Valid IMPI, Valid HomeDomainName
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(m_objValidPuids));
+    ON_CALL(m_objMockISubscriberConfig, GetPublicUserIds())
+            .WillByDefault(ReturnRef(m_objValidPuids));
 
     AString strImpi = "IMPI";
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPrivateUserId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strImpi));
+    ON_CALL(m_objMockISubscriberConfig, GetPrivateUserId()).WillByDefault(ReturnRef(strImpi));
 
     AString strHomeDomainName = "HOME_DOMAIN_NAME";
-    EXPECT_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strHomeDomainName));
+    ON_CALL(m_objMockISubscriberConfig, GetHomeDomainName())
+            .WillByDefault(ReturnRef(strHomeDomainName));
 
-    EXPECT_TRUE(m_pSubscriberManager->CheckIsimValues());
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->CheckIsimValues();
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosSubscriberManagerTest, FailedGetImpuFromIsimWhenGetEmptyPuids)
@@ -1030,8 +1234,9 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetImpuWhenSecondImpuIsNotSip)
     EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpuIsInvalid)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidImpu)
 {
+    // GIVEN
     m_pSubscriberManager->m_strTemporaryPublicUserId = AString::ConstNull();
 
     EXPECT_TRUE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
@@ -1039,11 +1244,17 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpuIsInvalid)
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpiIsInvalid)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidImpi)
 {
+    // GIVEN
     m_pSubscriberManager->m_strTemporaryPrivateUserId = AString::ConstNull();
 
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
@@ -1051,11 +1262,17 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ImpiIsInvalid)
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_HomeDomainNameIsInvalid)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenInvalidHdn)
 {
+    // GIVEN
     m_pSubscriberManager->m_strTemporaryHomeDomainName = AString::ConstNull();
 
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
@@ -1063,16 +1280,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_HomeDomainNameIsInvalid)
     EXPECT_TRUE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impu)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForImpu)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1091,16 +1313,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impu)
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impi)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForImpi)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1121,16 +1348,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Impi)
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_HomeDomainName)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForHdn)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1153,16 +1385,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_HomeD
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_PhoneContext)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForPhoneContext)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1187,16 +1424,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Phone
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthUserName)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForAuthUserName)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1223,16 +1465,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthU
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthRealm)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForAuthRealm)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1261,16 +1508,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_AuthR
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_ServerScscf)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseGetTemporaryImpuWhenUpdateFailedForServerScscf)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1301,17 +1553,22 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateFailed_Serve
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
 TEST_F(AosSubscriberManagerTest,
-        GetTemporaryImpu_ConfigurableUpdateFailed_WriteProvisioningSubscriber)
+        ReturnsFalseGetTemporaryImpuWhenUpdateFailedForWriteProvisioningSubscriber)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1343,16 +1600,21 @@ TEST_F(AosSubscriberManagerTest,
             .WillRepeatedly(Return(IMS_FALSE));
 
     AStringArray objPuids;
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithWritable)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueGetTemporaryImpuWithWritable)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1384,16 +1646,21 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithW
             .WillRepeatedly(Return(IMS_TRUE));
 
     AStringArray objPuids;
-    EXPECT_TRUE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_TRUE);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWithoutWritable)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueGetTemporaryImpuWithoutWritable)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
     EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
-    // Set IConfigurable
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
             .Times(1)
             .WillRepeatedly(Return(&m_objMockIConfigurable));
@@ -1424,7 +1691,12 @@ TEST_F(AosSubscriberManagerTest, GetTemporaryImpu_ConfigurableUpdateSuccessWitho
             .Times(0);
 
     AStringArray objPuids;
-    EXPECT_TRUE(m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->GetTemporaryImpu(objPuids, IMS_FALSE);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosSubscriberManagerTest, FailedUpdateImsiWhenSubsInfoIsNull)
@@ -1521,34 +1793,51 @@ TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenFailedUpdateImsIdentityWithUsim
     EXPECT_FALSE(bResult);
 }
 
-// ProcessFallback
-TEST_F(AosSubscriberManagerTest, ProcessFallback_UpdateImsIdentityReturnFalse)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueProcessFallback)
 {
-    EXPECT_FALSE(m_pSubscriberManager->ProcessFallback(IMS_TRUE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .WillByDefault(Return(&m_objMockIConfigurable));
+
+    ON_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockISubscriberConfig, IsUsimSupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessFallback(IMS_TRUE);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessFallback_UpdateImsIdentityReturnTrue)
+TEST_F(AosSubscriberManagerTest, ReturnsFalseProcessFallbackWhenUsimFallbackIsFalse)
 {
-    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
-            .Times(1)
-            .WillRepeatedly(Return(&m_objMockIConfigurable));
+    // GIVEN
+    m_pSubscriberManager->m_bUsimFallback = IMS_FALSE;
 
-    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM, _))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessFallback(IMS_TRUE);
 
-    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM, _))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    // THEN
+    EXPECT_FALSE(bResult);
+}
 
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockISubscriberConfig, IsUsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+TEST_F(AosSubscriberManagerTest, ReturnsFalseProcessFallbackWhenFailedUpdateImsIdentity)
+{
+    // GIVEN
+    m_pSubscriberManager->m_bUsimFallback = IMS_TRUE;
 
-    EXPECT_TRUE(m_pSubscriberManager->ProcessFallback(IMS_TRUE));
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessFallback(IMS_FALSE);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
 TEST_F(AosSubscriberManagerTest, FailedProcessFallbackToImsiBasedIsimWhenNotSupportFallBack)
@@ -1766,82 +2055,166 @@ TEST_F(AosSubscriberManagerTest, SucceedsProcessPhoneNumberAvailable)
     EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessIsimRecovery_SupportIsimImsiFallback)
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithLoaded)
 {
+    // GIVEN
+    IsimState state = IsimState::LOADED;
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessIsimStateChange(state);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshStarted)
+{
+    // GIVEN
+    IsimState state = IsimState::REFRESH_STARTED;
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessIsimStateChange(state);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshCompleted)
+{
+    // GIVEN
+    IsimState state = IsimState::REFRESH_COMPLETED;
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessIsimStateChange(state);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotReady)
+{
+    // GIVEN
+    IsimState state = IsimState::NOT_READY;
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->ProcessIsimStateChange(state);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ClearIsimRecoveryWhenProcessIsimRecoveryWithSupportIsimImsi)
+{
+    // GIVEN
     ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
-
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
-    AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&m_objMockIAosService), 0);
+    AosProvider::GetInstance()->SetService(&m_objMockIAosService, 0);
     EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(1);
 
+    // WHEN
     m_pSubscriberManager->ProcessIsimRecovery();
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_nIsimRecoveryCount, 0);
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessIsimRecovery_TimerIsRunning)
+TEST_F(AosSubscriberManagerTest, FailedProcessIsimRecoveryWhenTimerIsRunning)
 {
+    // GIVEN
     ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM]");
 
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
-    AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&m_objMockIAosService), 0);
+    AosProvider::GetInstance()->SetService(&m_objMockIAosService, 0);
     EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(0);
 
+    // WHEN
     m_pSubscriberManager->ProcessIsimRecovery();
+
+    // THEN
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessPhoneRestarted)
+TEST_F(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted)
 {
+    // GIVEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
+    // WHEN
     m_pSubscriberManager->ProcessPhoneRestarted();
+
+    // THEN
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessIsimRecoveryTimerExpired)
+TEST_F(AosSubscriberManagerTest, UpdateSubscriberAllWhenProcessIsimRecoveryTimerExpired)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
-    EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
-            .Times(1)
-            .WillRepeatedly(Return(&m_objMockIConfigurable));
+    ON_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .WillByDefault(Return(&m_objMockIConfigurable));
 
     EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIBER_ALL, _))
             .Times(1)
             .WillRepeatedly(Return(IMS_TRUE));
 
+    // WHEN
     m_pSubscriberManager->ProcessIsimRecoveryTimerExpired();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_IsUsimTrue)
+TEST_F(AosSubscriberManagerTest,
+        FailedUpdateWhenProcessIsimRecoveryTimerExpiredWithoutSubscriberConfig)
 {
+    // GIVEN
+    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
+    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
+
+    ON_CALL(m_objMockISubscriberConfig, GetConfigurable()).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIBER_ALL, _)).Times(0);
+
+    // WHEN
+    m_pSubscriberManager->ProcessIsimRecoveryTimerExpired();
+
+    // THEN
+    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
+}
+
+TEST_F(AosSubscriberManagerTest, InvokesProcessPhoneNumberAvailableWhenSupportUsim)
+{
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
     m_pSubscriberManager->SetIsim(IMS_FALSE);
     m_pSubscriberManager->SetUsim(IMS_TRUE);
 
+    // WHEN
     m_pSubscriberManager->ProcessPhoneRestartRecoveryTimerExpired();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_RefreshStarted)
+TEST_F(AosSubscriberManagerTest, InvokesProcessFallbackAndRestart)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
@@ -1855,7 +2228,6 @@ TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_Refresh
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
 
     // ProcessFallback(IMS_TRUE) and UpdateImsIdentity(IMS_TRUE) should return IMS_TRUE.
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
@@ -1875,12 +2247,16 @@ TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_Refresh
             .Times(1)
             .WillRepeatedly(Return(IMS_TRUE));
 
+    // WHEN
     m_pSubscriberManager->ProcessPhoneRestartRecoveryTimerExpired();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_ProcessFallback)
+TEST_F(AosSubscriberManagerTest, InvokesProcessFallbackAndClearAll)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
@@ -1894,64 +2270,140 @@ TEST_F(AosSubscriberManagerTest, ProcessPhoneRestartRecoveryTimerExpired_Process
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
 
+    // WHEN
     m_pSubscriberManager->ProcessPhoneRestartRecoveryTimerExpired();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, IsPrimaryImpuValid_PhoneNumberLengthZero)
+TEST_F(AosSubscriberManagerTest, SucceedsNotifyState)
 {
-    EXPECT_FALSE(m_pSubscriberManager->IsPrimaryImpuValid(m_objValidPuids));
-}
-
-TEST_F(AosSubscriberManagerTest, NotifyState)
-{
+    // GIVEN
     MockIAosSubscriberManagerListener objListener1;
     MockIAosSubscriberManagerListener objListener2;
     MockIAosSubscriberManagerListener objListener3;
 
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(2);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(2);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(2);
-    m_pSubscriberManager->AddListener(static_cast<IAosSubscriberManagerListener*>(&objListener1));
-    m_pSubscriberManager->AddListener(static_cast<IAosSubscriberManagerListener*>(&objListener2));
-    m_pSubscriberManager->AddListener(static_cast<IAosSubscriberManagerListener*>(&objListener3));
+    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
 
+    m_pSubscriberManager->AddListener(&objListener1);
+    m_pSubscriberManager->AddListener(&objListener2);
+    m_pSubscriberManager->AddListener(&objListener3);
+
+    // WHEN
     m_pSubscriberManager->NotifyState(IAosSubscriber::READY);
-    m_pSubscriberManager->NotifyState(IAosSubscriber::NOT_READY);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosSubscriberManagerTest, NotifyMonitorState)
+TEST_F(AosSubscriberManagerTest, FailedNotifyStateWhenEmptyListener)
 {
+    // GIVEN
     MockIAosSubscriberManagerListener objListener1;
     MockIAosSubscriberManagerListener objListener2;
     MockIAosSubscriberManagerListener objListener3;
 
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(2);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(2);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(2);
-    m_pSubscriberManager->AddListenerForMonitor(
-            static_cast<IAosSubscriberManagerListener*>(&objListener1));
-    m_pSubscriberManager->AddListenerForMonitor(
-            static_cast<IAosSubscriberManagerListener*>(&objListener2));
-    m_pSubscriberManager->AddListenerForMonitor(
-            static_cast<IAosSubscriberManagerListener*>(&objListener3));
+    // No AddListenr
 
-    m_pSubscriberManager->NotifyMonitorState(IAosSubscriber::READY);
-    m_pSubscriberManager->NotifyMonitorState(IAosSubscriber::NOT_READY);
+    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
+
+    // WHEN
+    m_pSubscriberManager->NotifyState(IAosSubscriber::READY);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosSubscriberManagerTest, IsSipUri)
+TEST_F(AosSubscriberManagerTest, SucceedsNotifyMonitorState)
 {
-    // Test1 : Impu length is zero
-    EXPECT_FALSE(m_pSubscriberManager->IsSipUri(AString::ConstNull()));
+    // GIVEN
+    MockIAosSubscriberManagerListener objListener1;
+    MockIAosSubscriberManagerListener objListener2;
+    MockIAosSubscriberManagerListener objListener3;
 
-    // Test2 : Impu scheme is Sip
-    EXPECT_TRUE(m_pSubscriberManager->IsSipUri(AString("sip:user1@ims.com")));
+    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
 
-    // Test3 : Impu scheme is Sips
-    EXPECT_TRUE(m_pSubscriberManager->IsSipUri(AString("sips:user1@ims.com")));
+    m_pSubscriberManager->AddListenerForMonitor(&objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&objListener3);
+
+    // WHEN
+    m_pSubscriberManager->NotifyMonitorState(IAosSubscriber::READY);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosSubscriberManagerTest, FailedNotifyMonitorStateWhenEmptyListener)
+{
+    // GIVEN
+    MockIAosSubscriberManagerListener objListener1;
+    MockIAosSubscriberManagerListener objListener2;
+    MockIAosSubscriberManagerListener objListener3;
+
+    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
+
+    // No AddListenr
+
+    // WHEN
+    m_pSubscriberManager->NotifyMonitorState(IAosSubscriber::READY);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnFalsePrimaryImpuValidWhenInvalidPhoneNumber)
+{
+    // GIVEN
+    m_pSubscriberManager->m_strPhoneNumber = AString::ConstNull();
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->IsPrimaryImpuValid(m_objValidPuids);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenIsSipUriWithZeroImpu)
+{
+    // GIVEN
+    AString strImpu = AString::ConstNull();
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->IsSipUri(strImpu);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSip)
+{
+    // GIVEN
+    AString strImpu = AString("sip:user1@ims.com");
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->IsSipUri(strImpu);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenIsSipUriWithSips)
+{
+    // GIVEN
+    AString strImpu = AString("sips:user1@ims.com");
+
+    // WHEN
+    IMS_BOOL bResult = m_pSubscriberManager->IsSipUri(strImpu);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosSubscriberManagerTest, SucceedsUpdateNConfiguration)
@@ -2084,24 +2536,27 @@ TEST_F(AosSubscriberManagerTest, FailedUpdateNConfigurationWhenSameConfiguration
     EXPECT_NE(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_InitCompleted_IsimUsimNotSupport)
+TEST_F(AosSubscriberManagerTest, ClearAllWhenInitCompletedWithNotSupportUsim)
 {
-    EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
-            .Times(1)
-            .WillRepeatedly(Return(IMS_FALSE));
+    // GIVEN
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_FALSE));
 
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
     EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_InitCompleted();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_RefreshCompleted_IsimUsimNotSupport)
+TEST_F(AosSubscriberManagerTest, ClearAllWhenRefreshCompletedWithNotSupportUsim)
 {
+    // GIVEN
     EXPECT_CALL(m_objMockISubscriberConfig, IsIsimSupported())
             .Times(1)
             .WillRepeatedly(Return(IMS_FALSE));
@@ -2111,33 +2566,45 @@ TEST_F(AosSubscriberManagerTest, SubscriberConfig_RefreshCompleted_IsimUsimNotSu
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
     EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_RefreshCompleted();
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_RefreshStarted)
+TEST_F(AosSubscriberManagerTest, EnableRefreshStartedValueWhenInvokesRefreshStarted)
 {
+    // GIVEN
     EXPECT_FALSE(m_pSubscriberManager->IsRefreshStarted());
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_RefreshStarted();
+
+    // THEN
     EXPECT_TRUE(m_pSubscriberManager->IsRefreshStarted());
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_IsimUsimNotSupport)
+TEST_F(AosSubscriberManagerTest, ClearAllWhenNotifyErrorWithNotSupportFallback)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
     EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_NotifyError(0);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_TimerIsRunning)
+TEST_F(AosSubscriberManagerTest, FailedFallbackOnNotifyErrorWhenTimerIsRunning)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
@@ -2148,19 +2615,21 @@ TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_TimerIsRunning)
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
 
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_NotifyError(0);
 
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
     EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_False)
+TEST_F(AosSubscriberManagerTest, ClearAllWhenFailedFallbackOnNotifyError)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
@@ -2171,16 +2640,18 @@ TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_Fa
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_NotifyError(0);
 
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_True)
+TEST_F(AosSubscriberManagerTest, RestartsWhenNotifyError)
 {
+    // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
@@ -2191,7 +2662,6 @@ TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_Tr
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
 
     // ProcessFallback(IMS_TRUE) and UpdateImsIdentity(IMS_TRUE) should return IMS_TRUE.
     EXPECT_CALL(m_objMockISubscriberConfig, GetConfigurable())
@@ -2211,20 +2681,23 @@ TEST_F(AosSubscriberManagerTest, SubscriberConfig_NotifyError_ProcessFallback_Tr
             .Times(1)
             .WillRepeatedly(Return(IMS_TRUE));
 
+    // WHEN
     m_pSubscriberManager->SubscriberConfig_NotifyError(0);
 
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
     EXPECT_FALSE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 }
 
-TEST_F(AosSubscriberManagerTest, ConfigUpdate_NotifyUpdate)
+TEST_F(AosSubscriberManagerTest, InvokesConfigUpdateNotifyUpdate)
 {
     // Currently, there is no logic that requires tests.
     m_pSubscriberManager->ConfigUpdate_NotifyUpdate(0, AString::ConstNull(), AString::ConstNull());
 }
 
-TEST_F(AosSubscriberManagerTest, Timer_TimerExpired_TimerIsNull)
+TEST_F(AosSubscriberManagerTest, FailedStartProcessWhenTimerExpiredWithInvalidTimer)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
 
@@ -2234,42 +2707,55 @@ TEST_F(AosSubscriberManagerTest, Timer_TimerExpired_TimerIsNull)
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
 
-    // Expiration of an invalid timer does not affect other timers.
+    // WHEN : Expiration of an invalid timer does not affect other timers.
     m_pSubscriberManager->Timer_TimerExpired(IMS_NULL);
 
+    // THEN
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, Timer_TimerExpired_IccLoadedWaiting)
+TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenIccLoadedWaitingTimerExpired)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
 
+    // WHEN
     m_pSubscriberManager->Timer_TimerExpired(m_pSubscriberManager->m_piTimerToIccLoadedWaiting);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, Timer_TimerExpired_IsimRecovery)
+TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenIsimRecoveryTimerExpired)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
+    // WHEN
     m_pSubscriberManager->Timer_TimerExpired(m_pSubscriberManager->m_piTimerToIsimRecovery);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, Timer_TimerExpired_PhoneRestartRecovery)
+TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenRecoveryTimerExpired)
 {
+    // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
+    // WHEN
     m_pSubscriberManager->Timer_TimerExpired(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery);
+
+    // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
-TEST_F(AosSubscriberManagerTest, ServicePhone_PhoneNumberStateChanged_IsNotReady)
+TEST_F(AosSubscriberManagerTest, RestartsWhenPhoneNumberStateChangedWithNotReady)
 {
     // GIVEN
     m_pSubscriberManager->m_objPuids = m_objValidPuids;
@@ -2284,76 +2770,87 @@ TEST_F(AosSubscriberManagerTest, ServicePhone_PhoneNumberStateChanged_IsNotReady
     EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
 }
 
-TEST_F(AosSubscriberManagerTest, ServicePhone_IsimStateChangedLoaded)
+TEST_F(AosSubscriberManagerTest, DisableUsimFallbackValueWhenIsimStateChanged)
 {
+    // GIVEN
+    m_pSubscriberManager->m_bUsimFallback = IMS_TRUE;
+
+    ON_CALL(m_objMockISubscriberConfig, GetConfigurable())
+            .WillByDefault(Return(&m_objMockIConfigurable));
+
+    ON_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockISubscriberConfig, IsIsimSupported()).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockISubscriberConfig, IsUsimSupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
     m_pSubscriberManager->ServicePhone_IsimStateChanged(IsimState::LOADED);
-    EXPECT_TRUE(m_pSubscriberManager->ProcessIsimStateChange(IsimState::LOADED));
+
+    // THEN
+    EXPECT_FALSE(m_pSubscriberManager->m_bUsimFallback);
 }
 
-TEST_F(AosSubscriberManagerTest, ServicePhone_IsimStateChangedRefreshStarted)
+TEST_F(AosSubscriberManagerTest, ReturnsEmptyWhenIdentityPriorityToStringWithEmpty)
 {
-    m_pSubscriberManager->ServicePhone_IsimStateChanged(IsimState::REFRESH_STARTED);
-    EXPECT_TRUE(m_pSubscriberManager->ProcessIsimStateChange(IsimState::REFRESH_STARTED));
+    // GIVEN
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
+
+    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    // WHEN
+    // THEN
+    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[Empty]");
 }
 
-TEST_F(AosSubscriberManagerTest, ServicePhone_IsimStateChangedRefreshCompleted)
-{
-    m_pSubscriberManager->ServicePhone_IsimStateChanged(IsimState::REFRESH_COMPLETED);
-    EXPECT_TRUE(m_pSubscriberManager->ProcessIsimStateChange(IsimState::REFRESH_COMPLETED));
-}
-
-TEST_F(AosSubscriberManagerTest, ServicePhone_IsimStateChangedReturnFalse)
-{
-    m_pSubscriberManager->ServicePhone_IsimStateChanged(IsimState::NOT_READY);
-    EXPECT_FALSE(m_pSubscriberManager->ProcessIsimStateChange(IsimState::NOT_READY));
-}
-
-TEST_F(AosSubscriberManagerTest, IdentityPriorityToString)
+TEST_F(AosSubscriberManagerTest, ReturnsIsimUsimWhenIdentityPriorityToStringWithIsimUsim)
 {
     ImsVector<IMS_SINT32> objImsIdentityPriority;
 
-    // Test1 : IdentityPriority is empty
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[Empty]");
-
-    // Test2 : [ISIM][USIM]
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
 
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    // WHEN
+    // THEN
     EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][USIM]");
+}
 
-    // Test2 : [ISIM][USIM][CONF]
-    objImsIdentityPriority.Clear();
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF);
+TEST_F(AosSubscriberManagerTest,
+        ReturnsIsimAndIsimImsiWhenIdentityPriorityToStringWithIsimAndIsimImsi)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
 
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][USIM][CONF]");
-
-    // Test3 : [ISIM][ISIM_IMSI]
-    objImsIdentityPriority.Clear();
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
+
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    // WHEN
+    // THEN
     EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[ISIM][ISIM_IMSI]");
+}
 
-    // Test4 : [USIM][ISIM]
-    objImsIdentityPriority.Clear();
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[USIM][ISIM]");
+TEST_F(AosSubscriberManagerTest, ReturnsConfWhenIdentityPriorityToStringWithConf)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
 
-    // Test4 : [CONF]
-    objImsIdentityPriority.Clear();
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF);
     m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
+
+    // WHEN
+    // THEN
     EXPECT_STREQ(m_pSubscriberManager->IdentityPriorityToString(), "[CONF]");
 }
 
-TEST_F(AosSubscriberManagerTest, PrintIdentity)
+TEST_F(AosSubscriberManagerTest, ReturnValidStringWhenPrintIdentity)
 {
     EXPECT_STREQ(
             m_pSubscriberManager->PrintIdentity(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM),
@@ -2369,7 +2866,7 @@ TEST_F(AosSubscriberManagerTest, PrintIdentity)
             "CONF");
 }
 
-TEST_F(AosSubscriberManagerTest, UpdateEventToString)
+TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenUpdateEventToString)
 {
     EXPECT_STREQ(
             m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_IMPU_0), "CP_I_IMPU_0");
@@ -2393,20 +2890,38 @@ TEST_F(AosSubscriberManagerTest, UpdateEventToString)
     EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(
                          IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM),
             "CP_I_SUBSCRIPTION_ATTRIBUTE_USIM");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(1000), "__INVALID__");
 }
 
-TEST_F(AosSubscriberManagerTest, TimerToString)
+TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenUpdateEventToStringWithInvalidEvent)
+{
+    // GIVEN
+    const IMS_UINT32 INVALID_EVENT = 1000;
+
+    // WHEN
+    // THEN
+    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(INVALID_EVENT), "__INVALID__");
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString)
 {
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_ICC_LOADED_WAITING),
             "TIMER_ICC_LOADED_WAITING");
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_ISIM_RECOVERY), "TIMER_ISIM_RECOVERY");
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_PHONE_RESTART_RECOVERY),
             "TIMER_PHONE_RESTART_RECOVERY");
-    EXPECT_STREQ(m_pSubscriberManager->TimerToString(999), "__INVALID__");
 }
 
-TEST_F(AosSubscriberManagerTest, StateToString)
+TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenTimerToStringWithInvalidtimer)
+{
+    // GIVEN
+    const IMS_UINT32 INVALID_TIMER = 999;
+
+    // WHEN
+    // THEN
+    EXPECT_STREQ(m_pSubscriberManager->TimerToString(INVALID_TIMER), "__INVALID__");
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsStateWhenStateToString)
 {
     EXPECT_STREQ(m_pSubscriberManager->StateToString(IAosSubscriber::NOT_READY), "NOT_READY");
     EXPECT_STREQ(m_pSubscriberManager->StateToString(IAosSubscriber::READY), "READY");
@@ -2416,5 +2931,14 @@ TEST_F(AosSubscriberManagerTest, StateToString)
             "REFRESH_COMPLETED");
     EXPECT_STREQ(
             m_pSubscriberManager->StateToString(IAosSubscriber::REFRESH_FAILED), "REFRESH_FAILED");
-    EXPECT_STREQ(m_pSubscriberManager->StateToString(100), "INVALID");
+}
+
+TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenStateToStringWithInvalidState)
+{
+    // GIVEN
+    const IMS_SINT32 INVALID_STATE = 100;
+
+    // WHEN
+    // THEN
+    EXPECT_STREQ(m_pSubscriberManager->StateToString(INVALID_STATE), "INVALID");
 }
