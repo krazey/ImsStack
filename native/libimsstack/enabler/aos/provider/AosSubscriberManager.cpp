@@ -509,7 +509,7 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
     else
     {
         SipAddress objSipAddress;
-        IMS_BOOL bIMPUValid = IMS_FALSE;
+        IMS_BOOL bImpuValid = IMS_FALSE;
 
         for (IMS_SINT32 nAt = 0; nAt < objImpus.GetCount(); ++nAt)
         {
@@ -522,14 +522,14 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
                     if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips() ||
                             objSipAddress.IsSchemeTel())
                     {
-                        bIMPUValid = IMS_TRUE;
+                        bImpuValid = IMS_TRUE;
                         break;
                     }
                 }
             }
         }
 
-        if (!bIMPUValid)
+        if (!bImpuValid)
         {
             A_IMS_TRACE_I(AOSTAG, "IMPU is invalid", 0, 0, 0);
 
