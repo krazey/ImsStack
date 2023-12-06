@@ -109,7 +109,7 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
      */
     @Override
     public String getDeviceName() {
-        return AppContext.getDeviceName();
+        return AppContext.getInstance().getDeviceName();
     }
 
     /**

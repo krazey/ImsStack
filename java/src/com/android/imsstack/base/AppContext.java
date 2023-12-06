@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.imsstack.util.MessageExecutor;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -38,25 +39,22 @@ public final class AppContext extends ContextWrapper {
     private static AppContext sAppContext = null;
 
     private final Handler mMainHandler;
-    private final HandlerThread mMainHandlerThread =
-            new HandlerThread(AppContext.class.getSimpleName());
     private final MessageExecutor mMainExecutor;
     private BroadcastReceiverProxy mBroadcastReceiverProxy;
     private ContentProviderProxy mContentProviderProxy;
     private SystemServiceProxy mSystemServiceProxy;
 
-    private AppContext(Context context) {
+    AppContext(Context context, Looper looper) {
         super(context);
-        mMainHandlerThread.start();
-        mMainHandler = new Handler(mMainHandlerThread.getLooper());
-        mMainExecutor = new MessageExecutor(mMainHandlerThread.getLooper());
+        mMainHandler = new Handler(looper);
+        mMainExecutor = new MessageExecutor(looper);
         mBroadcastReceiverProxy = new BroadcastReceiverProxyImpl(context, mMainHandler);
         mContentProviderProxy = new ContentProviderProxyImpl(context);
         mSystemServiceProxy = new SystemServiceProxyImpl(context);
     }
 
     private void releaseInstance() {
-        mMainHandlerThread.quit();
+        mMainHandler.getLooper().quit();
         mSystemServiceProxy = null;
         mContentProviderProxy = null;
     }
@@ -68,7 +66,9 @@ public final class AppContext extends ContextWrapper {
      */
     public static void init(Context context) {
         if (sAppContext == null) {
-            sAppContext = new AppContext(context);
+            HandlerThread handlerThread = new HandlerThread(AppContext.class.getSimpleName());
+            handlerThread.start();
+            sAppContext = new AppContext(context, handlerThread.getLooper());
         }
     }
 
@@ -83,26 +83,18 @@ public final class AppContext extends ContextWrapper {
     }
 
     /**
-     * Runs any tasks using the main handler.
+     * Runs the specified task through the main handler.
      *
      * @param task The task to be run.
      * @param millis The delayed time as milli-seconds.
      */
-    public static void runTask(Runnable task, long millis) {
-        if (task == null) {
-            return;
-        }
+    public static void runTask(@NonNull Runnable task, long millis) {
+        Objects.requireNonNull(task, "task must not be null");
 
-        Handler h = (sAppContext != null) ? sAppContext.getMainHandler() : null;
-
-        if (h != null) {
-            if (millis > 0) {
-                h.postDelayed(task, millis);
-            } else {
-                h.post(task);
-            }
-        } else {
+        if (sAppContext == null) {
             task.run();
+        } else {
+            sAppContext.runTaskAsync(task, millis);
         }
     }
 
@@ -189,7 +181,23 @@ public final class AppContext extends ContextWrapper {
      * Returns the main looper for ImsStack.
      */
     public Looper getMainLooper() {
-        return mMainHandlerThread.getLooper();
+        return mMainHandler.getLooper();
+    }
+
+    /**
+     * Runs the specified task asynchronously on the main handler.
+     *
+     * @param task The task to be run.
+     * @param millis The delayed time as milli-seconds.
+     */
+    public void runTaskAsync(@NonNull Runnable task, long millis) {
+        Objects.requireNonNull(task, "task must not be null");
+
+        if (millis > 0) {
+            mMainHandler.postDelayed(task, millis);
+        } else {
+            mMainHandler.post(task);
+        }
     }
 
     /**
@@ -221,9 +229,8 @@ public final class AppContext extends ContextWrapper {
      *
      * @return A device name.
      */
-    public static String getDeviceName() {
-        return getInstance().getContentProviderProxy().getGlobalSettings()
-                .getString(DEVICE_NAME, "");
+    public String getDeviceName() {
+        return getContentProviderProxy().getGlobalSettings().getString(DEVICE_NAME, "");
     }
 
     /**
