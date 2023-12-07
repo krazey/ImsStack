@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
@@ -40,11 +41,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+import java.lang.reflect.Field;
+
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class AppContextTest {
     private static final int RUN_TASK_DELAY = 500; // milli-seconds
 
@@ -54,6 +57,10 @@ public class AppContextTest {
     @Mock private TelephonyManagerProxy mTelephonyManagerProxy;
     @Mock private SmsManagerProxy mSmsManagerProxy;
     @Mock private Runnable mRunnable;
+
+    TestableLooper mTestableLooper;
+    Object mOldAppContext;
+    AppContext mAppContext;
 
     @Before
     public void setUp() throws Exception {
@@ -67,121 +74,118 @@ public class AppContextTest {
                 .thenReturn(mTelephonyManagerProxy);
         when(mSmsManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
                 .thenReturn(mSmsManagerProxy);
-        AppContext.init(mContext);
+
+        mTestableLooper = TestableLooper.get(this);
+        mAppContext = new AppContext(mContext, mTestableLooper.getLooper());
+        mOldAppContext = replaceSingletonAppContext(mAppContext);
     }
 
     @After
     public void tearDown() throws Exception {
+        replaceSingletonAppContext(mOldAppContext);
         mContentProviderProxy = null;
         mTelephonyManagerProxy = null;
         mSmsManagerProxy = null;
         mSystemServiceProxy = null;
         mRunnable = null;
         mContext = null;
-        AppContext.deinit();
+        mOldAppContext = null;
+        mAppContext = null;
     }
 
     @Test
     @SmallTest
-    public void testInit() throws IllegalStateException {
-        AppContext appContext = AppContext.getInstance();
+    public void testInit() throws Exception {
+        replaceSingletonAppContext(null);
+        AppContext.init(mContext);
 
-        assertNotNull(appContext);
-    }
-
-    @Test
-    @SmallTest
-    public void testDeinit() {
-        AppContext.deinit();
-
-        assertThrows(IllegalStateException.class, () -> {
-            AppContext.getInstance();
-        });
+        try {
+            AppContext appContext = AppContext.getInstance();
+            assertNotNull(appContext);
+        } finally {
+            AppContext.deinit();
+            assertThrows(IllegalStateException.class, () -> {
+                AppContext.getInstance();
+            });
+        }
     }
 
     @Test
     @SmallTest
     public void testGetSystemServiceProxy() {
-        AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
-        AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        mAppContext.setSystemServiceProxy(mSystemServiceProxy);
+        mAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         verify(mSystemServiceProxy).getSystemService(eq(TelephonyManagerProxy.class));
     }
 
     @Test
     @SmallTest
-    public void testGetTelephonyManagerProxy() {
-        AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
+    public void testGetTelephonyManagerProxy() throws Exception {
+        mAppContext.setSystemServiceProxy(mSystemServiceProxy);
         TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(SUB_ID_1);
         assertEquals(tmp, mTelephonyManagerProxy);
     }
 
     @Test
     @SmallTest
-    public void testGetSmsManagerProxy() {
-        AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
+    public void testGetSmsManagerProxy() throws Exception {
+        mAppContext.setSystemServiceProxy(mSystemServiceProxy);
         SmsManagerProxy smp = AppContext.getSmsManagerProxy(SUB_ID_1);
         assertEquals(smp, mSmsManagerProxy);
     }
 
     @Test
     @SmallTest
-    public void testRunTask() throws Exception {
-        TestableLooper looper = new TestableLooper(AppContext.getInstance().getMainLooper());
-        try {
-            AppContext.runTask(mRunnable, 0);
-            looper.processAllMessages();
-            verify(mRunnable).run();
-        } finally {
-            looper.destroy();
-        }
-    }
-
-    @Test
-    public void testRunTask_delay() throws Exception {
-        TestableLooper looper = new TestableLooper(AppContext.getInstance().getMainLooper());
-        try {
-            AppContext.runTask(mRunnable, RUN_TASK_DELAY);
-            looper.moveTimeForward(RUN_TASK_DELAY + 1);
-            looper.processAllMessages();
-            verify(mRunnable).run();
-        } finally {
-            looper.destroy();
-        }
+    public void testRunTaskWhenAppContextNull() throws Exception {
+        // Ensure that the AppContext is null.
+        replaceSingletonAppContext(null);
+        AppContext.runTask(mRunnable, 0);
+        verify(mRunnable).run();
     }
 
     @Test
     @SmallTest
-    public void testGetMainExecutor() throws IllegalStateException {
-        assertNotNull(AppContext.getInstance().getMainExecutor());
+    public void testRunTaskAsync() throws Exception {
+        mAppContext.runTaskAsync(mRunnable, 0);
+        mTestableLooper.processAllMessages();
+        verify(mRunnable).run();
     }
 
     @Test
     @SmallTest
-    public void testGetMainHandler() throws IllegalStateException {
-        assertNotNull(AppContext.getInstance().getMainHandler());
+    public void testRunTaskAsyncWithDelay() throws Exception {
+        mAppContext.runTaskAsync(mRunnable, RUN_TASK_DELAY);
+        mTestableLooper.moveTimeForward(RUN_TASK_DELAY + 100);
+        mTestableLooper.processAllMessages();
+        verify(mRunnable).run();
     }
 
     @Test
     @SmallTest
-    public void testGetMainLooper() throws Exception {
-        assertNotNull(AppContext.getInstance().getMainLooper());
+    public void testAccessors() {
+        assertNotNull(mAppContext.getMainExecutor());
+        assertNotNull(mAppContext.getMainHandler());
+        assertEquals(mAppContext.getMainLooper(), mTestableLooper.getLooper());
+        assertNotNull(AppContext.getExternalStoragePath());
     }
 
     @Test
     @SmallTest
     public void testGetDeviceName() {
-        AppContext.getInstance().setContentProviderProxy(mContentProviderProxy);
+        mAppContext.setContentProviderProxy(mContentProviderProxy);
         String testDeviceName = "Device-A";
         SettingsProxy settingsProxy = mock(SettingsProxy.class);
         when(mContentProviderProxy.getGlobalSettings()).thenReturn(settingsProxy);
         when(settingsProxy.getString(eq(DEVICE_NAME), anyString())).thenReturn(testDeviceName);
 
-        assertEquals(testDeviceName, AppContext.getDeviceName());
+        assertEquals(testDeviceName, mAppContext.getDeviceName());
     }
 
-    @Test
-    @SmallTest
-    public void testGetExternalStoragePath() {
-        assertNotNull(AppContext.getExternalStoragePath());
+    private Object replaceSingletonAppContext(Object newValue) throws Exception {
+        Field field = AppContext.class.getDeclaredField("sAppContext");
+        field.setAccessible(true);
+        Object oldValue = field.get(null);
+        field.set(null, newValue);
+        return oldValue;
     }
 }
