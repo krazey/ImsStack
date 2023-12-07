@@ -26,7 +26,7 @@ public:
 
     IMS_BOOL IsReady() final;
 
-private:
+protected:
     inline void AddServiceAvailable() final{};
     inline void RemoveServiceAvailable() final{};
 
@@ -46,9 +46,6 @@ private:
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};
     inline void ServicePhone_PlmnChanged() final{};
     inline void ServicePhone_PowerOff() final{};
-
-private:
-    friend class AosEConditionTest;
 };
 
 #endif  // AOS_E_CONDITION_H_

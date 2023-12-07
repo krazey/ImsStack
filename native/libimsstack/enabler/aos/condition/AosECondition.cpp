@@ -50,7 +50,7 @@ PUBLIC VIRTUAL IMS_BOOL AosECondition::IsReady()
     return bReturn;
 }
 
-PRIVATE VIRTUAL IMS_BOOL AosECondition::AddAosServiceListener()
+PROTECTED VIRTUAL IMS_BOOL AosECondition::AddAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
@@ -62,7 +62,7 @@ PRIVATE VIRTUAL IMS_BOOL AosECondition::AddAosServiceListener()
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL IMS_BOOL AosECondition::RemoveAosServiceListener()
+PROTECTED VIRTUAL IMS_BOOL AosECondition::RemoveAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
@@ -75,7 +75,7 @@ PRIVATE VIRTUAL IMS_BOOL AosECondition::RemoveAosServiceListener()
 }
 
 // IAosBlockListener
-PRIVATE VIRTUAL void AosECondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+PROTECTED VIRTUAL void AosECondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
     A_IMS_TRACE_I(APPPROFILE, "Block_Changed :: Reason(%s)(%d) - %s",
             AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
@@ -86,7 +86,7 @@ PRIVATE VIRTUAL void AosECondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UI
 }
 
 // AosServicePhoneListener
-PRIVATE VIRTUAL void AosECondition::ServicePhone_AosStart()
+PROTECTED VIRTUAL void AosECondition::ServicePhone_AosStart()
 {
     A_IMS_TRACE_D(APPPROFILE, "ServicePhone_AosStart()", 0, 0, 0);
     m_piBlock->ResetBlockReason(BLOCK_AOS_INCOMPLETED);
