@@ -32,18 +32,25 @@ const IMS_SINT32 SLOT_ID = 0;
 
 class TestAosTransaction : public AosTransaction
 {
+public:
     inline explicit TestAosTransaction(IN IMS_SINT32 nSlotId) :
             AosTransaction(nSlotId),
             piOriginRadio(IMS_NULL)
     {
     }
 
-    friend class AosTransactionTest;
     FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnsTrueIfImsRadioIsNull);
     FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnsTrueIfAlreadyStarted);
     FRIEND_TEST(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning);
     FRIEND_TEST(AosTransactionTest,
             StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting);
+    FRIEND_TEST(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated);
+    FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime);
+    FRIEND_TEST(AosTransactionTest, StopTraffic_DoNothingIfNotStarted);
+    FRIEND_TEST(AosTransactionTest, StopTraffic_StopIfStarted);
+    FRIEND_TEST(AosTransactionTest, StopEmergencyTraffic_DoNothingIfNotStarted);
+    FRIEND_TEST(AosTransactionTest, StopEmergencyTraffic_StopIfStarted);
     FRIEND_TEST(AosTransactionTest, StartAndStopTraffic);
 
 public:
@@ -106,7 +113,6 @@ TEST_F(AosTransactionTest, StartTraffic_ReturnsTrueIfImsRadioIsNull)
     m_pTestAosTransaction->m_piImsRadio = nullptr;
     EXPECT_TRUE(
             m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
-    m_pTestAosTransaction->m_piImsRadio = &m_objMockIImsRadio;
 }
 
 TEST_F(AosTransactionTest, StartTraffic_ReturnsTrueIfAlreadyStarted)
@@ -150,6 +156,69 @@ TEST_F(AosTransactionTest,
     EXPECT_FALSE(
             m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE));
     EXPECT_TRUE(m_pTestAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
+}
+
+TEST_F(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    EXPECT_FALSE(m_pTestAosTransaction->IsStartUpdated());
+
+    EXPECT_CALL(m_objMockIImsRadio,
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_REGISTRATION, _, IImsRadio::DIRECTION_MO, _));
+    EXPECT_FALSE(
+            m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+}
+
+TEST_F(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull)
+{
+    m_pTestAosTransaction->m_piImsRadio = nullptr;
+    EXPECT_CALL(m_objMockIImsRadio,
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
+            .Times(0);
+    m_pTestAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+}
+
+TEST_F(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime)
+{
+    EXPECT_CALL(m_objMockIImsRadio,
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+    m_pTestAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+    m_pTestAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+    m_pTestAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+}
+
+TEST_F(AosTransactionTest, StopTraffic_DoNothingIfNotStarted)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    m_pTestAosTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+}
+
+TEST_F(AosTransactionTest, StopTraffic_StopIfStarted)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    EXPECT_FALSE(m_pTestAosTransaction->IsStartUpdated());
+
+    m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+
+    EXPECT_TRUE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    EXPECT_TRUE(m_pTestAosTransaction->IsStartUpdated());
+
+    m_pTestAosTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+}
+
+TEST_F(AosTransactionTest, StopEmergencyTraffic_DoNothingIfNotStarted)
+{
+    EXPECT_CALL(m_objMockIImsRadio, StopImsTraffic(_)).Times(0);
+    m_pTestAosTransaction->StopEmergencyTraffic();
+}
+
+TEST_F(AosTransactionTest, StopEmergencyTraffic_StopIfStarted)
+{
+    m_pTestAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+    EXPECT_CALL(m_objMockIImsRadio, StopImsTraffic(_)).Times(1);
+    m_pTestAosTransaction->StopEmergencyTraffic();
 }
 
 TEST_F(AosTransactionTest, StartAndStopTraffic)
