@@ -1,4 +1,4 @@
-// Copyright (C) 2022 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,25 +17,21 @@ package {
 }
 
 android_test {
-    name: "ImsStackJavaTests",
+    name: "ImsStackTest",
     certificate: "platform",
     platform_apis: true,
     manifest: "AndroidManifest.xml",
 
-    defaults: [
-        "imsstack_mockito_target_extended_defaults",
-    ],
     srcs: [
         "src/**/*.java",
     ],
-    libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
-        "ims-common",
-        "telephony-common",
+    resource_dirs: [
+        "res"
     ],
-    static_libs: [
+    javacflags: [
+        "-Xlint",
+    ],
+    static_libs:[
         "androidx.test.core",
         "androidx.test.rules",
         "frameworks-base-testutils",
@@ -45,6 +41,9 @@ android_test {
         "testables",
         "truth",
     ],
-    instrumentation_for: "ImsStack",
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
     test_suites: ["general-tests"],
 }

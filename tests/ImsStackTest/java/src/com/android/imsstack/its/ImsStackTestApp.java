@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack;
+package com.android.imsstack.its;
 
 import android.app.Application;
 import android.util.Log;
 
+import com.android.imsstack.ImsStackMain;
+
 /**
- * An application entry point of ImsStack process.
+ * A application entry point of ImsStack test process.
  */
-public class ImsStackApp extends Application {
-    private static final String TAG = ImsStackApp.class.getSimpleName();
+public class ImsStackTestApp extends Application {
+    private static final String TAG = ImsStackTestApp.class.getSimpleName();
 
     private final ImsStackMain mMain = new ImsStackMain();
 

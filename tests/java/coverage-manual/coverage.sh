@@ -20,11 +20,11 @@
 
 PACKAGE_NAME='com.android.imsstack'
 MODULE_NAME='ImsStack'
-MODULE_PATH='packages/modules/ImsStack'
+MODULE_PATH='vendor/google/services/ImsStack'
 
 TEST_PACKAGE='com.android.imsstack.tests'
 TEST_MODULE_NAME='ImsStackJavaTests'
-TEST_MODULE_PATH='packages/modules/ImsStack/tests/java'
+TEST_MODULE_PATH='vendor/google/services/ImsStack/tests/java'
 TEST_MODULE_INSTALL_PATH="testcases/$TEST_MODULE_NAME/arm64/$TEST_MODULE_NAME.apk"
 TEST_RUNNER="$TEST_PACKAGE/androidx.test.runner.AndroidJUnitRunner"
 

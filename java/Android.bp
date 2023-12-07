@@ -16,31 +16,40 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-filegroup {
-    name: "imsstack_java_srcs",
-    srcs: [
-        "src/**/*.java",
-    ],
-    path: "src",
-}
-
-filegroup {
-    name: "imsstack_aidl_srcs",
-    srcs: [
-        "src/**/*.aidl",
-    ],
-    path: "src",
-}
-
-// For testing.
 android_library {
-    name: "imsstack-res",
-    manifest: "AndroidManifest-res.xml",
+    name: "imsstack",
+    platform_apis: true,
+    manifest: "AndroidManifest-lib.xml",
     asset_dirs: [
         "assets",
     ],
     resource_dirs: [
         "res",
+    ],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.aidl",
+    ],
+    exclude_srcs: [
+        "src/**/ImsStackApp.java",
+    ],
+    aidl: {
+        include_dirs: [
+            "frameworks/native/aidl/gui",
+        ],
+    },
+    javacflags: [
+        "-Xlint",
+    ],
+    static_libs:[
+        "androidx.annotation_annotation",
+        "ImsMediaFramework",
+        "imsstack-prebuilt",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "ims-common",
+        "telephony-common",
     ],
 }
 
@@ -53,20 +62,7 @@ android_app {
     manifest: "AndroidManifest.xml",
 
     srcs: [
-        ":imsstack_java_srcs",
-        ":imsstack_aidl_srcs",
-    ],
-
-    aidl: {
-        include_dirs: [
-            "frameworks/native/aidl/gui",
-        ],
-    },
-    resource_dirs: [
-        "res"
-    ],
-    asset_dirs: [
-        "assets",
+        "src/**/ImsStackApp.java",
     ],
     javacflags: [
         "-Xlint",
@@ -75,15 +71,7 @@ android_app {
         "--auto-add-overlay",
     ],
     static_libs:[
-        "androidx.annotation_annotation",
-        // TODO: move this to libs after API review
-        "ImsMediaFramework",
-        "imsstack-prebuilt",
-    ],
-    libs: [
-        "framework-annotations-lib",
-        "ims-common",
-        "telephony-common",
+        "imsstack",
     ],
     required: [
         "libimsstack",
