@@ -31,7 +31,7 @@ public class AosEmergencyTracker {
      *
      * @param type {@code type} is callback mode entry {@link EmcCallbackType}
      * @param state {@code state} is type of {@link EmcCallbackMode}.
-     * @param duration is the number of milliseconds remaining in the emergency callback mode.
+     * @param duration is the number of seconds remaining in the emergency callback mode.
      */
     public void updateEmcCallbackMode(int type, int state, long duration) {
         IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
