@@ -39,6 +39,11 @@ class TestAosTransaction : public AosTransaction
     }
 
     friend class AosTransactionTest;
+    FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnsTrueIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnsTrueIfAlreadyStarted);
+    FRIEND_TEST(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning);
+    FRIEND_TEST(AosTransactionTest,
+            StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting);
     FRIEND_TEST(AosTransactionTest, StartAndStopTraffic);
 
 public:
@@ -95,6 +100,57 @@ protected:
         }
     }
 };
+
+TEST_F(AosTransactionTest, StartTraffic_ReturnsTrueIfImsRadioIsNull)
+{
+    m_pTestAosTransaction->m_piImsRadio = nullptr;
+    EXPECT_TRUE(
+            m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+    m_pTestAosTransaction->m_piImsRadio = &m_objMockIImsRadio;
+}
+
+TEST_F(AosTransactionTest, StartTraffic_ReturnsTrueIfAlreadyStarted)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    EXPECT_TRUE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+
+    EXPECT_TRUE(
+            m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+}
+
+TEST_F(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    EXPECT_FALSE(m_pTestAosTransaction->IsStartUpdated());
+
+    m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    m_pTestAosTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+
+    EXPECT_TRUE(m_pTestAosTransaction->IsStartUpdated());
+    EXPECT_TRUE(m_pTestAosTransaction->IsTimerRunning());
+
+    EXPECT_TRUE(
+            m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+    EXPECT_FALSE(m_pTestAosTransaction->IsTimerRunning());
+}
+
+TEST_F(AosTransactionTest,
+        StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting)
+{
+    EXPECT_FALSE(m_pTestAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+    EXPECT_FALSE(m_pTestAosTransaction->IsStartUpdated());
+
+    m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+
+    EXPECT_TRUE(m_pTestAosTransaction->IsStartUpdated());
+    EXPECT_TRUE(m_pTestAosTransaction->IsTrafficResponseWaiting());
+    EXPECT_FALSE(m_pTestAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_REG));
+
+    EXPECT_FALSE(
+            m_pTestAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pTestAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
+}
 
 TEST_F(AosTransactionTest, StartAndStopTraffic)
 {
