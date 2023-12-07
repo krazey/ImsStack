@@ -63,49 +63,37 @@ public:
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIAosSubscriber m_objMockIAosSubscriber;
     MockIAosRegistration m_objMockIAosRegistration;
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
 
 protected:
     virtual void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnNull());
+        ON_CALL(m_objMockIAosAppContext, GetConnection()).WillByDefault(ReturnNull());
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosRegistration));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&m_objMockIAosRegistration));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetBlock())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnNull());
+        ON_CALL(m_objMockIAosAppContext, GetBlock()).WillByDefault(ReturnNull());
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnNull());
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker()).WillByDefault(ReturnNull());
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnNull());
+        ON_CALL(m_objMockIAosAppContext, GetSubscriber()).WillByDefault(ReturnNull());
 
-        m_pAosCondition = new AosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pAosCondition = new AosCondition(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosCondition != nullptr);
 
-        m_pAosBlock = new AosBlock(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pAosBlock = new AosBlock(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosBlock != nullptr);
 
-        IAosBlock* piAosBlock = static_cast<IAosBlock*>(m_pAosBlock);
-        SetAosBlock(piAosBlock);
+        SetAosBlock(m_pAosBlock);
 
         m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
     }
 
     virtual void TearDown() override
@@ -662,7 +650,7 @@ TEST_F(AosConditionTest, CallTracker_StateChanged_Cs_Offhook)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     CallTracker_StateChanged(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
 }
@@ -675,7 +663,7 @@ TEST_F(AosConditionTest, CallTracker_StateChanged_Cs_NotOffhook)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     CallTracker_StateChanged(IAosCallTracker::TYPE_CS, CallState::IDLE);
 }
@@ -688,20 +676,18 @@ TEST_F(AosConditionTest, CallTracker_StateChanged_Normal_Offhook)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
 }
 
-TEST_F(AosConditionTest, NetTracker_StatusChanged_ServiceIn)
+TEST_F(AosConditionTest, ResetBlockWhenNetTrackerStatusChangedWithServiceIn)
 {
-    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, IsServiceIn(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsServiceIn(_)).WillByDefault(Return(IMS_TRUE));
 
     m_pAosCondition->Start();
 
@@ -709,20 +695,21 @@ TEST_F(AosConditionTest, NetTracker_StatusChanged_ServiceIn)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlockToCellur(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToCellur(&objMockIAosBlock);
 
+    // WHEN
     NetTracker_StatusChanged();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosConditionTest, NetTracker_StatusChanged_ServiceOut)
+TEST_F(AosConditionTest, SetBlockWhenNetTrackerStatusChangedWithServiceOut)
 {
-    EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
 
-    EXPECT_CALL(m_objMockIAosNetTracker, IsServiceIn(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, IsServiceIn(_)).WillByDefault(Return(IMS_FALSE));
 
     m_pAosCondition->Start();
 
@@ -730,26 +717,32 @@ TEST_F(AosConditionTest, NetTracker_StatusChanged_ServiceOut)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlockToCellur(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToCellur(&objMockIAosBlock);
 
+    // WHEN
     NetTracker_StatusChanged();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshStarted)
+TEST_F(AosConditionTest, SetBlockWhenSubscriberStateChangedWithRefreshStarted)
 {
+    // GIVEN
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
+    // WHEN
     Subscriber_StateChanged(IAosSubscriber::REFRESH_STARTED);
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosConditionTest, Block_Changed)
@@ -757,16 +750,11 @@ TEST_F(AosConditionTest, Block_Changed)
     m_pAosCondition->Start();
     RemoveListener(AosCondition::LISTENER_ALL);
 
-    // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_TRUE));
 
     // Set IAosBlock
     MockIAosBlock objMockIAosBlock;
-    SetAosBlockToCellur(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToCellur(&objMockIAosBlock);
 
     EXPECT_CALL(objMockIAosBlock, IsCleared(_)).Times(AnyNumber()).WillRepeatedly(Return(IMS_TRUE));
 
@@ -782,7 +770,7 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStarted
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     SetRefreshStarted(IMS_FALSE);
     EXPECT_FALSE(IsRefreshStarted());
@@ -796,7 +784,7 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStarted
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     SetRefreshStarted(IMS_TRUE);
     EXPECT_TRUE(IsRefreshStarted());
@@ -810,7 +798,7 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshFailed)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     Subscriber_StateChanged(IAosSubscriber::REFRESH_FAILED);
 }
@@ -820,20 +808,14 @@ TEST_F(AosConditionTest, ServiceAvailable_RequestCommand_ListenerIsNotNull)
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     ServiceAvailable_RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, 0);
 }
 
 TEST_F(AosConditionTest, NConfiguration_NotifyConfigChanged_NConfigIsNotNull)
 {
-    // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteRoamingAvailable())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteRoamingAvailable())
             .Times(1)
             .WillRepeatedly(Return(IMS_TRUE));
 
@@ -843,10 +825,9 @@ TEST_F(AosConditionTest, NConfiguration_NotifyConfigChanged_NConfigIsNotNull)
 TEST_F(AosConditionTest, NConfiguration_NotifyConfigChanged_NConfigIsNull)
 {
     // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(IMS_NULL, 0);
+    AosProvider::GetInstance()->SetNConfiguration(IMS_NULL);
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteRoamingAvailable()).Times(0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteRoamingAvailable()).Times(0);
 
     NConfiguration_NotifyConfigChanged();
 }
@@ -857,7 +838,7 @@ TEST_F(AosConditionTest, ServicePhone_AosStart)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_AosStart();
 }
@@ -866,16 +847,11 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_Changed)
 {
     m_pAosCondition->Start();
 
-    // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
+    EXPECT_CALL(m_objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
             .WillRepeatedly(Return(IMS_TRUE));
 
     // Set ILocationProperties
@@ -886,7 +862,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_Changed)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strCountryNew));
 
-    SetTestLocation(static_cast<ILocationProperties*>(&objMockILocationProperties));
+    SetTestLocation(&objMockILocationProperties);
 
     // Set IAosBlock
     MockIAosBlock objMockIAosBlock;
@@ -899,7 +875,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_Changed)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
 
-    SetAosBlockToWifi(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToWifi(&objMockIAosBlock);
 
     ServicePhone_LocationInfoChanged(LocationInfo::CHANGED);
 }
@@ -908,16 +884,11 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_NotChanged)
 {
     m_pAosCondition->Start();
 
-    // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
+    EXPECT_CALL(m_objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
             .WillRepeatedly(Return(IMS_TRUE));
 
     // Set ILocationProperties
@@ -928,7 +899,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_NotChanged)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strCountryNew));
 
-    SetTestLocation(static_cast<ILocationProperties*>(&objMockILocationProperties));
+    SetTestLocation(&objMockILocationProperties);
 
     // Set IAosBlock
     MockIAosBlock objMockIAosBlock;
@@ -941,7 +912,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_NotChanged)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlockToWifi(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToWifi(&objMockIAosBlock);
 
     ServicePhone_LocationInfoChanged(LocationInfo::AVAILABLE);
 }
@@ -950,16 +921,11 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_ReturnByConfig)
 {
     m_pAosCondition->Start();
 
-    // Set IAosNConfiguration
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsVoLteAvailable()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsWfcImsAvailable()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
+    EXPECT_CALL(m_objMockIAosNConfiguration, UseWfcCountryCodeAvailabilityCheck())
             .WillRepeatedly(Return(IMS_FALSE));
 
     // Set ILocationProperties
@@ -970,7 +936,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_ReturnByConfig)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strCountryNew));
 
-    SetTestLocation(static_cast<ILocationProperties*>(&objMockILocationProperties));
+    SetTestLocation(&objMockILocationProperties);
 
     // Set IAosBlock
     MockIAosBlock objMockIAosBlock;
@@ -983,7 +949,7 @@ TEST_F(AosConditionTest, ServicePhone_LocationInfoChanged_ReturnByConfig)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlockToWifi(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlockToWifi(&objMockIAosBlock);
 
     ServicePhone_LocationInfoChanged(LocationInfo::CHANGED);
 }
@@ -994,37 +960,29 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_RetryFailure)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_PhoneNumberStateChanged(PhoneNumberState::RETRY_FAILURE);
 }
 
 TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimState)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_PhoneNumberStateChanged(PhoneNumberState::RETRY_SUCCESS);
 }
 
 TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_PlmnChanged();
 }
@@ -1037,7 +995,7 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNull)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_PowerOff();
 }
@@ -1047,14 +1005,13 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNotNull)
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServicePhone_PowerOff();
 }
@@ -1064,18 +1021,13 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
-
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServiceSetting_AirplaneChanged(IMS_TRUE);
 }
@@ -1085,18 +1037,13 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_False)
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(0);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
-
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServiceSetting_AirplaneChanged(IMS_FALSE);
 }
@@ -1107,7 +1054,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     AddHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_TRUE(IsHolded(HOLD_EVENT_IMS_SERVICE));
@@ -1122,7 +1069,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_On)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_FALSE(IsHolded(HOLD_EVENT_IMS_SERVICE));
@@ -1136,7 +1083,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_FALSE(IsHolded(HOLD_EVENT_IMS_SERVICE));
@@ -1146,38 +1093,30 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServiceSetting_TtyChanged(IMS_TRUE);
 }
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_TRUE));
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     SetLteInfo(IMS_TRUE);
     ServiceSetting_TtyChanged(IMS_TRUE);
@@ -1185,19 +1124,15 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     SetLteInfo(IMS_TRUE);
     ServiceSetting_TtyChanged(IMS_FALSE);
@@ -1205,17 +1140,13 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport)
 {
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_FALSE));
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     ServiceSetting_TtyChanged(IMS_TRUE);
     ServiceSetting_TtyChanged(IMS_FALSE);
@@ -1301,7 +1232,7 @@ TEST_F(AosConditionTest, AddHold_Roaming)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(BLOCK_CELLULAR_ROAMING, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     AddHold(HOLD_EVENT_ROAMING, IMS_TRUE);
 }
@@ -1312,7 +1243,7 @@ TEST_F(AosConditionTest, AddHold_ImsService)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(BLOCK_IMS_DISABLED, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     AddHold(HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
@@ -1323,7 +1254,7 @@ TEST_F(AosConditionTest, AddHold_IsNotEventReset)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     AddHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
@@ -1334,7 +1265,7 @@ TEST_F(AosConditionTest, AddHold_UninterestingEvent)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     AddHold(HOLD_EVENT_NONE, IMS_FALSE);
 }
@@ -1345,7 +1276,7 @@ TEST_F(AosConditionTest, RemoveHold_Roaming)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(BLOCK_CELLULAR_ROAMING, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_ROAMING, IMS_TRUE);
 }
@@ -1356,7 +1287,7 @@ TEST_F(AosConditionTest, RemoveHold_ImsService)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(BLOCK_IMS_DISABLED, _)).Times(1);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
@@ -1367,7 +1298,7 @@ TEST_F(AosConditionTest, RemoveHold_IsNotEventReset)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
@@ -1378,7 +1309,7 @@ TEST_F(AosConditionTest, RemoveHold_UninterestingEvent)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     RemoveHold(HOLD_EVENT_NONE, IMS_FALSE);
 }
@@ -1395,8 +1326,7 @@ TEST_F(AosConditionTest, RequestCommand_ListenerIsNotNull)
     MockIAosConditionListener objMockIAosConditionListener;
     EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
 
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     EXPECT_TRUE(RequestCommand(AosCondition::REQUEST_STOP, 0));
 }
@@ -1405,7 +1335,7 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsGreaterThanOne)
 {
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1428,7 +1358,7 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsOne)
 {
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1450,7 +1380,7 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_NoBlockReason)
 {
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_FALSE));
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1473,7 +1403,7 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_IsNotReady)
 {
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+    SetAosBlock(&objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
