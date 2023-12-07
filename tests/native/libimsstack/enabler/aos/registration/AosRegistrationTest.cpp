@@ -645,12 +645,6 @@ protected:
             delete m_pTestAosRegistration;
             m_pTestAosRegistration = IMS_NULL;
         }
-
-        if (m_pAosStaticProfile)
-        {
-            delete m_pAosStaticProfile;
-            m_pAosStaticProfile = IMS_NULL;
-        }
     }
 };
 
