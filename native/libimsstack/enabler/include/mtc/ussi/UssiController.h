@@ -40,7 +40,7 @@ public:
             IN IMessageUtils& objMessageUtils, IN IMessage* piMessage);
 
     virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
-    IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
+    virtual IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
     virtual IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
     virtual IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
     virtual UssiResult ParseUssiBodyAndCheckResult(
