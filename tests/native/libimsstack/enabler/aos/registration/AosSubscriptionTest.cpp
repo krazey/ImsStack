@@ -55,6 +55,39 @@ const IMS_SINT32 SLOT_ID = 0;
 class AosSubscriptionTest : public ::testing::Test
 {
 public:
+    AosSubscriptionTest()
+    {
+        m_pAosStaticProfile = new AosStaticProfile();
+
+        // save origin pointer
+        m_pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockAosConfig, SLOT_ID);
+
+        m_pOriginAosService = AosProvider::GetInstance()->GetService(SLOT_ID);
+        AosProvider::GetInstance()->SetService(&m_objMockAosService, SLOT_ID);
+
+        m_pOriginAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(&m_objMockAosRetryRepository, SLOT_ID);
+
+        m_pOriginAosTransaction = AosProvider::GetInstance()->GetTransaction(SLOT_ID);
+        AosProvider::GetInstance()->SetTransaction(&m_objMockIAosTransaction, SLOT_ID);
+    }
+
+    virtual ~AosSubscriptionTest()
+    {
+        ConfigurationManager::GetInstance()->DestroyConfigs();
+
+        AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
+        AosProvider::GetInstance()->SetService(m_pOriginAosService, SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(m_pOriginAosRetryRepository, SLOT_ID);
+        AosProvider::GetInstance()->SetTransaction(m_pOriginAosTransaction, SLOT_ID);
+
+        if (m_pAosStaticProfile)
+        {
+            delete m_pAosStaticProfile;
+        }
+    }
+
     AosSubscription* m_pAosSubscription;
 
     AosStaticProfile* m_pAosStaticProfile;
@@ -99,7 +132,6 @@ protected:
     {
         ConfigurationManager::GetInstance()->Initialize();
 
-        m_pAosStaticProfile = new AosStaticProfile();
         m_pMockAosAppContext = new MockAosAppContext(m_pAosStaticProfile);
 
         m_pAor = new AString(ADDRESS1);
@@ -126,23 +158,6 @@ protected:
         EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
                 .WillRepeatedly(Return(IMS_TRUE));
 
-        // save origin pointer
-        m_pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&m_objMockAosConfig), SLOT_ID);
-
-        m_pOriginAosService = AosProvider::GetInstance()->GetService(SLOT_ID);
-        AosProvider::GetInstance()->SetService(
-                static_cast<IAosService*>(&m_objMockAosService), SLOT_ID);
-
-        m_pOriginAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
-        AosProvider::GetInstance()->SetRetryRepository(
-                static_cast<IAosRetryRepository*>(&m_objMockAosRetryRepository), SLOT_ID);
-
-        m_pOriginAosTransaction = AosProvider::GetInstance()->GetTransaction(SLOT_ID);
-        AosProvider::GetInstance()->SetTransaction(
-                static_cast<IAosTransaction*>(&m_objMockIAosTransaction), SLOT_ID);
-
         EXPECT_CALL(m_objMockIAosTransaction, RemoveListener(_, _)).Times(AnyNumber());
         EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_))
                 .Times(AnyNumber())
@@ -155,13 +170,6 @@ protected:
 
     virtual void TearDown() override
     {
-        ConfigurationManager::GetInstance()->DestroyConfigs();
-
-        AosProvider::GetInstance()->SetNConfiguration(m_pOriginAosNConfiguration, SLOT_ID);
-        AosProvider::GetInstance()->SetService(m_pOriginAosService, SLOT_ID);
-        AosProvider::GetInstance()->SetRetryRepository(m_pOriginAosRetryRepository, SLOT_ID);
-        AosProvider::GetInstance()->SetTransaction(m_pOriginAosTransaction, SLOT_ID);
-
         if (m_pAor)
         {
             delete m_pAor;
@@ -181,11 +189,6 @@ protected:
         if (m_pMockAosAppContext)
         {
             delete m_pMockAosAppContext;
-        }
-
-        if (m_pAosStaticProfile)
-        {
-            delete m_pAosStaticProfile;
         }
     }
 
