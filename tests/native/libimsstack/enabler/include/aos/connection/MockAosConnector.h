@@ -34,10 +34,6 @@ class AosUtil;
 class MockAosConnector : public AosConnector
 {
 public:
-    MockAosConnector(IN IAosAppContext* piAppContext) :
-            AosConnector(piAppContext)
-    {
-    }
     MockAosConnector() :
             AosConnector()
     {

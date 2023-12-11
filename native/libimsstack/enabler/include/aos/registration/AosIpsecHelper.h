@@ -30,6 +30,7 @@ class AosIpsecHelper : public IAosIpsecListener
 public:
     AosIpsecHelper(IN IRegContact* piRegContact, IN IRegParameter* piRegParameter,
             IN IAosAppContext* piAppContext, IN AString& strRegId);
+    inline explicit AosIpsecHelper(){};
     virtual ~AosIpsecHelper();
 
 private:

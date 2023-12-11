@@ -39,6 +39,7 @@ class AosSubscription :
 public:
     AosSubscription(IN IAosAppContext* piContext, IN IRegSubscription* piRegSubscription,
             IN const AString& strAoR, IN const SipAddress& objContactAddress);
+    inline explicit AosSubscription(){};
 
     virtual ~AosSubscription();
 
