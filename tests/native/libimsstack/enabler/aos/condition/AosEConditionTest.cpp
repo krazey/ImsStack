@@ -28,7 +28,6 @@
 #include "provider/AosStaticProfile.h"
 
 using ::testing::_;
-using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
