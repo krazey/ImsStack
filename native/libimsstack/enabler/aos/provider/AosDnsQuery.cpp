@@ -56,15 +56,6 @@ private:
     void SetDomainName(IN const AString& strDomainName);
 
 private:
-    // Dns Query Event
-    enum
-    {
-        DNS_QUERY_NONE = 0x0000,
-        DNS_QUERY_EXEC = 0x0001,
-
-        DNS_QUERY_TERMINATE = 0x8000
-    };
-
     pthread_cond_t m_stSignal;
     OsMutex m_objMutex4Signal;
     IMS_UINT32 m_nEvent;
@@ -78,7 +69,7 @@ private:
 
 PUBLIC
 AosDnsQueryPrivate::AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer) :
-        m_nEvent(DNS_QUERY_NONE),
+        m_nEvent(AosDnsQuery::DNS_QUERY_NONE),
         m_pThread(new OsPthread()),
         m_piConnection(IMS_NULL),
         m_pQueryer(pDnsQueryer),
@@ -153,7 +144,7 @@ IMS_BOOL AosDnsQueryPrivate::Terminate()
         return IMS_FALSE;
     }
 
-    if (!SetEvent(DNS_QUERY_TERMINATE))
+    if (!SetEvent(AosDnsQuery::DNS_QUERY_TERMINATE))
     {
         return IMS_TRUE;
     }
@@ -171,7 +162,7 @@ IMS_BOOL AosDnsQueryPrivate::DoDnsQuery(
 {
     IMS_TRACE_D("DoDnsQuery :: domain = %s", strDomainName.GetStr(), 0, 0);
 
-    if (!SetEvent(DNS_QUERY_EXEC))
+    if (!SetEvent(AosDnsQuery::DNS_QUERY_EXEC))
     {
         return IMS_FALSE;
     }
@@ -228,7 +219,7 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
         IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
                 nWaitResult, m_nEvent, 0);
 
-        if ((nEventCache & DNS_QUERY_EXEC) != 0)
+        if ((nEventCache & AosDnsQuery::DNS_QUERY_EXEC) != 0)
         {
             ImsList<IpAddress> objIps;
 
@@ -247,13 +238,13 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
                 }
             }
 
-            ResetEvent(DNS_QUERY_EXEC);
+            ResetEvent(AosDnsQuery::DNS_QUERY_EXEC);
         }
 
-        if ((nEventCache & DNS_QUERY_TERMINATE) != 0)
+        if ((nEventCache & AosDnsQuery::DNS_QUERY_TERMINATE) != 0)
         {
             bLoop = IMS_FALSE;
-            ResetEvent(DNS_QUERY_TERMINATE);
+            ResetEvent(AosDnsQuery::DNS_QUERY_TERMINATE);
         }
 
         if (m_pQueryer->IsTestMode())
