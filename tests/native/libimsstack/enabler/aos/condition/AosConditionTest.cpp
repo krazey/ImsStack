@@ -53,10 +53,89 @@ enum
     HOLD_EVENT_IMS_SERVICE = 0x02
 };
 
+class TestAosCondition : public AosCondition
+{
+public:
+    inline explicit TestAosCondition(IN IAosAppContext* piAppContext) :
+            AosCondition(piAppContext)
+    {
+    }
+
+    inline IMS_BOOL IsReady() final { return AosCondition::IsReady(); }
+
+    friend class AosConditionTest;
+
+    FRIEND_TEST(AosConditionTest, Constructor);
+    FRIEND_TEST(AosConditionTest, Start);
+    FRIEND_TEST(AosConditionTest, Stop);
+    FRIEND_TEST(AosConditionTest, SetListener);
+    FRIEND_TEST(AosConditionTest, SetBlock);
+    FRIEND_TEST(AosConditionTest, ResetBlock);
+    FRIEND_TEST(AosConditionTest, IsReasonBlocked);
+    FRIEND_TEST(AosConditionTest, IsReady_CellularServiceAvailable);
+    FRIEND_TEST(AosConditionTest, IsReady_WifiServiceAvailable);
+    FRIEND_TEST(AosConditionTest, IsReady_WholeServiceAvailable);
+    FRIEND_TEST(AosConditionTest, IsReady_WholeServiceNotAvailable);
+    FRIEND_TEST(AosConditionTest, CheckServiceAvailable);
+    FRIEND_TEST(AosConditionTest, CheckBadNetwork);
+    FRIEND_TEST(AosConditionTest, Event_NotifyEvent_RoamingState);
+    FRIEND_TEST(AosConditionTest, Event_NotifyEvent_VopsState);
+    FRIEND_TEST(AosConditionTest, Event_NotifyEvent_LteInfo);
+    FRIEND_TEST(AosConditionTest, CallTracker_StateChanged_Cs_Offhook);
+    FRIEND_TEST(AosConditionTest, CallTracker_StateChanged_Cs_NotOffhook);
+    FRIEND_TEST(AosConditionTest, CallTracker_StateChanged_Normal_Offhook);
+    FRIEND_TEST(AosConditionTest, ResetBlockWhenNetTrackerStatusChangedWithServiceIn);
+    FRIEND_TEST(AosConditionTest, SetBlockWhenNetTrackerStatusChangedWithServiceOut);
+    FRIEND_TEST(AosConditionTest, SetBlockWhenSubscriberStateChangedWithRefreshStarted);
+    FRIEND_TEST(AosConditionTest, Block_Changed);
+    FRIEND_TEST(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStartedFalse);
+    FRIEND_TEST(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStartedTrue);
+    FRIEND_TEST(AosConditionTest, Subscriber_StateChanged_RefreshFailed);
+    FRIEND_TEST(AosConditionTest, ServiceAvailable_RequestCommand_ListenerIsNotNull);
+    FRIEND_TEST(AosConditionTest, NConfiguration_NotifyConfigChanged_NConfigIsNotNull);
+    FRIEND_TEST(AosConditionTest, NConfiguration_NotifyConfigChanged_NConfigIsNull);
+    FRIEND_TEST(AosConditionTest, ServicePhone_AosStart);
+    FRIEND_TEST(AosConditionTest, ServicePhone_LocationInfoChanged_Changed);
+    FRIEND_TEST(AosConditionTest, ServicePhone_LocationInfoChanged_NotChanged);
+    FRIEND_TEST(AosConditionTest, ServicePhone_LocationInfoChanged_ReturnByConfig);
+    FRIEND_TEST(AosConditionTest, ServicePhone_PhoneNumberStateChanged_RetryFailure);
+    FRIEND_TEST(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimState);
+    FRIEND_TEST(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged);
+    FRIEND_TEST(AosConditionTest, ServicePhone_PowerOff_ListenerIsNull);
+    FRIEND_TEST(AosConditionTest, ServicePhone_PowerOff_ListenerIsNotNull);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_AirplaneChanged_False);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_ServiceChanged_On);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_ServiceChanged_Off);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_False);
+    FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport);
+    FRIEND_TEST(AosConditionTest, AddListener);
+    FRIEND_TEST(AosConditionTest, RemoveListener);
+    FRIEND_TEST(AosConditionTest, IsListenerEnabled);
+    FRIEND_TEST(AosConditionTest, AddHold_Roaming);
+    FRIEND_TEST(AosConditionTest, AddHold_ImsService);
+    FRIEND_TEST(AosConditionTest, AddHold_IsNotEventReset);
+    FRIEND_TEST(AosConditionTest, AddHold_UninterestingEvent);
+    FRIEND_TEST(AosConditionTest, RemoveHold_Roaming);
+    FRIEND_TEST(AosConditionTest, RemoveHold_ImsService);
+    FRIEND_TEST(AosConditionTest, RemoveHold_IsNotEventReset);
+    FRIEND_TEST(AosConditionTest, RemoveHold_UninterestingEvent);
+    FRIEND_TEST(AosConditionTest, RequestCommand_ListenerIsNull);
+    FRIEND_TEST(AosConditionTest, RequestCommand_ListenerIsNotNull);
+    FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_ImpuCountIsGreaterThanOne);
+    FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_ImpuCountIsOne);
+    FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_NoBlockReason);
+    FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_IsNotReady);
+};
+
 class AosConditionTest : public ::testing::Test
 {
 public:
-    AosCondition* m_pAosCondition;
+    TestAosCondition* m_pAosCondition;
+
     AosBlock* m_pAosBlock;
     IAosNConfiguration* m_piOriginConfiguration;
     MockIAosAppContext m_objMockIAosAppContext;
@@ -68,6 +147,9 @@ public:
 protected:
     virtual void SetUp() override
     {
+        m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
+
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
 
         const AString strValue = AString("test");
@@ -84,22 +166,17 @@ protected:
 
         ON_CALL(m_objMockIAosAppContext, GetSubscriber()).WillByDefault(ReturnNull());
 
-        m_pAosCondition = new AosCondition(&m_objMockIAosAppContext);
+        m_pAosCondition = new TestAosCondition(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosCondition != nullptr);
 
         m_pAosBlock = new AosBlock(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosBlock != nullptr);
 
         SetAosBlock(m_pAosBlock);
-
-        m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
     }
 
     virtual void TearDown() override
     {
-        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
-
         if (m_pAosBlock)
         {
             delete m_pAosBlock;
@@ -109,6 +186,8 @@ protected:
         {
             delete m_pAosCondition;
         }
+
+        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
     }
 
     void SetAosBlock(IN IAosBlock* piBlock) { m_pAosCondition->m_piBlock = piBlock; }

@@ -595,7 +595,7 @@ Remarks
     And secondly, a related event will be ignored when it is received in Event_NotifyEvent().
     Refer to RemoveHold() too.
 */
-PRIVATE
+PROTECTED
 void AosCondition::AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /* = IMS_FALSE */)
 {
     m_nHoldEvents |= nEvent;
@@ -625,7 +625,7 @@ Remarks
     AosCondition will take care of the event or condition from now on.
 
 */
-PRIVATE
+PROTECTED
 void AosCondition::RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /* = IMS_FALSE */)
 {
     m_nHoldEvents &= ~(nEvent);
@@ -648,19 +648,19 @@ void AosCondition::RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /*
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosCondition::IsHolded(IN IMS_UINT32 nEvent) const
 {
     return (m_nHoldEvents & nEvent);
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosCondition::IsRefreshStarted() const
 {
     return m_bIsRefreshStarted;
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::SetInitialBlockReason()
 {
     A_IMS_TRACE_D(APPPROFILE, "SetInitialBlockReason()", 0, 0, 0);
@@ -685,13 +685,13 @@ void AosCondition::SetInitialBlockReason()
     SetStartBlockReason();
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::SetStartBlockReason()
 {
     m_piBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessBlockReason(
         IN IMS_BOOL bIsBlockSet, IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
@@ -705,13 +705,13 @@ void AosCondition::ProcessBlockReason(
     }
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessAosStartEvent()
 {
     ProcessBlockReason(IMS_FALSE, BLOCK_AOS_INCOMPLETED);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessAirPlaneEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
@@ -726,14 +726,14 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessPowerEvent()
 {
     RequestCommand(REQUEST_STOP, AosReason::POWER_OFF);
     ProcessBlockReason(IMS_TRUE, BLOCK_POWER_OFF);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCsState)
 {
     IMS_UINT32 nState = (nPsState == IMS_ROAMING_STATE_OFF) ? nCsState : IMS_ROAMING_STATE_ON;
@@ -747,13 +747,13 @@ void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCs
     ResetImsDisableReason();
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessPlmnEvent()
 {
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessPhoneNumberAvailableEvent(
         IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState eState)
 {
@@ -765,7 +765,7 @@ void AosCondition::ProcessPhoneNumberAvailableEvent(
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 /*nServiceBits*/)
 {
     if (IsHolded(HOLD_EVENT_IMS_SERVICE))
@@ -784,7 +784,7 @@ void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT3
     }
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessTtyEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
@@ -805,7 +805,7 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessImsVopsEvent(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessImsVopsEvent(), nState(%d)", nState, 0, 0);
@@ -813,7 +813,7 @@ void AosCondition::ProcessImsVopsEvent(IN IMS_UINT32 nState)
     SendConditionEvent(AosServiceAvailable::EVENT_VOPS, nState, SERVICE_CELLULAR);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessLocationInfo(IN LocationInfo eState)
 {
     if (eState != LocationInfo::CHANGED)
@@ -825,7 +825,7 @@ void AosCondition::ProcessLocationInfo(IN LocationInfo eState)
             AosServiceAvailable::EVENT_LOCATION, static_cast<IMS_UINT32>(eState), SERVICE_WIFI);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessLteInfoEvent(), nState(%d)", nState, 0, 0);
@@ -833,7 +833,7 @@ void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
     m_bIsCombinedAttached = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::ResetImsDisableReason()
 {
     A_IMS_TRACE_D(APPPROFILE, "ResetImsDisableReason", 0, 0, 0);
@@ -842,7 +842,7 @@ void AosCondition::ResetImsDisableReason()
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
 }
 
-PRIVATE
+PROTECTED
 SERVICE_TYPE AosCondition::GetServiceType()
 {
     SERVICE_TYPE eType = SERVICE_CELLULAR;
@@ -865,7 +865,7 @@ SERVICE_TYPE AosCondition::GetServiceType()
     return eType;
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState,
         IN IMS_SINT32 nStateEx /* = -1*/, IN SERVICE_TYPE eServiceType /*= SERVICE_WHOLE*/)
 {
@@ -889,7 +889,7 @@ void AosCondition::SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosCondition::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason /* = 0*/) const
 {
     if (m_piListener == IMS_NULL)
@@ -903,7 +903,7 @@ IMS_BOOL AosCondition::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nRea
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosCondition::UpdateRegistrationMode() const
 {
     IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
@@ -926,7 +926,7 @@ void AosCondition::UpdateRegistrationMode() const
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosCondition::IsServiceBlockedByMenu() const
 {
     IImsPrivateProperty* piProperty = UtilService::GetUtilService()->GetPrivateProperty();

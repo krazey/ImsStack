@@ -143,7 +143,6 @@ protected:
     void RemoveListener(IN IMS_UINT32 nType);
     IMS_BOOL IsListenerEnabled(IN IMS_UINT32 nType) const;
 
-private:
     void AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
     void RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
     IMS_BOOL IsHolded(IN IMS_UINT32 nEvent) const;
@@ -185,7 +184,6 @@ protected:
         HOLD_EVENT_IMS_SERVICE = 0x02
     };
 
-protected:
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
     IAosConditionListener* m_piListener;
@@ -203,9 +201,6 @@ protected:
 
     AString m_strTag;
     static const IMS_UINT32 RAT_CHANGE_GUARD_TIME_MILLIS = 2000;
-
-private:
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_CONDITION_H_
