@@ -22,7 +22,9 @@
 #include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "call/TestMtcPendingOperationHolder.h"
@@ -31,6 +33,8 @@
 #include "call/block/MockIMtcBlockChecker.h"
 #include "call/state/EstablishedState.h"
 #include "call/state/MtcCallState.h"
+#include "conferencecall/MockIConferenceController.h"
+#include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
@@ -41,7 +45,12 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/ISipClientConnection.h"
+#include "sipcore/MockISipClientConnection.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/MockISipServerConnection.h"
 #include "sipcore/SipMethod.h"
+#include "sipcore/SipStatusCode.h"
+#include "ussi/MockUssiController.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -52,6 +61,22 @@ using ::testing::ReturnRef;
 
 namespace android
 {
+
+// SipMethod
+MATCHER_P(IsEqualSipMethod, method, "")
+{
+    return arg.Equals(method);
+}
+
+MATCHER_P(IsSameCallReasonInfoCode, code, "")
+{
+    return arg.nCode == code;
+}
+
+MATCHER(IsEmptyString, "")
+{
+    return arg.IsEmpty();
+}
 
 class EstablishedStateTest : public ::testing::Test
 {
@@ -74,6 +99,9 @@ public:
     MediaInfo objMediaInfo;
     CallInfo objCallInfo;
     MtcSupplementaryService* pSupplementaryService;
+    MockIMtcCallManager objMockIMtcCallManager;
+    MockISipClientConnection objMockISipClientConnection;
+    MockUssiController* pMockUssiController;
 
 protected:
     virtual void SetUp() override
@@ -113,6 +141,12 @@ protected:
         // This will be deleted by EstablishedState.
         pBlockChecker = new MockIMtcBlockChecker();
         ON_CALL(objMockCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
+        ON_CALL(objMockCallContext, GetCallManager)
+                .WillByDefault(ReturnRef(objMockIMtcCallManager));
+        ON_CALL(objMockCallContext, CreateClientConnection(IsEqualSipMethod(SipMethod::INFO)))
+                .WillByDefault(Return(&objMockISipClientConnection));
+        pMockUssiController = new MockUssiController(objMockCallContext, new UssiDataParser());
+        ON_CALL(objMockCallContext, GetUssiController).WillByDefault(Return(pMockUssiController));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
@@ -123,6 +157,7 @@ protected:
         delete pUpdatingInfo;
         delete pEstablishedState;
         delete pSupplementaryService;
+        delete pMockUssiController;
     }
 };
 
@@ -154,6 +189,40 @@ TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     CallReasonInfo objReason(CODE_USER_TERMINATED);
     pEstablishedState->Terminate(objReason);
     pEstablishedState->Terminate(objReason);
+}
+
+TEST_F(EstablishedStateTest, SessionTerminatedInvokesSendTerminated)
+{
+    ImsList<IMtcCall*> objEmptyCalls;
+    ON_CALL(objMockIMtcCallManager, GetCallsInConference).WillByDefault(Return(objEmptyCalls));
+    ON_CALL(objMockISession, GetTerminationReason)
+            .WillByDefault(Return(ISession::TERMINATION_REASON_USER_ACTION));
+    EXPECT_CALL(objUiNotifier, SendTerminated(IsSameCallReasonInfoCode(CODE_USER_TERMINATED)));
+
+    pEstablishedState->SessionTerminated(&objMockISession);
+}
+
+TEST_F(EstablishedStateTest, SessionTerminatedInvokesSendTerminatedWithConf)
+{
+    MockIConferenceManager objMockConferenceManager;
+    MockIConferenceController objMockConferenceController;
+    ON_CALL(objMockCallContext, GetConferenceManager())
+            .WillByDefault(ReturnRef(objMockConferenceManager));
+    ON_CALL(objMockConferenceManager, GetController(_))
+            .WillByDefault(Return(&objMockConferenceController));
+    ON_CALL(objMockConferenceController, GetCallStatusInConference(_))
+            .WillByDefault(Return(IndividualCallState::JOINING));
+
+    ImsList<IMtcCall*> objConfCalls;
+    MockIMtcCall objMockMtcCall;
+    objConfCalls.Append(&objMockMtcCall);
+    ON_CALL(objMockIMtcCallManager, GetCallsInConference).WillByDefault(Return(objConfCalls));
+    ON_CALL(objMockISession, GetTerminationReason)
+            .WillByDefault(Return(ISession::TERMINATION_REASON_USER_ACTION));
+    EXPECT_CALL(objUiNotifier,
+            SendTerminated(IsSameCallReasonInfoCode(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)));
+
+    pEstablishedState->SessionTerminated(&objMockISession);
 }
 
 TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchronously)
@@ -384,11 +453,215 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
+TEST_F(EstablishedStateTest, TerminateUssiSendsInfoWithErrorCode)
+{
+    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockISipClientConnection, Send);
+    EXPECT_CALL(*pMockUssiController, SetNextActionByTerminateUssi);
+
+    CallReasonInfo objCallReasonInfo(CODE_UNSPECIFIED);
+    pEstablishedState->TerminateUssi(objCallReasonInfo);
+}
+
+TEST_F(EstablishedStateTest, TerminateUssiNotSendsInfoWithErrorCode)
+{
+    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_FAILURE));
+    EXPECT_CALL(objMockISipClientConnection, Close);
+    EXPECT_CALL(*pMockUssiController, SetNextActionByTerminateUssi);
+
+    CallReasonInfo objCallReasonInfo(CODE_UNSPECIFIED);
+    pEstablishedState->TerminateUssi(objCallReasonInfo);
+}
+
+TEST_F(EstablishedStateTest, UssiTerminateJustInvokesSendTerminated)
+{
+    ON_CALL(*pMockUssiController, IsByeForUssi(_)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objUiNotifier, SendTerminated(_)).Times(1);
+
+    pEstablishedState->UssiTerminated(&objMockISession);
+}
+
+TEST_F(EstablishedStateTest, UssiTerminateInvokesCheckingUssiBodyAndSendTerminated)
+{
+    ON_CALL(*pMockUssiController, IsByeForUssi(_)).WillByDefault(Return(IMS_TRUE));
+    MockISipMessage objMockISipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    SipMethod objSipMethod(SipMethod::PUBLISH);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objSipMethod));
+    UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+            .Times(1)
+            .WillOnce(Return(objResult));
+    EXPECT_CALL(objUiNotifier, SendTerminated(_)).Times(1);
+
+    pEstablishedState->UssiTerminated(&objMockISession);
+}
+
+TEST_F(EstablishedStateTest, SendUssdSendsInfo)
+{
+    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockISipClientConnection, Send);
+
+    AString strUssd;
+    pEstablishedState->SendUssd(strUssd);
+}
+
+TEST_F(EstablishedStateTest, SendUssdNotSendsInfo)
+{
+    ON_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).WillByDefault(Return(IMS_FAILURE));
+    EXPECT_CALL(objMockISipClientConnection, Close);
+
+    AString strUssd;
+    pEstablishedState->SendUssd(strUssd);
+}
+
+TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNotInfoMethod)
+{
+    MockISipServerConnection objMockISipServerConnection;
+    SipMethod objSipMethod(SipMethod::PUBLISH);
+    ON_CALL(objMockISipServerConnection, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_200));
+    EXPECT_CALL(objMockISipServerConnection, Send);
+    EXPECT_CALL(objMockISipServerConnection, Close);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _)).Times(0);
+
+    pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
+}
+
+TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNotValidInfoMethod)
+{
+    MockISipServerConnection objMockISipServerConnection;
+    SipMethod objSipMethod(SipMethod::INFO);
+    ON_CALL(objMockISipServerConnection, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(*pMockUssiController, IsUssiInfoReceived(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockUssiController, HasXmlBodyInInfo(_)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_469));
+    EXPECT_CALL(objMockISipServerConnection, Send);
+    EXPECT_CALL(objMockISipServerConnection, Close);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _)).Times(0);
+
+    pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
+}
+
+TEST_F(EstablishedStateTest,
+        UssiInfoReceivedInvokesTransactionResponseAndSendInfoForUssiWithErrorCode)
+{
+    MockISipServerConnection objMockISipServerConnection;
+    SipMethod objSipMethod(SipMethod::INFO);
+    ON_CALL(objMockISipServerConnection, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(*pMockUssiController, IsUssiInfoReceived(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockUssiController, HasXmlBodyInInfo(_)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_200));
+    EXPECT_CALL(objMockISipServerConnection, Send);
+    EXPECT_CALL(objMockISipServerConnection, Close);
+    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+            .Times(1)
+            .WillOnce(Return(objUssiResult));
+    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_1));
+
+    pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
+}
+
+TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesTransactionResponseAndSendInfoForUssi)
+{
+    MockISipServerConnection objMockISipServerConnection;
+    SipMethod objSipMethod(SipMethod::INFO);
+    ON_CALL(objMockISipServerConnection, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(*pMockUssiController, IsUssiInfoReceived(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockUssiController, HasXmlBodyInInfo(_)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_200));
+    EXPECT_CALL(objMockISipServerConnection, Send);
+    EXPECT_CALL(objMockISipServerConnection, Close);
+    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+            .Times(1)
+            .WillOnce(Return(objUssiResult));
+    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, IsEmptyString(), UssiError::CODE_NONE));
+
+    pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
+}
+
+TEST_F(EstablishedStateTest, UssiInfoReceivedInvokesJustTransactionResponseIfNoProperAction)
+{
+    MockISipServerConnection objMockISipServerConnection;
+    SipMethod objSipMethod(SipMethod::INFO);
+    ON_CALL(objMockISipServerConnection, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(*pMockUssiController, IsUssiInfoReceived(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockUssiController, HasXmlBodyInInfo(_)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objMockISipServerConnection, InitResponse(SipStatusCode::SC_200));
+    EXPECT_CALL(objMockISipServerConnection, Send);
+    EXPECT_CALL(objMockISipServerConnection, Close);
+    UssiResult objUssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, ParseUssiBodyAndCheckResult(_, _))
+            .Times(1)
+            .WillOnce(Return(objUssiResult));
+    EXPECT_CALL(*pMockUssiController, FormInfoRequest(_, _, _)).Times(0);
+
+    pEstablishedState->UssiInfoReceived(&objMockISession, &objMockISipServerConnection);
+}
+
+TEST_F(EstablishedStateTest, NotifyResponseToUssiInfoCallsTerminateUssiAfterInfoTransaction)
+{
+    UssiResult objUssiResult(
+            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(1);
+
+    pEstablishedState->NotifyResponseToUssiInfo(
+            &objMockISipClientConnection, &objMockISipClientConnection);
+}
+
+TEST_F(EstablishedStateTest, NotifyResponseToUssiInfoNotInvokesTerminateUssiAfterInfoTransaction)
+{
+    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+
+    pEstablishedState->NotifyResponseToUssiInfo(
+            &objMockISipClientConnection, &objMockISipClientConnection);
+}
+
+TEST_F(EstablishedStateTest, NotifyErrorToUssiInfoInvokesTerminateUssiAfterInfoTransaction)
+{
+    EXPECT_CALL(objMockISipClientConnection, Close);
+    UssiResult objUssiResult(
+            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(1);
+
+    AString strAny;
+    pEstablishedState->NotifyErrorToUssiInfo(&objMockISipClientConnection, 0, strAny);
+}
+
+TEST_F(EstablishedStateTest, NotifyErrorToUssiInfoNotInvokesTerminateUssiAfterInfoTransaction)
+{
+    EXPECT_CALL(objMockISipClientConnection, Close);
+    UssiResult objUssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_NONE);
+    EXPECT_CALL(*pMockUssiController, GetLastResult).WillOnce(Return(objUssiResult));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+
+    AString strAny;
+    pEstablishedState->NotifyErrorToUssiInfo(&objMockISipClientConnection, 0, strAny);
+}
+
 TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)
 {
     EXPECT_CALL(objUiNotifier, SendHeldBy).Times(2);
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneStarted());
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneFailed());
+}
+
+TEST_F(EstablishedStateTest, UpdatePushesPendingOperationDuringRefresh)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+    TestMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Update(CallType::VT, objMediaInfo));
+
+    pEstablishedState->Update(CallType::VT, objMediaInfo);
 }
 
 TEST_F(EstablishedStateTest, UpdateDoesNotRefreshConvertRemoteResponseTimer)
@@ -431,6 +704,61 @@ TEST_F(EstablishedStateTest,
             pEstablishedState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAosReason));
 
     delete pEpsFbTrigger;
+}
+
+TEST_F(EstablishedStateTest, HoldPushesPendingOperation)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+    TestMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Hold(objMediaInfo));
+
+    pEstablishedState->Hold(objMediaInfo);
+}
+
+TEST_F(EstablishedStateTest, HoldInvokesSendHeldWithAudioDirectionActive)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+    objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
+
+    EXPECT_CALL(objMockCallContext, SetHeldByMe(IMS_TRUE));
+    EXPECT_CALL(objUiNotifier, SendHeld());
+
+    pEstablishedState->Hold(objMediaInfo);
+}
+
+TEST_F(EstablishedStateTest, HoldInvokesHandleUpdate)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::HOLD, IMS_FALSE, SipMethod::INVITE));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->Hold(objMediaInfo));
+    EXPECT_EQ(UpdateType::HOLD, pUpdatingInfo->GetRequestingType());
+}
+
+TEST_F(EstablishedStateTest, ResumePushesPendingOperation)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+    TestMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), Resume(objMediaInfo));
+
+    pEstablishedState->Resume(objMediaInfo);
+}
+
+TEST_F(EstablishedStateTest, ResumeInvokesHandleUpdate)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::RESUME, IMS_FALSE, SipMethod::INVITE));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->Resume(objMediaInfo));
+    EXPECT_EQ(UpdateType::RESUME, pUpdatingInfo->GetRequestingType());
 }
 
 }  // namespace android
