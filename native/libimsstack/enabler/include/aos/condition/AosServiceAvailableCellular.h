@@ -24,6 +24,8 @@ public:
     AosServiceAvailableCellular();
     virtual ~AosServiceAvailableCellular();
 
+    IMS_BOOL IsSupportVops();
+
 private:
     void HandleNetworkStateChanged() final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) final;

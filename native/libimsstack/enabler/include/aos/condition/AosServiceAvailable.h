@@ -44,6 +44,9 @@ public:
     inline virtual IMS_BOOL StartToCheckNetworkConnection() { return IMS_FALSE; };
     virtual IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE);
 
+    void SetBlock(IN IAosBlock* piBlock);
+    IMS_BOOL IsRoaming();
+
 protected:
     inline virtual void RegisterListener(){};
     inline virtual void DeregisterListener(){};

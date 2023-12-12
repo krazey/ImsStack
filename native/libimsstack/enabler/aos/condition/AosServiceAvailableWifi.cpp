@@ -106,6 +106,12 @@ PUBLIC VIRTUAL IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
     return bWasDetected;
 }
 
+PUBLIC
+void AosServiceAvailableWifi::SetLocation(IN ILocationProperties* piTestLocation)
+{
+    m_piTestLocation = piTestLocation;
+}
+
 PRIVATE VIRTUAL void AosServiceAvailableWifi::RegisterListener()
 {
     AosServiceAvailable::RegisterListener();

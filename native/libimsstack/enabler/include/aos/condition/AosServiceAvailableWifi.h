@@ -34,6 +34,8 @@ public:
     IMS_BOOL StartToCheckNetworkConnection() final;
     IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE) final;
 
+    void SetLocation(IN ILocationProperties* piTestLocation);
+
     enum
     {
         STATE_BAD_NETWORK_NONE = 0,

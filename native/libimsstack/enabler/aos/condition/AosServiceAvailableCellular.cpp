@@ -44,6 +44,11 @@ PUBLIC VIRTUAL AosServiceAvailableCellular::~AosServiceAvailableCellular()
             sizeof(AosServiceAvailableCellular), this, 0);
 }
 
+PUBLIC IMS_BOOL AosServiceAvailableCellular::IsSupportVops()
+{
+    return m_bVopsState;
+}
+
 PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();

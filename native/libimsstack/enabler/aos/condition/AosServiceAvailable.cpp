@@ -215,6 +215,16 @@ PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
     return IMS_FALSE;
 }
 
+PUBLIC void AosServiceAvailable::SetBlock(IN IAosBlock* piBlock)
+{
+    m_piBlock = piBlock;
+}
+
+PUBLIC IMS_BOOL AosServiceAvailable::IsRoaming()
+{
+    return m_bRoamingState;
+}
+
 PROTECTED VIRTUAL void AosServiceAvailable::HandleCallStateChanged(
         IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
