@@ -59,9 +59,12 @@ PUBLIC VIRTUAL AosIpsecHelper::~AosIpsecHelper()
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosIpsecHelper = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosIpsecHelper), this);
 
-    // Set Socket Operation related to IPSEC
-    AosUtil::GetInstance()->SetSocketOptionLinger(-1, m_piContext->GetSlotId());
-    AosUtil::GetInstance()->SetSocketOptionShutDown(2 /*both*/, m_piContext->GetSlotId());
+    if (m_piContext != IMS_NULL)
+    {
+        // Set Socket Operation related to IPSEC
+        AosUtil::GetInstance()->SetSocketOptionLinger(-1, m_piContext->GetSlotId());
+        AosUtil::GetInstance()->SetSocketOptionShutDown(2 /*both*/, m_piContext->GetSlotId());
+    }
 
     if (m_pUeIpsecInfo != IMS_NULL)
     {

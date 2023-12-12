@@ -583,15 +583,14 @@ protected:
     static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3;   // 3 Sec.
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
     static const IMS_UINT32 CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME = 16;  // 16 Sec
+    static const IMS_UINT32 RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT = 10;
+    static const IMS_UINT32 AUTHENTICATION_RETRY_MAX_COUNT = 6;
+    static const IMS_UINT32 SIP_MTU_MAX_SIZE_VIA_WIFI = 1280;
 
 private:
     /// IPCAN category being registered
     IMS_SINT32 m_nRegIpcanCategory;
     IMS_UINT32 m_nPdnReactivateWaitTime;
-
-    static const IMS_UINT32 RECONNECT_SERVER_SOCKET_ERROR_MAX_COUNT = 10;
-    static const IMS_UINT32 AUTHENTICATION_RETRY_MAX_COUNT = 6;
-    static const IMS_UINT32 SIP_MTU_MAX_SIZE_VIA_WIFI = 1280;
 };
 
 #endif  // AOS_REGISTRATION_H_
