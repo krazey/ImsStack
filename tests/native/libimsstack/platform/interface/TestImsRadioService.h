@@ -37,6 +37,8 @@ public:
     inline MockIImsRadio& GetMockImsRadio() { return m_objImsRadio; }
     inline MockIImsTraffic& GetMockImsTraffic() { return m_objImsTraffic; }
 
+    inline void SetImsTraffic(IImsTraffic* piImsTraffic) { m_piImsTraffic = piImsTraffic; }
+
 private:
     MockIImsRadio m_objImsRadio;
     MockIImsTraffic m_objImsTraffic;
