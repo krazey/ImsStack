@@ -50,11 +50,6 @@ IMS_RESULT DialogInfoManager::Update(IN const AString& strEventPackage)
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
     DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
 
-    if (pDocumentBuilder == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
     IDocument* piDocument = pDocumentBuilder->Parse(strEventPackage);
     pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);
 

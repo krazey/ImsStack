@@ -136,6 +136,15 @@ TEST_F(DialogSubscriptionTest, SubscribeInvokesSubscribe)
     objSubscription.Subscribe();
 }
 
+TEST_F(DialogSubscriptionTest, SubscribeFailsIfAlreadySubscribed)
+{
+    ON_CALL(objSubscriptionHolder, GetISubscription(_, _, _, _))
+            .WillByDefault(Return(&objISubscription));
+    objSubscription.Subscribe();
+
+    EXPECT_EQ(objSubscription.Subscribe(), IMS_FAILURE);
+}
+
 TEST_F(DialogSubscriptionTest, UnsubscribeInvokesUnsubscribeIfSubscribed)
 {
     // make be subscribed so that m_piSubscription can be created.
