@@ -62,9 +62,38 @@ TEST_F(DialogInfoManagerTest, UpdateFailsIfXmlNotHaveMandatoryInfo)
 
     EXPECT_EQ(objManager.Update(strIncompleteDialogInfo), IMS_FAILURE);
 
-    EXPECT_EQ(objManager.GetState(), DialogInfo::STATE_FULL);
+    EXPECT_EQ(objManager.GetState(), DialogInfo::STATE_INVALID);
     EXPECT_EQ(objManager.GetVersion(), 0);
     EXPECT_EQ(objManager.GetEntity(), AString::ConstNull());
+}
+
+TEST_F(DialogInfoManagerTest, UpdateKeepsPreviousInfoIfFails)
+{
+    const AString strDialogInfo("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                                "<dialog-info xmlns=\"urn:ietf:params:xml:ns:dialog-info\" "
+                                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                                "xsi:schemaLocation=\"urn:ietf:params:xml:ns:dialog-info\" "
+                                "version=\"1\" state=\"full\" entity=\"sip:alice@example.com\">"
+
+                                "<dialog id=\"123456\">"
+                                "<state>confirmed</state>"
+                                "</dialog>"
+
+                                "</dialog-info>");
+    const AString strIncompleteDialogInfo(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<dialog-info xmlns=\"urn:ietf:params:xml:ns:dialog-info\" "
+            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+            "xsi:schemaLocation=\"urn:ietf:params:xml:ns:dialog-info\">"
+            "</dialog-info>");
+
+    objManager.Update(strDialogInfo);
+    objManager.Update(strIncompleteDialogInfo);
+
+    EXPECT_EQ(objManager.GetState(), DialogInfo::STATE_FULL);
+    EXPECT_EQ(objManager.GetVersion(), 1);
+    EXPECT_EQ(objManager.GetEntity(), "sip:alice@example.com");
+    EXPECT_EQ(objManager.GetDialogs().GetSize(), 1);
 }
 
 TEST_F(DialogInfoManagerTest, UpdateSuccess)
