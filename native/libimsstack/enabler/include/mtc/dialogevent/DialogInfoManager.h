@@ -34,14 +34,13 @@ public:
 
     IMS_RESULT Update(IN const AString& strEventPackage) override;
 
-    inline const ImsList<Dialog*>& GetDialogs() const override { return m_objDialogs; }
+    const ImsList<Dialog*>& GetDialogs() const override;
     IMS_UINT32 GetState() const override;
     IMS_UINT32 GetVersion() const override;
     const AString& GetEntity() const override;
 
 private:
     std::unique_ptr<DialogInfo> m_pLastDialogInfo;
-    ImsList<Dialog*> m_objDialogs;
 };
 
 #endif

@@ -58,10 +58,10 @@ LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIADIRECTION[] = "mediaDirection";
 LOCAL const IMS_CHAR EXTRA_ELEMENT_PORT0[] = "port0";
 
 PUBLIC
-DialogInfo::DialogInfo(IN_OUT ImsList<Dialog*>& objDialogs) :
-        m_objDialogs(objDialogs),
+DialogInfo::DialogInfo() :
+        m_objDialogs(ImsList<Dialog*>()),
         m_nVersion(0),
-        m_nState(STATE_FULL),
+        m_nState(STATE_INVALID),
         m_strEntity(AString::ConstNull())
 {
     IMS_TRACE_I("+DialogInfo", 0, 0, 0);
