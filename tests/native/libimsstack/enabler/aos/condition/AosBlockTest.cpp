@@ -30,9 +30,21 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+class TestAosBlock : public AosBlock
+{
+public:
+    inline explicit TestAosBlock(IN IAosAppContext* piAppContext) :
+            AosBlock(piAppContext)
+    {
+    }
+
+    // TODO : Remove friend class.
+    friend class AosBlockTest;
+};
+
 class AosBlockTest : public ::testing::Test {
 public:
-    AosBlock* m_pAosBlock;
+    TestAosBlock* m_pAosBlock;
 
 protected:
     virtual void SetUp() override {
@@ -46,7 +58,7 @@ protected:
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strValue));
 
-        m_pAosBlock = new AosBlock(static_cast<IAosAppContext*>(&objMockIAosAppContext));
+        m_pAosBlock = new TestAosBlock(&objMockIAosAppContext);
         ASSERT_TRUE(m_pAosBlock != nullptr);
     }
 
