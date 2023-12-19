@@ -98,7 +98,7 @@ PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
                                                : IMS_NULL;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosSubscriber::Init()
 {
     m_eRegType = m_piAppContext->GetRegistration()->GetRegType();
@@ -129,7 +129,7 @@ IMS_BOOL AosSubscriber::Init()
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosSubscriber::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -151,7 +151,7 @@ IMS_BOOL AosSubscriber::CleanUp()
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosSubscriber::Notify(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_D(APPPROFILE, "Notify (%d)", nState, 0, 0);
@@ -161,7 +161,7 @@ void AosSubscriber::Notify(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosSubscriber::AosSubscriberManager_NotifyState(IN IMS_UINT32 nState)
 {
     Notify(nState);

@@ -35,7 +35,7 @@ public:
     const AStringArray& GetFakeImpus() const override;
     const ISubscriberConfig* GetSubscriberConfig(IN IMS_SINT32 nType = NORMAL) const override;
 
-private:
+protected:
     // IAosSubscriber
     IMS_BOOL Init() override;
     IMS_BOOL CleanUp() override;
@@ -44,7 +44,7 @@ private:
     // IAosSubscriberManagerListener
     void AosSubscriberManager_NotifyState(IN IMS_UINT32 nState) override;
 
-private:
+protected:
     IAosAppContext* m_piAppContext;
     IAosSubscriberManager* m_piSubscriberManager;
     IMS_SINT32 m_nSlotId;
@@ -53,9 +53,6 @@ private:
     AosRegistrationType m_eRegType;
 
     AString m_strTag;
-
-private:
-    friend class AosSubscriberTest;
 };
 
 #endif  // AOS_SUBSCRIBER_H_

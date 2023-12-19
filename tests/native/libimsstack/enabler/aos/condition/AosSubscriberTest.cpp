@@ -32,10 +32,22 @@ using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
 
+class TestAosSubscriber : public AosSubscriber
+{
+public:
+    inline explicit TestAosSubscriber(IN IAosAppContext* piAppContext) :
+            AosSubscriber(piAppContext)
+    {
+    }
+
+    // TODO : Remove friend class.
+    friend class AosSubscriberTest;
+};
+
 class AosSubscriberTest : public ::testing::Test
 {
 public:
-    AosSubscriber* pAosSubscriber;
+    TestAosSubscriber* m_pAosSubscriber;
     MockIAosAppContext objIMockAosAppContext;
     MockIAosRegistration* pMockIAosRegistration;
 
@@ -57,39 +69,42 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(pMockIAosRegistration));
 
-        pAosSubscriber = new AosSubscriber(static_cast<IAosAppContext*>(&objIMockAosAppContext));
-        ASSERT_TRUE(pAosSubscriber != nullptr);
+        m_pAosSubscriber = new TestAosSubscriber(&objIMockAosAppContext);
+        ASSERT_TRUE(m_pAosSubscriber != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (pAosSubscriber)
+        if (m_pAosSubscriber)
         {
-            delete pAosSubscriber;
+            delete m_pAosSubscriber;
         }
     }
 
     void SetSubscriberManager(IN IAosSubscriberManager* piSubscriberManager)
     {
-        pAosSubscriber->m_piSubscriberManager = piSubscriberManager;
+        m_pAosSubscriber->m_piSubscriberManager = piSubscriberManager;
     }
 
     void SetAosSubscriberListener(IN IAosSubscriberListener* piSubscriberListener)
     {
-        pAosSubscriber->m_piListener = piSubscriberListener;
+        m_pAosSubscriber->m_piListener = piSubscriberListener;
     }
 
-    IAosSubscriberManager* GetSubscriberManager() { return pAosSubscriber->m_piSubscriberManager; }
+    IAosSubscriberManager* GetSubscriberManager()
+    {
+        return m_pAosSubscriber->m_piSubscriberManager;
+    }
 
-    void SetRegType(IN AosRegistrationType eRegType) { pAosSubscriber->m_eRegType = eRegType; }
+    void SetRegType(IN AosRegistrationType eRegType) { m_pAosSubscriber->m_eRegType = eRegType; }
 
-    IMS_BOOL Init() { return pAosSubscriber->Init(); }
+    IMS_BOOL Init() { return m_pAosSubscriber->Init(); }
 
-    IMS_BOOL CleanUp() { return pAosSubscriber->CleanUp(); }
+    IMS_BOOL CleanUp() { return m_pAosSubscriber->CleanUp(); }
 
     void AosSubscriberManager_NotifyState(IN IMS_UINT32 nState)
     {
-        pAosSubscriber->AosSubscriberManager_NotifyState(nState);
+        m_pAosSubscriber->AosSubscriberManager_NotifyState(nState);
     }
 };
 
@@ -98,7 +113,7 @@ TEST_F(AosSubscriberTest, IsReady_ManagerNull)
     SetSubscriberManager(IMS_NULL);
     EXPECT_EQ(GetSubscriberManager(), nullptr);
 
-    EXPECT_FALSE(pAosSubscriber->IsReady());
+    EXPECT_FALSE(m_pAosSubscriber->IsReady());
 }
 
 TEST_F(AosSubscriberTest, IsReady_ManagerReturn)
@@ -112,8 +127,8 @@ TEST_F(AosSubscriberTest, IsReady_ManagerReturn)
     SetSubscriberManager(static_cast<IAosSubscriberManager*>(&objMockIAosSubscriberManager));
     EXPECT_NE(GetSubscriberManager(), nullptr);
 
-    EXPECT_TRUE(pAosSubscriber->IsReady());
-    EXPECT_FALSE(pAosSubscriber->IsReady());
+    EXPECT_TRUE(m_pAosSubscriber->IsReady());
+    EXPECT_FALSE(m_pAosSubscriber->IsReady());
 }
 
 TEST_F(AosSubscriberTest, SetListener_IsReadyReturn)
@@ -133,15 +148,15 @@ TEST_F(AosSubscriberTest, SetListener_IsReadyReturn)
     MockIAosSubscriberListener objMockListener2;
     EXPECT_CALL(objMockListener2, Subscriber_StateChanged(IAosSubscriber::NOT_READY, _)).Times(1);
 
-    pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener1));
-    pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener2));
+    m_pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener1));
+    m_pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener2));
 }
 
 TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerNull)
 {
     SetSubscriberManager(IMS_NULL);
     EXPECT_EQ(GetSubscriberManager(), nullptr);
-    EXPECT_EQ(pAosSubscriber->GetConfiguredImpus().GetCount(), 0);
+    EXPECT_EQ(m_pAosSubscriber->GetConfiguredImpus().GetCount(), 0);
 }
 
 TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerReturn)
@@ -159,14 +174,14 @@ TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerReturn)
     SetSubscriberManager(static_cast<IAosSubscriberManager*>(&objMockIAosSubscriberManager));
     EXPECT_NE(GetSubscriberManager(), nullptr);
 
-    EXPECT_EQ(pAosSubscriber->GetConfiguredImpus().GetCount(), 3);
+    EXPECT_EQ(m_pAosSubscriber->GetConfiguredImpus().GetCount(), 3);
 }
 
 TEST_F(AosSubscriberTest, GetFakeImpus_ManagerNull)
 {
     SetSubscriberManager(IMS_NULL);
     EXPECT_EQ(GetSubscriberManager(), nullptr);
-    EXPECT_EQ(pAosSubscriber->GetFakeImpus().GetCount(), 0);
+    EXPECT_EQ(m_pAosSubscriber->GetFakeImpus().GetCount(), 0);
 }
 
 TEST_F(AosSubscriberTest, GetFakeImpus_ManagerReturn)
@@ -184,14 +199,14 @@ TEST_F(AosSubscriberTest, GetFakeImpus_ManagerReturn)
     SetSubscriberManager(static_cast<IAosSubscriberManager*>(&objMockIAosSubscriberManager));
     EXPECT_NE(GetSubscriberManager(), nullptr);
 
-    EXPECT_EQ(pAosSubscriber->GetFakeImpus().GetCount(), 3);
+    EXPECT_EQ(m_pAosSubscriber->GetFakeImpus().GetCount(), 3);
 }
 
 TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerNull)
 {
     SetSubscriberManager(IMS_NULL);
     EXPECT_EQ(GetSubscriberManager(), nullptr);
-    EXPECT_EQ(pAosSubscriber->GetSubscriberConfig(), nullptr);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberConfig(), nullptr);
 }
 
 TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerReturn)
@@ -205,7 +220,7 @@ TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerReturn)
     SetSubscriberManager(static_cast<IAosSubscriberManager*>(&objMockIAosSubscriberManager));
     EXPECT_NE(GetSubscriberManager(), nullptr);
 
-    EXPECT_EQ(pAosSubscriber->GetSubscriberConfig(), piSubscriberConfig);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberConfig(), piSubscriberConfig);
 }
 
 TEST_F(AosSubscriberTest, Init_SubscriberManagerNull)
