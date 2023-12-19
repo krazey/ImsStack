@@ -44,7 +44,7 @@ PUBLIC VIRTUAL AosServiceAvailableCellular::~AosServiceAvailableCellular()
             sizeof(AosServiceAvailableCellular), this, 0);
 }
 
-PUBLIC IMS_BOOL AosServiceAvailableCellular::IsSupportVops()
+PUBLIC IMS_BOOL AosServiceAvailableCellular::IsVopsSupported()
 {
     return m_bVopsState;
 }

@@ -24,7 +24,7 @@ public:
     AosServiceAvailableCellular();
     virtual ~AosServiceAvailableCellular();
 
-    IMS_BOOL IsSupportVops();
+    IMS_BOOL IsVopsSupported();
 
 private:
     void HandleNetworkStateChanged() final;

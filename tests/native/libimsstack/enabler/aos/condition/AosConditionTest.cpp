@@ -63,6 +63,24 @@ public:
 
     inline IMS_BOOL IsReady() final { return AosCondition::IsReady(); }
 
+    inline void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
+
+    inline void SetAosBlockToCellur(IN IAosBlock* piBlock)
+    {
+        m_pAvailableCellular->SetBlock(piBlock);
+    }
+
+    inline void SetAosBlockToWifi(IN IAosBlock* piBlock) { m_pAvailableWiFi->SetBlock(piBlock); }
+
+    inline IMS_BOOL IsRoaming() { return m_pAvailableCellular->IsRoaming(); }
+
+    inline IMS_BOOL IsVopsSupported() { return m_pAvailableCellular->IsVopsSupported(); }
+
+    inline void SetTestLocation(IN ILocationProperties* piTestLocation)
+    {
+        m_pAvailableWiFi->SetLocation(piTestLocation);
+    }
+
     FRIEND_TEST(AosConditionTest, Constructor);
     FRIEND_TEST(AosConditionTest, Start);
     FRIEND_TEST(AosConditionTest, Stop);
@@ -133,22 +151,6 @@ public:
     FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_ImpuCountIsOne);
     FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_NoBlockReason);
     FRIEND_TEST(AosConditionTest, UpdateRegistrationMode_IsNotReady);
-
-public:
-    void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
-
-    void SetAosBlockToCellur(IN IAosBlock* piBlock) { m_pAvailableCellular->SetBlock(piBlock); }
-
-    void SetAosBlockToWifi(IN IAosBlock* piBlock) { m_pAvailableWiFi->SetBlock(piBlock); }
-
-    IMS_BOOL IsRoaming() { return m_pAvailableCellular->IsRoaming(); }
-
-    IMS_BOOL IsSupportVops() { return m_pAvailableCellular->IsSupportVops(); }
-
-    void SetTestLocation(IN ILocationProperties* piTestLocation)
-    {
-        m_pAvailableWiFi->SetLocation(piTestLocation);
-    }
 };
 
 class AosConditionTest : public ::testing::Test
@@ -618,11 +620,11 @@ TEST_F(AosConditionTest, Event_NotifyEvent_VopsState)
 
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_SUPPORTED, 0);
-    EXPECT_TRUE(m_pAosCondition->IsSupportVops());
+    EXPECT_TRUE(m_pAosCondition->IsVopsSupported());
 
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
-    EXPECT_FALSE(m_pAosCondition->IsSupportVops());
+    EXPECT_FALSE(m_pAosCondition->IsVopsSupported());
 }
 
 TEST_F(AosConditionTest, Event_NotifyEvent_LteInfo)
