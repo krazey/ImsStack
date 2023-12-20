@@ -103,6 +103,12 @@ protected:
     // ITimerListener Interface
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
+    // For Unit Test
+    inline ImsMap<IMS_UINT32, ImsList<IAosTransactionListener*>> GetListeners()
+    {
+        return m_objListeners;
+    }
+
 private:
     IMS_UINT32 GetAccessNetworkType(IN IMS_UINT32 nRadioType);
 
