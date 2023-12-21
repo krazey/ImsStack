@@ -646,29 +646,41 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void handleAudioQos(String remoteIpAddress, int remotePortNumber)  {
-        synchronized (mRtpSocketList) {
-            if (remoteIpAddress != null && remotePortNumber != 0) {
-                if (mQosUpdateRequired) {
-                    Pair<DatagramSocket, DatagramSocket> rtpSocket = mRtpSocketList.get(0);
-                    mAudioQosAgent.updateQosConnection(rtpSocket.first, rtpSocket.second,
-                            remoteIpAddress, remotePortNumber);
-                    setQosUpdateRequired(false);
-                    ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
-                            + " remotePortNumber= " + remotePortNumber);
-                    return;
-                }
+        if (isOpening() || isLive()) {
+            synchronized (mRtpSocketList) {
+                if (remoteIpAddress != null && remotePortNumber != 0) {
+                    if (mQosUpdateRequired) {
+                        if (mRtpSocketList.size() > 0) {
+                            Pair<DatagramSocket, DatagramSocket> rtpSocket = mRtpSocketList.get(0);
+                            if (rtpSocket != null) {
+                                mAudioQosAgent.updateQosConnection(rtpSocket.first,
+                                        rtpSocket.second, remoteIpAddress, remotePortNumber);
+                                setQosUpdateRequired(false);
+                                ImsLog.d("Updated QoS Connection for remoteIpAddress= "
+                                        + remoteIpAddress + " remotePortNumber= "
+                                        + remotePortNumber);
+                            }
+                        }
+                        return;
+                    }
 
-                // TODO : updated rtpSocket has to be sent in modifySession
-                if (isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
-                    Pair<DatagramSocket, DatagramSocket> rtpSocket =
-                            mAudioQosAgent.createQosConnection(
-                                    mLocalAddress.first, mLocalAddress.second,
-                                    remoteIpAddress, remotePortNumber);
-                    ImsLog.d("Created QoS Connection for remoteIpAddress= " + remoteIpAddress
-                            + " remotePortNumber= " + remotePortNumber);
-                    mRtpSocketList.add(rtpSocket);
+                    // TODO : updated rtpSocket has to be sent in modifySession
+                    if (isNewRemoteAddress(remoteIpAddress, remotePortNumber)
+                            && mLocalAddress != null) {
+                        Pair<DatagramSocket, DatagramSocket> rtpSocket =
+                                mAudioQosAgent.createQosConnection(
+                                        mLocalAddress.first, mLocalAddress.second,
+                                        remoteIpAddress, remotePortNumber);
+                        ImsLog.d("Created QoS Connection for remoteIpAddress= " + remoteIpAddress
+                                + " remotePortNumber= " + remotePortNumber);
+                        mRtpSocketList.add(rtpSocket);
+                    }
                 }
             }
+        }
+        else {
+            ImsLog.d("OpenSession was not successful or session is already closed, state : "
+                    + getMediaState());
         }
     }
 
