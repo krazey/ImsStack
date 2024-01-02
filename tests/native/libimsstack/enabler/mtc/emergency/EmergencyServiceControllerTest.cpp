@@ -22,6 +22,7 @@
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
 #include "TestPhoneInfoService.h"
+#include "call/IMtcCall.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/EmergencyServiceController.h"
@@ -358,4 +359,19 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndOtherEmergencyCallBlockDoesNothi
             nSecondCall, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallStateChanged(nSecondCall, IMtcCall::State::TERMINATING,
             IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+}
+
+TEST_F(EmergencyServiceControllerTest, OnIpcanChangedDoesNothing)
+{
+    const IMS_UINT32 ANY_VALUE = 0;
+    pController->OnIpcanChanged(objNormalService, ANY_VALUE);
+    pController->OnIpcanChanged(objEmergencyService, ANY_VALUE);
+    // Nothing to be checked.
+}
+
+TEST_F(EmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
+{
+    const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;
+    pController->OnTotalCallStateChanged(ANY_STATE);
+    // Nothing to be checked.
 }
