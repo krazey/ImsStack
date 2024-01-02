@@ -38,8 +38,7 @@ public:
     {
     }
 
-    // TODO : Remove friend class.
-    friend class AosBlockTest;
+    inline ImsList<IAosBlockListener*> GetBlockListeners() { return m_objListeners; }
 };
 
 class AosBlockTest : public ::testing::Test {
@@ -67,34 +66,32 @@ protected:
             delete m_pAosBlock;
         }
     }
-
-    ImsList<IAosBlockListener*> GetBlockListeners() { return m_pAosBlock->m_objListeners; }
 };
 
 TEST_F(AosBlockTest, SetListener_ParamNull) {
     m_pAosBlock->SetListener(IMS_NULL);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 0);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
 TEST_F(AosBlockTest, SetListener_Success) {
-    EXPECT_EQ(GetBlockListeners().GetSize(), 0);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
 
     m_pAosBlock->SetListener(piAosBlockListener1);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 1);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 1);
 
     m_pAosBlock->SetListener(piAosBlockListener2);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 2);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 2);
 
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
 TEST_F(AosBlockTest, SetListener_AlreadyExist) {
-    EXPECT_EQ(GetBlockListeners().GetSize(), 0);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
@@ -103,12 +100,12 @@ TEST_F(AosBlockTest, SetListener_AlreadyExist) {
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
 TEST_F(AosBlockTest, RemoveListener_ParamNull) {
@@ -119,10 +116,10 @@ TEST_F(AosBlockTest, RemoveListener_ParamNull) {
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
     m_pAosBlock->RemoveListener(IMS_NULL);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
 TEST_F(AosBlockTest, RemoveListener_Success) {
@@ -133,16 +130,16 @@ TEST_F(AosBlockTest, RemoveListener_Success) {
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
     m_pAosBlock->RemoveListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 2);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 2);
 
     m_pAosBlock->RemoveListener(piAosBlockListener2);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 1);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 1);
 
     m_pAosBlock->RemoveListener(piAosBlockListener1);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 0);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
 TEST_F(AosBlockTest, SetBlockReason_IsReasonBlocked) {
@@ -169,7 +166,7 @@ TEST_F(AosBlockTest, SetBlockReason_Success) {
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
@@ -226,7 +223,7 @@ TEST_F(AosBlockTest, ResetBlockReason_Success) {
     m_pAosBlock->SetListener(piAosBlockListener1);
     m_pAosBlock->SetListener(piAosBlockListener2);
     m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(GetBlockListeners().GetSize(), 3);
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
