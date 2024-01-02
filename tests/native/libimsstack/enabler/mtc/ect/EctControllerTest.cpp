@@ -134,4 +134,11 @@ TEST_F(EctControllerTest, TransferDoesNothing)
     pController->Transfer();
 }
 
+TEST_F(EctControllerTest, TimerExpiredNotifiesFailure)
+{
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
+    pController->Timer_TimerExpired(IMS_NULL);
+}
+
 }  // namespace android

@@ -64,7 +64,15 @@ PUBLIC VIRTUAL void ConsultativeTransferController::Transfer()
     StartTimer();
 }
 
-PROTECTED VIRTUAL IMS_BOOL ConsultativeTransferController::IsValid() const
+PROTECTED VIRTUAL void ConsultativeTransferController::OnCompleted()
+{
+    // just in case EctManager directly delete controller once OnCompleted().
+    TerminateTransferTargetCall();
+    EctController::OnCompleted();
+}
+
+PRIVATE
+IMS_BOOL ConsultativeTransferController::IsValid() const
 {
     if (m_objContext.GetCallManager().GetCalls().GetSize() == 2)
     {
@@ -72,13 +80,6 @@ PROTECTED VIRTUAL IMS_BOOL ConsultativeTransferController::IsValid() const
     }
 
     return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL void ConsultativeTransferController::OnCompleted()
-{
-    // just in case EctManager directly delete controller once OnCompleted().
-    TerminateTransferTargetCall();
-    EctController::OnCompleted();
 }
 
 PRIVATE

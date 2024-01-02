@@ -37,8 +37,8 @@ public:
 
     void Transfer(IN const AString& strNumber) override;
 
-protected:
-    IMS_BOOL IsValid() const override;
+private:
+    IMS_BOOL IsValid() const;
 };
 
 #endif
