@@ -281,4 +281,22 @@ TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
     EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_INVITE);
 }
 
+TEST_F(ConferenceReferenceTest, SetForceToTerminateInterfaceChangesReleaseIReferenceParam)
+{
+    // Set true
+    {
+        pConferenceReference->SetForceToTerminateInterface(IMS_TRUE);
+        EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, IMS_TRUE));
+        delete pConferenceReference;
+    }
+
+    // Set false
+    {
+        pConferenceReference = new ConferenceReference(
+                objMockContext, CONFERENCE_CALL_KEY, &objUser, objMockListener);
+        pConferenceReference->SetForceToTerminateInterface(IMS_FALSE);
+        EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, IMS_FALSE));
+    }
+}
+
 }  // namespace android
