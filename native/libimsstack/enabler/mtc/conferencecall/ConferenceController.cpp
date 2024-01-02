@@ -276,6 +276,7 @@ PUBLIC VIRTUAL void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd,
 
     switch (nCmd)
     {
+        // TODO: use IConferenceController::GROUPCALL after checking the logic.
         case IuMtcCall::STARTCONF:
             ProcessGroupCall(objUsers, objCallInfo, objMediaInfo, objSuppServices);
             break;

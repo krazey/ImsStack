@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+#include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockITimer.h"
+#include "MtcDef.h"
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
@@ -623,6 +625,34 @@ TEST_F(ConferenceControllerTest, ProcessJoinedCommand)
 
     ImsList<ConfUser*> objUsers;
     pController->ProcessCommand(IConferenceController::JOINED, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
+}
+
+TEST_F(ConferenceControllerTest, ProcessGroupCallDoesNothing)
+{
+    ImsList<ConfUser*> objUsers;
+    CallInfo objCallInfo;
+    MediaInfo objMediaInfo;
+    ImsMap<SuppType, SuppService*> objSuppServices;
+    pController->ProcessCommand(
+            IuMtcCall::STARTCONF, objUsers, objCallInfo, objMediaInfo, objSuppServices);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
+}
+
+TEST_F(ConferenceControllerTest, ProcessExpandDoesNothing)
+{
+    ImsList<ConfUser*> objUsers;
+    pController->ProcessCommand(IConferenceController::EXPAND, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
+}
+
+TEST_F(ConferenceControllerTest, ProcessMergeDoesNothing)
+{
+    ImsList<ConfUser*> objUsers;
+    pController->ProcessCommand(IConferenceController::MERGE, objUsers);
 
     EXPECT_EQ(pController->GetState(), ConferenceController::STATE_CREATED);
 }
