@@ -63,6 +63,19 @@ public:
     FRIEND_TEST(AosTransactionTest, StopEmergencyTraffic_StopIfStarted);
     FRIEND_TEST(AosTransactionTest, SetWlan_DoNothingIfImsTrafficIsNull);
     FRIEND_TEST(AosTransactionTest, SetWlan_CallSetWlan);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnNgranIfNr);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnEutranIfLte);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfEhrpd);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfWcdma);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfHspa);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnIwlanIfWlan);
+    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUnknownIfNotConsideringRat);
+    FRIEND_TEST(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFailed);
+    FRIEND_TEST(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed);
+    FRIEND_TEST(AosTransactionTest,
+            ShouldNotifyToTheListenerForTypeRegWhenTrafficConnectionIsFailedForTypeReg);
+    FRIEND_TEST(AosTransactionTest,
+            ShouldNotifyToTheListenerForTypeSubWhenTrafficConnectionIsFailedForTypeSub);
 
 public:
     inline void SetMockIImsRadio(IN IImsRadio* piImsRadio)
@@ -90,6 +103,7 @@ class AosTransactionTest : public ::testing::Test
 public:
     TestAosTransaction* m_pAosTransaction;
 
+    MockIAosTransactionListener m_objMockIAosTransactionListener;
     MockIImsRadio m_objMockIImsRadio;
 
 protected:
@@ -203,9 +217,6 @@ TEST_F(AosTransactionTest, StartTraffic_ReturnTrueIfAlreadyStarted)
     EXPECT_TRUE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
 
     EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_EHRPD));
-    EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_WLAN));
 }
 
 TEST_F(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning)
@@ -330,4 +341,110 @@ TEST_F(AosTransactionTest, SetWlan_CallSetWlan)
     m_pAosTransaction->SetWlan(IMS_FALSE);
 
     PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, pOrigService);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnNgranIfNr)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_NR),
+            IImsRadio::ACCESS_NETWORK_TYPE_NGRAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnEutranIfLte)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_LTE),
+            IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfEhrpd)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_EHRPD),
+            IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfWcdma)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_WCDMA),
+            IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfHspa)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_HSPA),
+            IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnIwlanIfWlan)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_WLAN),
+            IImsRadio::ACCESS_NETWORK_TYPE_IWLAN);
+}
+
+TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUnknownIfNotConsideringRat)
+{
+    EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_INVALID),
+            IImsRadio::ACCESS_NETWORK_TYPE_UNKNOWN);
+}
+
+TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFailed)
+{
+    // GIVEN
+    m_pAosTransaction->GetListeners().Clear();
+    EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnConnectionFailed(_, _, _)).Times(0);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionFailed(
+            IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+}
+
+TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &m_objMockIAosTransactionListener);
+    EXPECT_CALL(m_objMockIAosTransactionListener,
+            Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 1000))
+            .Times(1);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionFailed(
+            IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+}
+
+TEST_F(AosTransactionTest,
+        ShouldNotifyToTheListenerForTypeRegWhenTrafficConnectionIsFailedForTypeReg)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &m_objMockIAosTransactionListener);
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE);
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    EXPECT_TRUE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_REG));
+    EXPECT_CALL(m_objMockIAosTransactionListener,
+            Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 1000))
+            .Times(2);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionFailed(
+            IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+
+    // THEN
+    EXPECT_FALSE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_REG));
+}
+
+TEST_F(AosTransactionTest,
+        ShouldNotifyToTheListenerForTypeSubWhenTrafficConnectionIsFailedForTypeSub)
+{
+    // GIVEN
+    m_pAosTransaction->SetListener(IAosTransaction::TYPE_SUB, &m_objMockIAosTransactionListener);
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE);
+    EXPECT_TRUE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
+    EXPECT_CALL(m_objMockIAosTransactionListener,
+            Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 1000))
+            .Times(2);
+
+    // WHEN
+    m_pAosTransaction->Traffic_OnConnectionFailed(
+            IAosTransaction::TYPE_SUB, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+
+    // THEN
+    EXPECT_FALSE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
 }
