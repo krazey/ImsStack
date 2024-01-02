@@ -39,12 +39,11 @@ enum
 
 class TestAosService : public AosService
 {
+public:
     inline TestAosService(IN IMS_SINT32 nSlotId) :
             AosService(nSlotId)
     {
     }
-
-    friend class AosServiceTest;
 
     FRIEND_TEST(AosServiceTest, NotifyPlmnChanged);
 };
@@ -57,7 +56,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pAosService = new AosService(SLOT_ID);
+        m_pAosService = new TestAosService(SLOT_ID);
         ASSERT_TRUE(m_pAosService != nullptr);
     }
 
