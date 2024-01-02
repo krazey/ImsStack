@@ -213,8 +213,12 @@ IMS_BOOL MultiEndpointManager::IsReady() const
     }
 
     // TODO: need to check AoS behavior.
-    return (m_objContext.GetAosConnector(ServiceType::NORMAL)->GetFeatures() &
-                   ImsAosFeature::MMTEL) == ImsAosFeature::MMTEL;
+    if (m_objContext.GetAosConnector(ServiceType::NORMAL))
+    {
+        return (m_objContext.GetAosConnector(ServiceType::NORMAL)->GetFeatures() &
+                       ImsAosFeature::MMTEL) == ImsAosFeature::MMTEL;
+    }
+    return IMS_FALSE;
 }
 
 PRIVATE
