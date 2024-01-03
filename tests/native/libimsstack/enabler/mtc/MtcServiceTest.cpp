@@ -327,6 +327,12 @@ TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
     EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
+{
+    MtcService objRealService(objMockContext, ServiceType::NORMAL);
+    EXPECT_FALSE(objRealService.IsWlanIpCanType());
+}
+
 TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
@@ -417,6 +423,23 @@ TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureDoesNothingForEmerg
     pEmergencyMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
 }
 
+TEST_F(MtcServiceTest, ImsAosConnectedDoesNothingForCallComposerIfCoreServiceIsNull)
+{
+    reinterpret_cast<TestMtcService*>(pNormalMtcService)->ReplaceCoreService(IMS_NULL);
+
+    // Meaningless codes.
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(AString("+g.gsma.callcomposer"), AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_ANY))
+            .Times(0);
+
+    const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
+}
+
 TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
 {
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
@@ -467,6 +490,12 @@ TEST_F(MtcServiceTest, GetJniServiceThreadReturnsThread)
     EXPECT_EQ(pNormalMtcService->GetJniServiceThread(), &objMockServiceThread);
 }
 
+TEST_F(MtcServiceTest, GetJniServiceThreadReturnsNullIfJniEnablerIsNull)
+{
+    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, IMS_NULL);
+    EXPECT_EQ(pNormalMtcService->GetJniServiceThread(), nullptr);
+}
+
 TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 {
     ON_CALL(*pMockSrvccStateManager, GetState).WillByDefault(Return(SrvccState::STARTED));
@@ -506,6 +535,26 @@ TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
     EXPECT_CALL(*pMockEmergencyManager, StartOpen(EmergencyCallRoutingPdn::EMERGENCY)).Times(1);
     pNormalMtcService->OpenEmergencyService(EmergencyCallRoutingPdn::EMERGENCY);
+}
+
+TEST_F(MtcServiceTest, StopEmergencyServiceInvokesStopOpenService)
+{
+    EXPECT_CALL(*pMockEmergencyManager, StopOpen(IMS_TRUE)).Times(1);
+    pNormalMtcService->StopEmergencyService();
+}
+
+TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
+{
+    const IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
+    const IMS_UINT32 nIpCanType = IIpcan::CATEGORY_MOBILE;
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpCanType)).Times(1);
+    pNormalMtcService->ProcessTestCommand(0 /* TEST_COMMAND_AOS_CONNECTED */, nFeature, nIpCanType);
+
+    const IMS_UINT32 nReason = ImsAosReason::NONE;
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
+    pNormalMtcService->ProcessTestCommand(1 /* TEST_COMMAND_AOS_DISCONNECTED */, nReason, 0);
+
+    pNormalMtcService->ProcessTestCommand(2 /* Not defined */, 0, 0);
 }
 
 TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
