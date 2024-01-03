@@ -46,13 +46,6 @@ using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
-enum
-{
-    HOLD_EVENT_NONE = 0x00,
-    HOLD_EVENT_ROAMING = 0x01,
-    HOLD_EVENT_IMS_SERVICE = 0x02
-};
-
 class TestAosCondition : public AosCondition
 {
 public:
@@ -1054,8 +1047,8 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->AddHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_TRUE(m_pAosCondition->IsHolded(HOLD_EVENT_IMS_SERVICE));
+    m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
+    EXPECT_TRUE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::ON, 0);
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
@@ -1069,8 +1062,8 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_On)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_FALSE(m_pAosCondition->IsHolded(HOLD_EVENT_IMS_SERVICE));
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
+    EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::ON, 0);
 }
@@ -1083,8 +1076,8 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_FALSE(m_pAosCondition->IsHolded(HOLD_EVENT_IMS_SERVICE));
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
+    EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
 }
@@ -1234,7 +1227,7 @@ TEST_F(AosConditionTest, AddHold_Roaming)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->AddHold(HOLD_EVENT_ROAMING, IMS_TRUE);
+    m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_ROAMING, IMS_TRUE);
 }
 
 TEST_F(AosConditionTest, AddHold_ImsService)
@@ -1245,7 +1238,7 @@ TEST_F(AosConditionTest, AddHold_ImsService)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->AddHold(HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
+    m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
 
 TEST_F(AosConditionTest, AddHold_IsNotEventReset)
@@ -1256,7 +1249,7 @@ TEST_F(AosConditionTest, AddHold_IsNotEventReset)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->AddHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
+    m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
 
 TEST_F(AosConditionTest, AddHold_UninterestingEvent)
@@ -1267,7 +1260,7 @@ TEST_F(AosConditionTest, AddHold_UninterestingEvent)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->AddHold(HOLD_EVENT_NONE, IMS_FALSE);
+    m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_NONE, IMS_FALSE);
 }
 
 TEST_F(AosConditionTest, RemoveHold_Roaming)
@@ -1278,7 +1271,7 @@ TEST_F(AosConditionTest, RemoveHold_Roaming)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_ROAMING, IMS_TRUE);
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_ROAMING, IMS_TRUE);
 }
 
 TEST_F(AosConditionTest, RemoveHold_ImsService)
@@ -1289,7 +1282,7 @@ TEST_F(AosConditionTest, RemoveHold_ImsService)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
 
 TEST_F(AosConditionTest, RemoveHold_IsNotEventReset)
@@ -1300,7 +1293,7 @@ TEST_F(AosConditionTest, RemoveHold_IsNotEventReset)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
 
 TEST_F(AosConditionTest, RemoveHold_UninterestingEvent)
@@ -1311,7 +1304,7 @@ TEST_F(AosConditionTest, RemoveHold_UninterestingEvent)
 
     m_pAosCondition->SetAosBlock(&objMockIAosBlock);
 
-    m_pAosCondition->RemoveHold(HOLD_EVENT_NONE, IMS_FALSE);
+    m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_NONE, IMS_FALSE);
 }
 
 TEST_F(AosConditionTest, RequestCommand_ListenerIsNull)
