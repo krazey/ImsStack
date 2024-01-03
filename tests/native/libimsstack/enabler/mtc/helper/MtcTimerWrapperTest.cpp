@@ -16,6 +16,7 @@
 
 #include "MockIOsFactory.h"
 #include "PlatformContext.h"
+#include "ServiceTimer.h"
 #include "call/state/MtcCallState.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/MtcTimerWrapper.h"
@@ -26,6 +27,17 @@ using ::testing::Return;
 
 namespace android
 {
+
+class TestImsMutexForMtc : public ImsMutex
+{
+public:
+    inline TestImsMutexForMtc() {}
+    inline virtual ~TestImsMutexForMtc() {}
+
+public:
+    void Lock() override {}
+    void Unlock() override {}
+};
 
 class TestImsTimerForMtc : public ImsTimer
 {
@@ -64,6 +76,9 @@ public:
     TestImsTimerForMtc* pTestImsTimerForMtc2;
     IMS_BOOL bTimerExpired;
     IMS_UINT32 nAnyDuration = 10000;
+    TimerService* pTimerService;
+    PlatformService* pOldTimerService;
+    ImsMutex* pImsMutex;
 
 protected:
     virtual void SetUp() override
@@ -72,11 +87,22 @@ protected:
 
         objMtcTimerWrapper.SetListener(this);
         bTimerExpired = IMS_FALSE;
+
+        // Mutex will be deleted by test TimerService deleting.
+        pImsMutex = new TestImsMutexForMtc();
+        ON_CALL(objMockIOsFactory, CreateMutex(_)).WillByDefault(Return(pImsMutex));
+
+        pTimerService = new TimerService();
+        pOldTimerService = PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, pTimerService);
     }
 
     virtual void TearDown() override
     {
         PlatformContext::GetInstance()->SetOsFactory(pOldIOsFactory);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, pOldTimerService);
+        pTimerService->Destroy();
     }
 };
 
