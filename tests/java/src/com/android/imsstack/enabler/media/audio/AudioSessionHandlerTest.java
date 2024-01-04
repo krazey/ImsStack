@@ -445,6 +445,21 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
+    public void testNotifyAnbrEnabed() {
+        // Send Anbr Enabled
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeBoolean(true);
+
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        assertEquals(mAudioSessionHandler.getAudioAnbrEnabled(), true);
+    }
+
+    @Test
     public void testFirstMediaPacketReceived() {
         // Receive First Packet Notification
         AudioConfig audioConfig = MediaTestUtils.createAudioConfig();

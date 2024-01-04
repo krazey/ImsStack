@@ -43,6 +43,9 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AudioSessionCallbackHandlerTest {
+    private static final int MEDIA_STREAM_TYPE_AUDIO = 1;
+    private static final int MEDIA_STREAM_DIRECTION_UPLINK = 1;
+    private static final int MEDIA_STREAM_TEST_BITRATE = 10;
 
     @Mock MtcMediaSession mMockMtcMediaSession;
     @Captor ArgumentCaptor<Parcel> mCaptorParcel;
@@ -152,6 +155,17 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery() {
+
+        mAudioSessionCallbackHandler.triggerAnbrQuery(MEDIA_STREAM_TYPE_AUDIO,
+                MEDIA_STREAM_DIRECTION_UPLINK, MEDIA_STREAM_TEST_BITRATE);
+
+        verify(mMockMtcMediaSession).triggerAnbrQuery(
+                eq(MEDIA_STREAM_TYPE_AUDIO), eq(MEDIA_STREAM_DIRECTION_UPLINK),
+                eq(MEDIA_STREAM_TEST_BITRATE));
     }
 
     @Test
