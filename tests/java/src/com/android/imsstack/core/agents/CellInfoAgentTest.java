@@ -47,12 +47,12 @@ import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
@@ -64,7 +64,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -74,7 +73,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class CellInfoAgentTest {
     private static final long TIMESTAMP = 55004107851687L;
     private static final long RECENT_TIMESTAMP = 55004907851687L;
@@ -103,9 +103,10 @@ public class CellInfoAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mTestableLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
         mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
-        mTestAppContext.setUp();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
 
@@ -121,7 +122,6 @@ public class CellInfoAgentTest {
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mCellInfoAgent = new CellInfoAgent(SLOT0);
         mCellInfoAgent.init(mTestAppContext.getContext());
@@ -135,11 +135,6 @@ public class CellInfoAgentTest {
         }
 
         mCellInfos.clear();
-
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
 
         mInvalidMcc = false;
         mInvalidMnc = false;
@@ -155,9 +150,10 @@ public class CellInfoAgentTest {
         mSpEditor = null;
         mSp = null;
         mTelephonyManagerProxy = null;
-        mContextFixture = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mContextFixture = null;
+        mTestableLooper = null;
     }
 
     @Test
