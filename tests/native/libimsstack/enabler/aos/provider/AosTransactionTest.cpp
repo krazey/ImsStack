@@ -24,6 +24,7 @@
 
 #include "MockIImsRadio.h"
 #include "MockIImsTraffic.h"
+#include "MockITimer.h"
 #include "interface/MockIAosTransactionListener.h"
 
 #include "../../../platform/interface/TestImsRadioService.h"
@@ -47,6 +48,8 @@ public:
     FRIEND_TEST(AosTransactionTest, SetListener_AddToTheMapIfDifferentTypeOfListener);
     FRIEND_TEST(AosTransactionTest, SetListener_NotAddedToTheListIfSameListener);
     FRIEND_TEST(AosTransactionTest, SetListener_AddToTheListIfDifferentListener);
+    FRIEND_TEST(AosTransactionTest, DoNothingIfListenerIsNullWhenRemoveListener);
+    FRIEND_TEST(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener);
     FRIEND_TEST(AosTransactionTest, IsTransactionAllowed_ReturnFalseIfImsRadioIsNull);
     FRIEND_TEST(AosTransactionTest, IsTransactionAllowed_CallIsImsTrafficAllowed);
     FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnTrueIfImsRadioIsNull);
@@ -54,8 +57,13 @@ public:
     FRIEND_TEST(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning);
     FRIEND_TEST(AosTransactionTest,
             StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting);
+    FRIEND_TEST(AosTransactionTest,
+            DoNothingIfStartUpdatedButTrafficResponseWaitingWhenTrafficIsStarted);
+    FRIEND_TEST(
+            AosTransactionTest, ShouldNotStartImsTrafficIfNoTrafficInstanceWhenTrafficIsStarted);
     FRIEND_TEST(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated);
     FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, DoNothingIfNoTrafficInstanceWhenEmergencyTrafficIsStarted);
     FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime);
     FRIEND_TEST(AosTransactionTest, StopTraffic_DoNothingIfNotStarted);
     FRIEND_TEST(AosTransactionTest, StopTraffic_StopForTheTypeAndStartTimerIfStarted);
@@ -86,6 +94,8 @@ public:
     FRIEND_TEST(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficPriorityChanged);
     FRIEND_TEST(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged);
     FRIEND_TEST(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged);
+    FRIEND_TEST(AosTransactionTest, DoNothingIfTheTimerIsNullWhenTimerIsExpired);
+    FRIEND_TEST(AosTransactionTest, DoNothingIfInvalidTimerWhenTimerIsExpired);
 
 public:
     inline void SetMockIImsRadio(IN IImsRadio* piImsRadio)
@@ -200,6 +210,23 @@ TEST_F(AosTransactionTest, SetListener_AddToTheListIfDifferentListener)
     EXPECT_EQ(nCountAfter, nCountBefore + 1);
 }
 
+TEST_F(AosTransactionTest, DoNothingIfListenerIsNullWhenRemoveListener)
+{
+    m_pAosTransaction->RemoveListener(IAosTransaction::TYPE_REG, nullptr);
+}
+
+TEST_F(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener)
+{
+    // GIVEN
+    MockIAosTransactionListener objMockIAosTransactionListener;
+    m_pAosTransaction->ClearListeners();
+
+    // WHEN
+    m_pAosTransaction->RemoveListener(IAosTransaction::TYPE_REG, &objMockIAosTransactionListener);
+
+    // THEN: Do nothing
+}
+
 TEST_F(AosTransactionTest, IsTransactionAllowed_ReturnFalseIfImsRadioIsNull)
 {
     m_pAosTransaction->m_piImsRadio = nullptr;
@@ -260,6 +287,35 @@ TEST_F(AosTransactionTest,
     EXPECT_TRUE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
 }
 
+TEST_F(AosTransactionTest, DoNothingIfStartUpdatedButTrafficResponseWaitingWhenTrafficIsStarted)
+{
+    // GIVEN
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_REG);
+    EXPECT_TRUE(m_pAosTransaction->IsStartUpdated());
+    EXPECT_FALSE(m_pAosTransaction->IsTrafficResponseWaiting());
+
+    // WHEN
+    EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE));
+
+    // THEN: Do nothing and return true in WHEN part
+}
+
+TEST_F(AosTransactionTest, ShouldNotStartImsTrafficIfNoTrafficInstanceWhenTrafficIsStarted)
+{
+    // GIVEN
+    m_pAosTransaction->ClearTraffics();
+    m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
+    EXPECT_TRUE(m_pAosTransaction->IsStartUpdated());
+
+    EXPECT_CALL(m_objMockIImsRadio, StartImsTraffic(_, _, _, _)).Times(0);
+
+    // WHEN
+    EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+
+    // THEN: StartImsTraffic should not be called as the GIVEN part and return true in WHEN part
+}
+
 TEST_F(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated)
 {
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
@@ -277,6 +333,21 @@ TEST_F(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
             .Times(0);
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+}
+
+TEST_F(AosTransactionTest, DoNothingIfNoTrafficInstanceWhenEmergencyTrafficIsStarted)
+{
+    // GIVEN
+    m_pAosTransaction->ClearTraffics();
+
+    EXPECT_CALL(m_objMockIImsRadio,
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
+            .Times(0);
+
+    // WHEN
+    m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime)
@@ -398,12 +469,14 @@ TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUnknownIfNotConsideringRat
 TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFailed)
 {
     // GIVEN
-    m_pAosTransaction->GetListeners().Clear();
+    m_pAosTransaction->ClearListeners();
     EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnConnectionFailed(_, _, _)).Times(0);
 
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionFailed(
             IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed)
@@ -417,6 +490,8 @@ TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFail
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionFailed(
             IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest,
@@ -462,11 +537,13 @@ TEST_F(AosTransactionTest,
 TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionSetupIsPrepared)
 {
     // GIVEN
-    m_pAosTransaction->GetListeners().Clear();
+    m_pAosTransaction->ClearListeners();
     EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnConnectionSetupPrepared()).Times(0);
 
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_REG);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionSetupIsPrepared)
@@ -477,6 +554,8 @@ TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionSetupI
 
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_REG);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest,
@@ -516,11 +595,13 @@ TEST_F(AosTransactionTest,
 TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficPriorityChanged)
 {
     // GIVEN
-    m_pAosTransaction->GetListeners().Clear();
+    m_pAosTransaction->ClearListeners();
     EXPECT_CALL(m_objMockIAosTransactionListener, Transaction_OnTrafficPriorityChanged()).Times(0);
 
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged)
@@ -531,6 +612,8 @@ TEST_F(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged)
 
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged)
@@ -542,4 +625,17 @@ TEST_F(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged)
 
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosTransactionTest, DoNothingIfTheTimerIsNullWhenTimerIsExpired)
+{
+    m_pAosTransaction->Timer_TimerExpired(nullptr);
+}
+
+TEST_F(AosTransactionTest, DoNothingIfInvalidTimerWhenTimerIsExpired)
+{
+    MockITimer objMockITimer;
+    m_pAosTransaction->Timer_TimerExpired(&objMockITimer);
 }

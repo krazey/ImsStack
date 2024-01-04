@@ -120,8 +120,11 @@ protected:
         return m_objListeners;
     }
 
+    inline void ClearListeners() { m_objListeners.Clear(); }
+    inline void ClearTraffics() { m_objTraffics.Clear(); }
+
 private:
-    void NotifyConnectionFailed(IN IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
+    void NotifyConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nType);
     void NotifyTrafficPriorityChanged(IN IMS_UINT32 nType);
