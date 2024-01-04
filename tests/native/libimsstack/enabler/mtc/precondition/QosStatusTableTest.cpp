@@ -43,7 +43,7 @@ TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsFalseIfNoQosStatusReco
 
 TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsTheSetValue)
 {
-    pQosStatusTable->CreateStatusRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeStatusRecords(SdpMedia::TYPE_AUDIO);
     EXPECT_FALSE(pQosStatusTable->IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO));
 
     pQosStatusTable->SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE);

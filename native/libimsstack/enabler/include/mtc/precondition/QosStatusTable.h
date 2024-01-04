@@ -54,17 +54,17 @@ public:
     inline ~QosStatusRecord() {}
 
 public:
-    inline QosStatusRecord& operator=(IN const QosStatusRecord& objRHS)
+    inline QosStatusRecord& operator=(IN const QosStatusRecord& objRhs)
     {
-        if (this != &objRHS)
+        if (this != &objRhs)
         {
-            eSdpMediaType = objRHS.eSdpMediaType;
-            eAttrType = objRHS.eAttrType;
-            eStatusType = objRHS.eStatusType;
-            eDirTag = objRHS.eDirTag;
-            eStrengthTag = objRHS.eStrengthTag;
-            bDesiredCheck = objRHS.bDesiredCheck;
-            bLocalResourceConfirmed = objRHS.bLocalResourceConfirmed;
+            eSdpMediaType = objRhs.eSdpMediaType;
+            eAttrType = objRhs.eAttrType;
+            eStatusType = objRhs.eStatusType;
+            eDirTag = objRhs.eDirTag;
+            eStrengthTag = objRhs.eStrengthTag;
+            bDesiredCheck = objRhs.bDesiredCheck;
+            bLocalResourceConfirmed = objRhs.bLocalResourceConfirmed;
         }
         return (*this);
     }
@@ -120,11 +120,11 @@ public:
     virtual ~QosStatusTable();
 
 private:
-    QosStatusTable(IN const QosStatusTable& objRHS);
-    QosStatusTable& operator=(IN const QosStatusTable& objRHS);
+    QosStatusTable(IN const QosStatusTable& objRhs);
+    QosStatusTable& operator=(IN const QosStatusTable& objRhs);
 
 public:
-    virtual void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);
+    virtual void UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia);
     virtual void UpdateLocalCurrentStatus(
             IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
     virtual void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
@@ -139,12 +139,11 @@ public:
             IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
     virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
     virtual IMS_BOOL IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType);
-    virtual void CreateStatusRecords(IN IMS_SINT32 eSdpMediaType);
+    virtual void InitializeStatusRecords(IN IMS_SINT32 eSdpMediaType);
     virtual IMS_BOOL IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType);
     virtual void RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes);
 
 private:
-    void AddStatusRecord(IN IMS_SINT32 eSdpMediaType);
     void InitializeDesChecked(IN IMS_SINT32 eSdpMediaType);
 
     void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
@@ -153,7 +152,7 @@ private:
     ImsList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
     ImsList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_NONE);
-    static void ClearStatusRecords(IN ImsList<QosStatusRecord*>& lstRecords);
+    static void ClearStatusRecords(IN_OUT ImsList<QosStatusRecord*>& lstRecords);
 
 private:
     ImsList<QosStatusRecord*> m_lstAudioRecords;
