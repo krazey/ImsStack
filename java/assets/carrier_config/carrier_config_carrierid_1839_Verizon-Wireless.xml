@@ -306,6 +306,7 @@
     </int-array>
 
     <!-- Media -->
+    <boolean name="media_anbr_capability_in_modem_bool" value="true"/>
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
             <item value="109"/>
