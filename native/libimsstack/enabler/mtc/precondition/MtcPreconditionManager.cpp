@@ -28,6 +28,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "precondition/MtcPreconditionManager.h"
 #include "precondition/QosStringDef.h"
 #include "precondition/SdpPreconditionHelper.h"
@@ -185,14 +186,12 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
         return IMS_FALSE;
     }
 
+    // IsPreconditionSupported() guarantees that it's not null
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-    if (!pStatusTable)
-    {
-        return IMS_FALSE;
-    }
 
     IMS_BOOL bResult = IMS_FALSE;
-    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
         if (!pStatusTable->IsLocalResourceConfirmed(GetSdpMediaType(eMediaType)) &&
                 IsLocalResourceReservedByMediaType(piSession, eMediaType))
@@ -291,7 +290,9 @@ PUBLIC VIRTUAL void MtcPreconditionManager::HandleQosOnIpcanChanged()
         }
         else
         {
-            NotifyQosStatusToListener(piSession, IMS_TRUE, GetMediaTypesFromCallType());
+            CallType eCallType = m_objContext.GetSession()->GetCallType();
+            NotifyQosStatusToListener(
+                    piSession, IMS_TRUE, MtcMediaUtil::GetMediaTypesFromCallType(eCallType));
         }
     }
 }
@@ -380,7 +381,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
         QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
         if (pStatusTable != IMS_NULL)
         {
-            pStatusTable->RemoveUnusedStatusRecords(GetMediaTypesFromCallType());
+            pStatusTable->RemoveUnusedStatusRecords(MtcMediaUtil::GetMediaTypesFromCallType(
+                    m_objContext.GetSession()->GetCallType()));
         }
     }
 }
@@ -471,7 +473,9 @@ void MtcPreconditionManager::SetQosStatus(
     }
 
     // To change Local status from QosStatus::LOST to QosStatus::IDLE for removed medias
-    if (eStatus == QosStatus::LOST && !(GetMediaTypesFromCallType() & eMediaType))
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    if (eStatus == QosStatus::LOST &&
+            !(MtcMediaUtil::GetMediaTypesFromCallType(eCallType) & eMediaType))
     {
         eStatus = QosStatus::IDLE;
     }
@@ -619,7 +623,8 @@ void MtcPreconditionManager::OnGuardAvailableTimerExpired(IN QosTimer* pTimer)
     }
 
     IMS_UINT32 eReservedMediaTypes = MEDIATYPE_NONE;
-    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
         if (IsStatusAvailable(GetQosStatus(piSession, eMediaType)))
         {
@@ -648,8 +653,10 @@ PRIVATE
 void MtcPreconditionManager::InitializeStatusForLostQos(
         IN ISession* piSession, IN IMS_BOOL bRemovedMedia) const
 {
-    std::vector<IMS_UINT32> objMediaTypeList =
-            bRemovedMedia ? GetUnusedMediaTypeListFromCallType() : GetMediaTypeListFromCallType();
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    std::vector<IMS_UINT32> objMediaTypeList = bRemovedMedia
+            ? MtcMediaUtil::GetUnusedMediaTypeListFromCallType(eCallType)
+            : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType);
     for (IMS_UINT32 eMediaType : objMediaTypeList)
     {
         if (GetQosStatus(piSession, eMediaType) == QosStatus::LOST)
@@ -665,7 +672,9 @@ void MtcPreconditionManager::CreateStatusRecordsWithActiveMediaTypes(IN ISession
 {
     IMS_TRACE_D("CreateStatusRecordsWithActiveMediaTypes", 0, 0, 0);
 
-    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+
+    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
         CreateStatusRecords(piSession, eMediaType);
     }
@@ -673,7 +682,7 @@ void MtcPreconditionManager::CreateStatusRecordsWithActiveMediaTypes(IN ISession
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable)
     {
-        pStatusTable->RemoveUnusedStatusRecords(GetMediaTypesFromCallType());
+        pStatusTable->RemoveUnusedStatusRecords(MtcMediaUtil::GetMediaTypesFromCallType(eCallType));
     }
 }
 
@@ -891,7 +900,8 @@ IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) c
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsRemoteResourceReserved(IN ISession* piSession) const
 {
-    std::vector<IMS_UINT32> objMediaTypeList = GetMediaTypeListFromCallType();
+    std::vector<IMS_UINT32> objMediaTypeList =
+            MtcMediaUtil::GetMediaTypeListFromCallType(m_objContext.GetSession()->GetCallType());
     if (objMediaTypeList.empty())
     {
         return IMS_FALSE;
@@ -915,7 +925,8 @@ PRIVATE
 IMS_BOOL MtcPreconditionManager::IsLocalResourceReserved(
         IN ISession* piSession, IN IMS_BOOL bAtLeastOneReserved) const
 {
-    std::vector<IMS_UINT32> objMediaTypeList = GetMediaTypeListFromCallType();
+    std::vector<IMS_UINT32> objMediaTypeList =
+            MtcMediaUtil::GetMediaTypeListFromCallType(m_objContext.GetSession()->GetCallType());
     if (objMediaTypeList.empty())
     {
         return IMS_FALSE;
@@ -1047,7 +1058,8 @@ PRIVATE
 IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession) const
 {
     IMS_UINT32 eEnabledMediaTypes = MEDIATYPE_NONE;
-    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
         if (!IsStatusAvailable(GetQosStatus(piSession, eMediaType)))
         {
@@ -1060,74 +1072,6 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
 
     IMS_TRACE_D("SetLocalResourceAvailable Enabled Media Types[%d]", eEnabledMediaTypes, 0, 0);
     return eEnabledMediaTypes;
-}
-
-PRIVATE
-IMS_UINT32 MtcPreconditionManager::GetMediaTypesFromCallType() const
-{
-    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
-    CallType eCallType = m_objContext.GetSession()->GetCallType();
-
-    if (eCallType == CallType::UNKNOWN)
-    {
-        IMS_TRACE_D("GetMediaTypesFromCallType CallType is unknown", 0, 0, 0);
-        return eMediaTypes;
-    }
-
-    eMediaTypes |= MEDIATYPE_AUDIO;
-
-    if (eCallType == CallType::VT)
-    {
-        eMediaTypes |= MEDIATYPE_VIDEO;
-    }
-    else if (eCallType == CallType::RTT)
-    {
-        eMediaTypes |= MEDIATYPE_TEXT;
-    }
-    else if (eCallType == CallType::VIDEO_RTT)
-    {
-        eMediaTypes |= MEDIATYPE_VIDEO;
-        eMediaTypes |= MEDIATYPE_TEXT;
-    }
-
-    IMS_TRACE_D("GetMediaTypesFromCallType [%d]", eMediaTypes, 0, 0);
-    return eMediaTypes;
-}
-
-PRIVATE
-std::vector<IMS_UINT32> MtcPreconditionManager::GetMediaTypeListFromCallType() const
-{
-    switch (m_objContext.GetSession()->GetCallType())
-    {
-        case CallType::VOIP:
-            return {MEDIATYPE_AUDIO};
-        case CallType::VT:
-            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO};
-        case CallType::RTT:
-            return {MEDIATYPE_AUDIO, MEDIATYPE_TEXT};
-        case CallType::VIDEO_RTT:
-            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
-        default:  // CallType::UNKNOWN
-            return {};
-    }
-}
-
-PRIVATE
-std::vector<IMS_UINT32> MtcPreconditionManager::GetUnusedMediaTypeListFromCallType() const
-{
-    switch (m_objContext.GetSession()->GetCallType())
-    {
-        case CallType::UNKNOWN:
-            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
-        case CallType::VOIP:
-            return {MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
-        case CallType::VT:
-            return {MEDIATYPE_TEXT};
-        case CallType::RTT:
-            return {MEDIATYPE_VIDEO};
-        default:  // CallType::VIDEO_RTT
-            return {};
-    }
 }
 
 PRIVATE
@@ -1275,8 +1219,8 @@ PRIVATE
 QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession) const
 {
     QosLossPolicy eAction = QosLossPolicy::MAINTAIN;
-
-    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType())
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
         if (!IsLocalResourceReservedByMediaType(piSession, eMediaType))
         {

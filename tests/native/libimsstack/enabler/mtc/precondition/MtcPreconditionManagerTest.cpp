@@ -478,8 +478,10 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteNotReservedWhen
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_TRUE));
 
+    // For coverage, not a real case
     EXPECT_CALL(objSession, GetCallType())
-            .Times(2)
+            .Times(3)
+            .WillOnce(Return(CallType::VOIP))
             .WillOnce(Return(CallType::VOIP))
             .WillOnce(Return(CallType::UNKNOWN));
     EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
@@ -702,7 +704,8 @@ TEST_F(MtcPreconditionManagerTest, FormFailurePreconditionSdp)
     pPreconditionManager->FormPreconditionSdp(&objISession, IMS_TRUE);
 }
 
-TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIncludingConfirmationStatus)
+TEST_F(MtcPreconditionManagerTest,
+        FormPreconditionSdpIncludingConfirmationStatusBeforeDialogConfirmed)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
@@ -715,6 +718,26 @@ TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIncludingConfirmationStatu
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_TRUE))
             .Times(1);
+    pPreconditionManager->FormPreconditionSdp(&objISession, IMS_FALSE);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        FormPreconditionSdpIncludingConfirmationStatusAfterDialogConfirmed)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+    ImsList<IMedia*> lstMedias;
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+    objCallInfo.ePeerType = PeerType::MT;
+    ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objISession, GetPreviousResponse(IMessage::SESSION_UPDATE))
+            .WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(
+            *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_TRUE))
+            .Times(1);
+
     pPreconditionManager->FormPreconditionSdp(&objISession, IMS_FALSE);
 }
 
@@ -1444,30 +1467,98 @@ TEST_F(MtcPreconditionManagerTest, DoNothingOnTimerExpiredIfSessionIsNull)
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_AVAILABLE);
 }
 
-TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpired)
+TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpiredForUnknown)
 {
     SetUpMockQosInfo();
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
     ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
     ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::UNKNOWN));
 
-    EXPECT_CALL(objSession, GetCallType())
-            .Times(5)
-            .WillOnce(Return(CallType::UNKNOWN))
-            .WillOnce(Return(CallType::UNKNOWN))
-            .WillOnce(Return(CallType::VT))
-            .WillOnce(Return(CallType::RTT))
-            .WillOnce(Return(CallType::VIDEO_RTT));
-    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(3);
-    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(2);
-    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(3);
-    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(2);
-    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIA_TYPE_AUDIOVIDEO)).Times(2);
-    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIATYPE_AUDIO)).Times(1);
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(*pInfo, SetTextStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objListener, QosReserved(&objISession, _)).Times(0);
 
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::FORCE_AVAILABLE);
+}
+
+TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpiredForVoip)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(*pInfo, SetTextStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIA_TYPE_AUDIO)).Times(1);
+
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::FORCE_AVAILABLE);
+}
+
+TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpiredForVt)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetTextStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIA_TYPE_AUDIOVIDEO)).Times(1);
+
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::FORCE_AVAILABLE);
+}
+
+TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpiredForRtt)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::RTT));
+
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(*pInfo, SetTextStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIA_TYPE_AUDIO)).Times(1);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::FORCE_AVAILABLE);
+}
+
+TEST_F(MtcPreconditionManagerTest, OnForceAvailableTimerExpiredForVideoRtt)
+{
+    SetUpMockQosInfo();
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
+    ON_CALL(*pInfo, GetTextStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetVideoStatus(QosStatus::AVAILABLE)).Times(1);
+    EXPECT_CALL(*pInfo, SetTextStatus(QosStatus::AVAILABLE)).Times(0);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIA_TYPE_AUDIOVIDEO)).Times(1);
+
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::FORCE_AVAILABLE);
 }
 
