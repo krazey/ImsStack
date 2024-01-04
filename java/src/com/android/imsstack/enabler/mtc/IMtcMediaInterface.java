@@ -89,4 +89,12 @@ public interface IMtcMediaInterface {
     void mediaQualityStatusChanged(int mediaSessionType, int accessNetwork,
             MediaQualityStatus mediaQualityStatus);
 
+    /**
+     * Trigger Anbr query to discuss with the network whether the current media bitrate
+     * can be changed after receiving cmr.
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction  of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE.
+     */
+    void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond);
 }

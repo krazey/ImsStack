@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.telephony.CallQuality;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.AnbrMode;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
@@ -52,7 +53,33 @@ import java.util.List;
  */
 public class AudioSessionHandler extends MediaState {
 
+    enum EDirectionType {
+        DIRECTION_NONE(0), DIRECTION_UPLINK(1), DIRECTION_DOWNLINK(2);
+
+        private final int mDirection;
+
+        EDirectionType(int direction) {
+            this.mDirection = direction;
+        }
+
+        public int getDirection() {
+            return mDirection;
+        }
+    }
+
     static final int UNUSED = -1;
+    /** Adaptive Multi-Rate */
+    static final int CODEC_AMR = AudioConfig.CODEC_AMR;
+    /** Adaptive Multi-Rate Wide Band */
+    static final int CODEC_AMR_WB = AudioConfig.CODEC_AMR_WB;
+    /** Enhanced Voice Services */
+    static final int CODEC_EVS = AudioConfig.CODEC_EVS;
+    /** G.711 A-law i.e. Pulse Code Modulation using A-law */
+    static final int CODEC_PCMA = AudioConfig.CODEC_PCMA;
+    /** G.711 μ-law i.e. Pulse Code Modulation using μ-law */
+    static final int CODEC_PCMU = AudioConfig.CODEC_PCMU;
+
+    static final int AUDIO_TYPE = 1;
 
     private final AudioSessionCallbackProxy mAudioSessionCallback;
     private ImsAudioSession mAudioSession;
@@ -69,6 +96,8 @@ public class AudioSessionHandler extends MediaState {
     private boolean mQosUpdateRequired;
     private Pair<String, Integer> mLocalAddress;
     private MediaConfig mMediaConfig;
+    private int mCodecType;
+    private boolean mAnbrEnabled;
 
     public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -80,6 +109,7 @@ public class AudioSessionHandler extends MediaState {
         mAudioMessageHandler = new AudioMessageHandler(mMediaManager.getMediaLooper());
         mMediaConfig = new MediaConfig();
         createQosAgent(mContext.getSlotId());
+        mAnbrEnabled = false;
         ImsLog.d("AudioSessionHandler created");
     }
 
@@ -95,6 +125,7 @@ public class AudioSessionHandler extends MediaState {
         mMediaConfig = mediaConfig;
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         mAudioMessageHandler = new AudioMessageHandler(looper);
+        mAnbrEnabled = false;
         ImsLog.d("AudioSessionHandler created");
     }
 
@@ -139,6 +170,11 @@ public class AudioSessionHandler extends MediaState {
     @VisibleForTesting
     AudioMessageHandler getAudioMessageHandler() {
         return mAudioMessageHandler;
+    }
+
+    @VisibleForTesting
+    boolean getAudioAnbrEnabled() {
+        return mAnbrEnabled;
     }
 
     private boolean isWaitRequired(int requestType) {
@@ -247,6 +283,18 @@ public class AudioSessionHandler extends MediaState {
                 }
                     break;
 
+                case MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
+                {
+                    handleAudioUpdateAnbrEnabledConfig((boolean) msg.obj);
+                }
+                    break;
+
+                case MediaConstants.NOTIFY_ANBR_RECEIVED:
+                {
+                    handleAudioAnbrReceived((int) msg.obj, msg.arg1, msg.arg2);
+                }
+                    break;
+
                 case MediaConstants.RESPONSE_OPEN_SESSION:
                 {
                     handleOpenSessionResponse((ImsMediaSession) msg.obj, msg.arg1);
@@ -304,6 +352,12 @@ public class AudioSessionHandler extends MediaState {
                 case MediaConstants.NOTIFY_MEDIA_DETACH:
                 {
                     handleAudioDisconnection();
+                }
+                    break;
+
+                case MediaConstants.TRIGGER_ANBR_QUERY:
+                {
+                    handleTriggerAnbrQuery((AudioConfig) msg.obj);
                 }
                     break;
 
@@ -404,6 +458,14 @@ public class AudioSessionHandler extends MediaState {
 
             Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_CALL_QUALITY_CHANGE,
                     callQuality).sendToTarget();
+        }
+
+        @Override
+        public void triggerAnbrQuery(final AudioConfig audioConfig) {
+            ImsLog.d("triggerAnbrQuery for SessionId[" + getAudioSessionId() + "]");
+
+            Message.obtain(mAudioMessageHandler, MediaConstants.TRIGGER_ANBR_QUERY,
+                    audioConfig).sendToTarget();
         }
     }
 
@@ -532,12 +594,33 @@ public class AudioSessionHandler extends MediaState {
             }
                 break;
 
+            case MediaConstants.REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
+            {
+                Boolean anbrEnabled = parcel.readBoolean();
+                ImsLog.v("anbr config =" + anbrEnabled);
+
+                Message.obtain(mAudioMessageHandler, requestType, anbrEnabled).sendToTarget();
+            }
+                break;
+
+            case MediaConstants.NOTIFY_ANBR_RECEIVED:
+            {
+                int mediaType = parcel.readInt();
+                int direction = parcel.readInt();
+                int bitrate = parcel.readInt();
+                ImsLog.v("media type=" + mediaType + " direction=" + direction
+                        + " bitrate=" + bitrate);
+                Message.obtain(mAudioMessageHandler, requestType, direction, bitrate, mediaType)
+                        .sendToTarget();
+            }
+                break;
+
             default:
             {
                 parcel.recycle();
                 ImsLog.e("Invalid RequestType");
             }
-            break;
+                break;
         }
     }
 
@@ -564,6 +647,8 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void handleAudioOpenSession(String localIpAddress, int localPortNumber) {
+
+        mCodecType = UNUSED;
 
         if(mAudioSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
@@ -599,8 +684,7 @@ public class AudioSessionHandler extends MediaState {
                 mMediaManager.openSession(rtpSocket.first, rtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_AUDIO, null, mAudioSessionCallback);
                 setMediaState(MEDIA_STATE_OPENING);
-            }
-            else {
+            } else {
                 ImsLog.d("ImsMediaManager is not ready");
                 if (mAudioSessionCallbackHandler != null) {
                     mAudioSessionCallbackHandler.openSessionResponse(
@@ -608,8 +692,7 @@ public class AudioSessionHandler extends MediaState {
                 }
                 setMediaState(MEDIA_STATE_IDLE);
             }
-        }
-        else {
+        } else {
             ImsLog.w("Audio Session is already created: SessionId="
                 + mAudioSession.getSessionId());
             if (mAudioSessionCallbackHandler != null) {
@@ -623,6 +706,8 @@ public class AudioSessionHandler extends MediaState {
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
             setMediaState(MEDIA_STATE_CLOSED);
+
+            mCodecType = UNUSED;
         }
     }
 
@@ -637,10 +722,10 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleAudioModifySession(AudioConfig audioConfig) {
         if (mAudioSession != null) {
+            mCodecType = audioConfig.getCodecType();
             mAudioSession.modifySession(audioConfig);
             mMediaConfig.updateRtpConfig(audioConfig);
-        }
-        else {
+        } else {
             handleModifySessionResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -687,6 +772,9 @@ public class AudioSessionHandler extends MediaState {
     private void handleAudioAddConfig(AudioConfig audioConfig) {
         if (mAudioSession != null) {
             // TODO : rtpSocket has to be sent via addConfig
+            mCodecType = audioConfig.getCodecType();
+            ImsLog.d("handleAudioAddConfig: codec type: " + mCodecType);
+
             mAudioSession.addConfig(audioConfig);
             mMediaConfig.updateRtpConfig(audioConfig);
         }
@@ -745,6 +833,9 @@ public class AudioSessionHandler extends MediaState {
                         ImsLog.d("rtpSocketList has [%d] sockets available"
                                 + mRtpSocketList.size());
                     }
+                    mCodecType = audioConfig.getCodecType();
+                    ImsLog.d("handleAudioConfirmConfig: codec type: " + mCodecType);
+
                     mAudioSession.confirmConfig(audioConfig);
                     mMediaConfig.updateRtpConfig(audioConfig);
                 } else {
@@ -787,6 +878,20 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
+    private void handleAudioUpdateAnbrEnabledConfig(Boolean anbrEnabled) {
+        if (mAudioSession != null) {
+            mAnbrEnabled = anbrEnabled;
+        }
+    }
+
+    private void handleAudioAnbrReceived(int mediayType, int direction, int bitsPerSecond) {
+        ImsLog.d("handleAudioAnbrReceived: bitsPerSecond= " + bitsPerSecond);
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.notifyAnbrReceived(
+                    mediayType, direction, bitsPerSecond);
+        }
+    }
+
     private void handleOpenSessionResponse(ImsMediaSession session, int result) {
         if (result == ImsMediaSession.RESULT_SUCCESS) {
             if (session == null) {
@@ -802,8 +907,7 @@ public class AudioSessionHandler extends MediaState {
             mAudioSessionId = mAudioSession.getSessionId();
             setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Audio Session created: SessionId=" + mAudioSessionId);
-        }
-        else {
+        } else {
             setMediaState(MEDIA_STATE_IDLE);
         }
 
@@ -874,6 +978,70 @@ public class AudioSessionHandler extends MediaState {
         if (mAudioSessionCallbackHandler != null) {
             mAudioSessionCallbackHandler.callQualityChanged(callQuality);
         }
+    }
+
+    private void handleTriggerAnbrQuery(final AudioConfig audioConfig) {
+        if (!mAnbrEnabled) {
+            ImsLog.d("Anbr feature is disabled");
+            return;
+        }
+
+        if (mAudioSessionCallbackHandler != null) {
+            AnbrMode anbrMode = audioConfig.getAnbrMode();
+            int anbrDirection = -1;
+            int bitrate = -1;
+
+            if (anbrMode.getAnbrUplinkCodecMode() > 0 && anbrMode.getAnbrDownlinkCodecMode() == 0) {
+                anbrDirection = EDirectionType.DIRECTION_UPLINK.getDirection();
+                bitrate = convertCodecModeToBitrate(anbrMode.getAnbrUplinkCodecMode());
+
+            } else {
+                if (anbrMode.getAnbrDownlinkCodecMode() > 0) {
+                    anbrDirection = EDirectionType.DIRECTION_DOWNLINK.getDirection();
+                    bitrate = convertCodecModeToBitrate(anbrMode.getAnbrDownlinkCodecMode());
+                } else {
+                    ImsLog.d("handleTriggerAnbrQuery: invalid codec mode ");
+                }
+            }
+
+            ImsLog.d("handleTriggerAnbrQuery: dir: " + anbrDirection + " bitrate: " + bitrate);
+            mAudioSessionCallbackHandler.triggerAnbrQuery(AUDIO_TYPE, anbrDirection, bitrate);
+        } else {
+            ImsLog.d("Enter Anbr Callback is null");
+        }
+    }
+
+    private int convertCodecModeToBitrate(int codecMode) {
+        int convertedBitrate = -1;
+
+        switch(mCodecType) {
+            case CODEC_AMR:
+            case CODEC_AMR_WB:
+                break;
+            case CODEC_EVS:
+                if (codecMode == 9) {
+                    convertedBitrate = 10;  // 5.9 kbps (or 2.8)
+                } else if (codecMode == 10) {    //7.2kbps
+                    convertedBitrate = 12;
+                } else if (codecMode > 10 && codecMode <= 12) { //9.6kbps
+                    convertedBitrate = 16;
+                } else if (codecMode == 13) { //13.2kbps
+                    convertedBitrate = 20;
+                } else if (codecMode == 14) { //16.4kbps
+                    convertedBitrate = 24;
+                } else if (codecMode == 15) { //24.4kbps
+                    convertedBitrate = 28;
+                } else {
+                    convertedBitrate = 20;  //default valu
+                    ImsLog.d("convertCodecModeToBitrate: Error - set to 13.2kbps");
+                }
+                break;
+            default:
+                break;
+        }
+
+        ImsLog.d("convertedBitrate: " + convertedBitrate);
+        return convertedBitrate;
     }
 
     private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {

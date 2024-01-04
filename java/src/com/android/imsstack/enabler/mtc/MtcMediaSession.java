@@ -29,6 +29,7 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
+import com.android.imsstack.imsservice.mmtel.videocall.base.ImsCamera;
 import com.android.imsstack.internal.imsservice.MmTelMediaQualityReporter;
 import com.android.imsstack.internal.imsservice.MmTelMediaRegistry;
 import com.android.imsstack.util.ImsLog;
@@ -73,6 +74,13 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+         * Called when the ANBR query is triggered for the audio stream
+         */
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
+            // no-op
+        }
     }
 
     /**
@@ -104,6 +112,13 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
          */
         public void onMediaSessionPeerDimensionsChanged(MtcMediaSession session,
                 final int width, final int height) {
+            // no-op
+        }
+
+        /**
+         * Called when the ANBR query is triggered for the video stream
+         */
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
             // no-op
         }
     }
@@ -470,6 +485,23 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
+    /**
+     * Trigger Anbr query to the network
+     *
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE
+     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    @Override
+    public void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+        log("triggerAnbrQuery");
+        if (mAudioListener != null) {
+            mAudioListener.onTriggerAnbrQueryReceived(mediaType, direction, bitsPerSecond);
+        }
+    }
+
     // TODO MEDIA : RTT audio indicator to be implemented
 
     /**
@@ -629,6 +661,29 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             RtpHeaderExtension rtpExt = extensions.next();
             rtpExt.writeToParcel(parcel, 1);
         }
+        parcel.setDataPosition(0);
+
+        onMessage(parcel);
+    }
+
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void notifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        log("notifyAnbr");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.NOTIFY_ANBR_RECEIVED);
+        parcel.writeInt(IUMtcMedia.SESSION_TYPE_AUDIO); // TODO: need to consider video type later
+        parcel.writeInt(mediaType);
+        parcel.writeInt(direction);
+        parcel.writeInt(bitsPerSecond);
         parcel.setDataPosition(0);
 
         onMessage(parcel);

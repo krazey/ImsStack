@@ -233,4 +233,39 @@ public class AudioSessionCallbackHandler {
 
         getMtcMediaInterface().sendRequest(parcel);
     }
+
+    /**
+     * Handles indication when triggerAnbrQuery is received
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE
+     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    public void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+        ImsLog.v("triggerAnbrQuery");
+
+        getMtcMediaInterface().triggerAnbrQuery(mediaType, direction, bitsPerSecond);
+    }
+
+    /**
+     * Notify received Anbr parameters to media logic
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE
+     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    public void notifyAnbrReceived(int mediaType, int direction, int bitsPerSecond) {
+        ImsLog.v("notifyAnbrReceived - NOTIFY_ANBR_RECEIVED");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.NOTIFY_ANBR_RECEIVED);
+        parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        parcel.writeInt(mediaType);
+        parcel.writeInt(direction);
+        parcel.writeInt(bitsPerSecond);
+
+        getMtcMediaInterface().sendRequest(parcel);
+    }
 }

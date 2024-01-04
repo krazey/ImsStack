@@ -268,6 +268,22 @@ public class MtcCall extends Call implements ConferenceTracker {
                 Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+        * Trigger Anbr query to discuss with the network whether the current media bitrate
+        * can be changed after receiving cmr.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param mediaType is used to identify media stream such as audio or video.
+        * @param direction of this packet stream (e.g. uplink or downlink).
+        * @param bitsPerSecond This value is the bitrate requested by the other party UE
+        *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+        *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+        */
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            // no-op
+        }
     }
 
     /**
@@ -292,6 +308,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         @Override
         public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
             Message.obtain(mHandler, MSG_AUDIO_RTP_EXTENSION_RECEIVED, extensions).sendToTarget();
+        }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
+            Message.obtain(mHandler, MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED, mediaType, direction,
+                    bitsPerSecond).sendToTarget();
         }
     }
 
@@ -365,6 +387,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     private static final int MSG_AUDIO_SESSION_CLOSED = 402;
     private static final int MSG_AUDIO_QUALITY_CHANGED = 403;
     private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 404;
+    private static final int MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED = 405;
 
     private final MessageHandler mHandler;
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
@@ -1185,6 +1208,23 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void notifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        logi("notifyAnbr - call mediaSession");
+
+        if (mMediaSession != null) {
+            mMediaSession.notifyAnbr(mediaType, direction, bitsPerSecond);
+        }
+    }
+
     public void sendUssd(String ussdMessage) {
         log("sendUssd :: ussdMessage=" + ussdMessage);
 
@@ -1699,6 +1739,11 @@ public class MtcCall extends Call implements ConferenceTracker {
                 case MSG_AUDIO_RTP_EXTENSION_RECEIVED: {
                     listener.onCallRtpHeaderExtensionsReceived(
                             MtcCall.this, (Set<RtpHeaderExtension>) msg.obj);
+                    break;
+                }
+                case MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED: {
+                    listener.onTriggerAnbrQueryReceived(MtcCall.this, msg.arg1, msg.arg2,
+                            (int) msg.obj);
                     break;
                 }
                 default:
