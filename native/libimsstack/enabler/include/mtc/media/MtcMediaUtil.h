@@ -22,6 +22,7 @@
 #include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "call/IMtcCall.h"
+#include <vector>
 
 class MtcMediaUtil
 {
@@ -31,6 +32,8 @@ public:
 
     static IMS_UINT32 GetMediaTypesFromCallType(IN CallType eCallType);
     static IMS_UINT32 GetMediaTypesFromMediaContents(IN MEDIA_CONTENT_TYPE eMediaContents);
+    static std::vector<IMS_UINT32> GetMediaTypeListFromCallType(IN CallType eCallType);
+    static std::vector<IMS_UINT32> GetUnusedMediaTypeListFromCallType(IN CallType eCallType);
 
     static MEDIA_CONTENT_TYPE GetMediaContentsFromMediaTypes(IN IMS_UINT32 eMediaTypes);
     static MEDIA_CONTENT_TYPE GetMediaContentsFromCallType(IN CallType eCallType);
