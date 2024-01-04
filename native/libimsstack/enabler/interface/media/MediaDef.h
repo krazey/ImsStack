@@ -133,6 +133,10 @@ typedef enum _REPORT_TYPE
     REPORT_RECEIVED_DTMF_EVENT,
     // Notify that the ImsMedia process disconnected
     REPORT_MEDIA_DETACH,
+    // Notify that the ImsMedia triggers ANBR_Query
+    REPORT_TRIGGER_ANBR_QUERY,
+    // Notify the ANBR negotiation result
+    REPORT_ANBR_NEGOTIATION_RESULT,
     REPORT_NOTUSED
 } REPORT_TYPE;
 

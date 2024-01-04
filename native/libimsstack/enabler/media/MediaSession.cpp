@@ -1060,6 +1060,10 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             break;
         case IJniMedia::CHANGE_MTU:
             /** TODO: add implementation */
+            break;
+        case IJniMedia::NOTIFY_ANBR_RECEIVED:
+            bRet = OnNotifyAnbrReceived(pParam);
+            break;
         default:
             break;
     }
@@ -1252,6 +1256,25 @@ IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
     if (pParam != IMS_NULL)
     {
         m_objAudioController.SendDtmf(pParam->m_dtmfCode);
+        delete pParam;
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MediaSession::OnNotifyAnbrReceived(IN IMS_UINTP nParam)
+{
+    ImsMediaMsgAnbrReceivedParam* pParam = reinterpret_cast<ImsMediaMsgAnbrReceivedParam*>(nParam);
+
+    if (pParam != IMS_NULL)
+    {
+        if (pParam->m_nAnbrMediaType == MEDIA_TYPE_AUDIO)
+        {
+            m_objAudioController.NotifyAnbrReceived(
+                    pParam->m_nAnbrMediaType, pParam->m_nAnbrDirection, pParam->m_nAnbrBitrate);
+        }
         delete pParam;
         return IMS_TRUE;
     }

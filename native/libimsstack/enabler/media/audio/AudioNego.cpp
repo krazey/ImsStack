@@ -731,6 +731,15 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->eDirection = eDir;
     }
 
+    MediaSessionConfig* pMediaSessionConfig =
+            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                    GetSlotId(), m_pEnvironment->eServiceType);
+
+    if (pMediaSessionConfig != IMS_NULL && pMediaSessionConfig->IsAnbrSupported())
+    {
+        pNewOaModel->pLocalProfile->bAnbr = IMS_TRUE;
+    }
+
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     AudioProfileUtil::SetRtcpRsRr(pNewOaModel->pLocalProfile, m_pConfig);
     m_lstOaModel.Append(pNewOaModel);
@@ -1812,6 +1821,15 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         IMS_TRACE_I("MakeSdpFromProfile() - bSupportRtcpXr[%d]", pProfile->bSupportRtcpXr, 0, 0);
     }
 
+    if (pProfile->bAnbr)
+    {
+        pDescriptor->AddAttribute(SdpAttribute::ANBR, AString::ConstNull());
+    }
+    else
+    {
+        IMS_TRACE_D("MakeSdpFromProfile() - anbr feature is not supported", 0, 0, 0);
+    }
+
     return IMS_TRUE;
 }
 
@@ -1986,6 +2004,13 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         {
             pProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
         }
+    }
+
+    // ANBR
+    pProfile->bAnbr = IMS_FALSE;
+    if (pDescriptor->GetAttribute(SdpAttribute::ANBR) == IMS_SUCCESS)
+    {
+        pProfile->bAnbr = IMS_TRUE;
     }
 
     return IMS_TRUE;
@@ -2509,6 +2534,17 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
         // Candidate Priority
         pNegotiatedProfile->objCandidateAttr = pLocalProfile->objCandidateAttr;
+
+        // ANBR
+        pNegotiatedProfile->bAnbr = IMS_FALSE;
+        if (pLocalProfile->bAnbr && pPeerProfile->bAnbr)
+        {
+            pNegotiatedProfile->bAnbr = IMS_TRUE;
+        }
+
+        IMS_TRACE_D("MakeNegotiatedProfile() - anbr local: %d peer: %d nego: %d",
+                pLocalProfile->bAnbr, pPeerProfile->bAnbr, pNegotiatedProfile->bAnbr);
+
         return IMS_TRUE;
     }
     else

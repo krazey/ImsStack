@@ -527,6 +527,7 @@ public:
     IMS_BOOL bSupportRtcpXr;
     RTCPXRAttributes objRtcpXrAttr;
     IMS_BOOL bRtcpDisableBeforeSetup;
+    IMS_BOOL bAnbr;
 
 public:
     AudioProfile() :
@@ -548,7 +549,8 @@ public:
             objCapaNego(CapaNego()),
             bSupportRtcpXr(IMS_FALSE),
             objRtcpXrAttr(RTCPXRAttributes()),
-            bRtcpDisableBeforeSetup(IMS_FALSE){};
+            bRtcpDisableBeforeSetup(IMS_FALSE),
+            bAnbr(IMS_FALSE){};
 
     ~AudioProfile()
     {
@@ -581,7 +583,7 @@ public:
                 nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
                 nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
                 bSupportRtcpXr == obj.bSupportRtcpXr && objRtcpXrAttr == obj.objRtcpXrAttr &&
-                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup);
+                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup && bAnbr == obj.bAnbr);
     }
 
     AudioProfile(IN const AudioProfile& obj) { copy(&obj); }
@@ -605,6 +607,7 @@ private:
         bSupportRtcpXr = pProfile->bSupportRtcpXr;
         objRtcpXrAttr = pProfile->objRtcpXrAttr;
         bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
+        bAnbr = pProfile->bAnbr;
 
         while (lstPayload.GetSize() > 0)
         {
@@ -632,6 +635,7 @@ private:
         bIsOfferCase = pProfile->bIsOfferCase;
         objCapaNego = pProfile->objCapaNego;
         nNegotiatedPayloadIndex = -1;
+        bAnbr = pProfile->bAnbr;
     }
 };
 
