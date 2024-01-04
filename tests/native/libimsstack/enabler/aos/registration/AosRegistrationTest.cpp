@@ -140,7 +140,6 @@ public:
     FRIEND_TEST(AosRegistrationTest, RetryCount);
     FRIEND_TEST(AosRegistrationTest, SpecificOperation);
     FRIEND_TEST(AosRegistrationTest, GetNetworkTypeForImsRegState);
-    FRIEND_TEST(AosRegistrationTest, IsGeolocationInfoRequired);
     FRIEND_TEST(AosRegistrationTest, StartFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, UpdateTransactionStarted);
@@ -168,6 +167,19 @@ public:
     FRIEND_TEST(AosRegistrationTest, HandleUninterestedMessageDoesNothing);
     FRIEND_TEST(AosRegistrationTest, InitializeSetsFeaturesAndListeners);
     FRIEND_TEST(AosRegistrationTest, CleanUpRemovesListeners);
+    FRIEND_TEST(AosRegistrationTest,
+            GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForCellular);
+    FRIEND_TEST(
+            AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForWifi);
+    FRIEND_TEST(AosRegistrationTest,
+            GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForCellular);
+    FRIEND_TEST(
+            AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForWifi);
+    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredForFakeType);
+    FRIEND_TEST(AosRegistrationTest,
+            GeolocationInfoIsRequiredForNormalTypeIfPidfIsNotSupportedForCellular);
+    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredIpsecHelperIsNull);
+    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredIpsecIsNotEstablished);
     FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingReconfigExistSendsRegReconfigMessage);
     FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingUpdateExistSendsRegUpdateMessage);
     FRIEND_TEST(AosRegistrationTest, ProcessPendingStartTriggersStartRegister);
@@ -217,12 +229,18 @@ public:
     FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_Others);
     FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode);
     FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_305);
-    FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedWhenRegistrationIsNull);
-    FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedWhenAuthChallengeMoreIsNotAllowed);
-    FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedButFailToProcess_TriggerReInitiate);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseWhenIpsecIsNotSupported);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseWhenResultIsNotOk);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseWhenResultIsOkButFailToSetPcscfPort);
+    FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull);
+    FRIEND_TEST(AosRegistrationTest,
+            AuthenticationChallengedIsNotHandledWhenAuthChallengeMoreIsNotAllowed);
+    FRIEND_TEST(AosRegistrationTest, FailToProcessAuthenticationChallengedTriggersRegReInitate);
+    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseIsNotHandledWhenIpsecIsNotSupported);
+    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNotOk);
+    FRIEND_TEST(
+            AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort);
+    FRIEND_TEST(AosRegistrationTest,
+            NotifyAkaResponseTriggersRegTerminatedWhenFailToUpdatePreloadedRoute);
+    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToMakeSas);
+    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseReturnsSaResultAsTrueWhenSucceedToMakeSas);
     FRIEND_TEST(AosRegistrationTest, Registration_Started);
     FRIEND_TEST(AosRegistrationTest, Registration_StartFailed);
     FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg403);
@@ -1332,86 +1350,6 @@ TEST_F(AosRegistrationTest, GetNetworkTypeForImsRegState)
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
 }
 
-TEST_F(AosRegistrationTest, IsGeolocationInfoRequired)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // IpcanCategory is CATEGORY_MOBILE - AosRegistrationType::NORMAL
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-
-    // IpcanCategory is CATEGORY_MOBILE - AosRegistrationType::EMERGENCY
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-
-    // IpcanCategory is CATEGORY_WLAN - AosRegistrationType::NORMAL
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
-    EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IIpcan::CATEGORY_WLAN));
-    m_pAosRegistration->UpdateRegIpcanCategory();
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-
-    // IpcanCategory is CATEGORY_WLAN - AosRegistrationType::EMERGENCY
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-
-    // AosRegistrationType::FAKE
-    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
-    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
-}
-
 TEST_F(AosRegistrationTest, StartFailed_TxnTimeout)
 {
     // Covers GetRegErrCodeForPcscfDiscovery() == CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F
@@ -2028,6 +1966,103 @@ TEST_F(AosRegistrationTest, CleanUpRemovesListeners)
     m_pAosRegistration->CleanUp();
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForCellular)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForWifi)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosRegistration->UpdateRegIpcanCategory();
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForCellular)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForWifi)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
+            .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    m_pAosRegistration->UpdateRegIpcanCategory();
+    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredForFakeType)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).Times(0);
+
+    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsNotSupportedForCellular)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_FALSE));
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).Times(0);
+
+    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredIpsecHelperIsNull)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+    m_pAosRegistration->m_pIpsecHelper = IMS_NULL;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_TRUE));
+
+    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
+}
+
+TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredIpsecIsNotEstablished)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pAosRegistration->IsGeolocationInfoRequired());
 }
 
 TEST_F(AosRegistrationTest, CheckPendingWhilePendingReconfigExistSendsRegReconfigMessage)
@@ -3713,7 +3748,7 @@ TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_3
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
 }
 
-TEST_F(AosRegistrationTest, AuthenticationChallengedWhenRegistrationIsNull)
+TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull)
 {
     IMS_BOOL bResponseToChallenge = IMS_FALSE;
     m_pAosRegistration->Registration_AuthenticationChallenged(
@@ -3723,7 +3758,7 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedWhenRegistrationIsNull)
     EXPECT_EQ(m_pAosRegistration->m_nAuthChallengeCount, 0);
 }
 
-TEST_F(AosRegistrationTest, AuthenticationChallengedWhenAuthChallengeMoreIsNotAllowed)
+TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenAuthChallengeMoreIsNotAllowed)
 {
     IMS_UINT32 nCounterThreshold = TestAosRegistration::AUTHENTICATION_RETRY_MAX_COUNT;
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
@@ -3737,7 +3772,7 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedWhenAuthChallengeMoreIsNotAl
     EXPECT_EQ(m_pAosRegistration->m_nAuthChallengeCount, nCounterThreshold + 1);
 }
 
-TEST_F(AosRegistrationTest, AuthenticationChallengedButFailToProcess_TriggerReInitiate)
+TEST_F(AosRegistrationTest, FailToProcessAuthenticationChallengedTriggersRegReInitate)
 {
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
@@ -3758,7 +3793,7 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedButFailToProcess_TriggerReIn
             TestAosRegistration::IPSEC_BLOCK_AUTENTICATION);
 }
 
-TEST_F(AosRegistrationTest, NotifyAkaResponseWhenIpsecIsNotSupported)
+TEST_F(AosRegistrationTest, NotifyAkaResponseIsNotHandledWhenIpsecIsNotSupported)
 {
     EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
 
@@ -3770,7 +3805,7 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseWhenIpsecIsNotSupported)
     EXPECT_FALSE(bResultOfSA);
 }
 
-TEST_F(AosRegistrationTest, NotifyAkaResponseWhenResultIsNotOk)
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNotOk)
 {
     m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
@@ -3790,7 +3825,7 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseWhenResultIsNotOk)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosRegistrationTest, NotifyAkaResponseWhenResultIsOkButFailToSetPcscfPort)
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort)
 {
     m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
@@ -3812,6 +3847,67 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseWhenResultIsOkButFailToSetPcscfPort
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToUpdatePreloadedRoute)
+{
+    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+
+    EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, UpdatePreloadedRoute(_)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_TERMINATED))
+            .Times(1);
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(
+            ImsAkaParam::RESULT_OK, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToMakeSas)
+{
+    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+
+    EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, MakeSas(_, _, _, _)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_TERMINATED))
+            .Times(1);
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(
+            ImsAkaParam::RESULT_OK, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseReturnsSaResultAsTrueWhenSucceedToMakeSas)
+{
+    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+
+    EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockAosIpsecHelper, MakeSas(_, _, _, _)).WillOnce(Return(IMS_TRUE));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(
+            ImsAkaParam::RESULT_OK, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_TRUE(bResultOfSA);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
 TEST_F(AosRegistrationTest, Registration_Started)
 {
     // m_piRegistration is null
