@@ -289,7 +289,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
             pAmrPayload->SetRtpMap(pAmrConfig->GetPayloadType(), strCodecName,
                     pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
-            pAmrPayload->pFmtp = reinterpret_cast<void*>(pAmrFmtp);
+            pAmrPayload->pFmtp = pAmrFmtp;
             pAudioProfile->lstPayload.Append(pAmrPayload);
             IMS_SINT32 nCurrAs;
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
@@ -318,12 +318,11 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                     reinterpret_cast<CodecTelephoneEventConfig*>(pCodecConfig);
             AString strCodecName;
             strCodecName.Sprintf("%s", "telephone-event");
-            AudioProfile::TelephoneEventFmtp* pTeFmtp =
-                    new AudioProfile::TelephoneEventFmtp(pDtmfConfig->GetEvents());
+
             AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
             pTelephoneEvent->SetRtpMap(
                     pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
-            pTelephoneEvent->pFmtp = reinterpret_cast<void*>(pTeFmtp);
+            pTelephoneEvent->pFmtp = new AudioProfile::TelephoneEventFmtp(pDtmfConfig->GetEvents());
             pAudioProfile->lstPayload.Append(pTelephoneEvent);
 
             IMS_TRACE_D("CreateProfile() add payload(%d),codec(%d), SamplingRate(%d)", i,
@@ -492,7 +491,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();
             pEvsPayload->SetRtpMap(
                     pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
-            pEvsPayload->pFmtp = reinterpret_cast<void*>(pEvsFmtp);
+            pEvsPayload->pFmtp = pEvsFmtp;
 
             pAudioProfile->lstPayload.Append(pEvsPayload);
 

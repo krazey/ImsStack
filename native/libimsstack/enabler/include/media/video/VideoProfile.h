@@ -22,8 +22,13 @@
 #include "ImsMap.h"
 #include "MediaDef.h"
 #include "VideoDef.h"
+#include "MediaBaseProfile.h"
 
-class VideoProfile
+/**
+ * VideoProfile is used to keep the SDP negotiation information for video like
+ * SDP offer, answer and the negotiated media information.
+ */
+class VideoProfile : public MediaBaseProfile
 {
 public:
     class RtpMap
@@ -61,7 +66,11 @@ public:
     };
 
 public:
-    class HevcFmtp
+    /**
+     * HevcFmtp attributes are used within the SDP to carry HEVC parameters that provide
+     * extra configuration details about a specific HEVC codec used in the RTP stream.
+     */
+    class HevcFmtp : public BaseFmtp
     {
     public:
         VIDEO_RESOLUTION eResolution;
@@ -134,10 +143,16 @@ public:
                 bShow_Level(IMS_FALSE),
                 bShow_SpropParam(IMS_FALSE),
                 bShow_PacketizationMode(IMS_FALSE){};
+
+        virtual ~HevcFmtp(){};
     };
 
 public:
-    class AvcFmtp
+    /**
+     * AvcFmtp attributes are used within the SDP to carry AVC parameters that provide
+     * extra configuration details about a specific AVC codec used in the RTP stream.
+     */
+    class AvcFmtp : public BaseFmtp
     {
     public:
         VIDEO_RESOLUTION eResolution;
@@ -202,6 +217,8 @@ public:
                 bShow_ProfileLevelId(IMS_FALSE),
                 bShow_PacketizationMode(IMS_FALSE),
                 bShow_SpropParam(IMS_FALSE){};
+
+        virtual ~AvcFmtp(){};
     };
 
 public:
@@ -276,7 +293,7 @@ public:
     {
     public:
         RtpMap objRtpMap;
-        void* pFmtp;
+        BaseFmtp* pFmtp;
         IMS_BOOL bIncludeImageAttr;
         IMS_BOOL bIncludeFrameSize;
         AString strImageAttr;
@@ -297,15 +314,13 @@ public:
                 strImageAttr(obj.strImageAttr),
                 objRtcpFbAttr(obj.objRtcpFbAttr)
         {
-            if (objRtpMap.strPayloadType.Equals("H264"))
+            if (objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
             {
-                pFmtp = new VideoProfile::AvcFmtp(
-                        reinterpret_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
+                pFmtp = new VideoProfile::AvcFmtp(static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
             }
-            else if (objRtpMap.strPayloadType.Equals("H265"))
+            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
             {
-                pFmtp = new VideoProfile::HevcFmtp(
-                        reinterpret_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
+                pFmtp = new VideoProfile::HevcFmtp(static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
             }
         }
 
@@ -318,15 +333,15 @@ public:
                 objRtpMap = obj.objRtpMap;
                 deleteFmtp();
 
-                if (objRtpMap.strPayloadType.Equals("H264"))
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
                 {
                     pFmtp = new VideoProfile::AvcFmtp(
-                            reinterpret_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
+                            static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
                 }
-                else if (objRtpMap.strPayloadType.Equals("H265"))
+                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
                 {
                     pFmtp = new VideoProfile::HevcFmtp(
-                            reinterpret_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
+                            static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
                 }
 
                 bIncludeImageAttr = obj.bIncludeImageAttr;
@@ -350,18 +365,10 @@ public:
     private:
         void deleteFmtp()
         {
-            if (pFmtp == IMS_NULL)
+            if (pFmtp != IMS_NULL)
             {
-                return;
-            }
-
-            if (objRtpMap.strPayloadType.Equals("H264"))
-            {
-                delete reinterpret_cast<VideoProfile::AvcFmtp*>(pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.Equals("H265"))
-            {
-                delete reinterpret_cast<VideoProfile::HevcFmtp*>(pFmtp);
+                delete pFmtp;
+                pFmtp = IMS_NULL;
             }
         }
     };

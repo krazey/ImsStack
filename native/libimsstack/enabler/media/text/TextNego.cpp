@@ -937,8 +937,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
         if (pPayload->objRtpMap.strPayloadType.Equals("red"))
         {
-            TextProfile::RedFmtp* pRedFmtp =
-                    reinterpret_cast<TextProfile::RedFmtp*>(pPayload->pFmtp);
+            TextProfile::RedFmtp* pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp);
 
             if (pRedFmtp == IMS_NULL)
             {
@@ -1289,9 +1288,8 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
 
                 if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
                 {
-                    TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp(
-                            *reinterpret_cast<TextProfile::RedFmtp*>(pPayload->pFmtp));
-                    pT140->pFmtp = reinterpret_cast<void*>(pRedFmtp);
+                    pT140->pFmtp = new TextProfile::RedFmtp(
+                            *static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp));
                 }
 
                 pNegotiatedProfile->lstPayload.Append(pT140);
