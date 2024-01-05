@@ -4349,7 +4349,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         {
             case SipStatusCode::SC_403:  // FALL-THROUGH
             case SipStatusCode::SC_408:  // FALL-THROUGH
-            case SipStatusCode::SC_500:  // FALL-THROUGH
             case SipStatusCode::SC_504:
                 ProcessReinitiate(IMS_FALSE);
                 return;

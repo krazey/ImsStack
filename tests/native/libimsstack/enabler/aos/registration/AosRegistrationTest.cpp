@@ -229,6 +229,7 @@ public:
     FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_Others);
     FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode);
     FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_305);
+    FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500);
     FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull);
     FRIEND_TEST(AosRegistrationTest,
             AuthenticationChallengedIsNotHandledWhenAuthChallengeMoreIsNotAllowed);
@@ -426,6 +427,7 @@ public:
     AStringArray m_objImpus;
     AStringArray m_objPcscfs;
     ImsList<IMS_SINT32> m_objPcscfPorts;
+    ImsVector<IMS_SINT32> m_objErrCode;
     AosFeatureTagList m_objFeatureTagList;
     AosFeatureTagList m_objBindedFeatureTagList;
 
@@ -491,6 +493,18 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+                .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+                .WillByDefault(ReturnRef(m_objErrCode));
+        ON_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForImsPdnReactivation())
+                .WillByDefault(ReturnRef(m_objErrCode));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+                .WillByDefault(ReturnRef(m_objErrCode));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+                .WillByDefault(ReturnRef(m_objErrCode));
+        ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
+                .WillByDefault(ReturnRef(m_objErrCode));
 
         // IAosSubscriber
         m_objImpus.AddElement(AString("sip:1111@ims.co.kr"));
@@ -3746,6 +3760,25 @@ TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_3
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500)
+{
+    m_pAosRegistration->SetImsCall(IMS_FALSE);
+    // return IMS_FALSE in ProcessUnpredictableFailureHeldByCall()
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // return IMS_FALSE in ProcessPlmnBlockOnUpdateFailure()
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // for executing the ProcessDefaultFlowRecovery_Update
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_500);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
 TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull)
