@@ -22,6 +22,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
@@ -37,6 +38,7 @@ import com.android.imsstack.base.SystemServiceProxy.SensorManagerProxy;
 import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -71,6 +73,7 @@ public class TestAppContext {
     private final ProvisioningManagerProxy mProvisioningManagerProxy =
             mock(ProvisioningManagerProxy.class);
     private final SystemServiceProxy mSystemServiceProxy = spy(new FakeSystemServiceProxy());
+    private AppContext mAppContext;
 
     public TestAppContext() {
         mContext = mock(Context.class);
@@ -88,8 +91,26 @@ public class TestAppContext {
         DeviceConfig.init(AppContext.getInstance());
     }
 
+    public void setUpWithLooper(Looper looper) throws Exception {
+        mAppContext = new AppContext(mContext, looper);
+        replaceSingletonAppContext(mAppContext);
+        AppContext.getInstance().setBroadcastReceiverProxy(mBroadcastReceiverProxy);
+        AppContext.getInstance().setContentProviderProxy(mContentProviderProxy);
+        AppContext.getInstance().setSystemServiceProxy(mSystemServiceProxy);
+        DeviceConfig.init(AppContext.getInstance());
+    }
+
     public void tearDown() {
-        AppContext.deinit();
+        if (mAppContext != null) {
+            try {
+                replaceSingletonAppContext(null);
+            } catch (Exception ignored) {
+                // Ignore an exception.
+            }
+            mAppContext = null;
+        } else {
+            AppContext.deinit();
+        }
     }
 
     public Context getContext() {
@@ -163,5 +184,11 @@ public class TestAppContext {
 
     public <T> T getSystemService(Class<T> clazz) {
         return mContext.getSystemService(clazz);
+    }
+
+    private void replaceSingletonAppContext(Object newValue) throws Exception {
+        Field field = AppContext.class.getDeclaredField("sAppContext");
+        field.setAccessible(true);
+        field.set(null, newValue);
     }
 }

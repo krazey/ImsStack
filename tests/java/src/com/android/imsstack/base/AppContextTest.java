@@ -58,9 +58,8 @@ public class AppContextTest {
     @Mock private SmsManagerProxy mSmsManagerProxy;
     @Mock private Runnable mRunnable;
 
-    TestableLooper mTestableLooper;
-    Object mOldAppContext;
-    AppContext mAppContext;
+    private TestableLooper mTestableLooper;
+    private AppContext mAppContext;
 
     @Before
     public void setUp() throws Exception {
@@ -77,19 +76,18 @@ public class AppContextTest {
 
         mTestableLooper = TestableLooper.get(this);
         mAppContext = new AppContext(mContext, mTestableLooper.getLooper());
-        mOldAppContext = replaceSingletonAppContext(mAppContext);
+        replaceSingletonAppContext(mAppContext);
     }
 
     @After
     public void tearDown() throws Exception {
-        replaceSingletonAppContext(mOldAppContext);
+        replaceSingletonAppContext(null);
         mContentProviderProxy = null;
         mTelephonyManagerProxy = null;
         mSmsManagerProxy = null;
         mSystemServiceProxy = null;
         mRunnable = null;
         mContext = null;
-        mOldAppContext = null;
         mAppContext = null;
     }
 
@@ -181,11 +179,9 @@ public class AppContextTest {
         assertEquals(testDeviceName, mAppContext.getDeviceName());
     }
 
-    private Object replaceSingletonAppContext(Object newValue) throws Exception {
+    private void replaceSingletonAppContext(Object newValue) throws Exception {
         Field field = AppContext.class.getDeclaredField("sAppContext");
         field.setAccessible(true);
-        Object oldValue = field.get(null);
         field.set(null, newValue);
-        return oldValue;
     }
 }

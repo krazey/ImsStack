@@ -36,9 +36,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
@@ -54,7 +54,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -62,7 +61,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class SimAgentTest {
     private static final String UST = "86EF112C27FE01744200FF040100001E01";
     private static final byte[] UST_BYTES = SimUtils.hexStringToBytes(UST);
@@ -89,8 +89,9 @@ public class SimAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mTestableLooper = TestableLooper.get(this);
         mTestAppContext = new TestAppContext();
-        mTestAppContext.setUp();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         when(mTelephonyManagerProxy.getSimServiceTable(eq(TelephonyManager.APPTYPE_USIM)))
@@ -108,8 +109,7 @@ public class SimAgentTest {
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mNativeStateInterface, TestAppContext.SLOT0);
 
-        mTestableLooper = new TestableLooper(Looper.getMainLooper());
-        mSimAgent = new SimAgent(TestAppContext.SLOT0, Looper.getMainLooper());
+        mSimAgent = new SimAgent(TestAppContext.SLOT0, mTestableLooper.getLooper());
         mSimAgent.init(mTestAppContext.getContext());
     }
 
@@ -118,11 +118,6 @@ public class SimAgentTest {
         if (mSimAgent != null) {
             mSimAgent.cleanup();
             mSimAgent = null;
-        }
-
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
         }
 
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
@@ -135,6 +130,7 @@ public class SimAgentTest {
         mNativeStateInterface = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test

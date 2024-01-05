@@ -19,39 +19,40 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class WakeLockAgentTest {
     private static final int WAKE_LOCK_TIMEOUT = 200; // 200ms
 
     private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
+    private TestAppContext mTestAppContext;
     private WakeLockAgent mWakeLockAgent;
 
     @Before
     public void setUp() throws Exception {
+        mTestableLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        AppContext.init(context);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
 
         mWakeLockAgent = new WakeLockAgent();
-        mWakeLockAgent.init(context);
+        mWakeLockAgent.init(mTestAppContext.getContext());
     }
 
     @After
@@ -61,13 +62,10 @@ public class WakeLockAgentTest {
             mWakeLockAgent = null;
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
         mContextFixture = null;
-        AppContext.deinit();
+        mTestableLooper = null;
     }
 
     @Test

@@ -15,82 +15,71 @@
  */
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.telephony.SubscriptionManager;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ConfigAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1 };
+    @Mock private ConfigInterface.Listener mListener;
 
-    static ContextFixture sContext;
-
-    @Mock ConfigInterface.Listener mListener;
-
+    private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
+    private TestAppContext mTestAppContext;
     private ConfigAgent mConfigAgent;
-
-    public ConfigAgentTest() {
-        mConfigAgent = new ConfigAgent(SLOT0);
-    }
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
+        mContextFixture = new ContextFixture();
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+
+        mConfigAgent = new ConfigAgent(SLOT0);
     }
 
     @After
     public void tearDown() throws Exception {
         mConfigAgent.cleanup();
+        mConfigAgent = null;
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        AppContext.deinit();
-        sContext = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+        mContextFixture = null;
+        mTestableLooper = null;
     }
 
     @Test
     @SmallTest
-    public void notifyCarrierConfigChanged() {
+    public void testNotifyCarrierConfigChanged() {
         mConfigAgent.addListener(mListener);
-        mConfigAgent.notifyCarrierConfigChanged(SUB_ID[0]);
+        mConfigAgent.notifyCarrierConfigChanged(SUB_ID_1);
         processAllMessages();
 
-        verify(mListener).onCarrierConfigChanged(eq(SLOT0), eq(SUB_ID[0]));
+        verify(mListener).onCarrierConfigChanged(eq(SLOT0), eq(SUB_ID_1));
 
         mConfigAgent.removeListener(mListener);
 
@@ -99,7 +88,7 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void notifyCarrierConfigChangedWhenInvalidSubscription() {
+    public void testNotifyCarrierConfigChangedWhenInvalidSubscription() {
         mConfigAgent.addListener(mListener);
         mConfigAgent.notifyCarrierConfigChanged(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
         processAllMessages();
@@ -114,7 +103,7 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void addListenerWhenListenerNull() throws IllegalArgumentException {
+    public void testAddListenerWhenListenerNull() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> {
             mConfigAgent.addListener(null);
         });
@@ -124,7 +113,7 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void removeListenerWhenListenerNull() throws IllegalArgumentException {
+    public void testRemoveListenerWhenListenerNull() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> {
             mConfigAgent.removeListener(null);
         });
