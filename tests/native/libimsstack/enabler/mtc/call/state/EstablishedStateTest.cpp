@@ -287,6 +287,28 @@ TEST_F(EstablishedStateTest, OnMediaFailed)
     pEstablishedState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
 }
 
+TEST_F(EstablishedStateTest, QosReserveFailedInvokesSendTerminated)
+{
+    EXPECT_CALL(objMockMtcSession,
+            Terminate(IMS_TRUE, CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)))
+            .Times(1);
+    EXPECT_CALL(objUiNotifier,
+            SendTerminated(CallReasonInfo(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pEstablishedState->QosReserveFailed(&objMockISession, QosLossPolicy::RELEASE));
+}
+
+TEST_F(EstablishedStateTest, QosReserveFailedDowngradesVtCallToVoipCall)
+{
+    ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VOIP));
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE));
+
+    EXPECT_EQ(CallStateName::UPDATING,
+            pEstablishedState->QosReserveFailed(&objMockISession, QosLossPolicy::MODIFY));
+}
+
 TEST_F(EstablishedStateTest, OnIpcanChangedNotHandledIfConfigurationIsOff)
 {
     ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
@@ -451,6 +473,26 @@ TEST_F(EstablishedStateTest, SessionUpdateReceivedInvokesSendIncomingResume)
     EXPECT_CALL(objTimerWrapper, Start(_, _)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest,
+        SessionUpdateReceivedAnswersDirectlyWithoutInteractionWithAnotherModule)
+{
+    // Hold, Resume without interaction with Java side, Refresh
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMockMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(*pMockConfigurationManager, IsCheckUiConditionForIncomingResume)
+            .WillByDefault(Return(IMS_FALSE));
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+
+    EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1);
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
 TEST_F(EstablishedStateTest, TerminateUssiSendsInfoWithErrorCode)
