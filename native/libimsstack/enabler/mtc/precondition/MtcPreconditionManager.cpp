@@ -702,7 +702,7 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     }
 
     IMS_TRACE_D("CreateStatusRecords", 0, 0, 0);
-    pStatusTable->CreateStatusRecords(eSdpMediaType);
+    pStatusTable->InitializeStatusRecords(eSdpMediaType);
     IMS_BOOL bLocalReserved = IsLocalResourceReservedByMediaType(piSession, eMediaType);
 
     if (IsConfirmedDialog(piSession))
@@ -856,7 +856,7 @@ void MtcPreconditionManager::UpdateQosAttributesFromRemoteSdp(IN ISession* piSes
 
         if (m_pSdpPreconditionHelper->IsPreconditionIncludedInSdp(piSession))
         {
-            pStatusTable->UpdateStatusTableWithRemoteSdp(piMedia);
+            pStatusTable->UpdateStatusTableWithRemoteSdp(*piMedia);
         }
     }
 }

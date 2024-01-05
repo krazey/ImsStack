@@ -44,6 +44,7 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::AnyOf;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -772,7 +773,7 @@ TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIfIMediaIsNull)
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(_)).Times(0);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(_)).Times(0);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
             .Times(1);
@@ -794,7 +795,7 @@ TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIfMediaStateIsDeleted)
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(_)).Times(0);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(_)).Times(0);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
             .Times(1);
@@ -817,7 +818,7 @@ TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIfPortOfLocalSdpIsZero)
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(_)).Times(0);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(_)).Times(0);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
             .Times(1);
@@ -842,7 +843,7 @@ TEST_F(MtcPreconditionManagerTest, FormPreconditionSdpIfStatusRecordsListAlready
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(_)).Times(0);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(_)).Times(0);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
             .Times(1);
@@ -868,7 +869,7 @@ TEST_F(MtcPreconditionManagerTest, CreateStatusRecordsWithMediaTypeNoneAndFormPr
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(_)).Times(0);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(_)).Times(0);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
             .Times(1);
@@ -896,7 +897,7 @@ TEST_F(MtcPreconditionManagerTest, CreateStatusRecordsAndFormPreconditionSdpInEa
     ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
 
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(SdpMedia::TYPE_AUDIO)).Times(1);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(SdpMedia::TYPE_AUDIO)).Times(1);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(1);
     EXPECT_CALL(
             *pSdpPreconditionHelper, FormPreconditionSdp(&objISession, &objStatusTable, IMS_FALSE))
@@ -932,7 +933,7 @@ TEST_F(MtcPreconditionManagerTest, CreateStatusRecordsAndFormPreconditionSdpInCo
                     CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE))
             .WillOnce(Return(
                     CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
-    EXPECT_CALL(objStatusTable, CreateStatusRecords(SdpMedia::TYPE_AUDIO)).Times(2);
+    EXPECT_CALL(objStatusTable, InitializeStatusRecords(SdpMedia::TYPE_AUDIO)).Times(2);
     EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE)).Times(1);
     EXPECT_CALL(objStatusTable, UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE)).Times(2);
     EXPECT_CALL(
@@ -1043,7 +1044,7 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objStatusTable, RemoveUnusedStatusRecords(MEDIATYPE_AUDIO)).Times(1);
-    EXPECT_CALL(objStatusTable, UpdateStatusTableWithRemoteSdp(&objAudioMedia)).Times(1);
+    EXPECT_CALL(objStatusTable, UpdateStatusTableWithRemoteSdp(Ref(objAudioMedia))).Times(1);
     EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AUDIO_AVAILABLE, _)).Times(0);
 
     pPreconditionManager->OnSdpReceived(&objISession, &objIMessage);

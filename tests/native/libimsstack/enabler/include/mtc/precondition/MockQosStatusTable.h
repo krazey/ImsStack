@@ -29,7 +29,7 @@ class MockQosStatusTable : public QosStatusTable
 public:
     MockQosStatusTable() {}
     ~MockQosStatusTable() {}
-    MOCK_METHOD(void, UpdateStatusTableWithRemoteSdp, (IN IMedia * piMedia), (override));
+    MOCK_METHOD(void, UpdateStatusTableWithRemoteSdp, (IN const IMedia& objMedia), (override));
     MOCK_METHOD(void, UpdateLocalCurrentStatus,
             (IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled), (override));
     MOCK_METHOD(void, EnableRemoteCurrentStatus, (IN IMS_SINT32 eSdpMediaType), (override));
@@ -52,7 +52,7 @@ public:
     MOCK_METHOD(void, SetLocalResourceConfirmed,
             (IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalResourceConfirmed, (IN IMS_SINT32 eSdpMediaType), (override));
-    MOCK_METHOD(void, CreateStatusRecords, (IN IMS_SINT32 eSdpMediaType), (override));
+    MOCK_METHOD(void, InitializeStatusRecords, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(IMS_BOOL, IsStatusRecordsListEmpty, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(void, RemoveUnusedStatusRecords, (IN IMS_UINT32 eMediaTypes), (override));
 };
