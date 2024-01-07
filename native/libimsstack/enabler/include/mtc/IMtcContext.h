@@ -19,7 +19,9 @@
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "helper/MtcTimerWrapper.h"
 #include <functional>
+#include <memory>
 
 class CallConnectionIdManager;
 class ICallStateProxy;
@@ -167,6 +169,13 @@ public:
      * @return
      */
     virtual IMessageUtils& GetMessageUtils() = 0;
+
+    /**
+     * @brief Creates MtcTimerWrapper. Each time it is called, a new MtcTimerWrapper is created.
+     *
+     * @return MtcTimerWrapper.
+     */
+    virtual std::unique_ptr<MtcTimerWrapper> CreateTimer() = 0;
 
     /**
      * @brief Gets

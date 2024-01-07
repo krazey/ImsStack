@@ -24,9 +24,12 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include <gtest/gtest.h>
+#include <memory>
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -48,6 +51,13 @@ protected:
 
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objContext, CreateTimer)
+                .WillByDefault(Invoke(
+                        []()
+                        {
+                            return std::make_unique<MockMtcTimerWrapper>();
+                        }));
 
         pCallManager = new MtcCallManager(objContext);
     }

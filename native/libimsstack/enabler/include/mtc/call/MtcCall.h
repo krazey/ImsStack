@@ -173,7 +173,7 @@ public:
     void DeleteUpdatingInfo() override;
     void RunPendingOperationIfPossible() override;
 
-    inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
+    inline MtcTimerWrapper& GetTimer() override { return *m_pTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
     {
         return m_objSupplementaryService;
@@ -228,6 +228,10 @@ public:
         return m_objContext.GetAsyncRunner(objOperation);
     }
     inline IMessageUtils& GetMessageUtils() override { return m_objContext.GetMessageUtils(); }
+    inline std::unique_ptr<MtcTimerWrapper> CreateTimer() override
+    {
+        return m_objContext.CreateTimer();
+    }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override
     {
         return m_objContext.GetPassiveTimerHolder();
@@ -324,7 +328,7 @@ private:
     ImsList<IMtcSession*> m_lstSessions;
     MtcCallStateMachine m_objStateMachine;
     MtcPendingOperationHolder m_objPendingOperationHolder;
-    MtcTimerWrapper m_objTimer;
+    std::unique_ptr<MtcTimerWrapper> m_pTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;
     MtcPreconditionManager m_objPreconditionManager;
