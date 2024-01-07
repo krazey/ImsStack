@@ -33,6 +33,7 @@
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceReference.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/MtcTimerWrapper.h"
 #include "utility/IMessageUtils.h"
 #include <memory>
 
@@ -52,7 +53,7 @@ ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext&
         m_pOperationQueue(objFactory.CreateOperationQueue()),
         m_pSubscription(IMS_NULL),
         m_objIConfReferences(ImsList<IConferenceReference*>()),
-        m_piTimer(IMS_NULL),
+        m_pTimer(nullptr),
         m_nConditionFinalSipfragTimer(CONDITION_NONE),
         m_nState(STATE_CREATED)
 {
@@ -75,12 +76,6 @@ PUBLIC VIRTUAL ConferenceController::~ConferenceController()
         delete m_objIConfReferences.GetAt(i);
     }
     m_objIConfReferences.Clear();
-
-    if (m_piTimer != IMS_NULL)
-    {
-        m_piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piTimer);
-    }
 }
 
 PUBLIC VIRTUAL void ConferenceController::OnCallStateChanged(
@@ -258,11 +253,11 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceUpdated(IN IConferenceRefer
     }
 }
 
-PUBLIC VIRTUAL void ConferenceController::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void ConferenceController::OnTimerExpired(IN IMS_SINT32 nType)
 {
-    IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
+    IMS_TRACE_D("OnTimerExpired", 0, 0, 0);
 
-    if (m_piTimer == piTimer)
+    if (nType == TIMER_FINAL_SIPFRAG_WAIT)
     {
         Recover();
     }
@@ -939,31 +934,25 @@ void ConferenceController::CheckNStartFinalSipfragWaitTimer(IN IMS_UINT32 nNewCo
 
     StopFinalSipfragWaitTimer();
 
-    m_piTimer = TimerService::GetTimerService()->CreateTimer();
-
-    if (m_piTimer == IMS_NULL)
+    if (m_pTimer == nullptr)
     {
-        return;
+        m_pTimer = m_objContext.CreateTimer();
+        m_pTimer->SetListener(this);
     }
-
-    m_piTimer->SetTimer(TIME_FINAL_SIPFRAG_WAIT, this);
+    m_pTimer->Start(TIMER_FINAL_SIPFRAG_WAIT, TIME_FINAL_SIPFRAG_WAIT);
 }
 
 PROTECTED
 void ConferenceController::StopFinalSipfragWaitTimer()
 {
-    m_nConditionFinalSipfragTimer = CONDITION_NONE;
-
-    if (m_piTimer == IMS_NULL)
-    {
-        return;
-    }
-
     IMS_TRACE_I("StopFinalSipfragWaitTimer", 0, 0, 0);
 
-    m_piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
-    m_piTimer = IMS_NULL;
+    m_nConditionFinalSipfragTimer = CONDITION_NONE;
+
+    if (m_pTimer)
+    {
+        m_pTimer->Stop(TIMER_FINAL_SIPFRAG_WAIT);
+    }
 }
 
 PROTECTED VIRTUAL IMS_BOOL ConferenceController::IsStartFinalSipfragWaitTimer() const

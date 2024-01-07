@@ -17,7 +17,6 @@
 #include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MockITimer.h"
 #include "MtcDef.h"
 #include "call/CallConnectionIdManager.h"
 #include "call/IMtcCall.h"
@@ -42,13 +41,16 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
 #include <gtest/gtest.h>
+#include <memory>
 
 using ::testing::_;
 using ::testing::AnyOf;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -80,6 +82,7 @@ public:
     MockIMtcSipInterfaceFactory* pMockInterfaceFactory;
     MockSubscriptionInterfaceHolder* pMockSubsHolder;
     MockIInterfaceHolderListener* pMockHolderListener;
+    std::unique_ptr<MockMtcTimerWrapper> pMockTimerWrapper;
 
 protected:
     virtual void SetUp() override
@@ -104,6 +107,14 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        pMockTimerWrapper = std::make_unique<MockMtcTimerWrapper>();
+        ON_CALL(objMockContext, CreateTimer)
+                .WillByDefault(Invoke(
+                        [&]()
+                        {
+                            return std::move(pMockTimerWrapper);
+                        }));
 
         piMockConferenceCall = CreateMockIMtcCall(CONFERENCE_CALL_KEY);
         pController = CreateController(piMockConferenceCall);
@@ -237,17 +248,10 @@ TEST_F(ConferenceControllerTest, IsSynchronousCallRequiredReturnsTrue)
     EXPECT_TRUE(pController->IsSynchronousCallRequired());
 }
 
-TEST_F(ConferenceControllerTest, NullTimerExpiresDoNothing)
+TEST_F(ConferenceControllerTest, UnknownTimerExpiresDoesNothing)
 {
-    pController->Timer_TimerExpired(IMS_NULL);
-    EXPECT_CALL(*pMockQueue, GetNextOperation).Times(0);
-    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(_, _)).Times(0);
-}
-
-TEST_F(ConferenceControllerTest, DifferentTimerExpiresDoNothing)
-{
-    MockITimer objMockTimer;
-    pController->Timer_TimerExpired(&objMockTimer);
+    const static IMS_UINT32 TIMER_UNKNOWN = 100;
+    pController->OnTimerExpired(TIMER_UNKNOWN);
     EXPECT_CALL(*pMockQueue, GetNextOperation).Times(0);
     EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(_, _)).Times(0);
 }
