@@ -63,7 +63,9 @@ public:
     MOCK_METHOD(const ImsList<ConfUser*>&, GetUsersOfCurrentOperation, (), (const, override));
     MOCK_METHOD(IMS_BOOL, HasPendingOperation, (), (const, override));
     MOCK_METHOD(void, Remove, (IN ConferenceOperation* pOperation), ());
-    MOCK_METHOD(void, Clear, (), ());
+    MOCK_METHOD(void, Clear, (), (override));
+
+    // TODO: remove unused ones
     MOCK_METHOD(
             void, Put, (IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation), ());
     MOCK_METHOD(void, RemoveActiveOperation, (), ());

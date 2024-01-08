@@ -148,7 +148,7 @@ public:
 
     virtual IMS_BOOL HasPendingOperation() const;
 
-    void Clear();
+    virtual void Clear();
 
 private:
     void Put(IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation);

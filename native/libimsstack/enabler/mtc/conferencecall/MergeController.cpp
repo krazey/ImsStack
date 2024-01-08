@@ -222,8 +222,7 @@ void MergeController::UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey)
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
         ConfUser* pUser = m_pParticipantList->GetConfUser(i);
-        if (m_objConnectionIdManager.GetCallKey(
-                    m_pParticipantList->GetConfUser(i)->nConnectionId) == nCallKey)
+        if (m_objConnectionIdManager.GetCallKey(pUser->nConnectionId) == nCallKey)
         {
             pUser->eStatus = STATUS_DISCONNECTED;
             NotifyUsersInfo();
@@ -264,8 +263,8 @@ void MergeController::RecoverOnReferring()
 
     if (m_pParticipantList->GetConnectedParticipantSize() == 0)
     {
-        IMS_TRACE_I("RecoverOnReferring : failure before start inviting members", 0, 0, 0);
-        ClearIndividualCallOnMergeFailed();  // ??
+        IMS_TRACE_I("RecoverOnReferring : failure before the first member joined.", 0, 0, 0);
+        ClearIndividualCallOnMergeFailed();
         m_pNotifier->NotifyMergeFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
         m_pOperationQueue->Clear();
         SetState(STATE_IDLE);
@@ -281,7 +280,7 @@ void MergeController::RecoverOnReferring()
     }
     else
     {
-        IMS_TRACE_I("RecoverOnReferring : failure during additional adding", 0, 0, 0);
+        IMS_TRACE_I("RecoverOnReferring : failure during additional adding.", 0, 0, 0);
         ClearIndividualCallOnMergeFailed();
         m_pNotifier->NotifyMergeFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
         m_pOperationQueue->Clear();
