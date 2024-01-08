@@ -56,9 +56,7 @@
     <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="ims_establishment_time_sec_int" value="300"/>
     <int name="reg_actual_wait_time_policy_int" value="1"/>
-    <int name="reg_retry_305_policy_int" value="2"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int name="rereg_retry_305_policy_int" value="2"/>
     <int-array name="permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
