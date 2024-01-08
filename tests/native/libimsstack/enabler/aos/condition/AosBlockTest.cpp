@@ -29,6 +29,7 @@
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ValuesIn;
 
 class TestAosBlock : public AosBlock
 {
@@ -41,12 +42,20 @@ public:
     inline ImsList<IAosBlockListener*> GetBlockListeners() { return m_objListeners; }
 };
 
-class AosBlockTest : public ::testing::Test {
+struct FormattingTestCase
+{
+    IMS_UINT32 nReason;
+    const IMS_CHAR* pszString;
+};
+
+class AosBlockTest : public testing::TestWithParam<FormattingTestCase>
+{
 public:
     TestAosBlock* m_pAosBlock;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         MockIAosAppContext objMockIAosAppContext;
         EXPECT_CALL(objMockIAosAppContext, GetSlotId())
             .Times(AnyNumber())
@@ -61,19 +70,53 @@ protected:
         ASSERT_TRUE(m_pAosBlock != nullptr);
     }
 
-    virtual void TearDown() override {
-        if (m_pAosBlock) {
+    virtual void TearDown() override
+    {
+        if (m_pAosBlock)
+        {
             delete m_pAosBlock;
         }
     }
 };
 
-TEST_F(AosBlockTest, SetListener_ParamNull) {
+INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
+        ValuesIn<FormattingTestCase>({
+                {BLOCK_AC_INCOMPLETED,                "AC_INCOMPLETED"               },
+                {BLOCK_AUTHENTICATION_FAILED,         "AUTHENTICATION_FAILED"        },
+                {BLOCK_AOS_INCOMPLETED,               "AOS_INCOMPLETED"              },
+                {BLOCK_CSCALL_STARTED,                "CSCALL_STARTED"               },
+                {BLOCK_PERMANENT_DATA_FAILED,         "PERMANENT_DATA_FAILED"        },
+                {BLOCK_ENABLER_DETACHED,              "ENABLER_DETACHED"             },
+                {BLOCK_IMS_DISABLED,                  "IMS_DISABLED"                 },
+                {BLOCK_PERMANENT_REG_FAILED,          "PERMANENT_REG_FAILED"         },
+                {BLOCK_POWER_OFF,                     "POWER_OFF"                    },
+                {BLOCK_SERVICE_CONNECTING,            "SERVICE_CONNECTING"           },
+                {BLOCK_SUBSCRIBER_INCOMPLETED,        "SUBSCRIBER_INCOMPLETED"       },
+                {BLOCK_TTY_MODE_ON,                   "TTY_MODE_ON"                  },
+                {BLOCK_TEMPORARY_DATA_DEACTIVATED,    "TEMPORARY_DATA_DEACTIVATED"   },
+                {BLOCK_IMS_SERVICE_DISABLED,          "IMS_SERVICE_DISABLED"         },
+                {BLOCK_EPS_FALLBACK_STARTED,          "EPS_FALLBACK_STARTED"         },
+                {BLOCK_CELLULAR_AIRPLANE_MODE_ON,     "CELLULAR_AIRPLANE_MODE_ON"    },
+                {BLOCK_CELLULAR_NO_NETWORK,           "CELLULAR_NO_NETWORK"          },
+                {BLOCK_CELLULAR_OUT_OF_SERVICE,       "CELLULAR_OUT_OF_SERVICE"      },
+                {BLOCK_CELLULAR_ROAMING,              "CELLULAR_ROAMING"             },
+                {BLOCK_CELLULAR_VOPS_OFF,             "CELLULAR_VOPS_OFF"            },
+                {BLOCK_WIFI_BAD_CONNECTION,           "WIFI_BAD_CONNECTION"          },
+                {BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, "WIFI_COUNTRY_CODE_UNAVAILABLE"},
+                {BLOCK_WIFI_AIRPLANE_MODE_ON,         "WIFI_AIRPLANE_MODE_ON"        },
+                {BLOCK_WIFI_NO_WIFI,                  "WIFI_NO_WIFI"                 },
+                {BLOCK_WIFI_TEMPORARILY_BLOCKED,      "WIFI_TEMPORARILY_BLOCKED"     },
+                {BLOCK_MAX,                           "INVALID"                      }
+}));
+
+TEST_F(AosBlockTest, SetListener_ParamNull)
+{
     m_pAosBlock->SetListener(IMS_NULL);
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
-TEST_F(AosBlockTest, SetListener_Success) {
+TEST_F(AosBlockTest, SetListener_Success)
+{
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
@@ -90,7 +133,8 @@ TEST_F(AosBlockTest, SetListener_Success) {
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, SetListener_AlreadyExist) {
+TEST_F(AosBlockTest, SetListener_AlreadyExist)
+{
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
@@ -108,7 +152,8 @@ TEST_F(AosBlockTest, SetListener_AlreadyExist) {
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, RemoveListener_ParamNull) {
+TEST_F(AosBlockTest, RemoveListener_ParamNull)
+{
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
@@ -122,7 +167,8 @@ TEST_F(AosBlockTest, RemoveListener_ParamNull) {
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, RemoveListener_Success) {
+TEST_F(AosBlockTest, RemoveListener_Success)
+{
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
@@ -142,7 +188,8 @@ TEST_F(AosBlockTest, RemoveListener_Success) {
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
-TEST_F(AosBlockTest, SetBlockReason_IsReasonBlocked) {
+TEST_F(AosBlockTest, SetBlockReason_IsReasonBlocked)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -158,7 +205,8 @@ TEST_F(AosBlockTest, SetBlockReason_IsReasonBlocked) {
     EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_PERMANENT_DATA_FAILED));
 }
 
-TEST_F(AosBlockTest, SetBlockReason_Success) {
+TEST_F(AosBlockTest, SetBlockReason_Success)
+{
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
@@ -205,7 +253,8 @@ TEST_F(AosBlockTest, SetBlockReason_Success) {
     EXPECT_EQ(objReason.GetSize(), 6);
 }
 
-TEST_F(AosBlockTest, ResetBlockReason_IsNotReasonBlocked) {
+TEST_F(AosBlockTest, ResetBlockReason_IsNotReasonBlocked)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED));
@@ -215,7 +264,8 @@ TEST_F(AosBlockTest, ResetBlockReason_IsNotReasonBlocked) {
     EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED));
 }
 
-TEST_F(AosBlockTest, ResetBlockReason_Success) {
+TEST_F(AosBlockTest, ResetBlockReason_Success)
+{
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
@@ -264,7 +314,8 @@ TEST_F(AosBlockTest, ResetBlockReason_Success) {
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 }
 
-TEST_F(AosBlockTest, ClearAllBlockReasons) {
+TEST_F(AosBlockTest, ClearAllBlockReasons)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -293,7 +344,8 @@ TEST_F(AosBlockTest, ClearAllBlockReasons) {
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 }
 
-TEST_F(AosBlockTest, PrintBlockReasons) {
+TEST_F(AosBlockTest, PrintBlockReasons)
+{
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
@@ -309,7 +361,8 @@ TEST_F(AosBlockTest, PrintBlockReasons) {
     EXPECT_TRUE(m_pAosBlock->PrintBlockReasons());
 }
 
-TEST_F(AosBlockTest, GetBlockReasons) {
+TEST_F(AosBlockTest, GetBlockReasons)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -335,7 +388,8 @@ TEST_F(AosBlockTest, GetBlockReasons) {
     EXPECT_EQ(objReason.GetSize(), 6);
 }
 
-TEST_F(AosBlockTest, IsReasonBlocked_OnlyEnabled) {
+TEST_F(AosBlockTest, IsReasonBlocked_OnlyEnabled)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
@@ -371,7 +425,8 @@ TEST_F(AosBlockTest, IsReasonBlocked_OnlyEnabled) {
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 }
 
-TEST_F(AosBlockTest, IsReasonBlocked_NotOnlyEnabled) {
+TEST_F(AosBlockTest, IsReasonBlocked_NotOnlyEnabled)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -399,7 +454,8 @@ TEST_F(AosBlockTest, IsReasonBlocked_NotOnlyEnabled) {
     EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
 }
 
-TEST_F(AosBlockTest, IsCleared_Cellular) {
+TEST_F(AosBlockTest, IsCleared_Cellular)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -430,7 +486,8 @@ TEST_F(AosBlockTest, IsCleared_Cellular) {
     EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_CELLULAR));
 }
 
-TEST_F(AosBlockTest, IsCleared_Wifi) {
+TEST_F(AosBlockTest, IsCleared_Wifi)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -461,7 +518,8 @@ TEST_F(AosBlockTest, IsCleared_Wifi) {
     EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WIFI));
 }
 
-TEST_F(AosBlockTest, IsCleared_Whole) {
+TEST_F(AosBlockTest, IsCleared_Whole)
+{
     EXPECT_TRUE(m_pAosBlock->IsCleared());
 
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
@@ -492,44 +550,14 @@ TEST_F(AosBlockTest, IsCleared_Whole) {
     EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WHOLE));
 }
 
-TEST_F(AosBlockTest, BlockReasonToString_ParamInvalid) {
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_MAX), "INVALID");
-}
+TEST_P(AosBlockTest, BlockReasonToString)
+{
+    // GIVEN
+    const FormattingTestCase& objTestCase = GetParam();
 
-TEST_F(AosBlockTest, BlockReasonToString_ParamValid) {
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_AC_INCOMPLETED), "AC_INCOMPLETED");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_AUTHENTICATION_FAILED), "AUTHENTICATION_FAILED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_AOS_INCOMPLETED), "AOS_INCOMPLETED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CSCALL_STARTED), "CSCALL_STARTED");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_DATA_FAILED), "PERMANENT_DATA_FAILED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_ENABLER_DETACHED), "ENABLER_DETACHED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_IMS_DISABLED), "IMS_DISABLED");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_REG_FAILED), "PERMANENT_REG_FAILED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_POWER_OFF), "POWER_OFF");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_SERVICE_CONNECTING), "SERVICE_CONNECTING");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_SUBSCRIBER_INCOMPLETED),
-            "SUBSCRIBER_INCOMPLETED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_TTY_MODE_ON), "TTY_MODE_ON");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_TEMPORARY_DATA_DEACTIVATED),
-            "TEMPORARY_DATA_DEACTIVATED");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_AIRPLANE_MODE_ON),
-            "CELLULAR_AIRPLANE_MODE_ON");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_NO_NETWORK), "CELLULAR_NO_NETWORK");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_OUT_OF_SERVICE),
-            "CELLULAR_OUT_OF_SERVICE");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_ROAMING), "CELLULAR_ROAMING");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_VOPS_OFF), "CELLULAR_VOPS_OFF");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_WIFI_BAD_CONNECTION), "WIFI_BAD_CONNECTION");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE),
-            "WIFI_COUNTRY_CODE_UNAVAILABLE");
-    EXPECT_STREQ(
-            m_pAosBlock->BlockReasonToString(BLOCK_WIFI_AIRPLANE_MODE_ON), "WIFI_AIRPLANE_MODE_ON");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_NO_WIFI), "WIFI_NO_WIFI");
-    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_TEMPORARILY_BLOCKED),
-            "WIFI_TEMPORARILY_BLOCKED");
+    // WHEN
+    const IMS_CHAR* pszActual = m_pAosBlock->BlockReasonToString(objTestCase.nReason);
+
+    // THEN
+    EXPECT_STREQ(objTestCase.pszString, pszActual);
 }
