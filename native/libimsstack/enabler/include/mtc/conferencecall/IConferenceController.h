@@ -25,11 +25,11 @@ class ConferenceParticipantList;
 
 enum class IndividualCallState
 {
-    IDLE,
-    HOST,
-    JOINING,
-    JOINED,
-    INVITED
+    IDLE,     // Neither Host nor Participant call.
+    HOST,     // Conference call.
+    JOINING,  // Call being referred.
+    JOINED,   // Call joined and not yet terminated.
+    INVITED,  // Call joined and terminated.
 };
 
 class IConferenceController
