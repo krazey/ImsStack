@@ -230,7 +230,13 @@ PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetDirectionTag(
         IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType)
 {
     ImsList<QosStatusRecord*> lstRecords = GetRecords(eSdpMediaType, eAttrType, eStatusType);
-    IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_INVALID;
+    if (lstRecords.IsEmpty())
+    {
+        return SdpPrecondition::DIRECTION_INVALID;
+    }
+
+    IMS_BOOL bSendFound = IMS_FALSE;
+    IMS_BOOL bRecvFound = IMS_FALSE;
 
     for (IMS_UINT32 index = 0; index < lstRecords.GetSize(); index++)
     {
@@ -241,20 +247,33 @@ PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetDirectionTag(
             continue;
         }
 
-        if ((eDirTag == SdpPrecondition::DIRECTION_RECV &&
-                    pRecord->eDirTag == SdpPrecondition::DIRECTION_SEND) ||
-                (eDirTag == SdpPrecondition::DIRECTION_SEND &&
-                        pRecord->eDirTag == SdpPrecondition::DIRECTION_RECV))
+        if (pRecord->eDirTag == SdpPrecondition::DIRECTION_SENDRECV)
         {
-            eDirTag = SdpPrecondition::DIRECTION_SENDRECV;
+            bSendFound = bRecvFound = IMS_TRUE;
         }
-        else
+        if (pRecord->eDirTag == SdpPrecondition::DIRECTION_SEND)
         {
-            eDirTag = pRecord->eDirTag;
+            bSendFound = IMS_TRUE;
+        }
+        else if (pRecord->eDirTag == SdpPrecondition::DIRECTION_RECV)
+        {
+            bRecvFound = IMS_TRUE;
         }
     }
 
-    return eDirTag;
+    if (bSendFound && bRecvFound)
+    {
+        return SdpPrecondition::DIRECTION_SENDRECV;
+    }
+    else if (bSendFound)
+    {
+        return SdpPrecondition::DIRECTION_SEND;
+    }
+    else if (bRecvFound)
+    {
+        return SdpPrecondition::DIRECTION_RECV;
+    }
+    return SdpPrecondition::DIRECTION_NONE;
 }
 
 PUBLIC VIRTUAL void QosStatusTable::SetDirectionTag(IN IMS_SINT32 eSdpMediaType,
@@ -307,8 +326,8 @@ PUBLIC VIRTUAL void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType,
     }
 
     QosStatusRecord* pRecord = lstRecords.GetAt(0);
-    if ((eStrengthTag == SdpPrecondition::STRENGTH_NOTUSED) ||
-            (pRecord->eStrengthTag > eStrengthTag))
+    // Not allow downgrade
+    if (eStrengthTag == SdpPrecondition::STRENGTH_NOTUSED || pRecord->eStrengthTag > eStrengthTag)
     {
         IMS_TRACE_D("SetStrengthTag : media[%s] status[%s] dir[%s]", PS_SdpMediaType(eSdpMediaType),
                 (eStatusType == SdpPrecondition::STATUS_LOCAL) ? "local" : "remote",

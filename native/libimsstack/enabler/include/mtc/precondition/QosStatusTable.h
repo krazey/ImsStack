@@ -220,4 +220,5 @@ private:
     ImsList<QosStatusRecord*> m_lstVideoRecords;
     ImsList<QosStatusRecord*> m_lstTextRecords;
 };
+
 #endif
