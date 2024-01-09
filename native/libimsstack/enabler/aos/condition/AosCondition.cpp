@@ -62,14 +62,7 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext) :
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosCondition = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosCondition), this);
 
-    IAosConnection* piAosConnection = m_piAppContext->GetConnection();
-    IMS_SINT32 nCnxType = (piAosConnection != IMS_NULL) ? piAosConnection->GetConnectionType()
-                                                        : NetworkPolicy::APN_NONE;
-
-    if ((nCnxType == NetworkPolicy::APN_WIFI) || (nCnxType == NetworkPolicy::APN_EMERGENCY))
-    {
-        RemoveListener(LISTENER_NETTRACKER);
-    }
+    Init();
 }
 
 PUBLIC VIRTUAL AosCondition::~AosCondition()
@@ -567,6 +560,19 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn
     }
 
     ProcessTtyEvent(bIsOn);
+}
+
+PROTECTED
+void AosCondition::Init()
+{
+    IAosConnection* piAosConnection = m_piAppContext->GetConnection();
+    IMS_SINT32 nCnxType = (piAosConnection != IMS_NULL) ? piAosConnection->GetConnectionType()
+                                                        : NetworkPolicy::APN_NONE;
+
+    if ((nCnxType == NetworkPolicy::APN_WIFI) || (nCnxType == NetworkPolicy::APN_EMERGENCY))
+    {
+        RemoveListener(LISTENER_NETTRACKER);
+    }
 }
 
 PROTECTED

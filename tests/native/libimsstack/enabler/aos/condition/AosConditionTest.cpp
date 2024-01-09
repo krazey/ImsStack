@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "ImsEventDef.h"
+#include "ServiceNetworkPolicy.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosConditionListener.h"
@@ -35,6 +36,7 @@
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
 #include "interface/MockIAosConditionListener.h"
+#include "interface/MockIAosConnection.h"
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
@@ -74,7 +76,6 @@ public:
         m_pAvailableWiFi->SetLocation(piTestLocation);
     }
 
-    FRIEND_TEST(AosConditionTest, Constructor);
     FRIEND_TEST(AosConditionTest, Start);
     FRIEND_TEST(AosConditionTest, Stop);
     FRIEND_TEST(AosConditionTest, SetListener);
@@ -127,6 +128,11 @@ public:
     FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached);
     FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_False);
     FRIEND_TEST(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport);
+    // TEST : Init
+    FRIEND_TEST(AosConditionTest, DisableNetTrackerListenerWhenConnectionTypeIsWifi);
+    FRIEND_TEST(AosConditionTest, DisableNetTrackerListenerWhenConnectionTypeIsEmergency);
+    FRIEND_TEST(AosConditionTest, EnableNetTrackerListenerWhenConnectionTypeIsIms);
+
     FRIEND_TEST(AosConditionTest, AddListener);
     FRIEND_TEST(AosConditionTest, RemoveListener);
     FRIEND_TEST(AosConditionTest, IsListenerEnabled);
@@ -154,6 +160,7 @@ public:
     AosBlock* m_pAosBlock;
     IAosNConfiguration* m_piOriginConfiguration;
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosConnection m_objMockIAosConnection;
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockIAosSubscriber m_objMockIAosSubscriber;
     MockIAosRegistration m_objMockIAosRegistration;
@@ -205,11 +212,6 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
     }
 };
-
-TEST_F(AosConditionTest, Constructor)
-{
-    EXPECT_EQ(m_pAosCondition->m_nListeners, AosCondition::LISTENER_ALL);
-}
 
 TEST_F(AosConditionTest, Start)
 {
@@ -1141,6 +1143,51 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport)
 
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_FALSE);
+}
+
+TEST_F(AosConditionTest, DisableNetTrackerListenerWhenConnectionTypeIsWifi)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetConnection())
+            .WillByDefault(Return(&m_objMockIAosConnection));
+    ON_CALL(m_objMockIAosConnection, GetConnectionType())
+            .WillByDefault(Return(NetworkPolicy::APN_WIFI));
+
+    // WHEN
+    m_pAosCondition->Init();
+
+    // THEN
+    EXPECT_FALSE(m_pAosCondition->IsListenerEnabled(AosCondition::LISTENER_NETTRACKER));
+}
+
+TEST_F(AosConditionTest, DisableNetTrackerListenerWhenConnectionTypeIsEmergency)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetConnection())
+            .WillByDefault(Return(&m_objMockIAosConnection));
+    ON_CALL(m_objMockIAosConnection, GetConnectionType())
+            .WillByDefault(Return(NetworkPolicy::APN_EMERGENCY));
+
+    // WHEN
+    m_pAosCondition->Init();
+
+    // THEN
+    EXPECT_FALSE(m_pAosCondition->IsListenerEnabled(AosCondition::LISTENER_NETTRACKER));
+}
+
+TEST_F(AosConditionTest, EnableNetTrackerListenerWhenConnectionTypeIsIms)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetConnection())
+            .WillByDefault(Return(&m_objMockIAosConnection));
+    ON_CALL(m_objMockIAosConnection, GetConnectionType())
+            .WillByDefault(Return(NetworkPolicy::APN_IMS));
+
+    // WHEN
+    m_pAosCondition->Init();
+
+    // THEN
+    EXPECT_TRUE(m_pAosCondition->IsListenerEnabled(AosCondition::LISTENER_NETTRACKER));
 }
 
 TEST_F(AosConditionTest, AddListener)

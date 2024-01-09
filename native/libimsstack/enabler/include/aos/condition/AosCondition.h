@@ -139,6 +139,7 @@ protected:
             IN ServiceSetting eState, IN IMS_UINT32 nServiceBits) override;
     void ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn) override;
 
+    void Init();
     void AddListener(IN IMS_UINT32 nType);
     void RemoveListener(IN IMS_UINT32 nType);
     IMS_BOOL IsListenerEnabled(IN IMS_UINT32 nType) const;
