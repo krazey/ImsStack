@@ -63,7 +63,6 @@ public:
     FRIEND_TEST(AosConnectorTest, StopWithDelay_RunStopDelayTimer);
     FRIEND_TEST(AosConnectorTest, StopWithDelay_KeepStopDelayTimerIfStopDelayTimerExist);
     FRIEND_TEST(AosConnectorTest, CheckWhetherIsReady);
-    FRIEND_TEST(AosConnectorTest, CheckWhetherIsPdnDeactivateRequired);
     FRIEND_TEST(AosConnectorTest, StateChangedToActive_IgnoreIfReadyState);
     FRIEND_TEST(AosConnectorTest, StateChangedToActive_WaitForIpv6);
     FRIEND_TEST(AosConnectorTest, StateChangedToActive_WaitForPco);
@@ -326,17 +325,6 @@ TEST_F(AosConnectorTest, CheckWhetherIsReady)
     // if TIMER_STOP_DELAY is running, it should not be treated as STATE_READY
     m_pTestAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
     EXPECT_FALSE(m_pTestAosConnector->IsReady());
-}
-
-TEST_F(AosConnectorTest, CheckWhetherIsPdnDeactivateRequired)
-{
-    // PdnDeactivateRequired is false
-    EXPECT_FALSE(m_pTestAosConnector->IsPdnDeactivationRequired());
-
-    m_pTestAosConnector->SetPdnDeactivationRequired(IMS_TRUE);
-
-    // PdnDeactivateRequired is changed to true
-    EXPECT_TRUE(m_pTestAosConnector->IsPdnDeactivationRequired());
 }
 
 TEST_F(AosConnectorTest, StateChangedToActive_IgnoreIfReadyState)
