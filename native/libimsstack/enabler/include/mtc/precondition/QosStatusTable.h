@@ -147,22 +147,6 @@ public:
      */
     virtual void ClearRecords(IN IMS_SINT32 eSdpMediaType);
 
-    virtual void UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia);
-    virtual void UpdateLocalCurrentStatus(
-            IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
-    virtual void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
-    virtual IMS_BOOL IsCurrentStatusEnabled(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType);
-    virtual IMS_SINT32 GetDirectionTag(
-            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType);
-    virtual IMS_SINT32 GetStrengthTag(
-            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
-    virtual void SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
-            IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
-    virtual void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
-            IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
-    virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
-    virtual IMS_BOOL IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType);
-
     /**
      * @brief Clears current records and sets initial records of the given media.
      *
@@ -187,6 +171,26 @@ public:
      *                    Flag combination of MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT.
      */
     virtual void RemoveUnusedRecords(IN IMS_UINT32 eMediaTypes);
+
+    virtual void UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia);
+
+    virtual void UpdateLocalCurrentStatus(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQosEnabled);
+    virtual void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
+    virtual IMS_BOOL IsCurrentStatusEnabled(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType);
+
+    virtual IMS_SINT32 GetDirectionTag(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType);
+    virtual void SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
+            IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
+
+    virtual IMS_SINT32 GetStrengthTag(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
+    virtual void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
+            IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
+
+    virtual IMS_BOOL IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType);
+    virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
 
 private:
     /**
