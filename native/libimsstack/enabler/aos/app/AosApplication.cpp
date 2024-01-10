@@ -831,11 +831,6 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
         ProcessPdnDisconnect();
         ClearOffReason();
     }
-
-    if (m_pConnector->IsPdnDeactivationRequired())
-    {
-        m_pConnector->Stop();
-    }
 }
 
 PROTECTED VIRTUAL void AosApplication::ClearConnection() {}
@@ -3086,21 +3081,6 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
             }
         }
 
-        return;
-    }
-
-    if (eCause == AosControlCause::PDN_CAPABILITY_CHANGED)
-    {
-        m_pConnector->SetPdnDeactivationRequired(IMS_TRUE);
-        if (IsImsCall())
-        {
-            m_pUtil->AddFeature(PENDING_REG_STOP_HELD, m_nRegPending);
-        }
-        else
-        {
-            ProcessDisconnectingState();
-            PostMessage(MSG_REG_STOP, 0, 0);
-        }
         return;
     }
 

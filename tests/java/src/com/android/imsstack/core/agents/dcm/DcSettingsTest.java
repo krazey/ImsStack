@@ -89,33 +89,6 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testIsImsPdnRequestWithoutMmtel() throws Exception {
-        when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
-                .thenReturn(true)
-                .thenReturn(false);
-
-        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-    }
-
-    @Test
-    public void testGetImsPdnEnabledInNoVopsSupport() throws Exception {
-        int[] emptyList = {};
-        int[] availableList = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME};
-        when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY)))
-                .thenReturn(emptyList)
-                .thenReturn(availableList);
-
-        int[] noNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noNetwork.length, emptyList.length);
-
-        int[] oneNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(oneNetwork.length, availableList.length);
-    }
-
-    @Test
     public void testGetImsSupportedRats() throws Exception {
         int[] emptyList = {};
         int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
@@ -202,9 +175,6 @@ public class DcSettingsTest {
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
         assertFalse(mDcSettingsUT.isVopsRequired());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        int[] noVopsRequired = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noVopsRequired.length, 0);
         int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());

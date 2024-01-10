@@ -388,30 +388,16 @@ public class ApnTest {
     }
 
     @Test
-    public void testRequestNetwork_vopsRequiredForPdn() throws Exception {
+    public void requestNetworkForImsTypeIncludesImsAndMmtelCapability() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
-        mApn.mIsMmtelRequired = true;
+        mApn.mType = EApnType.IMS;
+
+        mApn.requestNetwork();
 
         NetworkRequest.Builder nrb = new NetworkRequest.Builder();
         nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_MMTEL);
         NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-
-        mApn.requestNetwork();
-        verify(mConnectivityManagerProxy)
-                .requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));
-    }
-
-    @Test
-    public void testRequestNetwork_noVopsRequiredForPdn() throws Exception {
-        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
-        mApn.mIsMmtelRequired = false;
-
-        NetworkRequest.Builder nrb = new NetworkRequest.Builder();
-        nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        NetworkRequest nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-
-        mApn.requestNetwork();
         verify(mConnectivityManagerProxy)
                 .requestNetwork(eq(nr), eq(mMockNetworkCallback), eq(mApn));
     }

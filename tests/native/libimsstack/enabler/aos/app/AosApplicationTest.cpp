@@ -552,7 +552,6 @@ TEST_F(AosApplicationTest, CreateAndDestroy)
     m_pTestAosApplication->SetAosCondition(IMS_NULL);
 
     // TEST_F : CleanUp
-    m_pTestAosApplication->m_pConnector->SetPdnDeactivationRequired(IMS_TRUE);
     m_pTestAosApplication->CleanUp();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
     piLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
@@ -2388,15 +2387,6 @@ TEST_F(AosApplicationTest, Callback)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_IMS_SERVICE_DISABLED, IMS_FALSE)).Times(1);
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::IMS_SERVICE);
-    // eCause is PDN_CAPABILITY_CHANGED - eType is STOP
-    m_pTestAosApplication->SetImsCall(IMS_TRUE);
-    EXPECT_CALL(m_objMockAosConnector, SetPdnDeactivationRequired(IMS_TRUE));
-    m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
-            AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
-    m_pTestAosApplication->SetImsCall(IMS_FALSE);
-    EXPECT_CALL(m_objMockAosConnector, SetPdnDeactivationRequired(IMS_TRUE));
-    m_pTestAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
-            AosPcscfOrder::CURRENT, AosControlCause::PDN_CAPABILITY_CHANGED);
     // eCause is DATA - eType is START
     m_pTestAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::START, AosPcscfOrder::CURRENT, AosControlCause::DATA);
