@@ -35,6 +35,106 @@ protected:
     virtual void TearDown() override { delete pQosStatusTable; }
 };
 
+TEST_F(QosStatusTableTest, GetRecordsReturnsEmptyListInitially)
+{
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, GetRecordsReturnsEmptyListWithInvalidMediaType)
+{
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_INVALID).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, InitializeRecordsSetsInitialValueOfAudio)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, InitializeRecordsSetsInitialValueOfVideo)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
+
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, InitializeRecordsSetsInitialValueOfText)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
+
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, InitializeRecordsNotSetInitialValueOfInvalidMediaType)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_INVALID);
+
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfAudio)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
+
+    pQosStatusTable->ClearRecords(SdpMedia::TYPE_AUDIO);
+
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfVideo)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
+
+    pQosStatusTable->ClearRecords(SdpMedia::TYPE_VIDEO);
+
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, ClearRecordsClearsRecordsOfText)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
+
+    pQosStatusTable->ClearRecords(SdpMedia::TYPE_TEXT);
+
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_EQ(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
+TEST_F(QosStatusTableTest, ClearRecordsNotClearRecordsOfInvalidMediaType)
+{
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_VIDEO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_TEXT);
+
+    pQosStatusTable->ClearRecords(SdpMedia::TYPE_INVALID);
+
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_VIDEO).GetSize(), 0);
+    EXPECT_GT(pQosStatusTable->GetRecords(SdpMedia::TYPE_TEXT).GetSize(), 0);
+}
+
 TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsFalseIfNoQosStatusRecord)
 {
     pQosStatusTable->SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE);
@@ -43,7 +143,7 @@ TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsFalseIfNoQosStatusReco
 
 TEST_F(QosStatusTableTest, IsLocalResourceConfirmedReturnsTheSetValue)
 {
-    pQosStatusTable->InitializeStatusRecords(SdpMedia::TYPE_AUDIO);
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
     EXPECT_FALSE(pQosStatusTable->IsLocalResourceConfirmed(SdpMedia::TYPE_AUDIO));
 
     pQosStatusTable->SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE);

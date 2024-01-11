@@ -77,19 +77,22 @@ public:
         TYPE_TEXT,
     */
     IMS_SINT32 eSdpMediaType;
-    /*/ Type of attribute - Definition of SDPAttribute.h
+
+    /* Type of attribute - Definition of SDPAttribute.h
         // Extensions
         CURR = 18,                  //RFC 3312, Integration of Resource Management and SIP
         DES,                        //RFC 3312, Integration of Resource Management and SIP
         CONF,                       //RFC 3312, Integration of Resource Management and SIP
     */
     IMS_SINT32 eAttrType;
+
     /* Definition of SDPPrecondition.h
     // Type of "status-type"
         STATUS_LOCAL = 1,
         STATUS_REMOTE = 2,
     */
     IMS_SINT32 eStatusType;
+
     /* Definition of SDPPrecondition.h
     // Type of "direction-tag"
         DIRECTION_NONE = 0,
@@ -98,6 +101,7 @@ public:
         DIRECTION_SENDRECV,
     */
     IMS_SINT32 eDirTag;
+
     /* Definition of SDPPrecondition.h
     // Type of "strength-tag"
         STRENGTH_MANDATORY = 0,
@@ -108,8 +112,12 @@ public:
         STRENGTH_NOTUSED,
     */
     IMS_SINT32 eStrengthTag;
-    // whether if Desired Status is checked by remote view or not.
+
+    // Whether if Desired Status is checked by remote view or not.
+    // Only used for SDPAttribute::DES type.
     IMS_BOOL bDesiredCheck;
+
+    // Only used for SDPAttribute::CUR type.
     IMS_BOOL bLocalResourceConfirmed;
 };
 
@@ -124,6 +132,21 @@ private:
     QosStatusTable& operator=(IN const QosStatusTable& objRhs);
 
 public:
+    /**
+     * @brief Gets the records that match the given parameter.
+     *
+     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
+     * @return The list of the records.
+     */
+    virtual ImsList<QosStatusRecord*> GetRecords(IN IMS_SINT32 eSdpMediaType) const;
+
+    /**
+     * @brief Clears the records that match the given media.
+     *
+     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
+     */
+    virtual void ClearRecords(IN IMS_SINT32 eSdpMediaType);
+
     virtual void UpdateStatusTableWithRemoteSdp(IN const IMedia& objMedia);
     virtual void UpdateLocalCurrentStatus(
             IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
@@ -139,20 +162,54 @@ public:
             IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
     virtual void SetLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed);
     virtual IMS_BOOL IsLocalResourceConfirmed(IN IMS_SINT32 eSdpMediaType);
-    virtual void InitializeStatusRecords(IN IMS_SINT32 eSdpMediaType);
-    virtual IMS_BOOL IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType);
-    virtual void RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes);
+
+    /**
+     * @brief Clears current records and sets initial records of the given media.
+     *
+     * | Status | Status Type | Direction tag | Strength tag |
+     * | ------ | ----------- | ------------- | ------------ |
+     * | curr   | local       | none          | (not used)   |
+     * | curr   | remote      | none          | (not used)   |
+     * | des    | local       | send          | mandatory    |
+     * | des    | local       | recv          | mandatory    |
+     * | des    | remote      | send          | optional     |
+     * | des    | remote      | recv          | optional     |
+     * | conf   | remote      | sendrecv      | (not used)   |
+     *
+     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
+     */
+    virtual void InitializeRecords(IN IMS_SINT32 eSdpMediaType);
+
+    /**
+     * @brief Removes records that are unused.
+     *
+     * @param eMediaTypes Media types that are currently using.
+     *                    Flag combination of MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT.
+     */
+    virtual void RemoveUnusedRecords(IN IMS_UINT32 eMediaTypes);
 
 private:
+    /**
+     * @brief Gets the records that match the given parameter.
+     *
+     * @param eSdpMediaType TYPE_AUDIO, TYPE_VIDEO, TYPE_TEXT of SdpMedia.h
+     * @param eAttrType CURR, DES, CONF of SdpAttribute.h
+     * @param eStatusType STATUS_LOCAL, STATUS_REMOTE of SdpPrecondition.h
+     * @param eDirTag DIRECTION_NONE, DIRECTION_SEND, DIRECTION_RECV,
+     *                DIRECTION_SENDRECV of SdpPrecondition.h
+     *                Don't care if DIRECTION_INVALID.
+     * @return The list of the records.
+     */
+    ImsList<QosStatusRecord*> GetRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
+            IN IMS_SINT32 eStatusType,
+            IN IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_INVALID) const;
+
+    ImsList<QosStatusRecord*>* GetRecordsRef(IN IMS_SINT32 eSdpMediaType);
+
     void InitializeDesChecked(IN IMS_SINT32 eSdpMediaType);
 
     void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
     void UpdateDesiredStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
-
-    ImsList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
-    ImsList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
-            IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_NONE);
-    static void ClearStatusRecords(IN_OUT ImsList<QosStatusRecord*>& lstRecords);
 
 private:
     ImsList<QosStatusRecord*> m_lstAudioRecords;

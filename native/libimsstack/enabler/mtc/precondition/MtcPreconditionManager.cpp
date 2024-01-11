@@ -253,7 +253,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
         }
 
         IMS_SINT32 eSdpMediaType = pLocalSdp->GetType();
-        if ((pLocalSdp->GetPort() <= 0) || !pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+        if (pLocalSdp->GetPort() <= 0 || !pStatusTable->GetRecords(eSdpMediaType).IsEmpty())
         {
             continue;
         }
@@ -381,7 +381,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
         QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
         if (pStatusTable != IMS_NULL)
         {
-            pStatusTable->RemoveUnusedStatusRecords(MtcMediaUtil::GetMediaTypesFromCallType(
+            pStatusTable->RemoveUnusedRecords(MtcMediaUtil::GetMediaTypesFromCallType(
                     m_objContext.GetSession()->GetCallType()));
         }
     }
@@ -682,7 +682,7 @@ void MtcPreconditionManager::CreateStatusRecordsWithActiveMediaTypes(IN ISession
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable)
     {
-        pStatusTable->RemoveUnusedStatusRecords(MtcMediaUtil::GetMediaTypesFromCallType(eCallType));
+        pStatusTable->RemoveUnusedRecords(MtcMediaUtil::GetMediaTypesFromCallType(eCallType));
     }
 }
 
@@ -696,13 +696,13 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
 
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     IMS_SINT32 eSdpMediaType = GetSdpMediaType(eMediaType);
-    if (!pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+    if (!pStatusTable->GetRecords(eSdpMediaType).IsEmpty())
     {
         return;
     }
 
     IMS_TRACE_D("CreateStatusRecords", 0, 0, 0);
-    pStatusTable->InitializeStatusRecords(eSdpMediaType);
+    pStatusTable->InitializeRecords(eSdpMediaType);
     IMS_BOOL bLocalReserved = IsLocalResourceReservedByMediaType(piSession, eMediaType);
 
     if (IsConfirmedDialog(piSession))

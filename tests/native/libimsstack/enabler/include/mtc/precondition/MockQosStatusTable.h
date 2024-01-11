@@ -27,8 +27,11 @@ class IMediaDescriptor;
 class MockQosStatusTable : public QosStatusTable
 {
 public:
-    MockQosStatusTable() {}
-    ~MockQosStatusTable() {}
+    virtual ~MockQosStatusTable() {}
+
+    MOCK_METHOD(ImsList<QosStatusRecord*>, GetRecords, (IN IMS_SINT32 eSdpMediaType),
+            (const, override));
+    MOCK_METHOD(void, ClearRecords, (IN IMS_SINT32 eSdpMediaType), (override));
     MOCK_METHOD(void, UpdateStatusTableWithRemoteSdp, (IN const IMedia& objMedia), (override));
     MOCK_METHOD(void, UpdateLocalCurrentStatus,
             (IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled), (override));
@@ -52,9 +55,8 @@ public:
     MOCK_METHOD(void, SetLocalResourceConfirmed,
             (IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bConfirmed), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalResourceConfirmed, (IN IMS_SINT32 eSdpMediaType), (override));
-    MOCK_METHOD(void, InitializeStatusRecords, (IN IMS_SINT32 eSdpMediaType), (override));
-    MOCK_METHOD(IMS_BOOL, IsStatusRecordsListEmpty, (IN IMS_SINT32 eSdpMediaType), (override));
-    MOCK_METHOD(void, RemoveUnusedStatusRecords, (IN IMS_UINT32 eMediaTypes), (override));
+    MOCK_METHOD(void, InitializeRecords, (IN IMS_SINT32 eSdpMediaType), (override));
+    MOCK_METHOD(void, RemoveUnusedRecords, (IN IMS_UINT32 eMediaTypes), (override));
 };
 
 #endif
