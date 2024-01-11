@@ -196,21 +196,27 @@ public:
 
 protected:
     IRegSubscription* m_piRegSubscription;
-
     IAosAppContext* m_piContext;
+
+    /// this is used when running refresh timer
     ITimer* m_piRetryTimer;
 
+    /// throttling count for calculating  retry timer
     IMS_UINT32 m_nThrottlingCount;
 
-    // for matching reg info contact
+    /// for matching reg info contact
     SipAddress m_objContactAddress;
 
     AString m_strTag;
 
-    // public user identity for getting reg info
+    /// public user identity for getting reg info
     AString m_strAor;
-    // state of AoR of NOTIFY
+    /// state of AoR of NOTIFY
     IMS_SINT32 m_nAorState;
+
+    /// retry count for requesting another procedure
+    IMS_UINT32 m_nRetryCountSubTerminated;
+    IMS_UINT32 m_nRetryCountRegRequired;
 
 private:
     IAosSubscriptionListener* m_piListener;
@@ -220,16 +226,10 @@ private:
     IMS_BOOL m_bIsRadioWaiting;
     IMS_BOOL m_bIsTrafficPriorityBlocked;
 
-    IMS_UINT32 m_nRetryCountSubTerminated;
-    IMS_UINT32 m_nRetryCountRegRequired;
-
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;
     static const IMS_UINT32 REFRESH_POLICY_CRITERIA_INTERVAL_FOR_RETRY = 1200;
     static const IMS_UINT32 REFRESH_POLICY_RATIO_VALUE_BELOW_THE_CRITERIA = 50;
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;
-
-private:
-    friend class AosSubscriptionTest;
 };
 
 #endif  // AOS_SUBSCRIPTION_H_
