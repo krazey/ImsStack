@@ -14,64 +14,23 @@
  * limitations under the License.
  */
 
-#include "MockIOsFactory.h"
+#include "ImsTypeDef.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
-#include "ServiceTimer.h"
+#include "TestTimerService.h"
 #include "precondition/IQosTimerListener.h"
 #include "precondition/QosTimer.h"
 #include <gtest/gtest.h>
 
-using ::testing::_;
 using ::testing::Return;
 
 namespace android
 {
 
-class TestImsMutexForQos : public ImsMutex
-{
-public:
-    inline TestImsMutexForQos() {}
-    inline virtual ~TestImsMutexForQos() {}
-
-public:
-    void Lock() override {}
-    void Unlock() override {}
-};
-
-class TestImsTimerForQos : public ImsTimer
-{
-public:
-    inline TestImsTimerForQos() {}
-    inline ~TestImsTimerForQos() {}
-
-public:
-    IMS_BOOL Equals(IN const ITimer* piTimer) const override
-    {
-        ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
-        return pTimer->GetTimerId() == reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
-    {
-        return reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    void KillTimer() override {}
-
-    IMS_UINTP GetTimerId() const override { return reinterpret_cast<IMS_UINTP>(this); }
-
-    void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
-};
-
 class QosTimerTest : public ::testing::Test, public IQosTimerListener
 {
 public:
-    MockIOsFactory objMockIOsFactory;
-    IOsFactory* pOldIOsFactory;
-    TimerService* pTimerService;
-    TestImsTimerForQos* pTestImsTimerForQos;
-    PlatformService* pOldTimerService;
-    ImsMutex* pImsMutex;
+    TestTimerService objTimerService;
     IMS_BOOL bTimerExpired;
     IMS_UINT32 nAnyDuration = 10000;
     QosTimer* pQosTimer;
@@ -84,18 +43,8 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pOldIOsFactory = PlatformContext::GetInstance()->SetOsFactory(&objMockIOsFactory);
-
-        // Mutex will be deleted by test TimerService deleting.
-        pImsMutex = new TestImsMutexForQos();
-        ON_CALL(objMockIOsFactory, CreateMutex(_)).WillByDefault(Return(pImsMutex));
-
-        pTimerService = new TimerService();
-        pOldTimerService = PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, pTimerService);
-        // TestImsTimerForQos will be deleted by QosTimer.
-        pTestImsTimerForQos = new TestImsTimerForQos();
-        ON_CALL(objMockIOsFactory, CreateTimer()).WillByDefault(Return(pTestImsTimerForQos));
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
 
         bTimerExpired = IMS_FALSE;
         pQosTimer = new QosTimer(this);
@@ -105,10 +54,7 @@ protected:
     {
         delete pQosTimer;
 
-        PlatformContext::GetInstance()->SetOsFactory(pOldIOsFactory);
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, pOldTimerService);
-        pTimerService->Destroy();
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 };
 
@@ -132,11 +78,24 @@ TEST_F(QosTimerTest, TimerTimerExpiredRemovesTimerAndNotifies)
     EXPECT_TRUE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
     EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
 
-    pQosTimer->Timer_TimerExpired(pTestImsTimerForQos);
+    pQosTimer->Timer_TimerExpired(&(objTimerService.GetMockTimer()));
 
     EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
     EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
     EXPECT_TRUE(bTimerExpired);
+}
+
+TEST_F(QosTimerTest, DestructorClearsITimer)
+{
+    MockITimer objMockITimer;
+    objTimerService.SetTimer(&objMockITimer);
+
+    QosTimer* pQosTimerForDestructor = new QosTimer(this);
+    pQosTimerForDestructor->StartQosTimer(
+            QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER, nAnyDuration);
+    EXPECT_CALL(objMockITimer, KillTimer);
+
+    delete pQosTimerForDestructor;
 }
 
 }  // namespace android
