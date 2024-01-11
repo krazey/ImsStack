@@ -69,6 +69,19 @@ public:
         return (*this);
     }
 
+    IMS_BOOL operator==(const QosStatusRecord& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return eSdpMediaType == objRhs.eSdpMediaType && eAttrType == objRhs.eAttrType &&
+                eStatusType == objRhs.eStatusType && eDirTag == objRhs.eDirTag &&
+                eStrengthTag == objRhs.eStrengthTag && bDesiredCheck == objRhs.bDesiredCheck &&
+                bLocalResourceConfirmed == objRhs.bLocalResourceConfirmed;
+    }
+
 public:
     /* Definition of SDPMedia.h
         TYPE_INVALID = (-1),
