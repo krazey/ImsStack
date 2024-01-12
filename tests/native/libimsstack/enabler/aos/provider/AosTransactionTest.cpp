@@ -44,40 +44,41 @@ public:
     {
     }
 
-    FRIEND_TEST(AosTransactionTest, SetListener_NotAddedToTheListIfListenerIsNull);
-    FRIEND_TEST(AosTransactionTest, SetListener_AddToTheMapIfDifferentTypeOfListener);
-    FRIEND_TEST(AosTransactionTest, SetListener_NotAddedToTheListIfSameListener);
-    FRIEND_TEST(AosTransactionTest, SetListener_AddToTheListIfDifferentListener);
+    FRIEND_TEST(AosTransactionTest, NullListenerIsNotAddedToTheList);
+    FRIEND_TEST(AosTransactionTest, AddListOfTheTypeToTheMapIfDifferentTypeOfListener);
+    FRIEND_TEST(AosTransactionTest, SameListenerIsNotAddedToTheList);
+    FRIEND_TEST(AosTransactionTest, DifferentListenerIsAddedToTheList);
     FRIEND_TEST(AosTransactionTest, DoNothingIfListenerIsNullWhenRemoveListener);
     FRIEND_TEST(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener);
-    FRIEND_TEST(AosTransactionTest, IsTransactionAllowed_ReturnFalseIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, IsTransactionAllowed_CallIsImsTrafficAllowed);
-    FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnTrueIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, StartTraffic_ReturnTrueIfAlreadyStarted);
-    FRIEND_TEST(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning);
+    FRIEND_TEST(AosTransactionTest, TransactionIsNotAllowedIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, CallIsImsTrafficAllowedWithRegType);
+    FRIEND_TEST(AosTransactionTest, CallIsImsTrafficAllowedWithEmergencyType);
+    FRIEND_TEST(AosTransactionTest, StartTrafficReturnTrueIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, StartTrafficReturnTrueIfAlreadyStarted);
+    FRIEND_TEST(AosTransactionTest, StartTrafficStopsTimerIfStartUpdatedAndStopTimerIsRunning);
     FRIEND_TEST(AosTransactionTest,
-            StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting);
+            AddTheTrafficTypeToTheWaitingListIfStartUpdatedAndTrafficResponseWaiting);
     FRIEND_TEST(AosTransactionTest,
             DoNothingIfStartUpdatedButTrafficResponseWaitingWhenTrafficIsStarted);
     FRIEND_TEST(
             AosTransactionTest, ShouldNotStartImsTrafficIfNoTrafficInstanceWhenTrafficIsStarted);
-    FRIEND_TEST(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated);
-    FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull);
-    FRIEND_TEST(AosTransactionTest, DoNothingIfNoTrafficInstanceWhenEmergencyTrafficIsStarted);
-    FRIEND_TEST(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime);
-    FRIEND_TEST(AosTransactionTest, StopTraffic_DoNothingIfNotStarted);
-    FRIEND_TEST(AosTransactionTest, StopTraffic_StopForTheTypeAndStartTimerIfStarted);
-    FRIEND_TEST(AosTransactionTest, StopEmergencyTraffic_DoNothingIfNotStarted);
-    FRIEND_TEST(AosTransactionTest, StopEmergencyTraffic_StopIfStarted);
-    FRIEND_TEST(AosTransactionTest, SetWlan_DoNothingIfImsTrafficIsNull);
-    FRIEND_TEST(AosTransactionTest, SetWlan_CallSetWlan);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnNgranIfNr);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnEutranIfLte);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfEhrpd);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfWcdma);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfHspa);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnIwlanIfWlan);
-    FRIEND_TEST(AosTransactionTest, GetAccessNetworkType_ReturnUnknownIfNotConsideringRat);
+    FRIEND_TEST(AosTransactionTest, StartImsTrafficIfStartNotUpdated);
+    FRIEND_TEST(AosTransactionTest, EmergencyTrafficIsNotStartedIfImsRadioIsNull);
+    FRIEND_TEST(AosTransactionTest, EmergencyTrafficIsNotStartedIfNoTrafficInstance);
+    FRIEND_TEST(AosTransactionTest, StartingEmergencyTrafficIsNotDuplicated);
+    FRIEND_TEST(AosTransactionTest, TrafficCannotBeStoppedIfNotStarted);
+    FRIEND_TEST(AosTransactionTest, StopTrafficForTheTypeAndStartTimerIfTrafficStarted);
+    FRIEND_TEST(AosTransactionTest, EmergencyTrafficCannotBeStoppedIfNotStarted);
+    FRIEND_TEST(AosTransactionTest, EmergencyTrafficCanBeStoppedIfStarted);
+    FRIEND_TEST(AosTransactionTest, CannotSetWlanIfImsTrafficIsNull);
+    FRIEND_TEST(AosTransactionTest, SetWlanWithGivenValue);
+    FRIEND_TEST(AosTransactionTest, NrIsConvertedToNgran);
+    FRIEND_TEST(AosTransactionTest, LteIsConvertedToEutran);
+    FRIEND_TEST(AosTransactionTest, EhrpdIsConvertedToUtran);
+    FRIEND_TEST(AosTransactionTest, WcdmaIsConvertedToUtran);
+    FRIEND_TEST(AosTransactionTest, HspaIsConvertedToUtran);
+    FRIEND_TEST(AosTransactionTest, WlanIsConvertedToIwlan);
+    FRIEND_TEST(AosTransactionTest, OtherRatsAreConvertedToUnknown);
     FRIEND_TEST(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFailed);
     FRIEND_TEST(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed);
     FRIEND_TEST(AosTransactionTest,
@@ -153,23 +154,28 @@ protected:
     }
 };
 
-TEST_F(AosTransactionTest, SetListener_NotAddedToTheListIfListenerIsNull)
+TEST_F(AosTransactionTest, NullListenerIsNotAddedToTheList)
 {
+    // GIVEN
     IMS_SINT32 nCountBefore = m_pAosTransaction->GetListeners().GetSize();
 
+    // WHEN
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, nullptr);
 
+    // THEN
     IMS_SINT32 nCountAfter = m_pAosTransaction->GetListeners().GetSize();
     EXPECT_EQ(nCountAfter, nCountBefore);
 }
 
-TEST_F(AosTransactionTest, SetListener_AddToTheMapIfDifferentTypeOfListener)
+TEST_F(AosTransactionTest, AddListOfTheTypeToTheMapIfDifferentTypeOfListener)
 {
+    // GIVEN
     MockIAosTransactionListener objMockIAosTransactionListenerForReg;
     MockIAosTransactionListener objMockIAosTransactionListenerForSub;
     MockIAosTransactionListener objMockIAosTransactionListenerForEmergency;
     IMS_SINT32 nCountBefore = m_pAosTransaction->GetListeners().GetSize();
 
+    // WHEN
     m_pAosTransaction->SetListener(
             IAosTransaction::TYPE_REG, &objMockIAosTransactionListenerForReg);
     m_pAosTransaction->SetListener(
@@ -177,34 +183,41 @@ TEST_F(AosTransactionTest, SetListener_AddToTheMapIfDifferentTypeOfListener)
     m_pAosTransaction->SetListener(
             IAosTransaction::TYPE_EMERGENCY, &objMockIAosTransactionListenerForEmergency);
 
+    // THEN
     IMS_SINT32 nCountAfter = m_pAosTransaction->GetListeners().GetSize();
     EXPECT_EQ(nCountAfter, nCountBefore + 3);
 }
 
-TEST_F(AosTransactionTest, SetListener_NotAddedToTheListIfSameListener)
+TEST_F(AosTransactionTest, SameListenerIsNotAddedToTheList)
 {
+    // GIVEN
     MockIAosTransactionListener objMockIAosTransactionListener;
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &objMockIAosTransactionListener);
     IMS_SINT32 nCountBefore =
             m_pAosTransaction->GetListeners().GetValue(IAosTransaction::TYPE_REG).GetSize();
 
+    // WHEN
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &objMockIAosTransactionListener);
 
+    // THEN
     IMS_SINT32 nCountAfter =
             m_pAosTransaction->GetListeners().GetValue(IAosTransaction::TYPE_REG).GetSize();
     EXPECT_EQ(nCountAfter, nCountBefore);
 }
 
-TEST_F(AosTransactionTest, SetListener_AddToTheListIfDifferentListener)
+TEST_F(AosTransactionTest, DifferentListenerIsAddedToTheList)
 {
+    // GIVEN
     MockIAosTransactionListener objMockIAosTransactionListener;
     MockIAosTransactionListener objMockIAosTransactionListener2;
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &objMockIAosTransactionListener);
     IMS_SINT32 nCountBefore =
             m_pAosTransaction->GetListeners().GetValue(IAosTransaction::TYPE_REG).GetSize();
 
+    // WHEN
     m_pAosTransaction->SetListener(IAosTransaction::TYPE_REG, &objMockIAosTransactionListener2);
 
+    // THEN
     IMS_SINT32 nCountAfter =
             m_pAosTransaction->GetListeners().GetValue(IAosTransaction::TYPE_REG).GetSize();
     EXPECT_EQ(nCountAfter, nCountBefore + 1);
@@ -227,37 +240,66 @@ TEST_F(AosTransactionTest, DoNothingIfNoListenerForTheTypeWhenRemoveListener)
     // THEN: Do nothing
 }
 
-TEST_F(AosTransactionTest, IsTransactionAllowed_ReturnFalseIfImsRadioIsNull)
+TEST_F(AosTransactionTest, TransactionIsNotAllowedIfImsRadioIsNull)
 {
+    // GIVEN
     m_pAosTransaction->m_piImsRadio = nullptr;
+
+    // WHEN
     EXPECT_FALSE(m_pAosTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG));
+
+    // THEN: Return false
 }
 
-TEST_F(AosTransactionTest, IsTransactionAllowed_CallIsImsTrafficAllowed)
+TEST_F(AosTransactionTest, CallIsImsTrafficAllowedWithRegType)
 {
+    // GIVEN
     EXPECT_CALL(m_objMockIImsRadio, IsImsTrafficAllowed(IImsRadio::TRAFFIC_TYPE_REGISTRATION));
+
+    // WHEN
     m_pAosTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG);
+
+    // THEN: Given condition should be met
+}
+
+TEST_F(AosTransactionTest, CallIsImsTrafficAllowedWithEmergencyType)
+{
+    // GIVEN
     EXPECT_CALL(m_objMockIImsRadio, IsImsTrafficAllowed(IImsRadio::TRAFFIC_TYPE_EMERGENCY));
+
+    // WHEN
     m_pAosTransaction->IsTransactionAllowed(IAosTransaction::TYPE_EMERGENCY);
+
+    // THEN: Given condition should be met
 }
 
-TEST_F(AosTransactionTest, StartTraffic_ReturnTrueIfImsRadioIsNull)
+TEST_F(AosTransactionTest, StartTrafficReturnTrueIfImsRadioIsNull)
 {
+    // GIVEN
     m_pAosTransaction->m_piImsRadio = nullptr;
+
+    // WHEN
     EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+
+    // THEN: Return true
 }
 
-TEST_F(AosTransactionTest, StartTraffic_ReturnTrueIfAlreadyStarted)
+TEST_F(AosTransactionTest, StartTrafficReturnTrueIfAlreadyStarted)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE);
     EXPECT_TRUE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
 
+    // WHEN
     EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+
+    // THEN: Return true
 }
 
-TEST_F(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRunning)
+TEST_F(AosTransactionTest, StartTrafficStopsTimerIfStartUpdatedAndStopTimerIsRunning)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
 
@@ -267,13 +309,16 @@ TEST_F(AosTransactionTest, StartTraffic_StopsTimerIfStartUpdatedAndStopTimerIsRu
     EXPECT_TRUE(m_pAosTransaction->IsStartUpdated());
     EXPECT_TRUE(m_pAosTransaction->IsTimerRunning());
 
+    // WHEN
     EXPECT_TRUE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
+
+    // THEN
     EXPECT_FALSE(m_pAosTransaction->IsTimerRunning());
 }
 
-TEST_F(AosTransactionTest,
-        StartTraffic_AddsTypeToWaitingListIfStartUpdatedAndTrafficResponseWaiting)
+TEST_F(AosTransactionTest, AddTheTrafficTypeToTheWaitingListIfStartUpdatedAndTrafficResponseWaiting)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
 
@@ -283,7 +328,10 @@ TEST_F(AosTransactionTest,
     EXPECT_TRUE(m_pAosTransaction->IsTrafficResponseWaiting());
     EXPECT_FALSE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_REG));
 
+    // WHEN
     EXPECT_FALSE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_SUB, NW_REPORT_RADIO_LTE));
+
+    // THEN
     EXPECT_TRUE(m_pAosTransaction->IsResponseWaiting(IAosTransaction::TYPE_SUB));
 }
 
@@ -316,26 +364,35 @@ TEST_F(AosTransactionTest, ShouldNotStartImsTrafficIfNoTrafficInstanceWhenTraffi
     // THEN: StartImsTraffic should not be called as the GIVEN part and return true in WHEN part
 }
 
-TEST_F(AosTransactionTest, StartTraffic_StartImsTrafficIfStartNotUpdated)
+TEST_F(AosTransactionTest, StartImsTrafficIfStartNotUpdated)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
 
+    // WHEN
     EXPECT_CALL(m_objMockIImsRadio,
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_REGISTRATION, _, IImsRadio::DIRECTION_MO, _));
+
+    // THEN
     EXPECT_FALSE(m_pAosTransaction->StartTraffic(IAosTransaction::TYPE_REG, NW_REPORT_RADIO_LTE));
 }
 
-TEST_F(AosTransactionTest, StartEmergencyTraffic_DoNothingIfImsRadioIsNull)
+TEST_F(AosTransactionTest, EmergencyTrafficIsNotStartedIfImsRadioIsNull)
 {
+    // GIVEN
     m_pAosTransaction->m_piImsRadio = nullptr;
     EXPECT_CALL(m_objMockIImsRadio,
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
             .Times(0);
+
+    // WHEN
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+
+    // THEN: Do nothing
 }
 
-TEST_F(AosTransactionTest, DoNothingIfNoTrafficInstanceWhenEmergencyTrafficIsStarted)
+TEST_F(AosTransactionTest, EmergencyTrafficIsNotStartedIfNoTrafficInstance)
 {
     // GIVEN
     m_pAosTransaction->ClearTraffics();
@@ -347,27 +404,38 @@ TEST_F(AosTransactionTest, DoNothingIfNoTrafficInstanceWhenEmergencyTrafficIsSta
     // WHEN
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: Do nothing
 }
 
-TEST_F(AosTransactionTest, StartEmergencyTraffic_StartImsTrafficCalledOnlyOneTime)
+TEST_F(AosTransactionTest, StartingEmergencyTrafficIsNotDuplicated)
 {
+    // GIVEN
     EXPECT_CALL(m_objMockIImsRadio,
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+
+    // WHEN
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
+
+    // THEN: The GIVEN condition should be met
 }
 
-TEST_F(AosTransactionTest, StopTraffic_DoNothingIfNotStarted)
+TEST_F(AosTransactionTest, TrafficCannotBeStoppedIfNotStarted)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
+
+    // WHEN
     m_pAosTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+
+    // THEN: Do nothing
 }
 
-TEST_F(AosTransactionTest, StopTraffic_StopForTheTypeAndStartTimerIfStarted)
+TEST_F(AosTransactionTest, StopTrafficForTheTypeAndStartTimerIfTrafficStarted)
 {
+    // GIVEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
 
@@ -376,91 +444,116 @@ TEST_F(AosTransactionTest, StopTraffic_StopForTheTypeAndStartTimerIfStarted)
     EXPECT_TRUE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_TRUE(m_pAosTransaction->IsStartUpdated());
 
+    // WHEN
     m_pAosTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+
+    // THEN
     EXPECT_FALSE(m_pAosTransaction->IsStarted(IAosTransaction::TYPE_REG));
     EXPECT_TRUE(m_pAosTransaction->IsTimerRunning());
 
+    // Cleaning up the timer
     m_pAosTransaction->InvokeTimerExpired();
     EXPECT_FALSE(m_pAosTransaction->IsTimerRunning());
-    EXPECT_FALSE(m_pAosTransaction->IsStartUpdated());
 }
 
-TEST_F(AosTransactionTest, StopEmergencyTraffic_DoNothingIfNotStarted)
+TEST_F(AosTransactionTest, EmergencyTrafficCannotBeStoppedIfNotStarted)
 {
+    // GIVEN
     EXPECT_CALL(m_objMockIImsRadio, StopImsTraffic(_)).Times(0);
+
+    // WHEN
     m_pAosTransaction->StopEmergencyTraffic();
+
+    // THEN: Do nothing
 }
 
-TEST_F(AosTransactionTest, StopEmergencyTraffic_StopIfStarted)
+TEST_F(AosTransactionTest, EmergencyTrafficCanBeStoppedIfStarted)
 {
+    // GIVEN
     m_pAosTransaction->StartEmergencyTraffic(IAosTransaction::TYPE_REG);
     EXPECT_CALL(m_objMockIImsRadio, StopImsTraffic(_)).Times(1);
+
+    // WHEN
     m_pAosTransaction->StopEmergencyTraffic();
+
+    // THEN: The GIVEN condition should be met
 }
 
-TEST_F(AosTransactionTest, SetWlan_DoNothingIfImsTrafficIsNull)
+TEST_F(AosTransactionTest, CannotSetWlanIfImsTrafficIsNull)
 {
+    // GIVEN
     TestImsRadioService objTestImsRadioService;
     PlatformService* pOrigService = PlatformContext::GetInstance()->SetService(
             PlatformContext::SERVICE_RADIO, &objTestImsRadioService);
 
     objTestImsRadioService.SetImsTraffic(IMS_NULL);
     EXPECT_CALL(objTestImsRadioService.GetMockImsTraffic(), SetWlan(_, _)).Times(0);
+
+    // WHEN
     m_pAosTransaction->SetWlan(IMS_TRUE);
 
+    // THEN: The GIVEN condition should be met (no call SetWlan)
+
+    // Cleaning up (restore original service)
     PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, pOrigService);
 }
 
-TEST_F(AosTransactionTest, SetWlan_CallSetWlan)
+TEST_F(AosTransactionTest, SetWlanWithGivenValue)
 {
+    // GIVEN
     TestImsRadioService objTestImsRadioService;
     PlatformService* pOrigService = PlatformContext::GetInstance()->SetService(
             PlatformContext::SERVICE_RADIO, &objTestImsRadioService);
 
     EXPECT_CALL(objTestImsRadioService.GetMockImsTraffic(), SetWlan(_, _)).Times(2);
+
+    // WHEN
     m_pAosTransaction->SetWlan(IMS_TRUE);
     m_pAosTransaction->SetWlan(IMS_FALSE);
 
+    // THEN: The GIVEN condition should be met (Call SetWlan)
+
+    // Cleaning up (restore original service)
     PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, pOrigService);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnNgranIfNr)
+TEST_F(AosTransactionTest, NrIsConvertedToNgran)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_NR),
             IImsRadio::ACCESS_NETWORK_TYPE_NGRAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnEutranIfLte)
+TEST_F(AosTransactionTest, LteIsConvertedToEutran)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_LTE),
             IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfEhrpd)
+TEST_F(AosTransactionTest, EhrpdIsConvertedToUtran)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_EHRPD),
             IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfWcdma)
+TEST_F(AosTransactionTest, WcdmaIsConvertedToUtran)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_WCDMA),
             IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUtranIfHspa)
+TEST_F(AosTransactionTest, HspaIsConvertedToUtran)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_HSPA),
             IImsRadio::ACCESS_NETWORK_TYPE_UTRAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnIwlanIfWlan)
+TEST_F(AosTransactionTest, WlanIsConvertedToIwlan)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_WLAN),
             IImsRadio::ACCESS_NETWORK_TYPE_IWLAN);
 }
 
-TEST_F(AosTransactionTest, GetAccessNetworkType_ReturnUnknownIfNotConsideringRat)
+TEST_F(AosTransactionTest, OtherRatsAreConvertedToUnknown)
 {
     EXPECT_EQ(m_pAosTransaction->GetAccessNetworkType(NW_REPORT_RADIO_INVALID),
             IImsRadio::ACCESS_NETWORK_TYPE_UNKNOWN);
@@ -476,7 +569,7 @@ TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionIsFai
     m_pAosTransaction->Traffic_OnConnectionFailed(
             IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFailed)
@@ -491,7 +584,7 @@ TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionIsFail
     m_pAosTransaction->Traffic_OnConnectionFailed(
             IAosTransaction::TYPE_REG, IImsRadio::REASON_ACCESS_DENIED, 0, 1000);
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest,
@@ -543,7 +636,7 @@ TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficConnectionSetup
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_REG);
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionSetupIsPrepared)
@@ -555,7 +648,7 @@ TEST_F(AosTransactionTest, ShouldNotifyToTheListenersWhenTrafficConnectionSetupI
     // WHEN
     m_pAosTransaction->Traffic_OnConnectionSetupPrepared(IAosTransaction::TYPE_REG);
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest,
@@ -601,7 +694,7 @@ TEST_F(AosTransactionTest, ShouldNotNotifyIfNoListenerWhenTrafficPriorityChanged
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged)
@@ -613,7 +706,7 @@ TEST_F(AosTransactionTest, ShouldNotifyToOneListenerWhenTrafficPriorityChanged)
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged)
@@ -626,7 +719,7 @@ TEST_F(AosTransactionTest, ShouldNotifyToTwoListenersWhenTrafficPriorityChanged)
     // WHEN
     m_pAosTransaction->ImsRadio_OnTrafficPriorityChanged();
 
-    // THEN: The GIVEN condition should be met.
+    // THEN: The GIVEN condition should be met
 }
 
 TEST_F(AosTransactionTest, DoNothingIfTheTimerIsNullWhenTimerIsExpired)
