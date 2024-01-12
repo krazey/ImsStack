@@ -15,6 +15,7 @@
  */
 
 #include "ImsList.h"
+#include "MockICoreService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcSession.h"
@@ -31,6 +32,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
+#include "sipcore/SipHeaderName.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
@@ -84,6 +86,7 @@ public:
     MockISession objMockJoiningSession;
     MockIMtcSession objMockJoiningMtcSession;
     MockIReference objMockReference;
+    MockICoreService objMockICoreService;
 
 protected:
     virtual void SetUp() override
@@ -96,7 +99,9 @@ protected:
 
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
-        // ON_CALL(objMockContext, GetServiceByType).WillByDefault(ReturnRef(objMockCallManager));
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(&objMockService));
+        ON_CALL(objMockService, GetICoreService).WillByDefault(Return(&objMockICoreService));
 
         ON_CALL(objMockContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objMockInterfaceFactory));
@@ -123,8 +128,7 @@ protected:
 
     void CreateReference()
     {
-        // TODO: when multiple ConfUser logic is added, this should be updated
-        objUser.strUserEntity = "sip:testUser@ims.google.com";
+        objUser.strUserEntity = "sip:testUser1@ims.google.com";
         objUser.nConnectionId = JOINING_CALL_ID;
 
         pConferenceReference = new ConferenceReference(
@@ -209,6 +213,18 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
     pConferenceReference->ReferenceDelivered(&objMockReference);
 }
 
+TEST_F(ConferenceReferenceTest, OnReferenceDeliveredInvokesOnReferenceStartedWithNoRefer)
+{
+    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
+            .WillByDefault(Return(static_cast<IMessage*>(IMS_NULL)));
+
+    EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
+
+    pConferenceReference->ReferenceDelivered(&objMockReference);
+}
+
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
 {
     ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
@@ -220,6 +236,21 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
     ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(200));
 
     EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
+
+    pConferenceReference->ReferenceDelivered(&objMockReference);
+}
+
+TEST_F(ConferenceReferenceTest, OnReferenceDeliveredInvokesOnReferenceStartFailed)
+{
+    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
+            .WillByDefault(Return(IMS_FALSE));
+
+    MockIMessage objMockMessage;
+    ON_CALL(objMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(100));
+
+    EXPECT_CALL(objMockListener, OnReferenceStartFailed(_)).Times(1);
 
     pConferenceReference->ReferenceDelivered(&objMockReference);
 }
@@ -263,7 +294,27 @@ TEST_F(ConferenceReferenceTest, OnReferenceTerminated)
     pConferenceReference->ReferenceTerminated(&objMockReference);
 }
 
-TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoConfCall)
+{
+    ON_CALL(objMockConferenceCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
+
+    // TODO: let UriFormatter returns test uri
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithTerminatingState)
+{
+    ON_CALL(objMockConferenceCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
+
+    // TODO: let UriFormatter returns test uri
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForSingleUser)
 {
     ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
             .WillByDefault(Return(IMS_TRUE));
@@ -276,9 +327,89 @@ TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
     // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     ON_CALL(objMessageUtils, GetRemoteUri(_, _)).WillByDefault(Return(strReferToUri));
+
     IMS_RESULT nResult = pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager);
     EXPECT_EQ(nResult, IMS_SUCCESS);
     EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_INVITE);
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForMultipleUser)
+{
+    ConfUser objUser2;
+    objUser2.strUserEntity = "sip:testUser2@ims.google.com";
+    ImsList<ConfUser*> objConfUsers;
+    objConfUsers.Append(&objUser);
+    objConfUsers.Append(&objUser2);
+    ConferenceReference* pConferenceReferenceWithMultipleUser = new ConferenceReference(
+            objMockContext, CONFERENCE_CALL_KEY, objConfUsers, objMockListener);
+
+    EXPECT_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid).Times(0);
+
+    ON_CALL(*pMockConfigurationManager, GetConferenceFactoryUri)
+            .WillByDefault(Return(AString("sip:conference-factory1@mrfc1.home1.net")));
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
+            .WillByDefault(Return(&objMockReference));
+
+    MockIMessage objIMessage;
+    EXPECT_CALL(objMockReference, GetNextRequest).Times(1).WillOnce(Return(&objIMessage));
+    EXPECT_CALL(objIMessage,
+            AddHeader(AString(SipHeaderName::CONTENT_DISPOSITION), AString("recipient-list")))
+            .Times(1);
+
+    // TODO: let UriFormatter returns test uri
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    IMS_RESULT nResult = pConferenceReferenceWithMultipleUser->SendInvite(
+            strReferToUri, *pMockConnectionIdManager);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_EQ(pConferenceReferenceWithMultipleUser->GetType(), REFERENCE_TYPE_INVITE);
+
+    delete pConferenceReferenceWithMultipleUser;
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoUsers)
+{
+    ImsList<ConfUser*> objConfUsers;
+    ConferenceReference* pConferenceReferenceWithNoUsers = new ConferenceReference(
+            objMockContext, CONFERENCE_CALL_KEY, objConfUsers, objMockListener);
+
+    // TODO: let UriFormatter returns test uri
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReferenceWithNoUsers->SendInvite(strReferToUri, *pMockConnectionIdManager));
+    EXPECT_EQ(pConferenceReferenceWithNoUsers->GetType(), REFERENCE_TYPE_INVITE);
+    delete pConferenceReferenceWithNoUsers;
+}
+
+TEST_F(ConferenceReferenceTest, SendByFailedWithNoRefer)
+{
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
+            .WillByDefault(Return(static_cast<IReference*>(IMS_NULL)));
+
+    EXPECT_EQ(IMS_FAILURE, pConferenceReference->SendBye());
+    EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_BYE);
+}
+
+TEST_F(ConferenceReferenceTest, SendBySendsRefer)
+{
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, AString("BYE")))
+            .WillByDefault(Return(&objMockReference));
+    EXPECT_CALL(objMockReference, Refer(IMS_TRUE)).Times(1);
+    ON_CALL(objMockICoreService, GetLocalUserId).WillByDefault(Return(AString("LocalUserId")));
+    MockIMessage objMockMessage;
+    ON_CALL(objMockReference, GetNextRequest).WillByDefault(Return(&objMockMessage));
+    MockISipMessage objMockISipMessage;
+    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+
+    EXPECT_CALL(objMockISipMessage,
+            AddHeader(ISipHeader::REFERRED_BY, AString("LocalUserId"), AString::ConstNull()))
+            .Times(1);
+    EXPECT_EQ(IMS_SUCCESS, pConferenceReference->SendBye());
+    EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_BYE);
+}
+
+TEST_F(ConferenceReferenceTest, GetResponseCodeReturnsInvalid)
+{
+    EXPECT_EQ(SipStatusCode::SC_INVALID, pConferenceReference->GetResponseCode());
 }
 
 TEST_F(ConferenceReferenceTest, SetForceToTerminateInterfaceChangesReleaseIReferenceParam)
