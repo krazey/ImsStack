@@ -107,7 +107,7 @@ public:
     IMS_BOOL handleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
-private:
+protected:
     static const IMS_UINT32 TIME_WAIT_MEDIA_RESPONSE = 5000;
 
     MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId);
