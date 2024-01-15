@@ -74,9 +74,14 @@ public:
     }
 
     FRIEND_TEST(AosSubscriptionTest, Initialize);
-    FRIEND_TEST(AosSubscriptionTest, Stop);
-    FRIEND_TEST(AosSubscriptionTest, AosSubscriptionStart);
-    FRIEND_TEST(AosSubscriptionTest, AosSubscriptionStart_CheckRadioTrue);
+    FRIEND_TEST(AosSubscriptionTest, CallUnsubscribeInStopWhenUnsubscriptionIsSupported);
+    FRIEND_TEST(AosSubscriptionTest, NotCallUnsubscribeInStopWhenUnsubscriptionIsNotSupported);
+    FRIEND_TEST(AosSubscriptionTest, StateIsInvalidWhenStart);
+    FRIEND_TEST(AosSubscriptionTest, SubscribeFailedInStartWhenRegSubscriptionIsNull);
+    FRIEND_TEST(AosSubscriptionTest, StartReturnFalseWhenSendSubscribeFailed);
+    FRIEND_TEST(AosSubscriptionTest, StartReturnTrueWhenSendSubscribePassed);
+    FRIEND_TEST(AosSubscriptionTest, StartReturnFalseWhenStartWithCheckRadioIsTrue);
+
     FRIEND_TEST(AosSubscriptionTest, IsRetryActionDueToRetryCounter);
     FRIEND_TEST(AosSubscriptionTest, CheckSubscriptionTerminated);
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegRequired);
@@ -270,11 +275,11 @@ protected:
 
         m_pAosSubscription->SetListener(&m_objMockIAosSubscriptionListener);
         m_pAosSubscription->SetRegSubscription(&m_objMockIRegSubscription);
+        ON_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
+                .WillByDefault(Return(IMS_TRUE));
+
         EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_StateChanged(_, _))
                 .WillRepeatedly(Return());
-
-        EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-                .WillRepeatedly(Return(IMS_TRUE));
 
         EXPECT_CALL(m_objMockIAosTransaction, RemoveListener(_, _)).Times(AnyNumber());
         EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_))
@@ -320,14 +325,9 @@ TEST_F(AosSubscriptionTest, Initialize)
     m_pAosSubscription->Initialize();
 }
 
-TEST_F(AosSubscriptionTest, Stop)
+TEST_F(AosSubscriptionTest, CallUnsubscribeInStopWhenUnsubscriptionIsSupported)
 {
-    EXPECT_CALL(m_objMockAosConfig, IsUnSubscription())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    m_pAosSubscription->Stop();
+    ON_CALL(m_objMockAosConfig, IsUnSubscription()).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIRegSubscription, Unsubscribe()).Times(1);
 
@@ -335,36 +335,50 @@ TEST_F(AosSubscriptionTest, Stop)
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_UNSUBSCRIBING);
 }
 
-TEST_F(AosSubscriptionTest, AosSubscriptionStart)
+TEST_F(AosSubscriptionTest, NotCallUnsubscribeInStopWhenUnsubscriptionIsNotSupported)
+{
+    int nState = m_pAosSubscription->GetState();
+    ON_CALL(m_objMockAosConfig, IsUnSubscription()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosSubscription->Stop();
+    EXPECT_EQ(m_pAosSubscription->GetState(), nState);
+}
+
+TEST_F(AosSubscriptionTest, StateIsInvalidWhenStart)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_UNSUBSCRIBING);
     EXPECT_FALSE(m_pAosSubscription->Start(IMS_FALSE));
+}
 
+TEST_F(AosSubscriptionTest, SubscribeFailedInStartWhenRegSubscriptionIsNull)
+{
     m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
-
     m_pAosSubscription->SetRegSubscription(IMS_NULL);
-    EXPECT_FALSE(m_pAosSubscription->Start(IMS_FALSE));
 
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
-    m_pAosSubscription->SetRegSubscription(
-            static_cast<IRegSubscription*>(&m_objMockIRegSubscription));
-    EXPECT_CALL(m_objMockIRegSubscription, Subscribe())
-            .WillOnce(Return(IMS_FAILURE))
-            .WillRepeatedly(Return(IMS_SUCCESS));
     EXPECT_FALSE(m_pAosSubscription->Start(IMS_FALSE));
+}
+
+TEST_F(AosSubscriptionTest, StartReturnFalseWhenSendSubscribeFailed)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    ON_CALL(m_objMockIRegSubscription, Subscribe()).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_FALSE(m_pAosSubscription->Start(IMS_FALSE));
+}
+
+TEST_F(AosSubscriptionTest, StartReturnTrueWhenSendSubscribePassed)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    ON_CALL(m_objMockIRegSubscription, Subscribe()).WillByDefault(Return(IMS_SUCCESS));
+
     EXPECT_TRUE(m_pAosSubscription->Start(IMS_FALSE));
 }
 
-TEST_F(AosSubscriptionTest, AosSubscriptionStart_CheckRadioTrue)
+TEST_F(AosSubscriptionTest, StartReturnFalseWhenStartWithCheckRadioIsTrue)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
 
-    EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_)).WillOnce(Return(IMS_FALSE));
 
     EXPECT_FALSE(m_pAosSubscription->Start(IMS_TRUE));
 }
