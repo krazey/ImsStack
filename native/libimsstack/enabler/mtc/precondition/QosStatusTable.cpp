@@ -462,8 +462,8 @@ void QosStatusTable::UpdateCurrentStatus(
         else
         {
             IMS_TRACE_D("UpdateCurrentStatus : update remote current status", 0, 0, 0);
-            SetDirectionTag(eSdpMediaType, SdpAttribute::CURR, SdpPrecondition::STATUS_REMOTE,
-                    detailInfo.GetDirection());
+            SetDirectionTag(
+                    eSdpMediaType, SdpAttribute::CURR, SdpPrecondition::STATUS_REMOTE, eDirInSdp);
         }
     }
 }
@@ -534,7 +534,7 @@ void QosStatusTable::UpdateDesiredStatus(
     for (IMS_UINT32 index = 0; index < lstRecords.GetSize(); index++)
     {
         QosStatusRecord* pRecord = lstRecords.GetAt(index);
-        if ((pRecord->eAttrType == SdpAttribute::DES) && !(pRecord->bDesiredCheck))
+        if (pRecord->eAttrType == SdpAttribute::DES && !pRecord->bDesiredCheck)
         {
             SetStrengthTag(pRecord->eSdpMediaType, pRecord->eStatusType, pRecord->eDirTag,
                     SdpPrecondition::STRENGTH_NOTUSED);
