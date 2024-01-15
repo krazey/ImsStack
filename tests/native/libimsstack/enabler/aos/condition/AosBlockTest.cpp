@@ -109,82 +109,97 @@ INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
                 {BLOCK_MAX,                           "INVALID"                      }
 }));
 
-TEST_F(AosBlockTest, SetListener_ParamNull)
+TEST_F(AosBlockTest, FailsSetListenerWhenListenerIsNull)
 {
+    // GIVEN
+    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
+
+    // WHEN
     m_pAosBlock->SetListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
-TEST_F(AosBlockTest, SetListener_Success)
+TEST_F(AosBlockTest, SucceedsSetListener)
 {
+    // GIVEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
+    MockIAosBlockListener objMockIAosBlockListener1;
+    MockIAosBlockListener objMockIAosBlockListener2;
+    MockIAosBlockListener objMockIAosBlockListener3;
 
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    // WHEN
+    m_pAosBlock->SetListener(&objMockIAosBlockListener1);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener2);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener3);
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 1);
-
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 2);
-
-    m_pAosBlock->SetListener(piAosBlockListener3);
+    // THEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, SetListener_AlreadyExist)
+TEST_F(AosBlockTest, FailsSetListenerWhenSameListenerIsExist)
 {
+    // GIVEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
+    MockIAosBlockListener objMockIAosBlockListener1;
+    MockIAosBlockListener objMockIAosBlockListener2;
+    MockIAosBlockListener objMockIAosBlockListener3;
 
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    m_pAosBlock->SetListener(&objMockIAosBlockListener1);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener2);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener3);
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
+    // WHEN
+    m_pAosBlock->SetListener(&objMockIAosBlockListener1);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener2);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener3);
+
+    // THEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, RemoveListener_ParamNull)
+TEST_F(AosBlockTest, FailsRemoveListenerWhenListenerIsNull)
 {
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    // GIVEN
+    MockIAosBlockListener objMockIAosBlockListener1;
+    MockIAosBlockListener objMockIAosBlockListener2;
+    MockIAosBlockListener objMockIAosBlockListener3;
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener1);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener2);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener3);
+
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
+    // WHEN
     m_pAosBlock->RemoveListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 }
 
-TEST_F(AosBlockTest, RemoveListener_Success)
+TEST_F(AosBlockTest, SucceedsRemoveListener)
 {
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    // GIVEN
+    MockIAosBlockListener objMockIAosBlockListener1;
+    MockIAosBlockListener objMockIAosBlockListener2;
+    MockIAosBlockListener objMockIAosBlockListener3;
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener1);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener2);
+    m_pAosBlock->SetListener(&objMockIAosBlockListener3);
+
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
 
-    m_pAosBlock->RemoveListener(piAosBlockListener3);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 2);
+    // WHEN
+    m_pAosBlock->RemoveListener(&objMockIAosBlockListener3);
+    m_pAosBlock->RemoveListener(&objMockIAosBlockListener2);
+    m_pAosBlock->RemoveListener(&objMockIAosBlockListener1);
 
-    m_pAosBlock->RemoveListener(piAosBlockListener2);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 1);
-
-    m_pAosBlock->RemoveListener(piAosBlockListener1);
+    // THEN
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
