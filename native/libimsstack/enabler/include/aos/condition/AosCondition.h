@@ -189,13 +189,13 @@ protected:
     IMS_SINT32 m_nSlotId;
     IAosConditionListener* m_piListener;
     AosServiceAvailableCellular* m_pAvailableCellular;
-    AosServiceAvailableWifi* m_pAvailableWiFi;
+    AosServiceAvailableWifi* m_pAvailableWifi;
     IAosBlock* m_piBlock;
     SERVICE_TYPE m_eServiceType;
     IMS_BOOL m_bIsRefreshStarted;
     IMS_BOOL m_bIsCombinedAttached;
     IMS_BOOL m_bCellServiceAvailable;
-    IMS_BOOL m_bWiFiServiceAvailable;
+    IMS_BOOL m_bWifiServiceAvailable;
     IMS_BOOL m_bIsTtyOn;
     IMS_UINT32 m_nHoldEvents;
     IMS_UINT32 m_nListeners;

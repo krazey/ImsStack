@@ -55,7 +55,7 @@ private:
 
     void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) final;
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState) final;
-    void HandleWiFiConnectionChanged() final;
+    void HandleWifiConnectionChanged() final;
     void HandleLocationInfoChanged() final;
 
     IMS_BOOL CheckServiceAvailable() final;
@@ -69,7 +69,7 @@ private:
 private:
     AString m_strCountry;
     IMS_UINT32 m_nBadNetworkState;
-    IMS_BOOL m_bWiFiState;
+    IMS_BOOL m_bWifiState;
     INetworkPing* m_piNetPing;
 
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;

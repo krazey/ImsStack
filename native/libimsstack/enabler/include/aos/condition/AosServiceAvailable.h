@@ -57,7 +57,7 @@ protected:
     virtual void HandleRoamingChanged(IN IMS_UINT32 nState);
     virtual void HandleAirplaneModeChanged(IN IMS_UINT32 nState);
     virtual void HandleVopsChanged(IN IMS_UINT32 nState);
-    virtual void HandleWiFiConnectionChanged();
+    virtual void HandleWifiConnectionChanged();
     virtual void HandleLocationInfoChanged();
     virtual IMS_BOOL CheckServiceAvailable();
 

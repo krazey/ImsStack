@@ -196,7 +196,7 @@ IMS_UINT32 AosServiceAvailable::HandleEvent(
             break;
 
         case EVENT_WIFI_STATE:
-            HandleWiFiConnectionChanged();
+            HandleWifiConnectionChanged();
             eReturn = EVENT_WIFI_STATE;
             break;
 
@@ -262,9 +262,9 @@ PROTECTED VIRTUAL void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nSta
     A_IMS_TRACE_I(AOSTAG, "HandleVopsChanged :: nState(%d)", nState, 0, 0);
 }
 
-PROTECTED VIRTUAL void AosServiceAvailable::HandleWiFiConnectionChanged()
+PROTECTED VIRTUAL void AosServiceAvailable::HandleWifiConnectionChanged()
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleWiFiConnectionChanged", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "HandleWifiConnectionChanged", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleLocationInfoChanged()

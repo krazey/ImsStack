@@ -35,7 +35,7 @@ AosServiceAvailableWifi::AosServiceAvailableWifi() :
         AosServiceAvailable("AosServiceAvailableWifi"),
         m_strCountry(AString::ConstEmpty()),
         m_nBadNetworkState(STATE_BAD_NETWORK_NONE),
-        m_bWiFiState(IMS_FALSE),
+        m_bWifiState(IMS_FALSE),
         m_piNetPing(IMS_NULL),
         m_piTestLocation(IMS_NULL)
 {
@@ -121,7 +121,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::RegisterListener()
 
     if (piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED)
     {
-        m_bWiFiState = IMS_TRUE;
+        m_bWifiState = IMS_TRUE;
     }
 }
 
@@ -143,21 +143,21 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(
 
     if (pIWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED)
     {
-        if (m_bWiFiState)
+        if (m_bWifiState)
         {
             return;
         }
 
-        m_bWiFiState = IMS_TRUE;
+        m_bWifiState = IMS_TRUE;
     }
     else
     {
-        if (m_bWiFiState == IMS_FALSE)
+        if (m_bWifiState == IMS_FALSE)
         {
             return;
         }
 
-        m_bWiFiState = IMS_FALSE;
+        m_bWifiState = IMS_FALSE;
 
         ClearBadNetworkState();
     }
@@ -224,7 +224,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_U
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWifiConnectionChanged()
 {
     if (m_piBlock == IMS_NULL)
     {
