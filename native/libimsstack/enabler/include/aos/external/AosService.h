@@ -117,17 +117,17 @@ protected:
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
+protected:
+    enum
+    {
+        TIMER_PLMN_CHANGE_DELAY = 0
+    };
+
 private:
     void Init();
     void CleanUp();
     void Attach();
     IJniAosServiceThread* GetJniThread();
-
-private:
-    enum
-    {
-        TIMER_PLMN_CHANGE_DELAY = 0
-    };
 
 private:
     IMS_SINT32 m_nSlotId;

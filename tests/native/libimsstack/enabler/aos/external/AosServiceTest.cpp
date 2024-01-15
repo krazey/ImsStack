@@ -32,11 +32,6 @@ using ::testing::_;
 
 const IMS_SINT32 SLOT_ID = 0;
 
-enum
-{
-    TIMER_PLMN_CHANGE_DELAY = 0
-};
-
 class TestAosService : public AosService
 {
 public:
@@ -69,50 +64,98 @@ protected:
     }
 };
 
-TEST_F(AosServiceTest, AddListener_IAosEmergencyListener)
+TEST_F(AosServiceTest, SucceedsAddListenerForIAosEmergencyListener)
 {
+    // GIVEN
     MockIAosEmergencyListener objMockListener1;
     MockIAosEmergencyListener objMockListener2;
     MockIAosEmergencyListener objMockListener3;
 
-    // Case1 : Add success
-    EXPECT_TRUE(m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener1)));
-    EXPECT_TRUE(m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener2)));
-    EXPECT_TRUE(m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener3)));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosService->AddListener(&objMockListener1);
+    IMS_BOOL bResult2 = m_pAosService->AddListener(&objMockListener2);
+    IMS_BOOL bResult3 = m_pAosService->AddListener(&objMockListener3);
 
-    // Case2 : Exist listener
-    EXPECT_FALSE(
-            m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener3)));
-    EXPECT_FALSE(
-            m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener2)));
-    EXPECT_FALSE(
-            m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener1)));
-
-    // Case3 : Listener is null
-    EXPECT_FALSE(m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(IMS_NULL)));
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
 }
 
-TEST_F(AosServiceTest, RemoveListener_IAosEmergencyListener)
+TEST_F(AosServiceTest, FailsAddListenerForIAosEmergencyListenerWhenSameListenerIsExist)
 {
+    // GIVEN
     MockIAosEmergencyListener objMockListener1;
     MockIAosEmergencyListener objMockListener2;
     MockIAosEmergencyListener objMockListener3;
 
-    m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener1));
-    m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(&objMockListener2));
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
 
-    // Case1 : Remove success
-    EXPECT_TRUE(
-            m_pAosService->RemoveListener(static_cast<IAosEmergencyListener*>(&objMockListener2)));
-    EXPECT_TRUE(
-            m_pAosService->RemoveListener(static_cast<IAosEmergencyListener*>(&objMockListener1)));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosService->AddListener(&objMockListener1);
+    IMS_BOOL bResult2 = m_pAosService->AddListener(&objMockListener2);
+    IMS_BOOL bResult3 = m_pAosService->AddListener(&objMockListener3);
 
-    // Case2 : Not exist listener
-    EXPECT_FALSE(
-            m_pAosService->RemoveListener(static_cast<IAosEmergencyListener*>(&objMockListener3)));
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+}
 
-    // Case3 : Listener is null
-    EXPECT_FALSE(m_pAosService->RemoveListener(static_cast<IAosEmergencyListener*>(IMS_NULL)));
+TEST_F(AosServiceTest, FailsAddListenerForIAosEmergencyListenerWhenListenerIsNull)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosService->AddListener(static_cast<IAosEmergencyListener*>(IMS_NULL));
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosServiceTest, SucceedsRemoveListenerForIAosEmergencyListener)
+{
+    // GIVEN
+    MockIAosEmergencyListener objMockListener1;
+    MockIAosEmergencyListener objMockListener2;
+    MockIAosEmergencyListener objMockListener3;
+
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
+
+    // WHEN
+    IMS_BOOL bResult3 = m_pAosService->RemoveListener(&objMockListener3);
+    IMS_BOOL bResult2 = m_pAosService->RemoveListener(&objMockListener2);
+    IMS_BOOL bResult1 = m_pAosService->RemoveListener(&objMockListener1);
+
+    // THEN
+    EXPECT_TRUE(bResult3);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult1);
+}
+
+TEST_F(AosServiceTest, FailsRemoveListenerForIAosEmergencyListenerWhenNoExistListener)
+{
+    // GIVEN
+    MockIAosEmergencyListener objMockListener;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosService->RemoveListener(&objMockListener);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosServiceTest, FailsRemoveListenerForIAosEmergencyListenerWhenListenerIsNull)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosService->RemoveListener(static_cast<IAosEmergencyListener*>(IMS_NULL));
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
 TEST_F(AosServiceTest, AddListener_IAosRegistrationControlListener)
@@ -709,7 +752,7 @@ TEST_F(AosServiceTest, NotifyPlmnChanged)
     EXPECT_CALL(objMockListener3, ServicePhone_PlmnChanged()).Times(1);
 
     pTestAosService->NotifyPlmnChanged();
-    EXPECT_TRUE(pTestAosService->IsTimerRunning(TIMER_PLMN_CHANGE_DELAY));
+    EXPECT_TRUE(pTestAosService->IsTimerRunning(TestAosService::TIMER_PLMN_CHANGE_DELAY));
     pTestAosService->ProcessPlmnChangeDelayTimerExpired();
 }
 
