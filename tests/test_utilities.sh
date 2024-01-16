@@ -13,8 +13,11 @@ function coveragegen() {
 
     cd $ANDROID_BUILD_TOP
 
-    IMS_STACK_PATH=vendor/google/services/ImsStack
     IMS_STACK_BIN_PATH=$OUT/symbols/system_ext/lib64/libimsstack.so
+    if [ ! -e $IMS_STACK_BIN_PATH ]; then
+        IMS_STACK_BIN_PATH=$OUT/symbols/system_ext/lib/libimsstack.so
+    fi
+    IMS_STACK_PATH=vendor/google/services/ImsStack
     TEST_MODULE_PATH=$IMS_STACK_PATH/tests/native
 
     COVERAGE_OUTPUT_DEVICE_PATH=/data/misc/trace
