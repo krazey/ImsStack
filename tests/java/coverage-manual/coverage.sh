@@ -16,11 +16,7 @@
 # limitations under the License.
 #
 
-##### App specific parameters #####
-
 TEST_SCRIPT_PATH='vendor/google/services/ImsStack/tests/java/coverage-manual'
-
-##### End app specific parameters #####
 
 if [ -z $ANDROID_BUILD_TOP ]; then
   echo "You need to source and lunch before you can use this script"
@@ -28,5 +24,6 @@ if [ -z $ANDROID_BUILD_TOP ]; then
 fi
 
 $ANDROID_BUILD_TOP/$TEST_SCRIPT_PATH/install.sh && \
-sleep 5 && \ # wait 5 seconds for device rebooting
+# wait 5 seconds for device rebooting
+sleep 5 && \
 $ANDROID_BUILD_TOP/$TEST_SCRIPT_PATH/run.sh

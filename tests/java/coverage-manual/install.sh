@@ -18,15 +18,23 @@
 
 ##### App specific parameters #####
 
+if [ -z $TARGET_ARCH ]; then
+  TARGET_ARCH='arm64'
+fi
 TEST_PACKAGE='com.android.imsstack.tests'
 TEST_MODULE_NAME='ImsStackJavaTests'
 TEST_MODULE_PATH='vendor/google/services/ImsStack/tests/java'
-TEST_MODULE_INSTALL_PATH="testcases/$TEST_MODULE_NAME/arm64/$TEST_MODULE_NAME.apk"
+TEST_MODULE_INSTALL_PATH="testcases/$TEST_MODULE_NAME/$TARGET_ARCH/$TEST_MODULE_NAME.apk"
 
 ##### End app specific parameters #####
 
 # location on the device to store coverage results, need to be accessible by the app
 REMOTE_COVERAGE_OUTPUT_FILE="/storage/self/primary/Download/coverage.ec"
+
+if [ -z $ANDROID_BUILD_TOP ]; then
+  echo "You need to source and lunch before you can use this script"
+  exit 1
+fi
 
 source $ANDROID_BUILD_TOP/build/envsetup.sh
 
