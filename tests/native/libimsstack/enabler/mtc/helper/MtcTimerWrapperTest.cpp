@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#include "MockIOsFactory.h"
+#include "ITimer.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
-#include "ServiceTimer.h"
+#include "TestTimerService.h"
 #include "call/state/MtcCallState.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/MtcTimerWrapper.h"
@@ -28,132 +29,123 @@ using ::testing::Return;
 namespace android
 {
 
-class TestImsMutexForMtc : public ImsMutex
-{
-public:
-    inline TestImsMutexForMtc() {}
-    inline virtual ~TestImsMutexForMtc() {}
-
-public:
-    void Lock() override {}
-    void Unlock() override {}
-};
-
-class TestImsTimerForMtc : public ImsTimer
-{
-public:
-    inline TestImsTimerForMtc() {}
-    inline ~TestImsTimerForMtc() {}
-
-public:
-    IMS_BOOL Equals(IN const ITimer* piTimer) const override
-    {
-        ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
-        return pTimer->GetTimerId() == reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
-    {
-        return reinterpret_cast<IMS_UINTP>(this);
-    }
-
-    void KillTimer() override {}
-
-    IMS_UINTP GetTimerId() const override { return reinterpret_cast<IMS_UINTP>(this); }
-
-    void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
-};
-
 class MtcTimerWrapperTest : public ::testing::Test, public IMtcTimerListener
 {
 public:
-    void OnTimerExpired(IN IMS_SINT32 /*nType*/) override { bTimerExpired = IMS_TRUE; }
-
-    MockIOsFactory objMockIOsFactory;
-    IOsFactory* pOldIOsFactory;
-    MtcTimerWrapper objMtcTimerWrapper;
-    TestImsTimerForMtc* pTestImsTimerForMtc1;
-    TestImsTimerForMtc* pTestImsTimerForMtc2;
+    TestTimerService objTimerService;
     IMS_BOOL bTimerExpired;
     IMS_UINT32 nAnyDuration = 10000;
-    TimerService* pTimerService;
-    PlatformService* pOldTimerService;
-    ImsMutex* pImsMutex;
+    MtcTimerWrapper* pMtcTimerWrapper;
+
+    void OnTimerExpired(IN IMS_SINT32 /*nType*/) override { bTimerExpired = IMS_TRUE; }
 
 protected:
     virtual void SetUp() override
     {
-        pOldIOsFactory = PlatformContext::GetInstance()->SetOsFactory(&objMockIOsFactory);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
 
-        objMtcTimerWrapper.SetListener(this);
+        pMtcTimerWrapper = new MtcTimerWrapper();
+        pMtcTimerWrapper->SetListener(this);
         bTimerExpired = IMS_FALSE;
-
-        // Mutex will be deleted by test TimerService deleting.
-        pImsMutex = new TestImsMutexForMtc();
-        ON_CALL(objMockIOsFactory, CreateMutex(_)).WillByDefault(Return(pImsMutex));
-
-        pTimerService = new TimerService();
-        pOldTimerService = PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, pTimerService);
     }
 
     virtual void TearDown() override
     {
-        PlatformContext::GetInstance()->SetOsFactory(pOldIOsFactory);
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, pOldTimerService);
-        pTimerService->Destroy();
+        delete pMtcTimerWrapper;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 };
 
 TEST_F(MtcTimerWrapperTest, StartStopInvokesAddingRemovingTimer)
 {
-    pTestImsTimerForMtc1 = new TestImsTimerForMtc();
-    EXPECT_CALL(objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(pTestImsTimerForMtc1));
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
 
-    objMtcTimerWrapper.Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
+    EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
+    pMtcTimerWrapper->Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+}
 
-    EXPECT_TRUE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+TEST_F(MtcTimerWrapperTest, StartDoesNothingWithInvalidDuration)
+{
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper)).Times(0);
 
-    objMtcTimerWrapper.Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, -1);
 
-    EXPECT_FALSE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+}
+
+TEST_F(MtcTimerWrapperTest, StartInvokesStopIfExistedType)
+{
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+
+    EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, -1);
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+}
+
+TEST_F(MtcTimerWrapperTest, StartInvokesAddingTimerWithDuration0)
+{
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(0, pMtcTimerWrapper));
+
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, 0);
+
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+}
+
+TEST_F(MtcTimerWrapperTest, StopDoesNothingWithNotExistedType)
+{
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
+
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_E911_LTE_OPEN, nAnyDuration);
+
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+
+    pMtcTimerWrapper->Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
+
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 }
 
 TEST_F(MtcTimerWrapperTest, StopAllRemovesAllTimer)
 {
-    pTestImsTimerForMtc1 = new TestImsTimerForMtc();
-    pTestImsTimerForMtc2 = new TestImsTimerForMtc();
-    EXPECT_CALL(objMockIOsFactory, CreateTimer())
-            .Times(2)
-            .WillOnce(Return(pTestImsTimerForMtc1))
-            .WillOnce(Return(pTestImsTimerForMtc2));
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper)).Times(2);
 
-    objMtcTimerWrapper.Start(MtcCallState::TimerType::TIMER_E911_LTE_OPEN, nAnyDuration);
-    objMtcTimerWrapper.Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, nAnyDuration);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_E911_LTE_OPEN, nAnyDuration);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, nAnyDuration);
 
-    EXPECT_TRUE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
-    EXPECT_TRUE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer).Times(2);
 
-    objMtcTimerWrapper.StopAll();
+    pMtcTimerWrapper->StopAll();
 
-    EXPECT_FALSE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
-    EXPECT_FALSE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_E911_LTE_OPEN));
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
 }
 
-TEST_F(MtcTimerWrapperTest, Timer_TimerExpiredRemovesTimerAndNotifies)
+TEST_F(MtcTimerWrapperTest, TimerTimerExpiredRemovesTimerAndNotifies)
 {
-    pTestImsTimerForMtc1 = new TestImsTimerForMtc();
-    EXPECT_CALL(objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(pTestImsTimerForMtc1));
+    EXPECT_CALL(objTimerService.GetMockTimer(), SetTimer(nAnyDuration, pMtcTimerWrapper));
 
-    objMtcTimerWrapper.Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
+    pMtcTimerWrapper->Start(MtcCallState::TimerType::TIMER_MO_100_WAIT, nAnyDuration);
 
-    EXPECT_TRUE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    EXPECT_TRUE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
     EXPECT_FALSE(bTimerExpired);
 
-    objMtcTimerWrapper.Timer_TimerExpired(pTestImsTimerForMtc1);
+    EXPECT_CALL(objTimerService.GetMockTimer(), KillTimer);
 
-    EXPECT_FALSE(objMtcTimerWrapper.IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
+    // This pointer is actually member variable of `TestTimerService`. So, it will naturally be
+    // released.
+    ITimer* piTimer = objTimerService.CreateTimer();
+    pMtcTimerWrapper->Timer_TimerExpired(piTimer);
+
+    EXPECT_FALSE(pMtcTimerWrapper->IsActive(MtcCallState::TimerType::TIMER_MO_100_WAIT));
     EXPECT_TRUE(bTimerExpired);
 }
 
