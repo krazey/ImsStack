@@ -44,6 +44,7 @@
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
 namespace android
@@ -105,6 +106,7 @@ protected:
                 .WillByDefault(ReturnRef(objMockInterfaceFactory));
 
         ON_CALL(objMockContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMockContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
         pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
         ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
@@ -212,6 +214,16 @@ TEST_F(EctReferenceTest, ReferenceDeliveryFailedCallsListener)
     pEctReference->ReferenceDeliveryFailed(&objMockReference);
 }
 
+TEST_F(EctReferenceTest, ReferenceNotifyInvokesOnReferenceUpdated)
+{
+    MockIMessage objMockNotifyMessage;
+    ON_CALL(objMockNotifyMessage, GetMessage).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockListener, OnReferenceUpdated(_)).Times(1);
+
+    pEctReference->ReferenceNotify(&objMockReference, &objMockMessage);
+}
+
 TEST_F(EctReferenceTest, ReferenceTerminatedDoesNothing)
 {
     EXPECT_CALL(objMockListener, OnReferenceStarted).Times(0);
@@ -246,15 +258,61 @@ TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccess)
     EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 }
 
-TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailure)
+TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccessAndNotSetReferredByHeaderIfNoLocalUserId)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+    ON_CALL(objCoreService, GetLocalUserId).WillByDefault(Return(""));
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(1);
+    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId)).Times(1);
+    EXPECT_CALL(objMockSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _)).Times(1);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccessAndNotSetReferredByHeaderIfMessageIsNull)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+    ON_CALL(objMockReference, GetNextRequest).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(1);
+    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId)).Times(1);
+    EXPECT_CALL(objMockSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _)).Times(1);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailureIfCallStatusIsTerminating)
 {
     ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
 
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
 
     ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+}
 
-    // success case is done by SendInviteWithKeyReturnsSuccess
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailureIfReferenceIsNull)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _)).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(0);
+
+    EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsSuccess)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
 }
 
 TEST_F(EctReferenceTest, GetResponseCode)
