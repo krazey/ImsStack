@@ -41,46 +41,6 @@ PUBLIC VIRTUAL ExpandController::~ExpandController()
     IMS_TRACE_I("~ExpandController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
-{
-    // TODO: session updated...
-    // if (ntype != SESSION_UPDATED)
-    if (IMS_FALSE)
-    {
-        return ConferenceController::OnCallUpdated(nType, nCallKey);
-    }
-
-    if (nCallKey != m_nConfCallKey)
-    {
-        return;
-    }
-
-    if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
-                 m_objContext.GetConfigurationProxy()) ==
-                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
-            GetState() != STATE_EXPANDING)
-    {
-        return;
-    }
-
-    // Session is updated to conference during EXPANDING state - LGU+
-    // expanded_by will be notified via LGUPUCSession::StateCONVERSATION_Updated()
-
-    // Add the user of exist 1-to-1 session to participant list
-    IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
-
-    ConfUser* p1to1User = new ConfUser();
-    SipAddress objSIPAddress(
-            GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
-    p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
-
-    m_pParticipantList->AddUser(p1to1User);
-    m_pParticipantList->Login();
-
-    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
-    SetState(STATE_IDLE);
-}
-
 PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
@@ -266,6 +226,45 @@ PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() cons
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UINTP nCallKey)
+{
+    // TODO: session updated...
+    // if (ntype != SESSION_UPDATED)
+    // {
+    //     return ConferenceController::OnCallUpdated(nType, nCallKey);
+    // }
+
+    if (nCallKey != m_nConfCallKey)
+    {
+        return;
+    }
+
+    if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
+                 m_objContext.GetConfigurationProxy()) ==
+                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
+            GetState() != STATE_EXPANDING)
+    {
+        return;
+    }
+
+    // Session is updated to conference during EXPANDING state - LGU+
+    // expanded_by will be notified via LGUPUCSession::StateCONVERSATION_Updated()
+
+    // Add the user of exist 1-to-1 session to participant list
+    IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
+
+    ConfUser* p1to1User = new ConfUser();
+    SipAddress objSIPAddress(
+            GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
+    p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
+
+    m_pParticipantList->AddUser(p1to1User);
+    m_pParticipantList->Login();
+
+    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
+    SetState(STATE_IDLE);
 }
 
 PROTECTED VIRTUAL void ExpandController::Recover()
