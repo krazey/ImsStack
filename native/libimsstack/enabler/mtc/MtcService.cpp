@@ -16,6 +16,7 @@
 
 #include "AString.h"
 #include "CarrierConfig.h"
+#include "Configuration.h"
 #include "Connector.h"
 #include "ICapabilities.h"
 #include "ICarrierConfig.h"
@@ -42,6 +43,9 @@
 #include "ServiceTrace.h"
 #include "SipFactory.h"
 #include "SipMethod.h"
+#include "common/IAppConfig.h"
+#include "common/ICoreServiceConfig.h"
+#include "common/IMediaConfig.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/MtcAosConnector.h"
@@ -238,10 +242,16 @@ PUBLIC VIRTUAL void MtcService::CoreService_SessionInvitationReceived(
 PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
         IN ICoreService* piService, IN ICapabilities* piCapabilities)
 {
+    const IAppConfig* piAppConfig = Configuration::GetInstance()->GetAppConfig(
+            ImsServiceConfig::GetAppName(ImsAppId::MTC), m_objContext.GetSlotId());
+    const ICoreServiceConfig* piCoreServiceConfig =
+            piAppConfig ? piAppConfig->GetCoreServiceConfig(m_strServiceName) : IMS_NULL;
+    const IMediaConfig* piMediaConfig =
+            Configuration::GetInstance()->GetMediaConfig(m_objContext.GetSlotId());
     IMS_UINT32 nFeatures = m_pAosConnector ? m_pAosConnector->GetFeatures() : 0;
-    MtcCapabilityQueryHandler(m_objContext)
-            .HandleIncomingCapabilityQuery(piService, piCapabilities,
-                    ImsServiceConfig::GetAppName(ImsAppId::MTC), m_strServiceName, nFeatures);
+
+    MtcCapabilityQueryHandler(m_objContext, piCoreServiceConfig, piMediaConfig)
+            .HandleIncomingCapabilityQuery(piService, piCapabilities, nFeatures);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
