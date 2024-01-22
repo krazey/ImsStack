@@ -39,15 +39,6 @@ public interface IDcNetWatcher extends IDc {
     }
 
     /**
-     *
-     * Notify data state is changed to target apn object
-     *
-     * Only subject class can invoke this API.
-     * DO NOT allow to accessed by observer class
-     */
-    void notifyResult(EApnType eApnType, EDataState eDataState);
-
-    /**
      * Return service is available or not based on
      * 1) RAT policy configuration
      * 2) Current RAT information
@@ -306,36 +297,6 @@ public interface IDcNetWatcher extends IDc {
     void unregisterForRoamingStateChanged(Handler h);
 
     /**
-     * Register listener to receive voice roaming state changed event
-     */
-    void registerForVoiceRoamingStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice roaming state changed event
-     */
-    void unregisterForVoiceRoamingStateChanged(Handler h);
-
-     /**
-     * Register listener to receive voice roaming type changed event
-     */
-    void registerForVoiceRoamingTypeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice roaming type changed event
-     */
-    void unregisterForVoiceRoamingTypeChanged(Handler h);
-
-     /**
-     * Register listener to receive data roaming type changed event
-     */
-    void registerForDataRoamingTypeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive data roaming type changed event
-     */
-    void unregisterForDataRoamingTypeChanged(Handler h);
-
-    /**
      * Register listener to receive airplane mode changed event
      */
     void registerForAirplaneModeChanged(Handler h, int what, Object obj);
@@ -344,56 +305,6 @@ public interface IDcNetWatcher extends IDc {
      * De-register listener to receive airplane mode changed event
      */
     void unregisterForAirplaneModeChanged(Handler h);
-
-    /**
-     * Register listener to receive network operator changed event
-     */
-    void registerForNetworkOperatorChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive network operator changed event
-     */
-    void unregisterForNetworkOperatorChanged(Handler h);
-
-    /**
-     * Register listener to receive CS call state changed event
-     */
-    void registerForCsCallStatusChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive CS call state changed event
-     */
-    void unregisterForCsCallStatusChanged(Handler h);
-
-    /**
-     * Register listener to receive precise CS call state changed event
-     */
-    void registerForPreciseCsCallStatusChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive precise CS call state changed event
-     */
-    void unregisterForPreciseCsCallStatusChanged(Handler h);
-
-    /**
-     * Register listener to receive Voice of PS changed event
-     */
-    void registerForImsVopsChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive Voice of PS changed event
-     */
-    void unregisterForImsVopsChanged(Handler h);
-
-    /**
-     * Register listener to receive power off changed event
-     */
-    void registerForPowerOffChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive power off changed event
-     */
-    void unregisterForPowerOffChanged(Handler h);
 
     /**
      * Register listener to receive pdn connection fail event
@@ -406,6 +317,11 @@ public interface IDcNetWatcher extends IDc {
      * This api is used to handle XCAP pdn connection fail case, for now.
      */
     void unregisterForPdnConnectionFailed(Handler h);
+
+    /**
+     * Notifies data connection state is changed
+     */
+    void notifyDataConnectionState(EApnType eApnType, EDataState eDataState);
 
     /**
      * Notify pdn connection failed event with sm cause to listeners

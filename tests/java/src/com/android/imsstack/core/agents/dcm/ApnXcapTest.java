@@ -171,7 +171,7 @@ public class ApnXcapTest {
         mTestableLooper.processAllMessages();
 
         assertEquals(TelephonyManager.DATA_CONNECTED, mApnXcap.getDataState());
-        verify(mMockIDcNetWatcher).notifyResult(
+        verify(mMockIDcNetWatcher).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_CONNECTED);
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
@@ -196,7 +196,7 @@ public class ApnXcapTest {
 
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnXcap.getDataState());
-        verify(mMockIDcNetWatcher, times(2)).notifyResult(
+        verify(mMockIDcNetWatcher, times(2)).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
         verify(mMockISystem, times(2)).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
@@ -233,7 +233,7 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher).notifyResult(
+        verify(mMockIDcNetWatcher).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_IP_CHANGED);
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());

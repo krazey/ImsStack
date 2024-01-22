@@ -612,7 +612,8 @@ public class ApnTest {
         mApn.sendDataStateUpdateMessage(mApn.mType, EDataState.DATA_STATE_CONNECTED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher).notifyResult(mApn.mType, EDataState.DATA_STATE_CONNECTED);
+        verify(mMockIDcNetWatcher).notifyDataConnectionState(
+                mApn.mType, EDataState.DATA_STATE_CONNECTED);
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 mApn.mType.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }

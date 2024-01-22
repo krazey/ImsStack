@@ -584,7 +584,7 @@ public abstract class Apn extends Handler implements IApn {
 
         //notify to watcher
         if (mDcNetWatcher != null) {
-            mDcNetWatcher.notifyResult(apnType, dataState);
+            mDcNetWatcher.notifyDataConnectionState(apnType, dataState);
         }
 
         //notify to apn

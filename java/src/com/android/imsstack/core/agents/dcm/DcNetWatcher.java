@@ -101,16 +101,8 @@ public class DcNetWatcher implements IDcNetWatcher {
     private RegistrantList mRatChangedRegistrants = new RegistrantList();
     private RegistrantList mVoiceRatChangedRegistrants = new RegistrantList();
     private RegistrantList mRoamingStateChangedRegistrants = new RegistrantList();
-    private RegistrantList mVoiceRoamingStateChangedRegistrants = new RegistrantList();
     private RegistrantList mAirplaneModeChangedRegistrants = new RegistrantList();
-    private RegistrantList mNetworkOperatorChangedRegistrants = new RegistrantList();
-    private RegistrantList mCsCallStatusChangedRegistrants = new RegistrantList();
-    private RegistrantList mPreciseCsCallStatusChangedRegistrants = new RegistrantList();
-    private RegistrantList mImsVopsChangedRegistrants = new RegistrantList();
-    private RegistrantList mPowerOffChangedRegistrants = new RegistrantList();
     private RegistrantList mPdnConnectionFailedRegistrants = new RegistrantList();
-    private RegistrantList mVoiceRoamingTypeChangedRegistrants = new RegistrantList();
-    private RegistrantList mDataRoamingTypeChangedRegistrants = new RegistrantList();
 
     private int mRatPolicy = 0;
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
@@ -519,7 +511,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public void setDoingOffRadio(boolean input) {
         mDoingOffRadio = input;
-        mPowerOffChangedRegistrants.notifyResult(mDoingOffRadio);
     }
 
     @Override
@@ -547,7 +538,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     // Public methods --------------------------------------------
     /** Only subject class can invoke this API. DO NOT allow to accessed by observer class */
-    public void notifyResult(EApnType eApnType, EDataState nDataState) {
+    public void notifyDataConnectionState(EApnType eApnType, EDataState nDataState) {
         mStateDataConnectionState.notifyResult(new IDcNetWatcher.NotiObj(eApnType, nDataState, -1));
     }
 
@@ -609,16 +600,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
-    public void registerForVoiceRoamingStateChanged(Handler h, int what, Object obj) {
-        mVoiceRoamingStateChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForVoiceRoamingStateChanged(Handler h) {
-        mVoiceRoamingStateChangedRegistrants.remove(h);
-    }
-
-    @Override
     public void registerForAirplaneModeChanged(Handler h, int what, Object obj) {
         mAirplaneModeChangedRegistrants.add(new Registrant(h, what, obj));
     }
@@ -626,57 +607,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public void unregisterForAirplaneModeChanged(Handler h) {
         mAirplaneModeChangedRegistrants.remove(h);
-    }
-
-    // Message (obj) - AsyncResult, AsyncResult (result) - NetworkOperator
-    @Override
-    public void registerForNetworkOperatorChanged(Handler h, int what, Object obj) {
-        mNetworkOperatorChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForNetworkOperatorChanged(Handler h) {
-        mNetworkOperatorChangedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForCsCallStatusChanged(Handler h, int what, Object obj) {
-        mCsCallStatusChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForCsCallStatusChanged(Handler h) {
-        mCsCallStatusChangedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForPreciseCsCallStatusChanged(Handler h, int what, Object obj) {
-        mPreciseCsCallStatusChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForPreciseCsCallStatusChanged(Handler h) {
-        mPreciseCsCallStatusChangedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForImsVopsChanged(Handler h, int what, Object obj) {
-        mImsVopsChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForImsVopsChanged(Handler h) {
-        mImsVopsChangedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForPowerOffChanged(Handler h, int what, Object obj) {
-        mPowerOffChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForPowerOffChanged(Handler h) {
-        mPowerOffChangedRegistrants.remove(h);
     }
 
     /** Register pdn connection failure */
@@ -687,26 +617,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     /** Unregister pdn connection failure */
     public void unregisterForPdnConnectionFailed(Handler h) {
         mPdnConnectionFailedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForVoiceRoamingTypeChanged(Handler h, int what, Object obj) {
-        mVoiceRoamingTypeChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForVoiceRoamingTypeChanged(Handler h) {
-        mVoiceRoamingTypeChangedRegistrants.remove(h);
-    }
-
-    @Override
-    public void registerForDataRoamingTypeChanged(Handler h, int what, Object obj) {
-        mDataRoamingTypeChangedRegistrants.add(new Registrant(h, what, obj));
-    }
-
-    @Override
-    public void unregisterForDataRoamingTypeChanged(Handler h) {
-        mDataRoamingTypeChangedRegistrants.remove(h);
     }
 
     // Private/Protected methods ---------------------------------
@@ -1007,8 +917,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private void handleNetworkOperatorChanged() {
-        mNetworkOperatorChangedRegistrants.notifyResult(mNetworkOperator);
-
         mAosInfo.notifyPlmnChanged();
     }
 
@@ -1054,7 +962,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                 mDataRoaming = isDataRoaming;
             }
             mVoiceRoaming = isVoiceRoaming;
-            mVoiceRoamingStateChangedRegistrants.notifyResult(Boolean.valueOf(mVoiceRoaming));
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
         } else if (mDataRoaming != isDataRoaming) {
             mDataRoaming = isDataRoaming;
@@ -1074,14 +981,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                         ? ImsEventDef.IMS_ROAMING_STATE_ON
                         : ImsEventDef.IMS_ROAMING_STATE_OFF;
         mSystem.notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE, psRoamingState, csRoamingState);
-    }
-
-    private void handleVoiceRoamingTypeChanged() {
-        mVoiceRoamingTypeChangedRegistrants.notifyResult(mVoiceRoamingType);
-    }
-
-    private void handleDataRoamingTypeChanged() {
-        mDataRoamingTypeChangedRegistrants.notifyResult(mDataRoamingType);
     }
 
     private void handleImsNetworkFeature(ServiceState ss) {
@@ -1142,8 +1041,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         if (mImsVops != vopsSupported) {
             mImsVops = vopsSupported;
             ImsLog.d(mSlotId, "updated vops = " + mImsVops);
-
-            mImsVopsChangedRegistrants.notifyResult(Boolean.valueOf(mImsVops));
 
             int state =
                     (mImsVops)
@@ -1305,13 +1202,11 @@ public class DcNetWatcher implements IDcNetWatcher {
             // Voice Roaming Type
             if (mVoiceRoamingType != voiceRoamingType) {
                 mVoiceRoamingType = voiceRoamingType;
-                handleVoiceRoamingTypeChanged();
             }
 
             // Data Roaming Type
             if (mDataRoamingType != dataRoamingType) {
                 mDataRoamingType = dataRoamingType;
-                handleDataRoamingTypeChanged();
             }
         }
 
@@ -1340,8 +1235,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
             if (mCallState != state) {
                 mCallState = state;
-                mCsCallStatusChangedRegistrants.notifyResult(Integer.valueOf(state));
-
                 mSystem.notifyVoiceCallStateChanged(mCallState);
                 mSystem.notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE, mCallState, 0);
             }
@@ -1353,8 +1246,6 @@ public class DcNetWatcher implements IDcNetWatcher {
             if (mCallState == TelephonyManager.CALL_STATE_IDLE) {
                 if (mPreciseCallState != PreciseCallState.PRECISE_CALL_STATE_IDLE) {
                     mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-                    mPreciseCsCallStatusChangedRegistrants.notifyResult(
-                            Integer.valueOf(mPreciseCallState));
                     mAosInfo.notifyPreciseCallState(mPreciseCallState);
                 }
                 return;
@@ -1374,15 +1265,11 @@ public class DcNetWatcher implements IDcNetWatcher {
             if ((nBackgroundCallState == PreciseCallState.PRECISE_CALL_STATE_HOLDING)
                     || (nBackgroundCallState == PreciseCallState.PRECISE_CALL_STATE_ACTIVE)) {
                 mPreciseCallState = nBackgroundCallState;
-                mPreciseCsCallStatusChangedRegistrants.notifyResult(
-                        Integer.valueOf(mPreciseCallState));
                 mAosInfo.notifyPreciseCallState(mPreciseCallState);
             } else {
                 // If Background Call is not present, post ForegroundCallState to AoSCallTracker
                 if (mPreciseCallState != nForegroundCallState) {
                     mPreciseCallState = nForegroundCallState;
-                    mPreciseCsCallStatusChangedRegistrants.notifyResult(
-                            Integer.valueOf(mPreciseCallState));
                     mAosInfo.notifyPreciseCallState(mPreciseCallState);
                 }
             }

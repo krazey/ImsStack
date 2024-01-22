@@ -37,7 +37,6 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RegistrantList;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -80,7 +79,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
@@ -328,11 +326,11 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testNotifyResult() throws Exception {
+    public void testNotifyDataConnectionState() throws Exception {
         replaceInstance(DcNetWatcher.class, "mStateDataConnectionState", mDcNetWatcher,
                 mRegistrantList);
 
-        mDcNetWatcher.notifyResult(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
+        mDcNetWatcher.notifyDataConnectionState(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
 
         verify(mRegistrantList).notifyResult(any());
     }
@@ -408,18 +406,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testAddAndRemoveRegistrantList_voiceRoamingState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRoamingStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRoamingStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
     public void testAddAndRemoveRegistrantList_airplaneModeChange() throws Exception {
         replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
@@ -432,66 +418,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testAddAndRemoveRegistrantList_networkOperatorChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mNetworkOperatorChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForNetworkOperatorChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForNetworkOperatorChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_csCallStatusChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForCsCallStatusChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForCsCallStatusChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_preciseCsCallStatusChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPreciseCsCallStatusChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPreciseCsCallStatusChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_vopsChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mImsVopsChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForImsVopsChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForImsVopsChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_powerOffChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPowerOffChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPowerOffChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPowerOffChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
     public void testAddAndRemoveRegistrantList_pdnConnectionFailed() throws Exception {
         replaceInstance(DcNetWatcher.class, "mPdnConnectionFailedRegistrants", mDcNetWatcher,
                 mRegistrantList);
@@ -500,30 +426,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mRegistrantList).add(any());
 
         mDcNetWatcher.unregisterForPdnConnectionFailed(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_voiceRoamingTypeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRoamingTypeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRoamingTypeChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_dataRoamingTypeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForDataRoamingTypeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataRoamingTypeChanged(mMockHandler);
         verify(mRegistrantList).remove(mMockHandler);
     }
 
@@ -736,8 +638,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mNetworkOperatorChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(null);
@@ -748,7 +648,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult("45000");
         verify(mMockAosInfo).notifyPlmnChanged();
         assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
     }
@@ -892,11 +791,8 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        RegistrantList tempRegistrantList = Mockito.mock(RegistrantList.class);
         replaceInstance(DcNetWatcher.class, "mRoamingStateChangedRegistrants", mDcNetWatcher,
                 mRegistrantList);
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingStateChangedRegistrants", mDcNetWatcher,
-                tempRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
@@ -907,7 +803,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
         verify(mRegistrantList).notifyResult(true);
-        verify(tempRegistrantList).notifyResult(true);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
         assertEquals(true, mDcNetWatcher.isRoaming());
@@ -926,8 +821,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         DataSpecificRegistrationInfo dsrInfo =
                 new DataSpecificRegistrationInfo(2, false, true, true, vsi);
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
-        replaceInstance(DcNetWatcher.class, "mImsVopsChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         replaceInstance(DcNetWatcher.class, "mImsVops", mDcNetWatcher, true);
         when(mMockTelephonyInterface.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
@@ -939,7 +832,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(false);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
                 ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
         assertEquals(ServiceState.DUPLEX_MODE_FDD, mDcNetWatcher.getLteDuplexMode());
@@ -953,15 +845,12 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.ROAMING_TYPE_UNKNOWN);
         assertEquals(ServiceState.ROAMING_TYPE_UNKNOWN, mDcNetWatcher.getVoiceRoamingType());
     }
 
@@ -971,28 +860,22 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.ROAMING_TYPE_UNKNOWN);
         assertEquals(ServiceState.ROAMING_TYPE_UNKNOWN, mDcNetWatcher.getDataRoamingType());
     }
 
     @Test
     public void testOnCallStateChanged_psCallStateChanged() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
                 new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
-        verify(mRegistrantList, never()).notifyResult(anyInt());
         verify(mMockSystem, never()).notifyVoiceCallStateChanged(anyInt());
         verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
                 TelephonyManager.CALL_STATE_OFFHOOK, 0);
@@ -1001,8 +884,6 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testOnCallStateChanged_csCallStateChangedOffhookToIdle() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mMockTelephonyInterface.getCsCallState())
                 .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK)
                 .thenReturn(TelephonyManager.CALL_STATE_IDLE);
@@ -1010,7 +891,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
                 new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
-        verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_OFFHOOK);
         verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
                 TelephonyManager.CALL_STATE_OFFHOOK, 0);
@@ -1019,7 +899,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
                 new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
 
-        verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_IDLE);
         verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
                 TelephonyManager.CALL_STATE_IDLE, 0);
@@ -1031,8 +910,6 @@ public class DcNetWatcherTest extends ImsStackTest {
             throws Exception {
         replaceInstance(DcNetWatcher.class, "mPreciseCallState", mDcNetWatcher,
                 PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
 
         assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
                 mDcNetWatcher.getPreciseCallState());
@@ -1040,7 +917,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
                 new Class[] {PreciseCallState.class}, new Object[] {null});
 
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_IDLE);
         verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_IDLE);
         assertEquals(PreciseCallState.PRECISE_CALL_STATE_IDLE, mDcNetWatcher.getPreciseCallState());
     }
@@ -1055,13 +931,10 @@ public class DcNetWatcherTest extends ImsStackTest {
                 PreciseDisconnectCause.NOT_VALID);
         replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
                 TelephonyManager.CALL_STATE_OFFHOOK);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
                 new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
 
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
         verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
         assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
                 mDcNetWatcher.getPreciseCallState());
@@ -1077,13 +950,10 @@ public class DcNetWatcherTest extends ImsStackTest {
                 PreciseDisconnectCause.NOT_VALID);
         replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
                 TelephonyManager.CALL_STATE_OFFHOOK);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
                 new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
 
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
         verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
         assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
                 mDcNetWatcher.getPreciseCallState());
@@ -1266,13 +1136,8 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testSetDoingOffRadio() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPowerOffChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        mDcNetWatcher.registerForPowerOffChanged(mMockHandler, 1000, null);
-
         mDcNetWatcher.setDoingOffRadio(true);
 
-        verify(mRegistrantList).notifyResult(true);
         assertEquals(true, mDcNetWatcher.isDoingOffRadio());
     }
 
