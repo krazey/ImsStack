@@ -203,21 +203,16 @@ TEST_F(AosBlockTest, SucceedsRemoveListener)
     EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 0);
 }
 
-TEST_F(AosBlockTest, SetBlockReason_IsReasonBlocked)
+TEST_P(AosBlockTest, FailsSetBlockReasonWhenReasonIsBlocked)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // GIVEN
+    const FormattingTestCase& objTestCase = GetParam();
 
-    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_CSCALL_STARTED);
-    m_pAosBlock->SetBlockReason(BLOCK_PERMANENT_DATA_FAILED);
+    // WHEN
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
 
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED));
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED));
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_CSCALL_STARTED));
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(BLOCK_PERMANENT_DATA_FAILED));
+    // THEN
+    EXPECT_FALSE(m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason)));
 }
 
 TEST_F(AosBlockTest, SetBlockReason_Success)
