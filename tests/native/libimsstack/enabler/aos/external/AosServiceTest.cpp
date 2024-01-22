@@ -158,55 +158,100 @@ TEST_F(AosServiceTest, FailsRemoveListenerForIAosEmergencyListenerWhenListenerIs
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosServiceTest, AddListener_IAosRegistrationControlListener)
+TEST_F(AosServiceTest, SucceedsAddListenerForIAosRegistrationControlListener)
 {
+    // GIVEN
     MockIAosRegistrationControlListener objMockListener1;
     MockIAosRegistrationControlListener objMockListener2;
     MockIAosRegistrationControlListener objMockListener3;
 
-    // Case1 : Add success
-    EXPECT_TRUE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener1)));
-    EXPECT_TRUE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener2)));
-    EXPECT_TRUE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener3)));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosService->AddListener(&objMockListener1);
+    IMS_BOOL bResult2 = m_pAosService->AddListener(&objMockListener2);
+    IMS_BOOL bResult3 = m_pAosService->AddListener(&objMockListener3);
 
-    // Case2 : Exist listener
-    EXPECT_FALSE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener3)));
-    EXPECT_FALSE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener2)));
-    EXPECT_FALSE(m_pAosService->AddListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener1)));
-
-    // Case3 : Listener is null
-    EXPECT_FALSE(
-            m_pAosService->AddListener(static_cast<IAosRegistrationControlListener*>(IMS_NULL)));
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
 }
 
-TEST_F(AosServiceTest, RemoveListener_IAosRegistrationControlListener)
+TEST_F(AosServiceTest, FailsAddListenerForIAosRegistrationControlListenerWhenSameListenerIsExist)
 {
+    // GIVEN
     MockIAosRegistrationControlListener objMockListener1;
     MockIAosRegistrationControlListener objMockListener2;
     MockIAosRegistrationControlListener objMockListener3;
 
-    m_pAosService->AddListener(static_cast<IAosRegistrationControlListener*>(&objMockListener1));
-    m_pAosService->AddListener(static_cast<IAosRegistrationControlListener*>(&objMockListener2));
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
 
-    // Case1 : Remove success
-    EXPECT_TRUE(m_pAosService->RemoveListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener2)));
-    EXPECT_TRUE(m_pAosService->RemoveListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener1)));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosService->AddListener(&objMockListener1);
+    IMS_BOOL bResult2 = m_pAosService->AddListener(&objMockListener2);
+    IMS_BOOL bResult3 = m_pAosService->AddListener(&objMockListener3);
 
-    // Case2 : Not exist listener
-    EXPECT_FALSE(m_pAosService->RemoveListener(
-            static_cast<IAosRegistrationControlListener*>(&objMockListener3)));
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+}
 
-    // Case3 : Listener is null
-    EXPECT_FALSE(
-            m_pAosService->RemoveListener(static_cast<IAosRegistrationControlListener*>(IMS_NULL)));
+TEST_F(AosServiceTest, FailsAddListenerForIAosRegistrationControlListenerWhenListenerIsNull)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult =
+            m_pAosService->AddListener(static_cast<IAosRegistrationControlListener*>(IMS_NULL));
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosServiceTest, SucceedsRemoveListenerForIAosRegistrationControlListener)
+{
+    // GIVEN
+    MockIAosRegistrationControlListener objMockListener1;
+    MockIAosRegistrationControlListener objMockListener2;
+    MockIAosRegistrationControlListener objMockListener3;
+
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
+
+    // WHEN
+    IMS_BOOL bResult3 = m_pAosService->RemoveListener(&objMockListener3);
+    IMS_BOOL bResult2 = m_pAosService->RemoveListener(&objMockListener2);
+    IMS_BOOL bResult1 = m_pAosService->RemoveListener(&objMockListener1);
+
+    // THEN
+    EXPECT_TRUE(bResult3);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult1);
+}
+
+TEST_F(AosServiceTest, FailsRemoveListenerForIAosRegistrationControlListenerWhenNoExistListener)
+{
+    // GIVEN
+    MockIAosRegistrationControlListener objMockListener;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosService->RemoveListener(&objMockListener);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosServiceTest, FailsRemoveListenerForIAosRegistrationControlListenerWhenListenerIsNull)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosService->RemoveListener(
+            static_cast<MockIAosRegistrationControlListener*>(IMS_NULL));
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
 TEST_F(AosServiceTest, AddListener_IAosServiceSettingListener)
