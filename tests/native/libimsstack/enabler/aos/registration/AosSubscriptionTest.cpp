@@ -74,16 +74,25 @@ public:
     }
 
     FRIEND_TEST(AosSubscriptionTest, Initialize);
+    /// Stop()
     FRIEND_TEST(AosSubscriptionTest, CallUnsubscribeInStopWhenUnsubscriptionIsSupported);
     FRIEND_TEST(AosSubscriptionTest, NotCallUnsubscribeInStopWhenUnsubscriptionIsNotSupported);
+    /// Start()
     FRIEND_TEST(AosSubscriptionTest, StateIsInvalidWhenStart);
     FRIEND_TEST(AosSubscriptionTest, SubscribeFailedInStartWhenRegSubscriptionIsNull);
     FRIEND_TEST(AosSubscriptionTest, StartReturnFalseWhenSendSubscribeFailed);
     FRIEND_TEST(AosSubscriptionTest, StartReturnTrueWhenSendSubscribePassed);
     FRIEND_TEST(AosSubscriptionTest, StartReturnFalseWhenStartWithCheckRadioIsTrue);
+    /// IsRetryActionDueToRetryCounter()
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstInit);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstRefreshed);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenExtraRegErrRetryCntSharedIsNotUsed);
+    /// IsSubscriptionTerminated()
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenRetryCountForTerminatingSubIsZero);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenNumberOfCountsForTerminatingSubIsNotReached);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenNumberOfCountsForTerminatingSubIsReached);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenSetErrIsIndicatedBySingleDigit);
 
-    FRIEND_TEST(AosSubscriptionTest, IsRetryActionDueToRetryCounter);
-    FRIEND_TEST(AosSubscriptionTest, CheckSubscriptionTerminated);
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegRequired);
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegWithNextPcscfRequired);
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegRequiredInWifi);
@@ -383,22 +392,12 @@ TEST_F(AosSubscriptionTest, StartReturnFalseWhenStartWithCheckRadioIsTrue)
     EXPECT_FALSE(m_pAosSubscription->Start(IMS_TRUE));
 }
 
-TEST_F(AosSubscriptionTest, IsRetryActionDueToRetryCounter)
+TEST_F(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstInit)
 {
-    EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount())
-            .WillOnce(Return(5))
-            .WillOnce(Return(3))
-            .WillOnce(Return(0));
-
-    // AosRetryRepository::TYPE_NORMAL = 0
-    EXPECT_CALL(m_objMockAosRetryRepository, IncreaseRetryCount(0))
-            .Times(2)
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
+    ON_CALL(m_objMockAosRetryRepository, IncreaseRetryCount(0)).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
@@ -406,51 +405,84 @@ TEST_F(AosSubscriptionTest, IsRetryActionDueToRetryCounter)
             .Times(1);
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(2);
+            .Times(1);
 
     EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_FALSE));
+}
 
-    m_pAosSubscription->SetTerminated(IMS_FALSE);
+TEST_F(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstRefreshed)
+{
+    ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(3));
+    ON_CALL(m_objMockAosRetryRepository, IncreaseRetryCount(0)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED))
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
             .Times(1);
 
     EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_TRUE));
+}
+
+TEST_F(AosSubscriptionTest, ReturnFalseWhenExtraRegErrRetryCntSharedIsNotUsed)
+{
+    ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(0));
 
     EXPECT_FALSE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_TRUE));
 }
 
-TEST_F(AosSubscriptionTest, CheckSubscriptionTerminated)
+TEST_F(AosSubscriptionTest, ReturnFalseWhenRetryCountForTerminatingSubIsZero)
 {
-    EXPECT_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated())
-            .Times(AnyNumber())
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(2));
+    ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(0));
 
     EXPECT_FALSE(m_pAosSubscription->IsSubscriptionTerminated(403));
+}
+
+TEST_F(AosSubscriptionTest, ReturnFalseWhenNumberOfCountsForTerminatingSubIsNotReached)
+{
+    ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(2));
 
     ImsVector<IMS_SINT32> objErrSubTerminated;
     objErrSubTerminated.Clear();
     objErrSubTerminated.Add(404);
     objErrSubTerminated.Add(403);
 
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrSubTerminated));
+    ON_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
+            .WillByDefault(ReturnRef(objErrSubTerminated));
 
     m_pAosSubscription->SetRetryCountSubTerminated(0);
     EXPECT_FALSE(m_pAosSubscription->IsSubscriptionTerminated(403));
+}
+
+TEST_F(AosSubscriptionTest, ReturnTrueWhenNumberOfCountsForTerminatingSubIsReached)
+{
+    ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(2));
+
+    ImsVector<IMS_SINT32> objErrSubTerminated;
+    objErrSubTerminated.Clear();
+    objErrSubTerminated.Add(404);
+    objErrSubTerminated.Add(403);
+
+    ON_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
+            .WillByDefault(ReturnRef(objErrSubTerminated));
 
     m_pAosSubscription->SetRetryCountSubTerminated(1);
     EXPECT_TRUE(m_pAosSubscription->IsSubscriptionTerminated(403));
+}
 
+TEST_F(AosSubscriptionTest, ReturnTrueWhenSetErrIsIndicatedBySingleDigit)
+{
+    ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(2));
+
+    ImsVector<IMS_SINT32> objErrSubTerminated;
     objErrSubTerminated.Clear();
     objErrSubTerminated.Add(5);
     objErrSubTerminated.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrSubTerminated));
+
+    ON_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
+            .WillByDefault(ReturnRef(objErrSubTerminated));
 
     m_pAosSubscription->SetRetryCountSubTerminated(1);
     EXPECT_TRUE(m_pAosSubscription->IsSubscriptionTerminated(504));
