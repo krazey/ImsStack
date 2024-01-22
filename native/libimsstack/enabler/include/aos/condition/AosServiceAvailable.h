@@ -94,16 +94,10 @@ protected:
 
     IMS_BOOL m_bAirplaneMode;
     IMS_BOOL m_bRoamingState;
-
-private:
     IMS_BOOL m_bAvailableLastNotified;
 
     ImsList<IMS_UINT32> m_objBlockReasonsLastNotified;
     ImsList<IAosServiceAvailableListener*> m_objListeners;
-
-private:
-    friend class AosServiceAvailableTest;
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_H_
