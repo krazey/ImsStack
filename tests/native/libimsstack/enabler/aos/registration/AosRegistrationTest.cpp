@@ -130,6 +130,8 @@ public:
     FRIEND_TEST(AosRegistrationTest, IncreaseFailureCountForPdnReactivatedCommandIncreasesCount);
     FRIEND_TEST(AosRegistrationTest, SetEps5gsOnlyCommandUpdatesVariable);
     FRIEND_TEST(AosRegistrationTest, HandleUninterestedCommandDoesNothing);
+    FRIEND_TEST(AosRegistrationTest, GetRegTypeReturnsRegistrationType);
+    FRIEND_TEST(AosRegistrationTest, IsTerminatedReturnsTrueIfTerminatedIsPending);
     FRIEND_TEST(AosRegistrationTest, CheckMode);
     FRIEND_TEST(AosRegistrationTest, GetProperty);
     FRIEND_TEST(AosRegistrationTest, CheckBool);
@@ -296,15 +298,26 @@ public:
             AosRegistrationTest, RegTerminatedTriggersReinitiateIfReconnectingServerIsNotAllowed);
     FRIEND_TEST(AosRegistrationTest, RegTerminatedWhileInCallReportsFailureAsPdnReconnectReason);
     FRIEND_TEST(AosRegistrationTest, RegTerminatedReportsFailureAsTerminatedReason);
+    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNothing);
+    FRIEND_TEST(AosRegistrationTest,
+            SubscriptionStateChangedWithSubscriptionEstablishedClearsRetryCount);
+    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionFailedDoesNothing);
+    FRIEND_TEST(AosRegistrationTest,
+            SubscriptionStateChangedWithSubscriptionTerminatedSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWithUnknownReasonDoesNothing);
+    FRIEND_TEST(AosRegistrationTest,
+            SubscriptionCanBeTransmittedWhileTransactionIsNotStartedReturnsFalse);
+    FRIEND_TEST(
+            AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsStartedReturnsTrue);
+    FRIEND_TEST(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoesNothing);
+    FRIEND_TEST(AosRegistrationTest,
+            SubscriptionNotifyReceivedWithRegisteredEventSendsMessageForHandling);
     FRIEND_TEST(AosRegistrationTest, StopTimer);
     FRIEND_TEST(AosRegistrationTest, ClearTimer);
     FRIEND_TEST(AosRegistrationTest, TimerExpired);
     FRIEND_TEST(AosRegistrationTest, ProcessOfflineRecoverTimerExpired);
     FRIEND_TEST(AosRegistrationTest, ProcessStopRetryTimerExpired);
     FRIEND_TEST(AosRegistrationTest, CreateAndDestroySubscription);
-    FRIEND_TEST(AosRegistrationTest, Subscription_StateChanged);
-    FRIEND_TEST(AosRegistrationTest, Subscription_CanBeTransmitted);
-    FRIEND_TEST(AosRegistrationTest, Subscription_NotifyReceived);
     FRIEND_TEST(AosRegistrationTest, Subscription_Request);
     FRIEND_TEST(AosRegistrationTest, NConfiguration_NotifyConfigChanged);
     FRIEND_TEST(AosRegistrationTest, Transaction_OnConnectionFailed);
@@ -1073,6 +1086,24 @@ TEST_F(AosRegistrationTest, HandleUninterestedCommandDoesNothing)
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
 
     EXPECT_TRUE(m_pAosRegistration->m_bEps5GsOnly);
+}
+
+TEST_F(AosRegistrationTest, GetRegTypeReturnsRegistrationType)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+
+    AosRegistrationType nType = m_pAosRegistration->GetRegType();
+
+    EXPECT_EQ(nType, AosRegistrationType::EMERGENCY);
+}
+
+TEST_F(AosRegistrationTest, IsTerminatedReturnsTrueIfTerminatedIsPending)
+{
+    m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TERMINATED;
+
+    IMS_BOOL bResult = m_pAosRegistration->IsTerminated();
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, CheckMode)
@@ -4762,6 +4793,120 @@ TEST_F(AosRegistrationTest, RegTerminatedReportsFailureAsTerminatedReason)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
+TEST_F(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNothing)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
+    m_pAosRegistration->m_piRegistration = IMS_NULL;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+    m_pAosRegistration->m_nConsecutiveFailure = 1;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
+
+    m_pAosRegistration->Subscription_StateChanged(
+            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_ESTABLISHED);
+
+    EXPECT_EQ(m_pAosRegistration->m_nConsecutiveFailure, 1);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionEstablishedClearsRetryCount)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+    m_pAosRegistration->m_nConsecutiveFailure = 1;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
+            .WillOnce(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION));
+
+    m_pAosRegistration->Subscription_StateChanged(
+            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_ESTABLISHED);
+
+    EXPECT_EQ(m_pAosRegistration->m_nConsecutiveFailure, 0);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionFailedDoesNothing)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
+    EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
+
+    m_pAosRegistration->Subscription_StateChanged(
+            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_FAILED);
+}
+
+TEST_F(AosRegistrationTest,
+        SubscriptionStateChangedWithSubscriptionTerminatedSendsMessageForHandling)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(TestAosRegistration::MSG_SUB_TERMINATED)));
+
+    m_pAosRegistration->Subscription_StateChanged(
+            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_TERMINATED);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionStateChangedWithUnknownReasonDoesNothing)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
+    EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
+
+    m_pAosRegistration->Subscription_StateChanged(
+            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_NONE);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsNotStartedReturnsFalse)
+{
+    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    IMS_BOOL bResult = m_pAosRegistration->Subscription_CanBeTransmitted();
+
+    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(TestAosRegistration::PENDING_SUBSCRIPTION));
+}
+
+TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsStartedReturnsTrue)
+{
+    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    IMS_BOOL bResult = m_pAosRegistration->Subscription_CanBeTransmitted();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoesNothing)
+{
+    m_pAosRegistration->m_piRegistration = IMS_NULL;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
+
+    m_pAosRegistration->Subscription_NotifyReceived(AosSubscription::EVENT_REGISTERED);
+}
+
+TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWithRegisteredEventSendsMessageForHandling)
+{
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_EVENT_REGISTERED)));
+
+    m_pAosRegistration->Subscription_NotifyReceived(AosSubscription::EVENT_REGISTERED);
+}
+
 TEST_F(AosRegistrationTest, StopTimer)
 {
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_OFFLINE_RECOVER, 5000);
@@ -4977,56 +5122,6 @@ TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
 
     // CreateSubscription - m_piRegistration and piRegSubscription is not null
     EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
-}
-
-TEST_F(AosRegistrationTest, Subscription_StateChanged)
-{
-    // m_piRegistration is null
-    m_pAosRegistration->Subscription_StateChanged(
-            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_NONE);
-
-    // ProcessSubscription_Success
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION));
-    m_pAosRegistration->Subscription_StateChanged(
-            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_ESTABLISHED);
-    EXPECT_EQ(m_pAosRegistration->m_nConsecutiveFailure, 0);
-
-    // ProcessSubscription_Failed
-    m_pAosRegistration->Subscription_StateChanged(
-            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_FAILED);
-
-    // MSG_SUB_TERMINATED
-    m_pAosRegistration->Subscription_StateChanged(
-            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_SUB_TERMINATED);
-
-    // reason is REASON_NONE - It doesn't do anything
-    m_pAosRegistration->Subscription_StateChanged(
-            AosSubscription::STATE_SUBSCRIBING, AosSubscription::REASON_NONE);
-}
-
-TEST_F(AosRegistrationTest, Subscription_CanBeTransmitted)
-{
-    // Transaction is not started
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
-    EXPECT_FALSE(m_pAosRegistration->Subscription_CanBeTransmitted());
-    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(TestAosRegistration::PENDING_SUBSCRIPTION));
-
-    // Transaction is started
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    EXPECT_TRUE(m_pAosRegistration->Subscription_CanBeTransmitted());
-}
-
-TEST_F(AosRegistrationTest, Subscription_NotifyReceived)
-{
-    // m_piRegistration is null
-    m_pAosRegistration->Subscription_NotifyReceived(AosSubscription::EVENT_UNKNOWN);
-
-    // EVENT_REGISTERED
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->Subscription_NotifyReceived(AosSubscription::EVENT_REGISTERED);
 }
 
 TEST_F(AosRegistrationTest, Subscription_Request)
