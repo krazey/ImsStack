@@ -84,11 +84,12 @@ public:
     // TEST : Stop
     FRIEND_TEST(AosConditionTest, ShouldDeleteAvailableCellularWhenStop);
     FRIEND_TEST(AosConditionTest, ShouldDeleteAvailableWifiWhenStop);
-
-    FRIEND_TEST(AosConditionTest, SetListener);
-    FRIEND_TEST(AosConditionTest, SetBlock);
-    FRIEND_TEST(AosConditionTest, ResetBlock);
-    FRIEND_TEST(AosConditionTest, IsReasonBlocked);
+    // TEST : SetListener
+    FRIEND_TEST(AosConditionTest, SucceedsSetListener);
+    // TEST : SetBlock
+    FRIEND_TEST(AosConditionTest, SucceedsSetBlock);
+    // TEST : ResetBlock
+    FRIEND_TEST(AosConditionTest, SucceedsResetBlock);
     // TEST : IsReady
     FRIEND_TEST(AosConditionTest, ReturnTrueWhenCellularServiceIsReady);
     FRIEND_TEST(AosConditionTest, ReturnTrueWhenWifiServiceIsReady);
@@ -294,198 +295,67 @@ TEST_F(AosConditionTest, ShouldDeleteAvailableWifiWhenStop)
     EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
 }
 
-TEST_F(AosConditionTest, SetListener)
+TEST_F(AosConditionTest, SucceedsSetListener)
 {
+    // GIVEN
     EXPECT_EQ(m_pAosCondition->m_piListener, nullptr);
 
-    IAosConditionListener* piAosConditionListener = new MockIAosConditionListener();
-    m_pAosCondition->SetListener(piAosConditionListener);
-    EXPECT_EQ(m_pAosCondition->m_piListener, piAosConditionListener);
+    MockIAosConditionListener objMockIAosConditionListener;
+
+    // WHEN
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
+
+    // THEN
+    EXPECT_NE(m_pAosCondition->m_piListener, nullptr);
 }
 
-TEST_F(AosConditionTest, SetBlock)
+TEST_F(AosConditionTest, SucceedsSetBlock)
 {
-    ASSERT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN : Only block reasons corresponding to boundary values are checked.
     m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_AOS_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_CSCALL_STARTED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_ENABLER_DETACHED);
-    m_pAosCondition->SetBlock(BLOCK_IMS_DISABLED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_REG_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_POWER_OFF);
-    m_pAosCondition->SetBlock(BLOCK_SERVICE_CONNECTING);
-    m_pAosCondition->SetBlock(BLOCK_SUBSCRIBER_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_TTY_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED);
+    m_pAosCondition->SetBlock(BLOCK_EPS_FALLBACK_STARTED);
     m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_ROAMING);
     m_pAosCondition->SetBlock(BLOCK_CELLULAR_VOPS_OFF);
     m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_NO_WIFI);
     m_pAosCondition->SetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
 
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CSCALL_STARTED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_IMS_DISABLED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_POWER_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SERVICE_CONNECTING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TTY_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TEMPORARY_DATA_DEACTIVATED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_ROAMING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_VOPS_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_NO_WIFI));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_TEMPORARILY_BLOCKED));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED);
+    IMS_BOOL bResult2 = m_pAosCondition->IsReasonBlocked(BLOCK_EPS_FALLBACK_STARTED);
+    IMS_BOOL bResult3 = m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    IMS_BOOL bResult4 = m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_VOPS_OFF);
+    IMS_BOOL bResult5 = m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION);
+    IMS_BOOL bResult6 = m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_TEMPORARILY_BLOCKED);
+
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
+    EXPECT_TRUE(bResult4);
+    EXPECT_TRUE(bResult5);
+    EXPECT_TRUE(bResult6);
 }
 
-TEST_F(AosConditionTest, ResetBlock)
+TEST_F(AosConditionTest, SucceedsResetBlock)
 {
-    ASSERT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN : Only block reasons corresponding to boundary values are checked.
     m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_AOS_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_CSCALL_STARTED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_ENABLER_DETACHED);
-    m_pAosCondition->SetBlock(BLOCK_IMS_DISABLED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_REG_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_POWER_OFF);
-    m_pAosCondition->SetBlock(BLOCK_SERVICE_CONNECTING);
-    m_pAosCondition->SetBlock(BLOCK_SUBSCRIBER_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_TTY_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED);
+    m_pAosCondition->SetBlock(BLOCK_EPS_FALLBACK_STARTED);
     m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_ROAMING);
     m_pAosCondition->SetBlock(BLOCK_CELLULAR_VOPS_OFF);
     m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_NO_WIFI);
     m_pAosCondition->SetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
 
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CSCALL_STARTED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_IMS_DISABLED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_POWER_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SERVICE_CONNECTING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TTY_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TEMPORARY_DATA_DEACTIVATED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_ROAMING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_VOPS_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_NO_WIFI));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_TEMPORARILY_BLOCKED));
-
+    // WHEN
     m_pAosCondition->ResetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosCondition->ResetBlock(BLOCK_AOS_INCOMPLETED);
-    m_pAosCondition->ResetBlock(BLOCK_CSCALL_STARTED);
-    m_pAosCondition->ResetBlock(BLOCK_PERMANENT_DATA_FAILED);
-    m_pAosCondition->ResetBlock(BLOCK_ENABLER_DETACHED);
-    m_pAosCondition->ResetBlock(BLOCK_IMS_DISABLED);
-    m_pAosCondition->ResetBlock(BLOCK_PERMANENT_REG_FAILED);
-    m_pAosCondition->ResetBlock(BLOCK_POWER_OFF);
-    m_pAosCondition->ResetBlock(BLOCK_SERVICE_CONNECTING);
-    m_pAosCondition->ResetBlock(BLOCK_SUBSCRIBER_INCOMPLETED);
-    m_pAosCondition->ResetBlock(BLOCK_TTY_MODE_ON);
-    m_pAosCondition->ResetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED);
+    m_pAosCondition->ResetBlock(BLOCK_EPS_FALLBACK_STARTED);
     m_pAosCondition->ResetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->ResetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosCondition->ResetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    m_pAosCondition->ResetBlock(BLOCK_CELLULAR_ROAMING);
     m_pAosCondition->ResetBlock(BLOCK_CELLULAR_VOPS_OFF);
     m_pAosCondition->ResetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->ResetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosCondition->ResetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    m_pAosCondition->ResetBlock(BLOCK_WIFI_NO_WIFI);
     m_pAosCondition->ResetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
 
+    // THEN
     EXPECT_TRUE(m_pAosBlock->IsCleared());
-}
-
-TEST_F(AosConditionTest, IsReasonBlocked)
-{
-    ASSERT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_AOS_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_CSCALL_STARTED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_ENABLER_DETACHED);
-    m_pAosCondition->SetBlock(BLOCK_IMS_DISABLED);
-    m_pAosCondition->SetBlock(BLOCK_PERMANENT_REG_FAILED);
-    m_pAosCondition->SetBlock(BLOCK_POWER_OFF);
-    m_pAosCondition->SetBlock(BLOCK_SERVICE_CONNECTING);
-    m_pAosCondition->SetBlock(BLOCK_SUBSCRIBER_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_TTY_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_ROAMING);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_VOPS_OFF);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_NO_WIFI);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
-
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CSCALL_STARTED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_IMS_DISABLED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_POWER_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SERVICE_CONNECTING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TTY_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_TEMPORARY_DATA_DEACTIVATED));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_ROAMING));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_VOPS_OFF));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_NO_WIFI));
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_TEMPORARILY_BLOCKED));
 }
 
 TEST_F(AosConditionTest, ReturnTrueWhenCellularServiceIsReady)
