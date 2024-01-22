@@ -112,7 +112,7 @@ void AosServiceAvailableWifi::SetLocation(IN ILocationProperties* piTestLocation
     m_piTestLocation = piTestLocation;
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::RegisterListener()
+PROTECTED VIRTUAL void AosServiceAvailableWifi::RegisterListener()
 {
     AosServiceAvailable::RegisterListener();
 
@@ -125,7 +125,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::RegisterListener()
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::DeregisterListener()
+PROTECTED VIRTUAL void AosServiceAvailableWifi::DeregisterListener()
 {
     IWifiWatcher* piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
     piWifiWatcher->RemoveObserver(this);
@@ -133,7 +133,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::DeregisterListener()
     AosServiceAvailable::DeregisterListener();
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(
+PROTECTED VIRTUAL void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(
         IN IWifiWatcher* pIWifiWatcher)
 {
     if (pIWifiWatcher == IMS_NULL)
@@ -165,7 +165,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(
     HandleEvent(EVENT_WIFI_STATE, 0, -1);
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
+PROTECTED VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
         IN INetworkPing* piPing, IN IMS_SINT32 nResult)
 {
     A_IMS_TRACE_D(AOSTAG, "NetPing_NotifyResult :: result=%s", PingResultToString(nResult), 0, 0);
@@ -191,7 +191,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
+PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
         IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
     A_IMS_TRACE_D(AOSTAG, "HandleCallStateChanged :: nType(%d), nState(%d)", nState, nStateEx, 0);
@@ -205,7 +205,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
@@ -224,7 +224,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_U
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWifiConnectionChanged()
+PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleWifiConnectionChanged()
 {
     if (m_piBlock == IMS_NULL)
     {
@@ -241,7 +241,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWifiConnectionChanged()
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
+PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
 {
     AString strNewCountry;
 
@@ -277,7 +277,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
+PROTECTED VIRTUAL IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
 {
     if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
     {
@@ -294,7 +294,7 @@ PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
     return m_piBlock->IsCleared(SERVICE_WIFI);
 }
 
-PRIVATE
+PROTECTED
 void AosServiceAvailableWifi::ProcessBadConnectionReported()
 {
     m_nBadNetworkState = STATE_BAD_NETWORK_DETECTED;
@@ -302,7 +302,7 @@ void AosServiceAvailableWifi::ProcessBadConnectionReported()
     Notify();
 }
 
-PRIVATE
+PROTECTED
 void AosServiceAvailableWifi::ClearBadNetworkState()
 {
     m_nBadNetworkState = STATE_BAD_NETWORK_NONE;
@@ -314,7 +314,7 @@ void AosServiceAvailableWifi::ClearBadNetworkState()
     }
 }
 
-PRIVATE
+PROTECTED
 IMS_SINT32 AosServiceAvailableWifi::RequestNetPing()
 {
     IMS_SINT32 nResult = INetworkPing::PING_STATUS_OK;
@@ -356,7 +356,7 @@ IMS_SINT32 AosServiceAvailableWifi::RequestNetPing()
     return nResult;
 }
 
-PRIVATE
+PROTECTED
 const IMS_CHAR* AosServiceAvailableWifi::PingResultToString(IN IMS_SINT32 nResult)
 {
     switch (nResult)
