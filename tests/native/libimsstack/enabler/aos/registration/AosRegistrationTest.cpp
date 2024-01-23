@@ -312,13 +312,25 @@ public:
     FRIEND_TEST(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoesNothing);
     FRIEND_TEST(AosRegistrationTest,
             SubscriptionNotifyReceivedWithRegisteredEventSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, RegRequiredSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest,
+            RegRequiredWithNextPcscfSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest,
+            RegRequiredWithAvailableNextPcscfSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest,
+            RegRequiredWithSub403MsgSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest,
+            RegRequiredWithNotifyTerminatedMsgSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, RegTerminatedSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, SubRequiredSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, SubTerminatedSubscriptionCommandSendsMessageForHandling);
+    FRIEND_TEST(AosRegistrationTest, UnknownSubscriptionCommandDoesNothing);
     FRIEND_TEST(AosRegistrationTest, StopTimer);
     FRIEND_TEST(AosRegistrationTest, ClearTimer);
     FRIEND_TEST(AosRegistrationTest, TimerExpired);
     FRIEND_TEST(AosRegistrationTest, ProcessOfflineRecoverTimerExpired);
     FRIEND_TEST(AosRegistrationTest, ProcessStopRetryTimerExpired);
     FRIEND_TEST(AosRegistrationTest, CreateAndDestroySubscription);
-    FRIEND_TEST(AosRegistrationTest, Subscription_Request);
     FRIEND_TEST(AosRegistrationTest, NConfiguration_NotifyConfigChanged);
     FRIEND_TEST(AosRegistrationTest, Transaction_OnConnectionFailed);
     FRIEND_TEST(AosRegistrationTest, MessageMediator_AdjustMessage);
@@ -4907,6 +4919,82 @@ TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWithRegisteredEventSendsMe
     m_pAosRegistration->Subscription_NotifyReceived(AosSubscription::EVENT_REGISTERED);
 }
 
+TEST_F(AosRegistrationTest, RegRequiredSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
+
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, RegRequiredWithNextPcscfSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_NEXT_PCSCF)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest,
+        RegRequiredWithAvailableNextPcscfSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(
+                    IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, RegRequiredWithSub403MsgSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest,
+        RegRequiredWithNotifyTerminatedMsgSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_WAIT_TIME)));
+
+    m_pAosRegistration->Subscription_Request(
+            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, RegTerminatedSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread,
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_TERMINATED_BY_NOTIFY)));
+
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, SubRequiredSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(TestAosRegistration::MSG_SUB_REINITIATE)));
+
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_REQUIRED, 0, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, SubTerminatedSubscriptionCommandSendsMessageForHandling)
+{
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(TestAosRegistration::MSG_SUB_TERMINATED)));
+
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_TERMINATED, 0, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, UnknownSubscriptionCommandDoesNothing)
+{
+    EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
+
+    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_NONE, 0, IMS_FALSE);
+}
+
 TEST_F(AosRegistrationTest, StopTimer)
 {
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_OFFLINE_RECOVER, 5000);
@@ -5122,44 +5210,6 @@ TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
 
     // CreateSubscription - m_piRegistration and piRegSubscription is not null
     EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
-}
-
-TEST_F(AosRegistrationTest, Subscription_Request)
-{
-    // CMD_REG_REQUIRED
-    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE);
-
-    // CMD_REG_REQUIRED_WITH_SUB_403_MSG
-    m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_FALSE);
-
-    // CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG
-    m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_FALSE);
-
-    // CMD_REG_REQUIRED_WITH_NEXT_PCSCF
-    m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE);
-
-    // CMD_REG_REQUIRED with AWT
-    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_TRUE);
-
-    // CMD_REG_REQUIRED_WITH_SUB_403_MSG with AWT
-    m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE);
-
-    // CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG with AWT
-    m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_TRUE);
-
-    // CMD_REG_TERMINATED
-    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE);
-
-    // CMD_SUB_REQUIRED
-    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_REQUIRED, 0, IMS_FALSE);
-
-    // CMD_SUB_TERMINATED
-    m_pAosRegistration->Subscription_Request(AosSubscription::CMD_SUB_TERMINATED, 0, IMS_FALSE);
 }
 
 TEST_F(AosRegistrationTest, NConfiguration_NotifyConfigChanged)
