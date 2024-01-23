@@ -171,6 +171,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 
     if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
     {
+        // TODO: Check if it's okay that objUsers is empty.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_pOperationQueue->CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
@@ -189,7 +190,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     m_pOperationQueue->SetAddingOperationSetCompleted();
 }
 
-PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
+PROTECTED VIRTUAL void ExpandController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
     // TODO: how to check nullcall? never be null so no need to check?
@@ -208,24 +209,36 @@ PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
 
 PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
 {
+    // TODO: This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // when the state is EXPANDING only.
+    /*
     if (GetState() != STATE_EXPANDING)
     {
         return IMS_FALSE;
     }
+    */
 
     IMS_TRACE_I("IsStartFinalSipfragWaitTimer : [%d]", m_nConditionFinalSipfragTimer, 0, 0);
 
+    // TODO: This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // with only CONDITION_SIPFRAG_100_RECEIVED.
+    /*
     if (IsConditionMet(CONDITION_SIPFRAG_100_RECEIVED) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
+    */
 
+    // TODO: This if-statement is always true because OnCallUpdated() ignores non-conference call.
+    /*
     if (IsConditionMet(CONDITION_1TO1_TERMINATED) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
-
     return IMS_TRUE;
+    */
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UINTP nCallKey)
@@ -255,7 +268,7 @@ PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UIN
     // Add the user of exist 1-to-1 session to participant list
     IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
 
-    ConfUser* p1to1User = new ConfUser();
+    ConfUser* p1to1User = new ConfUser();  // TODO: delete
     SipAddress objSIPAddress(
             GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
     p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
@@ -275,12 +288,9 @@ PROTECTED VIRTUAL void ExpandController::Recover()
         case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
             break;
-        case CONTROL_OPERATION_SUBSCRIBE:
-            break;
         case CONTROL_OPERATION_REFER_INVITE:
             RecoverOnReferring();
             break;
-
         default:
             IMS_TRACE_I("Recover : not handled.", 0, 0, 0);
             break;

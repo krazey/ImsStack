@@ -75,7 +75,6 @@ public:
         // setters
         inline void SetConfUsers(IN const ImsList<ConfUser*>& objConfUsers)
         {
-            // Copy only ImsList.
             m_objConfUsers = objConfUsers;
         }
 
@@ -137,7 +136,7 @@ public:
     virtual void CreateNPutWithReason(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
 
-    void SetAddingOperationSetCompleted();
+    virtual void SetAddingOperationSetCompleted();
 
     virtual ConferenceOperationQueue::ConferenceOperation* GetNextOperation();
     virtual IMS_BOOL CompleteCurrentOperation(

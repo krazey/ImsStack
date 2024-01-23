@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
@@ -22,10 +23,12 @@
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ExpandController.h"
+#include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/MockConferenceEventNotifier.h"
 #include "conferencecall/MockConferenceFactory.h"
@@ -38,14 +41,17 @@
 #include "core/MockICoreService.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockMtcTimerWrapper.h"
+#include "helper/MtcSupplementaryService.h"
 #include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 #include <memory>
 
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::Invoke;
 using ::testing::Ref;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
 namespace android
@@ -53,6 +59,12 @@ namespace android
 
 LOCAL const CallKey CONFERENCE_CALL_KEY = 100;
 LOCAL const CallKey INDIVIDUAL_CALL_KEY = CONFERENCE_CALL_KEY + 1;
+
+// SipMethod
+MATCHER_P(IsSameTargetUser, user, "")
+{
+    return arg->strTarget.Equals(user->strTarget);
+}
 
 class TestExpandController : public ExpandController
 {
@@ -151,7 +163,8 @@ protected:
             ON_CALL(*pConnectionIdManager, GetCallKey(nConnectionId))
                     .WillByDefault(Return(INDIVIDUAL_CALL_KEY));
             pExpandController->OnCallStateChanged(
-                    INDIVIDUAL_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_TRUE, 0);
+                    INDIVIDUAL_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_TRUE,
+       0);
         }
     */
 };
@@ -206,6 +219,100 @@ TEST_F(ExpandControllerTest, OnReferenceStartFailedCompletesOperation)
     EXPECT_EQ(objUser.eStatus, STATUS_FAIL);
 }
 
+TEST_F(ExpandControllerTest,
+        OnReferenceStartFailedDoesNotRecoverIfOperationIsCreateConferenceCallAndStateIsNotExpanding)
+{
+    // Tests RecoverOnCreating().
+
+    pExpandController->SetStateForTest(ConferenceController::STATE_JOINING);
+
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
+            .WillByDefault(Return(CONTROL_OPERATION_CREATE_CONFERENCE_CALL));
+
+    EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)))
+            .Times(0);
+    EXPECT_CALL(*pOperationQueue, Clear).Times(0);
+
+    pExpandController->OnReferenceStartFailed(&objReference);
+
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_JOINING);
+}
+
+TEST_F(ExpandControllerTest,
+        OnReferenceStartFailedRecoversByResuming1To1SessionIfOperationIsCreateConferenceCall)
+{
+    // Tests RecoverOnCreating().
+
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
+            .WillByDefault(Return(CONTROL_OPERATION_CREATE_CONFERENCE_CALL));
+
+    EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
+    EXPECT_CALL(*pOperationQueue, Clear);
+    // TODO: Check that Resume1to1Session() is called after it's implemented.
+
+    pExpandController->OnReferenceStartFailed(&objReference);
+
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_IDLE);
+}
+
+TEST_F(ExpandControllerTest,
+        OnReferenceStartFailedRecoversByTerminatingConferenceCallIfOperationIsReferInvite)
+{
+    // Tests RecoverOnReferring().
+
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
+            .WillByDefault(Return(CONTROL_OPERATION_REFER_INVITE));
+    ON_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+
+    EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
+    EXPECT_CALL(*pOperationQueue, Clear);
+    // TODO: Check that Resume1to1Session() is called after it's implemented.
+    EXPECT_CALL(objConfCall, Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1)));
+
+    pExpandController->OnReferenceStartFailed(&objReference);
+
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_IDLE);
+}
+
+TEST_F(ExpandControllerTest,
+        OnReferenceStartFailedNotifiesUsersInfoWithStatusFailIfStateIsExpanding)
+{
+    // Tests RecoverOnReferring().
+
+    pExpandController->SetStateForTest(ConferenceController::STATE_JOINING);
+
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ON_CALL(*pOperationQueue, GetTypeOfCurrentOperation)
+            .WillByDefault(Return(CONTROL_OPERATION_REFER_INVITE));
+
+    ImsList<ConfUser*> objUsers;
+    ConfUser objUser;
+    objUser.eStatus = STATUS_CONNECTED;
+    objUsers.Append(&objUser);
+    ON_CALL(*pOperationQueue, GetUsersOfCurrentOperation).WillByDefault(ReturnRef(objUsers));
+    ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsers));
+
+    // Cannot check that pParticipantList has the ConfUser with `STATUS_FAIL`
+    // since it's reflecting by ConferenceEventNotifier.
+    EXPECT_CALL(*pNotifier, NotifyUsersInfo(Ref(*pParticipantList)));
+
+    pExpandController->OnReferenceStartFailed(&objReference);
+
+    EXPECT_EQ(objUser.eStatus, STATUS_FAIL);
+}
+
 TEST_F(ExpandControllerTest, OnReferenceStartFailedInvokesSendClosedIfExpandingState)
 {
     pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
@@ -250,9 +357,23 @@ TEST_F(ExpandControllerTest, OnReferenceUpdatedInvokesStopMedia1to1SessionIfExpa
 
     EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
             .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
-    // TODO: Implementation required.
+    // TODO: Implementation required for ExpandController::StopMedia1to1Session().
     EXPECT_CALL(
             *pOperationQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, IMS_NULL));
+
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_202, ReferSubscriptionState::ACTIVE);
+}
+
+TEST_F(ExpandControllerTest, StopMedia1to1SessionDoesNothingIfConfigIsReferMultiple)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+    // TODO: Implementation required for ExpandController::StopMedia1to1Session().
 
     pExpandController->OnReferenceUpdated(
             &objReference, SipStatusCode::SC_202, ReferSubscriptionState::ACTIVE);
@@ -345,14 +466,322 @@ TEST_F(ExpandControllerTest,
 }
 */
 
+TEST_F(ExpandControllerTest, OnReferenceUpdatedWithErrorCodeChangesUserStatus)
+{
+    // Tests UpdateUserStatusByReferResult().
+
+    pExpandController->SetStateForTest(ConferenceController::STATE_JOINING);
+    MockIConferenceReference objReference;
+    ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
+    ON_CALL(*pConfigurationManager, IsSupportConferenceReferSubscribe)
+            .WillByDefault(Return(IMS_TRUE));
+
+    ConfUser objUser;
+    ON_CALL(*pParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_400, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_SERVERERROR);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_503, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_SERVERERROR);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_403, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_FORBIDDEN);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_404, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_NOTSUPPORTED);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_415, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_NOTSUPPORTED);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_408, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_NOANSWER);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_480, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_LOWBATTERY);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_486, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_BUSY);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_499, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_NOTREACHABLE);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_500, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_INTSERVERERROR);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_603, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_REJECT);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_606, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_NOTACCEPTABLE);
+
+    objUser.eStatus = STATUS_IDLE;
+    pExpandController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_380, ReferSubscriptionState::TERMINATED);
+    EXPECT_EQ(objUser.eStatus, STATUS_FAIL);
+}
+
+TEST_F(ExpandControllerTest, ProcessExpandNotifiesFailureIfNotCreatedState)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
+    EXPECT_CALL(*pNotifier, NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1)));
+
+    ImsList<ConfUser*> objUsers;
+    pExpandController->ProcessCommand(IConferenceController::EXPAND, objUsers);
+}
+
+TEST_F(ExpandControllerTest,
+        ProcessExpandCreatesConferenceCallAndDoOtherOperationsIfConfigurationIsReferSingle)
+{
+    ConfUser* pUser1 = new ConfUser();  // Deleted by ClearListForConfUsers().
+    ConfUser* pUser2 = new ConfUser();  // Deleted by ClearListForConfUsers().
+    pUser1->nConnectionId = 0;
+    pUser2->nConnectionId = 1;
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(pUser1);
+    objUsers.Append(pUser2);
+
+    ImsList<ConfUser*> objUsersCopied;
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
+    ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsersCopied));
+
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(*pOperationQueue,
+                CreateNPutWithUsers(
+                        CONTROL_OPERATION_CREATE_CONFERENCE_CALL, Ref(objUsers), IMS_FALSE));
+        EXPECT_CALL(*pOperationQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, IMS_FALSE));
+        EXPECT_CALL(
+                *pOperationQueue, CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, _, IMS_FALSE));
+        EXPECT_CALL(*pOperationQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_FALSE));
+        EXPECT_CALL(*pOperationQueue, SetAddingOperationSetCompleted);
+    }
+
+    pExpandController->ProcessCommand(IConferenceController::EXPAND, objUsers);
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_EXPANDING);
+}
+
+TEST_F(ExpandControllerTest,
+        ProcessExpandDoesReferAndSubscribeOperationsOnlyIfConfigurationIsReferMultiple)
+{
+    ConfUser* pUser1 = new ConfUser();  // Deleted by ClearListForConfUsers().
+    ConfUser* pUser2 = new ConfUser();  // Deleted by ClearListForConfUsers().
+    pUser1->nConnectionId = 0;
+    pUser2->nConnectionId = 1;
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(pUser1);
+    objUsers.Append(pUser2);
+
+    ImsList<ConfUser*> objUsersCopied;
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
+    ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsersCopied));
+
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(*pOperationQueue,
+                CreateNPutWithUsers(CONTROL_OPERATION_REFER_INVITE, objUsersCopied, IMS_FALSE));
+        EXPECT_CALL(*pOperationQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, IMS_FALSE));
+        EXPECT_CALL(*pOperationQueue, SetAddingOperationSetCompleted);
+    }
+
+    pExpandController->ProcessCommand(IConferenceController::EXPAND, objUsers);
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_EXPANDING);
+}
+
+TEST_F(ExpandControllerTest, StartConferenceCallInvokesStartConferenceWithUsers)
+{
+    ConferenceOperationQueue::ConferenceOperation objOperation(
+            CONTROL_OPERATION_CREATE_CONFERENCE_CALL, 0);
+    ConfUser objUser;
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(&objUser);
+
+    objOperation.SetConfUsers(objUsers);
+    ON_CALL(*pOperationQueue, GetNextOperation).WillByDefault(Return(&objOperation));
+
+    EXPECT_CALL(objConfCall, StartConference(CallType::VOIP, AString::ConstNull(), objUsers));
+    pExpandController->OnOperationReady();
+}
+
 TEST_F(ExpandControllerTest, OnCallStateChangedForNonConfCallDoesNothing)
 {
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
     EXPECT_CALL(*pParticipantList, AddUser(_)).Times(0);
     EXPECT_CALL(*pOperationQueue, CompleteCurrentOperation(_, _)).Times(0);
 
     const IMtcCall::State eAnyState = IMtcCall::State::ESTABLISHED;
     pExpandController->OnCallStateChanged(
             INDIVIDUAL_CALL_KEY, eAnyState, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(ExpandControllerTest, OnCallStateChangedDoesNothingIfConfigIsSingleRefer)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
+
+    EXPECT_CALL(*pParticipantList, AddUser(_)).Times(0);
+    EXPECT_CALL(*pOperationQueue, CompleteCurrentOperation(_, _)).Times(0);
+
+    const IMtcCall::State eAnyState = IMtcCall::State::ESTABLISHED;
+    pExpandController->OnCallStateChanged(
+            CONFERENCE_CALL_KEY, eAnyState, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(ExpandControllerTest, OnCallStateChangedDoesNothingIfStateIsNotExpanding)
+{
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+
+    EXPECT_CALL(*pParticipantList, AddUser(_)).Times(0);
+    EXPECT_CALL(*pOperationQueue, CompleteCurrentOperation(_, _)).Times(0);
+
+    const IMtcCall::State eAnyState = IMtcCall::State::ESTABLISHED;
+    pExpandController->OnCallStateChanged(
+            CONFERENCE_CALL_KEY, eAnyState, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(ExpandControllerTest, OnCallStateChangedAddsUserToParticipantAndCompletesInviteOperation)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+
+    EXPECT_CALL(*pConfigurationManager, GetConferenceInvitingReferType)
+            .WillOnce(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE));
+
+    ParticipantInfo objParticipantInfo(objConfCallContext);
+    ON_CALL(objConfCallContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
+    MtcSupplementaryService objSuppService(objConfCallContext, objConfigurationProxy);
+    const AString strTargetUriWithScheme("sip:anyUri@domain.com");
+    const AString strTargetUri("anyUri");
+    objSuppService.Add(SuppType::TARGET_URI, strTargetUriWithScheme);
+    ON_CALL(objConfCallContext, GetSupplementaryService).WillByDefault(ReturnRef(objSuppService));
+
+    ConfUser objUser;
+    objUser.strTarget = strTargetUri;
+    EXPECT_CALL(*pParticipantList, AddUser(IsSameTargetUser(&objUser)));
+    EXPECT_CALL(
+            *pOperationQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, IMS_NULL));
+
+    const IMtcCall::State eAnyState = IMtcCall::State::ESTABLISHED;
+    pExpandController->OnCallStateChanged(
+            CONFERENCE_CALL_KEY, eAnyState, CallType::VOIP, IMS_FALSE, 0);
+
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_IDLE);
+}
+
+TEST_F(ExpandControllerTest, OnOperationReadyWithNotifyResultNotifiesJoinFailedIfNotReadyState)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+    ConferenceOperationQueue::ConferenceOperation objOperation(
+            CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
+    ON_CALL(*pOperationQueue, GetNextOperation).WillByDefault(Return(&objOperation));
+
+    // To keep the state as EXPANDING.
+    ON_CALL(*pOperationQueue,
+            CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pNotifier, NotifyExpanded);
+    EXPECT_CALL(*pNotifier, NotifyUsersInfo(Ref(*pParticipantList)));
+    EXPECT_CALL(*pNotifier,
+            NotifyJoinFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1), Ref(*pParticipantList)));
+
+    pExpandController->OnOperationReady();
+}
+
+TEST_F(ExpandControllerTest,
+        OnOperationReadyWithNotifyResultDoesNotNotifyJoinFailedIfCurrentOperationIsNotifyResult)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+    ConferenceOperationQueue::ConferenceOperation objOperation(
+            CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
+    EXPECT_CALL(*pOperationQueue, GetNextOperation)
+            .WillOnce(Return(&objOperation))
+            .WillRepeatedly(ReturnNull());  // To avoid infinitely invoking DoNextOperation().
+
+    // To change the state to IDLE.
+    ON_CALL(*pOperationQueue,
+            CompleteCurrentOperation(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_NULL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pNotifier, NotifyJoinFailed(_, _)).Times(0);
+
+    pExpandController->OnOperationReady();
+}
+
+TEST_F(ExpandControllerTest, OnOperationReadyWithNotifyResultChangesStateToJoining)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+    ConferenceOperationQueue::ConferenceOperation objOperation(
+            CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
+    ON_CALL(*pOperationQueue, GetNextOperation).WillByDefault(Return(&objOperation));
+
+    pExpandController->OnOperationReady();
+    EXPECT_EQ(pExpandController->GetState(), ConferenceController::STATE_JOINING);
+}
+
+TEST_F(ExpandControllerTest, OnOperationReadyWithNotifyPusReferInviteOperation)
+{
+    pExpandController->SetStateForTest(ConferenceController::STATE_EXPANDING);
+    ConferenceOperationQueue::ConferenceOperation objOperation(
+            CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, 0);
+    ON_CALL(*pOperationQueue, GetNextOperation).WillByDefault(Return(&objOperation));
+
+    ConfUser objUser1;
+    objUser1.eStatus = STATUS_CONNECTED;  // Already joined user.
+    ConfUser objUser2;
+    objUser2.eStatus = STATUS_IDLE;  // To be invited user.
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(&objUser1);
+    objUsers.Append(&objUser2);
+    ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsers));
+    ON_CALL(*pParticipantList, GetSize).WillByDefault(Return(2));
+
+    EXPECT_CALL(*pOperationQueue,
+            CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, &objUser2, IMS_FALSE));
+
+    pExpandController->OnOperationReady();
 }
 
 }  // namespace android
