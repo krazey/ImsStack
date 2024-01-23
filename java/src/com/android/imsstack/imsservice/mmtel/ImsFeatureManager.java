@@ -16,7 +16,6 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Handler;
-import android.os.Message;
 import android.telephony.ims.feature.MmTelFeature;
 
 import com.android.imsstack.base.DeviceConfig;
@@ -55,12 +54,13 @@ public class ImsFeatureManager {
             updateAndNotifyFeatureCapabilitiesIfChanged();
         }
     };
+
     public ImsFeatureManager(IBaseContext context,
             IMmTelFeatureCapabilityListener featureCapabilityListener) {
         mContext = context;
         mFeatureCapabilityListener = featureCapabilityListener;
         mNetworkTracker = new NetworkTracker();
-     }
+    }
 
     public void dispose() {
         if (mUt != null) {
@@ -232,9 +232,8 @@ public class ImsFeatureManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class NetworkTracker extends Handler implements WifiInterface.Listener {
-        private static final int EVENT_RAT_CHANGED = 1;
-
+    private class NetworkTracker extends Handler
+            implements WifiInterface.Listener, IDcNetWatcher.Listener {
         public NetworkTracker() {
             super(mContext.getDefaultLooper());
             init();
@@ -244,7 +243,7 @@ public class ImsFeatureManager {
             IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
-                idnw.unregisterForRatChanged(this);
+                idnw.removeListener(this);
             }
 
             WifiInterface wifi = getWifiInterface();
@@ -258,7 +257,7 @@ public class ImsFeatureManager {
             IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
-                idnw.registerForRatChanged(this, EVENT_RAT_CHANGED, null);
+                idnw.addListener(this);
             }
 
             WifiInterface wifi = getWifiInterface();
@@ -269,27 +268,19 @@ public class ImsFeatureManager {
         }
 
         @Override
+        public void onDataNetworkTypeChanged() {
+            post(() -> {
+                logi("Network Type changed");
+                updateAndNotifyFeatureCapabilitiesIfChanged();
+            });
+        }
+
+        @Override
         public void onWifiConnectionStateChanged() {
             post(() -> {
                 logi("WiFi state changed");
                 updateAndNotifyFeatureCapabilitiesIfChanged();
             });
         }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case EVENT_RAT_CHANGED: {
-                    logi("RAT changed");
-
-                    updateAndNotifyFeatureCapabilitiesIfChanged();
-                    break;
-                }
-                default:
-                    // no-op
-                    break;
-            }
-        }
     }
-
 }

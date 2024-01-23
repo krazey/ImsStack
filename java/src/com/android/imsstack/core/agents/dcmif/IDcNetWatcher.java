@@ -16,28 +16,10 @@
 
 package com.android.imsstack.core.agents.dcmif;
 
-import android.os.Handler;
-
 /**
  * this class is the inferface about data connection watcher
  */
 public interface IDcNetWatcher extends IDc {
-
-    /**
-     * this class is data object to notify
-     */
-    class NotiObj {
-        public EApnType   eApnType;
-        public EDataState eDataState;
-        public int mSmCause;
-
-        public NotiObj(EApnType apnType, EDataState dataState, int smCause) {
-            this.eApnType = apnType;
-            this.eDataState = dataState;
-            this.mSmCause = smCause;
-        }
-    }
-
     /**
      * Return service is available or not based on
      * 1) RAT policy configuration
@@ -224,107 +206,73 @@ public interface IDcNetWatcher extends IDc {
     boolean isVoiceRat5G();
 
     /**
-     *     registerForDataStateChanged
+     * Listener interface to receive the change notification of network status.
+     */
+    interface Listener {
+        /**
+         * invoked when data connection state is changed.
+         */
+        default void onDataConnectionStateChanged(EApnType apnType, EDataState dataState) {
+        }
+
+        /**
+         * Invoked when data service state is changed.
+         */
+        default void onDataServiceStateChanged(int state) {
+        }
+
+        /**
+         * Invoked when data network type is changed.
+         */
+        default void onDataNetworkTypeChanged() {
+        }
+
+        /**
+         * Invoked when voice network type is changed.
+         */
+        default void onVoiceNetworkTypeChanged() {
+        }
+
+        /**
+         * Invoked when roaming state is changed.
+         */
+        default void onRoamingStateChanged(boolean roaming) {
+        }
+
+        /**
+         * Invoked when airplane mode is changed.
+         */
+        default void onAirplaneModeChanged(boolean airplaneMode) {
+        }
+
+        /**
+         * Invoked when data connection attempt is failed.
+         */
+        default void onPdnConnectionFailed(EApnType apnType, int smCause) {
+        }
+    }
+
+    /**
+     * Adds a listener to monitor the network status change.
      *
-     *     Register listener to receive data state changed event
+     * @param listener The listener to be set.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
      *
-     *        Register "h" of Handler
-     *        The "h" will get message with "what" of event
-     *        and "obj" of IDcNetWatcher.NotiObj
-     *
-     *        Typical usage.
-     *        {@code class Example extends Handler{
-     *            Example{
-     *                registerForDataStateChanged(this, EVENT_NAME, null);
-     *            }
-     *
-     *            @Override
-     *            public void handleMessage(Message msg) {
-     *                AsyncResult ar = (AsyncResult)msg.obj;
-
-     *                IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
-     *                EApnType apnType = res.eApnType;
-     *                EDataState state = res.eDataState;
-     *                int smCause = res.mSmCause;
-     *            }
-     *        }}
+     * @param listener The listener to be removed.
      */
-    void registerForDataStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive data state changed event
-     */
-    void unregisterForDataStateChanged(Handler h);
-
-    /**
-     * Registerlistener to receive data service state changed event
-     */
-    void registerForDataServiceStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive data service state changed event
-     */
-    void unregisterForDataServiceStateChanged(Handler h);
-
-    /**
-     * Register listener to receive RAT changed event
-     */
-    void registerForRatChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive RAT changed event
-     */
-    void unregisterForRatChanged(Handler h);
-
-    /**
-     * Register listener to receive voice RAT changed event
-     */
-    void registerForVoiceRatChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice RAT changed event
-     */
-    void unregisterForVoiceRatChanged(Handler h);
-
-    /**
-     * Register listener to receive roaming state changed event
-     */
-    void registerForRoamingStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive roaming state changed event
-     */
-    void unregisterForRoamingStateChanged(Handler h);
-
-    /**
-     * Register listener to receive airplane mode changed event
-     */
-    void registerForAirplaneModeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive airplane mode changed event
-     */
-    void unregisterForAirplaneModeChanged(Handler h);
-
-    /**
-     * Register listener to receive pdn connection fail event
-     * This api is used to handle XCAP pdn connection fail case, for now.
-     */
-    void registerForPdnConnectionFailed(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive pdn connection fail event
-     * This api is used to handle XCAP pdn connection fail case, for now.
-     */
-    void unregisterForPdnConnectionFailed(Handler h);
+    void removeListener(Listener listener);
 
     /**
      * Notifies data connection state is changed
      */
-    void notifyDataConnectionState(EApnType eApnType, EDataState eDataState);
+    void notifyDataConnectionState(EApnType apnType, EDataState dataState);
 
     /**
-     * Notify pdn connection failed event with sm cause to listeners
+     * Notifies data connection attempt is failed with the cause
      */
-    void notifyPdnConnectionFailed(EApnType eApnType, int smCause);
+    void notifyPdnConnectionFailed(EApnType apnType, int smCause);
 }

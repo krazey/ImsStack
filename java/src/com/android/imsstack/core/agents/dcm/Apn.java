@@ -204,7 +204,8 @@ public abstract class Apn extends Handler implements IApn {
 
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED, -1);
+        msg.arg1 = mType.getType();
+        msg.arg2 = EDataState.DATA_STATE_DISCONNECTED.getState();
         handleMessage(msg);
 
         removeCallbacksAndMessages(null);
@@ -590,7 +591,8 @@ public abstract class Apn extends Handler implements IApn {
         //notify to apn
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(apnType, dataState, -1);
+        msg.arg1 = apnType.getType();
+        msg.arg2 = dataState.getState();
 
         sendMessage(msg);
     }
@@ -1187,30 +1189,20 @@ public abstract class Apn extends Handler implements IApn {
                 return;
             }
 
-            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) msg.obj;
-            if (res == null) {
-                return;
-            }
-
-            // Do not use dataState vi intent
-            EApnType apnType = res.eApnType;
-            EDataState dataState = res.eDataState;
-
             if (mSystem == null) {
                 return;
             }
 
-            if (dataState == EDataState.DATA_STATE_CONNECT_FAILED) {
+            int apnType = msg.arg1;
+            int dataState = msg.arg2;
+            if (dataState == EDataState.DATA_STATE_CONNECT_FAILED.getState()) {
                 ImsLog.w(mSlotId, "Data Connection failed : apnType=" + apnType);
-                mSystem.notifyDataConnectionFailed(apnType.getType());
+                mSystem.notifyDataConnectionFailed(apnType);
                 return;
             }
 
-            ImsLog.i(mSlotId, "apnType=" + apnType
-                    + " : " + apnType.getString() + ", dataState=" + dataState);
-
-            mSystem.notifyDataConnectionStateChanged(
-                    apnType.getType(), dataState.getState());
+            ImsLog.i(mSlotId, "apnType=" + apnType + ", dataState=" + dataState);
+            mSystem.notifyDataConnectionStateChanged(apnType, dataState);
         }
     }
 

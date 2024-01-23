@@ -650,7 +650,8 @@ public class ApnTest {
         // handle DATA_STATE_CONNECTED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED, -1);
+        msg.arg1 = mApn.mType.getType();
+        msg.arg2 = EDataState.DATA_STATE_CONNECTED.getState();
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
@@ -663,24 +664,12 @@ public class ApnTest {
         // handle DATA_STATE_CONNECT_FAILED
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECT_FAILED, -1);
+        msg.arg1 = mApn.mType.getType();
+        msg.arg2 = EDataState.DATA_STATE_CONNECT_FAILED.getState();
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem).notifyDataConnectionFailed(mApn.mType.getType());
-    }
-
-    @Test
-    public void testHandleDataStateChanged_ignoreNullObj() throws Exception {
-        // ignore if msg.obj is null
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = null;
-        mApn.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-
-        verify(mMockISystem, never()).notifyDataConnectionStateChanged(
-                mApn.mType.getType(), eq(anyInt()));
     }
 
     @Test
@@ -691,7 +680,8 @@ public class ApnTest {
         // ignore if radio off is ongoing
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDcNetWatcher.NotiObj(mApn.mType, EDataState.DATA_STATE_CONNECTED, -1);
+        msg.arg1 = mApn.mType.getType();
+        msg.arg2 = EDataState.DATA_STATE_CONNECTED.getState();
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 

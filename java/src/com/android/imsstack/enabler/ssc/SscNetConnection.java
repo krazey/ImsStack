@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -60,6 +59,7 @@ public class SscNetConnection implements ISscNetConnection {
     @VisibleForTesting
     protected int mConnectionInactivityTimer = 120 * 1000;
     private final ApnStateListener mApnStateListener = new ApnStateListenerImpl();
+    private IDcNetWatcher.Listener mNetWatcherListener;
 
     @VisibleForTesting
     protected LinkedHashMap<Integer, Long> mTimerIdTable = new LinkedHashMap<Integer, Long>();
@@ -90,12 +90,12 @@ public class SscNetConnection implements ISscNetConnection {
         handlerThread.start();
         mSscNetConnectionHandler = new SscNetConnectionHandler(handlerThread.getLooper());
 
-        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-        if (dnw != null) {
-            dnw.registerForDataStateChanged(mSscNetConnectionHandler,
-                    EVENT_PDN_DATA_STATE_CHANGED, null);
-            dnw.registerForPdnConnectionFailed(mSscNetConnectionHandler,
-                    EVENT_PDN_CONNECTION_FAILED, null);
+        if (mNetWatcherListener == null) {
+            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+            if (dnw != null) {
+                mNetWatcherListener = new NetWatcherListener();
+                dnw.addListener(mNetWatcherListener);
+            }
         }
 
         if (mApnType != null) {
@@ -122,13 +122,15 @@ public class SscNetConnection implements ISscNetConnection {
             }
         }
 
-        if (mSscNetConnectionHandler != null) {
+        if (mNetWatcherListener != null) {
             IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
             if (dnw != null) {
-                dnw.unregisterForDataStateChanged(mSscNetConnectionHandler);
-                dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
+                dnw.removeListener(mNetWatcherListener);
             }
+            mNetWatcherListener = null;
+        }
 
+        if (mSscNetConnectionHandler != null) {
             mSscNetConnectionHandler.removeCallbacksAndMessages(null);
             mSscNetConnectionHandler.getLooper().quit();
             mSscNetConnectionHandler = null;
@@ -296,8 +298,26 @@ public class SscNetConnection implements ISscNetConnection {
         }
     }
 
+    private final class NetWatcherListener implements IDcNetWatcher.Listener {
+        @Override
+        public void onDataConnectionStateChanged(EApnType apnType, EDataState dataState) {
+            if (mSscTransactionHandler != null) {
+                Message.obtain(mSscNetConnectionHandler, EVENT_PDN_DATA_STATE_CHANGED,
+                        apnType.getType(), dataState.getState()).sendToTarget();
+            }
+        }
+
+        @Override
+        public void onPdnConnectionFailed(EApnType apnType, int smCause) {
+            if (mSscTransactionHandler != null) {
+                Message.obtain(mSscNetConnectionHandler, EVENT_PDN_CONNECTION_FAILED,
+                    apnType.getType(), smCause).sendToTarget();
+            }
+        }
+    }
+
     private final class SscNetConnectionHandler extends Handler {
-        public SscNetConnectionHandler(Looper looper) {
+        SscNetConnectionHandler(Looper looper) {
             super(looper);
         }
 
@@ -329,30 +349,19 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         private void proc_dataStateChanged(Message msg) {
-            AsyncResult ar = (AsyncResult) msg.obj;
-            if (ar == null) {
+            if (mApnType == null || mApnType.getType() != msg.arg1) {
                 return;
             }
+            EDataState dataState = EDataState.convertIntTypeToEnum(msg.arg2);
+            ImsLog.i(mSlotId, "apnType[" + mApnType + "], state[" + dataState + "]");
 
-            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
-            if (res == null) {
-                return;
-            }
-
-            EApnType apnType = res.eApnType;
-            if (mApnType == null || mApnType != apnType) {
-                return;
-            }
-
-            ImsLog.i(mSlotId, "apnType[" + apnType + "], state[" + res.eDataState + "]");
-
-            if (res.eDataState == EDataState.DATA_STATE_CONNECTED) {
+            if (dataState == EDataState.DATA_STATE_CONNECTED) {
                 stopTimer(EVENT_PDN_REQUEST_TIMEOUT);
                 startTimer(EVENT_PDN_CONNECTION_EXPIRED, mConnectionInactivityTimer);
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTED);
                 }
-            } else if (res.eDataState == EDataState.DATA_STATE_DISCONNECTED) {
+            } else if (dataState == EDataState.DATA_STATE_DISCONNECTED) {
                 startTimer(EVENT_PDN_CONNECTION_EXPIRED, DISCONNECTION_DELAY);
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_DISCONNECTED);
@@ -361,20 +370,10 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         private void proc_connectionFailed(Message msg) {
-            AsyncResult ar = (AsyncResult) msg.obj;
-            if (ar == null) {
-                return;
-            }
+            if (mApnType == EApnType.XCAP && msg.arg1 == EApnType.XCAP.getType()) {
+                ImsLog.d(mSlotId, "smCause : " + msg.arg2);
 
-            IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
-            if (res == null) {
-                return;
-            }
-
-            if (mApnType == EApnType.XCAP && res.eApnType == EApnType.XCAP) {
-                ImsLog.d(mSlotId, "smCause : " + res.mSmCause);
-
-                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, res.mSmCause);
+                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, msg.arg2);
 
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTION_FAILED);

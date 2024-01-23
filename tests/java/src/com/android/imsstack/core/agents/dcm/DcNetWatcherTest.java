@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants;
@@ -65,6 +64,7 @@ import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -100,7 +100,7 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock SystemInterface mMockSystemInterface;
     @Mock AosFactory mMockAosFactory;
     @Mock NativeStateInterface mMockNativeStateInterface;
-    @Mock Handler mMockHandler;
+    @Mock IDcNetWatcher.Listener mNetWatherListener;
 
     @Before
     public void setup() throws Exception {
@@ -142,11 +142,13 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         mDcNetWatcher = new DcNetWatcher(SLOT0);
         mDcNetWatcher.init(mContext);
+        mDcNetWatcher.addListener(mNetWatherListener);
     }
 
     @After
     public void tearDown() throws Exception {
         mDcNetWatcher.cleanup();
+        mDcNetWatcher.removeListener(mNetWatherListener);
         super.tearDown();
 
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
@@ -327,106 +329,22 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testNotifyDataConnectionState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mStateDataConnectionState", mDcNetWatcher,
-                mRegistrantList);
+        EApnType apnType = EApnType.IMS;
+        EDataState dataState = EDataState.DATA_STATE_DISCONNECTED;
 
-        mDcNetWatcher.notifyDataConnectionState(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
+        mDcNetWatcher.notifyDataConnectionState(apnType, dataState);
 
-        verify(mRegistrantList).notifyResult(any());
+        verify(mNetWatherListener).onDataConnectionStateChanged(apnType, dataState);
     }
 
     @Test
     public void testNotifyPdnConnectionFailed() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPdnConnectionFailedRegistrants", mDcNetWatcher,
-                mRegistrantList);
+        EApnType apnType = EApnType.IMS;
+        int cause = 33;
 
-        mDcNetWatcher.notifyPdnConnectionFailed(EApnType.IMS, 33);
+        mDcNetWatcher.notifyPdnConnectionFailed(apnType, cause);
 
-        verify(mRegistrantList).notifyResult(any());
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_dataState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mStateDataConnectionState", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForDataStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_dataServiceState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForDataServiceStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataServiceStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_rat() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForRatChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForRatChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_voiceRat() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRatChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRatChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_roamingState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForRoamingStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForRoamingStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_airplaneModeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForAirplaneModeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForAirplaneModeChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_pdnConnectionFailed() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPdnConnectionFailedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPdnConnectionFailed(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPdnConnectionFailed(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
+        verify(mNetWatherListener).onPdnConnectionFailed(apnType, cause);
     }
 
     @Test
@@ -662,8 +580,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -673,7 +589,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
     }
@@ -689,8 +605,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -700,7 +614,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
     }
@@ -716,8 +630,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
                 TelephonyManager.NETWORK_TYPE_LTE, true);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_EMERGENCY_ONLY);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -727,7 +639,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_EMERGENCY_ONLY);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         assertEquals(ServiceState.STATE_EMERGENCY_ONLY, mDcNetWatcher.getDataServiceState());
     }
@@ -735,8 +647,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Test
     public void testOnServiceStateChanged_handleDataServiceStateChangedWithPowerOff()
             throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(null);
@@ -746,22 +656,20 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_POWER_OFF);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_POWER_OFF);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_POWER_OFF);
         assertEquals(ServiceState.STATE_POWER_OFF, mDcNetWatcher.getDataServiceState());
     }
 
     @Test
     public void testOnServiceStateChanged_handleRadioTechChangedWithLte() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mMockTelephonyInterface.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(DcNetWatcher.RAT_4G);
+        verify(mNetWatherListener).onDataNetworkTypeChanged();
         verify(mMockSystem).notifyNetworkTypeChanged(DcNetWatcher.RAT_4G);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getNetworkType());
     }
@@ -772,15 +680,13 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mVoiceRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(DcNetWatcher.RAT_4G);
+        verify(mNetWatherListener).onVoiceNetworkTypeChanged();
         verify(mMockSystem).notifyVoiceNetworkTypeChanged(DcNetWatcher.RAT_4G);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getVoiceNetworkType());
     }
@@ -791,8 +697,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
@@ -802,7 +706,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(true);
+        verify(mNetWatherListener).onRoamingStateChanged(true);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
         assertEquals(true, mDcNetWatcher.isRoaming());
@@ -961,8 +865,6 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
@@ -972,15 +874,13 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         verify(mMockAosInfo).notifyAirplaneSetting(true);
         verify(mMockSystem).notifyAirplaneModeChanged(1);
-        verify(mRegistrantList).notifyResult(true);
+        verify(mNetWatherListener).onAirplaneModeChanged(true);
         assertEquals(true, mDcNetWatcher.isAirplaneMode());
     }
 
     @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenStateIsdifferentFromSetting()
             throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(-1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
@@ -990,7 +890,7 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         verify(mMockAosInfo, never()).notifyAirplaneSetting(anyBoolean());
         verify(mMockSystem, never()).notifyAirplaneModeChanged(anyInt());
-        verify(mRegistrantList, never()).notifyResult(anyInt());
+        verify(mNetWatherListener, never()).onAirplaneModeChanged(anyBoolean());
         assertEquals(false, mDcNetWatcher.isAirplaneMode());
     }
 
@@ -1006,14 +906,10 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenInvalidInfo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
                 ImsEventDef.IMS_NR_INFO_UNKNOWN, 0).sendToTarget();
         processAllMessages();
 
-        verify(mRegistrantList, never()).notifyResult(anyInt());
         verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
                 ImsEventDef.IMS_NR_INFO_UNKNOWN, 0);
     }
@@ -1022,14 +918,11 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenEmergency() throws Exception {
         replaceInstance(DcNetWatcher.class, "mDataServiceState", mDcNetWatcher,
                 ServiceState.STATE_IN_SERVICE);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
 
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
                 ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0).sendToTarget();
         processAllMessages();
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
                 ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0);
         assertEquals(ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION,

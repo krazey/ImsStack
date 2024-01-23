@@ -25,10 +25,13 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Looper;
 import android.telephony.ims.feature.MmTelFeature;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.ArraySet;
 
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -40,13 +43,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ImsFeatureManagerTest {
     private TestAppContext mTestAppContext;
+    private TestableLooper mTestableLooper;
     private ImsFeatureManager mFeatureManager;
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities;
     private ImsRegistrationTracker mRegTracker;
@@ -57,19 +62,22 @@ public class ImsFeatureManagerTest {
     @Mock SettingsProxy mSettingsProxy;
     @Mock IBaseContext mMockBaseContext;
     @Mock IContext mMockContext;
+    @Mock IDcNetWatcher mMockDcNetWatcher;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
     @Mock IUtInterface mMockUt;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mTestableLooper = TestableLooper.get(this);
         mTestAppContext = new TestAppContext(mContext);
         mTestAppContext.setUp();
 
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mSettingsProxy);
         when(mMockContext.getContext()).thenReturn(mContext);
-        when(mMockBaseContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
+        when(mMockBaseContext.getDefaultLooper()).thenReturn(mTestableLooper.getLooper());
+        when(mMockBaseContext.getDcNetWatcher()).thenReturn(mMockDcNetWatcher);
         when(mMockContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
         mAosReg = new MockIAosRegistration();
         mFeatureManager = new ImsFeatureManager(mMockBaseContext, mMockFeatureCapabilityListener);
@@ -84,6 +92,7 @@ public class ImsFeatureManagerTest {
         mFeatureManager.dispose();
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test
@@ -190,6 +199,35 @@ public class ImsFeatureManagerTest {
         verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
                 eq(mMmTelCapabilities));
     }
+
+    @Test
+    public void testNetWatcherListenerOnDataNetworkTypeChanged_updateFeatureCapabilities() {
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(
+                IAosRegistrationListener.NetworkType.LTE,
+                features, new ArraySet<String>());
+        when(mMockUt.isUtAvailable()).thenReturn(false);
+
+        ArgumentCaptor<IDcNetWatcher.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mMockDcNetWatcher).addListener(listenerCaptor.capture());
+        IDcNetWatcher.Listener listener = listenerCaptor.getValue();
+        assertNotNull(listener);
+        listener.onDataNetworkTypeChanged();
+        processAllMessages();
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+        int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT;
+        mMmTelCapabilities.addCapabilities(capabilities);
+        mMmTelCapabilities.removeCapabilities(removeCapabilities);
+        verify(mMockFeatureCapabilityListener, times(2)).onFeatureCapabilityChanged(
+                eq(mMmTelCapabilities));
+    }
+
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {
         FakeImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl) {
             super(context, regImpl);
@@ -198,6 +236,12 @@ public class ImsFeatureManagerTest {
         @Override
         protected IAosRegistration getIAosRegistration(int slotId) {
             return mAosReg;
+        }
+    }
+
+    private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
         }
     }
 }

@@ -28,12 +28,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -186,11 +186,9 @@ public class CellInfoAgentTest {
 
         verify(mTelephonyManagerProxy).registerTelephonyCallback(any(Executor.class),
                 any(TelephonyCallback.class));
-        verify(mDcNetWatcher).registerForRatChanged(any(Handler.class), anyInt(), any());
-        verify(mDcNetWatcher).registerForVoiceRatChanged(any(Handler.class), anyInt(), any());
+        verify(mDcNetWatcher).addListener(any(IDcNetWatcher.Listener.class));
         verify(mTelephonyManagerProxy).unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mDcNetWatcher).unregisterForRatChanged(any(Handler.class));
-        verify(mDcNetWatcher).unregisterForVoiceRatChanged(any(Handler.class));
+        verify(mDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -201,9 +199,7 @@ public class CellInfoAgentTest {
 
         verify(mTelephonyManagerProxy, never())
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(mDcNetWatcher, never()).registerForRatChanged(any(Handler.class), anyInt(), any());
-        verify(mDcNetWatcher, never())
-                .registerForVoiceRatChanged(any(Handler.class), anyInt(), any());
+        verify(mDcNetWatcher, never()).addListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -213,8 +209,7 @@ public class CellInfoAgentTest {
 
         verify(mTelephonyManagerProxy, never())
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mDcNetWatcher, never()).unregisterForRatChanged(any(Handler.class));
-        verify(mDcNetWatcher, never()).unregisterForVoiceRatChanged(any(Handler.class));
+        verify(mDcNetWatcher, never()).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -314,6 +309,44 @@ public class CellInfoAgentTest {
         callback.onCellInfo(mCellInfos);
 
         verifyNoMoreInteractions(mSpEditor);
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateAllCellInfoWhenDataNetworkTypeChanged() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        ArgumentCaptor<IDcNetWatcher.Listener> captor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mDcNetWatcher).addListener(captor.capture());
+        IDcNetWatcher.Listener listener = captor.getValue();
+        assertNotNull(listener);
+
+        listener.onDataNetworkTypeChanged();
+        processAllMessages();
+
+        verify(mSpEditor, times(2)).putString(
+                eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO), anyString());
+        verify(mSpEditor, times(2)).commit();
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateAllCellInfoWhenVoiceNetworkTypeChanged() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        ArgumentCaptor<IDcNetWatcher.Listener> captor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mDcNetWatcher).addListener(captor.capture());
+        IDcNetWatcher.Listener listener = captor.getValue();
+        assertNotNull(listener);
+
+        listener.onVoiceNetworkTypeChanged();
+        processAllMessages();
+
+        verify(mSpEditor, times(2)).putString(
+                eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO), anyString());
+        verify(mSpEditor, times(2)).commit();
     }
 
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
