@@ -58,14 +58,14 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_objContactAddress(objContactAddress),
         m_strAor(strAor),
         m_nAorState(IRegInfoContact::STATE_TERMINATED),
+        m_nRetryCountSubTerminated(0),
+        m_nRetryCountRegRequired(0),
         m_piListener(IMS_NULL),
         m_nState(STATE_OFFLINE),
         m_bIsTerminated(IMS_FALSE),
         m_bIsErrChecked(IMS_FALSE),
         m_bIsRadioWaiting(IMS_FALSE),
-        m_bIsTrafficPriorityBlocked(IMS_FALSE),
-        m_nRetryCountSubTerminated(0),
-        m_nRetryCountRegRequired(0)
+        m_bIsTrafficPriorityBlocked(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosSubscription = %" PFLS_u "/%" PFLS_x,
             sizeof(AosSubscription), this, 0);
