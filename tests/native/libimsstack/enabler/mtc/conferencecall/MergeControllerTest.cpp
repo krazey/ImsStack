@@ -146,8 +146,8 @@ protected:
 
 TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeAndRefer)
 {
-    ConfUser* pUser1 = new ConfUser();
-    ConfUser* pUser2 = new ConfUser();
+    ConfUser* pUser1 = new ConfUser();  // Deleted by ClearListForConfUsers().
+    ConfUser* pUser2 = new ConfUser();  // Deleted by ClearListForConfUsers().
     pUser1->nConnectionId = 0;
     pUser2->nConnectionId = 1;
     ImsList<ConfUser*> objUsers;
@@ -165,8 +165,10 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeAndRefer)
             .WillOnce(Return(&objCall2));
 
     ImsList<ConfUser*> objUsersCopied;
-    objUsersCopied.Append(new ConfUser(*pUser1));
-    objUsersCopied.Append(new ConfUser(*pUser2));
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
 
     ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
@@ -225,8 +227,10 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithReferAndSubscribeFlow)
             .WillOnce(Return(&objCall2));
 
     ImsList<ConfUser*> objUsersCopied;
-    objUsersCopied.Append(new ConfUser(*pUser1));
-    objUsersCopied.Append(new ConfUser(*pUser2));
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
 
     ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
@@ -290,8 +294,10 @@ TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscribeNotifyReferFlow)
             .WillOnce(Return(&objCall2));
 
     ImsList<ConfUser*> objUsersCopied;
-    objUsersCopied.Append(new ConfUser(*pUser1));
-    objUsersCopied.Append(new ConfUser(*pUser2));
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
 
     ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));
@@ -388,8 +394,10 @@ TEST_F(MergeControllerTest, ProcessMergeInvokesMergeFailedIfStateIsNotReady)
             .WillOnce(Return(&objCall2));
 
     ImsList<ConfUser*> objUsersCopied;
-    objUsersCopied.Append(new ConfUser(*pUser1));
-    objUsersCopied.Append(new ConfUser(*pUser2));
+    ConfUser objUserCopied1(*pUser1);
+    ConfUser objUserCopied2(*pUser2);
+    objUsersCopied.Append(&objUserCopied1);
+    objUsersCopied.Append(&objUserCopied1);
 
     ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE));

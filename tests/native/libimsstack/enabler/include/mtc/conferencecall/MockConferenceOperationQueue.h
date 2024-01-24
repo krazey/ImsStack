@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(void, CreateNPutWithReason,
             (IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason, IN IMS_BOOL bStandAloneOperation),
             (override));
+    MOCK_METHOD(void, SetAddingOperationSetCompleted, (), (override));
     MOCK_METHOD(ConferenceOperationQueue::ConferenceOperation*, GetNextOperation, (), (override));
     MOCK_METHOD(IMS_BOOL, CompleteCurrentOperation,
             (IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser), (override));

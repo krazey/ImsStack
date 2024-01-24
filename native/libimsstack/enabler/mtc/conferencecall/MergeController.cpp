@@ -82,6 +82,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
     {
         UpdateStartCallType(objUsers);
         ClearListForConfUsers(objUsers);
+
+        // TODO: Check if it's okay to use CreateNPut() due to no users.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
