@@ -49,7 +49,7 @@ PUBLIC IMS_BOOL AosServiceAvailableCellular::IsVopsSupported()
     return m_bVopsState;
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     if (piNetTracker != IMS_NULL)
@@ -75,7 +75,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
@@ -102,7 +102,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
@@ -122,7 +122,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
     }
 }
 
-PRIVATE
+PROTECTED
 void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
 {
     m_bVopsState = (nState == IMS_VOICE_OVER_PS_SUPPORTED) ? IMS_TRUE : IMS_FALSE;
@@ -144,7 +144,7 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
+PROTECTED VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
 {
     if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
     {

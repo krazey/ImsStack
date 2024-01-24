@@ -26,7 +26,7 @@ public:
 
     IMS_BOOL IsVopsSupported();
 
-private:
+protected:
     void HandleNetworkStateChanged() final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) final;
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState) final;
@@ -36,10 +36,6 @@ private:
 private:
     IMS_BOOL m_bVopsState;
     IMS_BOOL m_bNetworkServiceIn;
-
-private:
-    friend class AosServiceAvailableCellurTest;
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_CELLULAR_H_
