@@ -57,7 +57,7 @@ ConferenceParticipantList::ConferenceParticipant::~ConferenceParticipant()
 }
 
 PUBLIC
-void ConferenceParticipantList::ConferenceParticipant::Login()
+void ConferenceParticipantList::ConferenceParticipant::Login() const
 {
     AStringBuffer objBuffer(256);
     objBuffer.Append("ConnectionId=");
@@ -173,20 +173,20 @@ PUBLIC
 void ConferenceParticipantList::SetReference(
         IN IConferenceReference* piReference, IN const ConfUser* pConfUser)
 {
-    ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
-    if (pTemp != IMS_NULL)
+    IMS_SINT32 nIndex = FindParticipant(pConfUser);
+    if (nIndex >= 0)
     {
-        pTemp->SetReference(piReference);
+        m_objParticipants.GetAt(nIndex)->SetReference(piReference);
     }
 }
 
 PUBLIC
 IConferenceReference* ConferenceParticipantList::GetReference(IN const ConfUser* pConfUser) const
 {
-    ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
-    if (pTemp != IMS_NULL)
+    IMS_SINT32 nIndex = FindParticipant(pConfUser);
+    if (nIndex >= 0)
     {
-        return pTemp->GetReference();
+        return m_objParticipants.GetAt(nIndex)->GetReference();
     }
     return IMS_NULL;
 }
@@ -208,20 +208,20 @@ PUBLIC
 void ConferenceParticipantList::SetReferInviteUri(
         IN const AString& strReferInviteUri, IN const ConfUser* pConfUser)
 {
-    ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
-    if (pTemp != IMS_NULL)
+    IMS_SINT32 nIndex = FindParticipant(pConfUser);
+    if (nIndex >= 0)
     {
-        pTemp->SetReferInviteUri(strReferInviteUri);
+        m_objParticipants.GetAt(nIndex)->SetReferInviteUri(strReferInviteUri);
     }
 }
 
 PUBLIC
 AString ConferenceParticipantList::GetReferInviteUri(IN const ConfUser* pConfUser)
 {
-    ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
-    if (pTemp != IMS_NULL)
+    IMS_SINT32 nIndex = FindParticipant(pConfUser);
+    if (nIndex >= 0)
     {
-        return pTemp->GetReferInviteUri();
+        return m_objParticipants.GetAt(nIndex)->GetReferInviteUri();
     }
     return AString::ConstEmpty();
 }
@@ -254,7 +254,7 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
         for (IMS_UINT32 nIndex = 0; nIndex < m_objParticipants.GetSize(); nIndex++)
         {
             ConferenceParticipant* pTempParticipant = m_objParticipants.GetAt(nIndex);
-            ConfUser* pTempUser = pTempParticipant ? pTempParticipant->GetConfUser() : IMS_NULL;
+            ConfUser* pTempUser = pTempParticipant->GetConfUser();
             if (pTempUser &&
                     objConnectionIdManager.GetCallKey(pTempUser->nConnectionId) ==
                             piTempCall->GetKey())
@@ -274,7 +274,7 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
 }
 
 PUBLIC
-void ConferenceParticipantList::Login()
+void ConferenceParticipantList::Login() const
 {
     for (IMS_UINT32 i = 0; i < m_objParticipants.GetSize(); i++)
     {
