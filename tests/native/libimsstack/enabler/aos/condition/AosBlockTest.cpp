@@ -26,10 +26,14 @@
 #include "interface/MockIAosBlockListener.h"
 #include "app/MockAosAppContext.h"
 
+using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::ValuesIn;
+
+const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
 
 class TestAosBlock : public AosBlock
 {
@@ -52,21 +56,16 @@ class AosBlockTest : public testing::TestWithParam<FormattingTestCase>
 {
 public:
     TestAosBlock* m_pAosBlock;
+    MockIAosAppContext m_objMockIAosAppContext;
 
 protected:
     virtual void SetUp() override
     {
-        MockIAosAppContext objMockIAosAppContext;
-        EXPECT_CALL(objMockIAosAppContext, GetSlotId())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
 
-        const AString strValue = AString("test");
-        EXPECT_CALL(objMockIAosAppContext, GetProfileId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
 
-        m_pAosBlock = new TestAosBlock(&objMockIAosAppContext);
+        m_pAosBlock = new TestAosBlock(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosBlock != nullptr);
     }
 
@@ -215,113 +214,131 @@ TEST_P(AosBlockTest, FailsSetBlockReasonWhenReasonIsBlocked)
     EXPECT_FALSE(m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason)));
 }
 
-TEST_F(AosBlockTest, SetBlockReason_Success)
+TEST_P(AosBlockTest, SucceedsSetBlockReason)
 {
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    // GIVEN
+    const FormattingTestCase& objTestCase = GetParam();
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
+    // WHEN
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
 
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AC_INCOMPLETED));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
-
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
-
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE));
-
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
-
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
-
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
+    // THEN
+    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(static_cast<BLOCK_REASON>(objTestCase.nReason)));
 }
 
-TEST_F(AosBlockTest, ResetBlockReason_IsNotReasonBlocked)
+TEST_F(AosBlockTest, SucceedsNotifySetBlockReasonWhenNotifyEnabled)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // GIVEN
+    MockIAosBlockListener objIAosBlockListener1;
+    MockIAosBlockListener objIAosBlockListener2;
+    MockIAosBlockListener objIAosBlockListener3;
 
-    EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED));
-    EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_AOS_INCOMPLETED));
-    EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_CSCALL_STARTED));
-    EXPECT_FALSE(m_pAosBlock->ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED));
+    m_pAosBlock->SetListener(&objIAosBlockListener1);
+    m_pAosBlock->SetListener(&objIAosBlockListener2);
+    m_pAosBlock->SetListener(&objIAosBlockListener3);
+
+    EXPECT_CALL(objIAosBlockListener1, Block_Changed(_, IMS_TRUE));
+    EXPECT_CALL(objIAosBlockListener2, Block_Changed(_, IMS_TRUE));
+    EXPECT_CALL(objIAosBlockListener3, Block_Changed(_, IMS_TRUE));
+
+    // WHEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_TRUE);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosBlockTest, ResetBlockReason_Success)
+TEST_F(AosBlockTest, DoesNotNotifySetBlockReasonWhenNotifyDisabled)
 {
-    IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();
-    IAosBlockListener* piAosBlockListener3 = new MockIAosBlockListener();
+    // GIVEN
+    MockIAosBlockListener objIAosBlockListener1;
+    MockIAosBlockListener objIAosBlockListener2;
+    MockIAosBlockListener objIAosBlockListener3;
 
-    m_pAosBlock->SetListener(piAosBlockListener1);
-    m_pAosBlock->SetListener(piAosBlockListener2);
-    m_pAosBlock->SetListener(piAosBlockListener3);
-    EXPECT_EQ(m_pAosBlock->GetBlockListeners().GetSize(), 3);
+    m_pAosBlock->SetListener(&objIAosBlockListener1);
+    m_pAosBlock->SetListener(&objIAosBlockListener2);
+    m_pAosBlock->SetListener(&objIAosBlockListener3);
 
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    EXPECT_CALL(objIAosBlockListener1, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(objIAosBlockListener2, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(objIAosBlockListener3, Block_Changed(_, _)).Times(0);
 
-    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+    // WHEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);
 
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+    // THEN : GIVEN conditions should be met.
+}
 
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+TEST_P(AosBlockTest, FailsResetBlockReasonWhenReasonIsNotBlocked)
+{
+    // GIVEN
+    const FormattingTestCase& objTestCase = GetParam();
 
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
+    // WHEN
+    IMS_BOOL bResult =
+            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
 
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
+    // THEN
+    EXPECT_FALSE(bResult);
+}
 
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
+TEST_P(AosBlockTest, SucceedsResetBlockReason)
+{
+    // GIVEN
+    const FormattingTestCase& objTestCase = GetParam();
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
 
-    m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->ResetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->ResetBlockReason(BLOCK_AOS_INCOMPLETED);
+    // WHEN
+    IMS_BOOL bResult =
+            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
 
-    m_pAosBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosBlock->ResetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosBlock->ResetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+    // THEN
+    EXPECT_TRUE(bResult);
+}
 
-    m_pAosBlock->ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosBlock->ResetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosBlock->ResetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+TEST_F(AosBlockTest, SucceedsNotifyResetBlockReasonWhenNotifyEnabled)
+{
+    // GIVEN
+    MockIAosBlockListener objIAosBlockListener1;
+    MockIAosBlockListener objIAosBlockListener2;
+    MockIAosBlockListener objIAosBlockListener3;
 
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    m_pAosBlock->SetListener(&objIAosBlockListener1);
+    m_pAosBlock->SetListener(&objIAosBlockListener2);
+    m_pAosBlock->SetListener(&objIAosBlockListener3);
+
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_TRUE);
+
+    EXPECT_CALL(objIAosBlockListener1, Block_Changed(_, IMS_FALSE));
+    EXPECT_CALL(objIAosBlockListener2, Block_Changed(_, IMS_FALSE));
+    EXPECT_CALL(objIAosBlockListener3, Block_Changed(_, IMS_FALSE));
+
+    // WHEN
+    m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED, IMS_TRUE);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosBlockTest, DoesNotNotifyResetBlockReasonWhenNotifyDisabled)
+{
+    // GIVEN
+    MockIAosBlockListener objIAosBlockListener1;
+    MockIAosBlockListener objIAosBlockListener2;
+    MockIAosBlockListener objIAosBlockListener3;
+
+    m_pAosBlock->SetListener(&objIAosBlockListener1);
+    m_pAosBlock->SetListener(&objIAosBlockListener2);
+    m_pAosBlock->SetListener(&objIAosBlockListener3);
+
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);
+
+    EXPECT_CALL(objIAosBlockListener1, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(objIAosBlockListener2, Block_Changed(_, _)).Times(0);
+    EXPECT_CALL(objIAosBlockListener3, Block_Changed(_, _)).Times(0);
+
+    // WHEN
+    m_pAosBlock->ResetBlockReason(BLOCK_AC_INCOMPLETED, IMS_FALSE);
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosBlockTest, ClearAllBlockReasons)
