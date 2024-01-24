@@ -32,6 +32,9 @@ using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
 
+const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
+
 class TestAosSubscriber : public AosSubscriber
 {
 public:
@@ -62,28 +65,20 @@ class AosSubscriberTest : public ::testing::Test
 {
 public:
     TestAosSubscriber* m_pAosSubscriber;
-    MockIAosAppContext objIMockAosAppContext;
-    MockIAosRegistration* pMockIAosRegistration;
+    MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosRegistration m_objMockIAosRegistration;
 
 protected:
     virtual void SetUp() override
     {
-        pMockIAosRegistration = new MockIAosRegistration();
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
 
-        EXPECT_CALL(objIMockAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
 
-        const AString strValue = AString("test");
-        EXPECT_CALL(objIMockAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&m_objMockIAosRegistration));
 
-        EXPECT_CALL(objIMockAosAppContext, GetRegistration())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(pMockIAosRegistration));
-
-        m_pAosSubscriber = new TestAosSubscriber(&objIMockAosAppContext);
+        m_pAosSubscriber = new TestAosSubscriber(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosSubscriber != nullptr);
     }
 
@@ -213,7 +208,7 @@ TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerReturn)
 
 TEST_F(AosSubscriberTest, Init_SubscriberManagerNull)
 {
-    EXPECT_CALL(*pMockIAosRegistration, GetRegType())
+    EXPECT_CALL(m_objMockIAosRegistration, GetRegType())
             .Times(1)
             .WillOnce(Return(AosRegistrationType::NORMAL));
     EXPECT_FALSE(m_pAosSubscriber->Init());
@@ -221,7 +216,7 @@ TEST_F(AosSubscriberTest, Init_SubscriberManagerNull)
 
 TEST_F(AosSubscriberTest, Init_RegTypeFake)
 {
-    EXPECT_CALL(*pMockIAosRegistration, GetRegType())
+    EXPECT_CALL(m_objMockIAosRegistration, GetRegType())
             .Times(1)
             .WillOnce(Return(AosRegistrationType::FAKE));
 
@@ -235,7 +230,7 @@ TEST_F(AosSubscriberTest, Init_RegTypeFake)
 
 TEST_F(AosSubscriberTest, Init_RegTypeNormal)
 {
-    EXPECT_CALL(*pMockIAosRegistration, GetRegType())
+    EXPECT_CALL(m_objMockIAosRegistration, GetRegType())
             .Times(1)
             .WillOnce(Return(AosRegistrationType::NORMAL));
 
