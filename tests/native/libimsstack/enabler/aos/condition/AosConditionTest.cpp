@@ -48,6 +48,9 @@ using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
+const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
+
 class TestAosCondition : public AosCondition
 {
 public:
@@ -99,8 +102,14 @@ public:
     FRIEND_TEST(AosConditionTest, ReturnFalseWhenCellularServiceIsNotReady);
     FRIEND_TEST(AosConditionTest, ReturnFalseWhenWifiServiceIsNotReady);
     FRIEND_TEST(AosConditionTest, ReturnFalseWhenWholeServiceIsNotReady);
+    // TEST : CheckServiceAvailable
+    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceCellular);
+    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWifi);
+    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWhole);
+    FRIEND_TEST(AosConditionTest, ReturnsCellularWhenExistAvailableServiceCellular);
+    FRIEND_TEST(AosConditionTest, ReturnsWifiWhenExistAvailableServiceWifi);
+    FRIEND_TEST(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole);
 
-    FRIEND_TEST(AosConditionTest, CheckServiceAvailable);
     FRIEND_TEST(AosConditionTest, CheckBadNetwork);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_RoamingState);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_VopsState);
@@ -180,10 +189,9 @@ protected:
         m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
-        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
 
-        const AString strValue = AString("test");
-        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(strValue));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
 
         ON_CALL(m_objMockIAosAppContext, GetConnection()).WillByDefault(ReturnNull());
 
@@ -470,22 +478,77 @@ TEST_F(AosConditionTest, ReturnFalseWhenWholeServiceIsNotReady)
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConditionTest, CheckServiceAvailable)
+TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceCellular)
 {
+    // GIVEN
+    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
+
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_NONE);
+}
+
+TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWifi)
+{
+    // GIVEN
+    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_NONE);
+}
+
+TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWhole)
+{
+    // GIVEN
     EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
     EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
-    EXPECT_EQ(m_pAosCondition->CheckServiceAvailable(SERVICE_WHOLE), AosCondition::CHECK_NONE);
-    EXPECT_EQ(m_pAosCondition->CheckServiceAvailable(SERVICE_CELLULAR), AosCondition::CHECK_NONE);
-    EXPECT_EQ(m_pAosCondition->CheckServiceAvailable(SERVICE_WIFI), AosCondition::CHECK_NONE);
 
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_NONE);
+}
+
+TEST_F(AosConditionTest, ReturnsCellularWhenExistAvailableServiceCellular)
+{
+    // GIVEN
     m_pAosCondition->Start();
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
-    EXPECT_EQ(m_pAosCondition->CheckServiceAvailable(SERVICE_WHOLE),
-            AosCondition::CHECK_CELLULAR | AosCondition::CHECK_WIFI);
-    EXPECT_EQ(
-            m_pAosCondition->CheckServiceAvailable(SERVICE_CELLULAR), AosCondition::CHECK_CELLULAR);
-    EXPECT_EQ(m_pAosCondition->CheckServiceAvailable(SERVICE_WIFI), AosCondition::CHECK_WIFI);
+
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_CELLULAR);
+}
+
+TEST_F(AosConditionTest, ReturnsWifiWhenExistAvailableServiceWifi)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_WIFI);
+}
+
+TEST_F(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
+    IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_EQ(nResult, AosCondition::CHECK_CELLULAR | AosCondition::CHECK_WIFI);
 }
 
 TEST_F(AosConditionTest, CheckBadNetwork)
