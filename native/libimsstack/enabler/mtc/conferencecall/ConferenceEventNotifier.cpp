@@ -49,7 +49,7 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 {
     IMS_TRACE_I("NotifyMerged", 0, 0, 0);
 
-    objParticipantList.Login();
+    objParticipantList.LogLn();
 
     m_objConfCallContext.GetUiNotifier().SendMerged(objParticipantList.GetConfUsers());
 }
@@ -148,7 +148,7 @@ PUBLIC
 void ConferenceEventNotifier::NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyUsersInfo", 0, 0, 0);
-    objParticipantList.Login();
+    objParticipantList.LogLn();
 
     ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
     m_objConfCallContext.GetUiNotifier().SendNotifyUsersInfo(objUsers);

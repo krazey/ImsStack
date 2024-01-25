@@ -88,7 +88,7 @@ public:
         }
         inline IMS_BOOL IsDisconnectedExplicitly() { return m_bDisconnectedExplicitly; }
 
-        void Login() const;
+        void LogLn() const;
 
     private:
         ConfUser* m_pConfUser;
@@ -145,7 +145,7 @@ public:
     virtual IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
     void ReOrder(IN IMtcCallManager& objCallManager,
             IN const CallConnectionIdManager& objConnectionIdManager);
-    void Login() const;
+    void LogLn() const;
 
     virtual inline IMS_UINT32 GetSize() const { return m_objParticipants.GetSize(); }
 

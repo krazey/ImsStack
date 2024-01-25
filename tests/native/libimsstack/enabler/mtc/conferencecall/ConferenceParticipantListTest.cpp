@@ -340,7 +340,7 @@ TEST_F(ConferenceParticipantListTest, GetConnectedParticipantSizeReturnsUserCoun
     EXPECT_EQ(pParticipantList->GetConnectedParticipantSize(IMS_FALSE), 2);
 }
 
-TEST_F(ConferenceParticipantListTest, LoginDoesNothing)
+TEST_F(ConferenceParticipantListTest, LogLnDoesNothing)
 {
     ConfUser objUser1;
     objUser1.eStatus = STATUS_CONNECTED;
@@ -348,7 +348,7 @@ TEST_F(ConferenceParticipantListTest, LoginDoesNothing)
     objUser2.eStatus = STATUS_IDLE;
     pParticipantList->AddUser(&objUser1);
     pParticipantList->AddUser(&objUser2);
-    pParticipantList->Login();
+    pParticipantList->LogLn();
     EXPECT_EQ(pParticipantList->GetConnectedParticipantSize(IMS_TRUE), 2);
     EXPECT_EQ(pParticipantList->GetConnectedParticipantSize(IMS_FALSE), 1);
 }
