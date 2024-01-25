@@ -167,7 +167,7 @@ TEST_F(ConferenceParticipantListTest, RemoveUserRemovesCorrespondingParticipant)
     EXPECT_EQ(pParticipantList->GetSize(), 1);
     delete pUser;
 
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser((IMS_UINT32)0);
+    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     pParticipantList->RemoveUser(pCopiedUser);
     EXPECT_EQ(pParticipantList->GetSize(), 0);
@@ -179,7 +179,7 @@ TEST_F(ConferenceParticipantListTest, RemoveUserByIndexRemovesCorrespondingParti
     pParticipantList->AddUser(pUser);
     EXPECT_EQ(pParticipantList->GetSize(), 1);
 
-    pParticipantList->RemoveUser((IMS_UINT32)0);
+    pParticipantList->RemoveUser(0u);
     EXPECT_EQ(pParticipantList->GetSize(), 0);
     delete pUser;
 }
@@ -191,7 +191,7 @@ TEST_F(ConferenceParticipantListTest, GetConfUserByConferenceReferenceReturnsCop
     ConfUser* pUser = new ConfUser();
     pParticipantList->AddUser(pUser);
     delete pUser;
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser((IMS_UINT32)0);
+    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     pParticipantList->SetReference(&objMockReference, pCopiedUser);
     EXPECT_EQ(pParticipantList->GetConfUser(&objMockReference), pCopiedUser);
@@ -204,7 +204,7 @@ TEST_F(ConferenceParticipantListTest, GetConfUserByConferenceReferenceReturnsNul
     ConfUser* pUser = new ConfUser();
     pParticipantList->AddUser(pUser);
     delete pUser;
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser((IMS_UINT32)0);
+    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     pParticipantList->SetReference(&objMockReference, pCopiedUser);
     EXPECT_EQ(pParticipantList->GetConfUser(&objMockReference), pCopiedUser);
@@ -217,7 +217,7 @@ TEST_F(ConferenceParticipantListTest, SetAndGetReferInviteUriUsingParticipantLis
     ConfUser* pUser = new ConfUser();
     pParticipantList->AddUser(pUser);
     delete pUser;
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser((IMS_UINT32)0);
+    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     AString strUri("sip:testuri@ims.google.com");
     pParticipantList->SetReferInviteUri(strUri, pCopiedUser);
@@ -288,8 +288,8 @@ TEST_F(ConferenceParticipantListTest, ReOrderRearragnesListByCallCreationOrder)
     ON_CALL(objIdManager, GetCallKey(CONNECTION_ID_2)).WillByDefault(Return(CALL_KEY_2));
 
     pParticipantList->ReOrder(objCallManager, objIdManager);
-    EXPECT_EQ(pParticipantList->GetConfUser((IMS_UINT32)0)->nConnectionId, CONNECTION_ID_1);
-    EXPECT_EQ(pParticipantList->GetConfUser(1)->nConnectionId, CONNECTION_ID_2);
+    EXPECT_EQ(pParticipantList->GetConfUser(0u)->nConnectionId, CONNECTION_ID_1);
+    EXPECT_EQ(pParticipantList->GetConfUser(1u)->nConnectionId, CONNECTION_ID_2);
 }
 
 TEST_F(ConferenceParticipantListTest, ParticipantObtainedUsingIndexHasCorrespondingUser)
@@ -298,7 +298,7 @@ TEST_F(ConferenceParticipantListTest, ParticipantObtainedUsingIndexHasCorrespond
     pParticipantList->AddUser(pUser);
     delete pUser;
 
-    ConfUser* pCopiedUser = pParticipantList->GetConfUser((IMS_UINT32)0);
+    ConfUser* pCopiedUser = pParticipantList->GetConfUser(0u);
 
     ASSERT_NE(pParticipantList->GetAt(0), nullptr);
     EXPECT_EQ(pParticipantList->GetAt(0)->GetConfUser(), pCopiedUser);
@@ -363,8 +363,7 @@ TEST_F(ConferenceParticipantListTest, GetConfUserReturnsCopiedUser)
     ConfUser objUser;
     pParticipantList->AddUser(&objUser);  // Copy User
 
-    ASSERT_NE(pParticipantList->GetConfUser((IMS_UINT32)0),
-            pParticipantList->GetConfUsers(IMS_TRUE).GetAt(0));
+    ASSERT_NE(pParticipantList->GetConfUser(0u), pParticipantList->GetConfUsers(IMS_TRUE).GetAt(0));
 }
 
 TEST_F(ConferenceParticipantListTest, GetConfUserReturnsOriginalUser)
@@ -372,13 +371,13 @@ TEST_F(ConferenceParticipantListTest, GetConfUserReturnsOriginalUser)
     ConfUser objUser;
     pParticipantList->AddUser(&objUser);  // Copy User
 
-    EXPECT_EQ(pParticipantList->GetConfUser((IMS_UINT32)0),
-            pParticipantList->GetConfUsers(IMS_FALSE).GetAt(0));
+    EXPECT_EQ(
+            pParticipantList->GetConfUser(0u), pParticipantList->GetConfUsers(IMS_FALSE).GetAt(0));
 }
 
 TEST_F(ConferenceParticipantListTest, GetConfUserReturnsNull)
 {
-    EXPECT_EQ(pParticipantList->GetConfUser((IMS_UINT32)0), nullptr);
+    EXPECT_EQ(pParticipantList->GetConfUser(0u), nullptr);
 }
 
 TEST_F(ConferenceParticipantListTest, GetReferenceReturnsNullIfNotFound)
@@ -392,10 +391,9 @@ TEST_F(ConferenceParticipantListTest, GetReferenceReturnsStoredReference)
     ConfUser objUser;
     pParticipantList->AddUser(&objUser);
     MockIConferenceReference objReference;
-    pParticipantList->SetReference(&objReference, pParticipantList->GetConfUser((IMS_UINT32)0));
+    pParticipantList->SetReference(&objReference, pParticipantList->GetConfUser(0u));
 
-    EXPECT_EQ(pParticipantList->GetReference(pParticipantList->GetConfUser((IMS_UINT32)0)),
-            &objReference);
+    EXPECT_EQ(pParticipantList->GetReference(pParticipantList->GetConfUser(0u)), &objReference);
 }
 
 }  // namespace android
