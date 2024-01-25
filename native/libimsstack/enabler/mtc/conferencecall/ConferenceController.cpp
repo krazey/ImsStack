@@ -478,7 +478,7 @@ IMS_UINT32 ConferenceController::AddUserToParticipantList(
         m_pParticipantList->ReOrder(m_objCallManager, m_objConnectionIdManager);  // TODO: callid
     }
     IMS_TRACE_D("AddUserToParticipantList size[%d]", m_pParticipantList->GetSize(), 0, 0);
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
     return nStartIndex;
 }
 
@@ -532,7 +532,7 @@ PROTECTED VIRTUAL void ConferenceController::StartSubscription()
         Recover();
     }
 
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
 }
 
 PROTECTED VIRTUAL void ConferenceController::StopSubscription()
@@ -769,7 +769,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfU
         }
     }
 
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
 }
 
 PROTECTED VIRTUAL void ConferenceController::RemoveParticipants(IN ImsList<ConfUser*> objUsers)
@@ -789,14 +789,14 @@ PROTECTED VIRTUAL void ConferenceController::RemoveParticipants(IN ImsList<ConfU
         }
     }
 
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
 }
 
 PROTECTED VIRTUAL void ConferenceController::NotifyCmdResult()
 {
     IMS_TRACE_D("NotifyCmdResult", 0, 0, 0);
 
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
 
     switch (GetState())
     {

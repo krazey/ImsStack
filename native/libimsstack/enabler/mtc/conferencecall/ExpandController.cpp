@@ -274,7 +274,7 @@ PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UIN
     p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
 
     m_pParticipantList->AddUser(p1to1User);
-    m_pParticipantList->Login();
+    m_pParticipantList->LogLn();
 
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
     SetState(STATE_IDLE);

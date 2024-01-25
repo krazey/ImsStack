@@ -57,7 +57,7 @@ ConferenceParticipantList::ConferenceParticipant::~ConferenceParticipant()
 }
 
 PUBLIC
-void ConferenceParticipantList::ConferenceParticipant::Login() const
+void ConferenceParticipantList::ConferenceParticipant::LogLn() const
 {
     AStringBuffer objBuffer(256);
     objBuffer.Append("ConnectionId=");
@@ -73,7 +73,7 @@ void ConferenceParticipantList::ConferenceParticipant::Login() const
     objBuffer.Append(" Status=");
     objBuffer.Append(m_pConfUser->eStatus);
 
-    IMS_TRACE_I("Login : %s", objBuffer.GetString().GetStr(), 0, 0);
+    IMS_TRACE_I("LogLn : %s", objBuffer.GetString().GetStr(), 0, 0);
 }
 
 PUBLIC
@@ -274,11 +274,11 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
 }
 
 PUBLIC
-void ConferenceParticipantList::Login() const
+void ConferenceParticipantList::LogLn() const
 {
     for (IMS_UINT32 i = 0; i < m_objParticipants.GetSize(); i++)
     {
-        m_objParticipants.GetAt(i)->Login();
+        m_objParticipants.GetAt(i)->LogLn();
     }
 }
 

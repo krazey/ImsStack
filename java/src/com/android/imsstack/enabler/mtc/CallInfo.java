@@ -49,7 +49,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(CallInfo callInfo) {
@@ -64,7 +64,7 @@ public class CallInfo implements Parcelable
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(Parcel source) {
@@ -83,7 +83,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(int _serviceType, int _callType, boolean _isConf) {
@@ -98,7 +98,7 @@ public class CallInfo implements Parcelable
         rttCapable = false;
         videoCapable = false;
 
-        logIn("init");
+        logLn("init");
     }
 
     public void update(CallInfo callInfo) {
@@ -113,10 +113,10 @@ public class CallInfo implements Parcelable
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
 
-        logIn("update");
+        logLn("update");
     }
 
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - serviceType : " + serviceType
                 + " callType : " + callType
                 + " isConf : " + isConf
@@ -142,7 +142,7 @@ public class CallInfo implements Parcelable
         rttCapable = (source.readInt() == 1) ? true : false;
         videoCapable = (source.readInt() == 1) ? true : false;
 
-        logIn("read");
+        logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {

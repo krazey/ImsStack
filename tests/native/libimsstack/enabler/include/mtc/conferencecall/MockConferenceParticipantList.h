@@ -56,7 +56,7 @@ public:
             (IN IMtcCallManager& objCallManager,
                     IN CallConnectionIdManager& objConnectionIdManager),
             ());
-    MOCK_METHOD(void, Login, (), ());
+    MOCK_METHOD(void, LogLn, (), ());
     MOCK_METHOD(IMS_UINT32, GetSize, (), (const, override));
     MOCK_METHOD(ConferenceParticipant*, GetAt, (IN IMS_UINT32 nAt), (override));
     MOCK_METHOD(ConfUser*, GetConfUser, (IN IMS_UINT32 nIndex), (const, override));
