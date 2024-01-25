@@ -159,7 +159,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis() >= 0)
+    if (GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis() > 0)
     {
         StartTimer(TIMER_APP_CONNECTED,
                 GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis());
