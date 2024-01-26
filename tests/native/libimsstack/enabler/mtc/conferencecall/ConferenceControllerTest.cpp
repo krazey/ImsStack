@@ -63,6 +63,8 @@ using ::testing::ReturnRef;
 namespace android
 {
 
+// To avoid ambiguous input param error.
+LOCAL const IMS_UINT32 EXPLICIT_INT_0 = 0;
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
 
 class TestConferenceController : public ConferenceController
@@ -257,7 +259,7 @@ TEST_F(ConferenceControllerTest, GetCallStatusInConferenceReturnsInvitedForAlrea
     const IMS_UINT32 nConnectionId = 1000;
     objUser2.nConnectionId = nConnectionId;
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(2));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser1));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser1));
     ON_CALL(*pMockParticipantList, GetConfUser(1)).WillByDefault(Return(&objUser2));
     ON_CALL(*pMockIdManager, GetCallKey(nConnectionId)).WillByDefault(Return(INVITED_CALL_KEY));
 

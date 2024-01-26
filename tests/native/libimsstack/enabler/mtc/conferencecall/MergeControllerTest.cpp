@@ -61,7 +61,9 @@ using ::testing::ReturnRef;
 namespace android
 {
 
-LOCAL CallKey CONFERENCE_CALL_KEY = 100;
+// To avoid ambiguous input param error.
+LOCAL const IMS_UINT32 EXPLICIT_INT_0 = 0;
+LOCAL const CallKey CONFERENCE_CALL_KEY = 100;
 
 class MergeControllerTest : public ::testing::Test
 {
@@ -501,7 +503,7 @@ TEST_F(MergeControllerTest, OnIndividualCallTerminatedUpdatesUserStateIfCopyCont
     objUser2.nConnectionId = nAnyConnectionId2;
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(2));
     // 0 is ambiguous due to another GetConfUser(IConferenceReference*).
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser1));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser1));
     ON_CALL(*pMockParticipantList, GetConfUser(1)).WillByDefault(Return(&objUser2));
 
     const CallKey n1to1Key1 = 10;
@@ -580,7 +582,7 @@ TEST_F(MergeControllerTest, OnTimerExpiredNotifiesFailureIfNoParticipantJoined)
 
     // Sets up ClearIndividualCallOnMergeFailed to be test.
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser));
     ConferenceParticipantList::ConferenceParticipant* pParticipant =
             new ConferenceParticipantList::ConferenceParticipant();
     pParticipant->SetInfoUpdated(IMS_TRUE);
@@ -612,7 +614,7 @@ TEST_F(MergeControllerTest, OnTimerExpiredDoesNothingForIndividualCallIfReferIsN
 
     // Sets up ClearIndividualCallOnMergeFailed to be test.
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(2));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser));
     ON_CALL(*pMockParticipantList, GetConfUser(1)).WillByDefault(Return(&objUser));
     ConferenceParticipantList::ConferenceParticipant* pParticipant1 =
             new ConferenceParticipantList::ConferenceParticipant();
@@ -658,7 +660,7 @@ TEST_F(MergeControllerTest, OnTimerExpiredInvokesNotifyIndividualCallTerminated)
 
     // Sets up ClearIndividualCallOnMergeFailed to be test.
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(2));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser));
     ON_CALL(*pMockParticipantList, GetConfUser(1)).WillByDefault(Return(&objUser));
     ConferenceParticipantList::ConferenceParticipant* pParticipant1 =
             new ConferenceParticipantList::ConferenceParticipant();
@@ -703,7 +705,7 @@ TEST_F(MergeControllerTest, OnTimerExpiredInvokesNotifyIndividualCallTerminatedI
 
     // Sets up ClearIndividualCallOnMergeFailed to be test.
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser));
     ConferenceParticipantList::ConferenceParticipant* pParticipant =
             new ConferenceParticipantList::ConferenceParticipant();
     pParticipant->SetInfoUpdated(IMS_FALSE);
@@ -739,7 +741,7 @@ TEST_F(MergeControllerTest,
 
     // Sets up ClearIndividualCallOnMergeFailed to be test.
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(1));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(&objUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(&objUser));
     ConferenceParticipantList::ConferenceParticipant* pParticipant =
             new ConferenceParticipantList::ConferenceParticipant();
     pParticipant->SetInfoUpdated(IMS_FALSE);
@@ -830,7 +832,7 @@ TEST_F(MergeControllerTest, OnTimerExpiredNotifiesFailureInAdditionalMergeCase)
     ON_CALL(*pMockParticipantList, GetAt(_)).WillByDefault(Return(pParticipant));
 
     ON_CALL(*pMockParticipantList, GetSize).WillByDefault(Return(3));
-    ON_CALL(*pMockParticipantList, GetConfUser((IMS_UINT32)0)).WillByDefault(Return(pNullUser));
+    ON_CALL(*pMockParticipantList, GetConfUser(EXPLICIT_INT_0)).WillByDefault(Return(pNullUser));
     ON_CALL(*pMockParticipantList, GetConfUser(1)).WillByDefault(Return(pNullUser));
     ON_CALL(*pMockParticipantList, GetConfUser(2)).WillByDefault(Return(pNullUser));
 
