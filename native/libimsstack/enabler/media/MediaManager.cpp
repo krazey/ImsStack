@@ -31,9 +31,9 @@ __IMS_TRACE_TAG_USER_DECL__("MED.MM");
 
 #define CALL_KEY_BROADCAST 0
 
-PRIVATE GLOBAL ImsMap<IMS_SINT32, MediaManager*> MediaManager::m_objMapMediaManager;
+PROTECTED GLOBAL ImsMap<IMS_SINT32, MediaManager*> MediaManager::m_objMapMediaManager;
 
-PRIVATE
+PROTECTED
 MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         ImsActivityEx(strName),
         m_nSlotId(nSlotId),
@@ -51,7 +51,7 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
             m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(INativeEnabler*, this));
 }
 
-PRIVATE VIRTUAL MediaManager::~MediaManager()
+PROTECTED VIRTUAL MediaManager::~MediaManager()
 {
     IMS_SLONG nIndex = m_objMapMediaManager.GetIndexOfKey(m_nSlotId);
 
@@ -237,7 +237,7 @@ IMS_BOOL MediaManager::handleRequestMsg(
     return IMS_FALSE;
 }
 
-PRIVATE
+PROTECTED
 void MediaManager::ClearMediaSessionNode()
 {
     IMS_TRACE_D(
@@ -252,7 +252,7 @@ void MediaManager::ClearMediaSessionNode()
     m_lstSessionNode.Clear();
 }
 
-PRIVATE
+PROTECTED
 void MediaManager::DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex)
 {
     if (pSessionNode != IMS_NULL)
@@ -275,7 +275,8 @@ void MediaManager::DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS
     m_lstSessionNode.RemoveAt(nIndex);
 }
 
-PRIVATE VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(IN IMS_SINTP nCallKey)
+PROTECTED VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(
+        IN IMS_SINTP nCallKey)
 {
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
     {
@@ -296,7 +297,7 @@ PRIVATE VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(IN
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
+PROTECTED VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     MediaSession* pMediaSession = GetSession(nCallKey);
