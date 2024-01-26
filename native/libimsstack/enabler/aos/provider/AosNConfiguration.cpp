@@ -444,6 +444,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyPreferredIpType() const
     return m_objAsset.nEmcPreferredIpType;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmcRegRetryTimerMillis() const
+{
+    return m_objAsset.nEmcRegRetryTimerMillis;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfPort() const
 {
     return m_objCarrierConfig.nSipServerPortNumber;
@@ -1267,6 +1272,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
             piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
+    m_objAsset.nEmcRegRetryTimerMillis =
+            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
     m_objAsset.nImsEstablishmentTimeSec =

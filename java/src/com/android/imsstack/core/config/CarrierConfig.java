@@ -537,6 +537,8 @@ public class CarrierConfig {
                 "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
                 "emc_preferred_iptype_int";
+        public static final String KEY_EMC_REG_RETRY_TIMER_MILLIS_INT =
+                "emc_reg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =

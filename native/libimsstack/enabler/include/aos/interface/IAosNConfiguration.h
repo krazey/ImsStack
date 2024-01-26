@@ -533,6 +533,25 @@ public:
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const = 0;
 
     /**
+     * @brief Get the maximum time waiting for emergency registration
+     *
+     *        Specify the maximum time from sending a SIP REGISTER for an emergency registration
+     *        until UE receives any final response from this P-CSCF. It will be stopped when the
+     *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer has
+     *        been stopped or expired. Upon this timer expiry, the UE considers that the emergency
+     *        registration attempt for this P-CSCF has failed. The UE may retry registration on
+     *        a different P-CSCF if available and restart the
+     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
+     *        more available P-CSCFs, the UE shall stop the
+     *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer by
+     *        considering the emergency registration has failed. If the value is zero, it considers
+     *        that the UE doesn't support the emerg-reg-retry timer defined in 3GPP 24.229.
+     *
+     * @return IMS_SINT32 Return the milli-second time
+     */
+    virtual IMS_SINT32 GetEmcRegRetryTimerMillis() const = 0;
+
+    /**
      * @brief Get the IMS Server default port as per operator
      *
      * @return IMS_SINT32 Return default P-CSCF port number
@@ -592,7 +611,8 @@ public:
      *        Specify the maximum time from deciding that an emergency service is to
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
-     *        the emergency call attempt as failed.
+     *        the emergency call attempt as failed, and stop the
+     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer, if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */

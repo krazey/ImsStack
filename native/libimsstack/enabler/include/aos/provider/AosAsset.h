@@ -55,6 +55,7 @@ public:
             nContactUserInfoPolicyForNonRegMessage(
                     CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
             nEmcPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
+            nEmcRegRetryTimerMillis(0),
             nGeolocationPidfFormingPolicy(
                     CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION),
             nImsEstablishmentTimeSec(0),
@@ -126,6 +127,7 @@ public:
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
     IMS_SINT32 nContactUserInfoPolicyForNonRegMessage;
     IMS_SINT32 nEmcPreferredIpType;
+    IMS_SINT32 nEmcRegRetryTimerMillis;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMS_SINT32 nImsEstablishmentTimeSec;
     IMS_SINT32 nImsPreferredIpType;

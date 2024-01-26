@@ -737,6 +737,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOIC
 const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[] =
         "contact_user_info_policy_for_non_reg_message_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT[] = "emc_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT[] =
+        "emc_reg_retry_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         "geolocation_pidf_forming_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[] =

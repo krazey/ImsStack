@@ -605,6 +605,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, -1))
+            .WillOnce(Return(3000));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT, -1))
             .WillOnce(Return(1));
@@ -788,6 +791,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
     EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyPreferredIpType());
+    EXPECT_EQ(3000, m_pAosNConfiguration->GetEmcRegRetryTimerMillis());
     EXPECT_EQ(1, m_pAosNConfiguration->GetGeolocationPidfFormingPolicy());
     EXPECT_EQ(120, m_pAosNConfiguration->GetImsEstablishmentTime());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPreferredIpType());

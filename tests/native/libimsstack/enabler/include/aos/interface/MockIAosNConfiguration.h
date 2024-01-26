@@ -92,6 +92,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetUssdMethod, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredIpType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyPreferredIpType, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetEmcRegRetryTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPcscfPort, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSipPreferredTransport, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv4MtuSize, (), (const, override));
