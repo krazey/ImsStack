@@ -18,23 +18,28 @@
 #include <gmock/gmock.h>
 
 #include "AString.h"
+#include "GeolocationHelper.h"
 #include "ImsMap.h"
 #include "CarrierConfig.h"
 #include "Credential.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
+#include "MockIPhoneInfoLocation.h"
 #include "MockIThread.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
 #include "SipStatusCode.h"
+#include "TestPhoneInfoService.h"
 #include "TestThreadService.h"
 #include "TestTimerService.h"
+#include "TestUtilService.h"
 
 #include "../../../config/interface/ImsServiceConfig.h"
 #include "../../../config/interface/common/MockIConfigurable.h"
 #include "../../../config/interface/common/MockISipConfigV.h"
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
+#include "../../../engine/interface/sipcore/MockISipMessageBodyPart.h"
 #include "../../../engine/interface/registration/MockIRegistration.h"
 #include "../../../engine/interface/registration/MockIRegContact.h"
 #include "../../../engine/interface/registration/MockIRegParameter.h"
@@ -340,6 +345,11 @@ public:
     FRIEND_TEST(AosRegistrationTest,
             TransactionOnConnectionFailedWithOtherReasonHandlesConnectionSetupPrepared);
     FRIEND_TEST(AosRegistrationTest, TransactionOnTrafficPriorityChangedTriggersPendingTransaction);
+    FRIEND_TEST(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfSipMessageIsNull);
+    FRIEND_TEST(AosRegistrationTest,
+            MessageMediatorAdjustMessageReturnsFailureIfFailToAddLocationHeaderBody);
+    FRIEND_TEST(AosRegistrationTest,
+            MessageMediatorAdjustMessageReturnsSuccessIfSucceedToAddLocationHeaderBody);
     FRIEND_TEST(AosRegistrationTest, StopTimer);
     FRIEND_TEST(AosRegistrationTest, ClearTimer);
     FRIEND_TEST(AosRegistrationTest, TimerExpired);
@@ -427,12 +437,17 @@ public:
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
+        m_objPhoneInfoService.SetLocationInfo(&m_objMockILocationInfo);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
         m_objThreadService.SetThread(&m_objMockThread);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_THREAD, &m_objThreadService);
         m_objTimerService.SetTimer(&m_objMockITimer);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &m_objTimerService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker(SLOT_ID);
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
@@ -453,8 +468,10 @@ public:
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
 
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         if (m_pAosStaticProfile)
         {
@@ -463,8 +480,10 @@ public:
     }
 
     TestAosRegistration* m_pAosRegistration;
+    TestPhoneInfoService m_objPhoneInfoService;
     TestThreadService m_objThreadService;
     TestTimerService m_objTimerService;
+    TestUtilService m_objUtilService;
     AosStaticProfile* m_pAosStaticProfile;
     IAosCallTracker* m_piAosCallTracker;
     IAosNConfiguration* m_piAosNConfiguration;
@@ -477,6 +496,8 @@ public:
     MockISipConfigV m_objMockISipConfigV;
     MockIConfigurable m_objMockIConfigurable;
     MockISipMessage m_objMockISipMessage;
+    MockILocationInfo m_objMockILocationInfo;
+    MockILocationProperties m_objMockILocationProperties;
     MockIRegistration m_objMockIRegistration;
     MockIRegContact m_objMockIRegContact;
     MockIRegParameter m_objMockIRegParameter;
@@ -499,6 +520,7 @@ public:
 
     AString m_strAppId = AString("ims.app.test");
     AString m_strServiceId = AString("ims.service.test");
+    AString m_strLocationProperties = AString("LocationProperties");
     SipAddress m_objSipAddress = SipAddress("sip:1111@1.1.1.1");
     ImsMap<AString, IAosHandle*> m_objHandles;
     AStringArray m_objImpus;
@@ -652,6 +674,36 @@ protected:
         // IAosTransaction
         ON_CALL(m_objMockIAosTransaction, StartTraffic(_, _)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_)).WillByDefault(Return(IMS_TRUE));
+
+        // ILocationInfo and ILocationProperties
+        ON_CALL(m_objMockILocationInfo, GetLocationProperties(_))
+                .WillByDefault(Return(&m_objMockILocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetLatitude())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetLongitude())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetRadius())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetShape())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetConfidence())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetCurrentTime())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetMethod())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetCountry())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetState())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetCity())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetPostal())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetAltitude())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
+        ON_CALL(m_objMockILocationProperties, GetVerticalAccuracy())
+                .WillByDefault(ReturnRef(m_strLocationProperties));
 
         // IRegParameter and ISipMessage
         ON_CALL(m_objMockIRegParameter, AddPreloadedRoute(_, _, _)).WillByDefault(Return(IMS_TRUE));
@@ -4229,35 +4281,25 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithOtherReason)
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
 {
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
-
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration,
             IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration,
             IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(m_strLocationProperties));
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403));
+
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
 }
 
@@ -4300,39 +4342,24 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrM
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReason)
 {
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
-
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
+    m_pAosRegistration->m_eImsReasonCode =
+            AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration,
             IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration,
             IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+            .WillByDefault(Return(IMS_TRUE));
 
-    // Set duplicate reason
-    m_pAosRegistration->m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_REG_403;
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
 
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403))
-            .Times(0);
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
 }
 
@@ -5144,6 +5171,44 @@ TEST_F(AosRegistrationTest, TransactionOnTrafficPriorityChangedTriggersPendingTr
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
+TEST_F(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfSipMessageIsNull)
+{
+    IMS_RESULT nResult = m_pAosRegistration->MessageMediator_AdjustMessage(
+            IMS_NULL, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_EQ(nResult, IMS_FAILURE);
+}
+
+TEST_F(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfFailToAddLocationHeaderBody)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+
+    IMS_RESULT nResult = m_pAosRegistration->MessageMediator_AdjustMessage(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_EQ(nResult, IMS_FAILURE);
+}
+
+TEST_F(AosRegistrationTest,
+        MessageMediatorAdjustMessageReturnsSuccessIfSucceedToAddLocationHeaderBody)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION));
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    ON_CALL(m_objMockISipMessage, CreateBodyPart())
+            .WillByDefault(Return(&objMockISipMessageBodyPart));
+
+    IMS_RESULT nResult = m_pAosRegistration->MessageMediator_AdjustMessage(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
 TEST_F(AosRegistrationTest, StopTimer)
 {
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_OFFLINE_RECOVER, 5000);
@@ -5361,19 +5426,6 @@ TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
     EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
 }
 
-TEST_F(AosRegistrationTest, MessageMediator_AdjustMessage)
-{
-    // piSipMsg is null
-    EXPECT_EQ(m_pAosRegistration->MessageMediator_AdjustMessage(
-                      IMS_NULL, IMessageMediator::MESSAGE_NORMAL),
-            IMS_FAILURE);
-
-    // fail to AddLocationHeaderBody
-    EXPECT_EQ(m_pAosRegistration->MessageMediator_AdjustMessage(
-                      &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL),
-            IMS_FAILURE);
-}
-
 TEST_F(AosRegistrationTest, AddLocationHeaderBody)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration,
@@ -5402,7 +5454,6 @@ TEST_F(AosRegistrationTest, AddLocationHeaderBody)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockISipMessage, RemoveBodyParts()).Times(1);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy()).Times(0);
     EXPECT_FALSE(m_pAosRegistration->AddLocationHeaderBody(
             &m_objMockISipMessage, IMessageMediator::MESSAGE_RESUBMIT));
 }
