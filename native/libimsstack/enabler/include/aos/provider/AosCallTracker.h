@@ -50,7 +50,7 @@ public:
     void SetListener(IN IAosCallTrackerListener* piListener) override;
     void RemoveListener(IN IAosCallTrackerListener* piListener) override;
 
-private:
+protected:
     template <typename T>
     void AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
     template <typename T>
@@ -89,7 +89,7 @@ private:
 
     AString PrintCallTypes(IN IMS_UINT32 nCallTypes);
 
-private:
+protected:
     IMS_SINT32 m_nSlotId;
     CallState m_eCsState;
     CallState m_eNormalState;
@@ -104,9 +104,6 @@ private:
     ImsList<IAosCallTrackerListener*> m_objListeners;
 
     AString m_strTag;
-
-private:
-    friend class AosCallTrackerTest;
 };
 
 #endif  // AOS_CALL_TRACKER_H_
