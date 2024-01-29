@@ -18,52 +18,66 @@
 #include <gmock/gmock.h>
 #include "provider/AosStaticConfig.h"
 
-TEST(AosStaticConfigTest, NEW)
+class AosStaticConfigTest : public ::testing::Test
 {
-    AosStaticConfig* pConfig = new AosStaticConfig();
+public:
+    AosStaticConfig* m_pConfig;
 
-    EXPECT_NE(pConfig, nullptr);
+protected:
+    virtual void SetUp() override
+    {
+        m_pConfig = new AosStaticConfig();
+        ASSERT_TRUE(m_pConfig != nullptr);
 
-    delete pConfig;
-    pConfig = nullptr;
-    EXPECT_EQ(pConfig, nullptr);
+        m_pConfig->Create();
+    }
+
+    virtual void TearDown() override
+    {
+        if (m_pConfig)
+        {
+            delete m_pConfig;
+        }
+    }
+};
+
+TEST_F(AosStaticConfigTest, FailsGetProfileWithInvalidService)
+{
+    // GIVEN
+    m_pConfig->Create();
+
+    AString strInvalidApp = AString("ims.app.invalid");
+    AString strInvalidService = AString("ims.service.invalid");
+
+    // WHEN
+    AosStaticProfile* pProfile = m_pConfig->GetProfile(strInvalidApp, strInvalidService);
+
+    EXPECT_EQ(nullptr, pProfile);
 }
 
-TEST(AosStaticConfigTest, Create)
+TEST_F(AosStaticConfigTest, SucceedsGetProfileWithValidService)
 {
-    AosStaticConfig* pConfig = new AosStaticConfig();
-    EXPECT_TRUE(pConfig->Create());
+    // GIVEN
+    m_pConfig->Create();
 
-    delete pConfig;
-    pConfig = nullptr;
+    AString strValidApp = AString("ims.app.mts");
+    AString strValidService = AString("ims.service.mts");
+
+    // WHEN
+    AosStaticProfile* pProfile = m_pConfig->GetProfile(strValidApp, strValidService);
+
+    // THEN
+    EXPECT_NE(nullptr, pProfile);
 }
 
-TEST(AosStaticConfigTest, GetProfile_ReturnNull)
+TEST_F(AosStaticConfigTest, SucceedsGetProfiles)
 {
-    AosStaticConfig* pConfig = new AosStaticConfig();
+    // GIVEN
+    m_pConfig->Create();
 
-    EXPECT_EQ(pConfig->GetProfile(AString("ims.app.test"), AString("ims.service.test")), nullptr);
+    // WHEN
+    IMS_UINT32 nSize = m_pConfig->GetProfiles().GetSize();
 
-    delete pConfig;
-    pConfig = nullptr;
-}
-
-TEST(AosStaticConfigTest, GetProfile_ReturnProfile)
-{
-    AosStaticConfig* pConfig = new AosStaticConfig();
-
-    EXPECT_EQ(pConfig->GetProfile(AString("ims.app.mts"), AString("ims.service.mts")), nullptr);
-
-    delete pConfig;
-    pConfig = nullptr;
-}
-
-TEST(AosStaticConfigTest, GetProfiles)
-{
-    AosStaticConfig* pConfig = new AosStaticConfig();
-
-    EXPECT_EQ(pConfig->GetProfiles().GetSize(), 0);
-
-    delete pConfig;
-    pConfig = nullptr;
+    // THEN
+    EXPECT_NE(0, nSize);
 }
