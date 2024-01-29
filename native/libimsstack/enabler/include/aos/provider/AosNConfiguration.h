@@ -104,6 +104,7 @@ public:
     IMS_SINT32 GetUssdMethod() const override;
     IMS_SINT32 GetPreferredIpType() const override;
     IMS_SINT32 GetEmergencyPreferredIpType() const override;
+    IMS_SINT32 GetEmcRegRetryMaxCnt() const override;
     IMS_SINT32 GetEmcRegRetryTimerMillis() const override;
     IMS_SINT32 GetPcscfPort() const override;
     IMS_SINT32 GetSipPreferredTransport() const override;
