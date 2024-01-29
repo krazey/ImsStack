@@ -181,6 +181,7 @@ private:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
     void Init(IN IMS_SINT32 nSlotId = IMS_SLOT_0) override;
 
+protected:
     void InitBundle(IN const ICarrierConfig* piCc);
     void InitConfig(IN const ICarrierConfig* piCc);
     void InitAssetsConfig(IN const ICarrierConfig* piCc);
@@ -208,8 +209,5 @@ private:
     ImsList<IAosNConfigurationListener*> m_objListeners;
 
     AString m_strLogTag;
-
-private:
-    friend class AosNConfigurationTest;
 };
 #endif  // AOS_NCONFIGURATION_H_
