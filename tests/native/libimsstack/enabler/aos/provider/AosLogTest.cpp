@@ -25,224 +25,70 @@
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 
-class ApplicationLogTest
-{
-public:
-    // State
-    enum
-    {
-        STATE_NOTREADY = 0,
-        STATE_READY,
-        STATE_CONNECTING,
-        STATE_CONNECTED,
-        STATE_UPDATING,
-        STATE_DISCONNECTING
-    };
-
-    // Message
-    enum
-    {
-        // State-Machine MSG
-        MSG_CONDITION = AOSMSG_SERVICE_INTERNAL,
-        MSG_CONNECTION,
-        MSG_REGISTRATION,
-
-        // NO State-Machine MSG
-        MSG_INIT = AOSMSG_SERVICE_INTERNAL + 10,
-        MSG_REG_START,
-        MSG_REG_UPDATE,
-        MSG_REG_STOP,
-        MSG_REG_RECONFIG,
-        MSG_REG_RECOVER,
-        MSG_IPCAN_CHANGED,
-        MSG_PUB_TERMINATED,
-        MSG_DESTROY,
-        MSG_IMS_EST_TIMER_CONTROL,
-        MSG_REG_EXCHANGE,
-        MSG_AC_CONFIGURED,
-        MSG_PCSCF_RECOVER,
-        MSG_SCSCF_RESTORATION,
-        MSG_OTHERS
-    };
-
-    // Pending
-    enum
-    {
-        PENDING_NONE = 0x0,
-
-        // REG PENDING
-        PENDING_REG_RECOVERY_HELD = 0x1,
-
-        // REG STOP PENDING
-        PENDING_REG_STOP_HELD = 0x2,
-
-        // APP PENDING
-        PENDING_APP_DESTROY_HELD = 0x4,
-
-        // REG RECONFIG PENDING
-        PENDING_REG_RECONFIG_HELD = 0x8,
-
-        // After CSFB
-        PENDING_REG_AFTER_CSFB_COMPLETE = 0x10,
-
-        // IPCAN PENDING
-        PENDING_IPCAN_HELD = 0x20,
-
-        // REG UPDATE PENDING
-        PENDING_REG_UPDATE_HELD = 0x40
-    };
-
-    // Timer
-    enum
-    {
-        TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONDITION,
-        TIMER_REG_STOP,
-        TIMER_REG_BLOCKED,
-        TIMER_APP_ACTIVATED,
-        TIMER_APP_CONNECTED,
-        TIMER_APP_TERMINATED,
-        TIMER_PDN_BLOCKED
-    };
-};
-
-class RegistrationLogTest
-{
-public:
-    enum
-    {
-        STATE_OFFLINE = 0,
-        STATE_REGISTERING,
-        STATE_REGSTOP,
-        STATE_REGISTERED,
-        STATE_REFRESHING,
-        STATE_REFRESHSTOP,
-        STATE_DEREGISTERING
-    };
-
-    enum
-    {
-        MSG_REG_START = AOSMSG_SERVICE_INTERNAL,
-
-        MSG_REG_REINITIATE,
-        MSG_REG_UPDATE,
-        MSG_REG_RECONFIG,
-
-        MSG_REG_REQUIRED_WITH_WAIT_TIME,
-        MSG_REG_REQUIRED_WITH_NEXT_PCSCF,
-        MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
-        MSG_REG_REINITIATE_WITH_REG_STATE,
-        MSG_REG_TERMINATED_BY_NOTIFY,
-
-        MSG_SUB_REINITIATE,
-        MSG_SUB_TERMINATED,
-
-        MSG_REG_EVENT_REGISTERED
-    };
-
-    enum
-    {
-        MODE_NORMAL = 0,
-        MODE_LIMITED,
-        MODE_FAKE
-    };
-
-    enum
-    {
-        PENDING_NONE = 0x0,
-        PENDING_START = 0x1,
-        PENDING_TRANSACTION = 0x2,
-        PENDING_UPDATE = 0x4,
-        PENDING_RECONFIG = 0x8,
-        PENDING_UPDATE_HELD_BY_CALL = 0x10,
-        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
-
-        PENDING_SUBSCRIPTION = 0x40,
-        PENDING_TERMINATED = 0x80,
-
-        PENDING_TRAFFIC = 0x100
-    };
-
-    enum
-    {
-        TIMER_OFFLINE_RECOVER = 100,
-        TIMER_STOP_RETRY,
-        TIMER_REFRESH,
-        TIMER_EXPIRED,
-        TIMER_MODE,
-        TIMER_TRANSACTION,
-        TIMER_INTERNAL_ERROR
-    };
-};
-
 TEST(AosLogTest, AppMessageToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_CONDITION),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_CONDITION),
             "MSG_CONDITION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_CONNECTION),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_CONNECTION),
             "MSG_CONNECTION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REGISTRATION),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REGISTRATION),
             "MSG_REGISTRATION");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_INIT), "MSG_INIT");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_START),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_INIT), "MSG_INIT");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_START),
             "MSG_REG_START");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_UPDATE),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_UPDATE),
             "MSG_REG_UPDATE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_STOP),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_STOP),
             "MSG_REG_STOP");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_RECONFIG),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_RECONFIG),
             "MSG_REG_RECONFIG");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_RECOVER),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_RECOVER),
             "MSG_REG_RECOVER");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_IPCAN_CHANGED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_IPCAN_CHANGED),
             "MSG_IPCAN_CHANGED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_PUB_TERMINATED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_PUB_TERMINATED),
             "MSG_PUB_TERMINATED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_DESTROY),
-            "MSG_DESTROY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(
-                         ApplicationLogTest::MSG_IMS_EST_TIMER_CONTROL),
-            "MSG_IMS_EST_TIMER_CONTROL");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_EXCHANGE),
-            "MSG_REG_EXCHANGE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_AC_CONFIGURED),
-            "MSG_AC_CONFIGURED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_PCSCF_RECOVER),
-            "MSG_PCSCF_RECOVER");
     EXPECT_STREQ(
-            AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_SCSCF_RESTORATION),
+            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_DESTROY), "MSG_DESTROY");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_IMS_EST_TIMER_CONTROL),
+            "MSG_IMS_EST_TIMER_CONTROL");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_EXCHANGE),
+            "MSG_REG_EXCHANGE");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_AC_CONFIGURED),
+            "MSG_AC_CONFIGURED");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_PCSCF_RECOVER),
+            "MSG_PCSCF_RECOVER");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_SCSCF_RESTORATION),
             "MSG_SCSCF_RESTORATION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_OTHERS),
-            "MSG_OTHERS");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_OTHERS + 99),
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_OTHERS), "MSG_OTHERS");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_OTHERS + 99),
             "__INVALID__");
 }
 
 TEST(AosLogTest, AppPendingToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(
-                         ApplicationLogTest::PENDING_REG_RECOVERY_HELD),
-            "PENDING_REG_RECOVERY_HELD");
     EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLogTest::PENDING_REG_STOP_HELD),
+            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_RECOVERY_HELD),
+            "PENDING_REG_RECOVERY_HELD");
+    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_STOP_HELD),
             "PENDING_REG_STOP_HELD");
     EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLogTest::PENDING_APP_DESTROY_HELD),
+            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_APP_DESTROY_HELD),
             "PENDING_APP_DESTROY_HELD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(
-                         ApplicationLogTest::PENDING_REG_RECONFIG_HELD),
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_RECONFIG_HELD),
             "PENDING_REG_RECONFIG_HELD");
     EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(
-                         ApplicationLogTest::PENDING_REG_AFTER_CSFB_COMPLETE),
+                         ApplicationLog::PENDING_REG_AFTER_CSFB_COMPLETE),
             "PENDING_REG_AFTER_CSFB_COMPLETE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLogTest::PENDING_IPCAN_HELD),
+    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_IPCAN_HELD),
             "PENDING_IPCAN_HELD");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLogTest::PENDING_REG_UPDATE_HELD),
+    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_UPDATE_HELD),
             "PENDING_REG_UPDATE_HELD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(
-                         ApplicationLogTest::PENDING_REG_UPDATE_HELD + 99),
+    EXPECT_STREQ(
+            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_UPDATE_HELD + 99),
             "__INVALID__");
 }
 
@@ -291,123 +137,118 @@ TEST(AosLogTest, AppRequestToString)
 
 TEST(AosLogTest, AppStateToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_NOTREADY),
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_NOTREADY),
             "STATE_NOTREADY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_READY),
-            "STATE_READY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_CONNECTING),
-            "STATE_CONNECTING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_CONNECTED),
-            "STATE_CONNECTED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_UPDATING),
-            "STATE_UPDATING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_DISCONNECTING),
-            "STATE_DISCONNECTING");
     EXPECT_STREQ(
-            AosProvider::GetLog()->AppStateToString(ApplicationLogTest::STATE_DISCONNECTING + 99),
+            AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_READY), "STATE_READY");
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_CONNECTING),
+            "STATE_CONNECTING");
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_CONNECTED),
+            "STATE_CONNECTED");
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_UPDATING),
+            "STATE_UPDATING");
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_DISCONNECTING),
+            "STATE_DISCONNECTING");
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_DISCONNECTING + 99),
             "__INVALID__");
 }
 
 TEST(AosLogTest, AppTimerToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_RECONFIG_GUARD),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_RECONFIG_GUARD),
             "TIMER_RECONFIG_GUARD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_MSG_CONDITION),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_MSG_CONDITION),
             "TIMER_MSG_CONDITION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_REG_STOP),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_REG_STOP),
             "TIMER_REG_STOP");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_REG_BLOCKED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_REG_BLOCKED),
             "TIMER_REG_BLOCKED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_APP_ACTIVATED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_APP_ACTIVATED),
             "TIMER_APP_ACTIVATED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_APP_CONNECTED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_APP_CONNECTED),
             "TIMER_APP_CONNECTED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_APP_TERMINATED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_APP_TERMINATED),
             "TIMER_APP_TERMINATED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_PDN_BLOCKED),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_PDN_BLOCKED),
             "TIMER_PDN_BLOCKED");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppTimerToString(ApplicationLogTest::TIMER_PDN_BLOCKED + 99),
+    EXPECT_STREQ(AosProvider::GetLog()->AppTimerToString(ApplicationLog::TIMER_PDN_BLOCKED + 99),
             "__INVALID__");
 }
 
 TEST(AosLogTest, RegMessageToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_REG_START),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_START),
             "MSG_REG_START");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_REG_REINITIATE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_REINITIATE),
             "MSG_REG_REINITIATE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_REG_UPDATE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_UPDATE),
             "MSG_REG_UPDATE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_REG_RECONFIG),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_RECONFIG),
             "MSG_REG_RECONFIG");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_REQUIRED_WITH_WAIT_TIME),
+                         RegistrationLog::MSG_REG_REQUIRED_WITH_WAIT_TIME),
             "MSG_REG_REQUIRED_WITH_WAIT_TIME");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_REQUIRED_WITH_NEXT_PCSCF),
+                         RegistrationLog::MSG_REG_REQUIRED_WITH_NEXT_PCSCF),
             "MSG_REG_REQUIRED_WITH_NEXT_PCSCF");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF),
+                         RegistrationLog::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF),
             "MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_REINITIATE_WITH_REG_STATE),
+                         RegistrationLog::MSG_REG_REINITIATE_WITH_REG_STATE),
             "MSG_REG_REINITIATE_WITH_REG_STATE");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_TERMINATED_BY_NOTIFY),
+                         RegistrationLog::MSG_REG_TERMINATED_BY_NOTIFY),
             "MSG_REG_TERMINATED_BY_NOTIFY");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_SUB_REINITIATE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_SUB_REINITIATE),
             "MSG_SUB_REINITIATE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLogTest::MSG_SUB_TERMINATED),
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_SUB_TERMINATED),
             "MSG_SUB_TERMINATED");
-    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_EVENT_REGISTERED),
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_EVENT_REGISTERED),
             "MSG_REG_EVENT_REGISTERED");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLogTest::MSG_REG_EVENT_REGISTERED + 99),
+                         RegistrationLog::MSG_REG_EVENT_REGISTERED + 99),
             "__INVALID__");
 }
 
 TEST(AosLogTest, RegModeToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->RegModeToString(RegistrationLogTest::MODE_NORMAL),
-            "MODE_NORMAL");
-    EXPECT_STREQ(AosProvider::GetLog()->RegModeToString(RegistrationLogTest::MODE_LIMITED),
-            "MODE_LIMITED");
     EXPECT_STREQ(
-            AosProvider::GetLog()->RegModeToString(RegistrationLogTest::MODE_FAKE), "MODE_FAKE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegModeToString(RegistrationLogTest::MODE_FAKE + 99),
-            "__INVALID__");
+            AosProvider::GetLog()->RegModeToString(RegistrationLog::MODE_NORMAL), "MODE_NORMAL");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegModeToString(RegistrationLog::MODE_LIMITED), "MODE_LIMITED");
+    EXPECT_STREQ(AosProvider::GetLog()->RegModeToString(RegistrationLog::MODE_FAKE), "MODE_FAKE");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegModeToString(RegistrationLog::MODE_FAKE + 99), "__INVALID__");
 }
 
 TEST(AosLogTest, RegPendingToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_NONE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_NONE),
             "PENDING_NONE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_START),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_START),
             "PENDING_START");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TRANSACTION),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_TRANSACTION),
             "PENDING_TRANSACTION");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_UPDATE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_UPDATE),
             "PENDING_UPDATE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_RECONFIG),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_RECONFIG),
             "PENDING_RECONFIG");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(
-                         RegistrationLogTest::PENDING_UPDATE_HELD_BY_CALL),
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_UPDATE_HELD_BY_CALL),
             "PENDING_UPDATE_HELD_BY_CALL");
     EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(
-                         RegistrationLogTest::PENDING_PLMN_BLOCK_HELD_BY_CALL),
+                         RegistrationLog::PENDING_PLMN_BLOCK_HELD_BY_CALL),
             "PENDING_PLMN_BLOCK_HELD_BY_CALL");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_SUBSCRIPTION),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_SUBSCRIPTION),
             "PENDING_SUBSCRIPTION");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TERMINATED),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_TERMINATED),
             "PENDING_TERMINATED");
-    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TRAFFIC),
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_TRAFFIC),
             "PENDING_TRAFFIC");
     EXPECT_STREQ(
-            AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_TERMINATED + 99),
+            AosProvider::GetLog()->RegPendingToString(RegistrationLog::PENDING_TERMINATED + 99),
             "__INVALID__");
 }
 
@@ -444,44 +285,42 @@ TEST(AosLogTest, RegReasonToString)
 
 TEST(AosLogTest, RegStateToString)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_OFFLINE),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_OFFLINE),
             "STATE_OFFLINE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_REGISTERING),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_REGISTERING),
             "STATE_REGISTERING");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_REGSTOP),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_REGSTOP),
             "STATE_REGSTOP");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_REGISTERED),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_REGISTERED),
             "STATE_REGISTERED");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_REFRESHING),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_REFRESHING),
             "STATE_REFRESHING");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_REFRESHSTOP),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_REFRESHSTOP),
             "STATE_REFRESHSTOP");
-    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_DEREGISTERING),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_DEREGISTERING),
             "STATE_DEREGISTERING");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->RegStateToString(RegistrationLogTest::STATE_DEREGISTERING + 99),
+    EXPECT_STREQ(AosProvider::GetLog()->RegStateToString(RegistrationLog::STATE_DEREGISTERING + 99),
             "__INVALID__");
 }
 
 TEST(AosLogTest, RegTimerToString)
 {
-    EXPECT_STREQ(
-            AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_OFFLINE_RECOVER),
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_OFFLINE_RECOVER),
             "TIMER_OFFLINE_RECOVER");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_STOP_RETRY),
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_STOP_RETRY),
             "TIMER_STOP_RETRY");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_REFRESH),
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_REFRESH),
             "TIMER_REFRESH");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_EXPIRED),
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_EXPIRED),
             "TIMER_EXPIRED");
     EXPECT_STREQ(
-            AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_MODE), "TIMER_MODE");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_TRANSACTION),
+            AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_MODE), "TIMER_MODE");
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_TRANSACTION),
             "TIMER_TRANSACTION");
-    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_INTERNAL_ERROR),
+    EXPECT_STREQ(AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_INTERNAL_ERROR),
             "TIMER_INTERNAL_ERROR");
     EXPECT_STREQ(
-            AosProvider::GetLog()->RegTimerToString(RegistrationLogTest::TIMER_INTERNAL_ERROR + 99),
+            AosProvider::GetLog()->RegTimerToString(RegistrationLog::TIMER_INTERNAL_ERROR + 99),
             "__INVALID__");
 }
 
