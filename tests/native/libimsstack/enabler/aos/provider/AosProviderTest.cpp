@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -38,120 +37,131 @@
 
 #include "../../interface/aos/MockIAosService.h"
 
-using ::testing::TypedEq;
-
 class AosProviderTest : public ::testing::Test
 {
 public:
-    AosProvider* m_pAosProvider;
+    AosProvider* m_pProvider;
 
 protected:
     virtual void SetUp() override
     {
-        m_pAosProvider = new AosProvider();
-        ASSERT_TRUE(m_pAosProvider != nullptr);
+        m_pProvider = new AosProvider();
+        ASSERT_TRUE(m_pProvider != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (m_pAosProvider)
+        if (m_pProvider)
         {
-            delete m_pAosProvider;
+            delete m_pProvider;
         }
     }
 };
 
-TEST_F(AosProviderTest, GetLog)
+TEST_F(AosProviderTest, SucceedsGetLog)
 {
-    m_pAosProvider->~AosProvider();
-    AosLog* pAosLog = m_pAosProvider->GetLog();
+    // GIVEN
+    // WHEN
+    AosLog* pAosLog = m_pProvider->GetLog();
 
+    // THEN
     EXPECT_TRUE(pAosLog != nullptr);
-    EXPECT_THAT(pAosLog, TypedEq<AosLog*>(pAosLog));
 }
 
-TEST_F(AosProviderTest, CreateDnsQuery)
+TEST_F(AosProviderTest, SucceedsCreateDnsQuery)
 {
-    AosDnsQuery* pAosDnsQuery = m_pAosProvider->CreateDnsQuery();
+    // GIVEN
+    // WHEN
+    AosDnsQuery* pAosDnsQuery = m_pProvider->CreateDnsQuery();
 
+    // THEN
     EXPECT_TRUE(pAosDnsQuery != nullptr);
-    EXPECT_THAT(pAosDnsQuery, TypedEq<AosDnsQuery*>(pAosDnsQuery));
 }
 
-TEST_F(AosProviderTest, CreateKeepAlive)
+TEST_F(AosProviderTest, SucceedsCreateKeepAlive)
 {
-    AosKeepAlive* pAosKeepAlive = m_pAosProvider->CreateKeepAlive(0);
+    // GIVEN
+    // WHEN
+    AosKeepAlive* pAosKeepAlive = m_pProvider->CreateKeepAlive();
 
+    // THEN
     EXPECT_TRUE(pAosKeepAlive != nullptr);
-    EXPECT_THAT(pAosKeepAlive, TypedEq<AosKeepAlive*>(pAosKeepAlive));
 }
 
-TEST_F(AosProviderTest, SetCallTracker)
+TEST_F(AosProviderTest, SucceedsGetCallTracker)
 {
+    // GIVEN
     MockIAosCallTracker objMockIAosCallTracker;
-    m_pAosProvider->SetCallTracker(static_cast<IAosCallTracker*>(&objMockIAosCallTracker));
+    m_pProvider->SetCallTracker(&objMockIAosCallTracker);
 
-    IAosCallTracker* piAosCallTracker = m_pAosProvider->GetCallTracker();
+    // WHEN
+    IAosCallTracker* piAosCallTracker = m_pProvider->GetCallTracker();
 
+    // THEN
     EXPECT_TRUE(piAosCallTracker != nullptr);
-    EXPECT_THAT(piAosCallTracker, TypedEq<IAosCallTracker*>(piAosCallTracker));
 }
 
-TEST_F(AosProviderTest, SetLocationStarter)
+TEST_F(AosProviderTest, SucceedsGetLocationStarter)
 {
+    // GIVEN
     MockIAosLocationStarter objMockIAosLocationStarter;
-    m_pAosProvider->SetLocationStarter(
-            static_cast<IAosLocationStarter*>(&objMockIAosLocationStarter));
+    m_pProvider->SetLocationStarter(&objMockIAosLocationStarter);
 
-    IAosLocationStarter* piAosLocationStarter = m_pAosProvider->GetLocationStarter();
+    // WHEN
+    IAosLocationStarter* piAosLocationStarter = m_pProvider->GetLocationStarter();
 
+    // THEN
     EXPECT_TRUE(piAosLocationStarter != nullptr);
-    EXPECT_THAT(piAosLocationStarter, TypedEq<IAosLocationStarter*>(piAosLocationStarter));
 }
 
-TEST_F(AosProviderTest, SetRegStateManager)
+TEST_F(AosProviderTest, SucceedsGetRegStateManager)
 {
+    // GIVEN
     MockIAosRegStateManager objMockIAosRegStateManager;
-    m_pAosProvider->SetRegStateManager(
-            static_cast<IAosRegStateManager*>(&objMockIAosRegStateManager));
+    m_pProvider->SetRegStateManager(&objMockIAosRegStateManager);
 
-    IAosRegStateManager* piAosRegStateManager = m_pAosProvider->GetRegStateManager();
+    // WHEN
+    IAosRegStateManager* piAosRegStateManager = m_pProvider->GetRegStateManager();
 
+    // THEN
     EXPECT_TRUE(piAosRegStateManager != nullptr);
-    EXPECT_THAT(piAosRegStateManager, TypedEq<IAosRegStateManager*>(piAosRegStateManager));
 }
 
-TEST_F(AosProviderTest, SetService)
+TEST_F(AosProviderTest, SucceedsGetService)
 {
+    // GIVEN
     MockIAosService objMockIAosService;
-    m_pAosProvider->SetService(static_cast<IAosService*>(&objMockIAosService));
+    m_pProvider->SetService(&objMockIAosService);
 
-    IAosService* piAosService = m_pAosProvider->GetService();
+    // WHEN
+    IAosService* piAosService = m_pProvider->GetService();
 
+    // THEN
     EXPECT_TRUE(piAosService != nullptr);
-    EXPECT_THAT(piAosService, TypedEq<IAosService*>(piAosService));
 }
 
-TEST_F(AosProviderTest, SetSubscriberManager)
+TEST_F(AosProviderTest, SucceedsGetSubscriberManager)
 {
+    // GIVEN
     MockIAosSubscriberManager objMockIAosSubscriberManager;
-    m_pAosProvider->SetSubscriberManager(
-            static_cast<IAosSubscriberManager*>(&objMockIAosSubscriberManager));
+    m_pProvider->SetSubscriberManager(&objMockIAosSubscriberManager);
 
-    IAosSubscriberManager* piAosSubscriberManager = m_pAosProvider->GetSubscriberManager();
+    // WHEN
+    IAosSubscriberManager* piAosSubscriberManager = m_pProvider->GetSubscriberManager();
 
+    // THEN
     EXPECT_TRUE(piAosSubscriberManager != nullptr);
-    EXPECT_THAT(piAosSubscriberManager, TypedEq<IAosSubscriberManager*>(piAosSubscriberManager));
 }
 
-TEST_F(AosProviderTest, SetRetryRepository)
+TEST_F(AosProviderTest, SucceedsGetRetryRepository)
 {
+    // GIVEN
     MockIAosRetryRepository objMockIAosRetryRepository;
-    m_pAosProvider->SetRetryRepository(
-            static_cast<IAosRetryRepository*>(&objMockIAosRetryRepository));
+    m_pProvider->SetRetryRepository(&objMockIAosRetryRepository);
 
-    IAosRetryRepository* piAosRetryRepository = m_pAosProvider->GetRetryRepository();
+    // WHEN
+    IAosRetryRepository* piAosRetryRepository = m_pProvider->GetRetryRepository();
 
+    // THEN
     EXPECT_TRUE(piAosRetryRepository != nullptr);
-    EXPECT_THAT(piAosRetryRepository, TypedEq<IAosRetryRepository*>(piAosRetryRepository));
 }
