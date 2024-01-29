@@ -839,7 +839,7 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
     InitBundle(piCc);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
 {
     // AosExtraRegErrBundle
@@ -1089,7 +1089,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 {
     /* aosp_carrier_config */
@@ -1205,7 +1205,7 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
@@ -1335,7 +1335,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 {
     ImsVector<IMS_SINT32> objAuthAlgo =
