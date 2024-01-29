@@ -23,73 +23,217 @@
 class AosStaticProfileTest : public ::testing::Test
 {
 public:
-    AosStaticProfile* pAosStaticProfile;
+    AosStaticProfile* m_pProfile;
 
 protected:
     virtual void SetUp() override
     {
-        pAosStaticProfile = new AosStaticProfile();
-        ASSERT_TRUE(pAosStaticProfile != nullptr);
+        m_pProfile = new AosStaticProfile();
+        ASSERT_TRUE(m_pProfile != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (pAosStaticProfile)
+        if (m_pProfile)
         {
-            delete pAosStaticProfile;
+            delete m_pProfile;
         }
     }
 };
 
-TEST_F(AosStaticProfileTest, SetProfileType_Normal)
+TEST_F(AosStaticProfileTest, SucceedsSetProfileTypeWhenNormal)
 {
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-    EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::NORMAL);
-    EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_normal"));
-    EXPECT_EQ(pAosStaticProfile->GetConnectionType(), NetworkPolicy::APN_IMS);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationId(), AString("aos_normal_reg"));
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationType(), AosRegistrationType::NORMAL);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationFlowId(),
-            static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+    // THEN
+    EXPECT_EQ(AosStaticProfile::Type::NORMAL, m_pProfile->GetProfileType());
 }
 
-TEST_F(AosStaticProfileTest, SetProfileType_Emergency)
+TEST_F(AosStaticProfileTest, SucceedsSetIdWhenNormal)
 {
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-    EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::EMERGENCY);
-    EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_emergency"));
-    EXPECT_EQ(pAosStaticProfile->GetConnectionType(), NetworkPolicy::APN_EMERGENCY);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationId(), AString("aos_emergency_reg"));
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationType(), AosRegistrationType::EMERGENCY);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationFlowId(),
-            static_cast<IMS_UINT32>(AosRegistrationFlowId::EMERGENCY));
+    // THEN
+    EXPECT_EQ(AString("aos_normal"), m_pProfile->GetId());
 }
 
-TEST_F(AosStaticProfileTest, SetProfileType_Rcs)
+TEST_F(AosStaticProfileTest, SucceedsSetConnectionTypeWhenNormal)
 {
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::RCS);
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-    EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::RCS);
-    EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_rcs"));
-    EXPECT_EQ(pAosStaticProfile->GetConnectionType(), NetworkPolicy::APN_INTERNET);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationId(), AString("aos_rcs_reg"));
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationType(), AosRegistrationType::RCS);
-    EXPECT_EQ(pAosStaticProfile->GetRegistrationFlowId(),
-            static_cast<IMS_UINT32>(AosRegistrationFlowId::RCS));
+    // THEN
+    EXPECT_EQ(NetworkPolicy::APN_IMS, m_pProfile->GetConnectionType());
 }
 
-TEST_F(AosStaticProfileTest, AddService)
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationIdWhenNormal)
 {
-    IMS_UINT32 nSize = pAosStaticProfile->GetServiceProfiles().GetSize();
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-    pAosStaticProfile->AddService(AString("TestAppId1"), AString("TestServiceId1"));
-    EXPECT_EQ(pAosStaticProfile->GetServiceProfiles().GetSize(), nSize + 1);
+    // THEN
+    EXPECT_EQ(AString("aos_normal_reg"), m_pProfile->GetRegistrationId());
+}
 
-    pAosStaticProfile->AddService(AString("TestAppId2"), AString("TestServiceId2"));
-    EXPECT_EQ(pAosStaticProfile->GetServiceProfiles().GetSize(), nSize + 2);
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationTypeWhenNormal)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-    pAosStaticProfile->AddService(AString("TestAppId3"), AString("TestServiceId3"));
-    EXPECT_EQ(pAosStaticProfile->GetServiceProfiles().GetSize(), nSize + 3);
+    // THEN
+    EXPECT_EQ(AosRegistrationType::NORMAL, m_pProfile->GetRegistrationType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationFlowIdWhenNormal)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
+
+    // THEN
+    EXPECT_EQ(static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL),
+            m_pProfile->GetRegistrationFlowId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetProfileTypeWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(AosStaticProfile::Type::EMERGENCY, m_pProfile->GetProfileType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetIdWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(AString("aos_emergency"), m_pProfile->GetId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetConnectionTypeWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(NetworkPolicy::APN_EMERGENCY, m_pProfile->GetConnectionType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationIdWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(AString("aos_emergency_reg"), m_pProfile->GetRegistrationId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationTypeWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(AosRegistrationType::EMERGENCY, m_pProfile->GetRegistrationType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationFlowIdWhenEmergency)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(static_cast<IMS_UINT32>(AosRegistrationFlowId::EMERGENCY),
+            m_pProfile->GetRegistrationFlowId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetProfileTypeWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(AosStaticProfile::Type::RCS, m_pProfile->GetProfileType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetIdWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(AString("aos_rcs"), m_pProfile->GetId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetConnectionTypeWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(NetworkPolicy::APN_INTERNET, m_pProfile->GetConnectionType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationIdWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(AString("aos_rcs_reg"), m_pProfile->GetRegistrationId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationTypeWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(AosRegistrationType::RCS, m_pProfile->GetRegistrationType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetRegistrationFlowIdWhenRcs)
+{
+    // GIVEN
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::RCS);
+
+    // THEN
+    EXPECT_EQ(static_cast<IMS_UINT32>(AosRegistrationFlowId::RCS),
+            m_pProfile->GetRegistrationFlowId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsAddService)
+{
+    // GIVEN
+    IMS_UINT32 nSize = m_pProfile->GetServiceProfiles().GetSize();
+
+    // WHEN
+    m_pProfile->AddService(AString("TestAppId1"), AString("TestServiceId1"));
+    m_pProfile->AddService(AString("TestAppId2"), AString("TestServiceId2"));
+    m_pProfile->AddService(AString("TestAppId3"), AString("TestServiceId3"));
+
+    // THEN
+    EXPECT_EQ(nSize + 3, m_pProfile->GetServiceProfiles().GetSize());
 }
