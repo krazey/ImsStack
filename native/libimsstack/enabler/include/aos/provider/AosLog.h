@@ -18,6 +18,157 @@
 
 #include "interface/AosInternalMsgDef.h"
 
+class ApplicationLog
+{
+public:
+    // State
+    enum
+    {
+        STATE_NOTREADY = 0,
+        STATE_READY,
+        STATE_CONNECTING,
+        STATE_CONNECTED,
+        STATE_UPDATING,
+        STATE_DISCONNECTING
+    };
+
+    // Message
+    enum
+    {
+        // State-Machine MSG
+        MSG_CONDITION = AOSMSG_SERVICE_INTERNAL,
+        MSG_CONNECTION,
+        MSG_REGISTRATION,
+
+        // NO State-Machine MSG
+        MSG_INIT = AOSMSG_SERVICE_INTERNAL + 10,
+        MSG_REG_START,
+        MSG_REG_UPDATE,
+        MSG_REG_STOP,
+        MSG_REG_RECONFIG,
+        MSG_REG_RECOVER,
+        MSG_IPCAN_CHANGED,
+        MSG_PUB_TERMINATED,
+        MSG_DESTROY,
+        MSG_IMS_EST_TIMER_CONTROL,
+        MSG_REG_EXCHANGE,
+        MSG_AC_CONFIGURED,
+        MSG_PCSCF_RECOVER,
+        MSG_SCSCF_RESTORATION,
+        MSG_OTHERS
+    };
+
+    // Pending
+    enum
+    {
+        PENDING_NONE = 0x0,
+
+        // REG PENDING
+        PENDING_REG_RECOVERY_HELD = 0x1,
+
+        // REG STOP PENDING
+        PENDING_REG_STOP_HELD = 0x2,
+
+        // APP PENDING
+        PENDING_APP_DESTROY_HELD = 0x4,
+
+        // REG RECONFIG PENDING
+        PENDING_REG_RECONFIG_HELD = 0x8,
+
+        // After CSFB
+        PENDING_REG_AFTER_CSFB_COMPLETE = 0x10,
+
+        // IPCAN PENDING
+        PENDING_IPCAN_HELD = 0x20,
+
+        // REG UPDATE PENDING
+        PENDING_REG_UPDATE_HELD = 0x40
+    };
+
+    // Timer
+    enum
+    {
+        TIMER_RECONFIG_GUARD = 0,
+        TIMER_MSG_CONDITION,
+        TIMER_REG_STOP,
+        TIMER_REG_BLOCKED,
+        TIMER_APP_ACTIVATED,
+        TIMER_APP_CONNECTED,
+        TIMER_APP_TERMINATED,
+        TIMER_PDN_BLOCKED,
+        TIMER_IMS_ESTABLISHMENT
+    };
+};
+
+class RegistrationLog
+{
+public:
+    enum
+    {
+        STATE_OFFLINE = 0,
+        STATE_REGISTERING,
+        STATE_REGSTOP,
+        STATE_REGISTERED,
+        STATE_REFRESHING,
+        STATE_REFRESHSTOP,
+        STATE_DEREGISTERING
+    };
+
+    enum
+    {
+        MSG_REG_START = AOSMSG_SERVICE_INTERNAL,
+
+        MSG_REG_REINITIATE,
+        MSG_REG_UPDATE,
+        MSG_REG_RECONFIG,
+
+        MSG_REG_REQUIRED_WITH_WAIT_TIME,
+        MSG_REG_REQUIRED_WITH_NEXT_PCSCF,
+        MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
+        MSG_REG_REINITIATE_WITH_REG_STATE,
+        MSG_REG_TERMINATED_BY_NOTIFY,
+
+        MSG_SUB_REINITIATE,
+        MSG_SUB_TERMINATED,
+
+        MSG_REG_EVENT_REGISTERED
+    };
+
+    enum
+    {
+        MODE_NORMAL = 0,
+        MODE_LIMITED,
+        MODE_FAKE
+    };
+
+    enum
+    {
+        PENDING_NONE = 0x0,
+        PENDING_START = 0x1,
+        PENDING_TRANSACTION = 0x2,
+        PENDING_UPDATE = 0x4,
+        PENDING_RECONFIG = 0x8,
+        PENDING_UPDATE_HELD_BY_CALL = 0x10,
+        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
+
+        PENDING_SUBSCRIPTION = 0x40,
+        PENDING_TERMINATED = 0x80,
+
+        PENDING_TRAFFIC = 0x100
+    };
+
+    enum
+    {
+        TIMER_OFFLINE_RECOVER = 100,
+        TIMER_STOP_RETRY,
+        TIMER_REFRESH,
+        TIMER_EXPIRED,
+        TIMER_MODE,
+        TIMER_TRANSACTION,
+        TIMER_INTERNAL_ERROR
+    };
+};
+
 class AosLog
 {
 public:
@@ -42,4 +193,5 @@ public:
     // Event Log
     static const IMS_CHAR* EventToString(IN IMS_SINT32 nEvent);
 };
+
 #endif  // AOS_LOG_H_
