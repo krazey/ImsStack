@@ -188,7 +188,7 @@ PUBLIC VIRTUAL void AosCallTracker::RemoveListener(IN IAosCallTrackerListener* p
     }
 }
 
-PRIVATE
+PROTECTED
 template <typename T>
 void AosCallTracker::AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
 {
@@ -206,7 +206,7 @@ void AosCallTracker::AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKe
     }
 }
 
-PRIVATE
+PROTECTED
 template <typename T>
 void AosCallTracker::RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey)
 {
@@ -220,7 +220,7 @@ void AosCallTracker::RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKe
     objCalls.RemoveAt(nAt);
 }
 
-PRIVATE
+PROTECTED
 CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
 {
     switch (eState)
@@ -247,7 +247,7 @@ CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
     }
 }
 
-PRIVATE
+PROTECTED
 CallState AosCallTracker::GetTotalState(IN ImsMap<CallKey, CallState>& objCalls)
 {
     if (objCalls.IsEmpty())
@@ -263,7 +263,7 @@ CallState AosCallTracker::GetTotalState(IN ImsMap<CallKey, CallState>& objCalls)
     return objCalls.GetValueAt(0);
 }
 
-PRIVATE
+PROTECTED
 IMS_UINT32 AosCallTracker::GetTotalCallType(IN ImsMap<CallKey, CallType>& objCallTypes)
 {
     IMS_UINT32 nTotalCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
@@ -286,13 +286,13 @@ IMS_UINT32 AosCallTracker::GetTotalCallType(IN ImsMap<CallKey, CallType>& objCal
     return nTotalCallType;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosCallTracker::IsExistCallType(IN CallType eCallType) const
 {
     return (m_nNormalCallType & (0x1 << static_cast<IMS_UINT32>(eCallType)));
 }
 
-PRIVATE
+PROTECTED
 CallState AosCallTracker::GetState(IN IMS_UINT32 nType) const
 {
     if (nType == TYPE_CS)
@@ -313,7 +313,7 @@ CallState AosCallTracker::GetState(IN IMS_UINT32 nType) const
     return CallState::IDLE;
 }
 
-PRIVATE
+PROTECTED
 void AosCallTracker::SetState(IN IMS_UINT32 nType, IN CallState eState)
 {
     switch (nType)
@@ -335,7 +335,7 @@ void AosCallTracker::SetState(IN IMS_UINT32 nType, IN CallState eState)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosCallTracker::Notify(IN IMS_UINT32 nType, IN CallState eState)
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
@@ -349,7 +349,7 @@ void AosCallTracker::Notify(IN IMS_UINT32 nType, IN CallState eState)
     }
 }
 
-PRIVATE void AosCallTracker::ProcessCsChanged(IN CallState eState)
+PROTECTED void AosCallTracker::ProcessCsChanged(IN CallState eState)
 {
     if (m_eCsState != eState)
     {
@@ -361,7 +361,7 @@ PRIVATE void AosCallTracker::ProcessCsChanged(IN CallState eState)
     }
 }
 
-PRIVATE void AosCallTracker::ProcessEmergencyChanged(IN CallKey eKey, IN CallState eState)
+PROTECTED void AosCallTracker::ProcessEmergencyChanged(IN CallKey eKey, IN CallState eState)
 {
     if (eState == CallState::IDLE)
     {
@@ -384,7 +384,7 @@ PRIVATE void AosCallTracker::ProcessEmergencyChanged(IN CallKey eKey, IN CallSta
     }
 }
 
-PRIVATE void AosCallTracker::ProcessNormalChanged(
+PROTECTED void AosCallTracker::ProcessNormalChanged(
         IN CallKey nCallKey, IN CallState eCallState, IN CallType eCallType)
 {
     if (eCallState == CallState::IDLE)
@@ -414,7 +414,7 @@ PRIVATE void AosCallTracker::ProcessNormalChanged(
     }
 }
 
-PRIVATE VIRTUAL void AosCallTracker::Event_NotifyEvent(
+PROTECTED VIRTUAL void AosCallTracker::Event_NotifyEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
     A_IMS_TRACE_I(AOSTAG, "Event_NotifyEvent :: [E(%d)/W(%d)/L(%d)]", nEvent, nWParam, nLParam);
@@ -457,7 +457,7 @@ PUBLIC VIRTUAL void AosCallTracker::ServicePhone_PreciseCallStateChanged(IN Prec
     }
 }
 
-PRIVATE VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
+PROTECTED VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
         IN CallType eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason)
 {
     CallState eCallState = GetConvertedState(eState);
@@ -487,9 +487,9 @@ PRIVATE VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN 
     }
 }
 
-PRIVATE VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State /* eState */) {}
+PROTECTED VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State /* eState */) {}
 
-PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
+PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -507,7 +507,7 @@ PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
     }
 }
 
-PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState)
+PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState)
 {
     switch (eState)
     {
@@ -534,7 +534,7 @@ PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState
     }
 }
 
-PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::CallTypeToString(IN CallType eType)
+PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::CallTypeToString(IN CallType eType)
 {
     switch (eType)
     {
@@ -555,7 +555,7 @@ PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::CallTypeToString(IN CallType eTyp
     }
 }
 
-PRIVATE GLOBAL AString AosCallTracker::PrintCallTypes(IN IMS_UINT32 nCallTypes)
+PROTECTED GLOBAL AString AosCallTracker::PrintCallTypes(IN IMS_UINT32 nCallTypes)
 {
     AString strCallTypes(AString::ConstEmpty());
 
