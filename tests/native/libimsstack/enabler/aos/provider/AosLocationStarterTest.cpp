@@ -170,7 +170,7 @@ TEST_F(AosLocationStarterTest, SucceedsInitialize)
     m_pAosLocationStarter->m_bInitialized = IMS_FALSE;
     m_pAosLocationStarter->SetAppContext(IMS_NULL);
 
-    EXPECT_CALL(m_objMockIAosBlock, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosBlock, SetListener(_));
 
     // WHEN
     m_pAosLocationStarter->Init(&m_objMockIAosAppContext);
@@ -327,7 +327,7 @@ TEST_F(AosLocationStarterTest, ReturnsFalseWhenIntervalIsLessThanDefault)
 TEST_F(AosLocationStarterTest, SucceedsStartListeningForLocation)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->StartLocationInfoUpdate();
@@ -352,7 +352,7 @@ TEST_F(AosLocationStarterTest, StartDelayTimerWhenStopLocationInfoUpdate)
     // GIVEN
     // StopListeningForLocation() should only be called once in the destructor.
     // Should not be called inside StopLocationInfoUpdate().
-    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation()).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation());
 
     // WHEN
     m_pAosLocationStarter->StopLocationInfoUpdate();
@@ -408,7 +408,7 @@ TEST_F(AosLocationStarterTest, FailedStopListeningWhenTimerIsInvalid)
     // GIVEN
     // StopListeningForLocation() should only be called once in the destructor.
     // Should not be called inside StopLocationInfoUpdate().
-    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation()).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation());
 
     m_pAosLocationStarter->StartDelayTimer(10000);
 
@@ -425,7 +425,7 @@ TEST_F(AosLocationStarterTest, StartListeningWhenWfcOnWithPolicy)
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_SETTING, 0);
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_ON, 0);
@@ -441,7 +441,7 @@ TEST_F(AosLocationStarterTest, StartDelayTimerWhenWfcOffWithPolicy)
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_SETTING, 0);
 
     // StopListeningForLocation() should only be called once in the destructor.
-    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation()).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StopListeningForLocation());
 
     // WHEN
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_OFF, 0);
@@ -481,9 +481,9 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledWfcAvailabilityPolicyAndBlockClea
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
-    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).Times(1).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Block_Changed(0, 0);
@@ -497,13 +497,11 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledWfcAvailabilityPolicyAndReasonOnl
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
-    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).Times(1).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Block_Changed(0, 0);
@@ -517,11 +515,9 @@ TEST_F(AosLocationStarterTest, DoesNotStartWhenEnabledWfcAvailabilityPolicyAndBl
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_WFC_AVAILABILITY, 0);
 
-    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).Times(1).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(0);
 
@@ -537,9 +533,9 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledVolteAvailabilityPolicyAndBlockCl
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_VOLTE_AVAILABLE, 0);
 
-    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).Times(1).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).WillRepeatedly(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Block_Changed(0, 0);
@@ -553,7 +549,7 @@ TEST_F(AosLocationStarterTest, DoesNotStartWhenEnabledVolteAvailabilityPolicyAnd
     m_pAosLocationStarter->InitFeatures(TestAosLocationStarter::FEATURE_NONE);
     m_pAosLocationStarter->SetPolicy(IAosLocationStarter::POLICY_START_ON_VOLTE_AVAILABLE, 0);
 
-    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).Times(1).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosBlock, IsCleared(_)).WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(0);
 
@@ -573,7 +569,7 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledWfcBlockPolicyAndBlockChanged)
     m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_WIFI_BAD_CONNECTION, 1);  // 1: WFC Type
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Block_Changed(0, 0);
@@ -615,7 +611,7 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledVolteBlockPolicyAndBlockChanged)
     m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_CELLULAR_NO_NETWORK, 0);  // 0: VoLTE Type
 
-    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_)).Times(1);
+    EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
 
     // WHEN
     m_pAosLocationStarter->Block_Changed(0, 0);
