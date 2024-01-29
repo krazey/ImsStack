@@ -84,8 +84,9 @@ protected:
     IMS_UINT32 m_nKeepAliveTime;
     IMS_BOOL m_bIsPongChecked;
     IMS_SINT32 m_nSlotId;
-
     AString m_strTag;
+
+    static const IMS_UINT32 PONG_WAIT_TIME_MILLIS = 10000;
 };
 
 class IAosKeepAliveListener
