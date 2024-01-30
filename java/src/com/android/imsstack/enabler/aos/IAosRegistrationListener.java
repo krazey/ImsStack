@@ -339,6 +339,14 @@ public interface IAosRegistrationListener {
          * Service unavailable; IMS is not registered
          */
         public static final int CODE_LOCAL_NOT_REGISTERED = 17;
+        /**
+         * The current RAT was blocked because registration failed for all P-CSCFs.
+         */
+        public static final int CODE_RAT_BLOCK = 18;
+        /**
+         * Clears blocks for all RATs.
+         */
+        public static final int CODE_CLEAR_RAT_BLOCKS = 19;
 
         public static String toString(int reasonCode) {
             switch (reasonCode) {
@@ -378,6 +386,10 @@ public interface IAosRegistrationListener {
                     return "CODE_LOCAL_SERVICE_UNAVAILABLE";
                 case CODE_LOCAL_NOT_REGISTERED:
                     return "CODE_LOCAL_NOT_REGISTERED";
+                case CODE_RAT_BLOCK:
+                    return "CODE_RAT_BLOCK";
+                case CODE_CLEAR_RAT_BLOCKS:
+                    return "CODE_CLEAR_RAT_BLOCKS";
                 default:
                     return "Unknown";
             }

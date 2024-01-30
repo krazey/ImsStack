@@ -322,7 +322,15 @@ enum class AosReasonCode
     /**
      * Service unavailable; IMS is not registered
      */
-    LOCAL_NOT_REGISTERED = 17
+    LOCAL_NOT_REGISTERED = 17,
+    /**
+     * The current RAT was blocked because registration failed for all P-CSCFs.
+     */
+    RAT_BLOCK = 18,
+    /**
+     * Clears blocks for all RATs.
+     */
+    CLEAR_RAT_BLOCKS = 19
 };
 
 /**
