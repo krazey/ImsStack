@@ -579,8 +579,6 @@ public class CarrierConfig {
                 "usat_reg_event_download_policy_int";
         public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
 
-        public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =
-                "emergency_pcscf_retry_wait_time_sec_int_array";
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 "permanent_pdn_failure_int_array";
         public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =

@@ -671,14 +671,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT, -1))
             .WillOnce(Return(60));
 
-    ImsVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
-    objEmergencyPcscfRetryWaitTimeSec.Clear();
-    objEmergencyPcscfRetryWaitTimeSec.Add(2);
-    objEmergencyPcscfRetryWaitTimeSec.Add(2);
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY))
-            .WillOnce(Return(objEmergencyPcscfRetryWaitTimeSec));
-
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Clear();
     objRegErrCodeForPcscfDiscovery.Add(408);
@@ -831,8 +823,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             m_pAosNConfiguration->GetUsatRegEventDownloadPolicy());
     EXPECT_EQ(60, m_pAosNConfiguration->GetVolteHysTime());
 
-    ImsVector<IMS_SINT32> objWaitTime = m_pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();
-    EXPECT_EQ(2, objWaitTime.GetSize());
     ImsVector<IMS_SINT32> objErrCode = m_pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
     EXPECT_EQ(408, objErrCode.GetAt(0));
     ImsVector<IMS_SINT32> objCount = m_pAosNConfiguration->GetRegPermanentErrMaxCount();

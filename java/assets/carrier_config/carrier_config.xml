@@ -361,8 +361,6 @@
     <int name="usat_reg_event_download_policy_int" value="0"/>
     <int name="volte_hys_time_sec_int" value="0"/>
 
-    <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
-    </int-array>
     <int-array name="permanent_pdn_failure_int_array" num="0">
     </int-array>
     <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="0">

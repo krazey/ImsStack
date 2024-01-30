@@ -65,10 +65,6 @@
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="volte_hys_time_sec_int" value="60"/>
     <int name="emergency_registration_retry_max_cnt_int" value="1"/>
-    <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
-        <item value="2"/>
-        <item value="2"/>
-    </int-array>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>

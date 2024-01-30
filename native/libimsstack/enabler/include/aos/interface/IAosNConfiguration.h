@@ -1324,13 +1324,6 @@ public:
     virtual ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
 
     /**
-     * @brief Indicate the list of the time seconds waiting after the emergency registration is
-     *        failed and pcscf is changed
-     * @return vector retry wait time
-     */
-    virtual ImsVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() = 0;
-
-    /**
      * @brief Indicate the error codes of the registration followed by PCSCF discovery
      *        when PCSCF is unavailable.
      * @return vector error code

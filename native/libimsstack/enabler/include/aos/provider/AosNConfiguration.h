@@ -172,7 +172,6 @@ public:
     ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() override;
-    ImsVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;

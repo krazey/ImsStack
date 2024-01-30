@@ -81,7 +81,6 @@ public:
             nSipMessageThresholdForTransportChange(200),
             nUsatRegEventDownloadPolicy(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD),
             nVolteHysTimeSec(0),
-            objEmergencyPcscfRetryWaitTimeSec(ImsVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(ImsVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(ImsVector<IMS_SINT32>()),
@@ -153,7 +152,6 @@ public:
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_SINT32 nUsatRegEventDownloadPolicy;
     IMS_SINT32 nVolteHysTimeSec;
-    ImsVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     ImsVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     ImsVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;

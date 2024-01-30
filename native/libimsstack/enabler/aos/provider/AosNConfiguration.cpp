@@ -772,11 +772,6 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetr
     return m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime;
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
-{
-    return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
-}
-
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeForPcscfDiscovery()
 {
     return m_objAsset.objRegErrCodeForPcscfDiscovery;
@@ -1330,8 +1325,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);
 
-    m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
     m_objAsset.objRegErrCodeForPcscfDiscovery = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =
