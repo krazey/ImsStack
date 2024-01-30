@@ -57,12 +57,14 @@
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
+    <boolean name="emergency_registration_on_random_pcscf_bool" value="true"/>
     <int name="ims_establishment_time_sec_int" value="120"/>
     <int name="reg_actual_wait_time_policy_int" value="3"/>
     <int name="reg_pcscf_update_policy_int" value="1"/>
     <int name="reg_retry_503_policy_int" value="0"/>
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="volte_hys_time_sec_int" value="60"/>
+    <int name="emergency_registration_retry_max_cnt_int" value="1"/>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
         <item value="2"/>
         <item value="2"/>
