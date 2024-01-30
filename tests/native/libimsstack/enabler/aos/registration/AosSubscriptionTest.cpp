@@ -94,10 +94,16 @@ public:
     FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenSetErrIsIndicatedBySingleDigit);
     /// IsInitialRegistrationRequired()
     FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsLessthanOne);
-    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsNotMached);
-    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsMachedBySingleDigit);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsNotMatched);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsMatchedBySingleDigit);
     FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsNotReached);
     FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsReached);
+    /// IsInitialRegistrationWithNextPcscfRequired()
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsLessthanOne);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsNotReached);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsReached);
+    FRIEND_TEST(AosSubscriptionTest,
+            ReturnTrueWhenErrForRegRequiredWithNextPcscfIsMatchedBySingleDigit);
 
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegWithNextPcscfRequired);
     FRIEND_TEST(AosSubscriptionTest, CheckInitialRegRequiredInWifi);
@@ -498,7 +504,7 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsLessthanOne
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequired(403, IMS_FALSE));
 }
 
-TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsNotMached)
+TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsNotMatched)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
     ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorRegRequired()).WillByDefault(Return(2));
@@ -513,7 +519,7 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsNotMached)
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequired(400, IMS_FALSE));
 }
 
-TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsMachedBySingleDigit)
+TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredIsMatchedBySingleDigit)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
     ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorRegRequired()).WillByDefault(Return(2));
@@ -574,42 +580,64 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsReached)
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequired(403, IMS_FALSE));
 }
 
-TEST_F(AosSubscriptionTest, CheckInitialRegWithNextPcscfRequired)
+TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsLessthanOne)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
     ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
-    objErrRegRequiredWithNextPcscf.Clear();
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
 
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(403, IMS_FALSE));
+}
 
-    objErrRegRequiredWithNextPcscf.Add(404);
+TEST_F(AosSubscriptionTest, ReturnFalseWhenErrForRegRequiredWithNextPcscfIsNotReached)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Add(400);
     objErrRegRequiredWithNextPcscf.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
-    // ReportState() if result is true.
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED))
-            .Times(1);
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+    EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(408, IMS_FALSE));
+}
+
+TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsReached)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Add(400);
+    objErrRegRequiredWithNextPcscf.Add(403);
+
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(2);
+            .Times(1);
+
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(403, IMS_FALSE));
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
 
-    m_pAosSubscription->SetTerminated(IMS_FALSE);
-
-    objErrRegRequiredWithNextPcscf.Clear();
+TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsMatchedBySingleDigit)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Add(6);
     objErrRegRequiredWithNextPcscf.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
+            .Times(1);
+
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(603, IMS_TRUE));
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
 TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
