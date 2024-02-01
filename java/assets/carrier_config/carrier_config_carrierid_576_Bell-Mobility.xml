@@ -26,6 +26,26 @@
     <boolean name="ims_dereg_on_3g_network_bool" value="true"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="true"/>
 
+    <!-- MTC -->
+    <int-array name="imsvoice.srvcc_type_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="3"/>
+    </int-array>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
+    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="8">
+        <item value="403"/>
+        <item value="408"/>
+        <item value="480"/>
+        <item value="488"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="600"/>
+    </int-array>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="60000"/>
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
+    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
