@@ -16,7 +16,7 @@
 
 package com.android.imsstack.enabler.mtc.reg;
 
-public class ImsServiceState {
+public class MtcServiceState {
     // IUMtcService.SERVICE_XXX
     public int mServiceType = 0;
     // Additional information for each service types
@@ -25,11 +25,11 @@ public class ImsServiceState {
     // Reason code if the service is not available
     public int mReason = 0;
 
-    public ImsServiceState(int serviceType) {
+    public MtcServiceState(int serviceType) {
         mServiceType = serviceType;
     }
 
-    public ImsServiceState(int serviceType, int extraState, int reason) {
+    public MtcServiceState(int serviceType, int extraState, int reason) {
         this(serviceType);
         mExtraState = extraState;
         mReason = reason;
@@ -39,7 +39,7 @@ public class ImsServiceState {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("[ ImsServiceState: serviceType=");
+        sb.append("[ MtcServiceState: serviceType=");
         sb.append(mServiceType);
         sb.append(", extraState=");
         sb.append(mExtraState);

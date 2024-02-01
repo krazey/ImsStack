@@ -26,12 +26,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
-public class ImsServiceStateTest {
+public class MtcServiceStateTest {
     @Test
     public void testConstructor() {
-        ImsServiceState imsServiceState = new ImsServiceState(IUMtcService.SERVICE_VOIP);
+        MtcServiceState mtcServiceState = new MtcServiceState(IUMtcService.SERVICE_VOIP);
 
-        assertEquals("[ ImsServiceState: serviceType=" + IUMtcService.SERVICE_VOIP
-                + ", extraState=-1, reason=0 ]" , imsServiceState.toString());
+        assertEquals("[ MtcServiceState: serviceType=" + IUMtcService.SERVICE_VOIP
+                + ", extraState=-1, reason=0 ]" , mtcServiceState.toString());
     }
 }

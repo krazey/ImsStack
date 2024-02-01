@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.annotation.NonNull;
 import android.location.Location;
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -64,7 +63,7 @@ import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
@@ -128,6 +127,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private MoPendingCall mMoPendingCall = null;
     private TtyModeListenerProxy mTtyModeListener = null;
     private CallApnStateListener mApnStateListener = null;
+    private MtcServiceStateListener mServiceStateListener = null;
     private final ImsVideoCallSession mVideoCallSession;
     private final ImsVideoCallProviderBase mVideoCallProvider;
     // WFC w/ geolocation {
@@ -2606,12 +2606,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         public void dispose() {
-            IServiceStateTracker sst = mCallContext.getServiceStateTracker();
-
-            if (mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-                sst.unregisterForEmergencyServiceStateChanged(this);
-            } else {
-                sst.unregisterForServiceStateChanged(this);
+            if (mServiceStateListener != null) {
+                IServiceStateTracker sst = mCallContext.getServiceStateTracker();
+                sst.removeListener(mServiceStateListener);
+                mServiceStateListener = null;
             }
 
             stopImsRegWaitingTimer();
@@ -2630,13 +2628,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         public void start(String callee) {
             mCallee = callee;
 
-            IServiceStateTracker sst = mCallContext.getServiceStateTracker();
-
-            if (mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-                sst.registerForEmergencyServiceStateChanged(
-                        this, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, null);
-            } else {
-                sst.registerForServiceStateChanged(this, EVENT_SERVICE_STATE_CHANGED, null);
+            if (mServiceStateListener == null) {
+                IServiceStateTracker sst = mCallContext.getServiceStateTracker();
+                mServiceStateListener = new MtcServiceStateListener();
+                sst.addListener(mServiceStateListener);
             }
 
             if (mImsRegWaitingTimerRequired) {
@@ -2653,8 +2648,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             switch (msg.what) {
             case EVENT_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
 
                 logi("MoPendingCall :: " + ss);
 
@@ -2671,8 +2665,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
 
                 logi("MoPendingCall :: " + ss);
 
@@ -2700,7 +2693,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
-        private int startCall(ImsServiceState ss) {
+        private int startCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
             }
@@ -2728,7 +2721,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return RESULT_NOK;
         }
 
-        private int startEmergencyCall(ImsServiceState ss) {
+        private int startEmergencyCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
             }
@@ -2802,7 +2795,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
-        private void notifyPendingECallStartFailed(ImsServiceState ss) {
+        private void notifyPendingECallStartFailed(MtcServiceState ss) {
             // Check whether call is already terminated or not, and
             // notify call start failed using the existing terminated reason if it's terminated
             if (notifyCallStartFailedIfAlreadyTerminated()) {
@@ -3228,6 +3221,20 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
                 }
             }
+        }
+    }
+
+    private class MtcServiceStateListener implements IServiceStateTracker.Listener {
+        @Override
+        public void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
+            Message.obtain(mMoPendingCall, MoPendingCall.EVENT_EMERGENCY_SERVICE_STATE_CHANGED,
+                    serviceState).sendToTarget();
+        }
+
+        @Override
+        public void onNormalServiceStateChanged(MtcServiceState serviceState) {
+            Message.obtain(mMoPendingCall, MoPendingCall.EVENT_SERVICE_STATE_CHANGED,
+                    serviceState).sendToTarget();
         }
     }
 
