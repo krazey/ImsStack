@@ -171,7 +171,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
             pAvcPayload->SetRtpMap(pAvcConfig->GetPayloadType(),
                     ImsCodec::CodecToString(pAvcConfig->GetCodec()),
                     pConfig->GetVideoSamplingRate(), pAvcConfig->GetChannel());
-            pAvcPayload->pFmtp = reinterpret_cast<void*>(pAvcFmtp);
+            pAvcPayload->pFmtp = pAvcFmtp;
 
             if (pAvcConfig->GetImageAttr().GetLength() != 0)
             {
@@ -284,7 +284,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
             pHevcPayload->SetRtpMap(pHevcConfig->GetPayloadType(),
                     ImsCodec::CodecToString(pHevcConfig->GetCodec()),
                     pConfig->GetVideoSamplingRate(), pHevcConfig->GetChannel());
-            pHevcPayload->pFmtp = reinterpret_cast<void*>(pHevcFmtp);
+            pHevcPayload->pFmtp = pHevcFmtp;
 
             if (pHevcConfig->GetImageAttr().GetLength() != 0)
             {

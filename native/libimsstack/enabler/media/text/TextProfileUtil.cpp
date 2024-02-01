@@ -105,7 +105,7 @@ PUBLIC GLOBAL TextProfile* TextProfileUtil::CreateProfile(
                         pT140Config->GetRedLevel(), pConfig->GetT140PayloadType());
                 IMS_TRACE_I("CreateProfile() add fmtp(%d) - nRedLevel(%d), nRedPayload(%d)", i,
                         pRedFmtp->nRedLevel, pRedFmtp->nRedPayload);
-                pT140Payload->pFmtp = reinterpret_cast<void*>(pRedFmtp);
+                pT140Payload->pFmtp = pRedFmtp;
             }
             else
             {

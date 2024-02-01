@@ -2056,9 +2056,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             {
                 AudioProfile::Payload* pAMR = new AudioProfile::Payload();
                 pAMR->SetRtpMap(pPayload->objRtpMap);
-                AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
-                        *reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp));
-                pAMR->pFmtp = static_cast<void*>(pAmrFmtp);
+                pAMR->pFmtp = new AudioProfile::AmrFmtp(
+                        *static_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp));
                 templstNegotiatedPayloads.Append(pAMR);
             }
         }
@@ -2071,9 +2070,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 AudioProfile::Payload* pEVS = new AudioProfile::Payload();
                 pEVS->SetRtpMap(pPayload->objRtpMap);
 
-                AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp(
-                        *reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp));
-                pEVS->pFmtp = static_cast<void*>(pEvsFmtp);
+                pEVS->pFmtp = new AudioProfile::EvsFmtp(
+                        *static_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp));
 
                 templstNegotiatedPayloads.Append(pEVS);
             }
@@ -2120,7 +2118,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                         (AudioProfile::AmrFmtp*)pLocalProfile->lstPayload.GetAt(nSrcPayloadIndex)
                                 ->pFmtp;
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
-                        *reinterpret_cast<AudioProfile::AmrFmtp*>(pDestPayload->pFmtp));
+                        *static_cast<AudioProfile::AmrFmtp*>(pDestPayload->pFmtp));
                 pAmrFmtp->nModeSetList = nNegoModeSetList;
                 pAmrFmtp->nDefaultRtpModeSet = nNegoDefaultRtpModeSet;
 
@@ -2133,7 +2131,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pAmrFmtp->bShowModeChangePeriod = pSrc_Fmtp->bShowModeChangePeriod;
                 pAmrFmtp->nModeChangePeriod = pSrc_Fmtp->nModeChangePeriod;
 
-                pAMR->pFmtp = static_cast<void*>(pAmrFmtp);
+                pAMR->pFmtp = pAmrFmtp;
                 pNegotiatedProfile->lstPayload.Append(pAMR);
                 lstNegotiatedPayloads.Append(pAMR);
 
@@ -2260,7 +2258,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     }
                 }
 
-                pEVS->pFmtp = static_cast<void*>(pEvsFmtp);
+                pEVS->pFmtp = pEvsFmtp;
                 pNegotiatedProfile->lstPayload.Append(pEVS);
                 lstNegotiatedPayloads.Append(pEVS);
 
@@ -2307,11 +2305,9 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 {
                     AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
                     pTelephoneEvent->SetRtpMap(pDestPayload->objRtpMap);
-                    AudioProfile::TelephoneEventFmtp* pTelephoneFmtp =
-                            new AudioProfile::TelephoneEventFmtp(
-                                    *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(
-                                            pDestPayload->pFmtp));
-                    pTelephoneEvent->pFmtp = static_cast<void*>(pTelephoneFmtp);
+                    pTelephoneEvent->pFmtp = new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(pDestPayload->pFmtp));
+
                     pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
                     bProperNegotiatedTe = IMS_TRUE;
                     break;
@@ -2385,11 +2381,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             pDestPayload->objRtpMap.nSamplingRate, 0);
                     AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
                     pTelephoneEvent->SetRtpMap(pDestPayload->objRtpMap);
-                    AudioProfile::TelephoneEventFmtp* pTelephoneFmtp =
-                            new AudioProfile::TelephoneEventFmtp(
-                                    *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(
-                                            pDestPayload->pFmtp));
-                    pTelephoneEvent->pFmtp = static_cast<void*>(pTelephoneFmtp);
+                    pTelephoneEvent->pFmtp = new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(pDestPayload->pFmtp));
                     pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
                 }
             }

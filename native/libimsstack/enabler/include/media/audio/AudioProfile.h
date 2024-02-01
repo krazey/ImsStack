@@ -20,8 +20,13 @@
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
 #include "ImsMap.h"
+#include "MediaBaseProfile.h"
 
-class AudioProfile
+/**
+ * AudioProfile is used to keep the SDP negotiation information for audio like
+ * SDP offer, answer and the negotiated media information.
+ */
+class AudioProfile : public MediaBaseProfile
 {
 public:
     class RtpMap
@@ -62,7 +67,11 @@ public:
     };
 
 public:
-    class AmrFmtp
+    /**
+     * AmrFmtp attributes are used within the SDP to carry AMR parameters that provide
+     * extra configuration details about a specific AMR codec used in the RTP stream.
+     */
+    class AmrFmtp : public BaseFmtp
     {
     public:
         IMS_UINT32 nModeSetList;
@@ -169,10 +178,15 @@ public:
                 bShowPtime(IMS_FALSE),
                 bShowMaxPtime(IMS_FALSE),
                 bShowModeSet(IMS_FALSE){};
+        virtual ~AmrFmtp(){};
     };
 
 public:
-    class EvsFmtp
+    /**
+     * EvsFmtp attributes are used within the SDP to carry EVS parameters that provide
+     * extra configuration details about a specific EVS codec used in the RTP stream.
+     */
+    class EvsFmtp : public BaseFmtp
     {
     public:
         enum
@@ -334,10 +348,17 @@ public:
                 bShowModeSetList(objFmtp.bShowModeSetList)
         {
         }
+
+        virtual ~EvsFmtp(){};
     };
 
 public:
-    class TelephoneEventFmtp
+    /**
+     * TelephoneEventFmtp attributes are used within the SDP to carry TelephoneEvent parameters that
+     * provide extra configuration details about a specific TelephoneEventFmtp codec used in the RTP
+     * stream.
+     */
+    class TelephoneEventFmtp : public BaseFmtp
     {
     public:
         AString strEvents;
@@ -351,6 +372,8 @@ public:
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
                 strEvents(objFmtp.strEvents){};
+
+        virtual ~TelephoneEventFmtp(){};
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
@@ -370,7 +393,7 @@ public:
     {
     public:
         RtpMap objRtpMap;
-        void* pFmtp;
+        BaseFmtp* pFmtp;
 
     public:
         Payload() :
@@ -382,42 +405,20 @@ public:
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
             {
-                pFmtp = new AudioProfile::AmrFmtp(
-                        *reinterpret_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
+                pFmtp = new AudioProfile::AmrFmtp(*static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
             }
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
             {
-                pFmtp = new AudioProfile::EvsFmtp(
-                        *reinterpret_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
+                pFmtp = new AudioProfile::EvsFmtp(*static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
             }
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
             {
                 pFmtp = new AudioProfile::TelephoneEventFmtp(
-                        *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
+                        *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
             }
         }
 
-        ~Payload()
-        {
-            if (this->pFmtp == IMS_NULL)
-            {
-                return;
-            }
-
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                    objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
-            {
-                delete reinterpret_cast<AudioProfile::AmrFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
-            {
-                delete reinterpret_cast<AudioProfile::EvsFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
-            {
-                delete reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(this->pFmtp);
-            }
-        }
+        virtual ~Payload() { deleteFmtp(); }
 
     public:
         void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString& strPayloadType,
@@ -436,6 +437,16 @@ public:
             objRtpMap.nSamplingRate = objMap.nSamplingRate;
             objRtpMap.nChannel = objMap.nChannel;
         };
+
+    private:
+        void deleteFmtp()
+        {
+            if (pFmtp != IMS_NULL)
+            {
+                delete pFmtp;
+                pFmtp = IMS_NULL;
+            }
+        }
     };
 
     class CapaNego

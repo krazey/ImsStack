@@ -19,8 +19,13 @@
 
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
+#include "MediaBaseProfile.h"
 
-class TextProfile
+/**
+ * TextProfile is used to keep the SDP negotiation information for text like
+ * SDP offer, answer and the negotiated media information.
+ */
+class TextProfile : public MediaBaseProfile
 {
 public:
     class RtpMap
@@ -57,7 +62,11 @@ public:
     };
 
 public:
-    class RedFmtp
+    /**
+     * RedFmtp attributes are used within the SDP to carry RED parameters that provide
+     * extra configuration details about a specific RED codec used in the RTP stream.
+     */
+    class RedFmtp : public BaseFmtp
     {
     public:
         IMS_SINT32 nRedLevel;
@@ -76,6 +85,8 @@ public:
                 nRedLevel(obj.nRedLevel),
                 nRedPayload(obj.nRedPayload){};
 
+        virtual ~RedFmtp(){};
+
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
             if (this != &obj)
@@ -92,7 +103,7 @@ public:
     {
     public:
         RtpMap objRtpMap;
-        void* pFmtp;
+        BaseFmtp* pFmtp;
 
     public:
         Payload() :
@@ -101,34 +112,25 @@ public:
                 objRtpMap(obj.objRtpMap),
                 pFmtp(IMS_NULL)
         {
-            if (objRtpMap.strPayloadType.Equals("red"))
+            if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
             {
-                pFmtp = new TextProfile::RedFmtp(
-                        *reinterpret_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                pFmtp = new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
             }
         }
 
-        virtual ~Payload()
-        {
-            if (objRtpMap.strPayloadType.Equals("red"))
-            {
-                if (pFmtp != IMS_NULL)
-                {
-                    delete reinterpret_cast<TextProfile::RedFmtp*>(pFmtp);
-                }
-            }
-        }
+        virtual ~Payload() { deleteFmtp(); }
 
         Payload& operator=(IN const Payload& obj)
         {
             if (this != &obj)
             {
                 objRtpMap = obj.objRtpMap;
+                deleteFmtp();
 
                 if (objRtpMap.strPayloadType.Equals("red"))
                 {
                     pFmtp = new TextProfile::RedFmtp(
-                            *reinterpret_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                            *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
                 }
             }
 
@@ -148,6 +150,16 @@ public:
             objRtpMap.nPayloadNum = objMap.nPayloadNum;
             objRtpMap.strPayloadType = objMap.strPayloadType;
             objRtpMap.nSamplingRate = objMap.nSamplingRate;
+        }
+
+    private:
+        void deleteFmtp()
+        {
+            if (pFmtp != IMS_NULL)
+            {
+                delete pFmtp;
+                pFmtp = IMS_NULL;
+            }
         }
     };
 
