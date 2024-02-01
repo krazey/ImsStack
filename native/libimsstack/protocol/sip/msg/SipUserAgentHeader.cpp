@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipUserAgentHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipUserAgentHeader.h"
+#include "platform/SipString.h"
 
 SipUserAgentHeader::SipUserAgentHeader(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType),

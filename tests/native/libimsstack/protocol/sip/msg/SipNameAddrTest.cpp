@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipAddrSpec.h"
 
 namespace android

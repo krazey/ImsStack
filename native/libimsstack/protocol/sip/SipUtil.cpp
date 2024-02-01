@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 #include "SipDatatypes.h"
-
-#include "SipUtil.h"
-
-#include "SipDefTimerUtil.h"
 #include "SipDefLoggerUtil.h"
 #include "SipDefNetworkUtil.h"
+#include "SipDefTimerUtil.h"
+#include "SipUtil.h"
 #include "msg/SipMsgUtil.h"
 
 static SipUtil* gpUtil = SIP_NULL;

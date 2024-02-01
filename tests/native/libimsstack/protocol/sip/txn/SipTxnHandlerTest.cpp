@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "SipUtil.h"
-#include "txn/SipTxnHandler.h"
-#include "SipTxnContext.h"
-#include "transport/SipTransportInfo.h"
+
 #include "SipStackCallback.h"
+#include "SipTxnContext.h"
+#include "SipUtil.h"
+#include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
+#include "txn/SipTxnHandler.h"
 
 namespace android
 {

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipAuthBase.h"
-#include "msg/SipParameters.h"
 #include "SipDebug.h"
+#include "msg/SipAuthBase.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipParameters.h"
 #include "platform/SipString.h"
 
 SipAuthBase::SipAuthBase(SIP_INT32 eHdrType) :

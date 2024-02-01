@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform/SipString.h"
-
 #include "SipDebug.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
 void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,

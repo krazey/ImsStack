@@ -15,15 +15,15 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "SipVector.h"
+#include "include/MockSipTransaction.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
-#include "transport/SipTransportInfo.h"
-#include "SipStackCallback.h"
-#include "txn/SipTimeoutData.h"
-#include "SipVector.h"
-#include "include/MockSipTransaction.h"
 
 SipVector<MockSipTransaction*> objTxnList;
 static int* pnTimerId = SIP_NULL;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 #include "IpAddress.h"
-#include "msg/SipAddrSpec.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
+#include "msg/SipAddrSpec.h"
 #include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 #define SIP_SIP_ENC  "sip:"
 #define SIP_SIPS_ENC "sips:"

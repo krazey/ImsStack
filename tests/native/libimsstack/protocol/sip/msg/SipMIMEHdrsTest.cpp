@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipAuthBase.h"
-#include "msg/SipUnknownHeader.h"
 #include "msg/SipMsgBody.h"
+#include "msg/SipUnknownHeader.h"
 
 namespace android
 {

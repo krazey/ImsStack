@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipDatatypes.h"
-#include "platform/SipMemory.h"
 #include <malloc.h>
 #include <memory.h>
 #include <string.h>
+
+#include "SipDatatypes.h"
+#include "platform/SipMemory.h"
 
 SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR uChars, SIP_SIZE_T nSize)
 {

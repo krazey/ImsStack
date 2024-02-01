@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "SipUtil.h"
-#include "txn/SipTxn.h"
 #include "include/MockSipTransaction.h"
+#include "txn/SipTxn.h"
 
 static int count = 0;
 SipVector<MockSipTransaction*> objFsmTxnList;

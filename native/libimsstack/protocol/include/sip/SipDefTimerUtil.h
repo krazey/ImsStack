@@ -16,8 +16,8 @@
 #ifndef __SIP_DEFTIMERUTIL_H__
 #define __SIP_DEFTIMERUTIL_H__
 
-#include "SipDatatypes.h"
 #include "ISipTimerUtil.h"
+#include "SipDatatypes.h"
 
 /*This can be an inner private class of SipDefTimerUtil*/
 

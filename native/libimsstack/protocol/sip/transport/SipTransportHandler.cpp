@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipDebug.h"
+#include "SipStackError.h"
+#include "platform/SipMemory.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
-#include "SipDebug.h"
-#include "SipStackError.h"
-#include "platform/SipString.h"
-#include "platform/SipMemory.h"
 
 /*****************************************************************************
   Macro

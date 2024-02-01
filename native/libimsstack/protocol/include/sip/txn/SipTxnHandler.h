@@ -16,10 +16,10 @@
 #ifndef __SIP_TXN_HANDLER_H__
 #define __SIP_TXN_HANDLER_H__
 
+#include "msg/SipMessage.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnInfo.h"
-#include "msg/SipMessage.h"
 
 /* Transaction Key Used to Match Response to Request vice versa */
 class SipTxnHandler
