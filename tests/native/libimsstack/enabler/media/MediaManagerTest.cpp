@@ -322,6 +322,11 @@ TEST_F(MediaManagerTest, testSendMessage_CommonResponse)
     EXPECT_TRUE(m_pMediaManager->SendMessage(
             IJniMedia::RESPONSE_CONFIRM_CONFIG, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam4)));
 
+    delete pParam1;
+    delete pParam2;
+    delete pParam3;
+    delete pParam4;
+
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
 
@@ -364,6 +369,12 @@ TEST_F(MediaManagerTest, testSendMessage_CommonNotification)
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pMediaManager->SendMessage(
             IJniMedia::NOTIFY_VIDEO_BITRATE, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam5)));
+
+    delete pParam1;
+    delete pParam2;
+    delete pParam3;
+    delete pParam4;
+    delete pParam5;
 
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
@@ -408,6 +419,12 @@ TEST_F(MediaManagerTest, testSendMessage_VideoIndication)
     EXPECT_TRUE(m_pMediaManager->SendMessage(
             IJniMedia::CHANGE_ORIENTATION_CMD, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam5)));
 
+    delete pParam1;
+    delete pParam2;
+    delete pParam3;
+    delete pParam4;
+    delete pParam5;
+
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
 
@@ -427,6 +444,8 @@ TEST_F(MediaManagerTest, testSendMessage_Etc)
     ON_CALL(*pMockIMediaSession, SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, nRatType))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType));
+
+    delete pParam1;
 
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
