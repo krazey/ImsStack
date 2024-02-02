@@ -510,6 +510,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -605,6 +608,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT, -1))
+            .WillOnce(Return(2));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, -1))
             .WillOnce(Return(3000));
@@ -765,6 +770,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(m_pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(m_pAosNConfiguration->IsDeregOn3gNetwork());
@@ -791,6 +797,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
     EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyPreferredIpType());
+    EXPECT_EQ(2, m_pAosNConfiguration->GetEmcRegRetryMaxCnt());
     EXPECT_EQ(3000, m_pAosNConfiguration->GetEmcRegRetryTimerMillis());
     EXPECT_EQ(1, m_pAosNConfiguration->GetGeolocationPidfFormingPolicy());
     EXPECT_EQ(120, m_pAosNConfiguration->GetImsEstablishmentTime());

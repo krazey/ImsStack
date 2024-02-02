@@ -480,6 +480,8 @@ public class CarrierConfig {
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL =
+                "emc_reg_on_random_pcscf_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
@@ -537,6 +539,7 @@ public class CarrierConfig {
                 "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
                 "emc_preferred_iptype_int";
+        public static final String KEY_EMC_REG_RETRY_MAX_CNT_INT = "emc_reg_retry_max_cnt_int";
         public static final String KEY_EMC_REG_RETRY_TIMER_MILLIS_INT =
                 "emc_reg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =

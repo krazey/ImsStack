@@ -73,6 +73,7 @@ public:
     IMS_BOOL IsSmsOverImsSupported() const override;
     IMS_BOOL IsImsOverNrEnabled() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
+    IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
@@ -104,6 +105,7 @@ public:
     IMS_SINT32 GetUssdMethod() const override;
     IMS_SINT32 GetPreferredIpType() const override;
     IMS_SINT32 GetEmergencyPreferredIpType() const override;
+    IMS_SINT32 GetEmcRegRetryMaxCnt() const override;
     IMS_SINT32 GetEmcRegRetryTimerMillis() const override;
     IMS_SINT32 GetPcscfPort() const override;
     IMS_SINT32 GetSipPreferredTransport() const override;

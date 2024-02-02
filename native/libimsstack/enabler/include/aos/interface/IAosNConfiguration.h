@@ -262,6 +262,16 @@ public:
     virtual IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const = 0;
 
     /**
+     * @brief Flag specifying if UE tries emergency registration on a random pcscf.
+     *
+     *        If this is set as TRUE, UE will choose P-CSCF randomly for emergency registration if
+     *        UE receives multiple P-CSCF addresses from P-CSCF discovery for emergency.
+     *
+     * @return IMS_BOOL Return wherther UE tries emergency registration on random pcscf.
+     */
+    virtual IMS_BOOL IsEmcRegOnRandomPcscf() const = 0;
+
+    /**
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
      *        during IMS calls and performed immediately after they are released.
      *
@@ -531,6 +541,24 @@ public:
      * @see CarrierConfig::Assets::IP_VERSION_4
      */
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const = 0;
+
+    /**
+     * @brief Get the retry attempt count about pcscfs discovered during emergency PDN/PDU setup.
+     *
+     *       Specify the number of emergency registration retry attempt to P-CSCFs. UE will try
+     *       emergency registration with specified number of P-CSCFs when
+     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer has expired. If the
+     *       number is zero, UE will try registration on every P-CSCFs once. If the number of
+     *       P-CSCF is less than a given number and UE's default retry policy is a
+     *       CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF, UE will try
+     *       registration from the first P-CSCF again after attempting on all P-CSCFs.
+     *       If UE doesn't support emerg-reg-retry defined in 3GPP 24.229, which is configured by
+     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, this configuration is
+     *       discarded.
+     *
+     * @return IMS_SINT32 Return the retry attempt count
+     */
+    virtual IMS_SINT32 GetEmcRegRetryMaxCnt() const = 0;
 
     /**
      * @brief Get the maximum time waiting for emergency registration

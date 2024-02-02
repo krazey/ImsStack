@@ -28,6 +28,7 @@ public:
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
+            bEmcRegOnRandomPcscf(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
@@ -55,6 +56,7 @@ public:
             nContactUserInfoPolicyForNonRegMessage(
                     CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
             nEmcPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
+            nEmcRegRetryMaxCnt(0),
             nEmcRegRetryTimerMillis(0),
             nGeolocationPidfFormingPolicy(
                     CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION),
@@ -101,6 +103,7 @@ public:
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
+    IMS_BOOL bEmcRegOnRandomPcscf;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
@@ -127,6 +130,7 @@ public:
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
     IMS_SINT32 nContactUserInfoPolicyForNonRegMessage;
     IMS_SINT32 nEmcPreferredIpType;
+    IMS_SINT32 nEmcRegRetryMaxCnt;
     IMS_SINT32 nEmcRegRetryTimerMillis;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMS_SINT32 nImsEstablishmentTimeSec;
