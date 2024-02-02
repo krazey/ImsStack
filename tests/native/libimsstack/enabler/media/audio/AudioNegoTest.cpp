@@ -217,6 +217,8 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
     lstMediaFormat.Append(&objAvCodec);
     ON_CALL(objAudioDescriptor, GetRemotePort()).WillByDefault(Return(50010));
     ON_CALL(objAudioDescriptor, GetMediaFormats()).WillByDefault(ReturnRef(lstMediaFormat));
+    ON_CALL(objAudioDescriptor, GetAttribute(SdpAttribute::ANBR, AString::ConstNull()))
+            .WillByDefault(ReturnRef(AString::ConstEmpty()));
 
     EXPECT_EQ(
             m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
