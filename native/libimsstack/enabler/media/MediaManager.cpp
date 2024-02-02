@@ -183,11 +183,13 @@ MediaResourceManager* MediaManager::GetResourceManager()
     return m_pResourceMngr;
 }
 
-PUBLIC VIRTUAL void MediaManager::SendMessage(
+PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     IMS_TRACE_I(
             "SendMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IJniMedia::PrintMsg(nMsg), nCallKey);
+
+    IMS_BOOL bResult = IMS_TRUE;
 
     if (nCallKey == CALL_KEY_BROADCAST)  // broadcast message to the all sessions
     {
@@ -197,11 +199,16 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
 
             if (pSessionNode != IMS_NULL && pSessionNode->pMediaSession != IMS_NULL)
             {
-                if (pSessionNode->pMediaSession->SendMessage(nMsg, pParam) == IMS_FALSE)
+                if (pSessionNode->pMediaSession->SendMessage(nMsg, pParam) != IMS_TRUE)
                 {
                     IMS_TRACE_E(0, "SendMessage() failed MSG[%d, %s], CallKey[%d]", nMsg,
                             IJniMedia::PrintMsg(nMsg), pSessionNode->nCallKey);
+                    bResult = IMS_FALSE;
                 }
+            }
+            else
+            {
+                bResult = IMS_FALSE;
             }
         }
     }
@@ -210,9 +217,11 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
         if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
         {
             IMS_TRACE_E(0, "SendMessage() - Fail to process nMsg", 0, 0, 0);
-            return;
+            bResult = IMS_FALSE;
         }
     }
+
+    return bResult;
 }
 
 PUBLIC

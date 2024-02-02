@@ -61,7 +61,8 @@ public:
 
     // TODO: temp inline. move to cpp
     inline void NotifyJniEnablerSet() override {}
-    void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
+    virtual IMS_BOOL SendMessage(
+            IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
     /**
      * @brief Creates a MediaSession instacne with the service type and assign the jni thread
@@ -72,14 +73,14 @@ public:
      * match with the call session
      * @return IMediaSession* created IMediaSession instance
      */
-    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey);
+    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey) override;
 
     /**
      * @brief Destroys the MediaSession instance
      *
      * @param pSession The instance to destroy
      */
-    void DestroySession(IN const IMediaSession* piSession);
+    void DestroySession(IN const IMediaSession* piSession) override;
 
     /**
      * @brief Gets MediaSession instance
