@@ -351,19 +351,16 @@ public:
     };
 
 public:
-    class Payload
+    /**
+     * Payload for audio is the actual audio data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
-
-    public:
         Payload() :
-                objRtpMap(1),
-                pFmtp(IMS_NULL){};
+                BasePayload(1){};
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                BasePayload(obj)
         {
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
@@ -381,35 +378,34 @@ public:
             }
         }
 
-        virtual ~Payload() { deleteFmtp(); }
-
-    public:
-        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString& strPayloadType,
-                IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
+        Payload& operator=(IN const Payload& obj)
         {
-            objRtpMap.nPayloadNum = nPayloadNum;
-            objRtpMap.strPayloadType = strPayloadType;
-            objRtpMap.nSamplingRate = nSamplingRate;
-            objRtpMap.nChannel = nChannel;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-            objRtpMap.nChannel = objMap.nChannel;
-        };
-
-    private:
-        void deleteFmtp()
-        {
-            if (pFmtp != IMS_NULL)
+            if (this != &obj)
             {
-                delete pFmtp;
-                pFmtp = IMS_NULL;
+                BasePayload::operator=(obj);
+
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
+                        objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+                {
+                    pFmtp = new AudioProfile::AmrFmtp(
+                            *static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
+                }
+                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+                {
+                    pFmtp = new AudioProfile::EvsFmtp(
+                            *static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
+                }
+                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+                {
+                    pFmtp = new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
+                }
             }
+
+            return (*this);
         }
+
+        virtual ~Payload() {}
     };
 
     class CapaNego

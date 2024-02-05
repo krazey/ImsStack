@@ -65,18 +65,16 @@ public:
     };
 
 public:
-    class Payload
+    /**
+     * Payload for text is the actual text data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
-
-    public:
         Payload() :
-                pFmtp(IMS_NULL){};
+                BasePayload(){};
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                BasePayload(obj)
         {
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
             {
@@ -84,16 +82,15 @@ public:
             }
         }
 
-        virtual ~Payload() { deleteFmtp(); }
+        virtual ~Payload() {}
 
         Payload& operator=(IN const Payload& obj)
         {
             if (this != &obj)
             {
-                objRtpMap = obj.objRtpMap;
-                deleteFmtp();
+                BasePayload::operator=(obj);
 
-                if (objRtpMap.strPayloadType.Equals("red"))
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
                 {
                     pFmtp = new TextProfile::RedFmtp(
                             *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
@@ -101,31 +98,6 @@ public:
             }
 
             return (*this);
-        }
-
-        void SetRtpMap(IN const IMS_UINT32 payloadNum, IN const AString& payloadType,
-                IN const IMS_UINT32 samplingRate)
-        {
-            objRtpMap.nPayloadNum = payloadNum;
-            objRtpMap.strPayloadType = payloadType;
-            objRtpMap.nSamplingRate = samplingRate;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-        }
-
-    private:
-        void deleteFmtp()
-        {
-            if (pFmtp != IMS_NULL)
-            {
-                delete pFmtp;
-                pFmtp = IMS_NULL;
-            }
         }
     };
 

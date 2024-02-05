@@ -82,6 +82,70 @@ public:
             return (*this);
         }
     };
+
+    /**
+     * This class is base class of Audio/Video/Text Payload.
+     * Payload is actual data transported by RTP in a packet.
+     */
+    class BasePayload
+    {
+    public:
+        RtpMap objRtpMap;
+        BaseFmtp* pFmtp;
+
+    public:
+        BasePayload(IN const IMS_SINT32 channel = 0) :
+                objRtpMap(channel),
+                pFmtp(IMS_NULL)
+        {
+        }
+
+        BasePayload(IN const BasePayload& obj) :
+                objRtpMap(obj.objRtpMap),
+                pFmtp(IMS_NULL)
+        {
+        }
+
+        virtual ~BasePayload() { deleteFmtp(); }
+
+        BasePayload& operator=(IN const BasePayload& obj)
+        {
+            if (this != &obj)
+            {
+                objRtpMap = obj.objRtpMap;
+                deleteFmtp();
+            }
+
+            return (*this);
+        }
+
+        void SetRtpMap(IN const RtpMap& objMap)
+        {
+            objRtpMap.nPayloadNum = objMap.nPayloadNum;
+            objRtpMap.strPayloadType = objMap.strPayloadType;
+            objRtpMap.nSamplingRate = objMap.nSamplingRate;
+            objRtpMap.nChannel = objMap.nChannel;
+        };
+
+        void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
+                IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel = 0)
+        {
+            objRtpMap.nPayloadNum = payloadNum;
+            objRtpMap.strPayloadType = payloadType;
+            objRtpMap.nSamplingRate = samplingRate;
+            objRtpMap.nChannel = nChannel;
+        };
+
+    protected:
+        void deleteFmtp()
+        {
+            if (pFmtp != IMS_NULL)
+            {
+                delete pFmtp;
+                pFmtp = IMS_NULL;
+            }
+        }
+    };
 };
 
 #endif
