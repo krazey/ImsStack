@@ -211,7 +211,12 @@ public:
     FRIEND_TEST(AosRegistrationTest,
             ProcessRetryInRegStoppedWhileTransactionIsNotAllowedNotTriesRegister);
     FRIEND_TEST(AosRegistrationTest, ProcessRetryInRegStoppedButFailsToSendRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessReregister);
+    FRIEND_TEST(AosRegistrationTest, ProcessReregisterWhileNotRegisteredDoesNothing);
+    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted);
+    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady);
+    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall);
+    FRIEND_TEST(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail);
+    FRIEND_TEST(AosRegistrationTest, ReregisterProcessSucceed);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileCallExist);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileRetryTimerExist);
     FRIEND_TEST(AosRegistrationTest, ProcessAuthenticationFailed);
@@ -2318,43 +2323,80 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedButFailsToSendRegister)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosRegistrationTest, ProcessReregister)
+TEST_F(AosRegistrationTest, ProcessReregisterWhileNotRegisteredDoesNothing)
 {
-    // not STATE_REGISTERED
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->ProcessReregister();
-    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG)).Times(0);
 
-    // CheckRadioReadyAndSetTxnPending() is false
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
+TEST_F(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted)
+{
+    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE));
-    m_pAosRegistration->ProcessReregister();
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 
-    // fail to SendRegister - ProcessUnpredictableFailureHeldByCall return true
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady)
+{
+    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall)
+{
     m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->m_piRegistration = IMS_NULL;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->ProcessReregister();
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_FALSE));
 
-    // fail to SendRegister - ProcessUnpredictableFailureHeldByCall return false
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_TRUE(m_pAosRegistration->m_bIsHeldByCall);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail)
+{
     m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
+    m_pAosRegistration->m_piRegistration = IMS_NULL;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsCall(IMS_FALSE);
-    m_pAosRegistration->ProcessReregister();
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_FALSE));
 
-    // succeed to SendRegister
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessReregister();
+}
+
+TEST_F(AosRegistrationTest, ReregisterProcessSucceed)
+{
     m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_UPDATE));
+
     m_pAosRegistration->ProcessReregister();
 }
 
