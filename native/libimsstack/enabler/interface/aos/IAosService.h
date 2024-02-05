@@ -38,17 +38,17 @@ class IAosService : public INativeEnabler
 public:
     virtual ~IAosService(){};
 
-    virtual IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual void AddListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosServiceSettingListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual void AddListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
+    virtual void AddListener(IN IAosServicePhoneListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosEmergencyListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosEmergencyListener* piListener) = 0;
+    virtual void AddListener(IN IAosEmergencyListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosEmergencyListener* piListener) = 0;
 
     /**
      * AosService(Java) -> IAosRegistrationControlListener(Native)

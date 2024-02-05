@@ -31,17 +31,17 @@ public:
     explicit AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
 
-    IMS_BOOL AddListener(IN IAosEmergencyListener* piListener) override;
-    IMS_BOOL RemoveListener(IN IAosEmergencyListener* piListener) override;
+    void AddListener(IN IAosRegistrationControlListener* piListener) override;
+    void RemoveListener(IN IAosRegistrationControlListener* piListener) override;
 
-    IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) override;
-    IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) override;
+    void AddListener(IN IAosServiceSettingListener* piListener) override;
+    void RemoveListener(IN IAosServiceSettingListener* piListener) override;
 
-    IMS_BOOL AddListener(IN IAosServiceSettingListener* piListener) override;
-    IMS_BOOL RemoveListener(IN IAosServiceSettingListener* piListener) override;
+    void AddListener(IN IAosServicePhoneListener* piListener) override;
+    void RemoveListener(IN IAosServicePhoneListener* piListener) override;
 
-    IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) override;
-    IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) override;
+    void AddListener(IN IAosEmergencyListener* piListener) override;
+    void RemoveListener(IN IAosEmergencyListener* piListener) override;
 
     /// Java -> Native
     void NotifyEmcCallbackModeChanged(
@@ -123,6 +123,11 @@ protected:
         TIMER_PLMN_CHANGE_DELAY = 0
     };
 
+    ImsList<IAosEmergencyListener*> m_objAosEmergencyListeners;
+    ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
+    ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
+    ImsList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
+
 private:
     void Init();
     void CleanUp();
@@ -133,11 +138,6 @@ private:
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
     ITimer* m_piPlmnChangeDelayTimer;
-
-    ImsList<IAosEmergencyListener*> m_objAosEmergencyListeners;
-    ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
-    ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
-    ImsList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
 
     // <AosNetworkType, AosCapability>
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;

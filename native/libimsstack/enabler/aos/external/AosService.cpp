@@ -56,53 +56,11 @@ PUBLIC VIRTUAL AosService::~AosService()
     CleanUp();
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosEmergencyListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosRegistrationControlListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
-    }
-
-    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
-    {
-        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
-
-        if (piListener == piTempListener)
-        {
-            return IMS_FALSE;
-        }
-    }
-
-    m_objAosEmergencyListeners.Append(piListener);
-    return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosEmergencyListener* piListener)
-{
-    if (piListener == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
-    {
-        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
-
-        if (piListener == piTempListener)
-        {
-            m_objAosEmergencyListeners.RemoveAt(i);
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosRegistrationControlListener* piListener)
-{
-    if (piListener == IMS_NULL)
-    {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
@@ -112,19 +70,18 @@ PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosRegistrationControlListen
 
         if (piListener == piTempListener)
         {
-            return IMS_FALSE;
+            return;
         }
     }
 
     m_objAosRegistrationControlListeners.Append(piListener);
-    return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosRegistrationControlListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosRegistrationControlListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
@@ -135,18 +92,16 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosRegistrationControlLis
         if (piListener == piTempListener)
         {
             m_objAosRegistrationControlListeners.RemoveAt(i);
-            return IMS_TRUE;
+            return;
         }
     }
-
-    return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosServiceSettingListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosServiceSettingListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -155,19 +110,18 @@ PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosServiceSettingListener* p
 
         if (piListener == piTempListener)
         {
-            return IMS_FALSE;
+            return;
         }
     }
 
     m_objAosServiceSettingListeners.Append(piListener);
-    return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -177,18 +131,16 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosServiceSettingListener
         if (piListener == piTempListener)
         {
             m_objAosServiceSettingListeners.RemoveAt(i);
-            return IMS_TRUE;
+            return;
         }
     }
-
-    return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosServicePhoneListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosServicePhoneListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -197,19 +149,18 @@ PUBLIC VIRTUAL IMS_BOOL AosService::AddListener(IN IAosServicePhoneListener* piL
 
         if (piListener == piTempListener)
         {
-            return IMS_FALSE;
+            return;
         }
     }
 
     m_objAosServicePhoneListeners.Append(piListener);
-    return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -219,11 +170,48 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RemoveListener(IN IAosServicePhoneListener* 
         if (piListener == piTempListener)
         {
             m_objAosServicePhoneListeners.RemoveAt(i);
-            return IMS_TRUE;
+            return;
+        }
+    }
+}
+
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosEmergencyListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener == piTempListener)
+        {
+            return;
         }
     }
 
-    return IMS_FALSE;
+    m_objAosEmergencyListeners.Append(piListener);
+}
+
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosEmergencyListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener == piTempListener)
+        {
+            m_objAosEmergencyListeners.RemoveAt(i);
+            return;
+        }
+    }
 }
 
 PUBLIC VIRTUAL void AosService::NotifyEmcCallbackModeChanged(
