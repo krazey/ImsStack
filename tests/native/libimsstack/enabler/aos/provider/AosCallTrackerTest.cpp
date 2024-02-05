@@ -30,6 +30,8 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 
+const IMS_SINT32 SLOT_ID = 0;
+
 class TestAosCallTracker : public AosCallTracker
 {
 public:
@@ -38,9 +40,14 @@ public:
     {
     }
 
-    FRIEND_TEST(AosCallTrackerTest, SetMtcReady);
-    FRIEND_TEST(AosCallTrackerTest, IsCsCallActive_CsStateChange);
-    FRIEND_TEST(AosCallTrackerTest, IsCsCallActive_ActiveCsStateChange);
+    // TEST : SetMtcReady
+    FRIEND_TEST(AosCallTrackerTest, SucceedsSetMtcReady);
+    // TEST : IsCsCallActive
+    FRIEND_TEST(AosCallTrackerTest, ReturnsFalseWhenCsCallStateIsSmallerThenActiveCsState);
+    FRIEND_TEST(AosCallTrackerTest, ReturnsTrueWhenCsCallStateBiggerThenActiveCsState);
+    FRIEND_TEST(AosCallTrackerTest, ReturnsFalseWhenActiveCallStateBiggerThenCsCallState);
+    FRIEND_TEST(AosCallTrackerTest, ReturnsTrueWhenActiveCallStateSmallerThenCsCallState);
+
     FRIEND_TEST(AosCallTrackerTest, IsNormalCallActive);
     FRIEND_TEST(AosCallTrackerTest, IsEmergencyCallActive);
     FRIEND_TEST(AosCallTrackerTest, IsVideoCallingActive_returnTrue);
@@ -97,7 +104,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pAosCallTracker = new TestAosCallTracker(0);
+        m_pAosCallTracker = new TestAosCallTracker(SLOT_ID);
         ASSERT_TRUE(m_pAosCallTracker != nullptr);
 
         // Store origin AosService
@@ -105,9 +112,6 @@ protected:
 
         // Set MockIAosService
         AosProvider::GetInstance()->SetService(&m_objMockIAosService);
-        EXPECT_CALL(m_objMockIAosService,
-                RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, m_pAosCallTracker)))
-                .Times(AnyNumber());
     }
 
     virtual void TearDown() override
@@ -121,53 +125,98 @@ protected:
     }
 };
 
-TEST_F(AosCallTrackerTest, SetMtcReady)
+TEST_F(AosCallTrackerTest, SucceedsSetMtcReady)
 {
-    EXPECT_TRUE(m_pAosCallTracker->SetMtcReady());
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosCallTracker->SetMtcReady();
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosCallTrackerTest, IsCsCallActive_CsStateChange)
+TEST_F(AosCallTrackerTest, ReturnsFalseWhenCsCallStateIsSmallerThenActiveCsState)
 {
+    // GIVEN
     m_pAosCallTracker->SetActiveCsCallState(CallState::RINGING);
 
-    // Expect return False
+    // WHEN
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult1 = m_pAosCallTracker->IsCsCallActive();
+
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::NEW);
+    IMS_BOOL bResult2 = m_pAosCallTracker->IsCsCallActive();
 
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::RINGBACK);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult3 = m_pAosCallTracker->IsCsCallActive();
 
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::RINGING);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult4 = m_pAosCallTracker->IsCsCallActive();
 
-    // Expect return True
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::ALERTING);
-    EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
-    EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+    EXPECT_FALSE(bResult4);
 }
 
-TEST_F(AosCallTrackerTest, IsCsCallActive_ActiveCsStateChange)
+TEST_F(AosCallTrackerTest, ReturnsTrueWhenCsCallStateBiggerThenActiveCsState)
 {
+    // GIVEN
+    m_pAosCallTracker->SetActiveCsCallState(CallState::RINGING);
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::ALERTING);
+    IMS_BOOL bResult1 = m_pAosCallTracker->IsCsCallActive();
+
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
+    IMS_BOOL bResult2 = m_pAosCallTracker->IsCsCallActive();
+
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+}
+
+TEST_F(AosCallTrackerTest, ReturnsFalseWhenActiveCallStateBiggerThenCsCallState)
+{
+    // GIVEN
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::RINGING);
 
-    // Expect return True
-    m_pAosCallTracker->SetActiveCsCallState(CallState::IDLE);
-    EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
-
-    m_pAosCallTracker->SetActiveCsCallState(CallState::RINGBACK);
-    EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
-
-    // Expect return False
+    // WHEN
     m_pAosCallTracker->SetActiveCsCallState(CallState::RINGING);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult1 = m_pAosCallTracker->IsCsCallActive();
 
     m_pAosCallTracker->SetActiveCsCallState(CallState::ALERTING);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult2 = m_pAosCallTracker->IsCsCallActive();
 
     m_pAosCallTracker->SetActiveCsCallState(CallState::OFFHOOK);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
+    IMS_BOOL bResult3 = m_pAosCallTracker->IsCsCallActive();
+
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+}
+
+TEST_F(AosCallTrackerTest, ReturnsTrueWhenActiveCallStateSmallerThenCsCallState)
+{
+    // GIVEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::RINGING);
+
+    // WHEN
+    m_pAosCallTracker->SetActiveCsCallState(CallState::IDLE);
+    IMS_BOOL bResult1 = m_pAosCallTracker->IsCsCallActive();
+
+    m_pAosCallTracker->SetActiveCsCallState(CallState::NEW);
+    IMS_BOOL bResult2 = m_pAosCallTracker->IsCsCallActive();
+
+    m_pAosCallTracker->SetActiveCsCallState(CallState::RINGBACK);
+    IMS_BOOL bResult3 = m_pAosCallTracker->IsCsCallActive();
+
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
 }
 
 TEST_F(AosCallTrackerTest, IsNormalCallActive)
