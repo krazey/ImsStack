@@ -39,6 +39,49 @@ public:
     public:
         virtual ~BaseFmtp() {}
     };
+
+    /**
+     * This class maps from a RTP payload type number (as used in an "m=" line)
+     * to an encoding name denoting the payload format to be used.
+     * It also provides information on the clock rate and encoding parameters.
+     */
+    class RtpMap
+    {
+    public:
+        IMS_UINT32 nPayloadNum;    // Payload number
+        AString strPayloadType;    // Payload type name
+        IMS_UINT32 nSamplingRate;  // Sampling rate
+        IMS_SINT32 nChannel;       // Number of channels
+
+    public:
+        RtpMap(IN const IMS_SINT32 channel = 0) :
+                nPayloadNum(0),
+                strPayloadType(AString::ConstNull()),
+                nSamplingRate(0),
+                nChannel(channel)
+        {
+        }
+
+        RtpMap(IN const RtpMap& obj) :
+                nPayloadNum(obj.nPayloadNum),
+                strPayloadType(obj.strPayloadType),
+                nSamplingRate(obj.nSamplingRate),
+                nChannel(obj.nChannel)
+        {
+        }
+
+        RtpMap& operator=(IN const RtpMap& obj)
+        {
+            if (this != &obj)
+            {
+                nPayloadNum = obj.nPayloadNum;
+                strPayloadType = obj.strPayloadType;
+                nSamplingRate = obj.nSamplingRate;
+                nChannel = obj.nChannel;
+            }
+            return (*this);
+        }
+    };
 };
 
 #endif

@@ -28,40 +28,6 @@
 class TextProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
-    {
-    public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                nSamplingRate(0)
-        {
-        }
-
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate)
-        {
-        }
-
-        RtpMap& operator=(IN const RtpMap& obj)
-        {
-            if (this != &obj)
-            {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-            }
-            return (*this);
-        }
-    };
-
-public:
     /**
      * RedFmtp attributes are used within the SDP to carry RED parameters that provide
      * extra configuration details about a specific RED codec used in the RTP stream.

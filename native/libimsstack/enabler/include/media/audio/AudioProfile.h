@@ -29,44 +29,6 @@
 class AudioProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
-    {
-    public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-        IMS_SINT32 nChannel;  // default is 1, if this value is -1 hide channel value at SDP
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                strPayloadType(AString::ConstNull()),
-                nSamplingRate(0),
-                nChannel(1)
-        {
-        }
-
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate),
-                nChannel(obj.nChannel)
-        {
-        }
-
-        RtpMap& operator=(IN const RtpMap& obj)
-        {
-            if (this != &obj)
-            {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-                nChannel = obj.nChannel;
-            }
-            return (*this);
-        }
-    };
-
-public:
     /**
      * AmrFmtp attributes are used within the SDP to carry AMR parameters that provide
      * extra configuration details about a specific AMR codec used in the RTP stream.
@@ -397,6 +359,7 @@ public:
 
     public:
         Payload() :
+                objRtpMap(1),
                 pFmtp(IMS_NULL){};
         Payload(IN const Payload& obj) :
                 objRtpMap(obj.objRtpMap),

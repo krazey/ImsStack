@@ -31,41 +31,6 @@
 class VideoProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
-    {
-    public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-        IMS_UINT32 nChannel;  // default is 0
-
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                strPayloadType(AString::ConstNull()),
-                nSamplingRate(0),
-                nChannel(0){};
-
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate),
-                nChannel(obj.nChannel){};
-
-        RtpMap& operator=(IN const RtpMap& obj)
-        {
-            if (this != &obj)
-            {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-                nChannel = obj.nChannel;
-            }
-            return (*this);
-        }
-    };
-
-public:
     /**
      * HevcFmtp attributes are used within the SDP to carry HEVC parameters that provide
      * extra configuration details about a specific HEVC codec used in the RTP stream.
