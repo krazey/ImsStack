@@ -157,7 +157,7 @@ PUBLIC VIRTUAL void AosApplication::Reconfig()
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
-        IN IMS_UINT32 nCmdType, IN IMS_UINT32 /* nReason */ /* = 0 */)
+        IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason /* = 0 */)
 {
     A_IMS_TRACE_I(APPID, "RequestCmd :: Cmd (%s)",
             AosProvider::GetLog()->AppRequestToString(nCmdType), 0, 0);
@@ -211,7 +211,8 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
-            PostMessage(MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, 0);
+            PostMessage(
+                    MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, nReason);
             break;
 
         case ImsAosControl::IPSEC_DISABLED:
@@ -1205,11 +1206,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
 PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg)
 {
     /* Abnormal network connection error between P-CSCF and S-CSCF has been detected.
-     * The case is explained in 3GPP 24.229 5.1.2A 1.6.
+     * The case is explained in 3GPP 24.229 5.1.2A.1.6.
      * It is sure that current P-CSCF is no longer available for any IMS services. */
 
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
-    A_IMS_TRACE_I(APPID, "ProcessScscfRestoration :: reason (%d)", nReason, 0, 0);
+    IMS_UINT32 nUnavailableTimeForCurrentPcscf = LONG_TO_INT(objMsg.nLparam);
+    A_IMS_TRACE_I(APPID,
+            "ProcessScscfRestoration :: reason (%d), nUnavailableTimeForCurrentPcscf (%d)", nReason,
+            nUnavailableTimeForCurrentPcscf, 0);
 
     if (IsRegRecoveryHeld())
     {
@@ -1219,7 +1223,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
         return;
     }
 
-    m_piRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 0);
+    m_piRegistration->RequestCmd(
+            IAosRegistration::CMD_SCSCF_RESTORATION, nUnavailableTimeForCurrentPcscf);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegRetryCount(IN IMSMSG& objMsg)

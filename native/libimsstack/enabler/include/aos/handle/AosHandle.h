@@ -106,6 +106,7 @@ public:
     IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) override;
     void UpdateFeature(IN IMS_UINT32 nFeatures) override;
     void UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag) override;
+    void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) override;
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;

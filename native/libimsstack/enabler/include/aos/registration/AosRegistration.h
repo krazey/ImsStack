@@ -241,7 +241,7 @@ protected:
     virtual void ProcessRefreshRegInfo();
     virtual void ProcessIpcanChanged();
     virtual void ProcessUpdateIpcan();
-    virtual void ProcessScscfRestoration();
+    virtual void ProcessScscfRestoration(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf);
     virtual void ProcessPendingTransaction();
     virtual void ProcessRetryInRegStopped(IN IMS_BOOL bIgnoreTimer = IMS_FALSE);
     virtual void ProcessReregister();

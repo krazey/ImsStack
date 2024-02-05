@@ -369,7 +369,7 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             break;
 
         case CMD_SCSCF_RESTORATION:
-            ProcessScscfRestoration();
+            ProcessScscfRestoration(nReason);
             break;
 
         case CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT:
@@ -2842,9 +2842,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateIpcan()
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration()
+PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
+        IN IMS_UINT32 nUnavailableTimeForCurrentPcscf)
 {
-    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration()", 0, 0, 0);
+    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration() :: nUnavailableTimeForCurrentPcscf (%d)",
+            nUnavailableTimeForCurrentPcscf, 0, 0);
 
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
 
@@ -2853,11 +2855,18 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration()
         return;
     }
 
-    piPcscf->RemoveCurrentPcscf();
+    if (nUnavailableTimeForCurrentPcscf > 0)
+    {
+        piPcscf->SetCurrentPcscfInvalid(IMS_TRUE, nUnavailableTimeForCurrentPcscf);
+    }
+    else
+    {
+        piPcscf->SetCurrentPcscfInvalid();
+    }
 
     Destroy();
 
-    if (piPcscf->GetPcscfCount() > 0)
+    if (SetNextPcscf(IMS_FALSE))
     {
         Start();
     }

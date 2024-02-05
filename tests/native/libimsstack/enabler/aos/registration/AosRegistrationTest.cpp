@@ -130,6 +130,13 @@ public:
     FRIEND_TEST(AosRegistrationTest, IpcanChangedCommandTriggersUpdateWhileInNoCall);
     FRIEND_TEST(AosRegistrationTest, UpdateIpcanCommandUpdatesBlockStatus);
     FRIEND_TEST(AosRegistrationTest, ScscfRestorationCommandTriggersRegisterAfterRefreshingPcscf);
+    FRIEND_TEST(
+            AosRegistrationTest, SetCurrentPcscfInvalidForGivenRetryAfterDuringScscfRestoration);
+    FRIEND_TEST(AosRegistrationTest,
+            SetCurrentPcscfInvalidPermanantlyIfNoRetryAfterDuringScscfRestoration);
+    FRIEND_TEST(AosRegistrationTest, DestroyRegistrationWhenScscfRestrorationIsTriggered);
+    FRIEND_TEST(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenScscfRestorationIsTriggered);
+    FRIEND_TEST(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenScscfRestorationIsTriggered);
     FRIEND_TEST(AosRegistrationTest, ClearServerSocketErrorCountCommandClearsErrorCount);
     FRIEND_TEST(AosRegistrationTest, UnavailableFeatureTagCommandUpdatesDetailRegState);
     FRIEND_TEST(AosRegistrationTest, IncreaseFailureCountForPdnReactivatedCommandIncreasesCount);
@@ -1093,14 +1100,66 @@ TEST_F(AosRegistrationTest, UpdateIpcanCommandUpdatesBlockStatus)
     EXPECT_FALSE(m_pAosRegistration->m_bIsTransactionStarted);
 }
 
-TEST_F(AosRegistrationTest, ScscfRestorationCommandTriggersRegisterAfterRefreshingPcscf)
+TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidForGivenRetryAfterDuringScscfRestoration)
 {
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillOnce(Return(2));
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_TRUE, 30));
 
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 30);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidPermanantlyIfNoRetryAfterDuringScscfRestoration)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
+
+    // WHEN
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
 
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, DestroyRegistrationWhenScscfRestrorationIsTriggered)
+{
+    // GIVEN
+    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
+    EXPECT_CALL(m_objMockIRegistration, SetListener(IMS_NULL)).Times(1);
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN: Then GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenScscfRestorationIsTriggered)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenScscfRestorationIsTriggered)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosRegistrationTest, ClearServerSocketErrorCountCommandClearsErrorCount)

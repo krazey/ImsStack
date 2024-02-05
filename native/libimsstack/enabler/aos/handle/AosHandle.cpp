@@ -410,6 +410,14 @@ PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN ImsList<ImsAosFeatureTag*>& /*ob
     // It is for SipController so it will be overridden in AosSipControllers
 }
 
+PUBLIC VIRTUAL void AosHandle::RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf)
+{
+    A_IMS_TRACE_D(APPPROFILE, "RegisterWithNextPcscf :: nUnavailableTimeForCurrentPcscf (%d)",
+            nUnavailableTimeForCurrentPcscf, 0, 0);
+    m_piAppContext->GetApp()->RequestCmd(
+            ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY, nUnavailableTimeForCurrentPcscf);
+}
+
 PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
     A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,
