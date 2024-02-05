@@ -46,13 +46,13 @@ public:
     inline ImsList<IAosBlockListener*> GetBlockListeners() { return m_objListeners; }
 };
 
-struct FormattingTestCase
+struct AosBlockParams
 {
     IMS_UINT32 nReason;
     const IMS_CHAR* pszString;
 };
 
-class AosBlockTest : public testing::TestWithParam<FormattingTestCase>
+class AosBlockTest : public testing::TestWithParam<AosBlockParams>
 {
 public:
     TestAosBlock* m_pAosBlock;
@@ -79,7 +79,7 @@ protected:
 };
 
 INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
-        ValuesIn<FormattingTestCase>({
+        ValuesIn<AosBlockParams>({
                 {BLOCK_AC_INCOMPLETED,                "AC_INCOMPLETED"               },
                 {BLOCK_AUTHENTICATION_FAILED,         "AUTHENTICATION_FAILED"        },
                 {BLOCK_AOS_INCOMPLETED,               "AOS_INCOMPLETED"              },
@@ -205,25 +205,25 @@ TEST_F(AosBlockTest, SucceedsRemoveListener)
 TEST_P(AosBlockTest, FailsSetBlockReasonWhenReasonIsBlocked)
 {
     // GIVEN
-    const FormattingTestCase& objTestCase = GetParam();
+    const AosBlockParams& objAosBlockParams = GetParam();
 
     // WHEN
-    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason));
 
     // THEN
-    EXPECT_FALSE(m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason)));
+    EXPECT_FALSE(m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason)));
 }
 
 TEST_P(AosBlockTest, SucceedsSetBlockReason)
 {
     // GIVEN
-    const FormattingTestCase& objTestCase = GetParam();
+    const AosBlockParams& objAosBlockParams = GetParam();
 
     // WHEN
-    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason));
 
     // THEN
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(static_cast<BLOCK_REASON>(objTestCase.nReason)));
+    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(static_cast<BLOCK_REASON>(objAosBlockParams.nReason)));
 }
 
 TEST_F(AosBlockTest, SucceedsNotifySetBlockReasonWhenNotifyEnabled)
@@ -271,11 +271,11 @@ TEST_F(AosBlockTest, DoesNotNotifySetBlockReasonWhenNotifyDisabled)
 TEST_P(AosBlockTest, FailsResetBlockReasonWhenReasonIsNotBlocked)
 {
     // GIVEN
-    const FormattingTestCase& objTestCase = GetParam();
+    const AosBlockParams& objAosBlockParams = GetParam();
 
     // WHEN
     IMS_BOOL bResult =
-            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
+            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason));
 
     // THEN
     EXPECT_FALSE(bResult);
@@ -284,12 +284,12 @@ TEST_P(AosBlockTest, FailsResetBlockReasonWhenReasonIsNotBlocked)
 TEST_P(AosBlockTest, SucceedsResetBlockReason)
 {
     // GIVEN
-    const FormattingTestCase& objTestCase = GetParam();
-    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
+    const AosBlockParams& objAosBlockParams = GetParam();
+    m_pAosBlock->SetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason));
 
     // WHEN
     IMS_BOOL bResult =
-            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objTestCase.nReason));
+            m_pAosBlock->ResetBlockReason(static_cast<BLOCK_REASON>(objAosBlockParams.nReason));
 
     // THEN
     EXPECT_TRUE(bResult);
@@ -341,38 +341,71 @@ TEST_F(AosBlockTest, DoesNotNotifyResetBlockReasonWhenNotifyDisabled)
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosBlockTest, ClearAllBlockReasons)
+TEST_F(AosBlockTest, SucceedsClearAllBlockReasons)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
-
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
+    // WHEN
     m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+
+    // THEN
+    EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WHOLE));
 }
 
-TEST_F(AosBlockTest, PrintBlockReasons)
+TEST_F(AosBlockTest, SucceedsPrintBlockReasonsForCommonBlocks)
 {
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
+    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->PrintBlockReasons();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, SucceedsPrintBlockReasonsForCellularBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->PrintBlockReasons();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, SucceedsPrintBlockReasonsForWifiBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->PrintBlockReasons();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, SucceedsGetBlockReasonsForCellular)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
@@ -381,17 +414,38 @@ TEST_F(AosBlockTest, PrintBlockReasons)
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
 
+    ImsList<IMS_UINT32> objReason;
+
+    // WHEN
+    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_EQ(objReason.GetSize(), 6);
+}
+
+TEST_F(AosBlockTest, SucceedsGetBlockReasonsForWifi)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
+    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    EXPECT_TRUE(m_pAosBlock->PrintBlockReasons());
+    ImsList<IMS_UINT32> objReason;
+
+    // WHEN
+    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
+
+    // THEN
+    EXPECT_EQ(objReason.GetSize(), 6);
 }
 
-TEST_F(AosBlockTest, GetBlockReasons)
+TEST_F(AosBlockTest, SucceedsGetBlockReasonsForWhole)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
@@ -405,14 +459,12 @@ TEST_F(AosBlockTest, GetBlockReasons)
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
     ImsList<IMS_UINT32> objReason;
+
+    // WHEN
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
+
+    // THEN
     EXPECT_EQ(objReason.GetSize(), 9);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
 }
 
 TEST_F(AosBlockTest, IsReasonBlocked_OnlyEnabled)
@@ -580,11 +632,11 @@ TEST_F(AosBlockTest, IsCleared_Whole)
 TEST_P(AosBlockTest, BlockReasonToString)
 {
     // GIVEN
-    const FormattingTestCase& objTestCase = GetParam();
+    const AosBlockParams& objAosBlockParams = GetParam();
 
     // WHEN
-    const IMS_CHAR* pszActual = m_pAosBlock->BlockReasonToString(objTestCase.nReason);
+    const IMS_CHAR* pszActual = m_pAosBlock->BlockReasonToString(objAosBlockParams.nReason);
 
     // THEN
-    EXPECT_STREQ(objTestCase.pszString, pszActual);
+    EXPECT_STREQ(objAosBlockParams.pszString, pszActual);
 }
