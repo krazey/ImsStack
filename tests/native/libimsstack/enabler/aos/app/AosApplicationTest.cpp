@@ -216,7 +216,21 @@ class TestAosApplication : public AosApplication
     FRIEND_TEST(AosApplicationTest, StateMachine);
     FRIEND_TEST(AosApplicationTest, Process);
     FRIEND_TEST(AosApplicationTest, RegTerminating);
-    FRIEND_TEST(AosApplicationTest, PdnDisconnect);
+    // TEST : ProcessPdnDisconnect
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldSetStateWithNotReadyWhenIsImsCall);
+    FRIEND_TEST(AosApplicationTest,
+            ProcessPdnDisconnectShouldSetOffReasonWithRegTerminationWhenIsImsCall);
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldNotSetOffReasonWhenIsNotImsCall);
+    FRIEND_TEST(AosApplicationTest,
+            ProcessPdnDisconnectShouldStopConnectorWhenOffReasonIsDataPermanentlyFailed);
+    FRIEND_TEST(AosApplicationTest,
+            ProcessPdnDisconnectShouldNotifyDeregisteredWithPlmnBlockWithTimeOutWhenNr);
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach);
+    FRIEND_TEST(AosApplicationTest,
+            ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteInfoExtraIsNotNone);
+    FRIEND_TEST(AosApplicationTest,
+            ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNotPlmnBlockConfig);
+
     FRIEND_TEST(AosApplicationTest, ImsEstablishmentStart);
     FRIEND_TEST(AosApplicationTest, Callback);
     FRIEND_TEST(AosApplicationTest, UpdateConnectedServices);
@@ -443,19 +457,14 @@ protected:
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
-        EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED));
-        EXPECT_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+                .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED));
+        ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+                .WillByDefault(Return(IMS_FALSE));
 
         m_piAosService = AosProvider::GetInstance()->GetService();
         AosProvider::GetInstance()->SetService(
@@ -2020,79 +2029,141 @@ TEST_F(AosApplicationTest, RegTerminating)
     EXPECT_EQ(m_pTestAosApplication->GetState(), IAosApplication::STATE_CONNECTING);
 }
 
-TEST_F(AosApplicationTest, PdnDisconnect)
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldSetStateWithNotReadyWhenIsImsCall)
 {
-    m_pTestAosApplication->SetNetTrackerListener();
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+            .WillByDefault(Return(IMS_TRUE));
 
-    // TEST_F : ProcessPdnDisconnect
-    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
     m_pTestAosApplication->SetImsCall(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+
+    // WHEN
     m_pTestAosApplication->ProcessPdnDisconnect();
-    EXPECT_EQ(m_pTestAosApplication->GetOffReason(), AosReason::REG_TERMINATING);
+
+    // THEN
     EXPECT_EQ(m_pTestAosApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldSetOffReasonWithRegTerminationWhenIsImsCall)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN
+    EXPECT_EQ(m_pTestAosApplication->GetOffReason(), AosReason::REG_TERMINATING);
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotSetOffReasonWhenIsNotImsCall)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+            .WillByDefault(Return(IMS_TRUE));
 
     m_pTestAosApplication->SetImsCall(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED));
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
+
+    // WHEN
     m_pTestAosApplication->ProcessPdnDisconnect();
 
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
-    m_pTestAosApplication->ProcessPdnDisconnect();
+    // THEN
+    EXPECT_NE(m_pTestAosApplication->GetOffReason(), AosReason::REG_TERMINATING);
+}
 
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED));
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
-    m_pTestAosApplication->ProcessPdnDisconnect();
-
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
-    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
-    m_pTestAosApplication->ProcessPdnDisconnect();
-
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
-    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
-    m_pTestAosApplication->SetLteExtraInfo(IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
-    m_pTestAosApplication->ProcessPdnDisconnect();
-
-    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);
+TEST_F(AosApplicationTest,
+        ProcessPdnDisconnectShouldStopConnectorWhenOffReasonIsDataPermanentlyFailed)
+{
+    // GIVEN
+    m_pTestAosApplication->SetNetTrackerListener();
     m_pTestAosApplication->SetOffReason(AosReason::DATA_PERMANENTLY_FAILED);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED));
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK))
-            .Times(1);
+
+    EXPECT_CALL(m_objMockAosConnector,
+            Stop(TestAosApplication::PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS));
+
+    // WHEN
     m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest,
+        ProcessPdnDisconnectShouldNotifyDeregisteredWithPlmnBlockWithTimeOutWhenNr)
+{
+    // GIVEN
+    m_pTestAosApplication->SetNetTrackerListener();
+    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_NR;
+
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(
+                    Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            .Times(1);
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach)
+{
+    // GIVEN
+    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
+    m_pTestAosApplication->m_nLteAttachState = IMS_LTE_INFO_COMBINED_ATTACHED;
+
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(
+                    Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteInfoExtraIsNotNone)
+{
+    // GIVEN
+    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
+    m_pTestAosApplication->m_nLteAttachState = IMS_LTE_INFO_COMBINED_ATTACHED;
+    m_pTestAosApplication->m_nLteExtraInfo = IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED;
+
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(
+                    Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT));
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNotPlmnBlockConfig)
+{
+    // GIVEN
+    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_INVALID;
+
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosApplicationTest, ImsEstablishmentStart)
