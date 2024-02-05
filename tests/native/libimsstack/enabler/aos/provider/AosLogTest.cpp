@@ -25,72 +25,80 @@
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
 
-TEST(AosLogTest, AppMessageToString)
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
+
+struct AosLogParams
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_CONDITION),
-            "MSG_CONDITION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_CONNECTION),
-            "MSG_CONNECTION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REGISTRATION),
-            "MSG_REGISTRATION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_INIT), "MSG_INIT");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_START),
-            "MSG_REG_START");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_UPDATE),
-            "MSG_REG_UPDATE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_STOP),
-            "MSG_REG_STOP");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_RECONFIG),
-            "MSG_REG_RECONFIG");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_RECOVER),
-            "MSG_REG_RECOVER");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_IPCAN_CHANGED),
-            "MSG_IPCAN_CHANGED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_PUB_TERMINATED),
-            "MSG_PUB_TERMINATED");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_DESTROY), "MSG_DESTROY");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_IMS_EST_TIMER_CONTROL),
-            "MSG_IMS_EST_TIMER_CONTROL");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_REG_EXCHANGE),
-            "MSG_REG_EXCHANGE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_AC_CONFIGURED),
-            "MSG_AC_CONFIGURED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_PCSCF_RECOVER),
-            "MSG_PCSCF_RECOVER");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_SCSCF_RESTORATION),
-            "MSG_SCSCF_RESTORATION");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_OTHERS), "MSG_OTHERS");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLog::MSG_OTHERS + 99),
-            "__INVALID__");
+    IMS_UINT32 nValue;
+    const IMS_CHAR* pszString;
+};
+
+using AosLogTestForAppMessage = TestWithParam<AosLogParams>;
+
+TEST_P(AosLogTestForAppMessage, ReturnsValidStringForApplicationLogMessage)
+{
+    // GIVEN
+    const AosLogParams& objAosLogParams = GetParam();
+
+    // WHEN
+    IMS_UINT32 nValue = objAosLogParams.nValue;
+    const IMS_CHAR* pszString = objAosLogParams.pszString;
+
+    // THEN
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(nValue), pszString);
 }
 
-TEST(AosLogTest, AppPendingToString)
+INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppMessage,
+        ValuesIn<AosLogParams>({
+                {ApplicationLog::MSG_CONDITION,             "MSG_CONDITION"            },
+                {ApplicationLog::MSG_CONNECTION,            "MSG_CONNECTION"           },
+                {ApplicationLog::MSG_REGISTRATION,          "MSG_REGISTRATION"         },
+                {ApplicationLog::MSG_INIT,                  "MSG_INIT"                 },
+                {ApplicationLog::MSG_REG_START,             "MSG_REG_START"            },
+                {ApplicationLog::MSG_REG_UPDATE,            "MSG_REG_UPDATE"           },
+                {ApplicationLog::MSG_REG_STOP,              "MSG_REG_STOP"             },
+                {ApplicationLog::MSG_REG_RECONFIG,          "MSG_REG_RECONFIG"         },
+                {ApplicationLog::MSG_REG_RECOVER,           "MSG_REG_RECOVER"          },
+                {ApplicationLog::MSG_IPCAN_CHANGED,         "MSG_IPCAN_CHANGED"        },
+                {ApplicationLog::MSG_PUB_TERMINATED,        "MSG_PUB_TERMINATED"       },
+                {ApplicationLog::MSG_DESTROY,               "MSG_DESTROY"              },
+                {ApplicationLog::MSG_IMS_EST_TIMER_CONTROL, "MSG_IMS_EST_TIMER_CONTROL"},
+                {ApplicationLog::MSG_REG_EXCHANGE,          "MSG_REG_EXCHANGE"         },
+                {ApplicationLog::MSG_AC_CONFIGURED,         "MSG_AC_CONFIGURED"        },
+                {ApplicationLog::MSG_PCSCF_RECOVER,         "MSG_PCSCF_RECOVER"        },
+                {ApplicationLog::MSG_SCSCF_RESTORATION,     "MSG_SCSCF_RESTORATION"    },
+                {ApplicationLog::MSG_OTHERS,                "MSG_OTHERS"               },
+                {ApplicationLog::MSG_OTHERS + 99,           "__INVALID__"              }
+}));
+
+using AosLogTestForPending = TestWithParam<AosLogParams>;
+
+TEST_P(AosLogTestForPending, ReturnsValidStringForApplicationPending)
 {
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_RECOVERY_HELD),
-            "PENDING_REG_RECOVERY_HELD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_STOP_HELD),
-            "PENDING_REG_STOP_HELD");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_APP_DESTROY_HELD),
-            "PENDING_APP_DESTROY_HELD");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_RECONFIG_HELD),
-            "PENDING_REG_RECONFIG_HELD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(
-                         ApplicationLog::PENDING_REG_AFTER_CSFB_COMPLETE),
-            "PENDING_REG_AFTER_CSFB_COMPLETE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_IPCAN_HELD),
-            "PENDING_IPCAN_HELD");
-    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_UPDATE_HELD),
-            "PENDING_REG_UPDATE_HELD");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppPendingToString(ApplicationLog::PENDING_REG_UPDATE_HELD + 99),
-            "__INVALID__");
+    // GIVEN
+    const AosLogParams& objAosLogParams = GetParam();
+
+    // WHEN
+    IMS_UINT32 nValue = objAosLogParams.nValue;
+    const IMS_CHAR* pszString = objAosLogParams.pszString;
+
+    // THEN
+    EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(nValue), pszString);
 }
+
+INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForPending,
+        ValuesIn<AosLogParams>({
+                {ApplicationLog::PENDING_REG_RECOVERY_HELD,       "PENDING_REG_RECOVERY_HELD"},
+                {ApplicationLog::PENDING_REG_STOP_HELD,           "PENDING_REG_STOP_HELD"    },
+                {ApplicationLog::PENDING_APP_DESTROY_HELD,        "PENDING_APP_DESTROY_HELD" },
+                {ApplicationLog::PENDING_REG_RECONFIG_HELD,       "PENDING_REG_RECONFIG_HELD"},
+                {ApplicationLog::PENDING_REG_AFTER_CSFB_COMPLETE,
+                 "PENDING_REG_AFTER_CSFB_COMPLETE"                                           },
+                {ApplicationLog::PENDING_IPCAN_HELD,              "PENDING_IPCAN_HELD"       },
+                {ApplicationLog::PENDING_REG_UPDATE_HELD,         "PENDING_REG_UPDATE_HELD"  },
+                {ApplicationLog::PENDING_NONE,                    "__INVALID__"              }
+}));
 
 TEST(AosLogTest, AppRequestToString)
 {
