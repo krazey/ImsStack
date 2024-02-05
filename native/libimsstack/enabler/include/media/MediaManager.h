@@ -100,12 +100,12 @@ public:
     /**
      * @brief Sends a request message from native to java layer
      *
-     * @param eEvent enum of message event. It is define in IJniMedia.h
+     * @param eEvent enum of message event. It is defined in IJniMedia.h
      * @param nCallKey The key to identify the call session
      * @param param additional message parameters
-     * @return IMS_BOOL
+     * @return IMS_BOOL IMS_TRUE for success, IMS_FALSE for failure
      */
-    IMS_BOOL handleRequestMsg(
+    virtual IMS_BOOL HandleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
 protected:

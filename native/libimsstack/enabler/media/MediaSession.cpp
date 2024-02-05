@@ -982,7 +982,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
 
     if (pMediaManager != IMS_NULL)
     {
-        return pMediaManager->handleRequestMsg(nEvent, m_nCallKey, param);
+        return pMediaManager->HandleRequestMsg(nEvent, m_nCallKey, param);
     }
 
     return IMS_FALSE;

@@ -224,11 +224,10 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
     return bResult;
 }
 
-PUBLIC
-IMS_BOOL MediaManager::handleRequestMsg(
+PUBLIC VIRTUAL IMS_BOOL MediaManager::HandleRequestMsg(
         IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param)
 {
-    IMS_TRACE_I("handleRequestMsg() - MediaType[%s], MSG[%s], CallKey[%d]",
+    IMS_TRACE_I("HandleRequestMsg() - MediaType[%s], MSG[%s], CallKey[%d]",
             IJniMedia::PrintMediaType(param->m_eMediaType), IJniMedia::PrintMsg(eEvent), nCallKey);
 
     MediaSessionNode* pNode = FindSessionNode(nCallKey);

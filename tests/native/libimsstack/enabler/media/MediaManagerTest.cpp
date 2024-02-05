@@ -23,6 +23,7 @@
 #include "MockIMediaSession.h"
 #include "MockIMediaManager.h"
 #include "MediaMsgHandler.h"
+#include "MockMediaMsgHandler.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -43,7 +44,7 @@ public:
     public:
         IMS_SINTP nCallKey;
         MockIMediaSession* pMediaSession;
-        MediaMsgHandler* pMessageHandler;
+        MockMediaMsgHandler* pMessageHandler;
 
     public:
         FakeMediaSessionNode() :
@@ -52,7 +53,7 @@ public:
                 pMessageHandler(IMS_NULL){};
 
         FakeMediaSessionNode(IN IMS_SINTP callKey, IN MockIMediaSession* pSession,
-                IN MediaMsgHandler* pHandler) :
+                IN MockMediaMsgHandler* pHandler) :
                 nCallKey(callKey),
                 pMediaSession(pSession),
                 pMessageHandler(pHandler){};
@@ -85,7 +86,7 @@ public:
             IN MEDIA_SERVICE_TYPE /* nService */, IN IMS_SINTP nCallKey)
     {
         MockIMediaSession* pSession = new MockIMediaSession();
-        MediaMsgHandler* pHandler = new MediaMsgHandler(m_nSlotId, nCallKey);
+        MockMediaMsgHandler* pHandler = new MockMediaMsgHandler(m_nSlotId, nCallKey);
         FakeMediaSessionNode* pSessionNode = new FakeMediaSessionNode(nCallKey, pSession, pHandler);
 
         m_lstFakeSessionNode.Append(pSessionNode);
@@ -125,6 +126,24 @@ public:
         }
 
         return bResult;
+    }
+
+    IMS_BOOL HandleRequestMsg(
+            IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param) override
+    {
+        FakeMediaSessionNode* pSessionNode = FindFakeSessionNode(nCallKey);
+
+        if (pSessionNode == IMS_NULL || pSessionNode->pMessageHandler == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        if (pSessionNode->pMessageHandler->SendMessageToJava(eEvent, param))
+        {
+            return IMS_TRUE;
+        }
+
+        return IMS_FALSE;
     }
 
     IMS_BOOL FakeSendMessageToSessions(
@@ -431,9 +450,107 @@ TEST_F(MediaManagerTest, testSendMessage_Etc)
     m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
 
-TEST_F(MediaManagerTest, testHandleRequestMsg)
+TEST_F(MediaManagerTest, testHandleRequestMsg_Common)
 {
-    // TODO : after changing void HandleRequestMsg() to bool.
+    MockIMediaSession* pMockIMediaSession =
+            m_pMediaManager->CreateFakeSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
+    FakeMediaManager::FakeMediaSessionNode* pNode =
+            m_pMediaManager->FindFakeSessionNode(CALL_KEY_1);
+    MockMediaMsgHandler* pHandler = pNode->pMessageHandler;
+
+    ImsMediaMsgOpenConfigParam* pParam1 = new ImsMediaMsgOpenConfigParam(MEDIA_TYPE_AUDIO);
+    ON_CALL(*pHandler,
+            SendMessageToJava(
+                    IJniMedia::REQUEST_OPEN_SESSION, static_cast<ImsMediaMsgParamBase*>(pParam1)))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_OPEN_SESSION, CALL_KEY_1, pParam1));
+
+    ImsMediaMsgConfigParam* pParam2 = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_MODIFY_SESSION, pParam2))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_MODIFY_SESSION, CALL_KEY_1, pParam2));
+
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_ADD_CONFIG, pParam2))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(
+            m_pMediaManager->HandleRequestMsg(IJniMedia::REQUEST_ADD_CONFIG, CALL_KEY_1, pParam2));
+
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_DELETE_CONFIG, pParam2))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_DELETE_CONFIG, CALL_KEY_1, pParam2));
+
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_CONFIRM_CONFIG, pParam2))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_CONFIRM_CONFIG, CALL_KEY_1, pParam2));
+
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_CLOSE_SESSION, pParam2))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_CLOSE_SESSION, CALL_KEY_1, pParam2));
+
+    ImsMediaMsgSetMediaQualityParam* pParam3 =
+            new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_AUDIO);
+    ON_CALL(*pHandler,
+            SendMessageToJava(IJniMedia::REQUEST_SET_MEDIA_QUALITY,
+                    static_cast<ImsMediaMsgParamBase*>(pParam3)))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_SET_MEDIA_QUALITY, CALL_KEY_1, pParam3));
+
+    delete pParam1;
+    delete pParam2;
+    delete pParam3;
+
+    m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
+}
+
+TEST_F(MediaManagerTest, testHandleRequestMsg_Audio)
+{
+    MockIMediaSession* pMockIMediaSession =
+            m_pMediaManager->CreateFakeSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
+    FakeMediaManager::FakeMediaSessionNode* pNode =
+            m_pMediaManager->FindFakeSessionNode(CALL_KEY_1);
+    MockMediaMsgHandler* pHandler = pNode->pMessageHandler;
+
+    ImsMediaMsgDtmfParam* pParam = new ImsMediaMsgDtmfParam;
+    ON_CALL(*pHandler,
+            SendMessageToJava(
+                    IJniMedia::REQUEST_SEND_DTMF, static_cast<ImsMediaMsgParamBase*>(pParam)))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(
+            m_pMediaManager->HandleRequestMsg(IJniMedia::REQUEST_SEND_DTMF, CALL_KEY_1, pParam));
+
+    delete pParam;
+
+    m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
+}
+
+TEST_F(MediaManagerTest, testHandleRequestMsg_Video)
+{
+    MockIMediaSession* pMockIMediaSession =
+            m_pMediaManager->CreateFakeSession(MEDIA_SERVICE_DEFAULT, CALL_KEY_1);
+    FakeMediaManager::FakeMediaSessionNode* pNode =
+            m_pMediaManager->FindFakeSessionNode(CALL_KEY_1);
+    MockMediaMsgHandler* pHandler = pNode->pMessageHandler;
+
+    ImsMediaMsgParamBase* pParam = new ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO);
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_SET_DISPLAY_SURFACE, pParam))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_SET_DISPLAY_SURFACE, CALL_KEY_1, pParam));
+
+    ON_CALL(*pHandler, SendMessageToJava(IJniMedia::REQUEST_SET_PREVIEW_SURFACE, pParam))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pMediaManager->HandleRequestMsg(
+            IJniMedia::REQUEST_SET_PREVIEW_SURFACE, CALL_KEY_1, pParam));
+
+    delete pParam;
+
+    m_pMediaManager->DestroyFakeSession(pMockIMediaSession);
 }
 
 TEST_F(MediaManagerTest, testClearMediaSessionNode)
