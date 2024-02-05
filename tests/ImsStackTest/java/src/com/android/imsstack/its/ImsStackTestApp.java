@@ -19,6 +19,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.android.imsstack.ImsStackMain;
+import com.android.imsstack.its.base.AppContextInitializer;
 
 /**
  * A application entry point of ImsStack test process.
@@ -32,6 +33,7 @@ public class ImsStackTestApp extends Application {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate");
+        AppContextInitializer.init(this);
         mMain.start(this);
     }
 
