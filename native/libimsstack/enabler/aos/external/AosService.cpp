@@ -33,12 +33,12 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
 AosService::AosService(IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
-        m_piPlmnChangeDelayTimer(IMS_NULL),
         m_objAosEmergencyListeners(ImsList<IAosEmergencyListener*>()),
         m_objAosRegistrationControlListeners(ImsList<IAosRegistrationControlListener*>()),
         m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
         m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
+        m_nSlotId(nSlotId),
+        m_piPlmnChangeDelayTimer(IMS_NULL),
         m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
