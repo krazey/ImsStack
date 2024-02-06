@@ -109,8 +109,12 @@ public:
     FRIEND_TEST(AosConditionTest, ReturnsCellularWhenExistAvailableServiceCellular);
     FRIEND_TEST(AosConditionTest, ReturnsWifiWhenExistAvailableServiceWifi);
     FRIEND_TEST(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole);
+    // TEST : CheckBadNetwork
+    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenAvailableWifiIsNull);
+    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenCellServiceIsNotAvailable);
+    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenServiceTypeIsNotWifi);
+    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsTrueWhenServiceTypeIsWifi);
 
-    FRIEND_TEST(AosConditionTest, CheckBadNetwork);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_RoamingState);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_VopsState);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_LteInfo);
@@ -551,30 +555,77 @@ TEST_F(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole)
     EXPECT_EQ(nResult, AosCondition::CHECK_CELLULAR | AosCondition::CHECK_WIFI);
 }
 
-TEST_F(AosConditionTest, CheckBadNetwork)
+TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenAvailableWifiIsNull)
 {
-    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
+    // GIVEN
     EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WIFI));
 
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
+    IMS_BOOL bResult2 = m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR);
+    IMS_BOOL bResult3 = m_pAosCondition->CheckBadNetwork(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+}
+
+TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenCellServiceIsNotAvailable)
+{
+    // GIVEN
     m_pAosCondition->Start();
+
     EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
     EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WIFI));
-
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR));
-    EXPECT_TRUE(m_pAosCondition->CheckBadNetwork(SERVICE_WIFI));
 
     m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR));
-    EXPECT_FALSE(m_pAosCondition->CheckBadNetwork(SERVICE_WIFI));
+
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
+    IMS_BOOL bResult2 = m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR);
+    IMS_BOOL bResult3 = m_pAosCondition->CheckBadNetwork(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+    EXPECT_FALSE(bResult3);
+}
+
+TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenServiceTypeIsNotWifi)
+{
+    // WHEN
+    m_pAosCondition->Start();
+
+    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+
+    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
+
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
+    IMS_BOOL bResult2 = m_pAosCondition->CheckBadNetwork(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_FALSE(bResult1);
+    EXPECT_FALSE(bResult2);
+}
+
+TEST_F(AosConditionTest, CheckBadNetworkReturnsTrueWhenServiceTypeIsWifi)
+{
+    // WHEN
+    m_pAosCondition->Start();
+
+    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+
+    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosCondition->CheckBadNetwork(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosConditionTest, Event_NotifyEvent_RoamingState)
