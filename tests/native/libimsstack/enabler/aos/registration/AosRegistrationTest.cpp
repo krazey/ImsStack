@@ -232,7 +232,15 @@ public:
     FRIEND_TEST(AosRegistrationTest, ReportFailureForReinitiateProcessWhenCreateRegistrationFail);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileCallExist);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileRetryTimerExist);
-    FRIEND_TEST(AosRegistrationTest, ProcessAuthenticationFailed);
+    FRIEND_TEST(AosRegistrationTest,
+            TriggerFlowRecoveryForStartWhenAuthenticationFailedWhileRegistering);
+    FRIEND_TEST(AosRegistrationTest,
+            TriggerFlowRecoveryForUpdateWhenAuthenticationFailedWhileRefreshing);
+    FRIEND_TEST(AosRegistrationTest,
+            ReportFailureWhenAuthenticationFailedIfExtraRegErrPolicyNotIncludePdnReactivated);
+    FRIEND_TEST(AosRegistrationTest, TriggerReinitiateWhenRegRequiredWithWaitTimeIfWaitTimeIsZero);
+    FRIEND_TEST(AosRegistrationTest, ReportFailureWhenRegRequiredWithWaitTimeIfAppIsNotReady);
+    FRIEND_TEST(AosRegistrationTest, TriggerOfflineRecoverWhenRegRequiredWithWaitTimeDuringCall);
     FRIEND_TEST(AosRegistrationTest, ProcessForbiddenFailed);
     FRIEND_TEST(AosRegistrationTest, ProcessRegRequiredWithAvailableNextPcscf);
     FRIEND_TEST(AosRegistrationTest, ProcessSubscriberFailed);
@@ -1017,20 +1025,15 @@ TEST_F(AosRegistrationTest, IpsecCommandForEnableWhileSupportIpsecTriggersDefaul
 {
     m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
             .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
-            .WillOnce(Return(AString("60")));
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
 
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_ENABLE);
-
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
 TEST_F(AosRegistrationTest, IpsecCommandForDisableUpdatesIpsecSupportedStatus)
@@ -2518,28 +2521,70 @@ TEST_F(AosRegistrationTest, ProcessRegTerminatedWhileRetryTimerExist)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosRegistrationTest, ProcessAuthenticationFailed)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForStartWhenAuthenticationFailedWhileRegistering)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED))
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED))
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-
-    // ERROR_POLICY_PDN_REACTIVATED - STATE_REGISTERING
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosRegistration->ProcessAuthenticationFailed();
 
-    // ERROR_POLICY_PDN_REACTIVATED - STATE_REFRESHING
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
+
+    m_pAosRegistration->ProcessAuthenticationFailed();
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForUpdateWhenAuthenticationFailedWhileRefreshing)
+{
     m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
-    m_pAosRegistration->ProcessAuthenticationFailed();
 
-    // Not ERROR_POLICY_PDN_REACTIVATED
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessAuthenticationFailed();
+}
+
+TEST_F(AosRegistrationTest,
+        ReportFailureWhenAuthenticationFailedIfExtraRegErrPolicyNotIncludePdnReactivated)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_AUTHENTICATION));
+
     m_pAosRegistration->ProcessAuthenticationFailed();
+}
+
+TEST_F(AosRegistrationTest, TriggerReinitiateWhenRegRequiredWithWaitTimeIfWaitTimeIsZero)
+{
+    AStringArray objEmptyImpus;
+    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(objEmptyImpus));
+
+    m_pAosRegistration->ProcessRegRequiredWithWaitTime(0);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenRegRequiredWithWaitTimeIfAppIsNotReady)
+{
+    m_pAosRegistration->SetAppReady(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_TERMINATED));
+
+    m_pAosRegistration->ProcessRegRequiredWithWaitTime(10);
+}
+
+TEST_F(AosRegistrationTest, TriggerOfflineRecoverWhenRegRequiredWithWaitTimeDuringCall)
+{
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+
+    m_pAosRegistration->ProcessRegRequiredWithWaitTime(10);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
 TEST_F(AosRegistrationTest, ProcessForbiddenFailed)
