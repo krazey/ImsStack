@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "app/MockAosAppContext.h"
+#include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
@@ -104,9 +104,13 @@ public:
     FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsReached);
     FRIEND_TEST(AosSubscriptionTest,
             ReturnTrueWhenErrForRegRequiredWithNextPcscfIsMatchedBySingleDigit);
+    /// IsInitialRegistrationRequiredInWifi()
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenEpdgIsNotEnabled);
+    FRIEND_TEST(AosSubscriptionTest, ReturnFalseWhenThereIsNoInfoForErrRegRequiredInWifi);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenErrRegRequiredInWifiIsMatchedBySingleDigit);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported);
+    FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsNotSupportedInRefreshState);
 
-    FRIEND_TEST(AosSubscriptionTest, CheckInitialRegWithNextPcscfRequired);
-    FRIEND_TEST(AosSubscriptionTest, CheckInitialRegRequiredInWifi);
     FRIEND_TEST(AosSubscriptionTest, CheckIsReSubscriptionStopped);
     FRIEND_TEST(AosSubscriptionTest, ProcessFailedStatusCode);
 
@@ -243,8 +247,9 @@ public:
     TestAosSubscription* m_pAosSubscription;
 
     AosStaticProfile* m_pAosStaticProfile;
-    MockAosAppContext* m_pMockAosAppContext;
-    MockIAosNetTracker m_objMockAosINetTracker;
+    MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosConnection m_objMockIAosConnection;
+    MockIAosNetTracker m_objMockIAosNetTracker;
     MockIRegSubscription m_objMockIRegSubscription;
     AString* m_pAor;
     SipAddress* m_pContactAddress;
@@ -273,24 +278,21 @@ protected:
     {
         ConfigurationManager::GetInstance()->Initialize();
 
-        m_pMockAosAppContext = new MockAosAppContext(m_pAosStaticProfile);
-
         m_pAor = new AString(ADDRESS1);
         m_pContactAddress = new SipAddress();
 
-        EXPECT_CALL(*m_pMockAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .WillByDefault(Return(&m_objMockIAosNetTracker));
 
-        EXPECT_CALL(*m_pMockAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockAosINetTracker));
-        EXPECT_CALL(m_objMockAosINetTracker, GetNetworkType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
+        ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
+                .WillByDefault(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
 
-        m_pAosSubscription =
-                new TestAosSubscription(static_cast<IAosAppContext*>(m_pMockAosAppContext),
-                        static_cast<IRegSubscription*>(&m_objMockIRegSubscription), *m_pAor,
-                        *m_pContactAddress);
+        m_pAosSubscription = new TestAosSubscription(&m_objMockIAosAppContext,
+                static_cast<IRegSubscription*>(&m_objMockIRegSubscription), *m_pAor,
+                *m_pContactAddress);
         ASSERT_TRUE(m_pAosSubscription != nullptr);
 
         m_pAosSubscription->SetListener(&m_objMockIAosSubscriptionListener);
@@ -327,11 +329,6 @@ protected:
         {
             m_pAosSubscription->SetListener(IMS_NULL);
             m_pAosSubscription->Destroy();
-        }
-
-        if (m_pMockAosAppContext)
-        {
-            delete m_pMockAosAppContext;
         }
     }
 };
@@ -640,76 +637,117 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsMatche
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
-TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
+TEST_F(AosSubscriptionTest, ReturnFalseWhenEpdgIsNotEnabled)
 {
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
-            .Times(6)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
-            .Times(6)
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
+}
+
+TEST_F(AosSubscriptionTest, ReturnFalseWhenThereIsNoInfoForErrRegRequiredInWifi)
+{
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
 
     // GetVowifiSubErrorRegRequired() - no info
     ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
-    objErrRegRequiredInWifi.Clear();
-    EXPECT_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
+    ON_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
+            .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
 
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
+}
 
-    // GetVowifiSubErrorRegRequired() - 404, 403
-    objErrRegRequiredInWifi.Add(404);
+TEST_F(AosSubscriptionTest, ReturnTrueWhenErrRegRequiredInWifiIsMatchedBySingleDigit)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
+    objErrRegRequiredInWifi.Add(3);
     objErrRegRequiredInWifi.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
-
-    EXPECT_CALL(m_objMockAosConfig,
+    ON_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
+            .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
+    ON_CALL(m_objMockAosConfig,
             IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(2));
 
-    // RequestCommand
-    EXPECT_CALL(m_objMockAosConfig, GetRegRetryCountResetPolicy())
-            .WillOnce(Return(2))
-            .WillOnce(Return(0));
-
-    // ReportState() if result is true.
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED))
-            .Times(1);
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_TRUE));
+    EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(301, IMS_FALSE));
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
+
+TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
+    objErrRegRequiredInWifi.Add(404);
+    objErrRegRequiredInWifi.Add(403);
+    ON_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
+            .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
+
+    ON_CALL(m_objMockAosConfig,
+            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // RequestCommand
+    ON_CALL(m_objMockAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(2));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE))
-            .Times(1);
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG, 0, IMS_TRUE));
 
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
 
+TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsNotSupportedInRefreshState)
+{
+    // UE is in SUBREFRESHSTOP state and the UE isn't terminated yet
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHSTOP);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    // Condition: The UE is in WiFi State
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+
+    // Condition: The 500 error in the test scenario is matched
+    ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
+    objErrRegRequiredInWifi.Add(400);
+    objErrRegRequiredInWifi.Add(500);
+    ON_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
+            .WillByDefault(ReturnRef(objErrRegRequiredInWifi));
+
+    // Condition: The Error isn't supported for showing wfc error message
+    ON_CALL(m_objMockAosConfig,
+            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_SUB_403))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // Condition: The UE isn't use wait time for sending registration in RequestCommand()
+    ON_CALL(m_objMockAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(0));
+
+    // Expected result: The UE will have to call Subscription_StateChanged with OFFLINE state and
+    // SUB_TERMINATED reason
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED))
-            .Times(1);
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE))
-            .Times(1);
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED));
 
-    objErrRegRequiredInWifi.Clear();
-    objErrRegRequiredInWifi.Add(3);
-    objErrRegRequiredInWifi.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
-    EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(301, IMS_TRUE));
+    // Expected result: The UE will have to request registration without wait time
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE));
+
+    // The result will be true
+    // when the UE calls IsInitialRegistrationRequiredInWifi() with 500 error & UE in refresh state
+    EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(500, IMS_TRUE));
+    // The result state of AosSubscription will be offline after all of the above
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
 TEST_F(AosSubscriptionTest, CheckIsReSubscriptionStopped)
@@ -822,11 +860,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
     // IsInitialRegistrationRequiredInWifi() - 1st: true, others: false
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -984,12 +1018,7 @@ TEST_F(AosSubscriptionTest, IsRegAfterWaitRequiredByNotify)
 
 TEST_F(AosSubscriptionTest, IsWfcErrorMessageSupportedWithStateChecked)
 {
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
-            .Times(5)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(5)
             .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
@@ -1234,12 +1263,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
     // ReportNotifyEvent() - bRegRequired == TRUE
     EXPECT_CALL(m_objMockAosConfig, GetNotifyWaitTime()).Times(2).WillRepeatedly(Return(60));
 
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
-            .Times(2)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
@@ -1443,12 +1467,9 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode)
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
     // IsInitialRegistrationRequiredInWifi - FALSE
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled()).Times(3).WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(3)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+            .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosSubscription->SetThrottlingCount(0);
     EXPECT_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub())
@@ -1556,15 +1577,10 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode)
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
     // IsInitialRegistrationRequiredInWifi - FALSE
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
             .Times(2)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(*m_pMockAosAppContext, GetConnection())
-            .Times(2)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
 
     // IsResubscriptionStopped - FALSE
     ImsVector<IMS_SINT32> objErrResubStopped;
