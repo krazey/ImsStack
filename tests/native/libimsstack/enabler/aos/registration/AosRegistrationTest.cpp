@@ -140,6 +140,16 @@ public:
     FRIEND_TEST(AosRegistrationTest, CheckMode);
     FRIEND_TEST(AosRegistrationTest, GetProperty);
     FRIEND_TEST(AosRegistrationTest, CheckBool);
+    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficIfRegTypeIsNotNormalOrEmergency);
+    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficListenerIfRegTypeIsNotNormalOrEmergency);
+    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficListenerIfTransactionIsNull);
+    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenSetAsFakeRegistration);
+    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenSetBlockReason);
+    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenFeatureIsNotOn);
+    FRIEND_TEST(AosRegistrationTest, IpsecIsSupportedWhenFeatureIsOnAndNoSetBlockReason);
+    FRIEND_TEST(AosRegistrationTest, FailsAddIpsecBlockReasonWhenFeatureIsNotOn);
+    FRIEND_TEST(AosRegistrationTest, SucceedsAddIpsecBlockReasonWhenFeatureIsOn);
+    FRIEND_TEST(AosRegistrationTest, SucceedsRemoveIpsecBlockReasonWhenFeatureIsOn);
     FRIEND_TEST(AosRegistrationTest, GetNetworkTypeReturnsLteWhenWifiTestIsOn);
     FRIEND_TEST(AosRegistrationTest, GetNetworkTypeFromAosNetTracker);
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
@@ -188,6 +198,8 @@ public:
     FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecIsNotEstablished);
     FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingReconfigExistSendsRegReconfigMessage);
     FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingUpdateExistSendsRegUpdateMessage);
+    FRIEND_TEST(AosRegistrationTest, AddTxnPendingFeatureWhenPlmnBlockOnUpdateFailure);
+    FRIEND_TEST(AosRegistrationTest, ReportFailureWhenPlmnBlockWithPcoLimitedModeOnStartFailure);
     FRIEND_TEST(AosRegistrationTest, ProcessPendingStartTriggersStartRegister);
     FRIEND_TEST(AosRegistrationTest,
             ProcessPendingTrafficWhileInRefreshStopStateTriggersUpdateRegister);
@@ -217,6 +229,7 @@ public:
     FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall);
     FRIEND_TEST(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail);
     FRIEND_TEST(AosRegistrationTest, ReregisterProcessSucceed);
+    FRIEND_TEST(AosRegistrationTest, ReportFailureForReinitiateProcessWhenCreateRegistrationFail);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileCallExist);
     FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileRetryTimerExist);
     FRIEND_TEST(AosRegistrationTest, ProcessAuthenticationFailed);
@@ -1330,6 +1343,102 @@ TEST_F(AosRegistrationTest, CheckBool)
     m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 }
 
+TEST_F(AosRegistrationTest, FailsSetTrafficIfRegTypeIsNotNormalOrEmergency)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+
+    IMS_BOOL bResult = m_pAosRegistration->SetTraffic(IMS_TRUE);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfRegTypeIsNotNormalOrEmergency)
+{
+    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+
+    EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(0);
+
+    m_pAosRegistration->SetTrafficListener(IMS_TRUE);
+}
+
+TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfTransactionIsNull)
+{
+    AosProvider::GetInstance()->SetTransaction(IMS_NULL, SLOT_ID);
+    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+
+    EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(0);
+
+    m_pAosRegistration->SetTrafficListener(IMS_TRUE);
+
+    AosProvider::GetInstance()->SetTransaction(&m_objMockIAosTransaction, SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, IpsecIsNotSupportedWhenSetAsFakeRegistration)
+{
+    m_pAosRegistration->SetFakeReg(IMS_TRUE);
+
+    IMS_BOOL bResult = m_pAosRegistration->IsIpsecSupported();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, IpsecIsNotSupportedWhenSetBlockReason)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->UpdateIpsecSupported(IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_ERROR);
+
+    IMS_BOOL bResult = m_pAosRegistration->IsIpsecSupported();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, IpsecIsNotSupportedWhenFeatureIsNotOn)
+{
+    m_pAosRegistration->m_nFeature = TestAosRegistration::FEATURE_NONE;
+
+    IMS_BOOL bResult = m_pAosRegistration->IsIpsecSupported();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, IpsecIsSupportedWhenFeatureIsOnAndNoSetBlockReason)
+{
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->ClearIpsecBlock();
+
+    IMS_BOOL bResult = m_pAosRegistration->IsIpsecSupported();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, FailsAddIpsecBlockReasonWhenFeatureIsNotOn)
+{
+    m_pAosRegistration->m_nFeature = TestAosRegistration::FEATURE_NONE;
+
+    m_pAosRegistration->UpdateIpsecSupported(IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->m_nIpsecBlockReason, TestAosRegistration::IPSEC_BLOCK_NONE);
+}
+
+TEST_F(AosRegistrationTest, SucceedsAddIpsecBlockReasonWhenFeatureIsOn)
+{
+    m_pAosRegistration->m_nFeature = TestAosRegistration::FEATURE_IPSEC;
+
+    m_pAosRegistration->UpdateIpsecSupported(IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->m_nIpsecBlockReason, TestAosRegistration::IPSEC_BLOCK_ERROR);
+}
+
+TEST_F(AosRegistrationTest, SucceedsRemoveIpsecBlockReasonWhenFeatureIsOn)
+{
+    m_pAosRegistration->m_nFeature = TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->m_nIpsecBlockReason = TestAosRegistration::IPSEC_BLOCK_ERROR;
+
+    m_pAosRegistration->UpdateIpsecSupported(IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->m_nIpsecBlockReason, TestAosRegistration::IPSEC_BLOCK_NONE);
+}
+
 TEST_F(AosRegistrationTest, GetNetworkTypeReturnsLteWhenWifiTestIsOn)
 {
     m_pAosRegistration->m_pUtil->SetWifiTest(IMS_TRUE);
@@ -1393,61 +1502,6 @@ TEST_F(AosRegistrationTest, FeatureTagForMtc)
 
     m_pAosRegistration->m_piRegContact = IMS_NULL;
     m_pAosRegistration->m_pUtil->SetISipConfigV(IMS_NULL);
-}
-
-TEST_F(AosRegistrationTest, IpsecSupported)
-{
-    // precondition for checking Ipsec supported - IsFakeRegistration()
-    m_pAosRegistration->SetFakeReg(IMS_FALSE);
-
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSubscription())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // FEATURE_IPSEC is not set
-    m_pAosRegistration->InitFeatures();
-
-    m_pAosRegistration->ClearIpsecBlock();
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_ERROR);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_ERROR);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    // FEATURE_IPSEC is set
-    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_ERROR);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(
-            IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_AUTENTICATION);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(
-            IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_AUTENTICATION);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_ERROR);
-    EXPECT_TRUE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_ROAMING);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(
-            IMS_FALSE, TestAosRegistration::IPSEC_BLOCK_NOT_ESTABLISHED);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(
-            IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_NOT_ESTABLISHED);
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-
-    m_pAosRegistration->UpdateIpsecSupported(IMS_TRUE, TestAosRegistration::IPSEC_BLOCK_ROAMING);
-    EXPECT_TRUE(m_pAosRegistration->IsIpsecSupported());
 }
 
 TEST_F(AosRegistrationTest, UpdatePreloadedRoute)
@@ -2123,6 +2177,33 @@ TEST_F(AosRegistrationTest, CheckPendingWhilePendingUpdateExistSendsRegUpdateMes
     m_pAosRegistration->CheckPending();
 }
 
+TEST_F(AosRegistrationTest, AddTxnPendingFeatureWhenPlmnBlockOnUpdateFailure)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsRoaming()).WillOnce(Return(IMS_TRUE));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessPendingPlmnBlockOnUpdateFailure();
+
+    EXPECT_TRUE(bResult);
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(
+            TestAosRegistration::PENDING_PLMN_BLOCK_HELD_BY_CALL));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenPlmnBlockWithPcoLimitedModeOnStartFailure)
+{
+    m_pAosRegistration->SetMode(IAosRegistration::MODE_LIMITED);
+
+    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PCO_LIMITED_SERVICE));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessPlmnBlockWithPcoLimitedModeOnStartFailure();
+
+    EXPECT_TRUE(bResult);
+}
+
 TEST_F(AosRegistrationTest, ProcessPendingStartTriggersStartRegister)
 {
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_START;
@@ -2398,6 +2479,17 @@ TEST_F(AosRegistrationTest, ReregisterProcessSucceed)
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_UPDATE));
 
     m_pAosRegistration->ProcessReregister();
+}
+
+TEST_F(AosRegistrationTest, ReportFailureForReinitiateProcessWhenCreateRegistrationFail)
+{
+    AStringArray objEmptyImpus;
+    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(objEmptyImpus));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessReinitiate(IMS_TRUE);
 }
 
 TEST_F(AosRegistrationTest, ProcessRegTerminatedWhileCallExist)
