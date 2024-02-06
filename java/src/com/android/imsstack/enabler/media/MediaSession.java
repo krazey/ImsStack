@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.media;
 import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
@@ -38,6 +39,7 @@ public class MediaSession implements IMediaConnectionObserver {
     private TextSessionHandler mTextSessionHandler;
     private final MediaListener mMediaListener;
     private final MediaManagerHelper mMediaManager;
+    private AudioVideoSync mAvSync;
 
     /**
      * Called by the ImsMediaManagerCallback when the ImsMedia service is connected.
@@ -74,6 +76,31 @@ public class MediaSession implements IMediaConnectionObserver {
         createAudioSession();
         mMediaListener = new MediaListener();
         setMtcMediaListener(mtcMediaSession);
+        mAvSync = null;
+    }
+
+    /**
+     * Set the RtpReceptionStats from the ImsMedia to AudioVideoSync to compare the delay for the AV
+     * synchronization
+     * @param type The media type of the session
+     * @param stats The RtpReceptionStats of the session
+     */
+    public void notifyRtpReceptionStats(int type, RtpReceptionStats stats) {
+        if (mAvSync != null) {
+            switch (type) {
+                default:
+                    break;
+                case ImsMediaSession.SESSION_TYPE_AUDIO:
+                    mAvSync.setAudioClockRate(mAudioSessionHandler.getSamplingRateKHz());
+                    mAvSync.setAudioStats(stats);
+                    break;
+                case ImsMediaSession.SESSION_TYPE_VIDEO:
+                    mAvSync.setVideoClockRate(mVideoSessionHandler.getSamplingRateKHz());
+                    mAvSync.setVideoStats(stats);
+                    adjustDelay(ImsMediaSession.SESSION_TYPE_VIDEO, mAvSync.getVideoDelay());
+                    break;
+            }
+        }
     }
 
     @VisibleForTesting
@@ -125,6 +152,9 @@ public class MediaSession implements IMediaConnectionObserver {
             mVideoSessionHandler = new VideoSessionHandler(mContext, mMediaManager,
                     mMtcMediaSession, mMtcMediaSession);
         }
+        if (mAvSync == null) {
+            mAvSync = new AudioVideoSync();
+        }
     }
 
     private void createTextSession() {
@@ -138,6 +168,15 @@ public class MediaSession implements IMediaConnectionObserver {
         if (mtcMediaInterface != null) {
             mtcMediaInterface.setMediaListener(mMediaListener);
         }
+    }
+
+    private void adjustDelay(int type, int delay) {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.REQUEST_ADJUST_DELAY);
+        parcel.writeInt(type);
+        parcel.writeInt(delay);
+        parcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(parcel);
     }
 
     private class MediaListener implements IMediaListener {

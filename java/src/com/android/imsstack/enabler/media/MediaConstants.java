@@ -45,6 +45,7 @@ public class MediaConstants {
     public static final int REQUEST_SET_PREVIEW_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 1);
     public static final int REQUEST_SET_DISPLAY_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 2);
     public static final int REQUEST_VIDEO_DATA_USAGE      = (IMSMEDIA_VIDEO_REQUEST + 3);
+    public static final int REQUEST_ADJUST_DELAY          = (IMSMEDIA_VIDEO_REQUEST + 4);
 
     // Requests for text
     public static final int IMSMEDIA_RTT_REQUEST          = (IMSMEDIA_REQUEST + 80);
@@ -69,6 +70,7 @@ public class MediaConstants {
     public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 18);
     public static final int TRIGGER_ANBR_QUERY            = (IMSMEDIA_RESPONSE + 20);
     public static final int NOTIFY_ANBR_RECEIVED          = (IMSMEDIA_RESPONSE + 21);
+    public static final int NOTIFY_RTP_RECEPTION_STATS    = (IMSMEDIA_RESPONSE + 22);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);

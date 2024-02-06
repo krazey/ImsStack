@@ -23,6 +23,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
@@ -444,6 +445,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             parcel.writeInt(mCamera);
             sendRequest(parcel);
             mIsPendingSelectCamera = false;
+        }
+    }
+
+    /**
+     * Notified when the audio session got the notification of the rtp reception stats
+     * @param type The media session type
+     * @param stats The rtp reception stats for the av sync
+     */
+    @Override
+    public void onNotifyRtpReceptionStats(int type, RtpReceptionStats stats) {
+        log("onNotifyRtpReceptionStats, type=" + type + ", stats=" + stats);
+        if (mMediaSession != null) {
+            mMediaSession.notifyRtpReceptionStats(type, stats);
         }
     }
 
