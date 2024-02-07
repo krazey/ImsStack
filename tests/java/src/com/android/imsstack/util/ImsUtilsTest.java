@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.android.imsstack.util;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import androidx.test.filters.SmallTest;
@@ -26,16 +27,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 @RunWith(JUnit4.class)
-public class IoUtilsTest {
-    @Mock private FileOutputStream mFileOutputStream;
-
+public class ImsUtilsTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -43,35 +41,38 @@ public class IoUtilsTest {
 
     @After
     public void tearDown() throws Exception {
-        mFileOutputStream = null;
+        // no-op
     }
 
     @Test
     @SmallTest
     public void testCloseQuietly() throws Exception {
-        IoUtils.closeQuietly(null);
-        IoUtils.closeQuietly(mFileOutputStream);
+        FileOutputStream output = mock(FileOutputStream.class);
+        ImsUtils.closeQuietly(null);
+        ImsUtils.closeQuietly(output);
 
-        verify(mFileOutputStream).close();
+        verify(output).close();
     }
 
     @Test
     @SmallTest
     public void testCloseQuietlyWithRuntimeException() throws Exception {
-        doThrow(new RuntimeException("close failed.")).when(mFileOutputStream).close();
+        FileOutputStream output = mock(FileOutputStream.class);
+        doThrow(new RuntimeException("close failed.")).when(output).close();
 
         assertThrows(RuntimeException.class, () -> {
-            IoUtils.closeQuietly(mFileOutputStream);
+            ImsUtils.closeQuietly(output);
         });
     }
 
     @Test
     @SmallTest
     public void testCloseQuietlyWithIOException() throws Exception {
-        doThrow(new IOException("close failed.")).when(mFileOutputStream).close();
-        IoUtils.closeQuietly(mFileOutputStream);
+        FileOutputStream output = mock(FileOutputStream.class);
+        doThrow(new IOException("close failed.")).when(output).close();
+        ImsUtils.closeQuietly(output);
 
         // Expected: exception is ignored.
-        verify(mFileOutputStream).close();
+        verify(output).close();
     }
 }

@@ -35,7 +35,7 @@ import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -265,7 +265,7 @@ public class QosAgent {
     */
     public void destroyQosConnection(DatagramSocket rtpSocket, DatagramSocket rtcpSocket) {
         if (rtcpSocket != null) {
-            IoUtils.closeQuietly(rtcpSocket);
+            ImsUtils.closeQuietly(rtcpSocket);
         }
 
         if (rtpSocket != null) {
@@ -281,7 +281,7 @@ public class QosAgent {
                 ImsLog.d(mSlotId, "socket is not connected");
             }
 
-            IoUtils.closeQuietly(rtpSocket);
+            ImsUtils.closeQuietly(rtpSocket);
         }
     }
 
