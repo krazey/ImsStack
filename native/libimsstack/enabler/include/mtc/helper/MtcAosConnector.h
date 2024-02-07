@@ -97,14 +97,19 @@ public:
         return m_objImsAosInfo.GetServiceRouteHeaderValue();
     }
 
-    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override
+    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) const override
     {
         return m_objImsAosInfo.NotifyEmergencyCallState(bIsInitialized);
     }
 
-    inline void NotifyEpsfbCallState(IN IMS_UINT32 nState) override
+    inline void NotifyEpsfbCallState(IN IMS_UINT32 nState) const override
     {
         return m_objImsAosInfo.NotifyEpsfbCallState(nState);
+    }
+
+    inline void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) const override
+    {
+        return m_objImsAos.RegisterWithNextPcscf(nUnavailableTimeForCurrentPcscf);
     }
 
 private:

@@ -191,14 +191,24 @@ public:
      *
      * @param bIsInitialized
      */
-    virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
+    virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) const = 0;
 
     /**
      * @brief Notifys
      *
      * @param nState
      */
-    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) = 0;
+    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) const = 0;
+
+    /**
+     * @brief Calls the AoS to register with next P-CSCF.
+     *        Current P-CSCF is marked as unavailable for nUnavailableTimeForCurrentPcscf value.
+     *        AoS would trigger P-CSCF discovery procedure if there is no available next P-CSCF.
+     *
+     * @param nUnavailableTimeForCurrentPcscf The duration(sec) of marking current P-CSCF as
+     *        unavailable.
+     */
+    virtual void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) const = 0;
 };
 
 #endif

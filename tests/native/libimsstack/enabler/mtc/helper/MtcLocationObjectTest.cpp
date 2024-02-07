@@ -33,6 +33,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
+#include "private/ConfigurationManager.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/MockISipMessageBodyPart.h"
 #include "utility/MockIMessageUtils.h"
@@ -88,6 +89,7 @@ protected:
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
+        ConfigurationManager::GetInstance()->DestroyConfigs();
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -559,6 +561,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountry)
 
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountryAndState)
 {
+    ConfigurationManager::GetInstance()->RefreshConfigs(objContext.GetSlotId());
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
     ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
             .WillByDefault(
@@ -570,7 +573,7 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountryAndSta
             "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
             "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
             "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"\">"
+            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"pres:\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"

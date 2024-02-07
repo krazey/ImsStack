@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "Configuration.h"
 #include "ImsTypeDef.h"
+#include "MockIMtcService.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
 #include "core/MockIMessage.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <array>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -34,18 +42,34 @@ public:
     MockIMtcCallContext objContext;
     CallInfo objCallInfo;
     UpdateErrorHandler* pHandler;
+    MockIMtcAosConnector objAosConnector;
+    MockIMessageUtils objMessageUtils;
+    MockIMtcService objMtcService;
+    TestConfigService* m_pConfigService;
 
 protected:
     virtual void SetUp() override
     {
+        m_pConfigService = new TestConfigService();
+        m_pConfigService->SetCarrierConfig(&(m_pConfigService->GetMockCarrierConfig()));
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
+        ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         pHandler = new UpdateErrorHandler(objContext);
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+        delete m_pConfigService;
+    }
 };
 
 TEST_F(UpdateErrorHandlerTest, HandleNullMessageReturnsServerError)
@@ -139,6 +163,49 @@ TEST_F(UpdateErrorHandlerTest, Handle500MessageReturnsServerError)
     IMS_SINT32 nStatusCode = SipStatusCode::SC_500;
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+}
+
+TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithoutRetryAfterReturnsServerErrorWithCallingAos)
+{
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(-1));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+}
+
+TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerErrorWithCallingAos)
+{
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Configuration::GetInstance()->RefreshConfigs(objContext.GetSlotId());
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
+}
+
+TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerErrorWithOutCallingAos)
+{
+    IMS_SINT32 nStatusCode = SipStatusCode::SC_503;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
+    Configuration::GetInstance()->RefreshConfigs(objContext.GetSlotId());
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
 

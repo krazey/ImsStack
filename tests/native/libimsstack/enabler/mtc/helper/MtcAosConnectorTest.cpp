@@ -274,4 +274,12 @@ TEST_F(MtcAosConnectorTest, NotifyEpsfbCallStateInvokesImsAosInfoApi)
     pConnector->NotifyEpsfbCallState(nAnyState);
 }
 
+TEST_F(MtcAosConnectorTest, RegisterWithNextPcscfInvokesImsAosInfoApi)
+{
+    IMS_UINT32 nAnyTime = 0;
+    EXPECT_CALL(objMockIImsAos, RegisterWithNextPcscf(nAnyTime)).Times(1);
+
+    pConnector->RegisterWithNextPcscf(nAnyTime);
+}
+
 }  // namespace android
