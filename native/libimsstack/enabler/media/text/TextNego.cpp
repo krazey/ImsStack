@@ -1235,23 +1235,12 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
     pNegotiatedProfile->nControlPort = pLocalProfile->nControlPort;
 
-    IpAddress objLocalIPAddr = pLocalProfile->objIpAddress;
-
     if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
     {
-        *pNegotiatedProfile = *pLocalProfile;
+        *pNegotiatedProfile =
+                (pPeerProfile->lstPayload.GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
 
-        // copy the dest profile as nego profile
-        if (pPeerProfile->lstPayload.GetSize() > 0)
-        {
-            *pNegotiatedProfile = *pPeerProfile;
-        }
-        else
-        {
-            *pNegotiatedProfile = *pLocalProfile;
-        }
-
-        pNegotiatedProfile->objIpAddress = objLocalIPAddr;
+        pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
         pNegotiatedProfile->nDataPort = 0;
 
         IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the text[%d][%d],\
@@ -1267,8 +1256,6 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Compare each payload based destination's profile
-    ImsList<TextProfile::Payload*> listNegotiatedPayloads;
-
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
         TextProfile::Payload* pPayload = pPeerProfile->lstPayload.GetAt(i);
@@ -1293,65 +1280,54 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
                 }
 
                 pNegotiatedProfile->lstPayload.Append(pT140);
-                listNegotiatedPayloads.Append(pT140);
             }
         }
     }
 
     IMS_BOOL bRet = IMS_FALSE;
 
-    if (listNegotiatedPayloads.GetSize() > 0)
+    if (pNegotiatedProfile->lstPayload.GetSize() > 0)
     {
         // Setting direction
-        if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
-                pNegotiatedProfile->lstPayload.GetSize() == 0)
-        {
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
-        }
-        else
+        if (pNegotiatedProfile->nDataPort != 0 && pPeerProfile->nDataPort != 0)
         {
             pNegotiatedProfile->eDirection = UpdateDirectionToMine(
                     pPeerProfile->eDirection, pLocalProfile->eDirection, bIsOfferReceived);
         }
+        else
+        {
+            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+        }
 
-        pNegotiatedProfile->bIsHold = pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE
-                ? IMS_TRUE
-                : IMS_FALSE;
+        pNegotiatedProfile->bIsHold =
+                (pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
+                                                                                 : IMS_FALSE;
         TextProfileUtil::MakeNegotiatedBandwidth(
                 m_pConfig, pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
         bRet = IMS_TRUE;
     }
     else
     {
-        // TODO: need to change this if condition later
-        if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
-                pNegotiatedProfile->lstPayload.GetSize() == 0)
-        {
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
-            bRet = IMS_TRUE;  // TODO: need to check later
-            IMS_TRACE_D("eDirection: %d bRet:%d", pNegotiatedProfile->eDirection, bRet, 0);
-        }
-
         if (pLocalProfile->lstPayload.GetSize() > 0)
         {
             IMS_TRACE_D("MakeNegotiatedProfile() - no negotiated payload. use the LocalProfile and "
                         "make port 0 ",
                     0, 0, 0);
             *pNegotiatedProfile = *pLocalProfile;
-            pNegotiatedProfile->nDataPort = 0;
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+            bRet = IMS_TRUE;
         }
         else
         {
             IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
         }
+
+        pNegotiatedProfile->nDataPort = 0;
+        pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
     }
 
-    pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-    pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
-
-    IMS_TRACE_D("MakeNegotiatedProfile() nego rs[%d] rr[%d]", pNegotiatedProfile->nBandwidthRs,
-            pNegotiatedProfile->nBandwidthRr, 0);
+    IMS_TRACE_D("MakeNegotiatedProfile() - eDirection=%d, nego rs=%d, rr=%d",
+            pNegotiatedProfile->eDirection, pNegotiatedProfile->nBandwidthRs,
+            pNegotiatedProfile->nBandwidthRr);
 
     if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
     {
