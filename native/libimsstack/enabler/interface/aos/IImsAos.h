@@ -133,6 +133,16 @@ public:
      * @param objFeatureTag Indicate the list of the feature-tag (@see ImsAosFeatureTag)
      */
     virtual void UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag) = 0;
+
+    /**
+     * @brief Register with next PCSCF.
+     *        Current PCSCF is marked as unavailable for nUnavailableTimeForCurrentPcscf value.
+     *        Aos would trigger PCSCF discovery procedure if there is no available next PCSCF.
+     *
+     * @param nUnavailableTimeForCurrentPcscf
+     *        The duration(sec) of marking current PCSCF as unavailable.
+     */
+    virtual void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) = 0;
 };
 
 #endif  // INTERFACE_IMS_AOS_H_

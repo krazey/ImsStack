@@ -96,6 +96,8 @@ public:
     FRIEND_TEST(AosHandleTest, ProcessCheckBlock_Test1);
     FRIEND_TEST(AosHandleTest, ProcessCheckBlock_Test3);
 
+    FRIEND_TEST(AosHandleTest, RequestAppToRegisterWithNextPcscf);
+
 public:
     void SetState(IN IMS_UINT32 nState) { AosHandle::SetState(nState); }
     IMS_UINT32 GetState() { return AosHandle::GetState(); }
@@ -4592,6 +4594,19 @@ TEST_F(AosHandleTest, UpdateFeature_for_ImsAosFeatureTag_Test)
 {
     ImsList<ImsAosFeatureTag*> objFeatureTag;
     m_pAosHandle->UpdateFeature(objFeatureTag);
+}
+
+TEST_F(AosHandleTest, RequestAppToRegisterWithNextPcscf)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY, _))
+            .Times(2);
+
+    // WHEN
+    m_pAosHandle->RegisterWithNextPcscf(30);
+    m_pAosHandle->RegisterWithNextPcscf(0);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
