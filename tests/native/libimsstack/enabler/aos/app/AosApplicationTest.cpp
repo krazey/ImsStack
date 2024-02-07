@@ -223,6 +223,9 @@ class TestAosApplication : public AosApplication
     FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldNotSetOffReasonWhenIsNotImsCall);
     FRIEND_TEST(AosApplicationTest,
             ProcessPdnDisconnectShouldStopConnectorWhenOffReasonIsDataPermanentlyFailed);
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldStartRatBlockTimerWhenTypeRatBlock);
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldAddRatBlockWhenTypeRatBlock);
+    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeRatBlock);
     FRIEND_TEST(AosApplicationTest,
             ProcessPdnDisconnectShouldNotifyDeregisteredWithPlmnBlockWithTimeOutWhenNr);
     FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach);
@@ -2084,6 +2087,48 @@ TEST_F(AosApplicationTest,
 
     EXPECT_CALL(m_objMockAosConnector,
             Stop(TestAosApplication::PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS));
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStartRatBlockTimerWhenTypeRatBlock)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosApplication->IsTimerRunning(TestAosApplication::TIMER_RAT_BLOCK));
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldAddRatBlockWhenTypeRatBlock)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
+
+    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
+
+    // WHEN
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    // THEN
+    EXPECT_TRUE(m_pTestAosApplication->IsBlockRat(NW_REPORT_RADIO_LTE));
+}
+
+TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeRatBlock)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, AosReasonCode::RAT_BLOCK)).Times(1);
 
     // WHEN
     m_pTestAosApplication->ProcessPdnDisconnect();
