@@ -72,7 +72,7 @@ import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFactory;
 import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
@@ -3126,7 +3126,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
                     return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_USSD;
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                        && SimUtils.containsWildValue(dialString)) {
+                        && ImsUtils.hasWildValueForDialString(dialString)) {
                     return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO;
                 }
             } else {
@@ -3135,7 +3135,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
                     return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_USSD;
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                        && SimUtils.containsWildValue(dialString)) {
+                        && ImsUtils.hasWildValueForDialString(dialString)) {
                     return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
                 }
             }
@@ -3144,14 +3144,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // for all the call control types except for the exceptional case.
             if ((newCcType == Usat.CALL_CONTROL_TYPE_SS
                     || newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL)
-                            && SimUtils.containsWildValue(dialString)) {
+                            && ImsUtils.hasWildValueForDialString(dialString)) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
             }
         } else if (oldCcType == Usat.CALL_CONTROL_TYPE_USSD) {
             if (newCcType == Usat.CALL_CONTROL_TYPE_SS) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_SS;
             } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                    && SimUtils.containsWildValue(dialString)) {
+                    && ImsUtils.hasWildValueForDialString(dialString)) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
             }
         }

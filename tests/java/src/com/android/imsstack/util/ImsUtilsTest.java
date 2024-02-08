@@ -16,6 +16,7 @@
 package com.android.imsstack.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -35,6 +36,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +51,10 @@ public class ImsUtilsTest {
     private static final byte[] DATA_BYTES = { 1, 2, '+', '9', ':', 'a', '~' };
     private static final String DATA_HEX_STRING = "01022B393A617E";
     private static final String DATA_LOWERCASE_HEX_STRING = "01022b393a617e";
+    private static final String DATA_PLMN = "310120";
+    private static final String DATA_PLMN_BCD = "131002";
+    private static final String DATA_PLMN_5DIGITS = "31012";
+    private static final String DATA_PLMN_5DIGITS_BCD = "1310F2";
 
     @Before
     public void setUp() throws Exception {
@@ -136,5 +142,80 @@ public class ImsUtilsTest {
         assertEquals("", ImsUtils.bytesToHexString(new byte[0]));
         assertEquals(DATA_HEX_STRING, ImsUtils.bytesToHexString(DATA_BYTES));
         assertEquals(DATA_LOWERCASE_HEX_STRING, ImsUtils.bytesToHexString(DATA_BYTES, false));
+    }
+
+    @Test
+    @SmallTest
+    public void testHexStringToBytes() {
+        assertNull(ImsUtils.hexStringToBytes(null));
+        assertTrue(Arrays.equals(new byte[0], ImsUtils.hexStringToBytes("")));
+        assertTrue(Arrays.equals(DATA_BYTES, ImsUtils.hexStringToBytes(DATA_HEX_STRING)));
+    }
+
+    @Test
+    @SmallTest
+    public void testHexCharToInt() {
+        assertEquals(0, ImsUtils.hexCharToInt('0'));
+        assertEquals(1, ImsUtils.hexCharToInt('1'));
+        assertEquals(2, ImsUtils.hexCharToInt('2'));
+        assertEquals(3, ImsUtils.hexCharToInt('3'));
+        assertEquals(4, ImsUtils.hexCharToInt('4'));
+        assertEquals(5, ImsUtils.hexCharToInt('5'));
+        assertEquals(6, ImsUtils.hexCharToInt('6'));
+        assertEquals(7, ImsUtils.hexCharToInt('7'));
+        assertEquals(8, ImsUtils.hexCharToInt('8'));
+        assertEquals(9, ImsUtils.hexCharToInt('9'));
+
+        assertEquals(10, ImsUtils.hexCharToInt('a'));
+        assertEquals(11, ImsUtils.hexCharToInt('b'));
+        assertEquals(12, ImsUtils.hexCharToInt('c'));
+        assertEquals(13, ImsUtils.hexCharToInt('d'));
+        assertEquals(14, ImsUtils.hexCharToInt('e'));
+        assertEquals(15, ImsUtils.hexCharToInt('f'));
+
+        assertEquals(10, ImsUtils.hexCharToInt('A'));
+        assertEquals(11, ImsUtils.hexCharToInt('B'));
+        assertEquals(12, ImsUtils.hexCharToInt('C'));
+        assertEquals(13, ImsUtils.hexCharToInt('D'));
+        assertEquals(14, ImsUtils.hexCharToInt('E'));
+        assertEquals(15, ImsUtils.hexCharToInt('F'));
+
+        assertThrows(RuntimeException.class, () -> {
+            ImsUtils.hexCharToInt('G');
+        });
+    }
+
+    @Test
+    @SmallTest
+    public void testStringToBcdString() {
+        assertNull(ImsUtils.stringToBcdString(null));
+        assertEquals("", ImsUtils.stringToBcdString(""));
+        assertEquals(DATA_PLMN_BCD, ImsUtils.stringToBcdString(DATA_PLMN));
+        assertEquals(DATA_PLMN_5DIGITS_BCD, ImsUtils.stringToBcdString(DATA_PLMN_5DIGITS));
+    }
+
+    @Test
+    @SmallTest
+    public void testHasWildValueForDialString() {
+        assertFalse(ImsUtils.hasWildValueForDialString(null));
+        assertFalse(ImsUtils.hasWildValueForDialString(""));
+        assertFalse(ImsUtils.hasWildValueForDialString("1-234567890"));
+        assertFalse(ImsUtils.hasWildValueForDialString("1-(234)-567890"));
+        assertTrue(ImsUtils.hasWildValueForDialString("1234567890;123"));
+        assertTrue(ImsUtils.hasWildValueForDialString("1234567890,123"));
+        assertTrue(ImsUtils.hasWildValueForDialString("1234567890N"));
+    }
+
+    @Test
+    @SmallTest
+    public void testHas12KeysOnlyForDialString() {
+        assertFalse(ImsUtils.has12KeysOnlyForDialString(null));
+        assertFalse(ImsUtils.has12KeysOnlyForDialString(""));
+        assertFalse(ImsUtils.has12KeysOnlyForDialString("1-234567890"));
+        assertFalse(ImsUtils.has12KeysOnlyForDialString("1-(234)-567890"));
+        assertTrue(ImsUtils.has12KeysOnlyForDialString("1234567890"));
+        assertTrue(ImsUtils.has12KeysOnlyForDialString("#686#"));
+        assertTrue(ImsUtils.has12KeysOnlyForDialString("*1372"));
+        assertTrue(ImsUtils.has12KeysOnlyForDialString("#*1372*#"));
     }
 }

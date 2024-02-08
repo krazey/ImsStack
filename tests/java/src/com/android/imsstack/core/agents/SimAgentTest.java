@@ -48,7 +48,7 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,9 +65,9 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class SimAgentTest {
     private static final String UST = "86EF112C27FE01744200FF040100001E01";
-    private static final byte[] UST_BYTES = SimUtils.hexStringToBytes(UST);
+    private static final byte[] UST_BYTES = ImsUtils.hexStringToBytes(UST);
     private static final String IST = "E200";
-    private static final byte[] IST_BYTES = SimUtils.hexStringToBytes(IST);
+    private static final byte[] IST_BYTES = ImsUtils.hexStringToBytes(IST);
     private static final String IMPI = "1234@test.ims.com";
     private static final String DOMAIN = "test.ims.com";
     private static final String[] IMPU_ARRAY = { "sip:1234@test.ims.com", "tel:1234" };
