@@ -398,7 +398,7 @@ private:
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
     IMS_BOOL IsNeedToSetLimitedMode();
 
-protected:
+public:
     enum
     {
         MSG_REG_START = AOSMSG_SERVICE_INTERNAL,
