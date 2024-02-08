@@ -724,6 +724,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 eq(extensions));
     }
 
+    @Test
+    public void testNotifyAnbr() {
+        mImsCallSession.callSessionNotifyAnbr(1, 1, 244);
+        verify(mMockMtcCall, times(1)).notifyAnbr(eq(1), eq(1), eq(244));
+    }
+
     private void verifyWaitOrNotifyCallTerminated() {
         mCallDetails.set(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
         mCallDetails.clear(mCallDetails.CALL_END_FINISHED);

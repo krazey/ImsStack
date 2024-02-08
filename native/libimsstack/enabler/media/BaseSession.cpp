@@ -117,3 +117,11 @@ PUBLIC VIRTUAL void BaseSession::SetState(IMS_SINT32 state)
 {
     m_nState = state;
 }
+
+PUBLIC
+void BaseSession::SetAnbrMode(AnbrMode anbrMode)
+{
+    IMS_TRACE_D("SetAnbrMode() - uplink codec mode[%d] downlink codec mode[%d]",
+            anbrMode.getAnbrUplinkCodecMode(), anbrMode.getAnbrDownlinkCodecMode(), 0);
+    m_pRtpConfig->setAnbrMode(anbrMode);
+}

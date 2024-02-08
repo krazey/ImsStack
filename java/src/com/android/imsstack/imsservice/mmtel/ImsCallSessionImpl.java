@@ -1189,6 +1189,26 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         mCall.sendRtpHeaderExtensions(rtpHeaderExtensions);
     }
 
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     * @hide
+     */
+    @Override
+    public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        if (mCall == null) {
+            loge("callSessionNotifyAnbr :: session is null");
+            return;
+        }
+
+        mCall.notifyAnbr(mediaType, direction, bitsPerSecond);
+    }
+
     // @Override
     // @QUALCOMM_API
     public void deflect(String deflectNumber) {
@@ -4527,6 +4547,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onCallRtpHeaderExtensionsReceived");
             mCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            logi("onTriggerAnbrQueryReceived");
+            mCallback.invokeSendAnbrQuery(mediaType, direction, bitsPerSecond);
         }
 
         private void clearTransferRequestedSessionEctDetails() {

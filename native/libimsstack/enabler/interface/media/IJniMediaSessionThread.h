@@ -98,6 +98,14 @@ public:
     virtual IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam);
 
     /**
+     * @brief Called to notify the Anbr negotiation result
+     *
+     * @param pParam the Anbr negotiation result
+     * @return IMS_BOOL Returns false when the parameter is invalid
+     */
+    virtual IMS_BOOL OnRequestUpdateAnbrEnabledConfig(IN ImsMediaMsgAnbrNegotiationParam* pParam);
+
+    /**
      * @brief Called to inform the preview surface is ready
      */
     virtual void OnSetPreviewSurface();

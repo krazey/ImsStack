@@ -35,6 +35,7 @@ public:
     IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam) override;
     IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam) override;
     IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam) override;
+    IMS_BOOL OnRequestUpdateAnbrEnabledConfig(IN ImsMediaMsgAnbrNegotiationParam* pParam) override;
     void OnSetPreviewSurface() override;
     void OnSetDisplaySurface() override;
 

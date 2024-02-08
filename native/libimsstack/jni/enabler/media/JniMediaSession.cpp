@@ -188,6 +188,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IJniMedia::SEND_DTMF:
             OnSendDtmf(nMsg, objParcel);
             break;
+        case IJniMedia::NOTIFY_ANBR_RECEIVED:
+            OnNotifyAnbrReceived(nMsg, objParcel);
+            break;
         case IJniMedia::SETSURFACE_CMD:
         case IJniMedia::SELECT_CAMERA_CMD:
         case IJniMedia::CHANGE_CAMERA_ZOOM_CMD:
@@ -262,6 +265,19 @@ void JniMediaSession::OnResponses(
     {
         pParam->m_eResult = objParcel.readInt32();
     }
+
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+{
+    ImsMediaMsgAnbrReceivedParam* pParam = new ImsMediaMsgAnbrReceivedParam(
+            ConvertToMediaType((SessionType)objParcel.readInt32()));
+
+    pParam->m_nAnbrMediaType = objParcel.readInt32();
+    pParam->m_nAnbrDirection = objParcel.readInt32();
+    pParam->m_nAnbrBitrate = objParcel.readInt32();
 
     GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
