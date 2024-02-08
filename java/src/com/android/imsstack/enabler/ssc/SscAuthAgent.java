@@ -19,7 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SystemUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -248,13 +248,13 @@ public class SscAuthAgent implements ISscAuthAgent {
             String varA1 = unqUsername + ":" + unqRealm + ":" + passwd;
 
             if ("MD5-sees".equals(algorithm)) {
-                varA1 = SystemUtils.calculateMessageDigest("MD5", varA1);
+                varA1 = ImsUtils.calculateMessageDigest("MD5", varA1);
                 String unqNonce = nonce.replace("\"", "");
                 String unqCnonce = cnonce.replace("\"", "");
                 varA1 = varA1 + ":" + unqNonce + ":" + unqCnonce;
             }
 
-            String varHA1 = SystemUtils.calculateMessageDigest("MD5", varA1);
+            String varHA1 = ImsUtils.calculateMessageDigest("MD5", varA1);
             ImsLog.d("\nA1 : " + varA1 + "\nHA1 : " + varHA1);
 
             return varHA1;
@@ -263,7 +263,7 @@ public class SscAuthAgent implements ISscAuthAgent {
         private String generateCnonce() {
             String date = "" + System.currentTimeMillis();
 
-            return SystemUtils.calculateMessageDigest("MD5", date);
+            return ImsUtils.calculateMessageDigest("MD5", date);
         }
 
         private String calculateResponse(String varHA1, String nonce, String nc,
@@ -280,10 +280,10 @@ public class SscAuthAgent implements ISscAuthAgent {
                     ImsLog.w("entity is null ");
                     entity = "";
                 }
-                varA2 = varA2 + ":" + SystemUtils.calculateMessageDigest("MD5", entity);
+                varA2 = varA2 + ":" + ImsUtils.calculateMessageDigest("MD5", entity);
             }
 
-            String varHA2 = SystemUtils.calculateMessageDigest("MD5", varA2);
+            String varHA2 = ImsUtils.calculateMessageDigest("MD5", varA2);
             ImsLog.d("A2 : " + varA2 + ", HA2 : " + varHA2);
 
             String tmpRsp = null;
@@ -294,7 +294,7 @@ public class SscAuthAgent implements ISscAuthAgent {
                 tmpRsp = varHA1 + ":" + nonce + ":" + varHA2;
             }
 
-            String requestDigest = SystemUtils.calculateMessageDigest("MD5", tmpRsp);
+            String requestDigest = ImsUtils.calculateMessageDigest("MD5", tmpRsp);
             ImsLog.d("temp-response : " + tmpRsp + ", requestDigest : " + requestDigest);
 
             return requestDigest;

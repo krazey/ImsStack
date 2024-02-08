@@ -345,7 +345,7 @@ public class ImsLogTest {
     }
 
     private void setLogEnabledForAllLevels() {
-        Log.init(SystemUtils.hexStringToInt(Log.DEFAULT_LOG_OPTIONS), false);
+        Log.init(ImsUtils.hexStringToInt(Log.DEFAULT_LOG_OPTIONS), false);
         ImsLog.init();
     }
 
