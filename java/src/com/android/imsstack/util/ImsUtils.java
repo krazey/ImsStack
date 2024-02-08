@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package com.android.imsstack.util;
 
 /**
- * This class provides the helper APIs for input/output streams.
+ * This class provides the utility and helper APIs for ImsStack application.
  */
-public final class IoUtils {
+public final class ImsUtils {
     /**
      * Closes the {@link AutoCloseable} object silently.
      *
@@ -36,5 +36,5 @@ public final class IoUtils {
         }
     }
 
-    private IoUtils() {}
+    private ImsUtils() {}
 }
