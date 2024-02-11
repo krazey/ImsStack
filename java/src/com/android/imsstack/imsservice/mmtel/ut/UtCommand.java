@@ -29,7 +29,7 @@ import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 /**
  * The class to process Ut transaction for each operation.
@@ -211,7 +211,7 @@ public final class UtCommand {
                     + " and dial string : " + dialedString);
         }
 
-        if (SimUtils.containsWildValue(dialedString)) {
+        if (ImsUtils.hasWildValueForDialString(dialedString)) {
             /**
              * 3GPP 7.3.1.6
              * if the SS string data object or address data object is present and the ME receives

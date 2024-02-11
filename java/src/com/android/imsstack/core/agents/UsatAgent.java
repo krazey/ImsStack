@@ -31,7 +31,7 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -108,7 +108,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                     + (value.length == 0
                             ? "(null)"
                             : (ImsLog.DBG
-                                    ? SimUtils.bytesToHexString(value)
+                                    ? ImsUtils.bytesToHexString(value)
                                     : value.length))
                     + " ]";
         }
@@ -138,7 +138,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                     + (data == null
                             ? "(null)"
                             : (ImsLog.DBG
-                                    ? SimUtils.bytesToHexString(data)
+                                    ? ImsUtils.bytesToHexString(data)
                                     : data.length))
                     + " ]";
         }
@@ -415,7 +415,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -592,7 +592,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -725,7 +725,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -789,7 +789,7 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         plmn += ani[1];
 
-        StringBuilder sb = new StringBuilder(SimUtils.stringToBcdString(plmn));
+        StringBuilder sb = new StringBuilder(ImsUtils.stringToBcdString(plmn));
 
         int tacOrLacLen = 4; // E-UTRAN / UTRAN / GERAN
         int cellIdLen = 7; // E-UTRAN / UTRAN
@@ -824,7 +824,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             sb.append("F");
         }
 
-        return SimUtils.hexStringToBytes(sb.toString());
+        return ImsUtils.hexStringToBytes(sb.toString());
     }
 
     /**
@@ -908,7 +908,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -1240,7 +1240,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             return result;
         }
 
-        byte[] res = SimUtils.hexStringToBytes(response);
+        byte[] res = ImsUtils.hexStringToBytes(response);
 
         if (res == null || res.length < 2) {
             // Invalid response data.

@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.util;
 
+import android.telephony.PhoneNumberUtils;
+
 import androidx.annotation.NonNull;
 
 import java.security.MessageDigest;
@@ -35,6 +37,13 @@ public final class ImsUtils {
     private static final char[] HEX_LOWERCASE_DIGITS = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
     };
+    /**
+     * BCD values 'C', 'D' and 'E' are never sent across the radio interface.
+     *     - PAUSE(‘,’), WILD(‘N’), WAIT(‘;’)
+     */
+    private static final char PAUSE = ',';
+    private static final char WILD = 'N';
+    private static final char WAIT = ';';
 
     /**
      * Closes the {@link AutoCloseable} object silently.
@@ -150,6 +159,118 @@ public final class ImsUtils {
         }
 
         return hexString.toString();
+    }
+
+    /**
+     * Converts a hexadecimal string into a byte array.
+     *
+     * @param s The hexadecimal string.
+     * @return A byte array of the specified string.
+     */
+    public static byte[] hexStringToBytes(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        int size = s.length();
+        byte[] bytes = new byte[size / 2];
+
+        for (int i = 0; i < size; i += 2) {
+            bytes[i / 2] = (byte) ((hexCharToInt(s.charAt(i)) << 4)
+                    | hexCharToInt(s.charAt(i + 1)));
+        }
+
+        return bytes;
+    }
+
+    /**
+     * Converts a hexadecimal character value to an integer value.
+     *
+     * @param c The hexadecimal character.
+     * @return An integer value of the specified character.
+     */
+    public static int hexCharToInt(char c) {
+        if (c >= '0' && c <= '9') {
+            return (c - '0');
+        } else if (c >= 'A' && c <= 'F') {
+            return (c - 'A' + 10);
+        } else if (c >= 'a' && c <= 'f') {
+            return (c - 'a' + 10);
+        }
+
+        throw new RuntimeException("invalid hex char '" + c + "'");
+    }
+
+    /**
+     * Converts a normal string to a BCD based string.
+     * It just changes the order of each two characters.
+     * And, if the string length is odd, it adds 'F' character in the end of the string.
+     *
+     * @param s The string value.
+     * @return A BCD string.
+     */
+    public static String stringToBcdString(String s) {
+        if (s == null) {
+            return null;
+        } else if (s.length() == 0) {
+            return "";
+        }
+
+        if (s.length() % 2 != 0) {
+            s += "F";
+        }
+
+        StringBuilder sb = new StringBuilder(s);
+
+        for (int i = 0; i < sb.length(); i += 2) {
+            char c = sb.charAt(i);
+            sb.setCharAt(i, sb.charAt(i + 1));
+            sb.setCharAt(i + 1, c);
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Checks if the specified string contains the wild values or not.
+     *
+     * @param s The string to be evaluated.
+     * @return {@code true} if it contains wild values, {@code false} otherwise.
+     */
+    public static boolean hasWildValueForDialString(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+
+            if (c == PAUSE || c == WILD || c == WAIT) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the specified string only consists of ISO-LATIN characters 0-9, *, #.
+     *
+     * @param s The string to be evaluated.
+     * @return {@code true} if it only contains 12 keys, {@code false} otherwise.
+     */
+    public static boolean has12KeysOnlyForDialString(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < s.length(); ++i) {
+            if (!PhoneNumberUtils.is12Key(s.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private ImsUtils() {}

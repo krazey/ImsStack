@@ -35,7 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +52,7 @@ import java.util.Set;
 @TestableLooper.RunWithLooper
 public class UsatAgentTest {
     private static final byte[] USIM_SERVICE_TABLE =
-            SimUtils.hexStringToBytes("000000FF00000000000000F0FF");
+            ImsUtils.hexStringToBytes("000000FF00000000000000F0FF");
     private static final String SEND_ENVELOPE_OK = "9000";
     private static final String SEND_ENVELOPE_ERROR = "9300";
     /** MO SMS control */
