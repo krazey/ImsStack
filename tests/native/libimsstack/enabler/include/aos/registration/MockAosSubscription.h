@@ -57,9 +57,11 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegAfterWaitRequiredByNotify, (IN IMS_UINT32 nFeature), (override));
     MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupportedWithStateChecked, (IN IMS_SINT32 nError),
             (override));
-    MOCK_METHOD(void, SetRequestCommand, (IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand),
+    MOCK_METHOD(void, SetRequestCommand,
+            (IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter),
             (override));
-    MOCK_METHOD(void, RequestCommand, (IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand), (override));
+    MOCK_METHOD(void, RequestCommand,
+            (IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter), (override));
     MOCK_METHOD(void, ProcessStartFailed_StatusCode, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(void, ProcessStartFailed_Others, (IN IMS_SINT32 nReason), (override));
     MOCK_METHOD(void, ProcessUpdateFailed_StatusCode, (IN IMS_SINT32 nStatusCode), (override));

@@ -60,8 +60,8 @@ protected:
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
-    void ReportState(
-            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0, IN IMS_BOOL bAwt = IMS_FALSE);
+    void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_BOOL bAwt = IMS_FALSE,
+            IN IMS_SINT32 nRetryAfter = 0);
     void ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter = 0);
 
     void SetState(IN IMS_UINT32 nState);
@@ -101,8 +101,10 @@ public:
     virtual IMS_BOOL IsWfcErrorMessageSupportedWithStateChecked(IN IMS_SINT32 nError);
 
 protected:
-    virtual void SetRequestCommand(IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand);
-    virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
+    virtual void SetRequestCommand(
+            IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
+    virtual void RequestCommand(
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
     virtual void ProcessStartFailed_Others(IN IMS_SINT32 nReason);
@@ -186,7 +188,7 @@ public:
         CMD_NONE = 0,
         CMD_REG_REQUIRED,
         CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
-        CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
+        CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION,
         CMD_REG_REQUIRED_WITH_SUB_403_MSG,
         CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
         CMD_REG_TERMINATED,

@@ -267,8 +267,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
         case RegistrationLog::MSG_REG_REQUIRED_WITH_NEXT_PCSCF:
             return "MSG_REG_REQUIRED_WITH_NEXT_PCSCF";
 
-        case RegistrationLog::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF:
-            return "MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF";
+        case RegistrationLog::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            return "MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION";
 
         case RegistrationLog::MSG_REG_REINITIATE_WITH_REG_STATE:
             return "MSG_REG_REINITIATE_WITH_REG_STATE";
