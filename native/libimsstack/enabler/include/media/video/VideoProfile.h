@@ -254,11 +254,12 @@ public:
     };
 
 public:
-    class Payload
+    /**
+     * Payload for video is the actual video data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
         IMS_BOOL bIncludeImageAttr;
         IMS_BOOL bIncludeFrameSize;
         AString strImageAttr;
@@ -266,14 +267,14 @@ public:
 
     public:
         Payload() :
-                pFmtp(IMS_NULL),
+                BasePayload(),
                 bIncludeImageAttr(IMS_FALSE),
                 bIncludeFrameSize(IMS_FALSE),
-                strImageAttr(AString::ConstNull()){};
+                strImageAttr(AString::ConstNull()),
+                objRtcpFbAttr(){};
 
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL),
+                BasePayload(obj),
                 bIncludeImageAttr(obj.bIncludeImageAttr),
                 bIncludeFrameSize(obj.bIncludeFrameSize),
                 strImageAttr(obj.strImageAttr),
@@ -289,14 +290,13 @@ public:
             }
         }
 
-        virtual ~Payload() { deleteFmtp(); }
+        virtual ~Payload() {}
 
         Payload& operator=(IN const Payload& obj)
         {
             if (this != &obj)
             {
-                objRtpMap = obj.objRtpMap;
-                deleteFmtp();
+                BasePayload::operator=(obj);
 
                 if (objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
                 {
@@ -316,25 +316,6 @@ public:
             }
 
             return (*this);
-        }
-
-        void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
-                const IN IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel)
-        {
-            objRtpMap.nPayloadNum = payloadNum;
-            objRtpMap.strPayloadType = payloadType;
-            objRtpMap.nSamplingRate = samplingRate;
-            objRtpMap.nChannel = nChannel;
-        };
-
-    private:
-        void deleteFmtp()
-        {
-            if (pFmtp != IMS_NULL)
-            {
-                delete pFmtp;
-                pFmtp = IMS_NULL;
-            }
         }
     };
 
