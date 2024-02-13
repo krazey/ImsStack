@@ -23,7 +23,7 @@ import java.util.Arrays;
  * This class provides an interface to output the logs.
  */
 public final class ImsLog {
-    public static final boolean DBG = !"user".equals(android.os.Build.TYPE);
+    public static final boolean DBG = !ImsUtils.IS_USER;
 
     private static final int OPT_MEDIUM_SERIAL = 0x00010000;
     private static final int OPT_HIDE_PRIVACY = 0x00000100;

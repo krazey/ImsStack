@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.util;
 
+import android.os.Build;
 import android.telephony.PhoneNumberUtils;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,13 @@ import java.util.Locale;
  * This class provides the utility and helper APIs for ImsStack application.
  */
 public final class ImsUtils {
+    /** A flag specifying whether the build type is a user or not. */
+    public static final boolean IS_USER = "user".equals(Build.TYPE);
+    /** Package name of ImsStack. */
+    public static final String PACKAGE_NAME = "com.android.imsstack";
+    /** Root directory of data storage for ImsStack. */
+    public static final String STORAGE_ROOT_DIR = "/data/user_de/0/" + PACKAGE_NAME;
+
     private static final char[] HEX_DIGITS = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };

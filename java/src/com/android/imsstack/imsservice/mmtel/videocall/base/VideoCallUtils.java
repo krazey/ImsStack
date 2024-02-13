@@ -28,8 +28,8 @@ import com.android.imsstack.base.AppContext;
 import com.android.imsstack.enabler.mtc.IUMtcMedia;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -60,8 +60,7 @@ public class VideoCallUtils {
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;
 
-    private static final String PAUSE_IMAGE_FILE
-            = ImsConstants.IMS_STORAGE_ROOT_DIR + "/pause_img.jpg";
+    private static final String PAUSE_IMAGE_FILE = ImsUtils.STORAGE_ROOT_DIR + "/pause_img.jpg";
 
     private static final LinkedHashMap<Integer, Integer> sVideoQualityForMediaProfileAndMediaInfo;
     /**

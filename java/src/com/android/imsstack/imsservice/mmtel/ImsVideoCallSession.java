@@ -466,8 +466,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             status = Connection.VideoProvider.SESSION_MODIFY_REQUEST_FAIL;
         }
 
-        if (ImsCallUtils.isGoogleNativeCompliant(mCallContext)
-                && (reasonInfoCode < 0)
+        if ((reasonInfoCode < 0)
                 && (requestedProfile != null) && (responseProfile != null)
                 && (requestedProfile.getVideoState() != responseProfile.getVideoState())) {
             status = Connection.VideoProvider.SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE;
@@ -519,11 +518,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     private void sendSessionModifyRejectCompleted() {
-        if (!ImsCallUtils.isGoogleNativeCompliant(mCallContext)) {
-            // Do nothing
-            return;
-        }
-
         logi("SessionModification-RejectCompleted");
 
         // Notify that video upgrade request is completely rejected.
