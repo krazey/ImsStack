@@ -1023,9 +1023,9 @@ public:
      * @brief Get the registration retry random intervals following the registration retry intervals
      *
      *        These values represent plus random value upper bound of the registration retry
-     *        intervals by GetRegRetryIntervals()
+     *        intervals by GetRegRetryIntervals().
      *        So the size of the return value has to be the same as the return value of
-     *        GetRegRetryIntervals()
+     *        GetRegRetryIntervals(). It doesn't work if the size is different.
      *        It defines in second.
      *
      * @return ImsVector<IMS_SINT32>& Return random value for registration retry intervals

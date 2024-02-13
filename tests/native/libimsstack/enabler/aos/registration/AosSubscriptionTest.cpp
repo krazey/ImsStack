@@ -110,6 +110,11 @@ public:
     FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenErrRegRequiredInWifiIsMatchedBySingleDigit);
     FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsSupported);
     FRIEND_TEST(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsNotSupportedInRefreshState);
+    /// GetNextThrottlingTime()
+    FRIEND_TEST(AosSubscriptionTest,
+            GetNextThrottlingTimeWhenRetryIntervalsWhichIsDifferentFromRandomIntervalsIsApplied);
+    FRIEND_TEST(AosSubscriptionTest,
+            GetNextThrottlingTimeWhenRetryRandomIntervalshaveValuesLessThenZero);
 
     FRIEND_TEST(AosSubscriptionTest, CheckIsReSubscriptionStopped);
     FRIEND_TEST(AosSubscriptionTest, ProcessFailedStatusCode);
@@ -274,6 +279,9 @@ public:
     IAosTransaction* m_pOriginAosTransaction;
     MockIAosTransaction m_objMockIAosTransaction;
 
+    ImsVector<IMS_SINT32> m_objRetryIntervals;
+    ImsVector<IMS_SINT32> m_objRetryRandomIntervals;
+
     const AString ADDRESS1 = "sip:1234@ims.google.com:5060";
     const AString ADDRESS2 = "sip:1234@ims.google.com";
     const AString ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.invalid";
@@ -294,6 +302,15 @@ protected:
 
         ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
+
+        ON_CALL(m_objMockAosConfig, GetRegistrationRetryBaseTime()).WillByDefault(Return(30000));
+        ON_CALL(m_objMockAosConfig, GetRegistrationRetryMaxTime()).WillByDefault(Return(1800000));
+        // m_objRetryIntervals.GetSize() = 0
+        ON_CALL(m_objMockAosConfig, GetRegRetryIntervals())
+                .WillByDefault(ReturnRef(m_objRetryIntervals));
+        // m_objRetryRandomIntervals.GetSize() = 0
+        ON_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
+                .WillByDefault(ReturnRef(m_objRetryRandomIntervals));
 
         m_pAosSubscription = new TestAosSubscription(&m_objMockIAosAppContext,
                 static_cast<IRegSubscription*>(&m_objMockIRegSubscription), *m_pAor,
@@ -1435,48 +1452,50 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdated)
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
 }
 
-TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_Others)
+TEST_F(AosSubscriptionTest,
+        GetNextThrottlingTimeWhenRetryIntervalsWhichIsDifferentFromRandomIntervalsIsApplied)
 {
-    EXPECT_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockAosConfig, GetRegistrationRetryBaseTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(30000));
-    EXPECT_CALL(m_objMockAosConfig, GetRegistrationRetryMaxTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1800000));
+    m_pAosSubscription->SetThrottlingCount(2);
 
-    // SetRetryTimer - GetNextThrottlingTime(objRetryIntervals)
-    ImsVector<IMS_SINT32> objRetryIntervals;
-    objRetryIntervals.Clear();
-    objRetryIntervals.Add(10);
-    objRetryIntervals.Add(10);
-    objRetryIntervals.Add(10);
-    EXPECT_CALL(m_objMockAosConfig, GetRegRetryIntervals())
-            .WillOnce(ReturnRef(objRetryIntervals))
-            .WillOnce(ReturnRef(objRetryIntervals));
-
-    m_pAosSubscription->SetThrottlingCount(0);
     ImsVector<IMS_SINT32> objRetryRandomIntervals;
-    objRetryRandomIntervals.Clear();
     objRetryRandomIntervals.Add(0);
     objRetryRandomIntervals.Add(5);
+    objRetryRandomIntervals.Add(15);
     objRetryRandomIntervals.Add(0);
-    EXPECT_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
-            .WillOnce(ReturnRef(objRetryRandomIntervals))
-            .WillOnce(ReturnRef(objRetryRandomIntervals));
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(0);
+    ON_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
+            .WillByDefault(ReturnRef(objRetryRandomIntervals));
 
-    // ProcessStartFailed_Others - m_pAosSubscription->SetRetryTimer(IMS_FALSE);
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+    ImsVector<IMS_SINT32> objRetryIntervals;
+    objRetryIntervals.Add(30);
+    objRetryIntervals.Add(60);
+    objRetryIntervals.Add(120);
+    objRetryIntervals.Add(480);
+    objRetryIntervals.Add(900);
+    EXPECT_EQ(120000, m_pAosSubscription->GetNextThrottlingTime(objRetryIntervals));
+}
 
+TEST_F(AosSubscriptionTest, GetNextThrottlingTimeWhenRetryRandomIntervalshaveValuesLessThenZero)
+{
     m_pAosSubscription->SetThrottlingCount(3);
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+
+    ImsVector<IMS_SINT32> objRetryRandomIntervals;
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(5);
+    objRetryRandomIntervals.Add(15);
+    objRetryRandomIntervals.Add(-5);
+    objRetryRandomIntervals.Add(-2);
+    ON_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
+            .WillByDefault(ReturnRef(objRetryRandomIntervals));
+
+    ImsVector<IMS_SINT32> objRetryIntervals;
+    objRetryIntervals.Add(30);
+    objRetryIntervals.Add(60);
+    objRetryIntervals.Add(120);
+    objRetryIntervals.Add(480);
+    objRetryIntervals.Add(900);
+    EXPECT_EQ(480000, m_pAosSubscription->GetNextThrottlingTime(objRetryIntervals));
 }
 
 TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode_Done)
@@ -1535,9 +1554,8 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode)
             .WillRepeatedly(Return(IMS_FALSE));
 
     m_pAosSubscription->SetThrottlingCount(0);
-    EXPECT_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockAosConfig, GetRegistrationRetryBaseTime())
             .Times(AnyNumber())
             .WillRepeatedly(Return(30000));
@@ -1843,4 +1861,87 @@ TEST_F(AosSubscriptionTest, Print)
 
     m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
+
+/// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)
+TEST_F(AosSubscriptionTest, RunSetRetryTimerWith3gppRetryRuleWhenStartFailed_Others)
+{
+    m_pAosSubscription->SetThrottlingCount(0);
+
+    ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_TRUE));
+
+    // When UE calls ProcessStartFailed_Others()
+    m_pAosSubscription->NotifyListenerEvent(
+            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+}
+
+/// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)
+TEST_F(AosSubscriptionTest, RunSetRetryTimerWithRetryIntervalsWhenStartFailed_Others)
+{
+    m_pAosSubscription->SetThrottlingCount(0);
+
+    ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objRetryIntervals;
+    objRetryIntervals.Add(30);
+    objRetryIntervals.Add(30);
+    objRetryIntervals.Add(60);
+    objRetryIntervals.Add(120);
+    objRetryIntervals.Add(480);
+    objRetryIntervals.Add(900);
+    ON_CALL(m_objMockAosConfig, GetRegRetryIntervals()).WillByDefault(ReturnRef(objRetryIntervals));
+
+    ImsVector<IMS_SINT32> objRetryRandomIntervals;
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(15);
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(0);
+    objRetryRandomIntervals.Add(0);
+    ON_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
+            .WillByDefault(ReturnRef(objRetryRandomIntervals));
+
+    // When UE calls ProcessStartFailed_Others()
+    m_pAosSubscription->NotifyListenerEvent(
+            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+}
+
+/// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)
+TEST_F(AosSubscriptionTest, RunSetRetryTimerWithOnlyRetryIntervalsWhenStartFailed_Others)
+{
+    m_pAosSubscription->SetThrottlingCount(0);
+
+    ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objRetryIntervals;
+    objRetryIntervals.Add(10);
+    ON_CALL(m_objMockAosConfig, GetRegRetryIntervals()).WillByDefault(ReturnRef(objRetryIntervals));
+
+    // When UE calls ProcessStartFailed_Others()
+    m_pAosSubscription->NotifyListenerEvent(
+            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+}
+
+/// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)
+TEST_F(AosSubscriptionTest,
+        RunSetRetryTimerWithOnlyRetryIntervalsWhenStartFailed_OthersAndThrottlingCountIsOver)
+{
+    m_pAosSubscription->SetThrottlingCount(3);
+
+    ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objRetryIntervals;
+    objRetryIntervals.Add(10);
+    objRetryIntervals.Add(10);
+    objRetryIntervals.Add(10);
+    ON_CALL(m_objMockAosConfig, GetRegRetryIntervals()).WillByDefault(ReturnRef(objRetryIntervals));
+
+    // When UE calls ProcessStartFailed_Others()
+    m_pAosSubscription->NotifyListenerEvent(
+            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }

@@ -197,11 +197,12 @@ PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
 
     IMS_BOOL bUseRegsitrationRetryIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->IsRegRetryIntervalsUsedForSub();
-    if (bUseRegsitrationRetryIntervals == IMS_TRUE)
-    {
-        ImsVector<IMS_SINT32>& objRetryIntervals =
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
 
+    ImsVector<IMS_SINT32>& objRetryIntervals =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
+
+    if (bUseRegsitrationRetryIntervals == IMS_TRUE && objRetryIntervals.GetSize() > 0)
+    {
         StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(objRetryIntervals)));
     }
     else
@@ -919,7 +920,6 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
                 1000;
     }
 
-    IMS_SINT32 nThrotllingTime = 0;
     IMS_UINT32 nTimeIndex = 0;
 
     if (m_nThrottlingCount > nMaxCount)
@@ -934,9 +934,10 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
     ImsVector<IMS_SINT32>& objRetryRandomIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRandomRetryIntervals();
 
-    nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000);
+    IMS_SINT32 nThrotllingTime = objInterval.GetAt(nTimeIndex - 1) * 1000;
 
-    if (objRetryRandomIntervals.GetAt(nTimeIndex - 1) > 0)
+    if (objRetryRandomIntervals.GetSize() == nMaxCount &&
+            objRetryRandomIntervals.GetAt(nTimeIndex - 1) > 0)
     {
         nThrotllingTime +=
                 (IMS_SYS_GetRandom(objRetryRandomIntervals.GetAt(nTimeIndex - 1) + 1) * 1000);
