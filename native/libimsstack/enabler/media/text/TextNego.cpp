@@ -935,7 +935,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.Equals("red"))
+        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp);
 

@@ -127,7 +127,7 @@ public:
                 objRtpMap = obj.objRtpMap;
                 deleteFmtp();
 
-                if (objRtpMap.strPayloadType.Equals("red"))
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
                 {
                     pFmtp = new TextProfile::RedFmtp(
                             *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
