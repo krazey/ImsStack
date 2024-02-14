@@ -1471,33 +1471,23 @@ PRIVATE MEDIA_DIRECTION TextNego::UpdateDirectionToMine(IN MEDIA_DIRECTION ePeer
                 "bIsMtCase[%d]",
             ePeerDirection, eLocalDirection, bIsMtCase);
 
-    MEDIA_DIRECTION eNegotiatedDir = MEDIA_DIRECTION_INVALID;
+    if (bIsMtCase == IMS_FALSE)
+    {
+        return eLocalDirection;
+    }
 
     switch (ePeerDirection)
     {
         case MEDIA_DIRECTION_INACTIVE:  // FALL_THROUGH
         case MEDIA_DIRECTION_SEND_RECEIVE:
-            eNegotiatedDir = ePeerDirection;
-            break;
-
+            return ePeerDirection;
         case MEDIA_DIRECTION_RECEIVE:
-            eNegotiatedDir = MEDIA_DIRECTION_SEND;
-            break;
-
+            return MEDIA_DIRECTION_SEND;
         case MEDIA_DIRECTION_SEND:
-            eNegotiatedDir = MEDIA_DIRECTION_RECEIVE;
-            break;
-
+            return MEDIA_DIRECTION_RECEIVE;
         default:
             return MEDIA_DIRECTION_INVALID;
     }
-
-    if (bIsMtCase == IMS_FALSE)
-    {
-        eNegotiatedDir = eLocalDirection;
-    }
-
-    return eNegotiatedDir;
 }
 
 PRIVATE TextNego::OaModel* TextNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
