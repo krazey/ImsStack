@@ -113,6 +113,11 @@ public:
 
     FRIEND_TEST(AosSubscriptionTest, CheckIsReSubscriptionStopped);
     FRIEND_TEST(AosSubscriptionTest, ProcessFailedStatusCode);
+    FRIEND_TEST(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRetryAfter);
+    FRIEND_TEST(AosSubscriptionTest,
+            ShouldRequestScscfRestorationWithRetryAfterIfRetryAfterIsBiggerThanTimerF);
+    FRIEND_TEST(AosSubscriptionTest,
+            ShouldNotRequestScscfRestorationIfRetryAfterIsSmallerThanOrEqualToTimerF);
 
     FRIEND_TEST(AosSubscriptionTest, IsRegAfterWaitRequiredByNotify);
     FRIEND_TEST(AosSubscriptionTest, IsWfcErrorMessageSupportedWithStateChecked);
@@ -907,40 +912,6 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     // nStatusCode == SipStatusCode::SC_423 nMinTime : 0;
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(423, IMS_FALSE));
 
-    // nStatusCode == SipStatusCode::SC_503 No Retry-After;
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
-    m_pAosSubscription->SetTerminated(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(
-                    AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(2);
-
-    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(503));
-
-    AString strRetryAfter = AString::ConstNull();
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
-            .WillOnce(Return(strRetryAfter));
-
-    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
-    // nStatusCode == SipStatusCode::SC_503 Retry-After > TimerF(default 128);
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
-    m_pAosSubscription->SetTerminated(IMS_FALSE);
-    strRetryAfter = AString("600");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
-            .WillOnce(Return(strRetryAfter));
-
-    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
-    // nStatusCode == SipStatusCode::SC_503 Retry-After <= TimerF(default 128);
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
-    m_pAosSubscription->SetTerminated(IMS_FALSE);
-    strRetryAfter = AString("60");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
-            .WillOnce(Return(strRetryAfter));
-
-    EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
     // nStatusCode == SipStatusCode::SC_504;
     ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Clear();
@@ -998,6 +969,98 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .WillRepeatedly(ReturnRef(objErrResubStopped));
 
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_TRUE));
+}
+
+TEST_F(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRetryAfter)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Clear();
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+    MockISipMessage objMockSipMsg;
+    ON_CALL(m_objMockIRegSubscription, GetPreviousResponse()).WillByDefault(Return(&objMockSipMsg));
+    ON_CALL(objMockSipMsg, GetStatusCode()).WillByDefault(Return(503));
+    AString strRetryAfter = AString::ConstNull();
+    ON_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillByDefault(Return(strRetryAfter));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, 0, IMS_FALSE));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
+
+    // THEN
+    // Subscription_Request will be called as the GIVEN condition.
+    // ProcessFailed_Status will return true as the WHEN.
+}
+
+TEST_F(AosSubscriptionTest,
+        ShouldRequestScscfRestorationWithRetryAfterIfRetryAfterIsBiggerThanTimerF)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Clear();
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+    MockISipMessage objMockSipMsg;
+    ON_CALL(m_objMockIRegSubscription, GetPreviousResponse())
+            .WillByDefault(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
+    ON_CALL(objMockSipMsg, GetStatusCode()).WillByDefault(Return(503));
+    AString strRetryAfter("600");
+    ON_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillByDefault(Return(strRetryAfter));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, 600, IMS_FALSE));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
+
+    // THEN
+    // Subscription_Request will be called as the GIVEN condition.
+    // ProcessFailed_Status will return true as the WHEN.
+}
+
+TEST_F(AosSubscriptionTest,
+        ShouldNotRequestScscfRestorationIfRetryAfterIsSmallerThanOrEqualToTimerF)
+{
+    // GIVEN
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    objErrRegRequiredWithNextPcscf.Clear();
+    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
+
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+    MockISipMessage objMockSipMsg;
+    ON_CALL(m_objMockIRegSubscription, GetPreviousResponse())
+            .WillByDefault(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
+    ON_CALL(objMockSipMsg, GetStatusCode()).WillByDefault(Return(503));
+    AString strRetryAfter("60");
+    ON_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillByDefault(Return(strRetryAfter));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, _, IMS_FALSE))
+            .Times(0);
+
+    // WHEN
+    EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
+
+    // THEN
+    // Subscription_Request should not be called as the GIVEN condition.
+    // ProcessFailed_Status will return false as the WHEN.
 }
 
 TEST_F(AosSubscriptionTest, IsRegAfterWaitRequiredByNotify)

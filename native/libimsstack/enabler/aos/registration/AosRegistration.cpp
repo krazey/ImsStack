@@ -1077,8 +1077,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
             ProcessRegRequiredWithNextPcscf();
             break;
 
-        case MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF:
-            ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        case MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            ProcessScscfRestoration(objMsg.nWparam);
             break;
 
         case MSG_REG_TERMINATED_BY_NOTIFY:
@@ -5535,8 +5535,9 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
         case AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF:
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
             break;
-        case AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF:
-            PostMessage(MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, 0);
+        case AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            PostMessage(MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
+                    static_cast<IMS_UINT32>(nRetryAfter), 0);
             break;
         case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
         {

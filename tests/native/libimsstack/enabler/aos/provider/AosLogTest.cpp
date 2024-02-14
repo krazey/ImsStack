@@ -200,8 +200,8 @@ TEST(AosLogTest, RegMessageToString)
                          RegistrationLog::MSG_REG_REQUIRED_WITH_NEXT_PCSCF),
             "MSG_REG_REQUIRED_WITH_NEXT_PCSCF");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
-                         RegistrationLog::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF),
-            "MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF");
+                         RegistrationLog::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION),
+            "MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
                          RegistrationLog::MSG_REG_REINITIATE_WITH_REG_STATE),
             "MSG_REG_REINITIATE_WITH_REG_STATE");

@@ -182,7 +182,7 @@ public:
     FRIEND_TEST(AosRegistrationTest, RegReconfigMessageTriggersReconfig);
     FRIEND_TEST(AosRegistrationTest, RegRequiredWithWaitTimeMessageStartsOfflineRecoverTimer);
     FRIEND_TEST(AosRegistrationTest, RegRequiredWithNextPcscfMessageTriggersRegister);
-    FRIEND_TEST(AosRegistrationTest, RegRequiredWithAvailableNextPcscfMessageTriggersRegister);
+    FRIEND_TEST(AosRegistrationTest, RegRequiredWithScscfRestorationMessageTriggersRegister);
     FRIEND_TEST(AosRegistrationTest, RegTerminatedByNotifyMessageNotifiesFailure);
     FRIEND_TEST(AosRegistrationTest, SubReinitiateMessageCreatesSubscription);
     FRIEND_TEST(AosRegistrationTest, SubTerminatedMessageDestroiesSubscription);
@@ -375,7 +375,7 @@ public:
     FRIEND_TEST(AosRegistrationTest,
             RegRequiredWithNextPcscfSubscriptionCommandSendsMessageForHandling);
     FRIEND_TEST(AosRegistrationTest,
-            RegRequiredWithAvailableNextPcscfSubscriptionCommandSendsMessageForHandling);
+            RegRequiredWithScscfRestorationSubscriptionCommandSendsMessageForHandling);
     FRIEND_TEST(AosRegistrationTest,
             RegRequiredWithSub403MsgSubscriptionCommandSendsMessageForHandling);
     FRIEND_TEST(AosRegistrationTest,
@@ -2022,7 +2022,7 @@ TEST_F(AosRegistrationTest, RegRequiredWithNextPcscfMessageTriggersRegister)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
-TEST_F(AosRegistrationTest, RegRequiredWithAvailableNextPcscfMessageTriggersRegister)
+TEST_F(AosRegistrationTest, RegRequiredWithScscfRestorationMessageTriggersRegister)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(3));
     EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(1));
@@ -2031,7 +2031,7 @@ TEST_F(AosRegistrationTest, RegRequiredWithAvailableNextPcscfMessageTriggersRegi
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
 
-    ImsMessage objMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, 0);
+    ImsMessage objMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION, 0, 0);
     m_pAosRegistration->OnMessage(objMsg);
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
@@ -5151,14 +5151,13 @@ TEST_F(AosRegistrationTest, RegRequiredWithNextPcscfSubscriptionCommandSendsMess
 }
 
 TEST_F(AosRegistrationTest,
-        RegRequiredWithAvailableNextPcscfSubscriptionCommandSendsMessageForHandling)
+        RegRequiredWithScscfRestorationSubscriptionCommandSendsMessageForHandling)
 {
     EXPECT_CALL(m_objMockThread,
-            PostMessageI(
-                    IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF)));
+            PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION)));
 
     m_pAosRegistration->Subscription_Request(
-            AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, IMS_FALSE);
+            AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, 0, IMS_FALSE);
 }
 
 TEST_F(AosRegistrationTest, RegRequiredWithSub403MsgSubscriptionCommandSendsMessageForHandling)
