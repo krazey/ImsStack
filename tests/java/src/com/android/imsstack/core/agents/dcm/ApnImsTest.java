@@ -175,10 +175,10 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testNotifyHandoverInfoChanged() throws Exception {
+    public void testNotifyHandoverStateChanged() throws Exception {
         int failureCause = 33;
         replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
-        mApnIms.notifyHandoverInfoChanged(
+        mApnIms.notifyHandoverStateChanged(
                 IApn.HANDOVER_FAILURE, TelephonyManager.NETWORK_TYPE_IWLAN, failureCause);
 
         verify(mMockIAosInfo).notifyIpcanHandoverFailure(

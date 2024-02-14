@@ -29,13 +29,37 @@ public interface IApn {
     public static final int HANDOVER_SUCCESS = 12;
     public static final int HANDOVER_FAILURE = 13;
 
-    void cleanup();
+    /**
+     * Listener interface to receive the change of data network status.
+     */
+    interface Listener {
+        /**
+         * invoked when the IPCAN(IP Connectivity Access Network) category is changed.
+         */
+        default void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
+        }
+
+        /**
+         * invoked when the state of handover between WWAN and WLAN is changed.
+         */
+        default void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        }
+    }
 
     /**
-     * Add/Remove Listener to receive ip category chaged event
+     * Adds a listener to monitor the change of data network status.
      */
-    void addListener(ApnStateListener listener);
-    void removeListener(ApnStateListener listener);
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
+     */
+    void removeListener(Listener listener);
+
+    /**
+     * Cleans up the Apn object.
+     */
+    void cleanup();
 
     /**
      * request apn connection to use target apn.

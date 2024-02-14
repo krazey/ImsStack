@@ -141,8 +141,8 @@ public class ApnIms extends Apn {
      * Notifies the application that data handover information is changed.
      */
     @Override
-    protected void notifyHandoverInfoChanged(int handoverState, int networkType, int failCause) {
-        super.notifyHandoverInfoChanged(handoverState, networkType, failCause);
+    protected void notifyHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        super.notifyHandoverStateChanged(handoverState, networkType, failCause);
 
         if (handoverState == IApn.HANDOVER_FAILURE) {
             ImsLog.d(mSlotId, "notifyIpcanHandoverFailure :: networkType=" + networkType

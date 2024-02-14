@@ -25,7 +25,6 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -58,7 +57,7 @@ public class SscNetConnection implements ISscNetConnection {
     private EApnType mApnType = null;
     @VisibleForTesting
     protected int mConnectionInactivityTimer = 120 * 1000;
-    private final ApnStateListener mApnStateListener = new ApnStateListenerImpl();
+    private final IApn.Listener mApnListener = new ApnListener();
     private IDcNetWatcher.Listener mNetWatcherListener;
 
     @VisibleForTesting
@@ -102,7 +101,7 @@ public class SscNetConnection implements ISscNetConnection {
             IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
             IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
             if (apn != null) {
-                apn.addListener(mApnStateListener);
+                apn.addListener(mApnListener);
             }
         }
 
@@ -118,7 +117,7 @@ public class SscNetConnection implements ISscNetConnection {
             IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
             IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
             if (apn != null) {
-                apn.removeListener(mApnStateListener);
+                apn.removeListener(mApnListener);
             }
         }
 
@@ -288,7 +287,7 @@ public class SscNetConnection implements ISscNetConnection {
         mTimerIdTable.remove(eventNum);
     }
 
-    private final class ApnStateListenerImpl extends ApnStateListener {
+    private final class ApnListener implements IApn.Listener {
         @Override
         public void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
             ImsLog.d(mSlotId, "IPCAN changed : " + ipcanCategory);

@@ -31,7 +31,6 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -71,7 +70,7 @@ public class SscNetConnectionTest {
 
     @Captor ArgumentCaptor<Integer> mEventCaptor;
     @Captor ArgumentCaptor<Message> mMessageCaptor;
-    @Captor ArgumentCaptor<ApnStateListener> mApnStateListenerCaptor;
+    @Captor ArgumentCaptor<IApn.Listener> mApnListenerCaptor;
     @Captor ArgumentCaptor<IDcNetWatcher.Listener> mNetWatcherListenerCaptor;
 
     @Before
@@ -297,11 +296,11 @@ public class SscNetConnectionTest {
 
     @Test
     public void onIpcanCategoryChanged() {
-        verify(mMockApn).addListener(mApnStateListenerCaptor.capture());
-        ApnStateListener apnStateListener = mApnStateListenerCaptor.getValue();
-        assertNotNull(apnStateListener);
+        verify(mMockApn).addListener(mApnListenerCaptor.capture());
+        IApn.Listener apnListener = mApnListenerCaptor.getValue();
+        assertNotNull(apnListener);
 
-        apnStateListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
+        apnListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
 
         verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
         int msg = mEventCaptor.getValue();

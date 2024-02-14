@@ -43,7 +43,6 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -161,8 +160,7 @@ public abstract class Apn extends Handler implements IApn {
     protected boolean mIsMonitoringCallbackRegistered = false;
     protected int mSubId = MSimUtils.INVALID_SUB_ID;
     protected ConfigInterface.Listener mConfigListener;
-    protected Set<ApnStateListener> mApnStateListeners =
-            new CopyOnWriteArraySet<ApnStateListener>();
+    protected Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     protected Apn(Context context, int slotId) {
         super(Looper.myLooper());
@@ -231,13 +229,13 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public void addListener(ApnStateListener listener) {
-        mApnStateListeners.add(listener);
+    public void addListener(Listener listener) {
+        mListeners.add(listener);
     }
 
     @Override
-    public void removeListener(ApnStateListener listener) {
-        mApnStateListeners.remove(listener);
+    public void removeListener(Listener listener) {
+        mListeners.remove(listener);
     }
 
     @Override
@@ -637,22 +635,22 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     /**
-     * Notifies the application that IPCAN category is changed.
+     * Notifies that IPCAN(IP Connectivity Access Network) category is changed.
      */
     protected void notifyIpcanCategoryChanged(int ipcanCategory) {
         ImsLog.i(mSlotId, "notifyIpcanCategoryChanged");
-        for (ApnStateListener l : mApnStateListeners) {
+        for (Listener l : mListeners) {
             l.onIpcanCategoryChanged(mType.getType(), ipcanCategory);
         }
     }
 
     /**
-     * Notifies the application that data handover information is changed.
+     * Notifies that state of handover between WWAN and WLAN is changed.
      */
-    protected void notifyHandoverInfoChanged(int handoverState, int networkType, int failCause) {
-        ImsLog.i(mSlotId, "notifyHandoverInfoChanged");
-        for (ApnStateListener l : mApnStateListeners) {
-            l.onHandoverInfoChanged(handoverState, networkType, failCause);
+    protected void notifyHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        ImsLog.i(mSlotId, "notifyHandoverStateChanged");
+        for (Listener l : mListeners) {
+            l.onHandoverStateChanged(handoverState, networkType, failCause);
         }
     }
 
@@ -1306,17 +1304,17 @@ public abstract class Apn extends Handler implements IApn {
 
         private void handleHandoverStart(int networkType) {
             ImsLog.i(mSlotId, "handleHandoverStart");
-            notifyHandoverInfoChanged(HANDOVER_START, networkType, DataFailCause.NONE);
+            notifyHandoverStateChanged(HANDOVER_START, networkType, DataFailCause.NONE);
         }
 
         private void handleHandoverSuccess(int networkType) {
             ImsLog.i(mSlotId, "handleHandoverSuccess");
-            notifyHandoverInfoChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
+            notifyHandoverStateChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
         }
 
         private void handleHandoverFailure(int networkType, int causeCode) {
             ImsLog.i(mSlotId, "handleHandoverFailure");
-            notifyHandoverInfoChanged(HANDOVER_FAILURE, networkType, causeCode);
+            notifyHandoverStateChanged(HANDOVER_FAILURE, networkType, causeCode);
         }
 
         private void handleInitialConnectionFailure(int causeCode) {

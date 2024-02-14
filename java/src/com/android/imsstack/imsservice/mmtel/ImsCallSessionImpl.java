@@ -40,7 +40,6 @@ import android.text.TextUtils;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -126,7 +125,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private ConferenceProxy mConferenceProxy = null;
     private MoPendingCall mMoPendingCall = null;
     private TtyModeListenerProxy mTtyModeListener = null;
-    private CallApnStateListener mApnStateListener = null;
+    private ApnListener mApnListener = null;
     private MtcServiceStateListener mServiceStateListener = null;
     private final ImsVideoCallSession mVideoCallSession;
     private final ImsVideoCallProviderBase mVideoCallProvider;
@@ -212,7 +211,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             tmt.addListener(mTtyModeListener);
         }
 
-        setApnStateListener();
+        setApnListener();
         updateCallExtraForRatType(mCallProfile, true);
     }
 
@@ -229,7 +228,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         clearPendingCall();
         clearLocationBasedCall();
         clearUsatBasedCall();
-        clearApnStateListener();
+        clearApnListener();
 
         logi("close");
 
@@ -3228,7 +3227,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private class CallApnStateListener extends ApnStateListener {
+    private class ApnListener implements IApn.Listener {
         @Override
         public void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
             log("onIpcanCategoryChanged :: apnType="
@@ -3270,8 +3269,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private void clearApnStateListener() {
-        if (mApnStateListener == null) {
+    private void clearApnListener() {
+        if (mApnListener == null) {
             return;
         }
 
@@ -3279,13 +3278,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
-            apn.removeListener(mApnStateListener);
+            apn.removeListener(mApnListener);
         }
 
-        mApnStateListener = null;
+        mApnListener = null;
     }
 
-    private void setApnStateListener() {
+    private void setApnListener() {
         if (!ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId())) {
             return;
         }
@@ -3294,13 +3293,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
-            mApnStateListener = new CallApnStateListener();
-            apn.addListener(mApnStateListener);
+            mApnListener = new ApnListener();
+            apn.addListener(mApnListener);
         }
     }
 
     private boolean updateCallExtraForRatType(ImsCallProfile profile, boolean isInitialSet) {
-        if (mApnStateListener == null) {
+        if (mApnListener == null) {
             // If Wi-Fi calling is not supported, do not update this call extra.
             return false;
         }
