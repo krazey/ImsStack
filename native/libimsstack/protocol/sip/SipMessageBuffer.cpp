@@ -15,9 +15,8 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
-#include "SystemConfig.h"
-
 #include "SipMessageBuffer.h"
+#include "SystemConfig.h"
 
 PUBLIC
 SipMessageBuffer::SipMessageBuffer() :

@@ -16,8 +16,8 @@
 #ifndef __SIP_MSGUTIL_H__
 #define __SIP_MSGUTIL_H__
 
-#include "SipDatatypes.h"
 #include "SipAbnfUtil.h"
+#include "SipDatatypes.h"
 #include "msg/SipHeaderBase.h"
 
 #define SIP_SIP_VERSION               "SIP/2.0"

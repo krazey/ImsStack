@@ -17,11 +17,10 @@
 #define __SIP_ADDR_SPEC_H__
 
 #include "AStringBuffer.h"
-
 #include "SipDatatypes.h"
 #include "SipRefBase.h"
-#include "msg/SipParameters.h"
 #include "msg/IParameterComponent.h"
+#include "msg/SipParameters.h"
 
 class SipUri : public SipRefBase, public IParameterComponent
 {

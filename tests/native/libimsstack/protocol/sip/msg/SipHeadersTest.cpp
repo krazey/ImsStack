@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipHeaders.h"
 #include "msg/SipMsgUtil.h"
 

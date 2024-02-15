@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipDebug.h"
 #include "msg/SipIntegerHeader.h"
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
-#include "SipDebug.h"
 
 #define MAX_LEN 20
 

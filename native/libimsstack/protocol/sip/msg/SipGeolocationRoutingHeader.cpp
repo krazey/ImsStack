@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipGeolocationRoutingHeader.h"
 #include "SipDebug.h"
+#include "msg/SipGeolocationRoutingHeader.h"
 #include "platform/SipString.h"
 
 SipGeolocationRoutingHeader::SipGeolocationRoutingHeader() :

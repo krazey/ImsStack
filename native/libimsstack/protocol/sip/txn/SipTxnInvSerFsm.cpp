@@ -16,11 +16,10 @@
 #include "SipDatatypes.h"
 #include "SipDebug.h"
 #include "SipStackError.h"
-
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
-#include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
 #define MIN(a, b)                ((a) < (b)) ? (a) : (b)

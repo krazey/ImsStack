@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipRetryAfterHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipRetryAfterHeader.h"
+#include "platform/SipString.h"
 
 #define MAX_RETRY_AFTER_LEN 12
 

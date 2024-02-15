@@ -18,12 +18,12 @@
 
 #define SIP_BADMESSAGE_PARSING
 
-#include "msg/SipHeaders.h"
-#include "msg/SipMsgBody.h"
-#include "msg/SipRequestLine.h"
 #ifdef SIP_BADMESSAGE_PARSING
 #include "msg/SipBadHeader.h"
 #endif
+#include "msg/SipHeaders.h"
+#include "msg/SipMsgBody.h"
+#include "msg/SipRequestLine.h"
 
 /**
   This class represents one SIP message. The stack user can create a suitable message by setting

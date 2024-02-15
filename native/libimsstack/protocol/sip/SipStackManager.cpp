@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform/SipMemory.h"
-#include "txn/SipTxn.h"
-#include "transport/SipTransportInfo.h"
-#include "SipStackManager.h"
-#include "txn/SipTxnHandler.h"
-#include "transport/SipTransportHandler.h"
 #include "SipDebug.h"
-#include "SipUtil.h"
 #include "SipMessageBuffer.h"
+#include "SipStackManager.h"
+#include "SipUtil.h"
+#include "platform/SipMemory.h"
+#include "transport/SipTransportHandler.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnHandler.h"
 
 extern SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
         IN SIP_VOID* pSipMsg, IN ISipUserData* pUserData);

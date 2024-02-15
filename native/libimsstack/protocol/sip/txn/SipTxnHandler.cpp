@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "txn/SipTxn.h"
-#include "msg/SipMessage.h"
-#include "txn/SipTxnHandler.h"
 #include "SipDebug.h"
-#include "txn/SipTxnFsm.h"
-#include "SipUtil.h"
 #include "SipStackError.h"
 #include "SipTxnContext.h"
+#include "SipUtil.h"
+#include "msg/SipMessage.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnFsm.h"
+#include "txn/SipTxnHandler.h"
 
 static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode);
 static SIP_INT32 GetNonInvSerFsmEvt(SIP_UINT16 nStatusCode);

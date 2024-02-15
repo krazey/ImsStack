@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 #include "IpAddress.h"
-#include "msg/SipAddrSpec.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
-#include "msg/SipViaHeader.h"
+#include "msg/SipAddrSpec.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipViaHeader.h"
+#include "platform/SipString.h"
 
 SipViaHeader::SipViaHeader() :
         SipHeaderBase(SipHeaderBase::VIA),

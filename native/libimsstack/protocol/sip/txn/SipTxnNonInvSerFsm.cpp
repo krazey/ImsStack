@@ -16,10 +16,9 @@
 #include "SipDatatypes.h"
 #include "SipDebug.h"
 #include "SipStackError.h"
-
 #include "txn/SipTxn.h"
-#include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
 static SIP_BOOL NonInvSerFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)

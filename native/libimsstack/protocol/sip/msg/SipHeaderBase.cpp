@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipHeaderBase.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
+#include "msg/SipHeaderBase.h"
 #include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END] = {
         {SIP_TRUE,  SIP_TRUE }, // ALLOW

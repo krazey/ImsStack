@@ -16,8 +16,8 @@
 #ifndef __SIP_DEFLOGGERUTIL_H__
 #define __SIP_DEFLOGGERUTIL_H__
 
-#include "SipDatatypes.h"
 #include "ISipLoggerUtil.h"
+#include "SipDatatypes.h"
 
 #define MAX_FILENAME_SIZE 256
 

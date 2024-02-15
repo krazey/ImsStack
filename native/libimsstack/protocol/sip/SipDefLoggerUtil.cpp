@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipDefLoggerUtil.h"
 #include "ServiceTrace.h"
+#include "SipDefLoggerUtil.h"
 
 __IMS_TRACE_TAG_SIP__;
 

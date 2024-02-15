@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "msg/SipHeaderList.h"
+
 #include "SipConfiguration.h"
+#include "msg/SipHeaderList.h"
 
 namespace android
 {

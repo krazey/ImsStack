@@ -19,8 +19,8 @@
 #include <assert.h>
 
 #include "SipDatatypes.h"
-#include "msg/SipParameters.h"
 #include "msg/SipAddrSpec.h"
+#include "msg/SipParameters.h"
 
 class IParameterComponent;
 

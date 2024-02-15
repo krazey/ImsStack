@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipDebug.h"
 #include "msg/SipHeaderList.h"
 #include "msg/SipMessage.h"
 #include "msg/SipMsgUtil.h"
-#include "SipDebug.h"
 #include "platform/SipString.h"
 
 extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(

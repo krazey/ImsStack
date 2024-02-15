@@ -16,8 +16,8 @@
 #ifndef __ISIP_USER_DATA__H__
 #define __ISIP_USER_DATA__H__
 
-#include "SipDatatypes.h"
 #include "SipConfiguration.h"
+#include "SipDatatypes.h"
 /****************************************************************************
 ISipUserData: Class Declaration Starts
  *****************************************************************************/

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipHeaders.h"
 #include "msg/SipIntegerHeader.h"
-#include "msg/SipParameters.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipParameters.h"
 
 namespace android
 {
