@@ -71,14 +71,8 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
 
     @Override
     public void notifyDeregistered(int networkType, int reason, String message) {
-        int suggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
 
-        if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK) {
-            suggestedAction = RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
-        } else if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT) {
-            suggestedAction = RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
-        }
-        onDeregistered(getReasonInfo(reason, message), suggestedAction, networkType);
+        onDeregistered(getReasonInfo(reason, message), getSuggestedAction(reason), networkType);
     }
 
     @Override
@@ -103,6 +97,22 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,
                     ImsReasonInfo.CODE_UNSPECIFIED, null);
+        }
+    }
+
+    private int getSuggestedAction(int reason) {
+        logi("getSuggestedAction for reason:" + reason);
+        switch (reason) {
+            case IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK:
+                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
+            case IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT:
+                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
+            case IAosRegistrationListener.ReasonCode.CODE_RAT_BLOCK:
+                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_RAT_BLOCK;
+            case IAosRegistrationListener.ReasonCode.CODE_CLEAR_RAT_BLOCKS:
+                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS;
+            default:
+                return RegistrationManager.SUGGESTED_ACTION_NONE;
         }
     }
 
