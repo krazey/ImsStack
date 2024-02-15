@@ -240,6 +240,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
         case ApplicationLog::TIMER_IMS_ESTABLISHMENT:
             return "TIMER_IMS_ESTABLISHMENT";
 
+        case ApplicationLog::TIMER_RAT_BLOCK:
+            return "TIMER_RAT_BLOCK";
+
         default:
             return "__INVALID__";
     }
