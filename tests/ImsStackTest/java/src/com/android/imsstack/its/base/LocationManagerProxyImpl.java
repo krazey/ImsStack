@@ -21,6 +21,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
@@ -34,13 +35,19 @@ import java.util.concurrent.Executor;
  * An implementation class to access the {@link LocationManager}.
  */
 public class LocationManagerProxyImpl implements LocationManagerProxy {
-    private boolean mProviderEnabled;
-    private Location mLastKnownLocation;
+    private final ArrayMap<String, Boolean> mProviderEnablements = new ArrayMap<>();
     private final ArraySet<LocationListenerRecord> mListenerRecords = new ArraySet<>();
+    private Location mLastKnownLocation;
+
+    LocationManagerProxyImpl() {
+        mProviderEnablements.put(LocationManager.FUSED_PROVIDER, Boolean.TRUE);
+        mProviderEnablements.put(LocationManager.GPS_PROVIDER, Boolean.TRUE);
+        mProviderEnablements.put(LocationManager.NETWORK_PROVIDER, Boolean.TRUE);
+    }
 
     @Override
     public boolean isProviderEnabled(@NonNull String provider) {
-        return mProviderEnabled;
+        return mProviderEnablements.getOrDefault(provider, Boolean.FALSE);
     }
 
     @Override
@@ -55,7 +62,13 @@ public class LocationManagerProxyImpl implements LocationManagerProxy {
             @NonNull LocationRequest locationRequest,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull LocationListener listener) {
-        mListenerRecords.add(new LocationListenerRecord(locationRequest, listener, executor));
+        LocationListenerRecord llr = new LocationListenerRecord(
+                locationRequest, listener, executor);
+        mListenerRecords.add(llr);
+
+        if (mLastKnownLocation != null) {
+            llr.dispatchLocationChanged(mLastKnownLocation);
+        }
     }
 
     @Override
@@ -68,6 +81,16 @@ public class LocationManagerProxyImpl implements LocationManagerProxy {
         });
 
         recordsToRemove.forEach(mListenerRecords::remove);
+    }
+
+    /**
+     * Sets the enablement of the specified provider.
+     *
+     * @param provider The provider name.
+     * @param enabled The flag specifying whether the given provider needs to be enabled or not.
+     */
+    public void setProviderEnablement(@NonNull String provider, boolean enabled) {
+        mProviderEnablements.put(provider, Boolean.valueOf(enabled));
     }
 
     /**
