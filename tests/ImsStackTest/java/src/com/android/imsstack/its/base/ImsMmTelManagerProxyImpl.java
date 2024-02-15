@@ -27,10 +27,14 @@ public class ImsMmTelManagerProxyImpl implements ImsMmTelManagerProxy {
     private boolean mAdvancedCallingSettingEnabled;
     private boolean mVtSettingEnabled;
     private boolean mVoWiFiSettingEnabled;
-    private @WiFiCallingMode int mVoWiFiMode = ImsMmTelManager.WIFI_MODE_UNKNOWN;
+    private @WiFiCallingMode int mVoWiFiMode = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
     private boolean mVoWiFiRoamingSettingEnabled;
-    private @WiFiCallingMode int mVoWiFiRoamingMode = ImsMmTelManager.WIFI_MODE_UNKNOWN;
+    private @WiFiCallingMode int mVoWiFiRoamingMode = ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
     private boolean mCrossSimCallingEnabled;
+
+    ImsMmTelManagerProxyImpl() {
+        setDefaultValues();
+    }
 
     @Override
     public boolean isAdvancedCallingSettingEnabled() {
@@ -124,5 +128,18 @@ public class ImsMmTelManagerProxyImpl implements ImsMmTelManagerProxy {
      */
     public void setVoWiFiRoamingMode(@WiFiCallingMode int mode) {
         mVoWiFiRoamingMode = mode;
+    }
+
+    /**
+     * Sets the default values for this object.
+     */
+    public void setDefaultValues() {
+        setCrossSimCallingEnabled(false);
+        setAdvancedCallingSettingEnabled(true);
+        setVtSettingEnabled(true);
+        setVoWiFiSettingEnabled(true);
+        setVoWiFiMode(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
+        setVoWiFiRoamingSettingEnabled(false);
+        setVoWiFiRoamingMode(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
     }
 }
