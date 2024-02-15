@@ -377,6 +377,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_CELLULAR_OUT_OF_SERVICE:
             return "CELLULAR_OUT_OF_SERVICE";
 
+        case BLOCK_CELLULAR_RAT_BLOCK:
+            return "CELLULAR_RAT_BLOCK";
+
         case BLOCK_CELLULAR_ROAMING:
             return "CELLULAR_ROAMING";
 

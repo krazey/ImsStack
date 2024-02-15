@@ -66,6 +66,8 @@ typedef enum
     BLOCK_CELLULAR_NO_NETWORK,
     /// Current data network is not valid for ims services.
     BLOCK_CELLULAR_OUT_OF_SERVICE,
+    /// The current RAT was blocked because registration failed for all P-CSCFs.
+    BLOCK_CELLULAR_RAT_BLOCK,
     /// a roming network. volte may be not allowed in roaming area.
     BLOCK_CELLULAR_ROAMING,
     /// IMS voice over PS Session Supported Indication is not configured during N/W attach.
