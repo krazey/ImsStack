@@ -53,7 +53,7 @@
         android:usesCleartextTraffic="true"
         android:debuggable="true">
         <service
-            android:name="com.android.imsstack.imsservice.ImsService"
+            android:name="com.android.imsstack.its.imsservice.ImsServiceConnector$TestImsService"
             android:exported="true"
             android:persistent="true"
             android:singleUser="true"
