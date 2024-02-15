@@ -43,7 +43,9 @@ public class SensorManagerProxyImpl implements SensorManagerProxy {
 
     @Override
     public boolean requestTriggerSensor(TriggerEventListener listener, Sensor sensor) {
-        mTriggerSensorRecords.add(new TriggerSensorRecord(listener, sensor));
+        TriggerSensorRecord tsr = new TriggerSensorRecord(listener, sensor);
+        mTriggerSensorRecords.add(tsr);
+        tsr.dispatchTriggerEvent();
         return true;
     }
 
