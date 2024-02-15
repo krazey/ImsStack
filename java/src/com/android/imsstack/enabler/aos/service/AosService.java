@@ -34,6 +34,9 @@ import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.aos.IAosInfo;
@@ -58,7 +61,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * This class provides an interface to manage and control the AoS related information.
  */
-public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener {
+public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener,
+         IDcNetWatcher.Listener, IApn.Listener {
 
     public static final int PCO_TARGET_ID = 0xff00;
     public static final int PCO_NONE_VALUE = 0;
@@ -150,10 +154,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
      */
     public void start() {
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
-
         if (sim != null) {
             sim.addListener(this);
             sim.addIsimListener(this);
+        }
+
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+        if (dnw != null) {
+            dnw.addListener(this);
+        }
+
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
+        if (apn != null) {
+            apn.addListener(this);
         }
     }
 
@@ -162,10 +176,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
      */
     public void stop() {
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
-
         if (sim != null) {
             sim.removeListener(this);
             sim.removeIsimListener(this);
+        }
+
+        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+        if (dnw != null) {
+            dnw.removeListener(this);
+        }
+
+        IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+        IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.IMS.getType()) : null;
+        if (apn != null) {
+            apn.removeListener(this);
         }
     }
 
@@ -250,11 +274,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyAirplaneSetting(boolean isOn) {
-        sendRequest(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, isOn);
-    }
-
-    @Override
     public void notifyDataRoamingSetting(boolean isAllowed) {
         sendRequest(IIAosService.J2N_NOTIFY_DATA_ROAMING_SETTING, isAllowed);
     }
@@ -305,16 +324,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyIpcanHandoverFailure(int targetNetwork, int causeCode) {
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE);
-        parcel.writeInt(targetNetwork);
-        parcel.writeInt(causeCode);
-        sendRequest(parcel);
-    }
-
-    @Override
     public void notifyIsimState(int state) {
         sendRequest(IIAosService.J2N_NOTIFY_ISIM_STATE, state);
     }
@@ -342,11 +351,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         parcel.writeInt(isRefresh ? 1 : 0);
         parcel.writeInt(state);
         sendRequest(parcel);
-    }
-
-    @Override
-    public void notifyPlmnChanged() {
-        sendRequest(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
     }
 
     @Override
@@ -378,21 +382,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         parcel.writeInt(state);
         parcel.writeLong(duration);
         sendRequest(parcel);
-    }
-
-    @Override
-    public void notifyCrossSimStatus(boolean isConnectedOverCrossSim) {
-        ImsLog.d(mSlotId, "AosService: notifyCrossSimStatus");
-        if (mIsConnectedOverCrossSim == isConnectedOverCrossSim) {
-            return;
-        }
-
-        mIsConnectedOverCrossSim = isConnectedOverCrossSim;
-        if ((mRegisteredNetworkType == NetworkType.CROSS_SIM) && !mIsConnectedOverCrossSim) {
-            updateRegisteredNetworkType(NetworkType.IWLAN);
-        } else if ((mRegisteredNetworkType == NetworkType.IWLAN) && mIsConnectedOverCrossSim) {
-            updateRegisteredNetworkType(NetworkType.CROSS_SIM);
-        }
     }
 
     @Override
@@ -431,6 +420,48 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 default:
                     break;
             }
+        }
+    }
+
+    @Override
+    public void onNetworkOperatorChanged() {
+        ImsLog.d(mSlotId, "AosService: onNetworkOperatorChanged");
+        sendRequest(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+    }
+
+    @Override
+    public void onAirplaneModeChanged(boolean airplaneMode) {
+        ImsLog.d(mSlotId, "AosService: onAirplaneModeChanged");
+        sendRequest(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, airplaneMode);
+    }
+
+    @Override
+    public void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        ImsLog.d(mSlotId, "AosService: onHandoverStateChanged");
+        if (handoverState == IApn.HANDOVER_FAILURE) {
+            int targetNetwork = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
+                    ? IApn.IPCAN_CATEGORY_MOBILE : IApn.IPCAN_CATEGORY_WLAN;
+
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE);
+            parcel.writeInt(targetNetwork);
+            parcel.writeInt(failCause);
+            sendRequest(parcel);
+        }
+    }
+
+    @Override
+    public void onCrossSimStatusChanged(boolean connectedOverCrossSim) {
+        ImsLog.d(mSlotId, "AosService: onCrossSimStatusChanged");
+        if (mIsConnectedOverCrossSim == connectedOverCrossSim) {
+            return;
+        }
+
+        mIsConnectedOverCrossSim = connectedOverCrossSim;
+        if ((mRegisteredNetworkType == NetworkType.CROSS_SIM) && !mIsConnectedOverCrossSim) {
+            updateRegisteredNetworkType(NetworkType.IWLAN);
+        } else if ((mRegisteredNetworkType == NetworkType.IWLAN) && mIsConnectedOverCrossSim) {
+            updateRegisteredNetworkType(NetworkType.CROSS_SIM);
         }
     }
 

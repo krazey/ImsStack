@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -300,15 +301,6 @@ public class AosServiceTest extends ImsStackTest {
         assertEquals(NetworkType.UTRAN, registeredNetworkType);
     }
 
-    @Test
-    public void notifyAirplaneSetting() {
-        byte[] airplaneSettingData = createBytes(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, true);
-
-        mAosService.notifyAirplaneSetting(true);
-
-        verify(mMockJniIms).sendData(mNativeObject, airplaneSettingData);
-    }
-
     // currently, not used
     @Test
     public void notifyDataRoamingSetting() {
@@ -403,18 +395,6 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void notifyIpcanHandoverFailure() {
-        byte[] ipcanHandoverFailureData = createBytes(
-                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE,
-                android.telephony.DataFailCause.OPERATOR_BARRED);
-
-        mAosService.notifyIpcanHandoverFailure(IApn.IPCAN_CATEGORY_MOBILE,
-                android.telephony.DataFailCause.OPERATOR_BARRED);
-
-        verify(mMockJniIms).sendData(mNativeObject, ipcanHandoverFailureData);
-    }
-
-    @Test
     public void notifyIsimState() {
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
 
@@ -462,15 +442,6 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.notifyPhoneNumberState(true, PhoneNumberState.SIM_LOADED);
 
         verify(mMockJniIms).sendData(mNativeObject, phoneNumberStateData);
-    }
-
-    @Test
-    public void notifyPlmnChanged() {
-        byte[] plmnChangedData = createBytes(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
-
-        mAosService.notifyPlmnChanged();
-
-        verify(mMockJniIms).sendData(mNativeObject, plmnChangedData);
     }
 
     @Test
@@ -596,35 +567,6 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void notifyCrossSimStatus() {
-        mAosService.addListener(mMockAosRegistrationListener);
-
-        // do not update registered network type when registered network is not IWLAN nor CROSS_SIM
-        mAosService.mIsConnectedOverCrossSim = false;
-        mAosService.mRegisteredNetworkType = NetworkType.LTE;
-        mAosService.notifyCrossSimStatus(true);
-        assertEquals(NetworkType.LTE, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, never()).notifyRegistered(
-                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
-
-        // update registered network type to IWLAN
-        mAosService.mIsConnectedOverCrossSim = true;
-        mAosService.mRegisteredNetworkType = NetworkType.CROSS_SIM;
-        mAosService.notifyCrossSimStatus(false);
-        assertEquals(NetworkType.IWLAN, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
-                NetworkType.IWLAN, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
-
-        // update registered network type to CROSS_SIM
-        mAosService.mIsConnectedOverCrossSim = false;
-        mAosService.mRegisteredNetworkType = NetworkType.IWLAN;
-        mAosService.notifyCrossSimStatus(true);
-        assertEquals(NetworkType.CROSS_SIM, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
-                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
-    }
-
-    @Test
     public void onSimStateChanged_simLoaded() {
         byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);
@@ -684,6 +626,86 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.onIsimStateChanged();
 
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
+    }
+
+    @Test
+    public void onNetworkOperatorChanged() {
+        byte[] plmnChangedData = createBytes(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+
+        mAosService.onNetworkOperatorChanged();
+
+        verify(mMockJniIms).sendData(mNativeObject, plmnChangedData);
+    }
+
+    @Test
+    public void onAirplaneModeChanged() {
+        byte[] airplaneSettingData = createBytes(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, true);
+
+        mAosService.onAirplaneModeChanged(true);
+
+        verify(mMockJniIms).sendData(mNativeObject, airplaneSettingData);
+    }
+
+    @Test
+    public void onHandoverStateChanged_doNotNotifyIpcanHandoverExceptFailure() {
+        int reason = android.telephony.DataFailCause.OPERATOR_BARRED;
+
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_START,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_SUCCESS,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+
+        verify(mMockJniIms, never()).sendData(eq(mNativeObject), anyObject());
+    }
+
+    @Test
+    public void onHandoverStateChanged_notifyIpcanHandoverFailure() {
+        int reason = android.telephony.DataFailCause.OPERATOR_BARRED;
+        byte[] ipcanHandoverFailureData = createBytes(
+                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE, reason);
+
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+
+        verify(mMockJniIms).sendData(mNativeObject, ipcanHandoverFailureData);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeForCellular() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.mIsConnectedOverCrossSim = false;
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+
+        mAosService.onCrossSimStatusChanged(true);
+
+        assertEquals(NetworkType.LTE, mAosService.mRegisteredNetworkType);
+        verifyNoMoreInteractions(mMockAosRegistrationListener);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToIwlan() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.mIsConnectedOverCrossSim = true;
+        mAosService.mRegisteredNetworkType = NetworkType.CROSS_SIM;
+
+        mAosService.onCrossSimStatusChanged(false);
+
+        assertEquals(NetworkType.IWLAN, mAosService.mRegisteredNetworkType);
+        verify(mMockAosRegistrationListener).notifyRegistered(
+                NetworkType.IWLAN, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToCrossSim() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.mIsConnectedOverCrossSim = false;
+        mAosService.mRegisteredNetworkType = NetworkType.IWLAN;
+
+        mAosService.onCrossSimStatusChanged(true);
+
+        assertEquals(NetworkType.CROSS_SIM, mAosService.mRegisteredNetworkType);
+        verify(mMockAosRegistrationListener).notifyRegistered(
+                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
     }
 
     @Test

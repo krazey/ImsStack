@@ -68,6 +68,7 @@ public class ApnImsTest {
     ApnIms mApnIms;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
+    @Mock private IApn.Listener mMockApnListener;
     @Mock private IDcApn mMockIDcApn;
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IAosInfo mMockIAosInfo;
@@ -175,17 +176,6 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testNotifyHandoverStateChanged() throws Exception {
-        int failureCause = 33;
-        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
-        mApnIms.notifyHandoverStateChanged(
-                IApn.HANDOVER_FAILURE, TelephonyManager.NETWORK_TYPE_IWLAN, failureCause);
-
-        verify(mMockIAosInfo).notifyIpcanHandoverFailure(
-                IApn.IPCAN_CATEGORY_MOBILE, failureCause);
-    }
-
-    @Test
     public void testHandleCarrierConfigChanged() throws Exception {
         when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
         DeviceConfig.setSimCount(2, 2);
@@ -204,25 +194,27 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testUpdateCrossSimStatus() throws Exception {
-        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
-        mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+    public void doNotNotifyCrossSimStatusWhenNotChanged() throws Exception {
+        mApnIms.addListener(mMockApnListener);
+        mApnIms.mIsCellularDefaultNetwork = false;
+        mApnIms.mIsConnectedOverCrossSim = false;
 
-        // do not notify CrossSim status to AosInfo because default network is not available
         mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_IWLAN);
-        verify(mMockIAosInfo, never()).notifyCrossSimStatus(anyBoolean());
 
-        // notify CrossSim status as true to AosInfo when default network is available
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
-        msg.obj = true;
-        mApnIms.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-        verify(mMockIAosInfo).notifyCrossSimStatus(true);
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean());
+        mApnIms.removeListener(mMockApnListener);
+    }
 
-        // notify CrossSim status as false to AosInfo because it does not connected over IWLAN
+    @Test
+    public void notifyCrossSimStatusWhenChanged() throws Exception {
+        mApnIms.addListener(mMockApnListener);
+        mApnIms.mIsCellularDefaultNetwork = true;
+        mApnIms.mIsConnectedOverCrossSim = true;
+
         mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_LTE);
-        verify(mMockIAosInfo).notifyCrossSimStatus(false);
+
+        verify(mMockApnListener).onCrossSimStatusChanged(false);
+        mApnIms.removeListener(mMockApnListener);
     }
 
     @Test
@@ -447,24 +439,33 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleDefaultNetworkStatusChanged() throws Exception {
-        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
+    public void doNotHandleInvalidMsgForDefaultNetworkStatusChange() throws Exception {
+        mApnIms.addListener(mMockApnListener);
         mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
 
-        // do not handle invalid msg.obj
-        Message msg1 = Message.obtain();
-        msg1.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
-        msg1.obj = null;
-        mApnIms.sendMessage(msg1);
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
+        msg.obj = null;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        Message msg2 = Message.obtain();
-        msg2.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
-        msg2.obj = true;
-        mApnIms.sendMessage(msg2);
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean());
+        mApnIms.removeListener(mMockApnListener);
+    }
+
+    @Test
+    public void handleMsgForDefaultNetworkStatusChange() throws Exception {
+        mApnIms.addListener(mMockApnListener);
+        mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
+        msg.obj = true;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIAosInfo).notifyCrossSimStatus(true);
+        verify(mMockApnListener).onCrossSimStatusChanged(true);
+        mApnIms.removeListener(mMockApnListener);
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

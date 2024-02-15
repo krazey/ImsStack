@@ -853,7 +853,9 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     private void handleNetworkOperatorChanged() {
-        mAosInfo.notifyPlmnChanged();
+        for (Listener l : mListeners) {
+            l.onNetworkOperatorChanged();
+        }
     }
 
     private void handleDataServiceStateChanged() {
@@ -1035,8 +1037,8 @@ public class DcNetWatcher implements IDcNetWatcher {
         public void onNativeServiceReady() {
             ImsLog.i(mSlotId, "NativeState: service ready.");
 
-            if (mAosInfo != null) {
-                mAosInfo.notifyAirplaneSetting(mAirplaneMode);
+            for (Listener l : mListeners) {
+                l.onAirplaneModeChanged(mAirplaneMode);
             }
 
             if (mSystem != null) {
@@ -1303,10 +1305,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                 }
 
                 mAirplaneMode = state;
-
-                if (mAosInfo != null) {
-                    mAosInfo.notifyAirplaneSetting(mAirplaneMode);
-                }
 
                 if (mSystem != null) {
                     mSystem.notifyAirplaneModeChanged(mAirplaneMode ? 1 : 0);

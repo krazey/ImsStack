@@ -38,14 +38,6 @@ public interface IAosInfo {
     void removeListener(IAosInfoListener listener);
 
     /**
-     * Called to notify the change of airplane setting.
-     * Native Listener : IAosServiceSettingListener.
-     *
-     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
-     */
-    void notifyAirplaneSetting(boolean isOn);
-
-    /**
      * Called to notify the change of data roaming setting.
      * Native Listener : IAosServiceSettingListener.
      *
@@ -121,16 +113,6 @@ public interface IAosInfo {
     void notifyAosStart();
 
     /**
-     * Called to notify the failure of IPCAN Handover.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param targetNetwork {@code targetNetwork} is the technology that has failed to be changed
-     * to. One of {@link com.android.imsstack.core.agents.dcmif.IApn#IPCAN_CATEGORY_XXX}.
-     * @param causeCode handover failure cause code. one of {@link android.telephony.DataFailCause}.
-     */
-    void notifyIpcanHandoverFailure(int targetNetwork, int causeCode);
-
-    /**
      * Called to notify the change of ISIM state.
      * Native Listener : IAosServicePhoneListener.
      *
@@ -173,13 +155,6 @@ public interface IAosInfo {
     void notifyPhoneNumberState(boolean isRefresh, int state);
 
     /**
-     * Called to notify the change of PLMN.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     */
-    void notifyPlmnChanged();
-
-    /**
      * Called to notify the power off.
      * Native Listener : IAosServicePhoneListener.
      *
@@ -211,15 +186,6 @@ public interface IAosInfo {
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */
     void notifyEmcCallbackModeChanged(int type, int state, long duration);
-
-    /**
-     * Called to notify the change of CrossSim connection status.
-     *
-     * @param isConnectedOverCrossSim
-     * {@code isConnectedOverCrossSim} is {@code true} if CrossSim is used for IMS service,
-     * {@code false} if CrossSim feature is not used for IMS service
-     */
-    void notifyCrossSimStatus(boolean isConnectedOverCrossSim);
 
     /**
      * Roaming Preferred Voice Network

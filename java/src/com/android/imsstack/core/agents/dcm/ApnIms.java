@@ -30,19 +30,15 @@ import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.util.ImsLog;
 
 /**
  * this is data connection class for ims
  */
 public class ApnIms extends Apn {
-    protected IAosInfo mAosInfo;
-    private boolean mIsCellularDefaultNetwork = false;
-    private boolean mIsConnectedOverCrossSim = false;
-    private DefaultNetworkCallback mDefaultNetworkCallback = null;
+    protected boolean mIsCellularDefaultNetwork = false;
+    protected boolean mIsConnectedOverCrossSim = false;
+    protected DefaultNetworkCallback mDefaultNetworkCallback = null;
 
     // Public methods --------------------------------------------
     public ApnIms(Context context, int slotId) {
@@ -123,7 +119,6 @@ public class ApnIms extends Apn {
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.IMS;
-        mAosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
 
         registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
         registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
@@ -135,25 +130,6 @@ public class ApnIms extends Apn {
 
         registerConfigListener();
         registerDefaultNetworkCallback();
-    }
-
-    /**
-     * Notifies the application that data handover information is changed.
-     */
-    @Override
-    protected void notifyHandoverStateChanged(int handoverState, int networkType, int failCause) {
-        super.notifyHandoverStateChanged(handoverState, networkType, failCause);
-
-        if (handoverState == IApn.HANDOVER_FAILURE) {
-            ImsLog.d(mSlotId, "notifyIpcanHandoverFailure :: networkType=" + networkType
-                    + ", failCause=" + failCause);
-
-            if (mAosInfo != null) {
-                int targetNetwork = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
-                        ? IApn.IPCAN_CATEGORY_MOBILE : IApn.IPCAN_CATEGORY_WLAN;
-                mAosInfo.notifyIpcanHandoverFailure(targetNetwork, failCause);
-            }
-        }
     }
 
     /**
@@ -173,7 +149,7 @@ public class ApnIms extends Apn {
 
     /**
      * If the access network status is changed, update CrossSim connection status and notify it.
-     * @param networkType The type of access network that is carry this data connection
+     * @param networkType The type of access network that carries this data connection
      */
     @Override
     protected void updateCrossSimStatus(@NetworkType int networkType) {
@@ -184,7 +160,9 @@ public class ApnIms extends Apn {
                 + " to " + isCrossSimUsed);
         if (mIsConnectedOverCrossSim != isCrossSimUsed) {
             mIsConnectedOverCrossSim = isCrossSimUsed;
-            mAosInfo.notifyCrossSimStatus(mIsConnectedOverCrossSim);
+            for (Listener l : mListeners) {
+                l.onCrossSimStatusChanged(mIsConnectedOverCrossSim);
+            }
         }
     }
 

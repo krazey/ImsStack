@@ -566,7 +566,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mMockAosInfo).notifyPlmnChanged();
+        verify(mNetWatherListener).onNetworkOperatorChanged();
         assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
     }
 
@@ -872,7 +872,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 intent).sendToTarget();
         processAllMessages();
 
-        verify(mMockAosInfo).notifyAirplaneSetting(true);
         verify(mMockSystem).notifyAirplaneModeChanged(1);
         verify(mNetWatherListener).onAirplaneModeChanged(true);
         assertEquals(true, mDcNetWatcher.isAirplaneMode());
@@ -888,7 +887,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 intent).sendToTarget();
         processAllMessages();
 
-        verify(mMockAosInfo, never()).notifyAirplaneSetting(anyBoolean());
         verify(mMockSystem, never()).notifyAirplaneModeChanged(anyInt());
         verify(mNetWatherListener, never()).onAirplaneModeChanged(anyBoolean());
         assertEquals(false, mDcNetWatcher.isAirplaneMode());
@@ -957,7 +955,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         NativeStateInterface.Listener listener = listenerCaptor.getValue();
         listener.onNativeServiceReady();
 
-        verify(mMockAosInfo).notifyAirplaneSetting(true);
+        verify(mNetWatherListener).onAirplaneModeChanged(true);
         verify(mMockSystem).notifyAirplaneModeChanged(1);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_OFF, ImsEventDef.IMS_ROAMING_STATE_ON);
