@@ -1091,7 +1091,8 @@ public:
             ERROR_TYPE_REPEATED = 1,
             ERROR_TYPE_CRITICAL = 2,
             ERROR_TYPE_ROAMING = 3,
-            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4
+            ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK = 4,
+            ERROR_TYPE_RAT_BLOCK = 5
         };
 
         // specific registration error policy
