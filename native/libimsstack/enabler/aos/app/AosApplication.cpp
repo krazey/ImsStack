@@ -111,10 +111,12 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_piAppTerminatedTimer(IMS_NULL),
         m_piPdnBlockedTimer(IMS_NULL),
         m_piImsEstablishmentTimer(IMS_NULL),
+        m_piRatBlockTimer(IMS_NULL),
         m_strAppId(strAppId),
         m_nAppType(TYPE_NORMAL),
         m_nOffReason(AosReason::NONE),
         m_nRat(NW_REPORT_RADIO_INVALID),
+        m_nBlockedRats(NW_REPORT_RADIO_INVALID),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nReportState(APP_DISCONNECTED),
         m_nRegPending(PENDING_NONE),
@@ -421,7 +423,42 @@ void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
     if (piService != IMS_NULL)
     {
         A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
-        piService->NotifyDeregistered(GetNetworkTypeForImsRegState(), eReason);
+        piService->NotifyDeregistered((eReason == AosReasonCode::CLEAR_RAT_BLOCKS)
+                        ? AosNetworkType::NONE
+                        : GetNetworkTypeForImsRegState(),
+                eReason);
+    }
+}
+
+PROTECTED
+void AosApplication::AddRatBlock()
+{
+    m_nBlockedRats |= m_nRat;
+}
+
+PROTECTED
+void AosApplication::ClearRatBlocks()
+{
+    m_nBlockedRats = NW_REPORT_RADIO_INVALID;
+}
+
+PROTECTED
+void AosApplication::PerformRatBlockActions(IN IMS_BOOL bStart)
+{
+    A_IMS_TRACE_D(APPID, "PerformRatBlockActions :: %s", _TRACE_B_(bStart), 0, 0);
+
+    if (bStart)
+    {
+        StartTimer(TIMER_RAT_BLOCK, RAT_BLOCK_TIME_MILLIS);
+        AddRatBlock();
+        m_pCondition->SetBlock(BLOCK_CELLULAR_RAT_BLOCK);
+        CleanAll();
+    }
+    else
+    {
+        StopTimer(TIMER_RAT_BLOCK);
+        ClearRatBlocks();
+        m_pCondition->ResetBlock(BLOCK_CELLULAR_RAT_BLOCK);
     }
 }
 
@@ -521,6 +558,11 @@ IMS_BOOL AosApplication::IsTimerRunning(IN IMS_UINT32 nType) const
         return (m_piImsEstablishmentTimer != IMS_NULL);
     }
 
+    if (nType == TIMER_RAT_BLOCK)
+    {
+        return (m_piRatBlockTimer != IMS_NULL);
+    }
+
     return IMS_FALSE;
 }
 
@@ -569,6 +611,12 @@ IMS_BOOL AosApplication::IsPlmnBlockRequired() const
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosApplication::IsBlockRat(IN IMS_UINT32 nRat) const
+{
+    return m_nBlockedRats & nRat;
 }
 
 PROTECTED VIRTUAL void AosApplication::CreateAosCondition()
@@ -1894,6 +1942,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nRea
     ClearOffReason();
     SetAppState(STATE_CONNECTED);
     UpdateRegisteredRat(m_piContext->GetNetTracker()->GetNetworkType());
+    PerformRatBlockActions(IMS_FALSE);
     Report_StateChanged();
 
     UpdateConnectedServices(IMS_FALSE);
@@ -2094,6 +2143,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     {
         ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK);
         m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+        return;
+    }
+
+    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK)
+    {
+        PerformRatBlockActions(IMS_TRUE);
+        NotifyDeregistered(AosReasonCode::RAT_BLOCK);
         return;
     }
 
@@ -2309,6 +2365,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
     }
 
     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRatBlockTimerExpired()
+{
+    NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+    m_pConnector->Stop();
+    PerformRatBlockActions(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlock() {}
@@ -2578,6 +2641,10 @@ PROTECTED VIRTUAL void AosApplication::StartTimer(IN IMS_UINT32 nType, IN IMS_UI
             ppiTimer = &m_piImsEstablishmentTimer;
             break;
 
+        case TIMER_RAT_BLOCK:
+            ppiTimer = &m_piRatBlockTimer;
+            break;
+
         default:
             return;
     }
@@ -2631,6 +2698,10 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
 
         case TIMER_IMS_ESTABLISHMENT:
             ppiTimer = &m_piImsEstablishmentTimer;
+            break;
+
+        case TIMER_RAT_BLOCK:
+            ppiTimer = &m_piRatBlockTimer;
             break;
 
         default:
@@ -2951,6 +3022,18 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
         }
     }
 
+    if (IsBlockRat(nNewRat))
+    {
+        A_IMS_TRACE_D(APPID, "NetTracker_StatusChanged :: New RAT(0x%x), Blocked RATs(0x%x)",
+                nNewRat, m_nBlockedRats, 0);
+        PerformRatBlockActions(IMS_TRUE);
+    }
+    else if (m_pCondition->IsReasonBlocked(BLOCK_CELLULAR_RAT_BLOCK))
+    {
+        StopTimer(TIMER_RAT_BLOCK);
+        m_pCondition->ResetBlock(BLOCK_CELLULAR_RAT_BLOCK);
+    }
+
     m_nRat = nNewRat;
 }
 
@@ -3058,6 +3141,12 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
     if (piTimer == m_piImsEstablishmentTimer)
     {
         ProcessImsEstablishmentTimerExpired();
+        return;
+    }
+
+    if (piTimer == m_piRatBlockTimer)
+    {
+        ProcessRatBlockTimerExpired();
         return;
     }
 }
