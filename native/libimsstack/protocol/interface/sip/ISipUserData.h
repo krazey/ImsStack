@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIP_USER_DATA__H__
-#define __ISIP_USER_DATA__H__
+#ifndef __INTERFACE_SIP_USER_DATA_H__
+#define __INTERFACE_SIP_USER_DATA_H__
 
 #include "SipConfiguration.h"
 #include "SipDatatypes.h"
@@ -58,4 +58,4 @@ public:
     inline virtual ~ISipUserData() {}
 };
 
-#endif  // __ISIP_USER_DATA__H__
+#endif  //__INTERFACE_SIP_USER_DATA_H__

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SIP_INTEGER_HEADER_H_
-#define SIP_INTEGER_HEADER_H_
+#ifndef __SIP_INTEGER_HEADER_H__
+#define __SIP_INTEGER_HEADER_H__
 
 #include "msg/SipHeaderBase.h"
 
@@ -35,4 +35,4 @@ public:
     SIP_BOOL DecodeHdr(SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen) override;
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 };
-#endif
+#endif  //__SIP_INTEGER_HEADER_H__

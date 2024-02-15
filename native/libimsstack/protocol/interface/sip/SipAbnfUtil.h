@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_ABNFUTIL_H__
-#define __SIP_ABNFUTIL_H__
+#ifndef __SIP_ABNF_UTIL_H__
+#define __SIP_ABNF_UTIL_H__
 
 #include "SipDatatypes.h"
 
@@ -223,4 +223,4 @@ SIP_BOOL SipFindTerminatingCRLF(SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint
 
 SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt);
 
-#endif /* __SIP_ABNFUTIL_H__ */
+#endif  //__SIP_ABNF_UTIL_H__

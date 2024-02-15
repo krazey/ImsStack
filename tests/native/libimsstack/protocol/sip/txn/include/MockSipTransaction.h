@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOCK_SIP_TRANSACTION_H_
-#define MOCK_SIP_TRANSACTION_H_
+#ifndef __MOCK_SIP_TRANSACTION_H__
+#define __MOCK_SIP_TRANSACTION_H__
 
 class SipTxnKey;
 class SipTxn;
@@ -37,4 +37,4 @@ private:
     SipTxn* m_pTxn;
 };
 
-#endif
+#endif  //__MOCK_SIP_TRANSACTION_H__

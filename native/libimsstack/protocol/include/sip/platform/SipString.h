@@ -61,4 +61,4 @@ SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSource, SIP_CHAR cChar);
 
 SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName);
 
-#endif /*__SIP_STRING_H__ */
+#endif  //__SIP_STRING_H__

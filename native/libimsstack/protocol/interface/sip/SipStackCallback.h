@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SIP_STACK_CALLBACK_H_
-#define SIP_STACK_CALLBACK_H_
+#ifndef __SIP_STACK_CALLBACK_H__
+#define __SIP_STACK_CALLBACK_H__
 
 #include "ImsTypeDef.h"
 #include "ISipTimerUtil.h"
@@ -54,4 +54,4 @@ struct SipStackCallbacks
 
 GLOBAL void SipStackCallback_SetCallbacks(IN const SipStackCallbacks& objCallbacks);
 
-#endif
+#endif  //__SIP_STACK_CALLBACK_H__

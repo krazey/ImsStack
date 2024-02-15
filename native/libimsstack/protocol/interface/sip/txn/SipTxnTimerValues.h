@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_TIMER_VALUES_H
-#define _SIP_TXN_TIMER_VALUES_H
+#ifndef __SIP_TXN_TIMER_VALUES_H__
+#define __SIP_TXN_TIMER_VALUES_H__
 
 #include "SipDatatypes.h"
 
@@ -72,4 +72,4 @@ private:
     };
 };
 
-#endif
+#endif  //__SIP_TXN_TIMER_VALUES_H__
