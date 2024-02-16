@@ -116,8 +116,9 @@ public:
     FRIEND_TEST(AosSubscriptionTest,
             GetNextThrottlingTimeWhenRetryRandomIntervalshaveValuesLessThenZero);
 
-    FRIEND_TEST(AosSubscriptionTest, CheckIsReSubscriptionStopped);
     FRIEND_TEST(AosSubscriptionTest, ProcessFailedStatusCode);
+
+    /// ProcessFailureResponse_503() - Refreshed
     FRIEND_TEST(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRetryAfter);
     FRIEND_TEST(AosSubscriptionTest,
             ShouldRequestScscfRestorationWithRetryAfterIfRetryAfterIsBiggerThanTimerF);
@@ -224,6 +225,7 @@ public:
     AosSubscriptionTest()
     {
         m_pAosStaticProfile = new AosStaticProfile();
+        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
         // save origin pointer
         m_pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
@@ -281,6 +283,8 @@ public:
 
     ImsVector<IMS_SINT32> m_objRetryIntervals;
     ImsVector<IMS_SINT32> m_objRetryRandomIntervals;
+    ImsVector<IMS_SINT32> m_objErrRegRequiredWithNextPcscf;
+    ImsVector<IMS_SINT32> m_objErrResubStopped;
 
     const AString ADDRESS1 = "sip:1234@ims.google.com:5060";
     const AString ADDRESS2 = "sip:1234@ims.google.com";
@@ -295,6 +299,8 @@ protected:
         m_pContactAddress = new SipAddress();
 
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
+                .WillByDefault(Return(m_pAosStaticProfile));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
         ON_CALL(m_objMockIAosAppContext, GetNetTracker())
@@ -303,14 +309,27 @@ protected:
         ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
                 .WillByDefault(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
 
+        ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+
+        ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
         ON_CALL(m_objMockAosConfig, GetRegistrationRetryBaseTime()).WillByDefault(Return(30000));
         ON_CALL(m_objMockAosConfig, GetRegistrationRetryMaxTime()).WillByDefault(Return(1800000));
+        ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorRegRequired()).WillByDefault(Return(0));
+        ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(0));
         // m_objRetryIntervals.GetSize() = 0
         ON_CALL(m_objMockAosConfig, GetRegRetryIntervals())
                 .WillByDefault(ReturnRef(m_objRetryIntervals));
         // m_objRetryRandomIntervals.GetSize() = 0
         ON_CALL(m_objMockAosConfig, GetRegRandomRetryIntervals())
                 .WillByDefault(ReturnRef(m_objRetryRandomIntervals));
+        // m_objErrRegRequiredWithNextPcscf.GetSize() = 0
+        ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
+                .WillByDefault(ReturnRef(m_objErrRegRequiredWithNextPcscf));
+        // m_objErrResubStopped.GetSize() = 0
+        ON_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
+                .WillByDefault(ReturnRef(m_objErrResubStopped));
 
         m_pAosSubscription = new TestAosSubscription(&m_objMockIAosAppContext,
                 static_cast<IRegSubscription*>(&m_objMockIRegSubscription), *m_pAor,
@@ -772,49 +791,8 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenWfcErrorMessageIsNotSupportedInRefresh
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
-TEST_F(AosSubscriptionTest, CheckIsReSubscriptionStopped)
-{
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
-    ImsVector<IMS_SINT32> objErrResubStopped;
-    objErrResubStopped.Clear();
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrResubStopped));
-
-    EXPECT_FALSE(m_pAosSubscription->IsResubscriptionStopped(403));
-
-    objErrResubStopped.Add(404);
-    objErrResubStopped.Add(403);
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrResubStopped));
-    EXPECT_TRUE(m_pAosSubscription->IsResubscriptionStopped(403));
-
-    objErrResubStopped.Clear();
-    objErrResubStopped.Add(403);
-    objErrResubStopped.Add(5);
-    EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrResubStopped));
-    EXPECT_TRUE(m_pAosSubscription->IsResubscriptionStopped(503));
-}
-
 TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
 {
-    // IsRetryActionDueToRetryCounter() - 1st: true, others: false
-    EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount())
-            .WillOnce(Return(5))
-            .WillRepeatedly(Return(0));
-
-    // AosRetryRepository::TYPE_NORMAL = 0
-    EXPECT_CALL(m_objMockAosRetryRepository, IncreaseRetryCount(0)).WillOnce(Return(IMS_FALSE));
-
-    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
-
     // IsSubscriptionTerminated() - 1st: true, others: false
     EXPECT_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated())
             .WillOnce(Return(1))
@@ -990,14 +968,10 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
 
 TEST_F(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRetryAfter)
 {
-    // GIVEN
-    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
-    objErrRegRequiredWithNextPcscf.Clear();
-    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
-
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    // 503 error response without retry after
     MockISipMessage objMockSipMsg;
     ON_CALL(m_objMockIRegSubscription, GetPreviousResponse()).WillByDefault(Return(&objMockSipMsg));
     ON_CALL(objMockSipMsg, GetStatusCode()).WillByDefault(Return(503));
@@ -1006,28 +980,23 @@ TEST_F(AosSubscriptionTest, ShouldRequestScscfRestorationWithoutRetryAfterIfNoRe
             .WillByDefault(Return(strRetryAfter));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(
                     AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, 0, IMS_FALSE));
 
-    // WHEN
     EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
-    // THEN
-    // Subscription_Request will be called as the GIVEN condition.
-    // ProcessFailed_Status will return true as the WHEN.
 }
 
 TEST_F(AosSubscriptionTest,
         ShouldRequestScscfRestorationWithRetryAfterIfRetryAfterIsBiggerThanTimerF)
 {
-    // GIVEN
-    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
-    objErrRegRequiredWithNextPcscf.Clear();
-    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
-
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    // 503 error response with retry after which value is 600 seconds
     MockISipMessage objMockSipMsg;
     ON_CALL(m_objMockIRegSubscription, GetPreviousResponse())
             .WillByDefault(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
@@ -1037,28 +1006,23 @@ TEST_F(AosSubscriptionTest,
             .WillByDefault(Return(strRetryAfter));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_TERMINATED));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(
                     AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, 600, IMS_FALSE));
 
-    // WHEN
     EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
-    // THEN
-    // Subscription_Request will be called as the GIVEN condition.
-    // ProcessFailed_Status will return true as the WHEN.
 }
 
 TEST_F(AosSubscriptionTest,
         ShouldNotRequestScscfRestorationIfRetryAfterIsSmallerThanOrEqualToTimerF)
 {
-    // GIVEN
-    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
-    objErrRegRequiredWithNextPcscf.Clear();
-    ON_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
-
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    // 503 error response with retry after which value is 60 seconds
     MockISipMessage objMockSipMsg;
     ON_CALL(m_objMockIRegSubscription, GetPreviousResponse())
             .WillByDefault(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
@@ -1067,17 +1031,13 @@ TEST_F(AosSubscriptionTest,
     ON_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
             .WillByDefault(Return(strRetryAfter));
 
+    // Should Not Request CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(
                     AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION, _, IMS_FALSE))
             .Times(0);
 
-    // WHEN
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(503, IMS_TRUE));
-
-    // THEN
-    // Subscription_Request should not be called as the GIVEN condition.
-    // ProcessFailed_Status will return false as the WHEN.
 }
 
 TEST_F(AosSubscriptionTest, IsRegAfterWaitRequiredByNotify)
@@ -1861,6 +1821,58 @@ TEST_F(AosSubscriptionTest, Print)
 
     m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
+
+// ProcessFailed_StatusCode - IsRetryActionDueToRetryCounter()
+TEST_F(AosSubscriptionTest, RequestRegWithNextPcscfWhenRetryIsReachedMax)
+{
+    // IsRetryActionDueToRetryCounter()
+    ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
+
+    // AosRetryRepository::TYPE_NORMAL = 0, Retry Count is reached MAX
+    ON_CALL(m_objMockAosRetryRepository, IncreaseRetryCount(0)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
+
+    EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
+}
+
+// IsResubscriptionStopped()
+TEST_F(AosSubscriptionTest, ReturnFalseWhenResubStoppedIsLessthanOne)
+{
+    // m_objErrResubStopped.GetSize() = 0 condition
+    // This conditions was defined in the SetUp() function.
+
+    EXPECT_FALSE(m_pAosSubscription->IsResubscriptionStopped(403));
+}
+
+TEST_F(AosSubscriptionTest, ReturnTrueWhenResubStoppedIsReachedSecond)
+{
+    m_objErrResubStopped.Clear();
+    m_objErrResubStopped.Add(404);
+    m_objErrResubStopped.Add(403);
+    ON_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
+            .WillByDefault(ReturnRef(m_objErrResubStopped));
+
+    EXPECT_TRUE(m_pAosSubscription->IsResubscriptionStopped(403));
+}
+
+TEST_F(AosSubscriptionTest, ReturnTrueWhenResubStoppedIsMatchedBySingleDigit)
+{
+    m_objErrResubStopped.Clear();
+    m_objErrResubStopped.Add(403);
+    m_objErrResubStopped.Add(5);
+    ON_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
+            .WillByDefault(ReturnRef(m_objErrResubStopped));
+
+    EXPECT_TRUE(m_pAosSubscription->IsResubscriptionStopped(503));
 }
 
 /// Called ProcessStartFailed_Others() > SetRetryTimer(IMS_FALSE)
