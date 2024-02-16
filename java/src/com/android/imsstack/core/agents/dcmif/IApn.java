@@ -34,15 +34,21 @@ public interface IApn {
      */
     interface Listener {
         /**
-         * invoked when the IPCAN(IP Connectivity Access Network) category is changed.
+         * Invoked when the IPCAN(IP Connectivity Access Network) category is changed.
          */
         default void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
         }
 
         /**
-         * invoked when the state of handover between WWAN and WLAN is changed.
+         * Invoked when the state of handover between WWAN and WLAN is changed.
          */
         default void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        }
+
+        /**
+         * Invoked when the connection status through Cross SIM is changed.
+         */
+        default void onCrossSimStatusChanged(boolean connectedOverCrossSim) {
         }
     }
 

@@ -17,7 +17,7 @@
 package com.android.imsstack.core.agents.dcmif;
 
 /**
- * this class is the inferface about data connection watcher
+ * this class is the interface about data connection watcher
  */
 public interface IDcNetWatcher extends IDc {
     /**
@@ -210,7 +210,7 @@ public interface IDcNetWatcher extends IDc {
      */
     interface Listener {
         /**
-         * invoked when data connection state is changed.
+         * Invoked when data connection state is changed.
          */
         default void onDataConnectionStateChanged(EApnType apnType, EDataState dataState) {
         }
@@ -231,6 +231,12 @@ public interface IDcNetWatcher extends IDc {
          * Invoked when voice network type is changed.
          */
         default void onVoiceNetworkTypeChanged() {
+        }
+
+        /**
+         * Invoked when the numeric ID of the network operator is changed.
+         */
+        default void onNetworkOperatorChanged() {
         }
 
         /**
