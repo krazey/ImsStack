@@ -90,13 +90,9 @@ class TestAosRegistration : public AosRegistration
 {
 public:
     explicit inline TestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
-            AosRegistration(piAppContext, strRegId),
-            m_piRegistrationInstance(IMS_NULL),
-            m_pSubscriptionInstance(IMS_NULL)
+            AosRegistration(piAppContext, strRegId)
     {
     }
-    inline void SetMockRegistration(IN IRegistration* piReg) { m_piRegistrationInstance = piReg; }
-    inline void SetMockSubscription(IN AosSubscription* pSubs) { m_pSubscriptionInstance = pSubs; }
 
     FRIEND_TEST(AosRegistrationTest, StartWhileTransactionIsNotStartedNotTriesCreateRegistration);
     FRIEND_TEST(AosRegistrationTest, StartWhileTransactionIsNotAllowedNotTriesCreateRegistration);
@@ -161,7 +157,6 @@ public:
     FRIEND_TEST(AosRegistrationTest, GetNetworkTypeFromAosNetTracker);
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, IpsecSupported);
-    FRIEND_TEST(AosRegistrationTest, UpdatePreloadedRoute);
     FRIEND_TEST(AosRegistrationTest, RetryCount);
     FRIEND_TEST(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReason);
     FRIEND_TEST(AosRegistrationTest, AddAccesstypeFeatureTagWithNumericalValue);
@@ -413,22 +408,37 @@ public:
     FRIEND_TEST(AosRegistrationTest, MessageMediator_AdjustMessage);
     FRIEND_TEST(AosRegistrationTest, AddLocationHeaderBody);
 
-protected:
+public:
     inline IRegistration* GetRegistration() override { return m_piRegistrationInstance; }
-    inline void CreateIpsecHelper() override {}
+    inline void CreateIpsecHelper() override { m_pIpsecHelper = m_pIpsecHelperInstance; }
     inline void DestroyIpsecHelper() override { m_pIpsecHelper = IMS_NULL; }
     inline AosSubscription* GetSubscription(IN IRegSubscription*) override
     {
         return m_pSubscriptionInstance;
     }
 
-public:
+    IMS_BOOL UpdatePreloadedRoute() { return AosRegistration::UpdatePreloadedRoute(); }
     void Registration_UpdateFailed(IN IMS_SINT32 nReason)
     {
         AosRegistration::Registration_UpdateFailed(nReason);
     }
     void SetImsCall(IN IMS_BOOL bStarted) { AosRegistration::SetImsCall(bStarted); }
     void SetState(IN IMS_UINT32 nState) { AosRegistration::SetState(nState); }
+    void SetTransactionStarted(IN IMS_BOOL bStarted) { m_bIsTransactionStarted = bStarted; }
+    void SetRegType(IN AosRegistrationType objRegType) { m_eRegType = objRegType; }
+
+    void UpdateRegInstances(IN IRegistration* piReg, IN AosSubscription* pSubs,
+            IN IRegContact* piContact, IN IRegParameter* piParam, IN AosIpsecHelper* pIpsec)
+    {
+        m_piRegistrationInstance = piReg;
+        m_pSubscriptionInstance = pSubs;
+        m_pIpsecHelperInstance = pIpsec;
+        m_piRegistration = piReg;
+        m_piRegContact = piContact;
+        m_piRegParameter = piParam;
+        m_pSubscription = pSubs;
+    }
+
     void SetFeature(IN IMS_UINT32 nFeature) { m_nFeature = nFeature; }
 
     inline IMS_BOOL IsTxnPendingOn(IN IMS_UINT32 nFeature)
@@ -484,6 +494,7 @@ public:
 private:
     IRegistration* m_piRegistrationInstance;
     AosSubscription* m_pSubscriptionInstance;
+    AosIpsecHelper* m_pIpsecHelperInstance;
 };
 
 MATCHER_P(IsSameMsg, message, "")
@@ -785,8 +796,8 @@ protected:
         m_pAosRegistration = new TestAosRegistration(
                 &m_objMockIAosAppContext, m_pAosStaticProfile->GetRegistrationId());
 
-        m_pAosRegistration->SetMockRegistration(&m_objMockIRegistration);
-        m_pAosRegistration->SetMockSubscription(&m_objMockAosSubscription);
+        m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
+                &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
         m_pAosRegistration->SetListener(&m_objMockIAosRegistrationListener);
     }
 
@@ -803,7 +814,7 @@ protected:
 TEST_F(AosRegistrationTest, StartWhileTransactionIsNotStartedNotTriesCreateRegistration)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber()).Times(0);
 
@@ -829,7 +840,7 @@ TEST_F(AosRegistrationTest, StartWhileTransactionIsNotAllowedNotTriesCreateRegis
 
 TEST_F(AosRegistrationTest, StartFailsToCreateRegistration)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(m_objEmptyImpus));
@@ -855,7 +866,6 @@ TEST_F(AosRegistrationTest, StartSucceedsToCreateRegistration)
 
 TEST_F(AosRegistrationTest, StopWhileInNotRegisteredStateReportsSuccessWithouDeregister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
 
     EXPECT_CALL(m_objMockIRegistration, Deregister()).Times(0);
@@ -870,7 +880,6 @@ TEST_F(AosRegistrationTest, StopWhileInNotRegisteredStateReportsSuccessWithouDer
 
 TEST_F(AosRegistrationTest, StopWhileInRegisteredStateReportsSuccessWhenFailToSendDeregister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Deregister()).WillOnce(Return(IMS_FAILURE));
@@ -885,7 +894,6 @@ TEST_F(AosRegistrationTest, StopWhileInRegisteredStateReportsSuccessWhenFailToSe
 
 TEST_F(AosRegistrationTest, StopWhileInRegisteredStateReportsTryingWhenSucceedToSendDeregister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Deregister()).WillOnce(Return(IMS_SUCCESS));
@@ -900,7 +908,6 @@ TEST_F(AosRegistrationTest, StopWhileInRegisteredStateReportsTryingWhenSucceedTo
 
 TEST_F(AosRegistrationTest, StopWhileInDeregisteringStateDoesNothing)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
 
     EXPECT_CALL(m_objMockIRegistration, Deregister()).Times(0);
@@ -913,7 +920,6 @@ TEST_F(AosRegistrationTest, StopWhileInDeregisteringStateDoesNothing)
 
 TEST_F(AosRegistrationTest, UpdateWhileInRegStopedStateTriggersRetrying)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -925,7 +931,6 @@ TEST_F(AosRegistrationTest, UpdateWhileInRegStopedStateTriggersRetrying)
 
 TEST_F(AosRegistrationTest, UpdateWhileInRegisteredStateTriggersRefreshing)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -937,7 +942,6 @@ TEST_F(AosRegistrationTest, UpdateWhileInRegisteredStateTriggersRefreshing)
 
 TEST_F(AosRegistrationTest, UpdateWhileInRegisteringStateIsPending)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
@@ -950,7 +954,6 @@ TEST_F(AosRegistrationTest, UpdateWhileInRegisteringStateIsPending)
 
 TEST_F(AosRegistrationTest, UpdateWhileInDeregisteringStateDoesNothing)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_DEREGISTERING);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
@@ -963,8 +966,6 @@ TEST_F(AosRegistrationTest, UpdateWhileInDeregisteringStateDoesNothing)
 
 TEST_F(AosRegistrationTest, ReconfigWhileInRegStopStateTriggersUpdateRegBinding)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIAosHandle, IsRegBinded()).WillOnce(Return(IMS_TRUE));
@@ -981,8 +982,6 @@ TEST_F(AosRegistrationTest, ReconfigWhileInRegStopStateTriggersUpdateRegBinding)
 TEST_F(AosRegistrationTest,
         ReconfigWhileInRegisteredStateTriggersUpdateRegBindingAndProcessReregister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosHandle, IsRegBinded()).WillOnce(Return(IMS_TRUE));
@@ -1054,7 +1053,6 @@ TEST_F(AosRegistrationTest, ClearRetryCountCommandClearsConsecutiveFailureCount)
 
 TEST_F(AosRegistrationTest, IpsecCommandForEnableWhileSupportIpsecTriggersDefaultFlowRecovery)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
@@ -1091,8 +1089,6 @@ TEST_F(AosRegistrationTest, UninterestedIpsecCommandDoesNothing)
 
 TEST_F(AosRegistrationTest, RefreshRegInfoCommandTriggersRecalculateCallerCapabilities)
 {
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
-
     EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(1);
 
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_REFRESH_REGINFO);
@@ -1100,8 +1096,6 @@ TEST_F(AosRegistrationTest, RefreshRegInfoCommandTriggersRecalculateCallerCapabi
 
 TEST_F(AosRegistrationTest, UpdateRegBindingCommandCreatesRegBinding)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosHandle, IsRegBinded()).WillOnce(Return(IMS_FALSE));
@@ -1152,7 +1146,6 @@ TEST_F(AosRegistrationTest, UpdateIpcanCommandUpdatesBlockStatus)
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_IPCAN);
 
     EXPECT_TRUE(m_pAosRegistration->IsBlocked());
-    EXPECT_FALSE(m_pAosRegistration->m_bIsTransactionStarted);
 }
 
 TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidForGivenRetryAfterDuringScscfRestoration)
@@ -1180,7 +1173,6 @@ TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidPermanantlyIfNoRetryAfterDurin
 TEST_F(AosRegistrationTest, DestroyRegistrationWhenScscfRestrorationIsTriggered)
 {
     // GIVEN
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIRegistration, SetListener(IMS_NULL)).Times(1);
 
@@ -1263,8 +1255,6 @@ TEST_F(AosRegistrationTest, SetEps5gsOnlyCommandUpdatesVariable)
 TEST_F(AosRegistrationTest, HandleUninterestedCommandDoesNothing)
 {
     m_pAosRegistration->m_bEps5GsOnly = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
 
     EXPECT_CALL(m_objMockIAosPcscf, SetFirstPcscfIndex()).Times(0);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationRetryBaseTime()).Times(0);
@@ -1281,7 +1271,7 @@ TEST_F(AosRegistrationTest, HandleUninterestedCommandDoesNothing)
 
 TEST_F(AosRegistrationTest, GetRegTypeReturnsRegistrationType)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
     AosRegistrationType nType = m_pAosRegistration->GetRegType();
 
@@ -1308,7 +1298,6 @@ TEST_F(AosRegistrationTest, CheckMode)
 
 TEST_F(AosRegistrationTest, GetProperty)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     IMS_UINT32 nValue;
     AString strValue;
 
@@ -1361,7 +1350,7 @@ TEST_F(AosRegistrationTest, GetProperty)
     EXPECT_STREQ(strValue.GetStr(), "TestSupported");
 
     // PROPERTY_PROTECTED - IpcanCategory is CATEGORY_MOBILE
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->CreateIpsecHelper();
     EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_TRUE));
     m_pAosRegistration->GetProperty(IAosRegistration::PROPERTY_PROTECTED, nValue, strValue);
     EXPECT_EQ(nValue, AoSRegProtectedType::REG_PROTECTED);
@@ -1401,7 +1390,7 @@ TEST_F(AosRegistrationTest, GetProperty)
 
 TEST_F(AosRegistrationTest, CheckBool)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     EXPECT_TRUE(m_pAosRegistration->IsRegistered());
@@ -1425,13 +1414,11 @@ TEST_F(AosRegistrationTest, CheckBool)
     EXPECT_TRUE(m_pAosRegistration->IsAppReady());
     m_pAosRegistration->SetAppReady(IMS_FALSE);
     EXPECT_FALSE(m_pAosRegistration->IsAppReady());
-
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 }
 
 TEST_F(AosRegistrationTest, FailsSetTrafficIfRegTypeIsNotNormalOrEmergency)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
 
     IMS_BOOL bResult = m_pAosRegistration->SetTraffic(IMS_TRUE);
 
@@ -1440,7 +1427,7 @@ TEST_F(AosRegistrationTest, FailsSetTrafficIfRegTypeIsNotNormalOrEmergency)
 
 TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfRegTypeIsNotNormalOrEmergency)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
 
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(0);
 
@@ -1450,7 +1437,6 @@ TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfRegTypeIsNotNormalOrEmergen
 TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfTransactionIsNull)
 {
     AosProvider::GetInstance()->SetTransaction(IMS_NULL, SLOT_ID);
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(0);
 
@@ -1555,7 +1541,6 @@ TEST_F(AosRegistrationTest, GetNetworkTypeFromAosNetTracker)
 TEST_F(AosRegistrationTest, FeatureTagForMtc)
 {
     m_pAosRegistration->m_pUtil->SetISipConfigV(&m_objMockISipConfigV);
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
 
     EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
             .Times(AnyNumber())
@@ -1586,19 +1571,25 @@ TEST_F(AosRegistrationTest, FeatureTagForMtc)
     m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY, IMS_TRUE);
     m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
 
-    m_pAosRegistration->m_piRegContact = IMS_NULL;
     m_pAosRegistration->m_pUtil->SetISipConfigV(IMS_NULL);
 }
 
-TEST_F(AosRegistrationTest, UpdatePreloadedRoute)
+TEST_F(AosRegistrationTest, UpdatePreloadedRouteFailIfRegParameterIsNull)
 {
-    // m_piRegParameter is null
-    EXPECT_FALSE(m_pAosRegistration->UpdatePreloadedRoute(AString::ConstNull(), 0));
+    m_pAosRegistration->Destroy();
 
-    // m_piRegParameter is not null
-    m_pAosRegistration->m_piRegParameter = &m_objMockIRegParameter;
-    EXPECT_CALL(m_objMockIRegParameter, RemoveAllPreloadedRoutes()).Times(1);
-    EXPECT_TRUE(m_pAosRegistration->UpdatePreloadedRoute(AString("192.168.0.1"), 80));
+    IMS_BOOL bResult = m_pAosRegistration->UpdatePreloadedRoute();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, UpdatePreloadedRouteSucceed)
+{
+    EXPECT_CALL(m_objMockIRegParameter, RemoveAllPreloadedRoutes());
+
+    IMS_BOOL bResult = m_pAosRegistration->UpdatePreloadedRoute();
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, RetryCount)
@@ -1625,9 +1616,8 @@ TEST_F(AosRegistrationTest, RetryCount)
 
 TEST_F(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReason)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
 
     EXPECT_CALL(m_objMockIRegContact, AddUriParameter(_, _)).Times(1);
     EXPECT_CALL(m_objMockIAosNConfiguration, IsSipOverIpsecInRoamingEnabled())
@@ -1643,8 +1633,6 @@ TEST_F(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReas
 
 TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithNumericalValue)
 {
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
-
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())
             .WillOnce(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED));
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillOnce(Return(IMS_FALSE));
@@ -1655,8 +1643,6 @@ TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithNumericalValue)
 
 TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithoutNumericalValue)
 {
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
-
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())
             .WillOnce(Return(CarrierConfig::Ims::
                             PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE));
@@ -1668,12 +1654,12 @@ TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithoutNumericalValue)
 
 TEST_F(AosRegistrationTest, UpdateTransactionStarted)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
     m_pAosRegistration->UpdateTransactionStarted();
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .WillOnce(Return(IMS_TRUE));
     m_pAosRegistration->SetHeldByCall(IMS_TRUE);
@@ -1707,12 +1693,7 @@ TEST_F(AosRegistrationTest, StandardPcscfSelection)
 
 TEST_F(AosRegistrationTest, SendRegisterEx)
 {
-    // m_piRegistration is null
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE));
-
     // m_piRegistration is not null
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIRegistration, Register(_))
             .Times(AnyNumber())
             .WillOnce(Return(IMS_FAILURE))
@@ -1723,13 +1704,16 @@ TEST_F(AosRegistrationTest, SendRegisterEx)
 
     // succeed to Register
     EXPECT_TRUE(m_pAosRegistration->SendRegisterEx(0, IMS_FALSE));
+
+    // m_piRegistration is null
+    m_pAosRegistration->Destroy();
+    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE));
 }
 
 TEST_F(AosRegistrationTest, UpdateFeatureTag)
 {
     AosFeatureTagList objFeatureTagList;
     AosFeatureTagList objBindedFeatureTagList;
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
     EXPECT_CALL(m_objMockIAosHandle, GetFeatureTagList())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objFeatureTagList));
@@ -1836,8 +1820,6 @@ TEST_F(AosRegistrationTest, GetActualWaitTime)
 
 TEST_F(AosRegistrationTest, TryNextPcscf)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     // succeed to SetNextPcscf - bHonorRetryAfter is true
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
             .Times(AnyNumber())
@@ -2033,8 +2015,6 @@ TEST_F(AosRegistrationTest, SubReinitiateMessageCreatesSubscription)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
 
     EXPECT_CALL(m_objMockAosSubscription, Destroy()).Times(1);
     EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_))
@@ -2049,7 +2029,6 @@ TEST_F(AosRegistrationTest, SubTerminatedMessageDestroiesSubscription)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockAosSubscription, Destroy()).Times(1);
 
@@ -2107,7 +2086,6 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSuppor
 {
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
 
@@ -2123,7 +2101,6 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSuppor
     ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
             .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
     m_pAosRegistration->UpdateRegIpcanCategory();
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
@@ -2137,7 +2114,7 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSup
 {
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
 
@@ -2153,7 +2130,7 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSup
     ON_CALL(m_objMockIAosConnection, GetIpcanCategory())
             .WillByDefault(Return(IIpcan::CATEGORY_WLAN));
     m_pAosRegistration->UpdateRegIpcanCategory();
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_FALSE));
@@ -2165,7 +2142,7 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSup
 
 TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredForFakeType)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).Times(0);
 
@@ -2178,7 +2155,6 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsNotSup
 {
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
             .WillByDefault(Return(IMS_FALSE));
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).Times(0);
 
@@ -2189,10 +2165,9 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsNotSup
 
 TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecHelperIsNull)
 {
+    m_pAosRegistration->DestroyIpsecHelper();
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
-    m_pAosRegistration->m_pIpsecHelper = IMS_NULL;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_TRUE));
 
@@ -2203,10 +2178,9 @@ TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecHelperIsNull)
 
 TEST_F(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecIsNotEstablished)
 {
+    m_pAosRegistration->CreateIpsecHelper();
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_FALSE));
@@ -2277,7 +2251,6 @@ TEST_F(AosRegistrationTest, ProcessPendingTrafficWhileInRefreshStopStateTriggers
 {
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TRAFFIC;
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TRANSACTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -2316,7 +2289,6 @@ TEST_F(AosRegistrationTest, ProcessPendingTransactionWhileRetryTimerExistDoesNot
 TEST_F(AosRegistrationTest, ProcessPendingTransactionWhileRetryIsHeldButFailsToSendRegister)
 {
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TRANSACTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
@@ -2333,7 +2305,6 @@ TEST_F(AosRegistrationTest, ProcessPendingTransactionWhileRetryIsHeldButFailsToS
 TEST_F(AosRegistrationTest, ProcessPendingTransactionWhileRetryIsHeldAndSucceedsToSendRegister)
 {
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TRANSACTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
 
@@ -2386,7 +2357,6 @@ TEST_F(AosRegistrationTest, ProcessPendingSubscriptionTriggersStartSubscription)
 {
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_SUBSCRIPTION;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockAosSubscription, Start(_)).Times(1);
 
@@ -2397,7 +2367,6 @@ TEST_F(AosRegistrationTest, ProcessPendingSubscriptionTriggersStartSubscription)
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryIsNotHeldNotTriesRegister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
@@ -2407,7 +2376,6 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryIsNotHeldNotTriesR
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryTimerExistNotTriesRegister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 10000);
 
@@ -2421,9 +2389,8 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryTimerExistNotTries
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileTransactionIsNotStartedNotTriesRegister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
 
@@ -2434,7 +2401,6 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileTransactionIsNotStarted
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileTransactionIsNotAllowedNotTriesRegister)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
@@ -2448,8 +2414,7 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileTransactionIsNotAllowed
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedButFailsToSendRegister)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::EMERGENCY;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
@@ -2472,7 +2437,7 @@ TEST_F(AosRegistrationTest, ProcessReregisterWhileNotRegisteredDoesNothing)
 
 TEST_F(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     m_pAosRegistration->ProcessReregister();
@@ -2482,7 +2447,6 @@ TEST_F(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted)
 
 TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
@@ -2495,24 +2459,22 @@ TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady)
 
 TEST_F(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
 
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
+
     m_pAosRegistration->ProcessReregister();
 
-    EXPECT_TRUE(m_pAosRegistration->m_bIsHeldByCall);
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 }
 
 TEST_F(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsCall(IMS_FALSE);
 
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
@@ -2522,8 +2484,6 @@ TEST_F(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail)
 
 TEST_F(AosRegistrationTest, ReregisterProcessSucceed)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
@@ -2554,7 +2514,6 @@ TEST_F(AosRegistrationTest, ProcessRegTerminatedWhileCallExist)
     m_pAosRegistration->ProcessRegTerminated();
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    EXPECT_TRUE(m_pAosRegistration->m_bIsHeldByCall);
     EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(TestAosRegistration::PENDING_TRANSACTION));
 }
 
@@ -2664,8 +2623,6 @@ TEST_F(AosRegistrationTest, ReportFailureWhenRegRequiredWithNextPcscfIfSetNextPc
 TEST_F(AosRegistrationTest,
         TriggerOfflineRecoverWhenRegRequiredWithAvailableNextPcscfButOnlyOnePcscfExist)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(1));
     EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
             .WillOnce(Return(AString("60")));
@@ -2726,8 +2683,6 @@ TEST_F(AosRegistrationTest, TryRegistrationWhenRegRequiredWithAvailableNextPcscf
 TEST_F(AosRegistrationTest, NotCreateSubscriptionWhenReinitiateIfNotRegistered)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
 
     EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_)).Times(0);
@@ -2775,7 +2730,6 @@ TEST_F(AosRegistrationTest, ProcessForbiddenFailed)
 
 TEST_F(AosRegistrationTest, ProcessSubscriberFailed)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
@@ -2956,7 +2910,6 @@ TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->m_piRegParameter = &m_objMockIRegParameter;
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(0);
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
 
@@ -3164,7 +3117,6 @@ TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_UpdateWithSpecifiedInterv
     EXPECT_EQ(m_pAosRegistration->m_nConsecutiveFailure, 1);
 
     // m_nConsecutiveFailure is 1 and Reg is Expired During Awt
-    m_pAosRegistration->m_piRegContact = &m_objMockIRegContact;
     EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(AnyNumber()).WillRepeatedly(Return(100));
     m_pAosRegistration->m_nConsecutiveFailure = 0;
     m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
@@ -3182,7 +3134,6 @@ TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_UpdateWithSpecifiedInterv
 TEST_F(AosRegistrationTest,
         TriggerPcscfSelectionWhenStartFailedWithTxnTimeoutIfConfiguredToPcscfDiscovery)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(1));
     ON_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillByDefault(Return(1));
 
@@ -3200,7 +3151,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, ReconnectPdnWhenStartFailedWithTxnTimeoutIfPdnReactivateIsRequired)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_bEps5GsOnly = IMS_FALSE;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
@@ -3225,8 +3175,6 @@ TEST_F(AosRegistrationTest, ReconnectPdnWhenStartFailedWithTxnTimeoutIfPdnReacti
 TEST_F(AosRegistrationTest,
         TriggerFlowRecoveryWhenStartFailedWithTxnTimeoutIfPdnReactivatedPolicyIsConfigured)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
     EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
@@ -3237,8 +3185,6 @@ TEST_F(AosRegistrationTest,
 TEST_F(AosRegistrationTest,
         TriggerIpsecFallbackWhenStartFailedWithTxnTimeoutIfConfiguredToAttemptWithoutIpsec)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     ImsVector<IMS_SINT32> objErrWithoutIpsec;
     objErrWithoutIpsec.Add(CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
@@ -3251,8 +3197,6 @@ TEST_F(AosRegistrationTest,
 TEST_F(AosRegistrationTest,
         TriggerFlowRecoveryWhenStartFailedWithTxnTimeoutIfExtraRegErrorCodeIncludeTimerF)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
@@ -3264,7 +3208,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, TryNextPcscfWhenStartFailedWithTxnTimeout)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(1));
     ON_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillByDefault(Return(1));
 
@@ -3279,8 +3222,6 @@ TEST_F(AosRegistrationTest, TryNextPcscfWhenStartFailedWithTxnTimeout)
 
 TEST_F(AosRegistrationTest, ReportFailureWhenStartFailedWithTxnTimeoutAndFailToTryNextPcscf)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
     EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _));
     EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
@@ -3484,7 +3425,6 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_ProcessStartFailed_305
 
     // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - succeed to SetFirstPcscf
     // fail to SendRegister
-    m_pAosRegistration->m_piRegParameter = &m_objMockIRegParameter;
     m_pAosRegistration->m_piRegistration = IMS_NULL;
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
@@ -3707,8 +3647,6 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
             .WillRepeatedly(Return(strHeader));
 
     EXPECT_CALL(m_objMockIAosService, NotifyRegistering(_, _, _)).Times(AnyNumber());
-
-    m_pAosRegistration->m_piRegParameter = &m_objMockIRegParameter;
 
     ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
@@ -3975,7 +3913,6 @@ TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500)
 TEST_F(AosRegistrationTest,
         RegUpdateFailTriggersFlowRecoveryIfActualWaitTimePolicyIsSpecifiedInterval)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
     ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
@@ -3992,7 +3929,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, RegUpdateFailTriggersFlowRecoveryIfConfiguredToRetryWithSamePcscf)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     ImsVector<IMS_SINT32> objErrCode;
     objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_OTHER);
     ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
@@ -4065,6 +4001,8 @@ TEST_F(AosRegistrationTest, ProcessUpdateFailedOthersTriggersAwtRecovery)
 
 TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull)
 {
+    m_pAosRegistration->Destroy();
+
     IMS_BOOL bResponseToChallenge = IMS_FALSE;
     m_pAosRegistration->Registration_AuthenticationChallenged(
             Credential::TYPE_MD5, bResponseToChallenge);
@@ -4076,7 +4014,6 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistration
 TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenMoreAuthChallengeIsNotAllowed)
 {
     IMS_UINT32 nCounterThreshold = TestAosRegistration::AUTHENTICATION_RETRY_MAX_COUNT;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = nCounterThreshold;
 
     IMS_BOOL bResponseToChallenge = IMS_FALSE;
@@ -4089,10 +4026,9 @@ TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenMoreAuthChal
 
 TEST_F(AosRegistrationTest, FailToProcessAuthenticationChallengedTriggersRegReInitate)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, ProcessAuthChallenged(_)).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountWithIpsecOnAuthFailure())
@@ -4103,7 +4039,6 @@ TEST_F(AosRegistrationTest, FailToProcessAuthenticationChallengedTriggersRegReIn
             Credential::TYPE_MD5, bResponseToChallenge);
 
     EXPECT_FALSE(bResponseToChallenge);
-    EXPECT_EQ(m_pAosRegistration->m_pIpsecHelper, nullptr);
     EXPECT_EQ(m_pAosRegistration->m_nIpsecBlockReason,
             TestAosRegistration::IPSEC_BLOCK_AUTENTICATION);
 }
@@ -4122,8 +4057,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseIsNotHandledWhenIpsecIsNotSupported
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNotOk)
 {
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -4141,8 +4076,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNo
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort)
 {
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
     m_pAosRegistration->m_nAuthChallengeCount = 3;
 
     EXPECT_CALL(m_objMockAosIpsecHelper, CreateOnChallenging()).Times(1);
@@ -4162,8 +4097,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToS
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToUpdatePreloadedRoute)
 {
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_TRUE));
@@ -4183,8 +4118,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToUpda
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToMakeSas)
 {
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_FALSE));
@@ -4204,8 +4139,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToMake
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseReturnsSaResultAsTrueWhenSucceedToMakeSas)
 {
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, SetPcscfPortnSpi()).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockAosIpsecHelper, IsPcscfServerPortDifferent()).WillOnce(Return(IMS_FALSE));
@@ -4222,8 +4157,8 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseReturnsSaResultAsTrueWhenSucceedToM
 
 TEST_F(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenRegistrationIsNull)
 {
+    m_pAosRegistration->Destroy();
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
 
     m_pAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
 
@@ -4233,7 +4168,6 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenRegistrationIsNul
 TEST_F(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenNotRegisteredState)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
 
     m_pAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
@@ -4244,7 +4178,6 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenNotRegisteredStat
 TEST_F(AosRegistrationTest, RefreshTimerExpiredReportsFailureWhenSuspended)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
@@ -4263,8 +4196,7 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredReportsFailureWhenSuspended)
 TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsNotStarted)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
@@ -4279,8 +4211,6 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsNotS
 TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsStopped)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
@@ -4296,11 +4226,9 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsStop
 TEST_F(AosRegistrationTest, RefreshTimerExpiredTriggersRegTerminatedWhenFailToCreateIpsec)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
-    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
             .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
@@ -4318,8 +4246,6 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredTriggersRegTerminatedWhenFailToCr
 TEST_F(AosRegistrationTest, RefreshTimerExpiredTriggersRegRefresh)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
@@ -4336,7 +4262,7 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredTriggersRegRefresh)
 
 TEST_F(AosRegistrationTest, RegistrationStartedWhenRegistrationIsNullDoesNothing)
 {
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
+    m_pAosRegistration->Destroy();
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetCurrentPcscfTriedCount()).Times(0);
 
@@ -4346,8 +4272,7 @@ TEST_F(AosRegistrationTest, RegistrationStartedWhenRegistrationIsNullDoesNothing
 TEST_F(AosRegistrationTest, RegistrationStartedTriggersReinitiateIfIpsecIsNotEstablished)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetCurrentPcscfTriedCount()).Times(1);
     EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_FALSE));
@@ -4359,8 +4284,7 @@ TEST_F(AosRegistrationTest, RegistrationStartedTriggersReinitiateIfIpsecIsNotEst
 TEST_F(AosRegistrationTest, RegistrationStartedReportsSuccess)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetCurrentPcscfTriedCount()).Times(1);
     EXPECT_CALL(m_objMockAosIpsecHelper, IsEstablished()).WillOnce(Return(IMS_TRUE));
@@ -4376,8 +4300,7 @@ TEST_F(AosRegistrationTest, RegistrationStartedReportsSuccess)
 
 TEST_F(AosRegistrationTest, RegistrationStartFailedWhenRegistrationIsNullDoesNothing)
 {
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-    m_pAosRegistration->m_nAuthChallengeCount = 0;
+    m_pAosRegistration->Destroy();
 
     EXPECT_CALL(m_objMockIRegistration, GetPreviousResponse()).Times(0);
 
@@ -4387,7 +4310,6 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWhenRegistrationIsNullDoesNot
 TEST_F(AosRegistrationTest,
         RegistrationStartFailedWhenMoreAuthChallengeIsNotAllowedHandlesAuthFailure)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     IMS_UINT32 nCounterThreshold = TestAosRegistration::AUTHENTICATION_RETRY_MAX_COUNT;
     m_pAosRegistration->m_nAuthChallengeCount = nCounterThreshold;
 
@@ -4401,7 +4323,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, RegistrationStartFailedWithStatusCode)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     // GetResponseCode
@@ -4421,7 +4342,6 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithStatusCode)
 
 TEST_F(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     // ProcessStartFailed_TxnTimeout
@@ -4438,7 +4358,6 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout)
 
 TEST_F(AosRegistrationTest, RegistrationStartFailedWithOtherReason)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     // ProcessStartFailed_Others
@@ -4452,7 +4371,6 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithOtherReason)
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
     ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
@@ -4477,8 +4395,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrMessage)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4513,7 +4429,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrM
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReason)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
     m_pAosRegistration->m_eImsReasonCode =
             AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
@@ -4537,8 +4452,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReaso
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4567,8 +4480,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500)
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_NotSupportErrMessage)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4598,8 +4509,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_NotSupportErrM
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_DuplicateReason)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4632,8 +4541,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_DuplicateReaso
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4662,8 +4569,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures)
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_NotSupportErrMessage)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4693,8 +4598,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_NotSupp
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_DuplicateReason)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4727,8 +4630,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_Duplica
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_UnconditionalDownload)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4756,8 +4657,6 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_Unconditiona
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
@@ -4786,9 +4685,9 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload)
 
 TEST_F(AosRegistrationTest, RegistrationUpdatedWhenRegistrationIsNullDoesNothing)
 {
+    m_pAosRegistration->Destroy();
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, ProcessRegUpdated()).Times(0);
 
@@ -4798,8 +4697,7 @@ TEST_F(AosRegistrationTest, RegistrationUpdatedWhenRegistrationIsNullDoesNothing
 TEST_F(AosRegistrationTest, RegistrationUpdatedReportsFailureIfFailToUpdateIpsec)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_IPSEC;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pIpsecHelper = &m_objMockAosIpsecHelper;
+    m_pAosRegistration->CreateIpsecHelper();
 
     EXPECT_CALL(m_objMockAosIpsecHelper, ProcessRegUpdated()).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -4812,7 +4710,7 @@ TEST_F(AosRegistrationTest, RegistrationUpdatedReportsFailureIfFailToUpdateIpsec
 TEST_F(AosRegistrationTest, RegistrationUpdatedCreatesSubscriptionAndReportsSuccess)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
+    m_pAosRegistration->DestroySubscription();
 
     EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_))
             .WillOnce(Return(&m_objMockIRegSubscription));
@@ -4829,8 +4727,6 @@ TEST_F(AosRegistrationTest, RegistrationUpdatedStartsSubscriptionAndReportsSucce
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockAosSubscription, Start(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -4845,7 +4741,6 @@ TEST_F(AosRegistrationTest, RegistrationUpdatedStartsSubscriptionAndReportsSucce
 TEST_F(AosRegistrationTest,
         RegistrationUpdateFailedWhenMoreAuthChallengeIsNotAllowedHandlesAuthFailure)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     IMS_UINT32 nCounterThreshold = TestAosRegistration::AUTHENTICATION_RETRY_MAX_COUNT;
     m_pAosRegistration->m_nAuthChallengeCount = nCounterThreshold;
 
@@ -4861,7 +4756,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, RegistrationUpdateFailedWithStatusCodeWhileInCallReportsFailure)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
     m_pAosRegistration->SetImsCall(IMS_TRUE);
 
@@ -5001,7 +4895,6 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryForUpdateWhenUpdateFailedWithTxnT
 
 TEST_F(AosRegistrationTest, RegistrationUpdateFailedWithOtherReasonTriggersFlowRecovery)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->m_nAuthChallengeCount = 0;
 
     // ProcessUpdateFailed_Others
@@ -5098,9 +4991,8 @@ TEST_F(AosRegistrationTest, RegTerminatedReportsFailureAsTerminatedReason)
 
 TEST_F(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNothing)
 {
+    m_pAosRegistration->Destroy();
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
     m_pAosRegistration->m_nConsecutiveFailure = 1;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
@@ -5114,8 +5006,6 @@ TEST_F(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNo
 TEST_F(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionEstablishedClearsRetryCount)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
     m_pAosRegistration->m_nConsecutiveFailure = 1;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
@@ -5130,8 +5020,6 @@ TEST_F(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionEstablishedC
 TEST_F(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionFailedDoesNothing)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
     EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
@@ -5144,8 +5032,6 @@ TEST_F(AosRegistrationTest,
         SubscriptionStateChangedWithSubscriptionTerminatedSendsMessageForHandling)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(TestAosRegistration::MSG_SUB_TERMINATED)));
 
@@ -5156,8 +5042,6 @@ TEST_F(AosRegistrationTest,
 TEST_F(AosRegistrationTest, SubscriptionStateChangedWithUnknownReasonDoesNothing)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy()).Times(0);
     EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
@@ -5168,9 +5052,7 @@ TEST_F(AosRegistrationTest, SubscriptionStateChangedWithUnknownReasonDoesNothing
 
 TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsNotStartedReturnsFalse)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
     IMS_BOOL bResult = m_pAosRegistration->Subscription_CanBeTransmitted();
 
@@ -5180,10 +5062,6 @@ TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsNotSta
 
 TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsStartedReturnsTrue)
 {
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
-
     IMS_BOOL bResult = m_pAosRegistration->Subscription_CanBeTransmitted();
 
     EXPECT_TRUE(bResult);
@@ -5191,8 +5069,7 @@ TEST_F(AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsStarte
 
 TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoesNothing)
 {
-    m_pAosRegistration->m_piRegistration = IMS_NULL;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
+    m_pAosRegistration->Destroy();
 
     EXPECT_CALL(m_objMockThread, PostMessageI(_)).Times(0);
 
@@ -5201,9 +5078,6 @@ TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoes
 
 TEST_F(AosRegistrationTest, SubscriptionNotifyReceivedWithRegisteredEventSendsMessageForHandling)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
-
     EXPECT_CALL(m_objMockThread,
             PostMessageI(IsSameMsg(TestAosRegistration::MSG_REG_EVENT_REGISTERED)));
 
@@ -5323,7 +5197,6 @@ TEST_F(AosRegistrationTest, CallTrackerStateChangedHandlesPendingPlmnBlock)
 
 TEST_F(AosRegistrationTest, CallTrackerStateChangedTriggersReinitiateRegIfRequired)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetImsCall(IMS_TRUE);
     m_pAosRegistration->SetHeldByCall(IMS_TRUE);
 
@@ -5338,7 +5211,6 @@ TEST_F(AosRegistrationTest, CallTrackerStateChangedTriggersReinitiateRegIfRequir
 
 TEST_F(AosRegistrationTest, CallTrackerStateChangedHandlesPendingUpdate)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetImsCall(IMS_TRUE);
     m_pAosRegistration->SetHeldByCall(IMS_FALSE);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
@@ -5382,8 +5254,6 @@ TEST_F(AosRegistrationTest,
 
 TEST_F(AosRegistrationTest, TransactionOnConnectionFailedWithAccessDeniedDestroysRegistration)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(1);
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -5399,8 +5269,6 @@ TEST_F(AosRegistrationTest, TransactionOnConnectionFailedWithAccessDeniedDestroy
 TEST_F(AosRegistrationTest,
         TransactionOnConnectionFailedWithRrcRejectDestroysRegistrationWithoutPcscfClear)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
-
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(0);
     EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
@@ -5418,7 +5286,6 @@ TEST_F(AosRegistrationTest,
 TEST_F(AosRegistrationTest,
         TransactionOnConnectionFailedWithOtherReasonHandlesConnectionSetupPrepared)
 {
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
     m_pAosRegistration->m_nTxnPending |= TestAosRegistration::PENDING_TRANSACTION;
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
@@ -5451,7 +5318,7 @@ TEST_F(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfSipMessa
 
 TEST_F(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfFailToAddLocationHeaderBody)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::FAKE;
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
 
     IMS_RESULT nResult = m_pAosRegistration->MessageMediator_AdjustMessage(
             &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
@@ -5462,7 +5329,6 @@ TEST_F(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfFailToAd
 TEST_F(AosRegistrationTest,
         MessageMediatorAdjustMessageReturnsSuccessIfSucceedToAddLocationHeaderBody)
 {
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
 
     ON_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))
@@ -5567,7 +5433,6 @@ TEST_F(AosRegistrationTest, TimerExpired)
 
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_INTERNAL_ERROR, 5000);
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIRegistration, RestoreActiveBindings()).Times(1);
     m_pAosRegistration->Timer_TimerExpired(m_pAosRegistration->m_piInternalErrorTimer);
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_INTERNAL_ERROR));
@@ -5593,7 +5458,6 @@ TEST_F(AosRegistrationTest, ProcessOfflineRecoverTimerExpired)
     m_pAosRegistration->SetAppReady(IMS_TRUE);
 
     // Transaction is started - fail to CreateRegistration
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
     EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
             .Times(AnyNumber())
             .WillOnce(ReturnRef(m_objEmptyImpus))
@@ -5616,7 +5480,7 @@ TEST_F(AosRegistrationTest, ProcessOfflineRecoverTimerExpired)
     // Transaction is not started
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
@@ -5625,25 +5489,8 @@ TEST_F(AosRegistrationTest, ProcessOfflineRecoverTimerExpired)
 
 TEST_F(AosRegistrationTest, ProcessStopRetryTimerExpired)
 {
-    // Retry is not held
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
-
-    // Transaction is started - fail to SendRegister
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_TRUE;
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
-
     // Transaction is started - succeed to SendRegister
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
@@ -5654,8 +5501,25 @@ TEST_F(AosRegistrationTest, ProcessStopRetryTimerExpired)
     // Transaction is not started
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->m_bIsTransactionStarted = IMS_FALSE;
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
+    m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->ProcessStopRetryTimerExpired();
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
+
+    // Retry is not held
+    m_pAosRegistration->Destroy();
+    m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->ProcessStopRetryTimerExpired();
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
+
+    // Transaction is started - fail to SendRegister
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->SetImsCall(IMS_FALSE);
+    m_pAosRegistration->SetTransactionStarted(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
     m_pAosRegistration->StartTimer(TestAosRegistration::TIMER_STOP_RETRY, 5000);
     m_pAosRegistration->ProcessStopRetryTimerExpired();
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(TestAosRegistration::TIMER_STOP_RETRY));
@@ -5664,7 +5528,6 @@ TEST_F(AosRegistrationTest, ProcessStopRetryTimerExpired)
 TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
 {
     m_pAosRegistration->m_nFeature |= TestAosRegistration::FEATURE_SUBSCRIPTION;
-    m_pAosRegistration->m_pSubscription = &m_objMockAosSubscription;
 
     // StartSubscription - m_pSubscription is not null
     EXPECT_TRUE(m_pAosRegistration->StartSubscription(IMS_TRUE));
@@ -5681,11 +5544,7 @@ TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
     // StopSubscription - m_pSubscription is null
     EXPECT_FALSE(m_pAosRegistration->StopSubscription());
 
-    // CreateSubscription - m_piRegistration is null
-    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
-
     // CreateSubscription - piRegSubscription is null
-    m_pAosRegistration->m_piRegistration = &m_objMockIRegistration;
     EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_))
             .Times(AnyNumber())
             .WillOnce(Return(nullptr))
@@ -5694,6 +5553,10 @@ TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
 
     // CreateSubscription - m_piRegistration and piRegSubscription is not null
     EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
+
+    // CreateSubscription - m_piRegistration is null
+    m_pAosRegistration->Destroy();
+    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
 }
 
 TEST_F(AosRegistrationTest, AddLocationHeaderBody)
@@ -5717,7 +5580,6 @@ TEST_F(AosRegistrationTest, AddLocationHeaderBody)
             &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL));
 
     // IsGeolocationInfoRequired return true
-    m_pAosRegistration->m_eRegType = AosRegistrationType::NORMAL;
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGeolocationPidfSupported(
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
