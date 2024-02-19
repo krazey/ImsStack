@@ -584,7 +584,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
                 m_nRetryCountSubTerminated++;
                 A_IMS_TRACE_I(AOSTAG, "Subscription terminated count: %d",
                         m_nRetryCountSubTerminated, 0, 0);
-                if (m_nRetryCountSubTerminated < nSize)
+                if (m_nRetryCountSubTerminated < nRetryInfoSubTerminated)
                 {
                     return IMS_FALSE;
                 }
@@ -621,7 +621,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
                 m_nRetryCountRegRequired++;
                 A_IMS_TRACE_I(
                         AOSTAG, "Registration required count: %d", m_nRetryCountRegRequired, 0, 0);
-                if (m_nRetryCountRegRequired < nSize)
+                if (m_nRetryCountRegRequired < nRetryInfoRegRequired)
                 {
                     return IMS_FALSE;
                 }
