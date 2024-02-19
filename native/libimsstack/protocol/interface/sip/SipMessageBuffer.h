@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SIP_MESSAGE_BUFFER_H_
-#define SIP_MESSAGE_BUFFER_H_
+#ifndef __SIP_MESSAGE_BUFFER_H__
+#define __SIP_MESSAGE_BUFFER_H__
 
 #include "RcObject.h"
 
@@ -51,4 +51,4 @@ public:
     IMS_BYTE** m_ppBuffer;
 };
 
-#endif
+#endif  //__SIP_MESSAGE_BUFFER_H__

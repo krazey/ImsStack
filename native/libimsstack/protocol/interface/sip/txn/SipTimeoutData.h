@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_TIMEOUT_DATA_H
-#define _SIP_TXN_TIMEOUT_DATA_H
+#ifndef __SIP_TXN_TIMEOUT_DATA_H__
+#define __SIP_TXN_TIMEOUT_DATA_H__
 
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
@@ -44,4 +44,4 @@ public:
     SIP_BOOL SetTimerType(SIP_INT32 eTimerType);
 };
 
-#endif
+#endif  //__SIP_TXN_TIMEOUT_DATA_H__

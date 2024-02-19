@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_DEFLOGGERUTIL_H__
-#define __SIP_DEFLOGGERUTIL_H__
+#ifndef __SIP_DEF_LOGGER_UTIL_H__
+#define __SIP_DEF_LOGGER_UTIL_H__
 
 #include "ISipLoggerUtil.h"
 #include "SipDatatypes.h"
@@ -32,4 +32,4 @@ public:
             const SIP_CHAR* pszFormat, ...) override;
 };
 
-#endif
+#endif  //__SIP_DEF_LOGGER_UTIL_H__

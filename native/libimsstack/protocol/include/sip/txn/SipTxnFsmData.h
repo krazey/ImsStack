@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_FSM_DATA_H_
-#define _SIP_TXN_FSM_DATA_H_
+#ifndef __SIP_TXN_FSM_DATA_H__
+#define __SIP_TXN_FSM_DATA_H__
 
 #include "msg/SipMessage.h"
 #include "transport/SipTransportInfo.h"
@@ -57,4 +57,4 @@ public:
     SIP_BOOL bTxnCreated;
 };
 
-#endif  //_SIP_TXN_FSM_DATA_H_
+#endif  //__SIP_TXN_FSM_DATA_H__
