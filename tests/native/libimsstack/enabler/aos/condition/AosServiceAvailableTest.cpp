@@ -44,19 +44,28 @@ public:
     {
     }
 
-    FRIEND_TEST(AosServiceAvailableTest, Init_MemberContextIsNull);
-    FRIEND_TEST(AosServiceAvailableTest, Init_MemberContextIsNotNull);
-    FRIEND_TEST(AosServiceAvailableTest, SetListener_ParamIsNull);
-    FRIEND_TEST(AosServiceAvailableTest, SetListener_AlreadyExist);
-    FRIEND_TEST(AosServiceAvailableTest, SetListener_Success);
-    FRIEND_TEST(AosServiceAvailableTest, RemoveListener_ParamIsNull);
-    FRIEND_TEST(AosServiceAvailableTest, RemoveListener_NotExist);
-    FRIEND_TEST(AosServiceAvailableTest, RemoveListener_Success);
-    FRIEND_TEST(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore);
-    FRIEND_TEST(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners);
-    FRIEND_TEST(AosServiceAvailableTest, HandleEvent_Valid);
-    FRIEND_TEST(AosServiceAvailableTest, HandleEvent_Invalid);
-    FRIEND_TEST(AosServiceAvailableTest, RequestCommand);
+    inline void RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason)
+    {
+        AosServiceAvailable::RequestCommand(nCommand, nReason);
+    }
+
+    inline void SetAppContext(IN IAosAppContext* piContext) { m_piAppContext = piContext; }
+
+    inline ImsList<IAosServiceAvailableListener*> GetListeners() { return m_objListeners; }
+
+    inline void SetListeners(IN ImsList<IAosServiceAvailableListener*> objListeners)
+    {
+        m_objListeners = objListeners;
+    }
+
+    inline IAosBlock* GetBlock() { return m_piBlock; }
+
+    inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
+
+    inline void SetAvailableLastNotified(IN IMS_BOOL bAvailable)
+    {
+        m_bAvailableLastNotified = bAvailable;
+    }
 };
 
 class AosServiceAvailableTest : public ::testing::Test
@@ -96,7 +105,7 @@ protected:
 
 TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull)
 {
-    m_pAosServiceAvailable->m_piAppContext = IMS_NULL;
+    m_pAosServiceAvailable->SetAppContext(IMS_NULL);
 
     MockIAosAppContext objMockIAosAppContext;
     EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(1);
@@ -115,7 +124,7 @@ TEST_F(AosServiceAvailableTest, Init_MemberContextIsNotNull)
     EXPECT_CALL(objMockIAosAppContext, GetRegistration()).Times(0);
     EXPECT_CALL(objMockIAosAppContext, GetConnection()).Times(0);
 
-    m_pAosServiceAvailable->m_piAppContext = &objMockIAosAppContext;
+    m_pAosServiceAvailable->SetAppContext(&objMockIAosAppContext);
 
     m_pAosServiceAvailable->Init(&objMockIAosAppContext);
 }
@@ -124,7 +133,7 @@ TEST_F(AosServiceAvailableTest, SetListener_ParamIsNull)
 {
     m_pAosServiceAvailable->CleanUp();
     m_pAosServiceAvailable->SetListener(IMS_NULL);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 }
 
 TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist)
@@ -132,13 +141,13 @@ TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist)
     m_pAosServiceAvailable->CleanUp();
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 }
 
 TEST_F(AosServiceAvailableTest, SetListener_Success)
@@ -146,19 +155,19 @@ TEST_F(AosServiceAvailableTest, SetListener_Success)
     m_pAosServiceAvailable->CleanUp();
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
 
     m_pAosServiceAvailable->SetListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 4);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
 
     m_pAosServiceAvailable->SetListener(&m_objListener5);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 5);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 5);
 }
 
 TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull)
@@ -166,13 +175,13 @@ TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull)
     m_pAosServiceAvailable->CleanUp();
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->RemoveListener(IMS_NULL);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 }
 
 TEST_F(AosServiceAvailableTest, RemoveListener_NotExist)
@@ -180,19 +189,19 @@ TEST_F(AosServiceAvailableTest, RemoveListener_NotExist)
     m_pAosServiceAvailable->CleanUp();
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener5);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 }
 
 TEST_F(AosServiceAvailableTest, RemoveListener_Success)
@@ -200,55 +209,55 @@ TEST_F(AosServiceAvailableTest, RemoveListener_Success)
     m_pAosServiceAvailable->CleanUp();
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
 
     m_pAosServiceAvailable->SetListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 4);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
 
     m_pAosServiceAvailable->SetListener(&m_objListener5);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 5);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 5);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 4);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener5);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
     m_pAosServiceAvailable->RemoveListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 }
 
 TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore)
 {
     MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->m_piBlock = &objMockIAosBlock;
+    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
 
-    EXPECT_NE(m_pAosServiceAvailable->m_piBlock, nullptr);
+    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
     EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(0);
 
-    m_pAosServiceAvailable->m_bAvailableLastNotified = IMS_TRUE;
+    m_pAosServiceAvailable->SetAvailableLastNotified(IMS_TRUE);
     m_pAosServiceAvailable->RefreshServiceAvailablility();
 }
 
 TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
 {
     MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->m_piBlock = &objMockIAosBlock;
+    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
 
-    EXPECT_NE(m_pAosServiceAvailable->m_piBlock, nullptr);
+    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
     EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(1);
 
@@ -256,13 +265,13 @@ TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
     objListeners.Append(&m_objListener1);
     objListeners.Append(&m_objListener2);
     objListeners.Append(&m_objListener3);
-    m_pAosServiceAvailable->m_objListeners = objListeners;
+    m_pAosServiceAvailable->SetListeners(objListeners);
 
     EXPECT_CALL(m_objListener1, ServiceAvailable_Changed()).Times(1);
     EXPECT_CALL(m_objListener2, ServiceAvailable_Changed()).Times(1);
     EXPECT_CALL(m_objListener3, ServiceAvailable_Changed()).Times(1);
 
-    m_pAosServiceAvailable->m_bAvailableLastNotified = IMS_FALSE;
+    m_pAosServiceAvailable->SetAvailableLastNotified(IMS_FALSE);
     m_pAosServiceAvailable->RefreshServiceAvailablility();
 }
 
@@ -308,7 +317,7 @@ TEST_F(AosServiceAvailableTest, RequestCommand)
     m_pAosServiceAvailable->SetListener(&m_objListener1);
     m_pAosServiceAvailable->SetListener(&m_objListener2);
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
 
     m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_STOP, AosReason::NOT_SPECIFIED);
     m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_DESTROY, AosReason::NOT_SPECIFIED);
