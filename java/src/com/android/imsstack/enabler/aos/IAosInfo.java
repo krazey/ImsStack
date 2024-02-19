@@ -162,14 +162,6 @@ public interface IAosInfo {
     void notifyPowerOff();
 
     /**
-     * Called to notify the change of precise call state.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param state {@code state} is type of {@link PreciseCallState}.
-     */
-    void notifyPreciseCallState(int state);
-
-    /**
      * Called to notify the change of carrier signal PCO value.
      * Native Listener : IAosServicePhoneListener.
      *
@@ -237,23 +229,6 @@ public interface IAosInfo {
         public static final int SIM_LOADED = 0;
         public static final int RETRY_SUCCESS = 1;
         public static final int RETRY_FAILURE = 2;
-    }
-
-    /**
-     * Precise call state
-     */
-    class PreciseCallState {
-
-        public static final int NOT_VALID = -1;
-        public static final int IDLE = 0;
-        public static final int ACTIVE = 1;
-        public static final int HOLDING = 2;
-        public static final int DIALING = 3;
-        public static final int ALERTING = 4;
-        public static final int INCOMING = 5;
-        public static final int WAITING = 6;
-        public static final int DISCONNECTED = 7;
-        public static final int DISCONNECTING = 8;
     }
 
     /**

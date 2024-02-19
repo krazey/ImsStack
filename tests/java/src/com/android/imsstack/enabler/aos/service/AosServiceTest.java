@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +31,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.DisconnectCause;
+import android.telephony.PreciseCallState;
+import android.telephony.PreciseDisconnectCause;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -45,13 +47,13 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
-import com.android.imsstack.enabler.aos.IAosInfo.PreciseCallState;
 import com.android.imsstack.enabler.aos.IAosInfo.RoamingPreferredVoiceNetwork;
 import com.android.imsstack.enabler.aos.IAosInfo.ServiceSetting;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
@@ -96,6 +98,7 @@ public class AosServiceTest extends ImsStackTest {
     @Mock SparseArray<ImsServiceRegistry> mMockImsServiceRegistrys;
     @Mock ImsServiceRegistry mMockImsServiceRegistry;
     @Mock SimInterface mMockSimInterface;
+    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock IAosRegistrationListener mMockAosRegistrationListener;
     @Mock IAosInfoListener mMockAosInfoListener;
     @Mock NativeStateInterface mMockNativeStateInterface;
@@ -117,11 +120,11 @@ public class AosServiceTest extends ImsStackTest {
         replaceInstance(ImsServiceRegistry.class, "sImsServiceRegistrys", null,
                 mMockImsServiceRegistrys);
 
-        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
-
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
 
         mAosService = new AosService();
         mAosService.init(SLOT_0);
@@ -454,16 +457,6 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void notifyPreciseCallState() {
-        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
-                PreciseCallState.ACTIVE);
-
-        mAosService.notifyPreciseCallState(PreciseCallState.ACTIVE);
-
-        verify(mMockJniIms).sendData(mNativeObject, callStateData);
-    }
-
-    @Test
     public void notifyCarrierSignalPcoValueChanged_pcoDataLengthIsFour() {
         byte[] value = createBytes(IIAosService.J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED,
                 PCO_LIMITED_SERVICE_VALUE);
@@ -629,7 +622,67 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void onNetworkOperatorChanged() {
+    public void onPreciseCallStateChanged_csCallStateIsIdle_notifyPreciseCallStateWithIdle() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        mAosService.mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_ACTIVE;
+        when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onPreciseCallStateChanged_notifyPreciseCallStateWithBackgroundCall() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        when(mMockTelephonyInterface.getCsCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onPreciseCallStateChanged_notifyPreciseCallStateWithForegroundCall() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        when(mMockTelephonyInterface.getCsCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onNetworkOperatorChanged_notifyChange() {
         byte[] plmnChangedData = createBytes(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
 
         mAosService.onNetworkOperatorChanged();
@@ -638,7 +691,7 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void onAirplaneModeChanged() {
+    public void onAirplaneModeChanged_notifyChange() {
         byte[] airplaneSettingData = createBytes(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, true);
 
         mAosService.onAirplaneModeChanged(true);
@@ -649,13 +702,15 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onHandoverStateChanged_doNotNotifyIpcanHandoverExceptFailure() {
         int reason = android.telephony.DataFailCause.OPERATOR_BARRED;
+        byte[] ipcanHandoverFailureData = createBytes(
+                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE, reason);
 
         mAosService.onHandoverStateChanged(IApn.HANDOVER_START,
                 TelephonyManager.NETWORK_TYPE_IWLAN, reason);
         mAosService.onHandoverStateChanged(IApn.HANDOVER_SUCCESS,
                 TelephonyManager.NETWORK_TYPE_IWLAN, reason);
 
-        verify(mMockJniIms, never()).sendData(eq(mNativeObject), anyObject());
+        verify(mMockJniIms, never()).sendData(mNativeObject, ipcanHandoverFailureData);
     }
 
     @Test

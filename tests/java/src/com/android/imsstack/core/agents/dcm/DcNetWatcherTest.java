@@ -43,11 +43,8 @@ import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
 import android.telephony.CellIdentityWcdma;
 import android.telephony.DataSpecificRegistrationInfo;
-import android.telephony.DisconnectCause;
 import android.telephony.LteVopsSupportInfo;
 import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PreciseCallState;
-import android.telephony.PreciseDisconnectCause;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -67,8 +64,6 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -92,13 +87,11 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock SettingsProxy mSettingsProxy;
     @Mock DcSettings mMockDcSetting;
     @Mock ISystem mMockSystem;
-    @Mock IAosInfo mMockAosInfo;
     @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
     @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock ConfigInterface mMockConfigInterface;
     @Mock SystemInterface mMockSystemInterface;
-    @Mock AosFactory mMockAosFactory;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock IDcNetWatcher.Listener mNetWatherListener;
 
@@ -118,9 +111,6 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         when(mMockSystemInterface.getSystem(SLOT0)).thenReturn(mMockSystem);
         replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
-
-        when(mMockAosFactory.getAosInfo(SLOT0)).thenReturn(mMockAosInfo);
-        replaceInstance(AosFactory.class, "sFactory", null, mMockAosFactory);
 
         AgentFactory.getInstance().setAgent(
                 PhoneStateInterface.class, mMockPhoneStateInterface, SLOT0);
@@ -165,7 +155,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testInit() {
         verify(mMockDcSetting).getImsSupportedRats();
         verify(mMockSystemInterface).getSystem(SLOT0);
-        verify(mMockAosFactory).getAosInfo(SLOT0);
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
         verify(mTestAppContext.getBroadcastReceiverProxy()).registerReceiver(any(), any());
         verify(mMockPhoneStateInterface).createNotifier(any(), any(Looper.class));
@@ -771,96 +760,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
         assertEquals(ServiceState.ROAMING_TYPE_UNKNOWN, mDcNetWatcher.getDataRoamingType());
-    }
-
-    @Test
-    public void testOnCallStateChanged_psCallStateChanged() throws Exception {
-        when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
-
-        verify(mMockSystem, never()).notifyVoiceCallStateChanged(anyInt());
-        verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_OFFHOOK, 0);
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mDcNetWatcher.getCallState());
-    }
-
-    @Test
-    public void testOnCallStateChanged_csCallStateChangedOffhookToIdle() throws Exception {
-        when(mMockTelephonyInterface.getCsCallState())
-                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK)
-                .thenReturn(TelephonyManager.CALL_STATE_IDLE);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
-
-        verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_OFFHOOK, 0);
-        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mDcNetWatcher.getCallState());
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
-
-        verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_IDLE, 0);
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mDcNetWatcher.getCallState());
-    }
-
-    @Test
-    public void testOnPreciseCallStateChanged_resetPreciseCallStateWhenCsCallStateIdle()
-            throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPreciseCallState", mDcNetWatcher,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {null});
-
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_IDLE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_IDLE, mDcNetWatcher.getPreciseCallState());
-    }
-
-    @Test
-    public void testOnPreciseCallStateChanged_withBackgroundCall() throws Exception {
-        PreciseCallState preciseCallState = new PreciseCallState(
-                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
-                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                DisconnectCause.NOT_VALID,
-                PreciseDisconnectCause.NOT_VALID);
-        replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
-                TelephonyManager.CALL_STATE_OFFHOOK);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
-
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
-    }
-
-    @Test
-    public void testOnPreciseCallStateChanged_withForegroundCall() throws Exception {
-        PreciseCallState preciseCallState = new PreciseCallState(
-                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                DisconnectCause.NOT_VALID,
-                PreciseDisconnectCause.NOT_VALID);
-        replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
-                TelephonyManager.CALL_STATE_OFFHOOK);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
-
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
     }
 
     @Test
