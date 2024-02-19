@@ -467,70 +467,138 @@ TEST_F(AosBlockTest, SucceedsGetBlockReasonsForWhole)
     EXPECT_EQ(objReason.GetSize(), 9);
 }
 
-TEST_F(AosBlockTest, IsReasonBlocked_OnlyEnabled)
+TEST_F(AosBlockTest, ShouldReturnFalseWhenCommonReasonBlockIsNotOne)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
-    EXPECT_FALSE(m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_WHOLE));
 
-    m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_WHOLE);
 
-    m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_WHOLE));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_CELLULAR));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_WIFI));
-
-    m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_ROAMING, IMS_TRUE, SERVICE_WHOLE));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_ROAMING, IMS_TRUE, SERVICE_CELLULAR));
-    EXPECT_FALSE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_ROAMING, IMS_TRUE, SERVICE_WIFI));
-
-    m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_NO_WIFI, IMS_TRUE, SERVICE_WHOLE));
-    EXPECT_FALSE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_NO_WIFI, IMS_TRUE, SERVICE_CELLULAR));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_NO_WIFI, IMS_TRUE, SERVICE_WIFI));
-
-    m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosBlockTest, IsReasonBlocked_NotOnlyEnabled)
+TEST_F(AosBlockTest, ShouldReturnFalseWhenCellularReasonBlockIsNotOne)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
 
+    // WHEN
+    IMS_BOOL bResult =
+            m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_ROAMING, IMS_TRUE, SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosBlockTest, ShouldReturnFalseWhenWifiReasonBlockIsNotOne)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_NO_WIFI, IMS_TRUE, SERVICE_WIFI);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenCommonReasonBlockIsOne)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_POWER_OFF);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->IsReasonBlocked(BLOCK_POWER_OFF, IMS_TRUE, SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenCellularReasonBlockIsOne)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+
+    // WHEN
+    IMS_BOOL bResult =
+            m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_ROAMING, IMS_TRUE, SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenWifiReasonBlockIsOne)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_NO_WIFI, IMS_TRUE, SERVICE_WIFI);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenCommonReasonBlocked)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
 
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosBlock->IsReasonBlocked(BLOCK_AC_INCOMPLETED);
+    IMS_BOOL bResult2 = m_pAosBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED);
+    IMS_BOOL bResult3 = m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED);
+
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenCellularReasonBlocked)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
 
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    IMS_BOOL bResult2 = m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK);
+    IMS_BOOL bResult3 = m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE);
+
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
+}
+
+TEST_F(AosBlockTest, ShouldReturnTrueWhenWifiReasonBlocked)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AC_INCOMPLETED));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
+    // WHEN
+    IMS_BOOL bResult1 = m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION);
+    IMS_BOOL bResult2 = m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
+    IMS_BOOL bResult3 = m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_NO_NETWORK));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_CELLULAR_OUT_OF_SERVICE));
-
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
+    // THEN
+    EXPECT_TRUE(bResult1);
+    EXPECT_TRUE(bResult2);
+    EXPECT_TRUE(bResult3);
 }
 
 TEST_F(AosBlockTest, IsCleared_Cellular)
