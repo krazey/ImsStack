@@ -40,20 +40,24 @@ public:
     {
     }
 
-    // TEST : IsReady
-    FRIEND_TEST(AosEConditionTest, ReturnFalseWhenIsReady);
-    FRIEND_TEST(AosEConditionTest, ReturnTrueWhenIsReady);
-    // TEST : AddAosServiceListener
-    FRIEND_TEST(AosEConditionTest, ReturnFalseAddAosServiceListenerWhenServiceNull);
-    // TEST : RemoveAosServiceListener
-    FRIEND_TEST(AosEConditionTest, ReturnFalseRemoveAosServiceListenerWhenServiceNull);
-    // TEST : Block_Changed
-    FRIEND_TEST(AosEConditionTest, InvokeConditionChangedWhenBlockChanged);
-    // TEST : ServicePhone_AosStart
-    FRIEND_TEST(AosEConditionTest, ResetBlockWhenServicePhoneAosStart);
+    inline IMS_BOOL AddAosServiceListener() override
+    {
+        return AosECondition::AddAosServiceListener();
+    }
 
-public:
-    void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
+    inline IMS_BOOL RemoveAosServiceListener() override
+    {
+        return AosECondition::RemoveAosServiceListener();
+    }
+
+    inline void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override
+    {
+        AosECondition::Block_Changed(nType, nParam);
+    }
+
+    inline void ServicePhone_AosStart() override { AosECondition::ServicePhone_AosStart(); }
+
+    inline void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 };
 
 class AosEConditionTest : public ::testing::Test {
