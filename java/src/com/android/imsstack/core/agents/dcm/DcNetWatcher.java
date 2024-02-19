@@ -26,10 +26,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants;
-import android.telephony.Annotation.CallState;
 import android.telephony.DataSpecificRegistrationInfo;
 import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PreciseCallState;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.VopsSupportInfo;
@@ -47,8 +45,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -100,8 +96,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     private int mRatPolicy = 0;
-    private int mCallState = TelephonyManager.CALL_STATE_IDLE;
-    private int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
     private int mVoiceRoamingType = 0;
     private int mDataRoamingType = 0;
 
@@ -137,7 +131,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
 
     private ISystem mSystem;
-    private IAosInfo mAosInfo;
     private int mSlotId = 0;
 
     // Static loading materials ----------------------------------
@@ -168,11 +161,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
         if (mSystem == null) {
-            return;
-        }
-
-        mAosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-        if (mAosInfo == null) {
             return;
         }
 
@@ -230,13 +218,10 @@ public class DcNetWatcher implements IDcNetWatcher {
             mNativeStateListener = null;
         }
 
-        mAosInfo = null;
         mSystem = null;
         mDcSettings = null;
 
         mRatPolicy = 0;
-        mCallState = TelephonyManager.CALL_STATE_IDLE;
-        mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
         mVoiceRoamingType = 0;
         mDataRoamingType = 0;
         mRat = TelephonyManager.NETWORK_TYPE_UNKNOWN;
@@ -335,18 +320,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                         + mRat
                         + ", ServiceState : Unavailable");
         return false;
-    }
-
-    // CS Call state in TelephonyManager
-    @Override
-    public int getCallState() {
-        return mCallState;
-    }
-
-    // precise CS Call state in TelephonyManager
-    @Override
-    public int getPreciseCallState() {
-        return mPreciseCallState;
     }
 
     // Data service state in ServiceState
@@ -1147,71 +1120,6 @@ public class DcNetWatcher implements IDcNetWatcher {
             // Data Roaming Type
             if (mDataRoamingType != dataRoamingType) {
                 mDataRoamingType = dataRoamingType;
-            }
-        }
-
-        /** Invokes when call state is changed. */
-        @Override
-        public void onCallStateChanged(@CallState int state) {
-            TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
-                    TelephonyInterface.class, mSlotId);
-
-            if (telephony == null) {
-                return;
-            }
-
-            int csStateFromPhone = telephony.getCsCallState();
-
-            if (csStateFromPhone != state) {
-                ImsLog.i(mSlotId, "call state is not CS");
-                if ((csStateFromPhone == TelephonyManager.CALL_STATE_IDLE)
-                        && (mCallState != TelephonyManager.CALL_STATE_IDLE)) {
-                    ImsLog.i(mSlotId, "CS call state is not IDLE. Therefore update it explicitly");
-                    state = TelephonyManager.CALL_STATE_IDLE;
-                } else {
-                    return;
-                }
-            }
-
-            if (mCallState != state) {
-                mCallState = state;
-                mSystem.notifyVoiceCallStateChanged(mCallState);
-                mSystem.notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE, mCallState, 0);
-            }
-        }
-
-        /** Invokes when precise call state is changed. */
-        @Override
-        public void onPreciseCallStateChanged(PreciseCallState callState) {
-            if (mCallState == TelephonyManager.CALL_STATE_IDLE) {
-                if (mPreciseCallState != PreciseCallState.PRECISE_CALL_STATE_IDLE) {
-                    mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-                    mAosInfo.notifyPreciseCallState(mPreciseCallState);
-                }
-                return;
-            }
-
-            // For CS Call, both Foreground and Background Call state check is required
-            int nForegroundCallState = callState.getForegroundCallState();
-            int nBackgroundCallState = callState.getBackgroundCallState();
-
-            ImsLog.i(
-                    mSlotId,
-                    "nForegroundCallState = "
-                            + nForegroundCallState
-                            + ", nBackgroundCallState = "
-                            + nBackgroundCallState);
-
-            if ((nBackgroundCallState == PreciseCallState.PRECISE_CALL_STATE_HOLDING)
-                    || (nBackgroundCallState == PreciseCallState.PRECISE_CALL_STATE_ACTIVE)) {
-                mPreciseCallState = nBackgroundCallState;
-                mAosInfo.notifyPreciseCallState(mPreciseCallState);
-            } else {
-                // If Background Call is not present, post ForegroundCallState to AoSCallTracker
-                if (mPreciseCallState != nForegroundCallState) {
-                    mPreciseCallState = nForegroundCallState;
-                    mAosInfo.notifyPreciseCallState(mPreciseCallState);
-                }
             }
         }
 

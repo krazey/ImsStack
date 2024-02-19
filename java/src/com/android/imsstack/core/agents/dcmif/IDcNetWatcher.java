@@ -28,16 +28,6 @@ public interface IDcNetWatcher extends IDc {
     boolean isRatPolicyAvailable();
 
     /**
-     * Return call state stored in DcNetWatcher object
-     */
-    int getCallState();
-
-    /**
-     * Return call state stored in DcNetWatcher object
-     */
-    int getPreciseCallState();
-
-    /**
      * Return data service state stored in DcNetWatcher object
      */
     int getDataServiceState();
