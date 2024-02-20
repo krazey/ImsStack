@@ -16,8 +16,6 @@
 package com.android.imsstack.its.imsservice.mmtel;
 
 import android.annotation.CallbackExecutor;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,6 +35,9 @@ import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ConnectionFailureInfo;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsUt;

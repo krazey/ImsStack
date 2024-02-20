@@ -22,7 +22,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsMmTelFeature;
+import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsServiceController;
+
+import androidx.annotation.NonNull;
 
 import com.android.ims.internal.IImsUt;
 import com.android.imsstack.base.AppContext;
@@ -31,6 +34,7 @@ import com.android.imsstack.its.base.TestConstants;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.mmtel.sms.ImsSmsWrapper;
 import com.android.imsstack.its.imsservice.mmtel.ut.ImsUtWrapper;
+import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.util.Log;
 
 /**
@@ -45,6 +49,7 @@ public final class ImsServiceConnector {
     private IImsServiceController mImsServiceBinder;
     private ImsServiceConnection mServiceConnection;
     private ImsMmTelFeatureWrapper mMmTelFeatureWrapper;
+    private ImsRegistrationWrapper mRegistrationWrapper;
     private ImsSmsWrapper mSmsWrapper;
     private ImsUtWrapper mUtWrapper;
 
@@ -69,20 +74,7 @@ public final class ImsServiceConnector {
      * Stop.
      */
     public void stop() {
-        if (mUtWrapper != null) {
-            mUtWrapper.destroy();
-            mUtWrapper = null;
-        }
-
-        if (mSmsWrapper != null) {
-            mSmsWrapper.destroy();
-            mSmsWrapper = null;
-        }
-
-        if (mMmTelFeatureWrapper != null) {
-            mMmTelFeatureWrapper.destroy();
-            mMmTelFeatureWrapper = null;
-        }
+        destroyWrappers();
 
         try {
             if (mImsServiceBinder != null) {
@@ -103,6 +95,13 @@ public final class ImsServiceConnector {
      */
     public ImsMmTelFeatureWrapper getMmTelFeature() {
         return mMmTelFeatureWrapper;
+    }
+
+    /**
+     * Gets Registration interface wrapper.
+     */
+    public ImsRegistrationWrapper getRegistration() {
+        return mRegistrationWrapper;
     }
 
     /**
@@ -134,30 +133,72 @@ public final class ImsServiceConnector {
         }
     }
 
+    private void createMmTelWrappers(@NonNull IImsMmTelFeature mmtelFeature) {
+        if (mMmTelFeatureWrapper != null) {
+            mMmTelFeatureWrapper.destroy();
+        }
+        mMmTelFeatureWrapper = new ImsMmTelFeatureWrapper(mmtelFeature);
+
+        if (mSmsWrapper != null) {
+            mSmsWrapper.destroy();
+        }
+        mSmsWrapper = new ImsSmsWrapper(mmtelFeature);
+
+        if (mUtWrapper != null) {
+            mUtWrapper.destroy();
+            mUtWrapper = null;
+        }
+        IImsUt imsUt = mMmTelFeatureWrapper.getUtInterface();
+        if (imsUt != null) {
+            mUtWrapper = new ImsUtWrapper(imsUt);
+        }
+    }
+
+    private void createRegistrationWrapper(@NonNull IImsRegistration registration) {
+        if (mRegistrationWrapper != null) {
+            mRegistrationWrapper.destroy();
+        }
+        mRegistrationWrapper = new ImsRegistrationWrapper(registration);
+    }
+
+    private void destroyWrappers() {
+        if (mUtWrapper != null) {
+            mUtWrapper.destroy();
+            mUtWrapper = null;
+        }
+
+        if (mSmsWrapper != null) {
+            mSmsWrapper.destroy();
+            mSmsWrapper = null;
+        }
+
+        if (mMmTelFeatureWrapper != null) {
+            mMmTelFeatureWrapper.destroy();
+            mMmTelFeatureWrapper = null;
+        }
+
+        if (mRegistrationWrapper != null) {
+            mRegistrationWrapper.destroy();
+            mRegistrationWrapper = null;
+        }
+    }
+
     private void notifyOnServiceConnected(IBinder service) {
         mImsServiceBinder = IImsServiceController.Stub.asInterface(service);
 
         try {
             mImsServiceBinder.enableIms(TestConstants.SLOT0, TestConstants.SUB_ID_1);
 
-            IImsMmTelFeature imsMmTelFeature = mImsServiceBinder.createMmTelFeature(0, 0);
-            if (mMmTelFeatureWrapper != null) {
-                mMmTelFeatureWrapper.destroy();
+            IImsRegistration registration = mImsServiceBinder.getRegistration(
+                    TestConstants.SLOT0, TestConstants.SUB_ID_1);
+            if (registration != null) {
+                createRegistrationWrapper(registration);
             }
-            mMmTelFeatureWrapper = new ImsMmTelFeatureWrapper(imsMmTelFeature);
 
-            if (mSmsWrapper != null) {
-                mSmsWrapper.destroy();
-            }
-            mSmsWrapper = new ImsSmsWrapper(imsMmTelFeature);
-
-            if (mUtWrapper != null) {
-                mUtWrapper.destroy();
-                mUtWrapper = null;
-            }
-            IImsUt imsUt = mMmTelFeatureWrapper.getUtInterface();
-            if (imsUt != null) {
-                mUtWrapper = new ImsUtWrapper(imsUt);
+            IImsMmTelFeature mmtelFeature = mImsServiceBinder.createMmTelFeature(
+                    TestConstants.SLOT0, TestConstants.SUB_ID_1);
+            if (mmtelFeature != null) {
+                createMmTelWrappers(mmtelFeature);
             }
         } catch (RemoteException e) {
             loge("notifyOnServiceConnected:" + e.toString());
