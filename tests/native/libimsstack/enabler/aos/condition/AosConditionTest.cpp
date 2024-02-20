@@ -79,41 +79,33 @@ public:
         m_pAvailableWifi->SetLocation(piTestLocation);
     }
 
-    // TEST : Start
-    FRIEND_TEST(AosConditionTest, ShouldCreateAvailableCellularWhenStart);
-    FRIEND_TEST(AosConditionTest, ShouldCreateAvailableWifiWhenStart);
-    FRIEND_TEST(AosConditionTest, ShouldSetBlockWithAosIncompletedWhenStart);
-    FRIEND_TEST(AosConditionTest, ShouldSetBlockWithSubscriberIncompletedWhenStart);
-    // TEST : Stop
-    FRIEND_TEST(AosConditionTest, ShouldDeleteAvailableCellularWhenStop);
-    FRIEND_TEST(AosConditionTest, ShouldDeleteAvailableWifiWhenStop);
-    // TEST : SetListener
-    FRIEND_TEST(AosConditionTest, SucceedsSetListener);
-    // TEST : SetBlock
-    FRIEND_TEST(AosConditionTest, SucceedsSetBlock);
-    // TEST : ResetBlock
-    FRIEND_TEST(AosConditionTest, SucceedsResetBlock);
-    // TEST : IsReady
-    FRIEND_TEST(AosConditionTest, ReturnTrueWhenCellularServiceIsReady);
-    FRIEND_TEST(AosConditionTest, ReturnTrueWhenWifiServiceIsReady);
-    FRIEND_TEST(AosConditionTest, ReturnTrueWhenWholeServiceIsReady);
-    FRIEND_TEST(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByCellular);
-    FRIEND_TEST(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByWifi);
-    FRIEND_TEST(AosConditionTest, ReturnFalseWhenCellularServiceIsNotReady);
-    FRIEND_TEST(AosConditionTest, ReturnFalseWhenWifiServiceIsNotReady);
-    FRIEND_TEST(AosConditionTest, ReturnFalseWhenWholeServiceIsNotReady);
-    // TEST : CheckServiceAvailable
-    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceCellular);
-    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWifi);
-    FRIEND_TEST(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWhole);
-    FRIEND_TEST(AosConditionTest, ReturnsCellularWhenExistAvailableServiceCellular);
-    FRIEND_TEST(AosConditionTest, ReturnsWifiWhenExistAvailableServiceWifi);
-    FRIEND_TEST(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole);
-    // TEST : CheckBadNetwork
-    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenAvailableWifiIsNull);
-    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenCellServiceIsNotAvailable);
-    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsFalseWhenServiceTypeIsNotWifi);
-    FRIEND_TEST(AosConditionTest, CheckBadNetworkReturnsTrueWhenServiceTypeIsWifi);
+    inline AosServiceAvailableCellular* GetAvailableCellular() { return m_pAvailableCellular; }
+
+    inline void SetAvailableCellular(IN AosServiceAvailableCellular* pAvailableCellular)
+    {
+        m_pAvailableCellular = pAvailableCellular;
+    }
+
+    inline AosServiceAvailableWifi* GetAvailableWifi() { return m_pAvailableWifi; }
+
+    inline void SetAvailableWifi(IN AosServiceAvailableWifi* pAvailableWifi)
+    {
+        m_pAvailableWifi = pAvailableWifi;
+    }
+
+    inline IAosConditionListener* GetListener() { return m_piListener; }
+
+    inline void SetServiceType(IN SERVICE_TYPE eType) { m_eServiceType = eType; }
+
+    inline void SetCellServiceAvailable(IN IMS_BOOL bIsAvailable)
+    {
+        m_bCellServiceAvailable = bIsAvailable;
+    }
+
+    inline void SetWifiServiceAvailable(IN IMS_BOOL bIsAvailable)
+    {
+        m_bWifiServiceAvailable = bIsAvailable;
+    }
 
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_RoamingState);
     FRIEND_TEST(AosConditionTest, Event_NotifyEvent_VopsState);
@@ -236,25 +228,25 @@ protected:
 TEST_F(AosConditionTest, ShouldCreateAvailableCellularWhenStart)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableCellular(), nullptr);
 
     // WHEN
     m_pAosCondition->Start();
 
     // THEN
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableCellular(), nullptr);
 }
 
 TEST_F(AosConditionTest, ShouldCreateAvailableWifiWhenStart)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
 
     // WHEN
     m_pAosCondition->Start();
 
     // THEN
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 }
 
 TEST_F(AosConditionTest, ShouldSetBlockWithAosIncompletedWhenStart)
@@ -284,33 +276,35 @@ TEST_F(AosConditionTest, ShouldSetBlockWithSubscriberIncompletedWhenStart)
 TEST_F(AosConditionTest, ShouldDeleteAvailableCellularWhenStop)
 {
     // GIVEN
-    m_pAosCondition->m_pAvailableCellular = new AosServiceAvailableCellular();
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
+    m_pAosCondition->SetAvailableCellular(new AosServiceAvailableCellular());
+
+    EXPECT_NE(m_pAosCondition->GetAvailableCellular(), nullptr);
 
     // WHEN
     m_pAosCondition->Stop();
 
     // THEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableCellular(), nullptr);
 }
 
 TEST_F(AosConditionTest, ShouldDeleteAvailableWifiWhenStop)
 {
     // GIVEN
-    m_pAosCondition->m_pAvailableWifi = new AosServiceAvailableWifi();
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+    m_pAosCondition->SetAvailableWifi(new AosServiceAvailableWifi());
+
+    EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 
     // WHEN
     m_pAosCondition->Stop();
 
     // THEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
 }
 
 TEST_F(AosConditionTest, SucceedsSetListener)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_piListener, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetListener(), nullptr);
 
     MockIAosConditionListener objMockIAosConditionListener;
 
@@ -318,7 +312,7 @@ TEST_F(AosConditionTest, SucceedsSetListener)
     m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     // THEN
-    EXPECT_NE(m_pAosCondition->m_piListener, nullptr);
+    EXPECT_NE(m_pAosCondition->GetListener(), nullptr);
 }
 
 TEST_F(AosConditionTest, SucceedsSetBlock)
@@ -373,9 +367,9 @@ TEST_F(AosConditionTest, SucceedsResetBlock)
 TEST_F(AosConditionTest, ReturnTrueWhenCellularServiceIsReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_CELLULAR;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_FALSE;
+    m_pAosCondition->SetServiceType(SERVICE_CELLULAR);
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -387,9 +381,9 @@ TEST_F(AosConditionTest, ReturnTrueWhenCellularServiceIsReady)
 TEST_F(AosConditionTest, ReturnTrueWhenWifiServiceIsReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WIFI;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetServiceType(SERVICE_WIFI);
+    m_pAosCondition->SetCellServiceAvailable(IMS_FALSE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -401,9 +395,9 @@ TEST_F(AosConditionTest, ReturnTrueWhenWifiServiceIsReady)
 TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WHOLE;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetServiceType(SERVICE_WHOLE);
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -415,9 +409,9 @@ TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReady)
 TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByCellular)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WHOLE;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_FALSE;
+    m_pAosCondition->SetServiceType(SERVICE_WHOLE);
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -429,9 +423,9 @@ TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByCellular)
 TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByWifi)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WHOLE;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetServiceType(SERVICE_WHOLE);
+    m_pAosCondition->SetCellServiceAvailable(IMS_FALSE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -443,9 +437,9 @@ TEST_F(AosConditionTest, ReturnTrueWhenWholeServiceIsReadyByWifi)
 TEST_F(AosConditionTest, ReturnFalseWhenCellularServiceIsNotReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_CELLULAR;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetServiceType(SERVICE_CELLULAR);
+    m_pAosCondition->SetCellServiceAvailable(IMS_FALSE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -457,9 +451,9 @@ TEST_F(AosConditionTest, ReturnFalseWhenCellularServiceIsNotReady)
 TEST_F(AosConditionTest, ReturnFalseWhenWifiServiceIsNotReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WIFI;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_FALSE;
+    m_pAosCondition->SetServiceType(SERVICE_WIFI);
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -471,9 +465,9 @@ TEST_F(AosConditionTest, ReturnFalseWhenWifiServiceIsNotReady)
 TEST_F(AosConditionTest, ReturnFalseWhenWholeServiceIsNotReady)
 {
     // GIVEN
-    m_pAosCondition->m_eServiceType = SERVICE_WHOLE;
-    m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
-    m_pAosCondition->m_bWifiServiceAvailable = IMS_FALSE;
+    m_pAosCondition->SetServiceType(SERVICE_WHOLE);
+    m_pAosCondition->SetCellServiceAvailable(IMS_FALSE);
+    m_pAosCondition->SetWifiServiceAvailable(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->IsReady();
@@ -485,7 +479,7 @@ TEST_F(AosConditionTest, ReturnFalseWhenWholeServiceIsNotReady)
 TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceCellular)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableCellular(), nullptr);
 
     // WHEN
     IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_CELLULAR);
@@ -497,7 +491,7 @@ TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceCellular)
 TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWifi)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
 
     // WHEN
     IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WIFI);
@@ -509,8 +503,8 @@ TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWifi)
 TEST_F(AosConditionTest, ReturnsNoneWhenNoAvailableServiceWhole)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableCellular, nullptr);
-    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableCellular(), nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
 
     // WHEN
     IMS_UINT32 nResult = m_pAosCondition->CheckServiceAvailable(SERVICE_WHOLE);
@@ -558,7 +552,7 @@ TEST_F(AosConditionTest, ReturnsWholeWhenExistAvailableServiceWhole)
 TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenAvailableWifiIsNull)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
 
     // WHEN
     IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
@@ -576,10 +570,10 @@ TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenCellServiceIsNotAvailabl
     // GIVEN
     m_pAosCondition->Start();
 
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableCellular(), nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 
-    m_pAosCondition->m_bCellServiceAvailable = IMS_FALSE;
+    m_pAosCondition->SetCellServiceAvailable(IMS_FALSE);
 
     // WHEN
     IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
@@ -597,10 +591,10 @@ TEST_F(AosConditionTest, CheckBadNetworkReturnsFalseWhenServiceTypeIsNotWifi)
     // WHEN
     m_pAosCondition->Start();
 
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableCellular(), nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult1 = m_pAosCondition->CheckBadNetwork(SERVICE_WHOLE);
@@ -616,10 +610,10 @@ TEST_F(AosConditionTest, CheckBadNetworkReturnsTrueWhenServiceTypeIsWifi)
     // WHEN
     m_pAosCondition->Start();
 
-    EXPECT_NE(m_pAosCondition->m_pAvailableCellular, nullptr);
-    EXPECT_NE(m_pAosCondition->m_pAvailableWifi, nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableCellular(), nullptr);
+    EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 
-    m_pAosCondition->m_bCellServiceAvailable = IMS_TRUE;
+    m_pAosCondition->SetCellServiceAvailable(IMS_TRUE);
 
     // WHEN
     IMS_BOOL bResult = m_pAosCondition->CheckBadNetwork(SERVICE_WIFI);
