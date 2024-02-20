@@ -37,35 +37,44 @@ public:
     {
     }
 
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleRoamingChanged_ReturnByConfig);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateTrue);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateFalse);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeTrue);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeFalse);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleVopsChange_VopsSupport);
-    FRIEND_TEST(AosServiceAvailableCellularTest, HandleVopsChange_VopsNotSupport);
+    inline void HandleRoamingChanged(IN IMS_UINT32 nState) override
+    {
+        AosServiceAvailableCellular::HandleRoamingChanged(nState);
+    }
+
+    inline void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override
+    {
+        AosServiceAvailableCellular::HandleAirplaneModeChanged(nState);
+    }
+
+    inline void HandleVopsChanged(IN IMS_UINT32 nState) override
+    {
+        AosServiceAvailableCellular::HandleVopsChanged(nState);
+    }
+
+    inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 };
 
 class AosServiceAvailableCellularTest : public ::testing::Test
 {
 public:
-    TestAosServiceAvailableCellular* m_pAosServiceAvailableCellular;
+    TestAosServiceAvailableCellular* m_pServiceAvailableCellular;
     IAosNConfiguration* m_piOriginConfiguration;
 
 protected:
     virtual void SetUp() override
     {
-        m_pAosServiceAvailableCellular = new TestAosServiceAvailableCellular();
-        ASSERT_TRUE(m_pAosServiceAvailableCellular != nullptr);
+        m_pServiceAvailableCellular = new TestAosServiceAvailableCellular();
+        ASSERT_TRUE(m_pServiceAvailableCellular != nullptr);
 
         m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     }
 
     virtual void TearDown() override
     {
-        if (m_pAosServiceAvailableCellular)
+        if (m_pServiceAvailableCellular)
         {
-            delete m_pAosServiceAvailableCellular;
+            delete m_pServiceAvailableCellular;
         }
 
         AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration, 0);
@@ -84,10 +93,10 @@ TEST_F(AosServiceAvailableCellularTest, HandleRoamingChanged_ReturnByConfig)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
 
-    m_pAosServiceAvailableCellular->HandleRoamingChanged(0);
-    m_pAosServiceAvailableCellular->HandleRoamingChanged(1);
+    m_pServiceAvailableCellular->HandleRoamingChanged(0);
+    m_pServiceAvailableCellular->HandleRoamingChanged(1);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateTrue)
@@ -102,9 +111,9 @@ TEST_F(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateTrue)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
 
-    m_pAosServiceAvailableCellular->HandleRoamingChanged(1);
+    m_pServiceAvailableCellular->HandleRoamingChanged(1);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateFalse)
@@ -119,9 +128,9 @@ TEST_F(AosServiceAvailableCellularTest, HandleRoamingChanged_RoamingStateFalse)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
 
-    m_pAosServiceAvailableCellular->HandleRoamingChanged(0);
+    m_pServiceAvailableCellular->HandleRoamingChanged(0);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeTrue)
@@ -133,9 +142,9 @@ TEST_F(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeTr
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
 
-    m_pAosServiceAvailableCellular->HandleAirplaneModeChanged(1);
+    m_pServiceAvailableCellular->HandleAirplaneModeChanged(1);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeFalse)
@@ -147,9 +156,9 @@ TEST_F(AosServiceAvailableCellularTest, HandleAirplaneModeChanged_AirplaneModeFa
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
 
-    m_pAosServiceAvailableCellular->HandleAirplaneModeChanged(0);
+    m_pServiceAvailableCellular->HandleAirplaneModeChanged(0);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleVopsChange_VopsSupport)
@@ -158,8 +167,8 @@ TEST_F(AosServiceAvailableCellularTest, HandleVopsChange_VopsSupport)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
-    m_pAosServiceAvailableCellular->HandleVopsChanged(1);
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
+    m_pServiceAvailableCellular->HandleVopsChanged(1);
 }
 
 TEST_F(AosServiceAvailableCellularTest, HandleVopsChange_VopsNotSupport)
@@ -168,6 +177,6 @@ TEST_F(AosServiceAvailableCellularTest, HandleVopsChange_VopsNotSupport)
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosServiceAvailableCellular->m_piBlock = &objMockIAosBlock;
-    m_pAosServiceAvailableCellular->HandleVopsChanged(0);
+    m_pServiceAvailableCellular->SetBlock(&objMockIAosBlock);
+    m_pServiceAvailableCellular->HandleVopsChanged(0);
 }
