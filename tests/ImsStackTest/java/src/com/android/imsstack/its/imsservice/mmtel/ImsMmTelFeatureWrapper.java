@@ -41,6 +41,7 @@ import androidx.annotation.Nullable;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsUt;
+import com.android.imsstack.its.imsservice.mmtel.call.ImsCallSessionWrapper;
 import com.android.imsstack.util.Log;
 
 import java.util.List;
@@ -167,6 +168,16 @@ public final class ImsMmTelFeatureWrapper {
     }
 
     /**
+     * Creates an {@link ImsCallSessionWrapper} with the specified call profile.
+     *
+     * @param profile a call profile to make the call.
+     */
+    public @Nullable ImsCallSessionWrapper createCallSession(@NonNull ImsCallProfile profile) {
+        IImsCallSession callSession = createImsCallSession(profile);
+        return (callSession != null) ? new ImsCallSessionWrapper(callSession) : null;
+    }
+
+    /**
      * For reporting a change to the RTP header extension types which should be offered
      * during SDP negotiation (see RFC8285 for more information).
      *
@@ -182,24 +193,6 @@ public final class ImsMmTelFeatureWrapper {
         }
     }
 
-    /**
-     * Creates an {@link ImsCallSession} with the specified call profile.
-     * Use other methods, if applicable, instead of interacting with
-     * {@link ImsCallSession} directly.
-     *
-     * @param profile a call profile to make the call.
-     */
-    public @Nullable IImsCallSession createCallSession(@NonNull ImsCallProfile profile) {
-        try {
-            return mIImsMmTelFeature.createCallSession(profile);
-        } catch (RemoteException e) {
-            loge(e.toString());
-            return null;
-        } catch (NullPointerException e) {
-            loge(e.toString());
-            return null;
-        }
-    }
 
     /**
      * For determining if the outgoing call, designated by the outgoing {@link String}s,
@@ -450,6 +443,25 @@ public final class ImsMmTelFeatureWrapper {
                 loge(e.toString());
             }
         });
+    }
+
+    /**
+     * Creates an {@link ImsCallSession} with the specified call profile.
+     * Use other methods, if applicable, instead of interacting with
+     * {@link ImsCallSession} directly.
+     *
+     * @param profile a call profile to make the call.
+     */
+    private @Nullable IImsCallSession createImsCallSession(@NonNull ImsCallProfile profile) {
+        try {
+            return mIImsMmTelFeature.createCallSession(profile);
+        } catch (RemoteException e) {
+            loge(e.toString());
+            return null;
+        } catch (NullPointerException e) {
+            loge(e.toString());
+            return null;
+        }
     }
 
     private void handleAddCapabilityCallback(@NonNull IImsCapabilityCallback c)

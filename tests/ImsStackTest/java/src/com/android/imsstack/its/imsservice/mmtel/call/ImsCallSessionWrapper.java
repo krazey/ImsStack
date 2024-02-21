@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.imsservice.mmtel.sms;
-
-import android.telephony.ims.aidl.IImsMmTelFeature;
+package com.android.imsstack.its.imsservice.mmtel.call;
 
 import androidx.annotation.NonNull;
 
+import com.android.ims.internal.IImsCallSession;
+
 /**
- * IMS SMS interface wrapper.
+ * IMS call session interface wrapper.
  */
-public final class ImsSmsWrapper {
-    private IImsMmTelFeature mIImsMmTelFeature;
+public final class ImsCallSessionWrapper {
+    private IImsCallSession mIImsCallSession;
 
     /** Constructor. */
-    public ImsSmsWrapper(@NonNull IImsMmTelFeature mmtelFeature) {
-        mIImsMmTelFeature = mmtelFeature;
+    public ImsCallSessionWrapper(@NonNull IImsCallSession callSession) {
+        mIImsCallSession = callSession;
     }
 
     /** Destroy. */
     public void destroy() {
-        mIImsMmTelFeature = null;
+        mIImsCallSession = null;
     }
 }

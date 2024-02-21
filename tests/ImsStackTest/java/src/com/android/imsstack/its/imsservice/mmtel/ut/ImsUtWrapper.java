@@ -15,7 +15,7 @@
  */
 package com.android.imsstack.its.imsservice.mmtel.ut;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.android.ims.internal.IImsUt;
 
