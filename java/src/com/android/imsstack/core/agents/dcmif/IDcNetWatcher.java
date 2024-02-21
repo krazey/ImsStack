@@ -110,9 +110,10 @@ public interface IDcNetWatcher extends IDc {
     int getDataRoamingType();
 
     /**
-     * Return VoPS value stored in DcNetWatcher object
+     * Returns whether VoPS is supported that cached in DcNetWatcher object.
+     * If {@link IDcSettings#isVopsIgnored} is true it always returns VoPS is supported.
      */
-    boolean isVops();
+    boolean isVopsSupported();
 
     /**
      * Return LTE duplex mode stored in ServiceState object

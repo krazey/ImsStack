@@ -27,9 +27,10 @@ public interface IDcSettings extends IDc {
     boolean isRoamingAllowed();
 
     /**
-     * Returns whether VoPS value should be notified when the VoPS is not supported
+     * Returns whether to ignore the VoPS supported indication passed from network
+     * and always consider it supported.
      */
-    boolean isVopsRequired();
+    boolean isVopsIgnored();
 
     /**
      * Returns list of RAT technologies on which IMS is supported
