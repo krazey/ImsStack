@@ -71,7 +71,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
     if (*pnError == E_ERR_PF_MALLOCFAILED)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxn Malloc Failed \n", SIP_ZERO, SIP_ZERO);
-        delete m_pTxnKey;
+        m_pTxnKey->SipDelete();
         m_pTxnKey = SIP_NULL;
     }
 

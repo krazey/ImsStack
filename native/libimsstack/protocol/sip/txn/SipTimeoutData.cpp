@@ -33,14 +33,14 @@ SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnK
     m_pTxnKey = new SipTxnKey(pTxnKey, &nError);
     if (E_ERR_PF_MALLOCFAILED == nError)
     {
-        delete m_pTxnKey;
+        m_pTxnKey->SipDelete();
         m_pTxnKey = SIP_NULL;
     }
 }
 
 SipTimeoutData::~SipTimeoutData()
 {
-    delete m_pTxnKey;
+    m_pTxnKey->SipDelete();
     m_pTxnKey = SIP_NULL;
 }
 
