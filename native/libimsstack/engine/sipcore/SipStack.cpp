@@ -546,7 +546,7 @@ GLOBAL ::SipMessage* CreateMessage(IN IMS_SINT32 nType)
 
         if (pReqLine == SIP_NULL)
         {
-            delete pMessage;
+            pMessage->SipDelete();
             return IMS_NULL;
         }
 
@@ -559,7 +559,7 @@ GLOBAL ::SipMessage* CreateMessage(IN IMS_SINT32 nType)
 
         if (pStatusLine == SIP_NULL)
         {
-            delete pMessage;
+            pMessage->SipDelete();
             return IMS_NULL;
         }
 

@@ -84,7 +84,7 @@ SIP_BOOL MockFsm_FetchTransaction(
                     SipMessage* pTempSipMsg = new SipMessage();
                     *ppvTxn = new SipTxn(
                             SipTxn::INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
-                    delete pTempSipMsg;
+                    pTempSipMsg->SipDelete();
                     return SIP_TRUE;
                 }
                 return SIP_FALSE;

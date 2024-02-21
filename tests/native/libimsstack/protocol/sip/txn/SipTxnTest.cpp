@@ -510,9 +510,9 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
-    delete pInSipMsg;
+    pInSipMsg->SipDelete();
     pTxn->SipDelete();
-    delete pRespSipMsg;
+    pRespSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, SetUserData)
@@ -587,7 +587,7 @@ TEST_F(SipTxnTest, InvalidTxn)
     SipTxn_RemoveFromTxnPool(SIP_NULL);
     pTxn->SipDelete();
     pTxnKey->SipDelete();
-    delete pInSipMsg;
+    pInSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, AbortTxn)

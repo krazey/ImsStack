@@ -116,7 +116,6 @@ private:
 
 public:
     SipMessage();
-    ~SipMessage();
     explicit SipMessage(SIP_INT32 eSipMsgType);
     SipMessage(const SipMessage& objSipMsg);
     SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
@@ -201,5 +200,8 @@ public:
             SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType);
 
     static SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
+
+private:
+    ~SipMessage();
 };
 #endif  //__SIP_MESSAGE_H__

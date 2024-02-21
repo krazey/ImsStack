@@ -70,7 +70,7 @@ static SIP_BOOL sipInvCli_HandleFailureResp(IN SipTxn* pTxn, IN_OUT SipTxnFsmDat
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "sipInvCli_HandleFailureResp:Failed \n", SIP_ZERO, SIP_ZERO);
-            delete pSipAckMsg;
+            pSipAckMsg->SipDelete();
             return SIP_FALSE;
         }
         /* State Transition */

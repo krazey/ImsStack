@@ -166,7 +166,7 @@ RSeq: 2\r\n\
                               [SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT](
                                       pTxn, pTxnFsmData, &nError));
     pTxn->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
     pTxnKey->SipDelete();
     delete pTxnFsmData;
 
@@ -196,7 +196,7 @@ RAck: 562 1 INVITE\r\n\
 
     pTxn->RemoveFromTxnPool();
     pTxn->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
     delete pTxnFsmData;
     pTxnKey->SipDelete();
 
@@ -233,7 +233,7 @@ RAck: 2 1 INVITE\r\n\
     delete pSipTranspParam;
     delete pTxnFsmData;
     pTxnKey->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
 }
 
 TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_TryingState)
