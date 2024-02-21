@@ -544,7 +544,7 @@ From: <sip:user@host>;tag=abcd\r\n\
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
     delete pTempMsg;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTxnInfo;
 }
 
@@ -559,7 +559,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Request)
     pTxnKey->SetCseqNum(22);
     /* Calling with different Key by changing CSeq for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxnKey->SetCseqNum(1);
@@ -582,7 +582,7 @@ CSeq: 1 INVITE\r\n\
     /* Calling with different callid for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTempMsg;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -598,7 +598,7 @@ CSeq: 1 INVITE\r\n\
     /* Calling with different from tag for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTempMsg;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -651,7 +651,7 @@ CSeq: 1 INVITE\r\n\
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTxn(pSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pReqLine = pSipMsg->GetReqLine();
     ASSERT_TRUE(pReqLine != nullptr);
@@ -660,7 +660,7 @@ CSeq: 1 INVITE\r\n\
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTxn(pSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTxnInfo;
 }
 
@@ -733,7 +733,7 @@ CSeq: 1 MESSAGE\r\n\
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE,
             pTxnHandler->OnRecvTxn(pRespSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pStatusLine = pRespSipMsg->GetStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
@@ -762,7 +762,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTranspError)
     Then OnRecvTranspError will be failed */
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     /* Calling with valid SipTxnKey by creating with resp msg*/
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
@@ -777,7 +777,7 @@ TEST_F(SipTxnHandlerTest, OnRecvTranspError)
     true but txn is not passed. Inorder to test if txn is null OnRecvTranspError will be failed */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     /* Calling with valid SipTxnKey by creating with INVITE req message
     first calling send txn to add txn to list.
@@ -835,7 +835,7 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     Then OnSendTranspError will be failed */
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnSendTranspError(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -862,7 +862,7 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     but with only request uri, via & to header */
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->OnSendTranspError(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTempSipMsg;
 }
 
@@ -880,7 +880,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     Then TerminateTxn will be failed */
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -902,13 +902,13 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     but with only request uri & via header */
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTempSipMsg;
 
     /* Calling with valid SipTxnKey by creating with resp msg */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
 TEST_F(SipTxnHandlerTest, DeleteTxn)
@@ -925,7 +925,7 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     Then DeleteTxn will be failed */
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->DeleteTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
@@ -940,12 +940,12 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     but without request uri */
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->DeleteTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     /* Calling with valid SipTxnKey by creating with resp msg */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->DeleteTxn(pTxnKey));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTempSipMsg;
 }
 
@@ -965,7 +965,7 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     Then UpdateTxnDetails will be failed */
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->UpdateTxnDetails(pTxnKey, pTranspInfo, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     SipStatusLine* pStatusLine = pRespSipMsg->GetStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
@@ -992,7 +992,7 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->UpdateTxnDetails(pTxnKey, pTranspInfo, &nError));
 
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pTranspInfo;
     delete pTxnInfo;
 }

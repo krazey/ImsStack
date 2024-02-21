@@ -163,7 +163,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 
         if (pNewTxnKey != SIP_NULL)
         {
-            delete pNewTxnKey;
+            pNewTxnKey->SipDelete();
         }
         return SIP_FALSE;
     }
@@ -173,7 +173,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 
     if (bStatus == SIP_FALSE)
     {
-        delete pNewTxnKey;
+        pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "NonInvCliFsm_IdleStSendNonInvReqEvt:Adding Txn into DB Fails \n", SIP_ZERO,
                 SIP_ZERO);

@@ -99,7 +99,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 
         if (pNewTxnKey != SIP_NULL)
         {
-            delete pNewTxnKey;
+            pNewTxnKey->SipDelete();
         }
         return SIP_FALSE;
     }
@@ -107,7 +107,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
     if (Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
                 reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
-        delete pNewTxnKey;
+        pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "InvCliFsm_IdleStSendInvReqEvt:Adding Txn into DB Fails \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -281,7 +281,7 @@ static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt(
 
             if (SipTxnUtil::AddTxnKey(pRprTxnKey) == SIP_FALSE)
             {
-                delete pRprTxnKey;
+                pRprTxnKey->SipDelete();
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "InvCliFsm_CallingStRecv1xxRespEvt: RprTxnKey insertion failed", SIP_ZERO,
@@ -399,7 +399,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
                 if (pTempTxnKey != SIP_NULL)
                 {
-                    delete pTempTxnKey;
+                    pTempTxnKey->SipDelete();
                 }
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Retransmitted message.",
@@ -411,7 +411,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 if (pINVTxnKey != SIP_NULL)
                 {
                     SIP_UINT32 nRseq = pTempTxnKey->GetRSeq();
-                    delete pTempTxnKey;
+                    pTempTxnKey->SipDelete();
                     if (pINVTxnKey->GetRSeq() + 1 != nRseq)
                     {
                         pFsmData->eTxnStatus = SipTxn::STATUS_STRAY_RESP;
@@ -429,7 +429,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 {
                     if (SipTxnUtil::AddTxnKey(pTempTxnKey) == SIP_FALSE)
                     {
-                        delete pTempTxnKey;
+                        pTempTxnKey->SipDelete();
                         SIP_DEBUG_WARNING(
                                 ESIPTRACE_MODTXN, "TxnKey insertion failed", SIP_ZERO, SIP_ZERO);
                     }

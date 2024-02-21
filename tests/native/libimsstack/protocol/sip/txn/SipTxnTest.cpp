@@ -241,7 +241,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
 TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
@@ -318,7 +318,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -401,7 +401,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -458,7 +458,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -586,7 +586,7 @@ TEST_F(SipTxnTest, InvalidTxn)
 
     SipTxn_RemoveFromTxnPool(SIP_NULL);
     pTxn->SipDelete();
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pInSipMsg;
 }
 
@@ -630,7 +630,7 @@ TEST_F(SipTxnTest, AbortTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 }  // namespace android

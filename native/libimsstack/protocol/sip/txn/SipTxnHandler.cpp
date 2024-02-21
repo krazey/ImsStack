@@ -52,7 +52,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
     {
         SIP_DEBUG_STACKBUG(
                 ESIPTRACE_MODTXN, "OnSendTxn:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         return SIP_FALSE;
     }
 
@@ -66,7 +66,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "OnSendTxn: Txn Already in Progress\n", SIP_ZERO, SIP_ZERO);
 
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_FALSE;
         }
     }
@@ -86,7 +86,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
                 }
             }
 
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_FALSE;
         }
         else
@@ -112,7 +112,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
             /* Invoking client FSM to process and send request. It create new txn object */
             if (HandleClientTxnSend(eTxnType, pTxnKey, &objTxnFsmData, pnError) == SIP_FALSE)
             {
-                delete pTxnKey;
+                pTxnKey->SipDelete();
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTxn: HandleClientTxnSend fail", SIP_ZERO,
                         SIP_ZERO);
@@ -126,7 +126,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
             /* Invokes server FSM to process and send response */
             if (HandleServerTxnSend(eTxnType, pTxnKey, &objTxnFsmData, pnError) == SIP_FALSE)
             {
-                delete pTxnKey;
+                pTxnKey->SipDelete();
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTxn: HandleServerTxnSend fail", SIP_ZERO,
                         SIP_ZERO);
@@ -136,7 +136,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
         break;
         default:
         {
-            delete pTxnKey;
+            pTxnKey->SipDelete();
 
             *pnError = SipTxn::INVALID_TXN;
             SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnSendTxn: INVALID Txn Type", SIP_ZERO, SIP_ZERO);
@@ -938,7 +938,7 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxnHandler:key Creation Fails \n", SIP_ZERO, SIP_ZERO);
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         return SIP_FALSE;
     }
 

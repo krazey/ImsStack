@@ -131,7 +131,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     pTxn->SipDelete();
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -144,7 +144,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_IDLE_ST][SipTxn::INV_CLI_SEND_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 
     SipRequestLine* pReqLine = pSipMsg->GetReqLine();
@@ -164,7 +164,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     delete pSipUserData;
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
 TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
@@ -210,7 +210,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
 
     delete pTimeoutData;
     delete pSipTranspParam;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
@@ -267,7 +267,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     delete pTxnFsmData;
     delete pSipTranspParam;
     delete pSipUserData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 }
 
@@ -397,7 +397,7 @@ RSeq: 2\r\n\
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST]
                                  [SipTxn::INV_CLI_RECV_3XX_6XX_RESP_EVT](
                                          pTxn, pTxnFsmData, &nError));
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
     delete pTxnFsmData;
 
@@ -415,7 +415,7 @@ RSeq: 2\r\n\
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_PROCEEDING_ST][SipTxn::INV_CLI_TRANSP_ERROR_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;

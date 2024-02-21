@@ -178,7 +178,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
             objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
         }
 
-        delete pTxnKey;
+        pTxnKey->SipDelete();
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTransp: Failed", 0, 0);
         return SIP_FALSE;
@@ -198,7 +198,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         }
 
         delete pTranspInfo;
-        delete pTxnKey;
+        pTxnKey->SipDelete();
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendToNetwork: Failed", 0, 0);
         return SIP_FALSE;
@@ -214,7 +214,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
            Delete Txn entry from DB and delete the instance*/
         objTxnHandler.DeleteTxn(pTxnKey);
 
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         delete pTranspInfo;
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendMsg: TxnTerminated", SIP_ZERO, SIP_ZERO);
@@ -234,7 +234,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
                     objTxnInfo.m_pUserData->SetUserData(SIP_NULL);
                 }
 
-                delete pTxnKey;
+                pTxnKey->SipDelete();
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "UpdateTxnDetails: Failed", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
@@ -248,7 +248,7 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
         }
         else
         {
-            delete pTxnKey;
+            pTxnKey->SipDelete();
         }
     }
 
@@ -323,7 +323,7 @@ send to network
 
     if (*peTxnStatus == SipTxn::STATUS_STRAY_RESP)
     {
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "OnRecvTransp, Drop Message, TxnStatus[%d]", *peTxnStatus, 0);
         return SIP_TRUE;
@@ -371,7 +371,7 @@ stack user must process this request and can decide whether to ignore or not
             {
                 *peTxnStatus = SipTxn::STATUS_2XX_STRAY_RESP;
 
-                delete pTxnKey;
+                pTxnKey->SipDelete();
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "OnRecvMessage: INVITE 2xx received (No txn exist)", 0, 0);
@@ -392,7 +392,7 @@ stack user must process this request and can decide whether to ignore or not
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: OnRecvTxn Failed", 0, 0);
 
-        delete pTxnKey;
+        pTxnKey->SipDelete();
 
         *peTxnStatus = SipTxn::STATUS_INVALID_MESSAGE;
 
@@ -428,7 +428,7 @@ stack user must process this request and can decide whether to ignore or not
         case SipTxn::STATUS_STRAY_RESP:
         case SipTxn::STATUS_STRAY_PRACK:
         {
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_TRUE;
         }
         case SipTxn::STATUS_NEW_REQ_RECVD:
@@ -439,7 +439,7 @@ stack user must process this request and can decide whether to ignore or not
         }
         default:
         {
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_FALSE;
         }
     }
@@ -459,7 +459,7 @@ stack user must process this request and can decide whether to ignore or not
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SendToNetwork Failed in retransmitted case", 0, 0);
         }
 
-        delete pTxnKey;
+        pTxnKey->SipDelete();
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: Re-Transmitted Msg received", 0, 0);
         return SIP_TRUE;
@@ -483,7 +483,7 @@ stack user must process this request and can decide whether to ignore or not
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage:EncodeMsg Fail", SIP_ZERO, SIP_ZERO);
             objTxnHandler.OnSendTranspError(pTxnKey);
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_TRUE;
         }
 
@@ -497,7 +497,7 @@ stack user must process this request and can decide whether to ignore or not
             /* Inform txn about transport error, this terminates Txn */
             objTxnHandler.OnSendTranspError(pTxnKey);
 
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             return SIP_TRUE;
         }
 
@@ -511,7 +511,7 @@ stack user must process this request and can decide whether to ignore or not
         if (SendToNetwork(pTranspInfo, objTxnInfo.m_pUserData) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: SendToNetwork Failed", 0, 0);
-            delete pTxnKey;
+            pTxnKey->SipDelete();
             delete pTranspInfo;
             return SIP_TRUE;
         }
@@ -555,7 +555,7 @@ stack user must process this request and can decide whether to ignore or not
         }
         else
         {
-            delete pTxnKey;
+            pTxnKey->SipDelete();
         }
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
