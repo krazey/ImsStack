@@ -47,4 +47,8 @@ public interface TestConstants {
     String MCC = "001";
     String MNC = "01";
     String MCC_MNC = MCC + MNC;
+
+    // Operator alpha string (short/long)
+    String OPERATOR_ALPHA_SHORT = "Test";
+    String OPERATOR_ALPHA_LONG = "Test-Carrier";
 }

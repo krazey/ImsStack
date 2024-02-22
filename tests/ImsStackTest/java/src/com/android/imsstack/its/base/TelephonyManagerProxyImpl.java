@@ -18,6 +18,7 @@ package com.android.imsstack.its.base;
 import android.annotation.CallbackExecutor;
 import android.content.Context;
 import android.net.Uri;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.SrvccState;
@@ -25,6 +26,7 @@ import android.telephony.Annotation.UiccAppType;
 import android.telephony.Annotation.UiccAppTypeExt;
 import android.telephony.BarringInfo;
 import android.telephony.CellInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
@@ -106,7 +108,9 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     @Override
     public void registerTelephonyCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull TelephonyCallback callback) {
-        mTelephonyCallbackRecords.add(new TelephonyCallbackRecord(callback, executor));
+        TelephonyCallbackRecord r = new TelephonyCallbackRecord(callback, executor);
+        mTelephonyCallbackRecords.add(r);
+        dispatchTelephonyCallback(r);
     }
 
     @Override
@@ -413,6 +417,8 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         setSupportedModemCount(2);
         setHalVersion(2, 1);
         clearEmergencyNumbers();
+        // The SIM state is NOT_READY by default,
+        // so we should change the SIM state to LOADED to start the IMS service.
         initUsimApplication();
         initIsimApplication();
         initNetworkInfo();
@@ -424,10 +430,14 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     public void initNetworkInfo() {
         mNetworkInfoRecord.setDataEnabled(false);
         mNetworkInfoRecord.setDataRoamingEnabled(false);
-        mNetworkInfoRecord.setServiceState(null);
-        mNetworkInfoRecord.setDataNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        mNetworkInfoRecord.setVoiceNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        mNetworkInfoRecord.setOperator(TestConstants.MCC);
+        ServiceState ss = new ServiceStateBuilder()
+                .addNetworkRegistrationInfoForLteCs()
+                .addNetworkRegistrationInfoForLtePs()
+                .build();
+        mNetworkInfoRecord.setServiceState(ss);
+        mNetworkInfoRecord.setDataNetworkType(getDataNetworkType(ss));
+        mNetworkInfoRecord.setVoiceNetworkType(getVoiceNetworkType(ss));
+        mNetworkInfoRecord.setOperator(TestConstants.MCC_MNC);
         mNetworkInfoRecord.setCountryIso("");
         mNetworkInfoRecord.setAllCellInfo(null);
     }
@@ -484,7 +494,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setCardState(TelephonyManager.SIM_STATE_PRESENT);
         mSimInfoRecord.setState(TelephonyManager.SIM_STATE_NOT_READY);
         mSimInfoRecord.setCarrierId(1911); // Test SIM
-        mSimInfoRecord.setCarrierIdName("Test-SIM");
+        mSimInfoRecord.setCarrierIdName(TestConstants.OPERATOR_ALPHA_LONG);
         mSimInfoRecord.setSpecificCarrierId(TelephonyManager.UNKNOWN_CARRIER_ID);
         if (mSubId == TestConstants.SUB_ID_1) {
             mSimInfoRecord.setSerialNumber(TestConstants.SIM_SERIAL_NUMBER_1);
@@ -496,7 +506,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setOperator(TestConstants.MCC);
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
-        mSimInfoRecord.setOperatorName("Test-SIM");
+        mSimInfoRecord.setOperatorName(TestConstants.OPERATOR_ALPHA_LONG);
         mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "0x00");
     }
 
@@ -525,8 +535,12 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      * Initializes the values for ISIM application.
      */
     public void initIsimApplication() {
-        final String domain = String.format("ims.mnc0%s.mcc%s.3gppnetwork.org",
-                TestConstants.MNC, TestConstants.MCC);
+        String mnc = TestConstants.MNC;
+        if (TestConstants.MNC.length() == 2) {
+            mnc = "0" + mnc;
+        }
+        final String domain = String.format("ims.mnc%s.mcc%s.3gppnetwork.org",
+                mnc, TestConstants.MCC);
         final String phoneNumber = (mSubId == TestConstants.SUB_ID_1)
                 ? TestConstants.PHONE_NUMBER_1
                 : TestConstants.PHONE_NUMBER_2;
@@ -742,6 +756,8 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void setServiceState(@Nullable ServiceState serviceState) {
         mNetworkInfoRecord.setServiceState(serviceState);
+        mNetworkInfoRecord.setDataNetworkType(getDataNetworkType(serviceState));
+        mNetworkInfoRecord.setVoiceNetworkType(getVoiceNetworkType(serviceState));
     }
 
     /**
@@ -797,6 +813,59 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void setHalVersion(int major, int minor) {
         mHalVersion = new Pair<>(major, minor);
+    }
+
+    /**
+     * Returns the data network type from the given {@link ServiceState} object.
+     *
+     * @param ss The {@link ServiceState} object.
+     * @return The data network type.
+     */
+    public static int getDataNetworkType(@NonNull ServiceState ss) {
+        final NetworkRegistrationInfo iwlanRegInfo = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+        final NetworkRegistrationInfo wwanRegInfo = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        // For legacy mode device, or AP-assisted mode device but IWLAN is out of service, use
+        // the RAT from cellular.
+        if (iwlanRegInfo == null || !iwlanRegInfo.isInService()) {
+            return (wwanRegInfo != null) ? wwanRegInfo.getAccessNetworkTechnology()
+                    : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        }
+
+        // At this point, it must be an AP-assisted mode device and IWLAN is in service. We should
+        // use the RAT from IWLAN service is cellular is out of service, or when both are in service
+        // and any APN type of data is preferred on IWLAN.
+        if (!wwanRegInfo.isInService() /*|| ss.isIwlanPreferred()*/) {
+            return iwlanRegInfo.getAccessNetworkTechnology();
+        }
+
+        // If both cellular and IWLAN are in service, but no APN is preferred on IWLAN, still use
+        // the RAT from cellular.
+        return wwanRegInfo.getAccessNetworkTechnology();
+    }
+
+    /**
+     * Returns the voice network type from the given {@link ServiceState} object.
+     *
+     * @param ss The {@link ServiceState} object.
+     * @return The voice network type.
+     */
+    public static int getVoiceNetworkType(ServiceState ss) {
+        final NetworkRegistrationInfo regState = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        if (regState != null) {
+            return regState.getAccessNetworkTechnology();
+        }
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    }
+
+    private void dispatchTelephonyCallback(TelephonyCallbackRecord r) {
+        ServiceState serviceState = mNetworkInfoRecord.getServiceState();
+        if (serviceState != null) {
+            r.dispatchServiceStateChanged(serviceState);
+        }
     }
 
     private static int getSubId(int slotIndex) {
