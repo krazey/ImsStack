@@ -75,17 +75,17 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testIsVopsRequired() throws Exception {
+    public void testIsVopsIgnored() throws Exception {
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
                 .thenReturn(false)
                 .thenReturn(true);
 
         // configured to not ignore VoPS
-        assertTrue(mDcSettingsUT.isVopsRequired());
+        assertFalse(mDcSettingsUT.isVopsIgnored());
 
         // configured to ignore VoPS
-        assertFalse(mDcSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsIgnored());
     }
 
     @Test
@@ -174,7 +174,7 @@ public class DcSettingsTest {
         mDcSettingsUT.init(mMockContext);
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
-        assertFalse(mDcSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsIgnored());
         int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());

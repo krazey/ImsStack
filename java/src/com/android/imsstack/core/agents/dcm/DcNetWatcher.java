@@ -462,12 +462,12 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
-    public boolean isVops() {
+    public boolean isVopsSupported() {
         IDcSettings dcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
-        if (dcSettings != null && dcSettings.isVopsRequired()) {
-            return mImsVops;
-        } else {
+        if (dcSettings == null || dcSettings.isVopsIgnored()) {
             return true;
+        } else {
+            return mImsVops;
         }
     }
 
@@ -917,7 +917,7 @@ public class DcNetWatcher implements IDcNetWatcher {
                     boolean vops = vsi.isVopsSupported();
                     boolean emcbs = vsi.isEmergencyServiceSupported();
 
-                    handleImsNetworkVoPSChanged(vops);
+                    handleImsNetworkVopsChanged(vops);
                     if (mEmcbs != emcbs) {
                         ImsLog.w(mSlotId, "update emergency service supported info : " + emcbs);
                         mEmcbs = emcbs;
@@ -944,16 +944,12 @@ public class DcNetWatcher implements IDcNetWatcher {
         }
     }
 
-    private void handleImsNetworkVoPSChanged(boolean currVops) {
-        boolean vopsSupported = true;
+    private void handleImsNetworkVopsChanged(boolean currentVops) {
+        boolean isVopsSupported = currentVops || mDcSettings == null || mDcSettings.isVopsIgnored();
 
-        if (!currVops && mDcSettings != null && mDcSettings.isVopsRequired()) {
-            vopsSupported = currVops;
-        }
-
-        if (mImsVops != vopsSupported) {
-            mImsVops = vopsSupported;
-            ImsLog.d(mSlotId, "updated vops = " + mImsVops);
+        if (mImsVops != isVopsSupported) {
+            mImsVops = isVopsSupported;
+            ImsLog.d(mSlotId, "VoPS supported indication is updated as = " + mImsVops);
 
             int state =
                     (mImsVops)
@@ -968,7 +964,7 @@ public class DcNetWatcher implements IDcNetWatcher {
                 .getInt(AIRPLANE_MODE_ON, -1);
     }
 
-    /** This class is for receiving the airplain mode intent */
+    /** This class is for receiving the airplane mode intent */
     public class DcNetWatcherReceiver extends BroadcastReceiver {
         /** Registers the broadcast receiver. */
         public void register() {

@@ -59,11 +59,11 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public boolean isVopsRequired() {
+    public boolean isVopsIgnored() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        return (config == null) ? false : !config.getBoolean(
-                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
+        return config == null || config.getBoolean(
+                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, true);
     }
 
     @Override

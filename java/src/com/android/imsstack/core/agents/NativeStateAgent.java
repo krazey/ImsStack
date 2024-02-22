@@ -117,7 +117,7 @@ public class NativeStateAgent implements NativeStateInterface {
 
             if (dnw != null) {
                 system.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
-                        dnw.isVops()
+                        dnw.isVopsSupported()
                         ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
                         : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
             }

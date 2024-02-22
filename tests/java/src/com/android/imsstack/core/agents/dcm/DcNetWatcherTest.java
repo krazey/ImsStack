@@ -720,7 +720,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
-        when(mMockDcSetting.isVopsRequired()).thenReturn(true);
+        when(mMockDcSetting.isVopsIgnored()).thenReturn(false);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
@@ -729,7 +729,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
         assertEquals(ServiceState.DUPLEX_MODE_FDD, mDcNetWatcher.getLteDuplexMode());
         assertEquals(true, mDcNetWatcher.isEmergencyServiceSupported());
-        assertEquals(false, mDcNetWatcher.isVops());
+        assertEquals(false, mDcNetWatcher.isVopsSupported());
     }
 
     @Test
