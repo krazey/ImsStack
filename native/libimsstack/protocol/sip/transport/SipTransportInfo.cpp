@@ -51,7 +51,7 @@ SipTransportInfo::~SipTransportInfo()
 
     if (m_pSentSipMsg != SIP_NULL)
     {
-        delete m_pSentSipMsg;
+        m_pSentSipMsg->SipDelete();
     }
 }
 

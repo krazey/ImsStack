@@ -43,16 +43,18 @@ TEST_F(SipStackTest, DisplayBadHeaders)
                               "Content-Length: 0\r\n"
                               "\r\n"};
 
-    ::SipMessage objSipMsg;
-    SIP_BOOL bResult = objSipMsg.DecCompleteMsg(const_cast<SIP_CHAR*>(acMsg), IMS_StrLen(acMsg));
+    ::SipMessage* pSipMsg = new ::SipMessage();
+    SIP_BOOL bResult = pSipMsg->DecCompleteMsg(const_cast<SIP_CHAR*>(acMsg), IMS_StrLen(acMsg));
 
     EXPECT_EQ(SIP_TRUE, bResult);
-    EXPECT_EQ(1, objSipMsg.GetBadHeaderCount());  // Date is a bad header.
+    EXPECT_EQ(1, pSipMsg->GetBadHeaderCount());  // Date is a bad header.
 
-    SipStack::DisplayBadHeaders(&objSipMsg);
+    SipStack::DisplayBadHeaders(pSipMsg);
 
     // Checks whether the bad header list is kept or not.
-    EXPECT_EQ(1, objSipMsg.GetBadHeaderCount());
+    EXPECT_EQ(1, pSipMsg->GetBadHeaderCount());
+
+    pSipMsg->SipDelete();
 }
 
 }  // namespace android

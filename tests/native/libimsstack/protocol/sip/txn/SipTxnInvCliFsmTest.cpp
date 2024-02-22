@@ -420,7 +420,7 @@ RSeq: 2\r\n\
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
 }
 
 TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)

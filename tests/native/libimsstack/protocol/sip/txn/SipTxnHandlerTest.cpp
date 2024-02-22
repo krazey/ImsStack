@@ -66,7 +66,7 @@ SIP_BOOL Mock_FetchTransaction(
                     SipMessage* pTempSipMsg = new SipMessage();
                     *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
                             pTempSipMsg, SIP_NULL, &nError);
-                    delete pTempSipMsg;
+                    pTempSipMsg->SipDelete();
                     return SIP_TRUE;
                 }
                 SIP_UINT32 nSize = objTxnList.GetSize();
@@ -369,7 +369,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_Invalid)
     EXPECT_EQ(SIP_FALSE,
             pTxnHandler->OnSendTxn(
                     pTempMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 }
 
 TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
@@ -481,7 +481,7 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -496,7 +496,7 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -512,7 +512,7 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -528,7 +528,7 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -543,7 +543,7 @@ From: <sip:user@host>;tag=abcd\r\n\
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    delete pTempMsg;
+    pTempMsg->SipDelete();
     pTxnKey->SipDelete();
     delete pTxnInfo;
 }
@@ -581,7 +581,7 @@ CSeq: 1 INVITE\r\n\
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different callid for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTempMsg;
+    pTempMsg->SipDelete();
     pTxnKey->SipDelete();
 
     pTempMsg = new SipMessage();
@@ -597,7 +597,7 @@ CSeq: 1 INVITE\r\n\
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different from tag for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTempMsg;
+    pTempMsg->SipDelete();
     pTxnKey->SipDelete();
 
     pTempMsg = new SipMessage();
@@ -618,7 +618,7 @@ CSeq: 1 INVITE\r\n\
 
     /* Calling with different to tag for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
-    delete pTempMsg;
+    pTempMsg->SipDelete();
 
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     /* Calling with same key for key comparison to match and terminate txn */
@@ -818,7 +818,7 @@ CSeq: 1 REGISTER\r\n\
 
     EXPECT_EQ(SIP_TRUE, pTxnHandler->OnRecvTranspError(nError, pTxnKey, &nError));
     delete pTxnInfo;
-    delete pNonInvSipMsg;
+    pNonInvSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnHandlerTest, OnSendTranspError)
@@ -863,7 +863,7 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->OnSendTranspError(pTxnKey));
     pTxnKey->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnHandlerTest, TerminateTxn)
@@ -903,7 +903,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     pTxnKey = new SipTxnKey(pTempSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     pTxnKey->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
 
     /* Calling with valid SipTxnKey by creating with resp msg */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
@@ -946,7 +946,7 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE, pTxnHandler->DeleteTxn(pTxnKey));
     pTxnKey->SipDelete();
-    delete pTempSipMsg;
+    pTempSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
