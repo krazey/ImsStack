@@ -55,7 +55,7 @@ cc_library_headers {
 }
 
 cc_library_static {
-    name:"libimsstack-enabler",
+    name: "libimsstack-enabler",
     defaults: [
         "imsstack_native_defaults",
     ],
@@ -63,7 +63,7 @@ cc_library_static {
         "**/*.cpp",
     ],
     header_libs: [
-        "libimsmedia_config_headers",
+        "libpixelimsmedia_config_headers",
         "libimsstack_config_headers",
         "libimsstack_enabler_headers",
         "libimsstack_enabler_loader_headers",

@@ -41,9 +41,9 @@ android_library {
     javacflags: [
         "-Xlint",
     ],
-    static_libs:[
+    static_libs: [
         "androidx.annotation_annotation",
-        "ImsMediaFramework",
+        "PixelImsMediaFramework",
         "imsstack-prebuilt",
     ],
     libs: [
@@ -70,7 +70,7 @@ android_app {
     aaptflags: [
         "--auto-add-overlay",
     ],
-    static_libs:[
+    static_libs: [
         "imsstack",
     ],
     required: [
