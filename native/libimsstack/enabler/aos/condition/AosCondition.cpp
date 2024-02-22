@@ -402,7 +402,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
         UpdateRegistrationMode();
     }
 
-    IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
+    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
 
     switch (nState)
     {
@@ -484,7 +484,7 @@ PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
 
-    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
 
     if (piNConfig == IMS_NULL)
     {
@@ -912,7 +912,7 @@ IMS_BOOL AosCondition::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nRea
 PROTECTED
 void AosCondition::UpdateRegistrationMode() const
 {
-    IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
+    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
 
     if (m_piBlock->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) && piSubscriber->IsReady())
     {

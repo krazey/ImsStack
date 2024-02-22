@@ -80,7 +80,7 @@ protected:
     void RunImp();
 
     // ImsActivityEx
-    IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
     enum
     {

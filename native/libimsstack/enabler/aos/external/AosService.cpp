@@ -65,7 +65,7 @@ PUBLIC VIRTUAL void AosService::AddListener(IN IAosRegistrationControlListener* 
 
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
     {
-        IAosRegistrationControlListener* piTempListener =
+        const IAosRegistrationControlListener* piTempListener =
                 m_objAosRegistrationControlListeners.GetAt(i);
 
         if (piListener == piTempListener)
@@ -86,7 +86,7 @@ PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosRegistrationControlListene
 
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
     {
-        IAosRegistrationControlListener* piTempListener =
+        const IAosRegistrationControlListener* piTempListener =
                 m_objAosRegistrationControlListeners.GetAt(i);
 
         if (piListener == piTempListener)
@@ -106,7 +106,7 @@ PUBLIC VIRTUAL void AosService::AddListener(IN IAosServiceSettingListener* piLis
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
     {
-        IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
+        const IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -126,7 +126,7 @@ PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServiceSettingListener* pi
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
     {
-        IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
+        const IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -145,7 +145,7 @@ PUBLIC VIRTUAL void AosService::AddListener(IN IAosServicePhoneListener* piListe
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
     {
-        IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
+        const IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -165,7 +165,7 @@ PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServicePhoneListener* piLi
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
     {
-        IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
+        const IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -184,7 +184,7 @@ PUBLIC VIRTUAL void AosService::AddListener(IN IAosEmergencyListener* piListener
 
     for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
     {
-        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+        const IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -204,7 +204,7 @@ PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosEmergencyListener* piListe
 
     for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
     {
-        IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
+        const IAosEmergencyListener* piTempListener = m_objAosEmergencyListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -964,7 +964,7 @@ void AosService::Attach()
 PRIVATE
 IJniAosServiceThread* AosService::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE);
     if (piJniEnabler == IMS_NULL)
     {

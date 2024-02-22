@@ -151,7 +151,7 @@ protected:
     virtual IMS_UINT32 GetReportState();
 
     // ImsActivityEx
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
     // Message
     virtual IMS_BOOL ProcessMessage(IN IMSMSG& objMsg);

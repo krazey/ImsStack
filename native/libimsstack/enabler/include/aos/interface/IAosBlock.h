@@ -179,12 +179,5 @@ public:
      * @param
      */
     virtual IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
-
-    /**
-     * @brief
-     *
-     * @param
-     */
-    static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 };
 #endif  // INTERFACE_AOS_BLOCK_H_

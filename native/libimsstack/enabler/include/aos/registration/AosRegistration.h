@@ -149,7 +149,7 @@ protected:
     AString FeatureToString();
 
     /// ImsActivityEx
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
     /// Initialize
     void Init() override;

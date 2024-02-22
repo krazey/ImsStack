@@ -39,9 +39,9 @@ public:
     virtual ImsList<IImsAos*> GetImsAosList(IN const AString& strAppId);
 
     /// ImsApp Class
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
+    IMS_BOOL OnPreprocess(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnPostprocess(IN IMSMSG& objMSG) override;
 };
 
 #endif  // IMS_AOS_MANAGER_H_
