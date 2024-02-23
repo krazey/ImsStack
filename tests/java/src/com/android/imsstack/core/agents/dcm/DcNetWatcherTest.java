@@ -516,13 +516,6 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testIsEmergencyOnlyForVonr() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mNrRegistrationInfo", mDcNetWatcher,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION);
-        assertEquals(true, invokeMethod(mDcNetWatcher, "isEmergencyOnlyForVonr",
-                new Class[] {}, new Object[] {}));
-
-        replaceInstance(DcNetWatcher.class, "mNrRegistrationInfo", mDcNetWatcher,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN);
         assertEquals(false, invokeMethod(mDcNetWatcher, "isEmergencyOnlyForVonr",
                 new Class[] {}, new Object[] {}));
     }
@@ -792,41 +785,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testDcNetWatcherHandler_handleVolteLteStateInfo() {
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_VOLTE_LTE_STATE_INFO,
-                intent).sendToTarget();
-        processAllMessages();
-
-        // TODO : no actual implementations so far
-    }
-
-    @Test
-    public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenInvalidInfo() throws Exception {
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN, 0).sendToTarget();
-        processAllMessages();
-
-        verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN, 0);
-    }
-
-    @Test
-    public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenEmergency() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceState", mDcNetWatcher,
-                ServiceState.STATE_IN_SERVICE);
-
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0).sendToTarget();
-        processAllMessages();
-
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0);
-        assertEquals(ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION,
-                mDcNetWatcher.getNrRegistrationInfo());
-    }
-
-    @Test
     public void testOnCarrierConfigChanged() throws Exception {
         ArgumentCaptor<ConfigInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(ConfigInterface.Listener.class);
@@ -929,14 +887,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         mDcNetWatcher.setDoingOffRadio(true);
 
         assertEquals(true, mDcNetWatcher.isDoingOffRadio());
-    }
-
-    @Test
-    public void testSetNrRegistrationInfo() {
-        mDcNetWatcher.setNrRegistrationInfo(ImsEventDef.IMS_NR_INFO_UNKNOWN, 0);
-
-        assertEquals(true, mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
-                DcNetWatcher.EVENT_NR_REGISTRATION_INFO));
     }
 
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,

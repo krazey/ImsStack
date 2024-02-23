@@ -48,11 +48,6 @@ public interface IDcNetWatcher extends IDc {
     int getVoiceServiceState();
 
     /**
-     * Return NR registration info stored in DcNetWatcher object
-     */
-    int getNrRegistrationInfo();
-
-    /**
      * Return MOCNPLMN info stored in DcNetWatcher object
      */
     int getMocnPlmnInfo();
@@ -140,11 +135,6 @@ public interface IDcNetWatcher extends IDc {
      * For check mismatch of Voice tech type between ServiceState and TelephonyManager
      */
     void setVoiceRatFromTelephonyManager(int nVoiceRat);
-
-    /**
-     * Set NR registration information
-     */
-    void setNrRegistrationInfo(int state, int reason);
 
     /**
      * Return current RAT is belong to 1xRTT RAT category
