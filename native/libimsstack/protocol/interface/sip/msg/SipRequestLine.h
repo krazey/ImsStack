@@ -33,8 +33,6 @@ public:
 
     SipRequestLine(const SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* pszSipVersion);
     SipRequestLine(const SipRequestLine& objHeader);
-    /*Destructor*/
-    ~SipRequestLine();
 
     /*Function for encoding*/
     SIP_BOOL EncodeRequestLine(SIP_CHAR** ppCurrPos);
@@ -54,6 +52,9 @@ public:
     inline const SIP_CHAR* GetSipVersion() const { return m_pszSipVersion; }
 
     SipAddrSpec* GetReqUri();
+
+private:
+    ~SipRequestLine();
 };
 
 #endif  //__SIP_REQUEST_LINE_H__

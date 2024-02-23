@@ -29,8 +29,6 @@ public:
     SipTriggerConsentHeader();
     SipTriggerConsentHeader(const SipTriggerConsentHeader& objHeader);
 
-    /*destructor*/
-    ~SipTriggerConsentHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -48,5 +46,8 @@ public:
     {
         return (m_pSipUri == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipTriggerConsentHeader();
 };
 #endif  //__SIP_TRIGGER_CONSENT_HEADER_H__

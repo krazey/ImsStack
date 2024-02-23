@@ -29,8 +29,6 @@ public:
     SipPChargingFunctionAddressesHeader();
     SipPChargingFunctionAddressesHeader(const SipPChargingFunctionAddressesHeader& objHeader);
 
-    /*destructor*/
-    ~SipPChargingFunctionAddressesHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -44,5 +42,8 @@ public:
     {
         return (m_pChargeAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipPChargingFunctionAddressesHeader();
 };
 #endif  //__SIP_P_CHARGING_FUNCTION_ADDRESSES_HEADER_H__

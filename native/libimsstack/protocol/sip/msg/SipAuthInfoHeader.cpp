@@ -49,7 +49,7 @@ SipAuthInfoHeader::~SipAuthInfoHeader()
 {
     while (m_pAuthInfoList.IsEmpty() != SIP_TRUE)
     {
-        delete m_pAuthInfoList.Top();
+        m_pAuthInfoList.Top()->SipDelete();
         m_pAuthInfoList.Pop();
     }
 }
@@ -166,14 +166,14 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         if (pNmVl->Decode(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decode fail", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            pNmVl->SipDelete();
             return SIP_FALSE;
         }
 
         if (m_pAuthInfoList.Add(pNmVl) < SIP_ZERO)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list Failed", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            pNmVl->SipDelete();
             return SIP_FALSE;
         }
 

@@ -163,7 +163,6 @@ private:
 public:
     explicit SipHeaderBase(SIP_INT32 eHdrType);
     SipHeaderBase(const SipHeaderBase& objHeader);
-    virtual ~SipHeaderBase();
     SIP_VOID InitParameters(SipParameters* pParameters);
     SIP_BOOL EncodeHeaderParameters(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
     SIP_BOOL EncodeParameters(AStringBuffer& objBuffer) const;
@@ -188,6 +187,7 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 protected:
+    virtual ~SipHeaderBase();
     static SIP_BOOL FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
             SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd);
 };
@@ -200,7 +200,6 @@ protected:
 public:
     explicit SipNameAddrHeader(SIP_INT32 eHdrType);
     SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader);
-    virtual ~SipNameAddrHeader();
 
     SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
     SipNameAddr* GetNameAddr();
@@ -214,5 +213,8 @@ public:
         return (m_pNameAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    virtual ~SipNameAddrHeader();
 };
 #endif  //__SIP_HEADER_BASE_H__

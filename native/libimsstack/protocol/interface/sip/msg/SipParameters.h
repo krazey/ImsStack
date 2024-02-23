@@ -33,7 +33,6 @@ public:
     SipNameValue();
     explicit SipNameValue(SIP_INT32 eHdrType);
     SipNameValue(const SipNameValue& objNmVl);
-    virtual ~SipNameValue();
 
     SIP_BOOL Encode(
             AStringBuffer& objBuffer, IParameterComponent* pParameterComponent = SIP_NULL) const;
@@ -43,6 +42,9 @@ public:
 
     SIP_BOOL Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
             IParameterComponent* pParameterComponent = SIP_NULL);
+
+private:
+    virtual ~SipNameValue();
 };
 
 class SipParameterList : public SipRefBase

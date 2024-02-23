@@ -27,9 +27,6 @@ public:
     /*constructor*/
     SipBadHeader();
 
-    /*destructor*/
-    ~SipBadHeader();
-
     SipBadHeader(const SipBadHeader& objHeader);
 
     /*virtual methods*/
@@ -51,5 +48,8 @@ public:
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }
 
     inline SIP_BOOL IsValidHeader() const override { return SIP_TRUE; }
+
+private:
+    ~SipBadHeader();
 };
 #endif  //__SIP_BAD_HEADER_H__

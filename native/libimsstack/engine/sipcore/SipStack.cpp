@@ -587,13 +587,13 @@ GLOBAL SipHeaderBase* CreateViaHeader(
 
     if (pVia->SetProtocolName("SIP") == SIP_FALSE)
     {
-        delete pVia;
+        pVia->SipDelete();
         return IMS_NULL;
     }
 
     if (pVia->SetProtocolVer(Sip::STR_SIP_VERSION_ONLY) == SIP_FALSE)
     {
-        delete pVia;
+        pVia->SipDelete();
         return IMS_NULL;
     }
 
@@ -606,7 +606,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
 
     if (pVia->SetTransport(pszTransport) == SIP_FALSE)
     {
-        delete pVia;
+        pVia->SipDelete();
         return IMS_NULL;
     }
 
@@ -628,7 +628,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
                 IMS_SINT32 nPort = IMS_Atoi(pszTmp);
                 if (pVia->SetPortNum(static_cast<SIP_UINT16>(nPort)) == SIP_FALSE)
                 {
-                    delete pVia;
+                    pVia->SipDelete();
                     return IMS_NULL;
                 }
             }
@@ -640,7 +640,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         }
         else
         {
-            delete pVia;
+            pVia->SipDelete();
             return IMS_NULL;
         }
     }
@@ -654,7 +654,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         IMS_SINT32 nPort = IMS_Atoi(pszTmp);
         if (pVia->SetPortNum(static_cast<SIP_UINT16>(nPort)) == SIP_FALSE)
         {
-            delete pVia;
+            pVia->SipDelete();
             return IMS_NULL;
         }
     }
@@ -663,14 +663,14 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         // only host present
         if (pVia->SetHost(pszHost) == SIP_FALSE)
         {
-            delete pVia;
+            pVia->SipDelete();
             return IMS_NULL;
         }
     }
 
     if (pVia->SetBranchParam(strBranch.GetStr()) == SIP_FALSE)
     {
-        delete pVia;
+        pVia->SipDelete();
         return IMS_NULL;
     }
 
@@ -701,7 +701,7 @@ GLOBAL SipAddrSpec* DecodeAddrSpec(IN const AString& strAddress)
 
     if (pAddrSpec->DecodeAddrSpec(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
     {
-        delete pAddrSpec;
+        pAddrSpec->SipDelete();
         return IMS_NULL;
     }
 

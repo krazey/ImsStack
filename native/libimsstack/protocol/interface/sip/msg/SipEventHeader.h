@@ -29,8 +29,6 @@ public:
     SipEventHeader();
     SipEventHeader(const SipEventHeader& objHeader);
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-    /*destructor*/
-    ~SipEventHeader();
 
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -39,5 +37,8 @@ public:
 
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+
+private:
+    ~SipEventHeader();
 };
 #endif  //__SIP_EVENT_HEADER_H__

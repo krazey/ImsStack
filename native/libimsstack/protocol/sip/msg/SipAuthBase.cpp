@@ -47,7 +47,7 @@ SipAuthBase::~SipAuthBase()
 {
     while (m_objAuthList.IsEmpty() != SIP_TRUE)
     {
-        delete m_objAuthList.Top();
+        m_objAuthList.Top()->SipDelete();
         m_objAuthList.Pop();
     }
 }
@@ -145,7 +145,7 @@ SIP_BOOL SipAuthBase::SetParams(
     if (pNV->m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
-        delete pNV;
+        pNV->SipDelete();
         return SIP_FALSE;
     }
 
@@ -153,7 +153,7 @@ SIP_BOOL SipAuthBase::SetParams(
     if (pszTempVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
-        delete pNV;
+        pNV->SipDelete();
         return SIP_FALSE;
     }
 
@@ -282,13 +282,13 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         if (pNmVl->Decode(pStartPt, pTempPre) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value decode Fail", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            pNmVl->SipDelete();
             return SIP_FALSE;
         }
         if (m_objAuthList.Add(pNmVl) < 0)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list fail", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            pNmVl->SipDelete();
             return SIP_FALSE;
         }
         /*Update the Start point to the start of next Name Value Pair*/

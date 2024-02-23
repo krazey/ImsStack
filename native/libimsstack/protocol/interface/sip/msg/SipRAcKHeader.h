@@ -34,8 +34,7 @@ public:
     /*constructor*/
     SipRAcKHeader();
     SipRAcKHeader(const SipRAcKHeader& objHeader);
-    /*destructor*/
-    ~SipRAcKHeader();
+
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -57,6 +56,9 @@ public:
     {
         return (m_pszMethod == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipRAcKHeader();
 };
 
 #endif  //__SIP_RACK_HEADER_H__

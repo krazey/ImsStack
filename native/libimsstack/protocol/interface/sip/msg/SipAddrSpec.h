@@ -52,12 +52,12 @@ private:
 
     SIP_BOOL DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
+    ~SipUri();
+
 public:
     /*constructor*/
     SipUri();
     SipUri(const SipUri& objSipUri);
-    /*destructor*/
-    ~SipUri();
 
     SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
 
@@ -120,7 +120,6 @@ public:
     SipAddrSpec();
 
     SipAddrSpec(const SipAddrSpec& objAddressSpec);
-    ~SipAddrSpec();
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
 
@@ -142,6 +141,9 @@ public:
 
     /* Get methods as reference */
     inline const SipUri* GetSipUriAsRef() const { return m_pSipUri; }
+
+private:
+    ~SipAddrSpec();
 };
 
 class SipNameAddr : public SipRefBase
@@ -153,7 +155,6 @@ public:
 public:
     SipNameAddr();
     SipNameAddr(const SipNameAddr& objNameAddr);
-    virtual ~SipNameAddr();
 
     SIP_BOOL SetAddrSpec(SipAddrSpec* pSipAddrSpec);
 
@@ -168,6 +169,9 @@ public:
     SIP_BOOL SetDisplayName(const SIP_CHAR* pszDisplayName);
 
     inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
+
+private:
+    virtual ~SipNameAddr();
 };
 
 #endif  //__SIP_ADDR_SPEC_H__
