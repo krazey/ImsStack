@@ -37,7 +37,7 @@ const IMS_SINT32 SLOT_ID = 0;
 class AosUtilTest : public ::testing::Test
 {
 public:
-    AosUtil* pAosUtil;
+    AosUtil* m_pAosUtil;
 
     enum
     {
@@ -49,30 +49,30 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pAosUtil = new AosUtil();
-        ASSERT_TRUE(pAosUtil != nullptr);
+        m_pAosUtil = new AosUtil();
+        ASSERT_TRUE(m_pAosUtil != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (pAosUtil)
+        if (m_pAosUtil)
         {
-            delete pAosUtil;
+            delete m_pAosUtil;
         }
     }
 };
 
 TEST_F(AosUtilTest, GetResponseCode)
 {
-    EXPECT_EQ(-1, pAosUtil->GetResponseCode(IMS_NULL));
+    EXPECT_EQ(-1, m_pAosUtil->GetResponseCode(IMS_NULL));
 
     MockISipMessage objMockSipMsg;
 
     EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(403));
-    EXPECT_EQ(403, pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(403, m_pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
 
     EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(200));
-    EXPECT_EQ(200, pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(200, m_pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
 }
 
 TEST_F(AosUtilTest, GetRetryAfterValue)
@@ -87,35 +87,38 @@ TEST_F(AosUtilTest, GetRetryAfterValue)
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
 
-    EXPECT_EQ(0, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
-    EXPECT_EQ(0, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+    EXPECT_EQ(
+            0, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+    EXPECT_EQ(
+            0, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
 
     strHeader.Append("60");
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
 
-    EXPECT_EQ(60, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+    EXPECT_EQ(
+            60, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
 }
 
 TEST_F(AosUtilTest, GetMinExpiresValue)
 {
-    EXPECT_EQ(-1, pAosUtil->GetMinExpiresValue(IMS_NULL));
+    EXPECT_EQ(-1, m_pAosUtil->GetMinExpiresValue(IMS_NULL));
 
     MockISipMessage objMockSipMsg;
     AString strHeader = "";
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
-    EXPECT_EQ(-1, pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(-1, m_pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
 
     strHeader.Append("600");
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
-    EXPECT_EQ(600, pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(600, m_pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
 }
 
 TEST_F(AosUtilTest, IsInitialRegistrationRequired)
 {
-    EXPECT_FALSE(pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
+    EXPECT_FALSE(m_pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
 
     ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Clear();
@@ -123,7 +126,7 @@ TEST_F(AosUtilTest, IsInitialRegistrationRequired)
     MockISipMessage objMockSipMsg;
     EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
     EXPECT_FALSE(
-            pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+            m_pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
 
     SipMessageBodyPart objBodyPart;
     ISipMessageBodyPart* piBodyPart = static_cast<ISipMessageBodyPart*>(&objBodyPart);
@@ -143,35 +146,36 @@ TEST_F(AosUtilTest, IsInitialRegistrationRequired)
     objBodyParts.Append(piBodyPart);
 
     EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
-    EXPECT_TRUE(pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_TRUE(
+            m_pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
 }
 
 TEST_F(AosUtilTest, IsParameterIncluded3)
 {
     IMS_SINT32 nHeaderType = 0;
     AString strParameter = "test";
-    EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strParameter));
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strParameter));
 
     MockISipMessage objMockSipMsg;
     ImsList<AString> objHeaders;
     objHeaders.Clear();
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
             .WillOnce(Return(objHeaders));
-    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
 
     AString strHeader = "";
     objHeaders.Append(strHeader);
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
             .WillOnce(Return(objHeaders));
-    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
 
     strHeader = "test";
     objHeaders.Append(strHeader);
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
             .WillOnce(Return(objHeaders));
-    EXPECT_TRUE(pAosUtil->IsParameterIncluded(
+    EXPECT_TRUE(m_pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
 }
 
@@ -180,13 +184,13 @@ TEST_F(AosUtilTest, IsParameterIncluded4)
     IMS_SINT32 nHeaderType = 0;
     AString strName = "name";
     AString strParameter = "test";
-    EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strName, strParameter));
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strName, strParameter));
 
     MockISipMessage objMockSipMsg;
     ImsList<AString> objHeaders;
     objHeaders.Clear();
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
-    EXPECT_FALSE(pAosUtil->IsParameterIncluded(
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
 
     AString strHeader = "";
@@ -194,51 +198,51 @@ TEST_F(AosUtilTest, IsParameterIncluded4)
     strHeader = "test";
     objHeaders.Append(strHeader);
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
-    EXPECT_TRUE(pAosUtil->IsParameterIncluded(
+    EXPECT_TRUE(m_pAosUtil->IsParameterIncluded(
             static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
 }
 
 TEST_F(AosUtilTest, GetLocalPort)
 {
-    EXPECT_EQ(-1, pAosUtil->GetLocalPort(SLOT_ID));
+    EXPECT_EQ(-1, m_pAosUtil->GetLocalPort(SLOT_ID));
 }
 
 TEST_F(AosUtilTest, CheckFeature)
 {
     IMS_UINT32 nFeatures = 0;
-    pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
-    EXPECT_TRUE(pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
+    m_pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
+    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
 
-    pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
-    EXPECT_TRUE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+    m_pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
+    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
 
-    pAosUtil->RemoveFeature(FEATURE_IPSEC, nFeatures);
-    EXPECT_FALSE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+    m_pAosUtil->RemoveFeature(FEATURE_IPSEC, nFeatures);
+    EXPECT_FALSE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
 
-    pAosUtil->ClearFeature(nFeatures);
+    m_pAosUtil->ClearFeature(nFeatures);
 }
 
 TEST_F(AosUtilTest, SetRetryTimeDuration)
 {
-    EXPECT_EQ(30, pAosUtil->CalculateUpperBoundTime(30, 1800, 0));
-    EXPECT_LE(30, pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
-    EXPECT_GE(1800, pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
+    EXPECT_EQ(30, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 0));
+    EXPECT_LE(30, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
+    EXPECT_GE(1800, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
 
-    EXPECT_LE(30, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
-    EXPECT_LE(60, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 2));
-    EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
+    EXPECT_LE(30, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
+    EXPECT_LE(60, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 2));
+    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
 }
 
 TEST_F(AosUtilTest, SetRetryTimeDurationExecption)
 {
-    EXPECT_EQ(1800, pAosUtil->CalculateUpperBoundTime(30, 1800, 30));
-    EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 30));
+    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 30));
+    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 30));
 
-    EXPECT_EQ(1800, pAosUtil->CalculateUpperBoundTime(1800, 1800, 1));
-    EXPECT_EQ(1800, pAosUtil->CalculateUpperBoundTime(1800, 1800, 30));
+    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(1800, 1800, 1));
+    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(1800, 1800, 30));
 
-    EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 1));
-    EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 30));
+    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 1));
+    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 30));
 }
 
 TEST_F(AosUtilTest, CompareList)
@@ -266,17 +270,17 @@ TEST_F(AosUtilTest, CompareList)
     rightArray.AddElement("sip:1234@ims.google.com");
     rightArray.AddElement("tel:+1234@ims.google.com");
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
 
     leftArray.AddElement("+1234@ims.google.com");
-    EXPECT_FALSE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_FALSE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_FALSE));
 
-    EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_FALSE));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_FALSE));
 
-    EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_FALSE));
+    EXPECT_TRUE(m_pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_FALSE));
+    EXPECT_FALSE(m_pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_FALSE));
 }
 
 TEST_F(AosUtilTest, CompareListIPv4)
@@ -304,14 +308,14 @@ TEST_F(AosUtilTest, CompareListIPv4)
     rightArray.AddElement("10.168.219.104");
     rightArray.AddElement("10.168.219.106");
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
 
-    EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
 
-    EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
+    EXPECT_FALSE(m_pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
 }
 
 TEST_F(AosUtilTest, CompareListIPv6)
@@ -339,14 +343,14 @@ TEST_F(AosUtilTest, CompareListIPv6)
     rightArray.AddElement("240a:3:4400:3420:0:0:0:7");
     rightArray.AddElement("fc01:abab:cdcd:6fee::1");
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
 
-    EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
 
-    EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
+    EXPECT_FALSE(m_pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
 }
 
 TEST_F(AosUtilTest, ManageIntList)
@@ -356,49 +360,49 @@ TEST_F(AosUtilTest, ManageIntList)
     reasons.Clear();
     compareReasons.Clear();
 
-    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
-    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
-    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
 
-    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, compareReasons);
-    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, compareReasons);
+    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, compareReasons);
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, compareReasons);
 
-    EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
-    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
-
-    reasons.Clear();
-    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
-    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
-    EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
-
-    pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
-    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
-    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
+    EXPECT_TRUE(m_pAosUtil->IsElementExistInList(compareReasons, reasons));
 
     reasons.Clear();
-    pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
-    pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
-    EXPECT_FALSE(pAosUtil->IsElementExistInList(compareReasons, reasons));
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    EXPECT_TRUE(m_pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
+
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
+    EXPECT_TRUE(m_pAosUtil->IsElementExistInList(compareReasons, reasons));
+    EXPECT_FALSE(m_pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+
+    reasons.Clear();
+    m_pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
+    m_pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
+    EXPECT_FALSE(m_pAosUtil->IsElementExistInList(compareReasons, reasons));
 }
 
 TEST_F(AosUtilTest, checkNetworkType)
 {
-    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WCDMA));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WCDMA));
 
-    EXPECT_TRUE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
-    EXPECT_FALSE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
 }
 
 TEST_F(AosUtilTest, checkSet)
 {
-    pAosUtil->SetWifiTest(IMS_TRUE);
-    EXPECT_TRUE(pAosUtil->IsWifiTest());
-    pAosUtil->SetWifiTest(IMS_FALSE);
-    EXPECT_FALSE(pAosUtil->IsWifiTest());
+    m_pAosUtil->SetWifiTest(IMS_TRUE);
+    EXPECT_TRUE(m_pAosUtil->IsWifiTest());
+    m_pAosUtil->SetWifiTest(IMS_FALSE);
+    EXPECT_FALSE(m_pAosUtil->IsWifiTest());
 }
