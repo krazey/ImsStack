@@ -190,13 +190,13 @@ protected:
         delete m_pICoreService;
         delete m_pMockICarrierConfig;
         delete m_pAudioBundle;
-        delete m_pEvsBundle;
-        delete m_pAmrWbBundle;
-        delete m_pAmrNbBundle;
-        delete m_pEvsSubBundle;
-        delete m_pAmrWbSubBundle;
-        delete m_pAmrNbSubBundle;
         delete m_pConfig;
+        delete m_pEvsBundle;
+        delete m_pEvsSubBundle;
+        delete m_pAmrWbBundle;
+        delete m_pAmrWbSubBundle;
+        delete m_pAmrNbBundle;
+        delete m_pAmrNbSubBundle;
 
         m_objEvsPayloadType.Clear();
         m_objAmrWbPayloadType.Clear();

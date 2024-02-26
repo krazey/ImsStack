@@ -89,12 +89,13 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
+        delete m_pConfig;
+        delete m_pMockICarrierConfig;
+        delete m_pTextPayloads;
         delete m_pTextNego;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;
-        delete m_pMockICarrierConfig;
-        delete m_pTextPayloads;
     }
 };
 

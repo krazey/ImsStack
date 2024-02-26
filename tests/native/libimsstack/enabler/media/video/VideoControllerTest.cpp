@@ -74,6 +74,7 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
+        delete m_pConfig;
         delete m_pVideoNego;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
