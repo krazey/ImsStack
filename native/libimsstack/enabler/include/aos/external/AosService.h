@@ -105,6 +105,12 @@ public:
     static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
     static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
 
+public:
+    enum
+    {
+        TIMER_PLMN_CHANGE_DELAY = 0
+    };
+
 protected:
     void ProcessPlmnChangeDelayTimerExpired();
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
@@ -116,12 +122,6 @@ protected:
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-
-protected:
-    enum
-    {
-        TIMER_PLMN_CHANGE_DELAY = 0
-    };
 
     ImsList<IAosEmergencyListener*> m_objAosEmergencyListeners;
     ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
