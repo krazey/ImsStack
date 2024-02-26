@@ -35,30 +35,29 @@ using ::testing::ReturnRef;
 const IMS_SINT32 SLOT_ID = 0;
 const AString PROFILE_ID = AString("test");
 
+#define DECLARE_USING(Base) \
+    using Base::Init;       \
+    using Base::CleanUp;    \
+    using Base::AosSubscriberManager_NotifyState;
+
 class TestAosSubscriber : public AosSubscriber
 {
 public:
+    DECLARE_USING(AosSubscriber)
+
     inline explicit TestAosSubscriber(IN IAosAppContext* piAppContext) :
             AosSubscriber(piAppContext)
     {
     }
 
-    FRIEND_TEST(AosSubscriberTest, IsReady_ManagerNull);
-    FRIEND_TEST(AosSubscriberTest, IsReady_ManagerReturn);
-    FRIEND_TEST(AosSubscriberTest, SetListener_IsReadyReturn);
-    FRIEND_TEST(AosSubscriberTest, GetConfiguredImpus_ManagerNull);
-    FRIEND_TEST(AosSubscriberTest, GetConfiguredImpus_ManagerReturn);
-    FRIEND_TEST(AosSubscriberTest, GetFakeImpus_ManagerNull);
-    FRIEND_TEST(AosSubscriberTest, GetFakeImpus_ManagerReturn);
-    FRIEND_TEST(AosSubscriberTest, GetSubscriberConfig_ManagerNull);
-    FRIEND_TEST(AosSubscriberTest, GetSubscriberConfig_ManagerReturn);
-    FRIEND_TEST(AosSubscriberTest, Init_SubscriberManagerNull);
-    FRIEND_TEST(AosSubscriberTest, Init_RegTypeFake);
-    FRIEND_TEST(AosSubscriberTest, Init_RegTypeNormal);
-    FRIEND_TEST(AosSubscriberTest, CleanUp_SubscriberManagerNull);
-    FRIEND_TEST(AosSubscriberTest, CleanUp_RegTypeFake);
-    FRIEND_TEST(AosSubscriberTest, CleanUp_RegTypeNormal);
-    FRIEND_TEST(AosSubscriberTest, AosSubscriberManager_NotifyState);
+    inline IAosSubscriberManager* GetSubscriberManager() { return m_piSubscriberManager; }
+
+    inline void SetSubscriberManager(IN IAosSubscriberManager* piSubscriberManager)
+    {
+        m_piSubscriberManager = piSubscriberManager;
+    }
+
+    inline void SetRegType(IN AosRegistrationType eRegType) { m_eRegType = eRegType; }
 };
 
 class AosSubscriberTest : public ::testing::Test
@@ -67,6 +66,7 @@ public:
     TestAosSubscriber* m_pAosSubscriber;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosRegistration m_objMockIAosRegistration;
+    MockIAosSubscriberListener m_objMockListener;
 
 protected:
     virtual void SetUp() override
@@ -80,6 +80,9 @@ protected:
 
         m_pAosSubscriber = new TestAosSubscriber(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosSubscriber != nullptr);
+
+        ON_CALL(m_objMockListener, Subscriber_StateChanged(_, _)).WillByDefault(Return());
+        m_pAosSubscriber->SetListener(&m_objMockListener);
     }
 
     virtual void TearDown() override
@@ -93,8 +96,8 @@ protected:
 
 TEST_F(AosSubscriberTest, IsReady_ManagerNull)
 {
-    m_pAosSubscriber->m_piSubscriberManager = IMS_NULL;
-    EXPECT_EQ(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(IMS_NULL);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_FALSE(m_pAosSubscriber->IsReady());
 }
@@ -107,8 +110,8 @@ TEST_F(AosSubscriberTest, IsReady_ManagerReturn)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
-    EXPECT_NE(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_TRUE(m_pAosSubscriber->IsReady());
     EXPECT_FALSE(m_pAosSubscriber->IsReady());
@@ -122,8 +125,8 @@ TEST_F(AosSubscriberTest, SetListener_IsReadyReturn)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
-    EXPECT_NE(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     MockIAosSubscriberListener objMockListener1;
     EXPECT_CALL(objMockListener1, Subscriber_StateChanged(IAosSubscriber::READY, _)).Times(1);
@@ -131,14 +134,14 @@ TEST_F(AosSubscriberTest, SetListener_IsReadyReturn)
     MockIAosSubscriberListener objMockListener2;
     EXPECT_CALL(objMockListener2, Subscriber_StateChanged(IAosSubscriber::NOT_READY, _)).Times(1);
 
-    m_pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener1));
-    m_pAosSubscriber->SetListener(static_cast<IAosSubscriberListener*>(&objMockListener2));
+    m_pAosSubscriber->SetListener(&objMockListener1);
+    m_pAosSubscriber->SetListener(&objMockListener2);
 }
 
 TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerNull)
 {
-    m_pAosSubscriber->m_piSubscriberManager = IMS_NULL;
-    EXPECT_EQ(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(IMS_NULL);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberManager(), nullptr);
     EXPECT_EQ(m_pAosSubscriber->GetConfiguredImpus().GetCount(), 0);
 }
 
@@ -154,16 +157,16 @@ TEST_F(AosSubscriberTest, GetConfiguredImpus_ManagerReturn)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPuids));
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
-    EXPECT_NE(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_EQ(m_pAosSubscriber->GetConfiguredImpus().GetCount(), 3);
 }
 
 TEST_F(AosSubscriberTest, GetFakeImpus_ManagerNull)
 {
-    m_pAosSubscriber->m_piSubscriberManager = IMS_NULL;
-    EXPECT_EQ(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(IMS_NULL);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberManager(), nullptr);
     EXPECT_EQ(m_pAosSubscriber->GetFakeImpus().GetCount(), 0);
 }
 
@@ -179,16 +182,16 @@ TEST_F(AosSubscriberTest, GetFakeImpus_ManagerReturn)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPuids));
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
-    EXPECT_NE(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_EQ(m_pAosSubscriber->GetFakeImpus().GetCount(), 3);
 }
 
 TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerNull)
 {
-    m_pAosSubscriber->m_piSubscriberManager = IMS_NULL;
-    EXPECT_EQ(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(IMS_NULL);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberManager(), nullptr);
     EXPECT_EQ(m_pAosSubscriber->GetSubscriberConfig(), nullptr);
 }
 
@@ -200,8 +203,8 @@ TEST_F(AosSubscriberTest, GetSubscriberConfig_ManagerReturn)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnPointee(&piSubscriberConfig));
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
-    EXPECT_NE(m_pAosSubscriber->m_piSubscriberManager, nullptr);
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
 
     EXPECT_EQ(m_pAosSubscriber->GetSubscriberConfig(), piSubscriberConfig);
 }
@@ -223,7 +226,7 @@ TEST_F(AosSubscriberTest, Init_RegTypeFake)
     MockIAosSubscriberManager objMockIAosSubscriberManager;
     EXPECT_CALL(objMockIAosSubscriberManager, AddListenerForMonitor(_)).Times(1);
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
 
     EXPECT_TRUE(m_pAosSubscriber->Init());
 }
@@ -237,7 +240,7 @@ TEST_F(AosSubscriberTest, Init_RegTypeNormal)
     MockIAosSubscriberManager objMockIAosSubscriberManager;
     EXPECT_CALL(objMockIAosSubscriberManager, AddListener(_)).Times(1);
 
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
 
     EXPECT_TRUE(m_pAosSubscriber->Init());
 }
@@ -250,9 +253,9 @@ TEST_F(AosSubscriberTest, CleanUp_SubscriberManagerNull)
 TEST_F(AosSubscriberTest, CleanUp_RegTypeFake)
 {
     MockIAosSubscriberManager objMockIAosSubscriberManager;
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
 
-    m_pAosSubscriber->m_eRegType = AosRegistrationType::FAKE;
+    m_pAosSubscriber->SetRegType(AosRegistrationType::FAKE);
 
     EXPECT_TRUE(m_pAosSubscriber->CleanUp());
 }
@@ -260,23 +263,64 @@ TEST_F(AosSubscriberTest, CleanUp_RegTypeFake)
 TEST_F(AosSubscriberTest, CleanUp_RegTypeNormal)
 {
     MockIAosSubscriberManager objMockIAosSubscriberManager;
-    m_pAosSubscriber->m_piSubscriberManager = &objMockIAosSubscriberManager;
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
 
-    m_pAosSubscriber->m_eRegType = AosRegistrationType::NORMAL;
+    m_pAosSubscriber->SetRegType(AosRegistrationType::NORMAL);
 
     EXPECT_TRUE(m_pAosSubscriber->CleanUp());
 }
 
-TEST_F(AosSubscriberTest, AosSubscriberManager_NotifyState)
+TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithNotReady)
 {
-    MockIAosSubscriberListener objMockListener;
-    EXPECT_CALL(objMockListener, Subscriber_StateChanged(_, _)).Times(5);
+    // GIVEN
+    EXPECT_CALL(m_objMockListener, Subscriber_StateChanged(_, _));
 
-    m_pAosSubscriber->m_piListener = &objMockListener;
-
+    // WHEN
     m_pAosSubscriber->AosSubscriberManager_NotifyState(IAosSubscriber::NOT_READY);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithReady)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockListener, Subscriber_StateChanged(_, _));
+
+    // WHEN
     m_pAosSubscriber->AosSubscriberManager_NotifyState(IAosSubscriber::READY);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithRefreshStarted)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockListener, Subscriber_StateChanged(_, _));
+
+    // WHEN
     m_pAosSubscriber->AosSubscriberManager_NotifyState(IAosSubscriber::REFRESH_STARTED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithRefreshCompleted)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockListener, Subscriber_StateChanged(_, _));
+
+    // WHEN
     m_pAosSubscriber->AosSubscriberManager_NotifyState(IAosSubscriber::REFRESH_COMPLETED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithRefreshFailed)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockListener, Subscriber_StateChanged(_, _));
+
+    // WHEN
     m_pAosSubscriber->AosSubscriberManager_NotifyState(IAosSubscriber::REFRESH_FAILED);
+
+    // THEN: The GIVEN condition should be met.
 }
