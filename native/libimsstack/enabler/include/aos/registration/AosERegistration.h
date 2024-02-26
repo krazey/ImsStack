@@ -126,8 +126,8 @@ protected:
     void ClearCbm();
 
     /// IAosEmergencyListener
-    void CallbackModeChanged(
-            IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration);
+    void CallbackModeChanged(IN EmcCallbackModeType eType, IN EmcCallbackMode eState,
+            IN IMS_ULONG nDuration) override;
 
     void HandleECallState(IN IMS_UINT32 nState);
     void HandleESmsState(IN IMS_UINT32 nState);

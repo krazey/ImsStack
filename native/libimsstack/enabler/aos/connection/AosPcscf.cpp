@@ -803,7 +803,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 
     for (IMS_UINT32 nAt = 0; nAt < objHosts.GetSize(); ++nAt)
     {
-        ServerAddress* pServAddr = objHosts.GetAt(nAt);
+        const ServerAddress* pServAddr = objHosts.GetAt(nAt);
         const AString& strHost = pServAddr->GetAddress();
         IMS_SINT32 nPort = pServAddr->GetPort();
 
@@ -1110,7 +1110,7 @@ IMS_SINT32 AosPcscf::GetPcscfPort()
 
     if (piSubsConfig != IMS_NULL)
     {
-        ServerAddress* pServerAddress = piSubsConfig->GetPcscfAddress();
+        const ServerAddress* pServerAddress = piSubsConfig->GetPcscfAddress();
         if (pServerAddress != IMS_NULL)
             return pServerAddress->GetPort();
     }

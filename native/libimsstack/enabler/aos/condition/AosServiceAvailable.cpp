@@ -102,7 +102,7 @@ void AosServiceAvailable::SetListener(IN IAosServiceAvailableListener* piListene
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
-        IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
+        const IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
 
         if (piTemp == piListener)
         {
@@ -126,7 +126,7 @@ void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piList
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
-        IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
+        const IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
 
         if (piTemp == piListener)
         {

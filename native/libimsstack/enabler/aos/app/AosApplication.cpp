@@ -642,7 +642,7 @@ PROTECTED VIRTUAL void AosApplication::CreateAosConnector()
 PROTECTED VIRTUAL void AosApplication::CreateAosLocationStarter(
         IN IMS_BOOL bInitiation /* = IMS_TRUE */)
 {
-    IAosLocationStarter* piLs = AosProvider::GetInstance()->GetLocationStarter(m_nSlotId);
+    const IAosLocationStarter* piLs = AosProvider::GetInstance()->GetLocationStarter(m_nSlotId);
 
     if (piLs != IMS_NULL)
     {
@@ -3041,7 +3041,7 @@ PROTECTED VIRTUAL void AosApplication::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPID, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
 
-    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
 
     if (piNConfig == IMS_NULL)
     {

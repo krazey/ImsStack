@@ -247,7 +247,7 @@ PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
 
     if (m_piTestLocation == IMS_NULL)
     {
-        ILocationProperties* piLocation =
+        const ILocationProperties* piLocation =
                 PhoneInfoService::GetPhoneInfoService()
                         ->GetLocationInfo(m_nSlotId)
                         ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
