@@ -26,9 +26,9 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
 AosRetryRepository::AosRetryRepository(IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
         m_nRetryCount(0),
-        m_nEmergencyRetryCount(0)
+        m_nEmergencyRetryCount(0),
+        m_nSlotId(nSlotId)
 {
     m_strTag.Sprintf("%d", m_nSlotId);
 
