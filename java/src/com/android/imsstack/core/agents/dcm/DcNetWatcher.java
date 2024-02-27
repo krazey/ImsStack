@@ -122,8 +122,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     // Emergency bearer support capability
     private boolean mEmcbs = false;
 
-    private boolean mDoingOffRadio = false;
-
     private int mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
     private int mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
 
@@ -235,7 +233,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         mVoiceRatFromTm = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         mImsVops = false;
         mEmcbs = false;
-        mDoingOffRadio = false;
         mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
         mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
     }
@@ -465,16 +462,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public int getLteDuplexMode() {
         return mLteDuplexMode;
-    }
-
-    @Override
-    public void setDoingOffRadio(boolean input) {
-        mDoingOffRadio = input;
-    }
-
-    @Override
-    public boolean isDoingOffRadio() {
-        return mDoingOffRadio;
     }
 
     @Override
