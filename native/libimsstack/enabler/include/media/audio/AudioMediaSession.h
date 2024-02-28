@@ -93,7 +93,7 @@ public:
     void SetConfig(IN AudioConfiguration* pConfig);
 
     /**
-     * @brief Set AudioConfig for libimsmedia from src/dest/negotiated profile
+     * @brief Set AudioConfig for libpixelimsmedia from src/dest/negotiated profile
      * @param nAccessNetwork : AccessNetwork information
      * @param pLocalProfile : local profile of the SDP negotiation
      * @param pPeerProfile : peer profile of the SDP negotiation
