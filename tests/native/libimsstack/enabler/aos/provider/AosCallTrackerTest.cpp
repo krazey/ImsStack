@@ -32,66 +32,50 @@ using ::testing::AnyNumber;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+#define DECLARE_USING(Base)                           \
+    using Base::AddOrUpdateCall;                      \
+    using Base::GetConvertedState;                    \
+    using Base::GetTotalState;                        \
+    using Base::GetTotalCallType;                     \
+    using Base::SetState;                             \
+    using Base::Notify;                               \
+    using Base::ProcessCsChanged;                     \
+    using Base::ProcessEmergencyChanged;              \
+    using Base::ProcessNormalChanged;                 \
+    using Base::Event_NotifyEvent;                    \
+    using Base::ServicePhone_PreciseCallStateChanged; \
+    using Base::OnCallStateChanged;                   \
+    using Base::OnTotalCallStateChanged;              \
+    using Base::TypeToString;                         \
+    using Base::StateToString;                        \
+    using Base::CallTypeToString;                     \
+    using Base::PrintCallTypes;
+
 class TestAosCallTracker : public AosCallTracker
 {
 public:
+    DECLARE_USING(AosCallTracker)
+
     inline explicit TestAosCallTracker(IN IMS_SINT32 nSlotId) :
             AosCallTracker(nSlotId)
     {
     }
 
-    // TEST : SetMtcReady
-    FRIEND_TEST(AosCallTrackerTest, SucceedsSetMtcReady);
-    // TEST : IsCsCallActive
-    FRIEND_TEST(AosCallTrackerTest, ReturnsFalseWhenCsCallStateIsSmallerThenActiveCsState);
-    FRIEND_TEST(AosCallTrackerTest, ReturnsTrueWhenCsCallStateBiggerThenActiveCsState);
-    FRIEND_TEST(AosCallTrackerTest, ReturnsFalseWhenActiveCallStateBiggerThenCsCallState);
-    FRIEND_TEST(AosCallTrackerTest, ReturnsTrueWhenActiveCallStateSmallerThenCsCallState);
+    inline void SetNormalCallType(IN IMS_UINT32 nType) { m_nNormalCallType = nType; }
 
-    FRIEND_TEST(AosCallTrackerTest, IsNormalCallActive);
-    FRIEND_TEST(AosCallTrackerTest, IsEmergencyCallActive);
-    FRIEND_TEST(AosCallTrackerTest, IsVideoCallingActive_returnTrue);
-    FRIEND_TEST(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtIsNotOffhook);
-    FRIEND_TEST(AosCallTrackerTest, IsVideoCallingActive_returnFalse_NormalCallTypesEmpty);
-    FRIEND_TEST(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtCallTypeIsNotExist);
-    FRIEND_TEST(AosCallTrackerTest, GetSlotId);
-    FRIEND_TEST(AosCallTrackerTest, GetCallState_TypeCs);
-    FRIEND_TEST(AosCallTrackerTest, GetCallState_TypeNormal);
-    FRIEND_TEST(AosCallTrackerTest, GetCallState_TypeEmergency);
-    FRIEND_TEST(AosCallTrackerTest, GetCallState_TypeInvalid);
-    FRIEND_TEST(AosCallTrackerTest, SetCsCallStateWatchMode);
-    FRIEND_TEST(AosCallTrackerTest, SetListener_Success);
-    FRIEND_TEST(AosCallTrackerTest, SetListener_ExistSameListener);
-    FRIEND_TEST(AosCallTrackerTest, RemoveListener_Success);
-    FRIEND_TEST(AosCallTrackerTest, RemoveListener_NotExistListener);
-    FRIEND_TEST(AosCallTrackerTest, AddOrUpdateCall);
-    FRIEND_TEST(AosCallTrackerTest, GetConvertedState);
-    FRIEND_TEST(AosCallTrackerTest, GetTotalState_GreaterThanOne);
-    FRIEND_TEST(AosCallTrackerTest, GetTotalState_SizeOne);
-    FRIEND_TEST(AosCallTrackerTest, GetTotalState_Empty);
-    FRIEND_TEST(AosCallTrackerTest, GetTotalCallType_IsNotEmpty);
-    FRIEND_TEST(AosCallTrackerTest, GetTotalCallType_IsEmpty);
-    FRIEND_TEST(AosCallTrackerTest, Notify);
-    FRIEND_TEST(AosCallTrackerTest, ProcessCsChanged);
-    FRIEND_TEST(AosCallTrackerTest, ProcessEmergencyChanged);
-    FRIEND_TEST(AosCallTrackerTest, ProcessNormalChanged);
-    FRIEND_TEST(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIdle);
-    FRIEND_TEST(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIncoming);
-    FRIEND_TEST(AosCallTrackerTest, Event_NotifyEvent_CsCallStateActive);
-    FRIEND_TEST(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateIdle);
-    FRIEND_TEST(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateRinging);
-    FRIEND_TEST(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateOffhook);
-    FRIEND_TEST(AosCallTrackerTest, OnCallStateChanged_Emergency);
-    FRIEND_TEST(AosCallTrackerTest, OnCallStateChanged_CallTypeVoip);
-    FRIEND_TEST(AosCallTrackerTest, OnCallStateChanged_CallTypeVt);
-    FRIEND_TEST(AosCallTrackerTest, OnCallStateChanged_CallTypeRtt);
-    FRIEND_TEST(AosCallTrackerTest, OnCallStateChanged_CallTypeVideoRtt);
-    FRIEND_TEST(AosCallTrackerTest, OnTotalCallStateChanged);
-    FRIEND_TEST(AosCallTrackerTest, TypeToString);
-    FRIEND_TEST(AosCallTrackerTest, StateToString);
-    FRIEND_TEST(AosCallTrackerTest, CallTypeToString);
-    FRIEND_TEST(AosCallTrackerTest, PrintCallTypes_StringLengthIsZero);
-    FRIEND_TEST(AosCallTrackerTest, PrintCallTypes_StringLengthIsNotZero);
+    inline void SetNormalCalls(IN ImsMap<CallKey, CallState> objCalls)
+    {
+        m_objNormalCalls = objCalls;
+    }
+
+    inline void SetNormalCallTypes(IN ImsMap<CallKey, CallType> objCallTypes)
+    {
+        m_objNormalCallTypes = objCallTypes;
+    }
+
+    inline void SetSlotId(IN IMS_SINT32 nSlotId) { m_nSlotId = nSlotId; }
+
+    inline ImsList<IAosCallTrackerListener*> GetListeners() { return m_objListeners; }
 };
 
 class AosCallTrackerTest : public ::testing::Test
@@ -263,7 +247,7 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnTrue)
 {
     IMS_UINT32 nNormalCallType = (0x1 << static_cast<IMS_UINT32>(CallType::VT)) |
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
-    m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
+    m_pAosCallTracker->SetNormalCallType(nNormalCallType);
 
     ImsMap<CallKey, CallState> objNormalCalls;
     ImsMap<CallKey, CallType> objNormalCallTypes;
@@ -276,8 +260,8 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnTrue)
     m_pAosCallTracker->AddOrUpdateCall(objNormalCalls, nKey2, CallState::OFFHOOK);
     m_pAosCallTracker->AddOrUpdateCall(objNormalCallTypes, nKey2, CallType::VT);
 
-    m_pAosCallTracker->m_objNormalCalls = objNormalCalls;
-    m_pAosCallTracker->m_objNormalCallTypes = objNormalCallTypes;
+    m_pAosCallTracker->SetNormalCalls(objNormalCalls);
+    m_pAosCallTracker->SetNormalCallTypes(objNormalCallTypes);
 
     EXPECT_TRUE(m_pAosCallTracker->IsVideoCallingActive());
 }
@@ -286,7 +270,7 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtIsNotOffhook)
 {
     IMS_UINT32 nNormalCallType = (0x1 << static_cast<IMS_UINT32>(CallType::VT)) |
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
-    m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
+    m_pAosCallTracker->SetNormalCallType(nNormalCallType);
 
     ImsMap<CallKey, CallState> objNormalCalls;
     ImsMap<CallKey, CallType> objNormalCallTypes;
@@ -299,8 +283,8 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtIsNotOffhook)
     m_pAosCallTracker->AddOrUpdateCall(objNormalCalls, nKey2, CallState::IDLE);
     m_pAosCallTracker->AddOrUpdateCall(objNormalCallTypes, nKey2, CallType::VT);
 
-    m_pAosCallTracker->m_objNormalCalls = objNormalCalls;
-    m_pAosCallTracker->m_objNormalCallTypes = objNormalCallTypes;
+    m_pAosCallTracker->SetNormalCalls(objNormalCalls);
+    m_pAosCallTracker->SetNormalCallTypes(objNormalCallTypes);
 
     EXPECT_FALSE(m_pAosCallTracker->IsVideoCallingActive());
 }
@@ -309,13 +293,13 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_NormalCallTypesEmpty
 {
     IMS_UINT32 nNormalCallType = (0x1 << static_cast<IMS_UINT32>(CallType::VT)) |
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
-    m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
+    m_pAosCallTracker->SetNormalCallType(nNormalCallType);
 
     ImsMap<CallKey, CallState> objNormalCalls;
     ImsMap<CallKey, CallType> objNormalCallTypes;
 
-    m_pAosCallTracker->m_objNormalCalls = objNormalCalls;
-    m_pAosCallTracker->m_objNormalCallTypes = objNormalCallTypes;
+    m_pAosCallTracker->SetNormalCalls(objNormalCalls);
+    m_pAosCallTracker->SetNormalCallTypes(objNormalCallTypes);
 
     EXPECT_FALSE(m_pAosCallTracker->IsVideoCallingActive());
 }
@@ -324,20 +308,20 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtCallTypeIsNotExist
 {
     IMS_UINT32 nNormalCallType = (0x1 << static_cast<IMS_UINT32>(CallType::RTT)) |
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
-    m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
+    m_pAosCallTracker->SetNormalCallType(nNormalCallType);
 
     EXPECT_FALSE(m_pAosCallTracker->IsVideoCallingActive());
 }
 
 TEST_F(AosCallTrackerTest, GetSlotId)
 {
-    m_pAosCallTracker->m_nSlotId = 2;
+    m_pAosCallTracker->SetSlotId(2);
     EXPECT_EQ(m_pAosCallTracker->GetSlotId(), 2);
 
-    m_pAosCallTracker->m_nSlotId = 1;
+    m_pAosCallTracker->SetSlotId(1);
     EXPECT_EQ(m_pAosCallTracker->GetSlotId(), 1);
 
-    m_pAosCallTracker->m_nSlotId = 0;
+    m_pAosCallTracker->SetSlotId(0);
     EXPECT_EQ(m_pAosCallTracker->GetSlotId(), 0);
 }
 
@@ -428,7 +412,7 @@ TEST_F(AosCallTrackerTest, SetCsCallStateWatchMode)
 
 TEST_F(AosCallTrackerTest, SetListener_Success)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     IAosCallTrackerListener* piListener1 = new MockIAosCallTrackerListener();
     IAosCallTrackerListener* piListener2 = new MockIAosCallTrackerListener();
@@ -437,12 +421,12 @@ TEST_F(AosCallTrackerTest, SetListener_Success)
     m_pAosCallTracker->SetListener(piListener1);
     m_pAosCallTracker->SetListener(piListener2);
     m_pAosCallTracker->SetListener(piListener3);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 3);
 }
 
 TEST_F(AosCallTrackerTest, SetListener_ExistSameListener)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     IAosCallTrackerListener* piListener1 = new MockIAosCallTrackerListener();
     IAosCallTrackerListener* piListener2 = new MockIAosCallTrackerListener();
@@ -453,12 +437,12 @@ TEST_F(AosCallTrackerTest, SetListener_ExistSameListener)
     // Sets with existing Listener
     m_pAosCallTracker->SetListener(piListener2);
 
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 2);
 }
 
 TEST_F(AosCallTrackerTest, RemoveListener_Success)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     IAosCallTrackerListener* piListener1 = new MockIAosCallTrackerListener();
     IAosCallTrackerListener* piListener2 = new MockIAosCallTrackerListener();
@@ -467,21 +451,21 @@ TEST_F(AosCallTrackerTest, RemoveListener_Success)
     m_pAosCallTracker->SetListener(piListener1);
     m_pAosCallTracker->SetListener(piListener2);
     m_pAosCallTracker->SetListener(piListener3);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 3);
 
     m_pAosCallTracker->RemoveListener(piListener3);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 2);
 
     m_pAosCallTracker->RemoveListener(piListener2);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 1);
 
     m_pAosCallTracker->RemoveListener(piListener1);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 0);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 0);
 }
 
 TEST_F(AosCallTrackerTest, RemoveListener_NotExistListener)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     IAosCallTrackerListener* piListener1 = new MockIAosCallTrackerListener();
     IAosCallTrackerListener* piListener2 = new MockIAosCallTrackerListener();
@@ -490,17 +474,17 @@ TEST_F(AosCallTrackerTest, RemoveListener_NotExistListener)
     m_pAosCallTracker->SetListener(piListener1);
     m_pAosCallTracker->SetListener(piListener2);
     m_pAosCallTracker->SetListener(piListener3);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 3);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 3);
 
     m_pAosCallTracker->RemoveListener(piListener3);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 2);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 2);
 
     m_pAosCallTracker->RemoveListener(piListener2);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 1);
 
     // Removes with listener that doesn't already exist.
     m_pAosCallTracker->RemoveListener(piListener2);
-    EXPECT_EQ(m_pAosCallTracker->m_objListeners.GetSize(), 1);
+    EXPECT_EQ(m_pAosCallTracker->GetListeners().GetSize(), 1);
 }
 
 TEST_F(AosCallTrackerTest, AddOrUpdateCall)
@@ -616,7 +600,7 @@ TEST_F(AosCallTrackerTest, GetTotalCallType_IsEmpty)
 
 TEST_F(AosCallTrackerTest, Notify)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener1;
     MockIAosCallTrackerListener objListener2;
@@ -638,7 +622,7 @@ TEST_F(AosCallTrackerTest, Notify)
 TEST_F(AosCallTrackerTest, ProcessCsChanged)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -651,7 +635,7 @@ TEST_F(AosCallTrackerTest, ProcessCsChanged)
 
 TEST_F(AosCallTrackerTest, ProcessEmergencyChanged)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -671,7 +655,7 @@ TEST_F(AosCallTrackerTest, ProcessEmergencyChanged)
 
 TEST_F(AosCallTrackerTest, ProcessNormalChanged)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -692,7 +676,7 @@ TEST_F(AosCallTrackerTest, ProcessNormalChanged)
 TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIdle)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -706,7 +690,7 @@ TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIdle)
 TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIncoming)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -720,7 +704,7 @@ TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateIncoming)
 TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateActive)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -734,7 +718,7 @@ TEST_F(AosCallTrackerTest, Event_NotifyEvent_CsCallStateActive)
 TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateIdle)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -760,7 +744,7 @@ TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateIdle)
 TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateRinging)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -780,7 +764,7 @@ TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateRinging
 TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateOffhook)
 {
     m_pAosCallTracker->SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -796,7 +780,7 @@ TEST_F(AosCallTrackerTest, ServicePhone_PreciseCallStateChanged_CallStateOffhook
 
 TEST_F(AosCallTrackerTest, OnCallStateChanged_Emergency)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -814,7 +798,7 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_Emergency)
 
 TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVoip)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -832,7 +816,7 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVoip)
 
 TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVt)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -850,7 +834,7 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVt)
 
 TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeRtt)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
@@ -868,7 +852,7 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeRtt)
 
 TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVideoRtt)
 {
-    m_pAosCallTracker->m_objListeners.Clear();
+    m_pAosCallTracker->GetListeners().Clear();
 
     MockIAosCallTrackerListener objListener;
     m_pAosCallTracker->SetListener(&objListener);
