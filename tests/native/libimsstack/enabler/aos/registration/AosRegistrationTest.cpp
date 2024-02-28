@@ -84,11 +84,116 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
+#define DECLARE_USING(Base)                                                   \
+    using Base::AddAccesstypeFeatureTag;                                      \
+    using Base::AddFeatureTagForMtc;                                          \
+    using Base::AddLocationHeaderBody;                                        \
+    using Base::AddSpecificOperation;                                         \
+    using Base::Block_Changed;                                                \
+    using Base::CallTracker_StateChanged;                                     \
+    using Base::CheckPending;                                                 \
+    using Base::CleanUp;                                                      \
+    using Base::ClearIpsecBlock;                                              \
+    using Base::ClearRetryCount;                                              \
+    using Base::ClearRetryTimers;                                             \
+    using Base::ClearTimers;                                                  \
+    using Base::CreateSubscription;                                           \
+    using Base::DestroySubscription;                                          \
+    using Base::GetActualWaitTime;                                            \
+    using Base::GetNetworkTypeForImsRegState;                                 \
+    using Base::GetRegIpcanCategory;                                          \
+    using Base::IncreaseConsecutiveFailCount;                                 \
+    using Base::Init;                                                         \
+    using Base::IsAppReady;                                                   \
+    using Base::IsBlocked;                                                    \
+    using Base::IsGeolocationInfoRequired;                                    \
+    using Base::IsImsCall;                                                    \
+    using Base::IsIpsecSupported;                                             \
+    using Base::IsRetryOnSamePcscfRequired;                                   \
+    using Base::IsTransactionStarted;                                         \
+    using Base::MessageMediator_AdjustMessage;                                \
+    using Base::NConfiguration_NotifyConfigChanged;                           \
+    using Base::NetTracker_StatusChanged;                                     \
+    using Base::OnMessage;                                                    \
+    using Base::ProcessAuthenticationFailed;                                  \
+    using Base::ProcessDefaultFlowRecovery_Start;                             \
+    using Base::ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy;         \
+    using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy;  \
+    using Base::ProcessDefaultFlowRecovery_Update;                            \
+    using Base::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy; \
+    using Base::ProcessForbiddenFailed;                                       \
+    using Base::ProcessIpVersionChange;                                       \
+    using Base::ProcessOfflineRecoverTimerExpired;                            \
+    using Base::ProcessPendingPlmnBlockOnUpdateFailure;                       \
+    using Base::ProcessPendingTransaction;                                    \
+    using Base::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure;             \
+    using Base::ProcessRegRequiredWithAvailableNextPcscf;                     \
+    using Base::ProcessRegRequiredWithNextPcscf;                              \
+    using Base::ProcessRegRequiredWithWaitTime;                               \
+    using Base::ProcessRegTerminated;                                         \
+    using Base::ProcessReinitiate;                                            \
+    using Base::ProcessReregister;                                            \
+    using Base::ProcessRetryInRegStopped;                                     \
+    using Base::ProcessStandardPcscfSelection;                                \
+    using Base::ProcessStartFailed_305;                                       \
+    using Base::ProcessStartFailed_Others;                                    \
+    using Base::ProcessStartFailed_StatusCode;                                \
+    using Base::ProcessStartFailed_TxnTimeout;                                \
+    using Base::ProcessStopRetryTimerExpired;                                 \
+    using Base::ProcessSubReinitiate;                                         \
+    using Base::ProcessSubscriberFailed;                                      \
+    using Base::ProcessUpdateFailed_Others;                                   \
+    using Base::ProcessUpdateFailed_StatusCode;                               \
+    using Base::Registration_AuthenticationChallenged;                        \
+    using Base::Registration_NotifyAkaResponse;                               \
+    using Base::Registration_RefreshTimerExpired;                             \
+    using Base::Registration_Removed;                                         \
+    using Base::Registration_Started;                                         \
+    using Base::Registration_StartFailed;                                     \
+    using Base::Registration_Terminated;                                      \
+    using Base::Registration_Updated;                                         \
+    using Base::Registration_UpdateFailed;                                    \
+    using Base::RemoveFeatureTagForMtc;                                       \
+    using Base::SendRegisterEx;                                               \
+    using Base::SetBlocked;                                                   \
+    using Base::SetDynamicIpQos;                                              \
+    using Base::SetFakeReg;                                                   \
+    using Base::SetHeldByCall;                                                \
+    using Base::SetImsCall;                                                   \
+    using Base::SetMode;                                                      \
+    using Base::SetNextPcscf;                                                 \
+    using Base::SetPcscf;                                                     \
+    using Base::SetRadioWaiting;                                              \
+    using Base::SetState;                                                     \
+    using Base::SetStaticIpQos;                                               \
+    using Base::SetTraffic;                                                   \
+    using Base::SetTrafficListener;                                           \
+    using Base::SetTrafficPriorityBlocked;                                    \
+    using Base::StartSubscription;                                            \
+    using Base::StartTimer;                                                   \
+    using Base::StopSubscription;                                             \
+    using Base::StopTimer;                                                    \
+    using Base::Subscription_CanBeTransmitted;                                \
+    using Base::Subscription_NotifyReceived;                                  \
+    using Base::Subscription_Request;                                         \
+    using Base::Subscription_StateChanged;                                    \
+    using Base::Timer_TimerExpired;                                           \
+    using Base::Transaction_OnConnectionFailed;                               \
+    using Base::Transaction_OnTrafficPriorityChanged;                         \
+    using Base::TryNextPcscf;                                                 \
+    using Base::UpdateFeatureTag;                                             \
+    using Base::UpdateIpsecSupported;                                         \
+    using Base::UpdatePreloadedRoute;                                         \
+    using Base::UpdateRegIpcanCategory;                                       \
+    using Base::UpdateTransactionStarted;
+
 const IMS_SINT32 SLOT_ID = 0;
 
 class TestAosRegistration : public AosRegistration
 {
 public:
+    DECLARE_USING(AosRegistration)
+
     explicit inline TestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
             AosRegistration(piAppContext, strRegId),
             m_piRegistrationInstance(IMS_NULL),
@@ -97,320 +202,6 @@ public:
     {
     }
 
-    FRIEND_TEST(AosRegistrationTest, StartWhileTransactionIsNotStartedNotTriesCreateRegistration);
-    FRIEND_TEST(AosRegistrationTest, StartWhileTransactionIsNotAllowedNotTriesCreateRegistration);
-    FRIEND_TEST(AosRegistrationTest, StartFailsToCreateRegistration);
-    FRIEND_TEST(AosRegistrationTest, StartSucceedsToCreateRegistration);
-    FRIEND_TEST(AosRegistrationTest, StopWhileInNotRegisteredStateReportsSuccessWithouDeregister);
-    FRIEND_TEST(
-            AosRegistrationTest, StopWhileInRegisteredStateReportsSuccessWhenFailToSendDeregister);
-    FRIEND_TEST(AosRegistrationTest,
-            StopWhileInRegisteredStateReportsTryingWhenSucceedToSendDeregister);
-    FRIEND_TEST(AosRegistrationTest, StopWhileInDeregisteringStateDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, UpdateWhileInRegStopedStateTriggersRetrying);
-    FRIEND_TEST(AosRegistrationTest, UpdateWhileInRegisteredStateTriggersRefreshing);
-    FRIEND_TEST(AosRegistrationTest, UpdateWhileInRegisteringStateIsPending);
-    FRIEND_TEST(AosRegistrationTest, UpdateWhileInDeregisteringStateDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, ReconfigWhileInRegStopStateTriggersUpdateRegBinding);
-    FRIEND_TEST(AosRegistrationTest,
-            ReconfigWhileInRegisteredStateTriggersUpdateRegBindingAndProcessReregister);
-    FRIEND_TEST(AosRegistrationTest, ReconfigWhileInRegisteringStateIsPending);
-    FRIEND_TEST(AosRegistrationTest, ReconfigWhileInOfflineStateIsIgnored);
-    FRIEND_TEST(AosRegistrationTest, InitPcscfCommandSetsFirstPcscfIndex);
-    FRIEND_TEST(AosRegistrationTest, InitAwtCommandSetsRetryTime);
-    FRIEND_TEST(AosRegistrationTest, ClearRetryCountCommandClearsConsecutiveFailureCount);
-    FRIEND_TEST(
-            AosRegistrationTest, IpsecCommandForEnableWhileSupportIpsecTriggersDefaultFlowRecovery);
-    FRIEND_TEST(AosRegistrationTest, IpsecCommandForDisableUpdatesIpsecSupportedStatus);
-    FRIEND_TEST(AosRegistrationTest, UninterestedIpsecCommandDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, RefreshRegInfoCommandTriggersRecalculateCallerCapabilities);
-    FRIEND_TEST(AosRegistrationTest, UpdateRegBindingCommandCreatesRegBinding);
-    FRIEND_TEST(AosRegistrationTest, IpcanChangedCommandHoldsUpdateWhileInCall);
-    FRIEND_TEST(AosRegistrationTest, IpcanChangedCommandTriggersUpdateWhileInNoCall);
-    FRIEND_TEST(AosRegistrationTest, UpdateIpcanCommandUpdatesBlockStatus);
-    FRIEND_TEST(AosRegistrationTest, ScscfRestorationCommandTriggersRegisterAfterRefreshingPcscf);
-    FRIEND_TEST(
-            AosRegistrationTest, SetCurrentPcscfInvalidForGivenRetryAfterDuringScscfRestoration);
-    FRIEND_TEST(AosRegistrationTest,
-            SetCurrentPcscfInvalidPermanantlyIfNoRetryAfterDuringScscfRestoration);
-    FRIEND_TEST(AosRegistrationTest, DestroyRegistrationWhenScscfRestrorationIsTriggered);
-    FRIEND_TEST(AosRegistrationTest, StartWithNextPcscfIfAvailableWhenScscfRestorationIsTriggered);
-    FRIEND_TEST(AosRegistrationTest, ReconnectPdnIfNoAvailablePcscfWhenScscfRestorationIsTriggered);
-    FRIEND_TEST(AosRegistrationTest, ClearServerSocketErrorCountCommandClearsErrorCount);
-    FRIEND_TEST(AosRegistrationTest, UnavailableFeatureTagCommandUpdatesDetailRegState);
-    FRIEND_TEST(AosRegistrationTest, IncreaseFailureCountForPdnReactivatedCommandIncreasesCount);
-    FRIEND_TEST(AosRegistrationTest, SetEps5gsOnlyCommandUpdatesVariable);
-    FRIEND_TEST(AosRegistrationTest, HandleUninterestedCommandDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, GetRegTypeReturnsRegistrationType);
-    FRIEND_TEST(AosRegistrationTest, IsTerminatedReturnsTrueIfTerminatedIsPending);
-    FRIEND_TEST(AosRegistrationTest, CheckMode);
-    FRIEND_TEST(AosRegistrationTest, GetProperty);
-    FRIEND_TEST(AosRegistrationTest, CheckBool);
-    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficIfRegTypeIsNotNormalOrEmergency);
-    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficListenerIfRegTypeIsNotNormalOrEmergency);
-    FRIEND_TEST(AosRegistrationTest, FailsSetTrafficListenerIfTransactionIsNull);
-    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenSetAsFakeRegistration);
-    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenSetBlockReason);
-    FRIEND_TEST(AosRegistrationTest, IpsecIsNotSupportedWhenFeatureIsNotOn);
-    FRIEND_TEST(AosRegistrationTest, IpsecIsSupportedWhenFeatureIsOnAndNoSetBlockReason);
-    FRIEND_TEST(AosRegistrationTest, FailsAddIpsecBlockReasonWhenFeatureIsNotOn);
-    FRIEND_TEST(AosRegistrationTest, SucceedsAddIpsecBlockReasonWhenFeatureIsOn);
-    FRIEND_TEST(AosRegistrationTest, SucceedsRemoveIpsecBlockReasonWhenFeatureIsOn);
-    FRIEND_TEST(AosRegistrationTest, GetNetworkTypeReturnsLteWhenWifiTestIsOn);
-    FRIEND_TEST(AosRegistrationTest, GetNetworkTypeFromAosNetTracker);
-    FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
-    FRIEND_TEST(AosRegistrationTest, IpsecSupported);
-    FRIEND_TEST(AosRegistrationTest, RetryCount);
-    FRIEND_TEST(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReason);
-    FRIEND_TEST(AosRegistrationTest, AddAccesstypeFeatureTagWithNumericalValue);
-    FRIEND_TEST(AosRegistrationTest, AddAccesstypeFeatureTagWithoutNumericalValue);
-    FRIEND_TEST(AosRegistrationTest, UpdateTransactionStarted);
-    FRIEND_TEST(AosRegistrationTest, StandardPcscfSelection);
-    FRIEND_TEST(AosRegistrationTest, SendRegisterEx);
-    FRIEND_TEST(AosRegistrationTest, UpdateFeatureTag);
-    FRIEND_TEST(AosRegistrationTest, SetStaticIpQos);
-    FRIEND_TEST(AosRegistrationTest, SetDynamicIpQos);
-    FRIEND_TEST(AosRegistrationTest, GetActualWaitTime);
-    FRIEND_TEST(AosRegistrationTest, TryNextPcscf);
-    FRIEND_TEST(AosRegistrationTest, SetNextPcscf_SamePcscf);
-    FRIEND_TEST(AosRegistrationTest, IsRetryOnSamePcscfRequired);
-    FRIEND_TEST(AosRegistrationTest, RegReinitiateMessageTriggersReinitiate);
-    FRIEND_TEST(AosRegistrationTest, RegUpdateMessageTriggersUpdate);
-    FRIEND_TEST(AosRegistrationTest, RegReconfigMessageTriggersReconfig);
-    FRIEND_TEST(AosRegistrationTest, RegRequiredWithWaitTimeMessageStartsOfflineRecoverTimer);
-    FRIEND_TEST(AosRegistrationTest, RegRequiredWithNextPcscfMessageTriggersRegister);
-    FRIEND_TEST(AosRegistrationTest, RegRequiredWithScscfRestorationMessageTriggersRegister);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedByNotifyMessageNotifiesFailure);
-    FRIEND_TEST(AosRegistrationTest, SubReinitiateMessageCreatesSubscription);
-    FRIEND_TEST(AosRegistrationTest, SubTerminatedMessageDestroiesSubscription);
-    FRIEND_TEST(AosRegistrationTest, RegisteredEventMessageClearsRetryCount);
-    FRIEND_TEST(AosRegistrationTest, HandleUninterestedMessageDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, InitializeSetsFeaturesAndListeners);
-    FRIEND_TEST(AosRegistrationTest, CleanUpRemovesListeners);
-    FRIEND_TEST(AosRegistrationTest,
-            GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForCellular);
-    FRIEND_TEST(
-            AosRegistrationTest, GeolocationInfoIsRequiredForNormalTypeIfPidfIsSupportedForWifi);
-    FRIEND_TEST(AosRegistrationTest,
-            GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForCellular);
-    FRIEND_TEST(
-            AosRegistrationTest, GeolocationInfoIsRequiredForEmergencyTypeIfPidfIsSupportedForWifi);
-    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredForFakeType);
-    FRIEND_TEST(AosRegistrationTest,
-            GeolocationInfoIsRequiredForNormalTypeIfPidfIsNotSupportedForCellular);
-    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecHelperIsNull);
-    FRIEND_TEST(AosRegistrationTest, GeolocationInfoIsNotRequiredIfIpsecIsNotEstablished);
-    FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingReconfigExistSendsRegReconfigMessage);
-    FRIEND_TEST(AosRegistrationTest, CheckPendingWhilePendingUpdateExistSendsRegUpdateMessage);
-    FRIEND_TEST(AosRegistrationTest, AddTxnPendingFeatureWhenPlmnBlockOnUpdateFailure);
-    FRIEND_TEST(AosRegistrationTest, ReportFailureWhenPlmnBlockWithPcoLimitedModeOnStartFailure);
-    FRIEND_TEST(AosRegistrationTest, ProcessPendingStartTriggersStartRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessPendingTrafficWhileInRefreshStopStateTriggersUpdateRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessPendingTrafficWhileInOfflineStateTriggersStartRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessPendingTransactionWhileRetryTimerExistDoesNothing);
-    FRIEND_TEST(
-            AosRegistrationTest, ProcessPendingTransactionWhileRetryIsHeldButFailsToSendRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessPendingTransactionWhileRetryIsHeldAndSucceedsToSendRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessPendingTransactionWhileRetryIsNotHeldAndInOfflineStateButFailsToRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessPendingTransactionWhileRetryIsNotHeldAndInOfflineStateAndSucceedsToRegister);
-    FRIEND_TEST(
-            AosRegistrationTest, ProcessPendingTransactionWhileRetryIsNotHeldAndNotInOfflineState);
-    FRIEND_TEST(AosRegistrationTest, ProcessPendingSubscriptionTriggersStartSubscription);
-    FRIEND_TEST(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryIsNotHeldNotTriesRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryTimerExistNotTriesRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessRetryInRegStoppedWhileTransactionIsNotStartedNotTriesRegister);
-    FRIEND_TEST(AosRegistrationTest,
-            ProcessRetryInRegStoppedWhileTransactionIsNotAllowedNotTriesRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessRetryInRegStoppedButFailsToSendRegister);
-    FRIEND_TEST(AosRegistrationTest, ProcessReregisterWhileNotRegisteredDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted);
-    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady);
-    FRIEND_TEST(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall);
-    FRIEND_TEST(AosRegistrationTest, ReportFailureForReregisterProcessWhenRegisterFail);
-    FRIEND_TEST(AosRegistrationTest, ReregisterProcessSucceed);
-    FRIEND_TEST(AosRegistrationTest, ReportFailureForReinitiateProcessWhenCreateRegistrationFail);
-    FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileCallExist);
-    FRIEND_TEST(AosRegistrationTest, ProcessRegTerminatedWhileRetryTimerExist);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerFlowRecoveryForStartWhenAuthenticationFailedWhileRegistering);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerFlowRecoveryForUpdateWhenAuthenticationFailedWhileRefreshing);
-    FRIEND_TEST(AosRegistrationTest,
-            ReportFailureWhenAuthenticationFailedIfExtraRegErrPolicyNotIncludePdnReactivated);
-    FRIEND_TEST(AosRegistrationTest, TriggerReinitiateWhenRegRequiredWithWaitTimeIfWaitTimeIsZero);
-    FRIEND_TEST(AosRegistrationTest, ReportFailureWhenRegRequiredWithWaitTimeIfAppIsNotReady);
-    FRIEND_TEST(AosRegistrationTest, TriggerOfflineRecoverWhenRegRequiredWithWaitTimeDuringCall);
-    FRIEND_TEST(
-            AosRegistrationTest, ReportFailureWhenRegRequiredWithNextPcscfIfCreateRegistrationFail);
-    FRIEND_TEST(AosRegistrationTest, ReportFailureWhenRegRequiredWithNextPcscfIfSetNextPcscfFail);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerOfflineRecoverWhenRegRequiredWithAvailableNextPcscfButOnlyOnePcscfExist);
-    FRIEND_TEST(AosRegistrationTest,
-            ReportFailureWhenRegRequiredWithAvailableNextPcscfIfCreateRegistrationFail);
-    FRIEND_TEST(AosRegistrationTest,
-            ReportFailureWithAwtWhenRegRequiredWithAvailableNextPcscfIfSetNextPcscfFail);
-    FRIEND_TEST(AosRegistrationTest,
-            ReportFailureWhenRegRequiredWithAvailableNextPcscfIfSetNextPcscfFail);
-    FRIEND_TEST(AosRegistrationTest, TryRegistrationWhenRegRequiredWithAvailableNextPcscf);
-    FRIEND_TEST(AosRegistrationTest, NotCreateSubscriptionWhenReinitiateIfNotRegistered);
-    FRIEND_TEST(AosRegistrationTest, ProcessForbiddenFailed);
-    FRIEND_TEST(AosRegistrationTest, ProcessSubscriberFailed);
-    FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_Start);
-    FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy);
-    FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy);
-    FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_Update);
-    FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerPcscfSelectionWhenStartFailedWithTxnTimeoutIfConfiguredToPcscfDiscovery);
-    FRIEND_TEST(AosRegistrationTest,
-            ReconnectPdnWhenStartFailedWithTxnTimeoutIfPdnReactivateIsRequired);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerFlowRecoveryWhenStartFailedWithTxnTimeoutIfPdnReactivatedPolicyIsConfigured);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerIpsecFallbackWhenStartFailedWithTxnTimeoutIfConfiguredToAttemptWithoutIpsec);
-    FRIEND_TEST(AosRegistrationTest,
-            TriggerFlowRecoveryWhenStartFailedWithTxnTimeoutIfExtraRegErrorCodeIncludeTimerF);
-    FRIEND_TEST(AosRegistrationTest, TryNextPcscfWhenStartFailedWithTxnTimeout);
-    FRIEND_TEST(
-            AosRegistrationTest, ReportFailureWhenStartFailedWithTxnTimeoutAndFailToTryNextPcscf);
-    FRIEND_TEST(AosRegistrationTest, ProcessIpVersionChange);
-    FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode);
-    FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Success);
-    FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failure);
-    FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNextPcscf);
-    FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_Others);
-    FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode);
-    FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_305);
-    FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500);
-    FRIEND_TEST(AosRegistrationTest,
-            RegUpdateFailTriggersFlowRecoveryIfActualWaitTimePolicyIsSpecifiedInterval);
-    FRIEND_TEST(
-            AosRegistrationTest, RegUpdateFailTriggersFlowRecoveryIfConfiguredToRetryWithSamePcscf);
-    FRIEND_TEST(AosRegistrationTest, RegUpdateFailWithSocketErrorTriggersPdnReactivationIfRequired);
-    FRIEND_TEST(AosRegistrationTest,
-            RegUpdateFailWithSocketErrorTriggersFlowRecoveryIfPdnReactivationIsNotRequired);
-    FRIEND_TEST(AosRegistrationTest, ProcessUpdateFailedOthersTriggersAwtRecovery);
-    FRIEND_TEST(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull);
-    FRIEND_TEST(AosRegistrationTest,
-            AuthenticationChallengedIsNotHandledWhenMoreAuthChallengeIsNotAllowed);
-    FRIEND_TEST(AosRegistrationTest, FailToProcessAuthenticationChallengedTriggersRegReInitate);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseIsNotHandledWhenIpsecIsNotSupported);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNotOk);
-    FRIEND_TEST(
-            AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort);
-    FRIEND_TEST(AosRegistrationTest,
-            NotifyAkaResponseTriggersRegTerminatedWhenFailToUpdatePreloadedRoute);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenFailToMakeSas);
-    FRIEND_TEST(AosRegistrationTest, NotifyAkaResponseReturnsSaResultAsTrueWhenSucceedToMakeSas);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenRegistrationIsNull);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredIsNotHandledWhenNotRegisteredState);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredReportsFailureWhenSuspended);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsNotStarted);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsStopped);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredTriggersRegTerminatedWhenFailToCreateIpsec);
-    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpiredTriggersRegRefresh);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartedWhenRegistrationIsNullDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartedTriggersReinitiateIfIpsecIsNotEstablished);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartedReportsSuccess);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartFailedWhenRegistrationIsNullDoesNothing);
-    FRIEND_TEST(AosRegistrationTest,
-            RegistrationStartFailedWhenMoreAuthChallengeIsNotAllowedHandlesAuthFailure);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartFailedWithStatusCode);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout);
-    FRIEND_TEST(AosRegistrationTest, RegistrationStartFailedWithOtherReason);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg403);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrMessage);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReason);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg500);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_NotSupportErrMessage);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_DuplicateReason);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures);
-    FRIEND_TEST(
-            AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_NotSupportErrMessage);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_DuplicateReason);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_RegEventChange_UnconditionalDownload);
-    FRIEND_TEST(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload);
-    FRIEND_TEST(AosRegistrationTest, RegistrationUpdatedWhenRegistrationIsNullDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, RegistrationUpdatedReportsFailureIfFailToUpdateIpsec);
-    FRIEND_TEST(AosRegistrationTest, RegistrationUpdatedCreatesSubscriptionAndReportsSuccess);
-    FRIEND_TEST(AosRegistrationTest, RegistrationUpdatedStartsSubscriptionAndReportsSuccess);
-    FRIEND_TEST(AosRegistrationTest,
-            RegistrationUpdateFailedWhenMoreAuthChallengeIsNotAllowedHandlesAuthFailure);
-    FRIEND_TEST(
-            AosRegistrationTest, RegistrationUpdateFailedWithStatusCodeWhileInCallReportsFailure);
-    FRIEND_TEST(AosRegistrationTest,
-            RegistrationUpdateFailedWithTransactionTimeoutWhileInRoamingReportsFailure);
-    FRIEND_TEST(AosRegistrationTest, RegistrationUpdateFailedWithOtherReasonTriggersFlowRecovery);
-    FRIEND_TEST(AosRegistrationTest, RegistrationRemovedDestroysRegistration);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedDoesNotStartInternalErrorTimerAgainIfExist);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedStartsInternalErrorTimerIfNotExist);
-    FRIEND_TEST(
-            AosRegistrationTest, RegTerminatedTriggersReinitiateIfReconnectingServerIsNotAllowed);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedWhileInCallReportsFailureAsPdnReconnectReason);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedReportsFailureAsTerminatedReason);
-    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNothing);
-    FRIEND_TEST(AosRegistrationTest,
-            SubscriptionStateChangedWithSubscriptionEstablishedClearsRetryCount);
-    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWithSubscriptionFailedDoesNothing);
-    FRIEND_TEST(AosRegistrationTest,
-            SubscriptionStateChangedWithSubscriptionTerminatedSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, SubscriptionStateChangedWithUnknownReasonDoesNothing);
-    FRIEND_TEST(AosRegistrationTest,
-            SubscriptionCanBeTransmittedWhileTransactionIsNotStartedReturnsFalse);
-    FRIEND_TEST(
-            AosRegistrationTest, SubscriptionCanBeTransmittedWhileTransactionIsStartedReturnsTrue);
-    FRIEND_TEST(AosRegistrationTest, SubscriptionNotifyReceivedWhenRegistrationIsNullDoesNothing);
-    FRIEND_TEST(AosRegistrationTest,
-            SubscriptionNotifyReceivedWithRegisteredEventSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, RegRequiredSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest,
-            RegRequiredWithNextPcscfSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest,
-            RegRequiredWithScscfRestorationSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest,
-            RegRequiredWithSub403MsgSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest,
-            RegRequiredWithNotifyTerminatedMsgSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, RegTerminatedSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, SubRequiredSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, SubTerminatedSubscriptionCommandSendsMessageForHandling);
-    FRIEND_TEST(AosRegistrationTest, UnknownSubscriptionCommandDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, UpdatesBlockedStatusWhenBlockChanged);
-    FRIEND_TEST(AosRegistrationTest, CallTrackerStateChangedForEmergencyTypeDoesNothing);
-    FRIEND_TEST(AosRegistrationTest, CallTrackerStateChangedHandlesPendingPlmnBlock);
-    FRIEND_TEST(AosRegistrationTest, CallTrackerStateChangedTriggersReinitiateRegIfRequired);
-    FRIEND_TEST(AosRegistrationTest, CallTrackerStateChangedHandlesPendingUpdate);
-    FRIEND_TEST(AosRegistrationTest,
-            NotifyConfigChangedUpdatesFeaturesWhileIpsecAndSubscriptionIsSupported);
-    FRIEND_TEST(AosRegistrationTest,
-            NotifyConfigChangedUpdatesFeaturesWhileIpsecAndSubscriptionIsNotSupported);
-    FRIEND_TEST(
-            AosRegistrationTest, TransactionOnConnectionFailedWithAccessDeniedDestroysRegistration);
-    FRIEND_TEST(AosRegistrationTest,
-            TransactionOnConnectionFailedWithRrcRejectDestroysRegistrationWithoutPcscfClear);
-    FRIEND_TEST(AosRegistrationTest,
-            TransactionOnConnectionFailedWithOtherReasonHandlesConnectionSetupPrepared);
-    FRIEND_TEST(AosRegistrationTest, TransactionOnTrafficPriorityChangedTriggersPendingTransaction);
-    FRIEND_TEST(AosRegistrationTest, MessageMediatorAdjustMessageReturnsFailureIfSipMessageIsNull);
-    FRIEND_TEST(AosRegistrationTest,
-            MessageMediatorAdjustMessageReturnsFailureIfFailToAddLocationHeaderBody);
-    FRIEND_TEST(AosRegistrationTest,
-            MessageMediatorAdjustMessageReturnsSuccessIfSucceedToAddLocationHeaderBody);
-    FRIEND_TEST(AosRegistrationTest, StopTimer);
-    FRIEND_TEST(AosRegistrationTest, ClearTimer);
-    FRIEND_TEST(AosRegistrationTest, TimerExpired);
-    FRIEND_TEST(AosRegistrationTest, ProcessOfflineRecoverTimerExpired);
-    FRIEND_TEST(AosRegistrationTest, ProcessStopRetryTimerExpired);
-    FRIEND_TEST(AosRegistrationTest, CreateAndDestroySubscription);
-    FRIEND_TEST(AosRegistrationTest, MessageMediator_AdjustMessage);
-    FRIEND_TEST(AosRegistrationTest, AddLocationHeaderBody);
-
-public:
     inline IRegistration* GetRegistration() override { return m_piRegistrationInstance; }
     inline AosSubscription* GetSubscription(IN IRegSubscription*) override
     {
@@ -418,15 +209,6 @@ public:
     }
     inline void CreateIpsecHelper() override { m_pIpsecHelper = m_pIpsecHelperInstance; }
     inline void DestroyIpsecHelper() override { m_pIpsecHelper = IMS_NULL; }
-
-    IMS_BOOL ProcessStartFailed_305() override { return AosRegistration::ProcessStartFailed_305(); }
-    void Registration_UpdateFailed(IN IMS_SINT32 nReason) override
-    {
-        AosRegistration::Registration_UpdateFailed(nReason);
-    }
-    IMS_BOOL UpdatePreloadedRoute() { return AosRegistration::UpdatePreloadedRoute(); }
-    void SetImsCall(IN IMS_BOOL bStarted) { AosRegistration::SetImsCall(bStarted); }
-    void SetState(IN IMS_UINT32 nState) { AosRegistration::SetState(nState); }
 
     inline void UpdateRegInstances(IN IRegistration* piReg, IN AosSubscription* pSubs,
             IN IRegContact* piContact, IN IRegParameter* piParam, IN AosIpsecHelper* pIpsec)
