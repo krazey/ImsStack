@@ -32,16 +32,19 @@ using ::testing::_;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+#define DECLARE_USING(Base)     \
+    using Base::IsTimerRunning; \
+    using Base::ProcessPlmnChangeDelayTimerExpired;
+
 class TestAosService : public AosService
 {
 public:
+    DECLARE_USING(AosService)
+
     inline TestAosService(IN IMS_SINT32 nSlotId) :
             AosService(nSlotId)
     {
     }
-
-    // TEST : NotifyPlmnChanged
-    FRIEND_TEST(AosServiceTest, NotifyPlmnChanged);
 
     inline ImsList<IAosEmergencyListener*> GetEmergencyListeners()
     {
