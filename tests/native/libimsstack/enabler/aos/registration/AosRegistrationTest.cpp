@@ -1338,42 +1338,6 @@ TEST_F(AosRegistrationTest, GetNetworkTypeFromAosNetTracker)
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
 }
 
-TEST_F(AosRegistrationTest, FeatureTagForMtc)
-{
-    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
-
-    EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(ISipConfigV::FEATURE_TAG_MEDIA_STREAM));
-
-    EXPECT_TRUE(m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::VIDEO, IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::TEXT, IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->AddFeatureTagForMtc(
-            ImsAosFeature::VIDEO | ImsAosFeature::TEXT, IMS_FALSE));
-
-    EXPECT_CALL(m_objMockISipConfigV, GetFeatureTagOptions())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
-                    ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT));
-
-    EXPECT_TRUE(m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::VIDEO));
-    EXPECT_TRUE(m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::TEXT));
-    EXPECT_TRUE(
-            m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::VIDEO | ImsAosFeature::TEXT));
-
-    EXPECT_CALL(m_objMockIRegContact,
-            AddExtraCapability(
-                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()));
-    EXPECT_CALL(m_objMockIRegContact,
-            RemoveExtraCapability(
-                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()));
-    m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY, IMS_FALSE);
-    m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY, IMS_TRUE);
-    m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
-
-    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
-}
-
 TEST_F(AosRegistrationTest, UpdatePreloadedRouteFailIfRegParameterIsNull)
 {
     m_pAosRegistration->Destroy();
@@ -1452,6 +1416,72 @@ TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithoutNumericalValue)
     m_pAosRegistration->AddAccesstypeFeatureTag();
 }
 
+TEST_F(AosRegistrationTest, UpdateFeatureTagOptionsSucceedWhenAddFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(_, _)).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities());
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    m_pAosRegistration->AddFeatureTagForMtc(nRegFeatures, IMS_FALSE);
+
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, UpdateFeatureTagOptionsFailWhenAddFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+
+    EXPECT_CALL(m_objMockIConfigurable, Update(_, _)).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIRegContact, RecalculateCallerCapabilities()).Times(0);
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    m_pAosRegistration->AddFeatureTagForMtc(nRegFeatures, IMS_FALSE);
+
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, AddExtraCapabilitySucceedWhenAddFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+
+    EXPECT_CALL(m_objMockIRegContact,
+            AddExtraCapability(AString(AosString::STR_USSI_FEATURE), AString::ConstNull()));
+    EXPECT_CALL(m_objMockIRegContact,
+            AddExtraCapability(
+                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()));
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::USSI | ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    m_pAosRegistration->AddFeatureTagForMtc(nRegFeatures, IMS_FALSE);
+
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, AddExtraCapabilityFailWhenAddFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+
+    EXPECT_CALL(m_objMockIRegContact, AddExtraCapability(_, _)).Times(0);
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::USSI | ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    m_pAosRegistration->AddFeatureTagForMtc(nRegFeatures, IMS_TRUE);
+
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, AddHeaderParameterSucceedWhenAddFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+
+    EXPECT_CALL(m_objMockIRegContact,
+            AddHeaderParameter(AString(AosString::STR_VERSTAT_FEATURE), AString::ConstNull()));
+
+    m_pAosRegistration->AddFeatureTagForMtc(ImsAosFeature::VERSTAT, IMS_TRUE);
+
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
 TEST_F(AosRegistrationTest, UpdateTransactionStarted)
 {
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
@@ -1468,27 +1498,6 @@ TEST_F(AosRegistrationTest, UpdateTransactionStarted)
     m_pAosRegistration->SetRadioWaiting(IMS_FALSE);
     m_pAosRegistration->UpdateTransactionStarted();
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
-}
-
-TEST_F(AosRegistrationTest, StandardPcscfSelection)
-{
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT))
-            .Times(AnyNumber());
-
-    m_pAosRegistration->ProcessStandardPcscfSelection();
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT))
-            .Times(AnyNumber());
-
-    m_pAosRegistration->ProcessStandardPcscfSelection(30);
 }
 
 TEST_F(AosRegistrationTest, SendRegisterEx)
@@ -2663,65 +2672,65 @@ TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_Start)
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_600);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy)
+// ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy
+TEST_F(AosRegistrationTest, StartRetryTimerIfRetryAfterIsNotZeroWhenStartWithEveryPcscfPolicy)
 {
-    // succeed to SetNextPcscf - nRetryAfter is greater than 0
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(10);
+    IMS_UINT32 retryAfter = 10;
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // succeed to SetNextPcscf - nRetryAfter is 0 - fail to SendRegister
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
+TEST_F(AosRegistrationTest, ReportFailureIfSendOfRegisterFailWhenStartWithEveryPcscfPolicy)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(0);
 
-    // succeed to SetNextPcscf - nRetryAfter is 0 - succeed to SendRegister
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_CALL(m_objMockIRegistration, Register(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_SUCCESS));
+    IMS_UINT32 retryAfter = 0;
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
+}
+
+TEST_F(AosRegistrationTest, RetryForNextPcscfWhenStartWithEveryPcscfPolicy)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(0);
 
-    // fail to SetNextPcscf - succeed to SetFirstPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(4));
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(0);
+    IMS_UINT32 retryAfter = 0;
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfSetOfNextPcscfFailWhenStartWithEveryPcscfPolicy)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    IMS_UINT32 retryAfter = 0;
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // fail to SetNextPcscf - fail to SetFirstPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE));
+TEST_F(AosRegistrationTest, ReportFailureIfSetOfPcscfFailWhenStartWithEveryPcscfPolicy)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(0);
+
+    IMS_UINT32 retryAfter = 0;
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
 }
 
 TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy)
@@ -3813,6 +3822,38 @@ TEST_F(AosRegistrationTest, ProcessUpdateFailedOthersTriggersAwtRecovery)
     m_pAosRegistration->ProcessUpdateFailed_Others(IRegistration::REASON_NONE);
 
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, TryNextPcscfWhenStandardPcscfSelection)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessStandardPcscfSelection();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfTryNextPcscfFailWhenStandardPcscfSelection)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessStandardPcscfSelection();
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfTryNextPcscfFailWhenStandardPcscfSelectionWithRetryAfter)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
+
+    m_pAosRegistration->ProcessStandardPcscfSelection(30);
 }
 
 TEST_F(AosRegistrationTest, AuthenticationChallengedIsNotHandledWhenRegistrationIsNull)
