@@ -1482,6 +1482,132 @@ TEST_F(AosRegistrationTest, AddHeaderParameterSucceedWhenAddFeatureTagForMtc)
     m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
 }
 
+TEST_F(AosRegistrationTest, UpdateFeatureTagOptionsSucceedWhenRemoveFeatureTagForMtc)
+{
+    m_pAosRegistration->GetUtil()->SetISipConfigV(&m_objMockISipConfigV);
+    IMS_UINT32 nOldFeature = ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO |
+            ISipConfigV::FEATURE_TAG_MEDIA_STREAM_TEXT;
+    ON_CALL(m_objMockISipConfigV, GetFeatureTagOptions()).WillByDefault(Return(nOldFeature));
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::VIDEO | ImsAosFeature::TEXT;
+    IMS_BOOL bResult = m_pAosRegistration->RemoveFeatureTagForMtc(nRegFeatures);
+
+    EXPECT_TRUE(bResult);
+    m_pAosRegistration->GetUtil()->SetISipConfigV(IMS_NULL);
+}
+
+TEST_F(AosRegistrationTest, RemoveExtraCapabilitySucceedWhenRemoveFeatureTagForMtc)
+{
+    EXPECT_CALL(m_objMockIRegContact,
+            RemoveExtraCapability(AString(AosString::STR_USSI_FEATURE), AString::ConstNull()));
+    EXPECT_CALL(m_objMockIRegContact,
+            RemoveExtraCapability(
+                    AString(FeatureTags::CALL_COMPOSER_VIA_TELEPHONY), AString::ConstNull()));
+
+    IMS_UINT32 nRegFeatures = ImsAosFeature::USSI | ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    m_pAosRegistration->RemoveFeatureTagForMtc(nRegFeatures);
+}
+
+TEST_F(AosRegistrationTest, RemoveHeaderParameterSucceedWhenRemoveFeatureTagForMtc)
+{
+    EXPECT_CALL(m_objMockIRegContact,
+            RemoveHeaderParameter(AString(AosString::STR_VERSTAT_FEATURE), AString::ConstNull()));
+
+    m_pAosRegistration->RemoveFeatureTagForMtc(ImsAosFeature::VERSTAT);
+}
+
+TEST_F(AosRegistrationTest, ReturnFalseIfSameWithBindedOneWhenUpdateFeatureTag)
+{
+    AosFeatureTagList objFeatureTagList;
+    AosFeatureTagList objBindedList;
+    ON_CALL(m_objMockIAosHandle, GetFeatureTagList()).WillByDefault(ReturnRef(objFeatureTagList));
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+
+    IMS_BOOL bResult = m_pAosRegistration->UpdateFeatureTag(&m_objMockIAosHandle);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueIfDifferentWithBindedOneWhenUpdateFeatureTag)
+{
+    AosFeatureTagList objFeatureTagList;
+    AosFeatureTagList objBindedList;
+    objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);
+    objBindedList.AddFeatureTag(FeatureTags::VIDEO);
+    ON_CALL(m_objMockIAosHandle, GetFeatureTagList()).WillByDefault(ReturnRef(objFeatureTagList));
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+
+    IMS_BOOL bResult = m_pAosRegistration->UpdateFeatureTag(&m_objMockIAosHandle);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsNoneWhenSetStaticIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_NONE));
+
+    m_pAosRegistration->SetStaticIpQos();
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfSignallingDscpIsZeroWhenSetStaticIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsSignallingDscp()).WillOnce(Return(0));
+
+    m_pAosRegistration->SetStaticIpQos();
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsDifferentWithConnectionWhenSetStaticIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_WIFI));
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but ePDG is enabled
+    m_pAosRegistration->SetStaticIpQos();
+
+    // nPreferredImsDscp is PREFERRED_DSCP_WIFI but ePDG is not enabled
+    m_pAosRegistration->SetStaticIpQos();
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsNoneWhenSetDynamicIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_NONE));
+
+    m_pAosRegistration->SetDynamicIpQos();
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfSignallingDscpIsZeroWhenSetDynamicIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsSignallingDscp()).WillOnce(Return(0));
+
+    m_pAosRegistration->SetDynamicIpQos();
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsDifferentWithConnectionWhenSetDynamicIpQos)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_WIFI));
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but ePDG is enabled
+    m_pAosRegistration->SetDynamicIpQos();
+
+    // nPreferredImsDscp is PREFERRED_DSCP_WIFI but ePDG is not enabled
+    m_pAosRegistration->SetDynamicIpQos();
+}
+
 TEST_F(AosRegistrationTest, UpdateTransactionStarted)
 {
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
@@ -1517,88 +1643,6 @@ TEST_F(AosRegistrationTest, SendRegisterEx)
     // m_piRegistration is null
     m_pAosRegistration->Destroy();
     EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE));
-}
-
-TEST_F(AosRegistrationTest, UpdateFeatureTag)
-{
-    AosFeatureTagList objFeatureTagList;
-    AosFeatureTagList objBindedFeatureTagList;
-    EXPECT_CALL(m_objMockIAosHandle, GetFeatureTagList())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objFeatureTagList));
-    EXPECT_CALL(m_objMockIAosHandle, GetBindedFeatureTagList())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objBindedFeatureTagList));
-
-    // same with binded feature tag
-    EXPECT_FALSE(m_pAosRegistration->UpdateFeatureTag(&m_objMockIAosHandle));
-
-    // Not same with binded feature tag
-    objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);
-    objBindedFeatureTagList.AddFeatureTag(FeatureTags::VIDEO);
-    EXPECT_CALL(m_objMockIRegContact, RemoveHeaderParameter(_, _)).Times(1);
-    EXPECT_CALL(m_objMockIRegContact, AddHeaderParameter(_, _)).Times(1);
-    EXPECT_TRUE(m_pAosRegistration->UpdateFeatureTag(&m_objMockIAosHandle));
-}
-
-TEST_F(AosRegistrationTest, SetStaticIpQos)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsSignallingDscp())
-            .Times(AnyNumber())
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(46));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_WIFI))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_NONE));
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but GetImsSignallingDscp is 0
-    m_pAosRegistration->SetStaticIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but ePDG is enabled
-    m_pAosRegistration->SetStaticIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_WIFI but ePDG is not enabled
-    m_pAosRegistration->SetStaticIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_NONE
-    m_pAosRegistration->SetStaticIpQos();
-}
-
-TEST_F(AosRegistrationTest, SetDynamicIpQos)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsSignallingDscp())
-            .Times(AnyNumber())
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(46));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredImsDscp())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_WIFI))
-            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_DSCP_NONE));
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but GetImsSignallingDscp is 0
-    m_pAosRegistration->SetDynamicIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_CELLULAR but ePDG is enabled
-    m_pAosRegistration->SetDynamicIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_WIFI but ePDG is not enabled
-    m_pAosRegistration->SetDynamicIpQos();
-
-    // nPreferredImsDscp is PREFERRED_DSCP_NONE
-    m_pAosRegistration->SetDynamicIpQos();
 }
 
 TEST_F(AosRegistrationTest, GetActualWaitTime)
