@@ -882,13 +882,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         assertEquals(true, mDcNetWatcher.isVoiceRat5G());
     }
 
-    @Test
-    public void testSetDoingOffRadio() throws Exception {
-        mDcNetWatcher.setDoingOffRadio(true);
-
-        assertEquals(true, mDcNetWatcher.isDoingOffRadio());
-    }
-
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
             int registrationState, int networkType, boolean isEmergencyOnly) {
         return new NetworkRegistrationInfo.Builder()

@@ -671,23 +671,6 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleDataStateChanged_ignoreRadioOff() throws Exception {
-        replaceInstance(Apn.class, "mDcNetWatcher", mApn, mMockIDcNetWatcher);
-        when(mMockIDcNetWatcher.isDoingOffRadio()).thenReturn(true);
-
-        // ignore if radio off is ongoing
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.arg1 = mApn.mType.getType();
-        msg.arg2 = EDataState.DATA_STATE_CONNECTED.getState();
-        mApn.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-
-        verify(mMockISystem, never()).notifyDataConnectionStateChanged(
-                mApn.mType.getType(), eq(anyInt()));
-    }
-
-    @Test
     public void testHandlePreciseDataConnectionStateChanged_ignoreNullState() throws Exception {
         // ignore if PreciseDataConnectionState is null
         assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);

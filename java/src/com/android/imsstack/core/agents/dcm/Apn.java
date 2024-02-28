@@ -1181,12 +1181,6 @@ public abstract class Apn extends Handler implements IApn {
 
         @Override
         public void procMsg(Message msg) {
-            // Ignore DataState Change During ShutDown
-            if (mDcNetWatcher != null && mDcNetWatcher.isDoingOffRadio()) {
-                ImsLog.w(mSlotId, "radio is doing off");
-                return;
-            }
-
             if (mSystem == null) {
                 return;
             }

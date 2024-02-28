@@ -116,17 +116,6 @@ public interface IDcNetWatcher extends IDc {
     int getLteDuplexMode();
 
     /**
-     * Set if "Intent.ACTION_REBOOT" was delivered to IMS
-     * Special operator has requirement in this case related with data connection
-     */
-    void setDoingOffRadio(boolean b);
-
-    /**
-     * Return if "Intent.ACTION_REBOOT" was delivered to IMS or not
-     */
-    boolean isDoingOffRadio();
-
-    /**
      * For check mismatch of DATA tech type between ServiceState and TelephonyManager
      */
     void setRatFromTelephonyManager(int nRat);
