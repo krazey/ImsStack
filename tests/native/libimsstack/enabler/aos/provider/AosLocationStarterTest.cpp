@@ -30,9 +30,20 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SetArgPointee;
 
+#define DECLARE_USING(Base)         \
+    using Base::Timer_TimerExpired; \
+    using Base::Event_NotifyEvent;  \
+    using Base::Block_Changed;      \
+    using Base::Start;              \
+    using Base::Stop;               \
+    using Base::StartDelayTimer;    \
+    using Base::StopDelayTimer;
+
 class TestAosLocationStarter : public AosLocationStarter
 {
 public:
+    DECLARE_USING(AosLocationStarter)
+
     inline explicit TestAosLocationStarter() :
             AosLocationStarter()
     {
@@ -43,57 +54,17 @@ public:
         m_piAppContext = piAosAppContext;
     }
 
-    // TEST : SetSlotId
-    FRIEND_TEST(AosLocationStarterTest, SucceedsSetSlotId);
-    // TEST : Init
-    FRIEND_TEST(AosLocationStarterTest, FailedInitializeWhenAleadyInitialized);
-    FRIEND_TEST(AosLocationStarterTest, SucceedsInitialize);
-    // TEST : SetPolicy
-    FRIEND_TEST(AosLocationStarterTest, SucceedsEnableFeature);
-    FRIEND_TEST(AosLocationStarterTest, FailedEnableFeatureWhenAlreadyEnabled);
-    FRIEND_TEST(AosLocationStarterTest, SucceedsDisableFeature);
-    FRIEND_TEST(AosLocationStarterTest, FailedDisableFeatureWhenAlreadyDisabled);
-    // TEST : IsPolicyEnabled
-    FRIEND_TEST(AosLocationStarterTest, ReturnsTrueWhenPolicyEnabled);
-    FRIEND_TEST(AosLocationStarterTest, ReturnsFalseWhenPolicyNotEnabled);
-    // TEST : AddBlockReason
-    FRIEND_TEST(AosLocationStarterTest, SucceedsAddBlockReasonForVolte);
-    FRIEND_TEST(AosLocationStarterTest, SucceedsAddBlockReasonForWfc);
-    // TEST : SetUpdateInterval
-    FRIEND_TEST(AosLocationStarterTest, ReturnsTrueWhenIntervalIsGreaterThanDefault);
-    FRIEND_TEST(AosLocationStarterTest, ReturnsFalseWhenIntervalIsLessThanDefault);
-    // TEST : StartLocationInfoUpdate
-    FRIEND_TEST(AosLocationStarterTest, SucceedsStartListeningForLocation);
-    FRIEND_TEST(AosLocationStarterTest, FailedStartListeningWhenLocationIsNull);
-    // TEST : StopLocationInfoUpdate
-    FRIEND_TEST(AosLocationStarterTest, StartDelayTimerWhenStopLocationInfoUpdate);
-    // TEST : Stop
-    FRIEND_TEST(AosLocationStarterTest, SucceedsStopListeningForLocation);
-    FRIEND_TEST(AosLocationStarterTest, FailedStopListeningWhenLocationIsNull);
-    // TEST : Timer_TimerExpired
-    FRIEND_TEST(AosLocationStarterTest, SucceedsStopListeningWhenTimerIsExpired);
-    FRIEND_TEST(AosLocationStarterTest, FailedStopListeningWhenTimerIsInvalid);
-    // TEST : Event_NotifyEvent
-    FRIEND_TEST(AosLocationStarterTest, StartListeningWhenWfcOnWithPolicy);
-    FRIEND_TEST(AosLocationStarterTest, StartDelayTimerWhenWfcOffWithPolicy);
-    FRIEND_TEST(AosLocationStarterTest, UpdateWfcSettingWhenWfcOnWithoutPolicy);
-    FRIEND_TEST(AosLocationStarterTest, UpdateWfcSettingWhenWfcOffWithoutPolicy);
-    // TEST : Block_Changed
-    FRIEND_TEST(AosLocationStarterTest, StartWhenEnabledWfcAvailabilityPolicyAndBlockCleared);
-    FRIEND_TEST(AosLocationStarterTest, StartWhenEnabledWfcAvailabilityPolicyAndReasonOnlyBlocked);
-    FRIEND_TEST(AosLocationStarterTest, DoesNotStartWhenEnabledWfcAvailabilityPolicyAndBlocked);
-    FRIEND_TEST(AosLocationStarterTest, StartWhenEnabledVolteAvailabilityPolicyAndBlockCleared);
-    FRIEND_TEST(AosLocationStarterTest, DoesNotStartWhenEnabledVolteAvailabilityPolicyAndBlocked);
-    FRIEND_TEST(AosLocationStarterTest, StartWhenEnabledWfcBlockPolicyAndBlockChanged);
-    FRIEND_TEST(AosLocationStarterTest, DoesNotStartWhenEnabledWfcBlockPolicyAndSameBlocks);
-    FRIEND_TEST(AosLocationStarterTest, StartWhenEnabledVolteBlockPolicyAndBlockChanged);
-    FRIEND_TEST(AosLocationStarterTest, DoesNotStartWhenEnabledVolteBlockPolicyAndSameBlocks);
-    // TEST : StartDelayTimer
-    FRIEND_TEST(AosLocationStarterTest, SucceedsStartDelayTimer);
-    FRIEND_TEST(AosLocationStarterTest, FailedStartDelayTimerWhenTimerIsExist);
-    // TEST : StopDelayTimer
-    FRIEND_TEST(AosLocationStarterTest, SucceedsStopDelayTimer);
-    FRIEND_TEST(AosLocationStarterTest, FailedStopDelayTimerWhenNoTimer);
+    inline void SetInitialized(IN IMS_BOOL bInitialized) { m_bInitialized = bInitialized; }
+
+    inline IMS_BOOL GetWfcSetting() { return m_bWfcSetting; }
+
+    inline ImsList<IMS_UINT32> GetVolteBlockReasons() { return m_objVolteBlockReasons; }
+
+    inline ImsList<IMS_UINT32> GetWfcBlockReasons() { return m_objWfcBlockReasons; }
+
+    inline ITimer* GetStopDelayTimer() { return m_piStopDelayTimer; }
+
+    inline void SetStopDelayTimer(IN ITimer* piTimer) { m_piStopDelayTimer = piTimer; }
 };
 
 class AosLocationStarterTest : public ::testing::Test
@@ -154,7 +125,7 @@ TEST_F(AosLocationStarterTest, SucceedsSetSlotId)
 TEST_F(AosLocationStarterTest, FailedInitializeWhenAleadyInitialized)
 {
     // GIVEN
-    m_pAosLocationStarter->m_bInitialized = IMS_TRUE;
+    m_pAosLocationStarter->SetInitialized(IMS_TRUE);
 
     EXPECT_CALL(m_objMockIAosBlock, SetListener(_)).Times(0);
 
@@ -167,7 +138,7 @@ TEST_F(AosLocationStarterTest, FailedInitializeWhenAleadyInitialized)
 TEST_F(AosLocationStarterTest, SucceedsInitialize)
 {
     // GIVEN
-    m_pAosLocationStarter->m_bInitialized = IMS_FALSE;
+    m_pAosLocationStarter->SetInitialized(IMS_FALSE);
     m_pAosLocationStarter->SetAppContext(IMS_NULL);
 
     EXPECT_CALL(m_objMockIAosBlock, SetListener(_));
@@ -271,7 +242,7 @@ TEST_F(AosLocationStarterTest, ReturnsFalseWhenPolicyNotEnabled)
 TEST_F(AosLocationStarterTest, SucceedsAddBlockReasonForVolte)
 {
     // GIVEN
-    m_pAosLocationStarter->m_objVolteBlockReasons.Clear();
+    m_pAosLocationStarter->GetVolteBlockReasons().Clear();
     IMS_SINT32 nType = 0;  // VoLTE
 
     // WHEN
@@ -280,13 +251,13 @@ TEST_F(AosLocationStarterTest, SucceedsAddBlockReasonForVolte)
     m_pAosLocationStarter->AddBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE, nType);
 
     // THEN
-    EXPECT_EQ(m_pAosLocationStarter->m_objVolteBlockReasons.GetSize(), 3);
+    EXPECT_EQ(m_pAosLocationStarter->GetVolteBlockReasons().GetSize(), 3);
 }
 
 TEST_F(AosLocationStarterTest, SucceedsAddBlockReasonForWfc)
 {
     // GIVEN
-    m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
+    m_pAosLocationStarter->GetWfcBlockReasons().Clear();
     IMS_SINT32 nType = 1;  // WFC
 
     // WHEN
@@ -295,7 +266,7 @@ TEST_F(AosLocationStarterTest, SucceedsAddBlockReasonForWfc)
     m_pAosLocationStarter->AddBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON, nType);
 
     // THEN
-    EXPECT_EQ(m_pAosLocationStarter->m_objWfcBlockReasons.GetSize(), 3);
+    EXPECT_EQ(m_pAosLocationStarter->GetWfcBlockReasons().GetSize(), 3);
 }
 
 TEST_F(AosLocationStarterTest, ReturnsTrueWhenIntervalIsGreaterThanDefault)
@@ -358,7 +329,7 @@ TEST_F(AosLocationStarterTest, StartDelayTimerWhenStopLocationInfoUpdate)
     m_pAosLocationStarter->StopLocationInfoUpdate();
 
     // THEN
-    EXPECT_NE(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_NE(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
 }
 
 TEST_F(AosLocationStarterTest, SucceedsStopListeningForLocation)
@@ -397,10 +368,10 @@ TEST_F(AosLocationStarterTest, SucceedsStopListeningWhenTimerIsExpired)
     m_pAosLocationStarter->StartDelayTimer(10000);
 
     // WHEN
-    m_pAosLocationStarter->Timer_TimerExpired(m_pAosLocationStarter->m_piStopDelayTimer);
+    m_pAosLocationStarter->Timer_TimerExpired(m_pAosLocationStarter->GetStopDelayTimer());
 
     // THEN
-    EXPECT_EQ(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_EQ(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
 }
 
 TEST_F(AosLocationStarterTest, FailedStopListeningWhenTimerIsInvalid)
@@ -416,7 +387,7 @@ TEST_F(AosLocationStarterTest, FailedStopListeningWhenTimerIsInvalid)
     m_pAosLocationStarter->Timer_TimerExpired(IMS_NULL);
 
     // THEN
-    EXPECT_NE(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_NE(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
 }
 
 TEST_F(AosLocationStarterTest, StartListeningWhenWfcOnWithPolicy)
@@ -431,7 +402,7 @@ TEST_F(AosLocationStarterTest, StartListeningWhenWfcOnWithPolicy)
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_ON, 0);
 
     // THEN
-    EXPECT_TRUE(m_pAosLocationStarter->m_bWfcSetting);
+    EXPECT_TRUE(m_pAosLocationStarter->GetWfcSetting());
 }
 
 TEST_F(AosLocationStarterTest, StartDelayTimerWhenWfcOffWithPolicy)
@@ -447,8 +418,8 @@ TEST_F(AosLocationStarterTest, StartDelayTimerWhenWfcOffWithPolicy)
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_OFF, 0);
 
     // THEN
-    EXPECT_FALSE(m_pAosLocationStarter->m_bWfcSetting);
-    EXPECT_NE(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_FALSE(m_pAosLocationStarter->GetWfcSetting());
+    EXPECT_NE(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
 }
 
 TEST_F(AosLocationStarterTest, UpdateWfcSettingWhenWfcOnWithoutPolicy)
@@ -460,7 +431,7 @@ TEST_F(AosLocationStarterTest, UpdateWfcSettingWhenWfcOnWithoutPolicy)
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_ON, 0);
 
     // THEN
-    EXPECT_TRUE(m_pAosLocationStarter->m_bWfcSetting);
+    EXPECT_TRUE(m_pAosLocationStarter->GetWfcSetting());
 }
 
 TEST_F(AosLocationStarterTest, UpdateWfcSettingWhenWfcOffWithoutPolicy)
@@ -472,7 +443,7 @@ TEST_F(AosLocationStarterTest, UpdateWfcSettingWhenWfcOffWithoutPolicy)
     m_pAosLocationStarter->Event_NotifyEvent(IMS_EVENT_WFC_SETTING_CHANGED, IMS_WFC_OFF, 0);
 
     // THEN
-    EXPECT_FALSE(m_pAosLocationStarter->m_bWfcSetting);
+    EXPECT_FALSE(m_pAosLocationStarter->GetWfcSetting());
 }
 
 TEST_F(AosLocationStarterTest, StartWhenEnabledWfcAvailabilityPolicyAndBlockCleared)
@@ -566,7 +537,7 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledWfcBlockPolicyAndBlockChanged)
     m_pAosLocationStarter->SetPolicy(
             IAosLocationStarter::POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON, 0);
 
-    m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
+    m_pAosLocationStarter->GetWfcBlockReasons().Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_WIFI_BAD_CONNECTION, 1);  // 1: WFC Type
 
     EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
@@ -584,7 +555,7 @@ TEST_F(AosLocationStarterTest, DoesNotStartWhenEnabledWfcBlockPolicyAndSameBlock
     m_pAosLocationStarter->SetPolicy(
             IAosLocationStarter::POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON, 0);
 
-    m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
+    m_pAosLocationStarter->GetWfcBlockReasons().Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_WIFI_BAD_CONNECTION, 1);  // 1: WFC Type
 
     ImsList<IMS_UINT32> objBlocks;
@@ -608,7 +579,7 @@ TEST_F(AosLocationStarterTest, StartWhenEnabledVolteBlockPolicyAndBlockChanged)
     m_pAosLocationStarter->SetPolicy(
             IAosLocationStarter::POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON, 0);
 
-    m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
+    m_pAosLocationStarter->GetWfcBlockReasons().Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_CELLULAR_NO_NETWORK, 0);  // 0: VoLTE Type
 
     EXPECT_CALL(m_objMockILocationInfo, StartListeningForLocation(_));
@@ -626,7 +597,7 @@ TEST_F(AosLocationStarterTest, DoesNotStartWhenEnabledVolteBlockPolicyAndSameBlo
     m_pAosLocationStarter->SetPolicy(
             IAosLocationStarter::POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON, 0);
 
-    m_pAosLocationStarter->m_objWfcBlockReasons.Clear();
+    m_pAosLocationStarter->GetWfcBlockReasons().Clear();
     m_pAosLocationStarter->AddBlockReason(BLOCK_CELLULAR_NO_NETWORK, 0);  // 0: VoLTE Type
 
     ImsList<IMS_UINT32> objBlocks;
@@ -646,13 +617,13 @@ TEST_F(AosLocationStarterTest, DoesNotStartWhenEnabledVolteBlockPolicyAndSameBlo
 TEST_F(AosLocationStarterTest, SucceedsStartDelayTimer)
 {
     // GIVEN
-    m_pAosLocationStarter->m_piStopDelayTimer = IMS_NULL;
+    m_pAosLocationStarter->SetStopDelayTimer(IMS_NULL);
 
     // WHEN
     IMS_BOOL bResult = m_pAosLocationStarter->StartDelayTimer(1000);
 
     // THEN
-    EXPECT_NE(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_NE(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
     EXPECT_TRUE(bResult);
 }
 
@@ -665,7 +636,7 @@ TEST_F(AosLocationStarterTest, FailedStartDelayTimerWhenTimerIsExist)
     IMS_BOOL bResult = m_pAosLocationStarter->StartDelayTimer(1000);
 
     // THEN
-    EXPECT_NE(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_NE(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
     EXPECT_FALSE(bResult);
 }
 
@@ -678,19 +649,19 @@ TEST_F(AosLocationStarterTest, SucceedsStopDelayTimer)
     IMS_BOOL bResult = m_pAosLocationStarter->StopDelayTimer();
 
     // THEN
-    EXPECT_EQ(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_EQ(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
     EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosLocationStarterTest, FailedStopDelayTimerWhenNoTimer)
 {
     // GIVEN
-    m_pAosLocationStarter->m_piStopDelayTimer = IMS_NULL;
+    m_pAosLocationStarter->SetStopDelayTimer(IMS_NULL);
 
     // WHEN
     IMS_BOOL bResult = m_pAosLocationStarter->StopDelayTimer();
 
     // THEN
-    EXPECT_EQ(nullptr, m_pAosLocationStarter->m_piStopDelayTimer);
+    EXPECT_EQ(nullptr, m_pAosLocationStarter->GetStopDelayTimer());
     EXPECT_FALSE(bResult);
 }
