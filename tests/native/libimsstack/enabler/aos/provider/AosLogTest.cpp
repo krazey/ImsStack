@@ -72,9 +72,9 @@ INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppMessage,
                 {ApplicationLog::MSG_OTHERS + 99,           "__INVALID__"              }
 }));
 
-using AosLogTestForPending = TestWithParam<AosLogParams>;
+using AosLogTestForAppPending = TestWithParam<AosLogParams>;
 
-TEST_P(AosLogTestForPending, ReturnsValidStringForApplicationPending)
+TEST_P(AosLogTestForAppPending, ReturnsValidStringForApplicationPending)
 {
     // GIVEN
     const AosLogParams& objAosLogParams = GetParam();
@@ -87,7 +87,7 @@ TEST_P(AosLogTestForPending, ReturnsValidStringForApplicationPending)
     EXPECT_STREQ(AosProvider::GetLog()->AppPendingToString(nValue), pszString);
 }
 
-INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForPending,
+INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppPending,
         ValuesIn<AosLogParams>({
                 {ApplicationLog::PENDING_REG_RECOVERY_HELD,       "PENDING_REG_RECOVERY_HELD"},
                 {ApplicationLog::PENDING_REG_STOP_HELD,           "PENDING_REG_STOP_HELD"    },
@@ -100,48 +100,43 @@ INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForPending,
                 {ApplicationLog::PENDING_NONE,                    "__INVALID__"              }
 }));
 
-TEST(AosLogTest, AppRequestToString)
+using AosLogTestForAppRequest = TestWithParam<AosLogParams>;
+
+TEST_P(AosLogTestForAppRequest, ReturnsValidStringForApplicationRequest)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_START),
-            "REGISTER_START");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_START_WITH_WLAN),
-            "REGISTER_START_WITH_WLAN");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_REFRESH),
-            "REGISTER_REFRESH");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_STOP),
-            "REGISTER_STOP");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_STOP_BY_ROAMING),
-            "REGISTER_STOP_BY_ROAMING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_REINITIATE),
-            "REGISTER_REINITIATE");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_REINITIATE_BY_CSFB),
-            "REGISTER_REINITIATE_BY_CSFB");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
-                         ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF),
-            "E_REGISTER_FAKE_WITH_NEXT_PCSCF");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppRequestToString(ImsAosControl::PCSCF_NEXT), "PCSCF_NEXT");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppRequestToString(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY),
-            "PCSCF_NEXT_WITH_DISCOVERY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::IPSEC_DISABLED),
-            "IPSEC_DISABLED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::RETRY_COUNT_INCREASE),
-            "RETRY_COUNT_INCREASE");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
-                         ImsAosControl::UPDATE_SIP_DELEGATE_REGISTRATION),
-            "UPDATE_SIP_DELEGATE_REGISTRATION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
-                         ImsAosControl::TRIGGER_SIP_DELEGATE_DEREGISTRATION),
-            "TRIGGER_SIP_DELEGATE_DEREGISTRATION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
-                         ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION),
-            "TRIGGER_FULL_NETWORK_REGISTRATION");
-    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
-                         ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION + 99),
-            "__INVALID__");
+    // GIVEN
+    const AosLogParams& objAosLogParams = GetParam();
+
+    // WHEN
+    IMS_UINT32 nValue = objAosLogParams.nValue;
+    const IMS_CHAR* pszString = objAosLogParams.pszString;
+
+    // THEN
+    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(nValue), pszString);
 }
+
+INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppRequest,
+        ValuesIn<AosLogParams>({
+                {ImsAosControl::REGISTER_START,                         "REGISTER_START"                 },
+                {ImsAosControl::REGISTER_START_WITH_WLAN,               "REGISTER_START_WITH_WLAN"       },
+                {ImsAosControl::REGISTER_REFRESH,                       "REGISTER_REFRESH"               },
+                {ImsAosControl::REGISTER_STOP,                          "REGISTER_STOP"                  },
+                {ImsAosControl::REGISTER_STOP_BY_ROAMING,               "REGISTER_STOP_BY_ROAMING"       },
+                {ImsAosControl::REGISTER_REINITIATE,                    "REGISTER_REINITIATE"            },
+                {ImsAosControl::REGISTER_REINITIATE_BY_CSFB,            "REGISTER_REINITIATE_BY_CSFB"    },
+                {ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF,        "E_REGISTER_FAKE_WITH_NEXT_PCSCF"},
+                {ImsAosControl::PCSCF_NEXT,                             "PCSCF_NEXT"                     },
+                {ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY,              "PCSCF_NEXT_WITH_DISCOVERY"      },
+                {ImsAosControl::IPSEC_DISABLED,                         "IPSEC_DISABLED"                 },
+                {ImsAosControl::RETRY_COUNT_INCREASE,                   "RETRY_COUNT_INCREASE"           },
+                {ImsAosControl::UPDATE_SIP_DELEGATE_REGISTRATION,
+                 "UPDATE_SIP_DELEGATE_REGISTRATION"                                                      },
+                {ImsAosControl::TRIGGER_SIP_DELEGATE_DEREGISTRATION,
+                 "TRIGGER_SIP_DELEGATE_DEREGISTRATION"                                                   },
+                {ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION,
+                 "TRIGGER_FULL_NETWORK_REGISTRATION"                                                     },
+                {ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION + 99, "__INVALID__"                    }
+}));
 
 TEST(AosLogTest, AppStateToString)
 {
