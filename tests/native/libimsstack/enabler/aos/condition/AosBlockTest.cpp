@@ -601,100 +601,166 @@ TEST_F(AosBlockTest, ShouldReturnTrueWhenWifiReasonBlocked)
     EXPECT_TRUE(bResult3);
 }
 
-TEST_F(AosBlockTest, IsCleared_Cellular)
+TEST_F(AosBlockTest, IsClearedForCellularReturnsTrueWhenBlockIsEmpty)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
-
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
-
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    EXPECT_FALSE(m_pAosBlock->IsCleared(SERVICE_CELLULAR));
-
+    // GIVEN
     m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_CELLULAR));
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_TRUE(bReturn);
 }
 
-TEST_F(AosBlockTest, IsCleared_Wifi)
+TEST_F(AosBlockTest, IsClearedForCellularReturnsTrueWhenExistOnlyWifiBlocks)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
-    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
-    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
-    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
-
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_CELLULAR);
 
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    EXPECT_FALSE(m_pAosBlock->IsCleared(SERVICE_WIFI));
-
-    m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WIFI));
+    // THEN
+    EXPECT_TRUE(bReturn);
 }
 
-TEST_F(AosBlockTest, IsCleared_Whole)
+TEST_F(AosBlockTest, IsClearedForCellularReturnsFalseWhenExistCommonBlocks)
 {
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
-
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
     m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
 
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForCellularReturnsFalseWhenExistCellularBlocks)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
     m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
 
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_CELLULAR);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWifiReturnsTrueWhenBlockIsEmpty)
+{
+    // GIVEN
+    m_pAosBlock->ClearAllBlockReasons();
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_TRUE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWifiReturnsTrueWhenExistOnlyCellularBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_TRUE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWifiReturnsFalseWhenExistCommonBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
+    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WIFI);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWifiReturnsFalseWhenExistWiFiBlocks)
+{
+    // GIVEN
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 9);
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WIFI);
 
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_CELLULAR);
-    EXPECT_EQ(objReason.GetSize(), 6);
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
 
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WIFI);
-    EXPECT_EQ(objReason.GetSize(), 6);
-
-    EXPECT_FALSE(m_pAosBlock->IsCleared(SERVICE_WHOLE));
-
+TEST_F(AosBlockTest, IsClearedForWholeReturnsTrueWhenBlockIsEmpty)
+{
+    // GIVEN
     m_pAosBlock->ClearAllBlockReasons();
-    EXPECT_TRUE(m_pAosBlock->IsCleared(SERVICE_WHOLE));
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_TRUE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWholeReturnsFalseWhenExistCommonBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);
+    m_pAosBlock->SetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWholeReturnsFalseWhenExistCellularBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_NO_NETWORK);
+    m_pAosBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
+}
+
+TEST_F(AosBlockTest, IsClearedForWholeReturnsFalseWhenExistWiFiBlocks)
+{
+    // GIVEN
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
+    m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+
+    // WHEN
+    IMS_BOOL bReturn = m_pAosBlock->IsCleared(SERVICE_WHOLE);
+
+    // THEN
+    EXPECT_FALSE(bReturn);
 }
 
 TEST_P(AosBlockTest, BlockReasonToString)
