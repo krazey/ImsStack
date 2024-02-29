@@ -25,9 +25,24 @@ using ::testing::_;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+#define DECLARE_USING(Base)                   \
+    using Base::SendPing;                     \
+    using Base::SetCheckingPong;              \
+    using Base::IsPongChecked;                \
+    using Base::ProcessKeepAliveTimerExpired; \
+    using Base::ProcessPongWaitTimerExpired;  \
+    using Base::StartTimer;                   \
+    using Base::StopTimer;                    \
+    using Base::ClearTimer;                   \
+    using Base::KeepAliveHelper_PongReceived; \
+    using Base::Timer_TimerExpired;           \
+    using Base::TimerToString;
+
 class TestAosKeepAlive : public AosKeepAlive
 {
 public:
+    DECLARE_USING(AosKeepAlive)
+
     inline explicit TestAosKeepAlive(IN IMS_SINT32 nSlotId) :
             AosKeepAlive(nSlotId)
     {
@@ -38,45 +53,15 @@ public:
         m_piKeepAliveHelper = piKeepAliveHelper;
     }
 
-    // TEST : SetListener
-    FRIEND_TEST(AosKeepAliveTest, SucceedsSetListener);
-    // TEST : Start
-    FRIEND_TEST(AosKeepAliveTest, SucceedsSetCheckingPongTrueWhenStartWithTrue);
-    FRIEND_TEST(AosKeepAliveTest, SucceedsSetCheckingPongFalseWhenStartWithFalse);
-    FRIEND_TEST(AosKeepAliveTest, FailsSetCheckingPongTrueWhenStartWithShortRepeatTime);
-    // TEST : Stop
-    FRIEND_TEST(AosKeepAliveTest, SucceedsClearKeepAliveTimeWhenStop);
-    // TEST : SetTransport
-    FRIEND_TEST(AosKeepAliveTest, SucceedsSetTransport);
-    // TEST : SendPing
-    FRIEND_TEST(AosKeepAliveTest, SucceedsSendPing);
-    // TEST : ProcessKeepAliveTimerExpired
-    FRIEND_TEST(AosKeepAliveTest, StartPongWaitTimerWhenPoingChecked);
-    FRIEND_TEST(AosKeepAliveTest, DoesNotStartPongWaitTimerWhenPoingNotChecked);
-    // TEST : ProcessPongWaitTimerExpired
-    FRIEND_TEST(AosKeepAliveTest, InvokesDetectedFlowFailed);
-    FRIEND_TEST(AosKeepAliveTest, DoesNotInvokesDetectedFlowFailedWhenListenerIsNull);
-    // TEST : StartTimer
-    FRIEND_TEST(AosKeepAliveTest, StartKeepAliveTimer);
-    FRIEND_TEST(AosKeepAliveTest, StartPongWaitTimer);
-    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenDurationIsZero);
-    FRIEND_TEST(AosKeepAliveTest, StartTimerAfterStopWhenSameTimerIsRunning);
-    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStartTimerWithInvalidTimer);
-    // TEST : StopTimer
-    FRIEND_TEST(AosKeepAliveTest, StopKeepAliveTimer);
-    FRIEND_TEST(AosKeepAliveTest, StopPongWaitTimer);
-    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithoutTimer);
-    FRIEND_TEST(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithInvalidTimer);
-    // TEST : ClearTimer
-    FRIEND_TEST(AosKeepAliveTest, ClearTimerWhenTimersAreSet);
-    // TEST : KeepAliveHelper_PongReceived
-    FRIEND_TEST(AosKeepAliveTest, StopPongWaitTimerWhenPongReceived);
-    // TEST : Timer_TimerExpired
-    FRIEND_TEST(AosKeepAliveTest, InvokesSendPacketWhenKeepaliveTimerExpired);
-    FRIEND_TEST(AosKeepAliveTest, InvokesDetectedFlowFailedWhenPongWaitTimerExpired);
-    FRIEND_TEST(AosKeepAliveTest, DoesNotInvokesAnyTimerExpiredProcessWhenTimerIsNull);
-    // TEST : TimerToString
-    FRIEND_TEST(AosKeepAliveTest, ReturnsTimerString);
+    inline IAosKeepAliveListener* GetListener() { return m_piListener; }
+
+    inline ITimer* GetKeepAliveTimer() { return m_piKeepAliveTimer; }
+
+    inline ITimer* GetPongWaitTimer() { return m_piPongWaitTimer; }
+
+    inline IMS_UINT32 GetKeepAliveTime() { return m_nKeepAliveTime; }
+
+    inline void SetKeepAliveTime(IN IMS_UINT32 nTime) { m_nKeepAliveTime = nTime; }
 
     static const IMS_UINT32 GRATER_TIME_THAN_POING_WAIT = PONG_WAIT_TIME_MILLIS + 10000;
     static const IMS_UINT32 SMALLER_TIME_THAN_POING_WAIT = PONG_WAIT_TIME_MILLIS - 10000;
@@ -110,13 +95,13 @@ protected:
 TEST_F(AosKeepAliveTest, SucceedsSetListener)
 {
     // GIVEN
-    EXPECT_EQ(m_pAosKeepAlive->m_piListener, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetListener(), nullptr);
 
     // WHEN
     m_pAosKeepAlive->SetListener(&m_objMockIAosKeepAliveListener);
 
     // THEN
-    EXPECT_NE(m_pAosKeepAlive->m_piListener, nullptr);
+    EXPECT_NE(m_pAosKeepAlive->GetListener(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, SucceedsSetCheckingPongTrueWhenStartWithTrue)
@@ -160,13 +145,13 @@ TEST_F(AosKeepAliveTest, SucceedsClearKeepAliveTimeWhenStop)
     // GIVEN
     EXPECT_CALL(m_objMockSipKeepAliveHelper, SetListener(_));
 
-    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
+    m_pAosKeepAlive->SetKeepAliveTime(2000);
 
     // WHEN
     m_pAosKeepAlive->Stop();
 
     // THEN
-    EXPECT_EQ(m_pAosKeepAlive->m_nKeepAliveTime, 0);
+    EXPECT_EQ(m_pAosKeepAlive->GetKeepAliveTime(), 0);
 }
 
 TEST_F(AosKeepAliveTest, SucceedsSetTransport)
@@ -197,14 +182,14 @@ TEST_F(AosKeepAliveTest, StartPongWaitTimerWhenPoingChecked)
     // GIVEN
     m_pAosKeepAlive->SetCheckingPong(IMS_TRUE);
     m_pAosKeepAlive->ClearTimer();
-    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
+    m_pAosKeepAlive->SetKeepAliveTime(2000);
 
     // WHEN
     m_pAosKeepAlive->ProcessKeepAliveTimerExpired();
 
     // THEN
-    EXPECT_TRUE(m_pAosKeepAlive->m_piKeepAliveTimer);
-    EXPECT_TRUE(m_pAosKeepAlive->m_piPongWaitTimer);
+    EXPECT_TRUE(m_pAosKeepAlive->GetKeepAliveTimer());
+    EXPECT_TRUE(m_pAosKeepAlive->GetPongWaitTimer());
 }
 
 TEST_F(AosKeepAliveTest, DoesNotStartPongWaitTimerWhenPoingNotChecked)
@@ -212,14 +197,14 @@ TEST_F(AosKeepAliveTest, DoesNotStartPongWaitTimerWhenPoingNotChecked)
     // GIVEN
     m_pAosKeepAlive->SetCheckingPong(IMS_FALSE);
     m_pAosKeepAlive->ClearTimer();
-    m_pAosKeepAlive->m_nKeepAliveTime = 2000;
+    m_pAosKeepAlive->SetKeepAliveTime(2000);
 
     // WHEN
     m_pAosKeepAlive->ProcessKeepAliveTimerExpired();
 
     // THEN
-    EXPECT_TRUE(m_pAosKeepAlive->m_piKeepAliveTimer);
-    EXPECT_FALSE(m_pAosKeepAlive->m_piPongWaitTimer);
+    EXPECT_TRUE(m_pAosKeepAlive->GetKeepAliveTimer());
+    EXPECT_FALSE(m_pAosKeepAlive->GetPongWaitTimer());
 }
 
 TEST_F(AosKeepAliveTest, InvokesDetectedFlowFailed)
@@ -257,7 +242,7 @@ TEST_F(AosKeepAliveTest, StartKeepAliveTimer)
     m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
 
     // THEN
-    EXPECT_NE(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+    EXPECT_NE(m_pAosKeepAlive->GetKeepAliveTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, StartPongWaitTimer)
@@ -268,7 +253,7 @@ TEST_F(AosKeepAliveTest, StartPongWaitTimer)
     m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_PONG_WAIT, 1000);
 
     // THEN
-    EXPECT_NE(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+    EXPECT_NE(m_pAosKeepAlive->GetPongWaitTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, ReturnsFalseWhenDurationIsZero)
@@ -291,7 +276,7 @@ TEST_F(AosKeepAliveTest, StartTimerAfterStopWhenSameTimerIsRunning)
     m_pAosKeepAlive->StartTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE, 1000);
 
     // THEN
-    EXPECT_NE(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+    EXPECT_NE(m_pAosKeepAlive->GetKeepAliveTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, ReturnsFalseWhenStartTimerWithInvalidTimer)
@@ -315,7 +300,7 @@ TEST_F(AosKeepAliveTest, StopKeepAliveTimer)
     m_pAosKeepAlive->StopTimer(TestAosKeepAlive::TIMER_KEEP_ALIVE);
 
     // THEN
-    EXPECT_EQ(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetKeepAliveTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, StopPongWaitTimer)
@@ -327,7 +312,7 @@ TEST_F(AosKeepAliveTest, StopPongWaitTimer)
     m_pAosKeepAlive->StopTimer(TestAosKeepAlive::TIMER_PONG_WAIT);
 
     // THEN
-    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetPongWaitTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, ReturnsFalseWhenStopTimerWithoutTimer)
@@ -363,8 +348,8 @@ TEST_F(AosKeepAliveTest, ClearTimerWhenTimersAreSet)
     m_pAosKeepAlive->ClearTimer();
 
     // THEN
-    EXPECT_EQ(m_pAosKeepAlive->m_piKeepAliveTimer, nullptr);
-    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetKeepAliveTimer(), nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetPongWaitTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, StopPongWaitTimerWhenPongReceived)
@@ -376,7 +361,7 @@ TEST_F(AosKeepAliveTest, StopPongWaitTimerWhenPongReceived)
     m_pAosKeepAlive->KeepAliveHelper_PongReceived();
 
     // THEN
-    EXPECT_EQ(m_pAosKeepAlive->m_piPongWaitTimer, nullptr);
+    EXPECT_EQ(m_pAosKeepAlive->GetPongWaitTimer(), nullptr);
 }
 
 TEST_F(AosKeepAliveTest, InvokesSendPacketWhenKeepaliveTimerExpired)
@@ -387,7 +372,7 @@ TEST_F(AosKeepAliveTest, InvokesSendPacketWhenKeepaliveTimerExpired)
     m_pAosKeepAlive->Start(TestAosKeepAlive::GRATER_TIME_THAN_POING_WAIT, IMS_TRUE);
 
     // WHEN
-    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->m_piKeepAliveTimer);
+    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->GetKeepAliveTimer());
 
     // THEN : GIVEN conditions should be met.
     //     If SendPacket(_) is not invoked as a result of calling Timer_TimerExpired,
@@ -405,7 +390,7 @@ TEST_F(AosKeepAliveTest, InvokesDetectedFlowFailedWhenPongWaitTimerExpired)
     m_pAosKeepAlive->Start(TestAosKeepAlive::GRATER_TIME_THAN_POING_WAIT, IMS_TRUE);
 
     // WHEN
-    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->m_piPongWaitTimer);
+    m_pAosKeepAlive->Timer_TimerExpired(m_pAosKeepAlive->GetPongWaitTimer());
 
     // THEN : GIVEN conditions should be met.
 }

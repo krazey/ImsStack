@@ -49,6 +49,12 @@ public:
         TRANSPORT_MAX,
     };
 
+    enum
+    {
+        TIMER_KEEP_ALIVE = 0,
+        TIMER_PONG_WAIT
+    };
+
 protected:
     void SendPing();
 
@@ -69,12 +75,6 @@ protected:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
-
-    enum
-    {
-        TIMER_KEEP_ALIVE = 0,
-        TIMER_PONG_WAIT
-    };
 
 protected:
     ISipKeepAliveHelper* m_piKeepAliveHelper;
