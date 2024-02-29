@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.android.imsstack.ImsStackMain;
 import com.android.imsstack.its.base.AppContextInitializer;
+import com.android.imsstack.its.core.agents.WifiAgent;
 
 /**
  * A application entry point of ImsStack test process.
@@ -34,6 +35,7 @@ public class ImsStackTestApp extends Application {
         super.onCreate();
         Log.i(TAG, "onCreate");
         AppContextInitializer.init(this);
+        WifiAgent.getInstance().init(this);
         mMain.start(this);
     }
 
@@ -41,6 +43,7 @@ public class ImsStackTestApp extends Application {
     public void onTerminate() {
         super.onTerminate();
         Log.i(TAG, "onTerminate");
+        WifiAgent.getInstance().cleanup();
         mMain.stop();
     }
 
