@@ -1608,21 +1608,28 @@ TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsDifferentWithConnectionWhe
     m_pAosRegistration->SetDynamicIpQos();
 }
 
-TEST_F(AosRegistrationTest, UpdateTransactionStarted)
+TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForEmergencyType)
 {
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->UpdateTransactionStarted();
-    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 
+    m_pAosRegistration->UpdateTransactionStarted();
+
+    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
+}
+
+TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForNormalType)
+{
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pAosRegistration->SetBlocked(IMS_FALSE);
+
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .WillOnce(Return(IMS_TRUE));
-    m_pAosRegistration->SetHeldByCall(IMS_TRUE);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
-    m_pAosRegistration->SetBlocked(IMS_FALSE);
-    m_pAosRegistration->SetRadioWaiting(IMS_FALSE);
+
     m_pAosRegistration->UpdateTransactionStarted();
+
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 }
 
@@ -1671,50 +1678,56 @@ TEST_F(AosRegistrationTest, GetActualWaitTime)
     m_pAosRegistration->GetActualWaitTime();
 }
 
-TEST_F(AosRegistrationTest, TryNextPcscf)
+TEST_F(AosRegistrationTest, StartRetryTimerIfRetryAfterIsNotZeroWhenTryNextPcscf)
 {
-    // succeed to SetNextPcscf - bHonorRetryAfter is true
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
-            .Times(AnyNumber())
             .WillRepeatedly(Return(AString("60")));
 
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_TRUE));
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_TRUE);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
     m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
+}
 
-    // succeed to SetNextPcscf - bHonorRetryAfter is false - succeed to SendRegister
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(1);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+TEST_F(AosRegistrationTest, StopRegistrationIfSendRegisterFailWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
-    // succeed to SetNextPcscf - bHonorRetryAfter is false - fail to SendRegister
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, Register(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FAILURE));
-    EXPECT_FALSE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
+
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
 
-    // fail to SetNextPcscf - bFlowRecoveryOnAllFail is true
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(4));
+TEST_F(AosRegistrationTest, TryRegistrationIfSendRegisterSucceedWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillOnce(Return(IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
 
-    // fail to SetNextPcscf - bFlowRecoveryOnAllFail is false
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_FALSE(m_pAosRegistration->TryNextPcscf(IMS_FALSE, IMS_FALSE));
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForStartIfFailToSetNextPcscfWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
+
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(AosRegistrationTest, StopRegistrationIfFailToSetNextPcscfWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosRegistration->TryNextPcscf(IMS_FALSE, IMS_FALSE);
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
