@@ -1633,23 +1633,31 @@ TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForNormalType)
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 }
 
-TEST_F(AosRegistrationTest, SendRegisterEx)
+TEST_F(AosRegistrationTest, ReturnFalseIfRegistrationIsNullWhenSendRegisterEx)
 {
-    // m_piRegistration is not null
-    EXPECT_CALL(m_objMockIRegistration, Register(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FAILURE))
-            .WillOnce(Return(IMS_SUCCESS));
-
-    // fail to Register
-    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE));
-
-    // succeed to Register
-    EXPECT_TRUE(m_pAosRegistration->SendRegisterEx(0, IMS_FALSE));
-
-    // m_piRegistration is null
     m_pAosRegistration->Destroy();
-    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnFalseIfRegisterFailWhenSendRegisterEx)
+{
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueIfRegisterSucceedWhenSendRegisterEx)
+{
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE);
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, GetActualWaitTime)
@@ -2556,42 +2564,68 @@ TEST_F(AosRegistrationTest, NotCreateSubscriptionWhenReinitiateIfNotRegistered)
     m_pAosRegistration->ProcessSubReinitiate();
 }
 
-TEST_F(AosRegistrationTest, ProcessForbiddenFailed)
+TEST_F(AosRegistrationTest, ReturnFalseWhenForbiddenFailIfCodeIsNotPermanentErrorCode)
 {
     ImsVector<IMS_SINT32> objErrCode;
-    objErrCode.Clear();
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrCode));
-    ImsVector<IMS_SINT32> objCount;
-    objCount.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objCount));
+            .WillOnce(ReturnRef(objErrCode));
 
-    // Error code is exist in RegPermanentErrCode
-    EXPECT_FALSE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
 
-    // m_nForbiddenCount is greater than or equal to nMaxCount
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenForbiddenFailIfForbiddenCountIsGreaterThanMaxCount)
+{
+    ImsVector<IMS_SINT32> objErrCode;
     objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
+
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_TYPE_CRITICAL));
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_CRITICAL));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN))
-            .Times(AnyNumber());
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
 
-    // m_nForbiddenCount is less than nMaxCount - Not Registered
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForStartWhenForbiddenFailWhileRegistering)
+{
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
     objCount.Add(5);
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
 
-    // m_nForbiddenCount is less than nMaxCount - Registered
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
+
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForUpdateWhenForbiddenFailWhileRefreshing)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
+    objCount.Add(5);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
 }
 
 TEST_F(AosRegistrationTest, ProcessSubscriberFailed)
