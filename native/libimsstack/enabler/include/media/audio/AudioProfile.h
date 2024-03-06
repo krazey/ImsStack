@@ -478,16 +478,7 @@ public:
         DEFAULT_MAXPTIME = 240,
     };
 
-    IpAddress objIpAddr;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
     ImsList<Payload*> lstPayload;
-    MEDIA_DIRECTION eDirection;
     IMS_SINT32 nPtime;
     IMS_SINT32 nMaxPtime;
     ImsVector<AString> objCandidateAttr;
@@ -501,16 +492,9 @@ public:
 
 public:
     AudioProfile() :
-            objIpAddr(IpAddress::IPv6NONE),
-            nDataPort(0),
-            nControlPort(0),
-            strTransportType("RTP/AVP"),
-            nRtcpInterval(0),
-            nBandwidthAs(0),
-            nBandwidthRs(0),
-            nBandwidthRr(0),
+            MediaBaseProfile(
+                    IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_SEND_RECEIVE),
             lstPayload(ImsList<Payload*>()),
-            eDirection(MEDIA_DIRECTION_SEND_RECEIVE),
             nPtime(0),
             nMaxPtime(0),
             objCandidateAttr(ImsVector<AString>()),
@@ -548,7 +532,7 @@ public:
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (objIpAddr == obj.objIpAddr && nDataPort == obj.nDataPort &&
+        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
                 nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
                 nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
                 nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
@@ -566,7 +550,7 @@ private:
             return;
         }
 
-        objIpAddr = pProfile->objIpAddr;
+        objIpAddress = pProfile->objIpAddress;
         nDataPort = pProfile->nDataPort;
         nControlPort = pProfile->nControlPort;
         strTransportType = pProfile->strTransportType;

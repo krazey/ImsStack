@@ -320,16 +320,7 @@ public:
     };
 
 public:
-    IpAddress objIpAddress;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
     ImsList<Payload*> lstPayload;
-    MEDIA_DIRECTION eDirection;
     IMS_SINT32 nFrameRate;
     IMS_BOOL bSupportAvpf;
     IMS_SINT32 nCvoId;
@@ -339,14 +330,8 @@ public:
 
 public:
     VideoProfile() :
-            nDataPort(0),
-            nControlPort(0),
-            strTransportType("RTP/AVPF"),
-            nRtcpInterval(0),
-            nBandwidthAs(0),
-            nBandwidthRs(0),
-            nBandwidthRr(0),
-            eDirection(MEDIA_DIRECTION_INVALID),
+            MediaBaseProfile(
+                    IpAddress::IPv6NONE, 0, 0, "RTP/AVPF", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
             nFrameRate(0),
             bSupportAvpf(IMS_FALSE),
             nCvoId(-1),

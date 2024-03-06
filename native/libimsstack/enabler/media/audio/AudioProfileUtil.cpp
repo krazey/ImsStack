@@ -97,7 +97,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
     AudioProfile* pAudioProfile = new AudioProfile();
 
     // Local IP
-    pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
+    pAudioProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
 
     // Setting RTP/RTCP port from resource manager
     if (pAudioProfile->nDataPort > 0)
@@ -111,8 +111,8 @@ AudioProfile* AudioProfileUtil::CreateProfile(
     }
     pAudioProfile->nControlPort = pAudioProfile->nDataPort + 1;
 
-    IMS_TRACE_D("CreateProfile() IpAddress[%s], port[%d]", pAudioProfile->objIpAddr.ToCharString(),
-            pAudioProfile->nDataPort, 0);
+    IMS_TRACE_D("CreateProfile() IpAddress[%s], port[%d]",
+            pAudioProfile->objIpAddress.ToCharString(), pAudioProfile->nDataPort, 0);
 
     pAudioProfile->strTransportType = "RTP/AVP";
 
@@ -293,7 +293,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             pAudioProfile->lstPayload.Append(pAmrPayload);
             IMS_SINT32 nCurrAs;
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddr.IsIPv6Address(), pAmrConfig->GetModeSet());
+                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetModeSet());
 
             if (nCurrAs > nAsOptimal)
             {
@@ -301,7 +301,8 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             }
 
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddr.IsIPv6Address(), pAmrConfig->GetModeSet(), IMS_TRUE);
+                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetModeSet(),
+                    IMS_TRUE);
 
             if (nCurrAs > nAsMax)
             {
@@ -504,14 +505,14 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 nTempCodecMode = 0;
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddr.IsIPv6Address(),
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddress.IsIPv6Address(),
                     nTempCodecMode, pEvsConfig->GetBr());  // primary mode
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddr.IsIPv6Address(),
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddress.IsIPv6Address(),
                     nTempCodecMode, pEvsConfig->GetBr(), IMS_TRUE);
             if (nCurrAs > nAsMax)
             {
@@ -537,7 +538,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
 
             // br setting
             IMS_SINT32 nTempBandwidth = 0;
-            if (pAudioProfile->objIpAddr.IsIPv6Address() == IMS_TRUE)
+            if (pAudioProfile->objIpAddress.IsIPv6Address() == IMS_TRUE)
             {
                 nTempBandwidth = 72;
             }
@@ -932,14 +933,14 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             }
 
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddr.IsIPv6Address(), nMaxModeset);
+                    pAudioProfile->objIpAddress.IsIPv6Address(), nMaxModeset);
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
             }
 
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddr.IsIPv6Address(), nMaxModeset, IMS_TRUE);
+                    pAudioProfile->objIpAddress.IsIPv6Address(), nMaxModeset, IMS_TRUE);
             if (nCurrAs > nAsMax)
             {
                 nAsMax = nCurrAs;
@@ -974,15 +975,16 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 }
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddr.IsIPv6Address(), 0,
-                    nMaxBr);  // primary mode
+            nCurrAs =
+                    ConvertToBandwidthAS(nCurrCodec, pAudioProfile->objIpAddress.IsIPv6Address(), 0,
+                            nMaxBr);  // primary mode
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
             }
 
             nCurrAs = ConvertToBandwidthAS(
-                    nCurrCodec, pAudioProfile->objIpAddr.IsIPv6Address(), 0, nMaxBr, IMS_TRUE);
+                    nCurrCodec, pAudioProfile->objIpAddress.IsIPv6Address(), 0, nMaxBr, IMS_TRUE);
             if (nCurrAs > nAsMax)
             {
                 nAsMax = nCurrAs;

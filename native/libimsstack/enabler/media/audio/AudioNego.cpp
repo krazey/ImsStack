@@ -305,7 +305,7 @@ PUBLIC VIRTUAL const IpAddress& AudioNego::GetNegotiatedRemoteAddress()
 
     if (pProfile != IMS_NULL)
     {
-        return pProfile->objIpAddr;
+        return pProfile->objIpAddress;
     }
 
     return IpAddress::NONE;
@@ -1088,14 +1088,14 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // make"c" &"o" line of session level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddr))
+    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddress))
     {
         IMS_TRACE_D("MakeSdpFromProfile() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
                 pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->objIpAddr.ToCharString(), 0);
+                pProfile->objIpAddress.ToCharString(), 0);
 
-        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddr.ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddr.ToString());
+        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddress.ToString());
+        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddress.ToString());
     }
 
     // make"m" line
@@ -1843,7 +1843,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     }
 
     // IP
-    pProfile->objIpAddr = pDescriptor->GetRemoteAddress();
+    pProfile->objIpAddress = pDescriptor->GetRemoteAddress();
 
     // data & control port
     pProfile->nDataPort = pDescriptor->GetRemotePort();
@@ -2032,11 +2032,11 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     }
 
     // Setting IP of mine
-    pNegotiatedProfile->objIpAddr = pLocalProfile->objIpAddr;
+    pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
 
     IMS_TRACE_D("MakeNegotiatedProfile() - IPAddr nego[%s] src[%s] DestPayloadSize[%d]",
-            pNegotiatedProfile->objIpAddr.ToCharString(), pLocalProfile->objIpAddr.ToCharString(),
-            pPeerProfile->lstPayload.GetSize());
+            pNegotiatedProfile->objIpAddress.ToCharString(),
+            pLocalProfile->objIpAddress.ToCharString(), pPeerProfile->lstPayload.GetSize());
 
     // Setting RTP/RTCP port of mine
     pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
@@ -2443,8 +2443,9 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("AMR-WB", pNegotiatedPayload);
             }
 
-            nAsValueOfNegoticatedCodec = AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec,
-                    pAmrFmtp->nOctetAlign, pNegotiatedProfile->objIpAddr.IsIPv6Address(), nModeSet);
+            nAsValueOfNegoticatedCodec =
+                    AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+                            pNegotiatedProfile->objIpAddress.IsIPv6Address(), nModeSet);
         }
         else if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
         {
@@ -2452,7 +2453,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             AUDIO_CODEC nCurrCodec = AUDIO_CODEC_EVS;
             nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegotiatedPayload);
             nAsValueOfNegoticatedCodec = AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec,
-                    pNegotiatedProfile->objIpAddr.IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
+                    pNegotiatedProfile->objIpAddress.IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
                     nModeSet);
         }
 
