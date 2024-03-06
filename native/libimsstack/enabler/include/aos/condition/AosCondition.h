@@ -93,6 +93,13 @@ public:
         CHECK_WIFI = 0x2
     };
 
+    enum
+    {
+        HOLD_EVENT_NONE = 0x00,
+        HOLD_EVENT_ROAMING = 0x01,
+        HOLD_EVENT_IMS_SERVICE = 0x02
+    };
+
 protected:
     virtual void AddServiceAvailable();
     virtual void RemoveServiceAvailable();
@@ -178,13 +185,6 @@ protected:
     IMS_BOOL IsServiceBlockedByMenu() const;
 
 protected:
-    enum
-    {
-        HOLD_EVENT_NONE = 0x00,
-        HOLD_EVENT_ROAMING = 0x01,
-        HOLD_EVENT_IMS_SERVICE = 0x02
-    };
-
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
     IAosConditionListener* m_piListener;

@@ -160,9 +160,10 @@ enum
     PENDING_REG_UPDATE_HELD = 0x40
 };
 
-class TestAosCondition : public AosCondition
+// FIXME : Please replace this clsss with Mock.
+class TestAosConditionEx : public AosCondition
 {
-    inline explicit TestAosCondition(IN IAosAppContext* piAppContext) :
+    inline explicit TestAosConditionEx(IN IAosAppContext* piAppContext) :
             AosCondition(piAppContext),
             m_bReady(IMS_FALSE)
     {
@@ -314,7 +315,7 @@ class AosApplicationTest : public ::testing::Test
 {
 public:
     TestAosApplication* m_pTestAosApplication;
-    TestAosCondition* m_pTestAosCondition;
+    TestAosConditionEx* m_pTestAosCondition;
     AosStaticProfile* m_pAosStaticProfile;
 
     IAosCallTracker* m_piAosCallTracker;
@@ -487,7 +488,7 @@ protected:
                         m_pAosStaticProfile->GetId());
 
         m_pTestAosCondition =
-                new TestAosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+                new TestAosConditionEx(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
         m_pTestAosApplication->SetAosCondition(m_pTestAosCondition);
 
         m_pTestAosApplication->SetAosConnector(&m_objMockAosConnector);
