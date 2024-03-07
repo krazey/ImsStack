@@ -111,63 +111,70 @@ public:
     TextProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
+            lstPayload(ImsList<Payload*>()),
             bISOfferCase(IMS_FALSE),
             bIsHold(IMS_FALSE),
             bKeepRedLevel(IMS_TRUE){};
 
-    TextProfile(IN const TextProfile& obj) { copy(&obj); }
+    virtual ~TextProfile() { deletePayloads(); }
 
-    virtual ~TextProfile()
+    TextProfile(IN TextProfile* profile) :
+            MediaBaseProfile(profile)
     {
-        while (lstPayload.GetSize() > 0)
+        if (profile == nullptr)
         {
-            TextProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
+            return;
         }
+
+        bISOfferCase = profile->bISOfferCase;
+        bIsHold = profile->bIsHold;
+        bKeepRedLevel = profile->bKeepRedLevel;
+
+        deletePayloads();
+        addPayloads(profile->lstPayload);
+    }
+
+    TextProfile(IN const TextProfile& obj) :
+            MediaBaseProfile(obj)
+    {
+        bISOfferCase = obj.bISOfferCase;
+        bIsHold = obj.bIsHold;
+        bKeepRedLevel = obj.bKeepRedLevel;
+
+        deletePayloads();
+        addPayloads(obj.lstPayload);
     }
 
     TextProfile& operator=(IN const TextProfile& obj)
     {
         if (this != &obj)
         {
-            copy(&obj);
+            MediaBaseProfile::operator=(obj);
+            bISOfferCase = obj.bISOfferCase;
+            bIsHold = obj.bIsHold;
+            bKeepRedLevel = obj.bKeepRedLevel;
+
+            deletePayloads();
+            addPayloads(obj.lstPayload);
         }
         return (*this);
     }
 
     bool operator==(IN const TextProfile& obj) const
     {
-        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
-                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
-                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
-                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
-                eDirection == obj.eDirection && bISOfferCase == obj.bISOfferCase &&
+        return (MediaBaseProfile::operator==(obj) && bISOfferCase == obj.bISOfferCase &&
                 bIsHold == obj.bIsHold && bKeepRedLevel == obj.bKeepRedLevel);
     }
 
-private:
-    void copy(const TextProfile* pProfile)
+    bool operator!=(IN const TextProfile& obj) const
     {
-        if (pProfile == IMS_NULL)
-        {
-            return;
-        }
+        return (MediaBaseProfile::operator!=(obj) || bISOfferCase != obj.bISOfferCase ||
+                bIsHold != obj.bIsHold || bKeepRedLevel != obj.bKeepRedLevel);
+    }
 
-        objIpAddress = pProfile->objIpAddress;
-        nDataPort = pProfile->nDataPort;
-        nControlPort = pProfile->nControlPort;
-        strTransportType = pProfile->strTransportType;
-        nRtcpInterval = pProfile->nRtcpInterval;
-        nBandwidthAs = pProfile->nBandwidthAs;
-        nBandwidthRs = pProfile->nBandwidthRs;
-        nBandwidthRr = pProfile->nBandwidthRr;
-
+private:
+    void deletePayloads()
+    {
         while (lstPayload.GetSize() > 0)
         {
             TextProfile::Payload* pPayload = lstPayload.GetAt(0);
@@ -179,18 +186,15 @@ private:
 
             lstPayload.RemoveAt(0);
         }
+    }
 
-        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    void addPayloads(IN ImsList<Payload*> payloadList)
+    {
+        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
         {
-            TextProfile::Payload* pNewPayload =
-                    new TextProfile::Payload(*pProfile->lstPayload.GetAt(i));
+            TextProfile::Payload* pNewPayload = new TextProfile::Payload(*payloadList.GetAt(i));
             lstPayload.Append(pNewPayload);
         }
-
-        eDirection = pProfile->eDirection;
-        bISOfferCase = pProfile->bISOfferCase;
-        bIsHold = pProfile->bIsHold;
-        bKeepRedLevel = pProfile->bKeepRedLevel;
     }
 };
 

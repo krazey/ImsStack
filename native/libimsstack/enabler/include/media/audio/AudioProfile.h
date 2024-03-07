@@ -506,63 +506,87 @@ public:
             bRtcpDisableBeforeSetup(IMS_FALSE),
             bAnbr(IMS_FALSE){};
 
-    ~AudioProfile()
+    virtual ~AudioProfile() { deletePayloads(); };
+
+    AudioProfile(IN AudioProfile* profile) :
+            MediaBaseProfile(profile)
     {
-        while (lstPayload.GetSize() > 0)
+        if (profile == nullptr)
         {
-            AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
+            return;
         }
-    };
+        nPtime = profile->nPtime;
+        nMaxPtime = profile->nMaxPtime;
+        objCandidateAttr = profile->objCandidateAttr;
+        nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
+        bIsOfferCase = profile->bIsOfferCase;
+        objCapaNego = profile->objCapaNego;
+        bSupportRtcpXr = profile->bSupportRtcpXr;
+        objRtcpXrAttr = profile->objRtcpXrAttr;
+        bRtcpDisableBeforeSetup = profile->bRtcpDisableBeforeSetup;
+        bAnbr = profile->bAnbr;
+
+        deletePayloads();
+        addPayloads(profile->lstPayload);
+    }
+
+    AudioProfile(IN const AudioProfile& obj) :
+            MediaBaseProfile(obj)
+    {
+        nPtime = obj.nPtime;
+        nMaxPtime = obj.nMaxPtime;
+        objCandidateAttr = obj.objCandidateAttr;
+        nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+        bIsOfferCase = obj.bIsOfferCase;
+        objCapaNego = obj.objCapaNego;
+        bSupportRtcpXr = obj.bSupportRtcpXr;
+        objRtcpXrAttr = obj.objRtcpXrAttr;
+        bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
+        bAnbr = obj.bAnbr;
+
+        deletePayloads();
+        addPayloads(obj.lstPayload);
+    }
 
     AudioProfile& operator=(IN const AudioProfile& obj)
     {
         if (this != &obj)
         {
-            copy(&obj);
+            MediaBaseProfile::operator=(obj);
+            nPtime = obj.nPtime;
+            nMaxPtime = obj.nMaxPtime;
+            objCandidateAttr = obj.objCandidateAttr;
+            nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+            bIsOfferCase = obj.bIsOfferCase;
+            objCapaNego = obj.objCapaNego;
+            bSupportRtcpXr = obj.bSupportRtcpXr;
+            objRtcpXrAttr = obj.objRtcpXrAttr;
+            bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
+            bAnbr = obj.bAnbr;
+
+            deletePayloads();
+            addPayloads(obj.lstPayload);
         }
         return (*this);
     }
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
-                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
-                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
-                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
-                bSupportRtcpXr == obj.bSupportRtcpXr && objRtcpXrAttr == obj.objRtcpXrAttr &&
+        return (MediaBaseProfile::operator==(obj) && bSupportRtcpXr == obj.bSupportRtcpXr &&
+                objRtcpXrAttr == obj.objRtcpXrAttr &&
                 bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup && bAnbr == obj.bAnbr);
     }
 
-    AudioProfile(IN const AudioProfile& obj) { copy(&obj); }
+    bool operator!=(IN const AudioProfile& obj) const
+    {
+        return (MediaBaseProfile::operator!=(obj) || bSupportRtcpXr != obj.bSupportRtcpXr ||
+                objRtcpXrAttr != obj.objRtcpXrAttr ||
+                bRtcpDisableBeforeSetup != obj.bRtcpDisableBeforeSetup || bAnbr != obj.bAnbr);
+    }
 
 private:
-    void copy(IN const AudioProfile* pProfile)
+    void deletePayloads()
     {
-        if (pProfile == IMS_NULL)
-        {
-            return;
-        }
-
-        objIpAddress = pProfile->objIpAddress;
-        nDataPort = pProfile->nDataPort;
-        nControlPort = pProfile->nControlPort;
-        strTransportType = pProfile->strTransportType;
-        nRtcpInterval = pProfile->nRtcpInterval;
-        nBandwidthAs = pProfile->nBandwidthAs;
-        nBandwidthRs = pProfile->nBandwidthRs;
-        nBandwidthRr = pProfile->nBandwidthRr;
-        bSupportRtcpXr = pProfile->bSupportRtcpXr;
-        objRtcpXrAttr = pProfile->objRtcpXrAttr;
-        bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
-        bAnbr = pProfile->bAnbr;
-
         while (lstPayload.GetSize() > 0)
         {
             AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
@@ -574,22 +598,15 @@ private:
 
             lstPayload.RemoveAt(0);
         }
+    }
 
-        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    void addPayloads(IN ImsList<Payload*> payloadList)
+    {
+        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
         {
-            AudioProfile::Payload* pNewPayload =
-                    new AudioProfile::Payload(*pProfile->lstPayload.GetAt(i));
+            AudioProfile::Payload* pNewPayload = new AudioProfile::Payload(*payloadList.GetAt(i));
             lstPayload.Append(pNewPayload);
         }
-
-        eDirection = pProfile->eDirection;
-        nPtime = pProfile->nPtime;
-        nMaxPtime = pProfile->nMaxPtime;
-        objCandidateAttr = pProfile->objCandidateAttr;
-        bIsOfferCase = pProfile->bIsOfferCase;
-        objCapaNego = pProfile->objCapaNego;
-        nNegotiatedPayloadIndex = -1;
-        bAnbr = pProfile->bAnbr;
     }
 };
 

@@ -183,6 +183,71 @@ public:
     }
 
     virtual ~MediaBaseProfile() {}
+
+    MediaBaseProfile(MediaBaseProfile* profile)
+    {
+        if (profile == nullptr)
+        {
+            return;
+        }
+        objIpAddress = profile->objIpAddress;
+        nDataPort = profile->nDataPort;
+        nControlPort = profile->nControlPort;
+        strTransportType = profile->strTransportType;
+        nRtcpInterval = profile->nRtcpInterval;
+        nBandwidthAs = profile->nBandwidthAs;
+        nBandwidthRs = profile->nBandwidthRs;
+        nBandwidthRr = profile->nBandwidthRr;
+        eDirection = profile->eDirection;
+    }
+
+    MediaBaseProfile(const MediaBaseProfile& obj)
+    {
+        objIpAddress = obj.objIpAddress;
+        nDataPort = obj.nDataPort;
+        nControlPort = obj.nControlPort;
+        strTransportType = obj.strTransportType;
+        nRtcpInterval = obj.nRtcpInterval;
+        nBandwidthAs = obj.nBandwidthAs;
+        nBandwidthRs = obj.nBandwidthRs;
+        nBandwidthRr = obj.nBandwidthRr;
+        eDirection = obj.eDirection;
+    }
+
+    MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
+    {
+        if (this != &obj)
+        {
+            objIpAddress = obj.objIpAddress;
+            nDataPort = obj.nDataPort;
+            nControlPort = obj.nControlPort;
+            strTransportType = obj.strTransportType;
+            nRtcpInterval = obj.nRtcpInterval;
+            nBandwidthAs = obj.nBandwidthAs;
+            nBandwidthRs = obj.nBandwidthRs;
+            nBandwidthRr = obj.nBandwidthRr;
+            eDirection = obj.eDirection;
+        }
+        return (*this);
+    }
+
+    bool operator==(IN const MediaBaseProfile& obj) const
+    {
+        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
+                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
+                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
+                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
+                eDirection == obj.eDirection);
+    }
+
+    bool operator!=(IN const MediaBaseProfile& obj) const
+    {
+        return (objIpAddress != obj.objIpAddress || nDataPort != obj.nDataPort ||
+                nControlPort != obj.nControlPort || strTransportType != obj.strTransportType ||
+                nRtcpInterval != obj.nRtcpInterval || nBandwidthAs != obj.nBandwidthAs ||
+                nBandwidthRs != obj.nBandwidthRs || nBandwidthRr != obj.nBandwidthRr ||
+                eDirection != obj.eDirection);
+    }
 };
 
 #endif

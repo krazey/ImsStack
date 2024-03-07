@@ -332,64 +332,68 @@ public:
     VideoProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVPF", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
+            lstPayload(ImsList<Payload*>()),
             nFrameRate(0),
             bSupportAvpf(IMS_FALSE),
             nCvoId(-1),
             bSupportCapaNegoForAvpf(IMS_FALSE),
+            objCapaNego(CapaNego()),
             nNegotiatedPayloadIndex(-1){};
 
-    VideoProfile(IN const VideoProfile& objProfile)
+    virtual ~VideoProfile() { deletePayloads(); };
+
+    VideoProfile(IN VideoProfile* profile) :
+            MediaBaseProfile(profile)
     {
-        copy(&objProfile);
+        if (profile == nullptr)
+        {
+            return;
+        }
+        nFrameRate = profile->nFrameRate;
+        bSupportAvpf = profile->bSupportAvpf;
+        nCvoId = profile->nCvoId;
+        bSupportCapaNegoForAvpf = profile->bSupportCapaNegoForAvpf;
+        objCapaNego = profile->objCapaNego;
         nNegotiatedPayloadIndex = -1;
+
+        deletePayloads();
+        addPayloads(profile->lstPayload);
+    }
+
+    VideoProfile(IN const VideoProfile& obj) :
+            MediaBaseProfile(obj)
+    {
+        nFrameRate = obj.nFrameRate;
+        bSupportAvpf = obj.bSupportAvpf;
+        nCvoId = obj.nCvoId;
+        bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
+        objCapaNego = obj.objCapaNego;
+        nNegotiatedPayloadIndex = -1;
+
+        deletePayloads();
+        addPayloads(obj.lstPayload);
     }
 
     VideoProfile& operator=(IN const VideoProfile& obj)
     {
         if (this != &obj)
         {
-            copy(&obj);
+            MediaBaseProfile::operator=(obj);
+            nFrameRate = obj.nFrameRate;
+            bSupportAvpf = obj.bSupportAvpf;
+            nCvoId = obj.nCvoId;
+            bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
+            objCapaNego = obj.objCapaNego;
+
+            deletePayloads();
+            addPayloads(obj.lstPayload);
         }
+
         nNegotiatedPayloadIndex = -1;
         return (*this);
     }
 
-    virtual ~VideoProfile() { deletePayloads(); };
-
 private:
-    void copy(const VideoProfile* pProfile)
-    {
-        if (pProfile == IMS_NULL)
-        {
-            return;
-        }
-
-        objIpAddress = pProfile->objIpAddress;
-        nDataPort = pProfile->nDataPort;
-        nControlPort = pProfile->nControlPort;
-        strTransportType = pProfile->strTransportType;
-        nRtcpInterval = pProfile->nRtcpInterval;
-        nBandwidthAs = pProfile->nBandwidthAs;
-        nBandwidthRs = pProfile->nBandwidthRs;
-        nBandwidthRr = pProfile->nBandwidthRr;
-
-        deletePayloads();
-
-        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
-        {
-            VideoProfile::Payload* pNewPayload =
-                    new VideoProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
-
-        eDirection = pProfile->eDirection;
-        nFrameRate = pProfile->nFrameRate;
-        bSupportAvpf = pProfile->bSupportAvpf;
-        nCvoId = pProfile->nCvoId;
-        bSupportCapaNegoForAvpf = pProfile->bSupportCapaNegoForAvpf;
-        objCapaNego = pProfile->objCapaNego;
-    }
-
     void deletePayloads()
     {
         while (lstPayload.GetSize() > 0)
@@ -402,6 +406,15 @@ private:
             }
 
             lstPayload.RemoveAt(0);
+        }
+    }
+
+    void addPayloads(IN ImsList<Payload*> payloadList)
+    {
+        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
+        {
+            VideoProfile::Payload* pNewPayload = new VideoProfile::Payload(*payloadList.GetAt(i));
+            lstPayload.Append(pNewPayload);
         }
     }
 };
