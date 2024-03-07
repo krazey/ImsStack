@@ -81,6 +81,12 @@ public:
             }
             return (*this);
         }
+
+        bool operator==(IN const RtpMap& obj) const
+        {
+            return (nPayloadNum == obj.nPayloadNum && strPayloadType == obj.strPayloadType &&
+                    nSamplingRate == obj.nSamplingRate && nChannel == obj.nChannel);
+        }
     };
 
     /**
