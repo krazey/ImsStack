@@ -131,12 +131,13 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioConfig objAudioConfig;
 
     // Setting the network properties
-    SetLocalEndPoint(pNegoProfile->objIpAddr, pNegoProfile->nDataPort);
+    SetLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
     objAudioConfig.setAccessNetwork(nAccessNetwork);
     objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
 
     // remote network parameters
-    objAudioConfig.setRemoteAddress(android::String8(pPeerProfile->objIpAddr.ToString().GetStr()));
+    objAudioConfig.setRemoteAddress(
+            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
     objAudioConfig.setRemotePort(pPeerProfile->nDataPort);
     objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
 

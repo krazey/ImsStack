@@ -167,7 +167,7 @@ public:
      *
      * @return const IpAddress& The local ip address
      */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddr; };
+    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
 
     /**
      * @brief Get the local port number

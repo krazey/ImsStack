@@ -102,30 +102,15 @@ public:
     };
 
 public:
-    IpAddress objIpAddress;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
     ImsList<Payload*> lstPayload;
-    MEDIA_DIRECTION eDirection;
     IMS_BOOL bISOfferCase;
     IMS_BOOL bIsHold;
     IMS_BOOL bKeepRedLevel;
 
 public:
     TextProfile() :
-            nDataPort(0),
-            nControlPort(0),
-            strTransportType("RTP/AVP"),
-            nRtcpInterval(0),
-            nBandwidthAs(0),
-            nBandwidthRs(0),
-            nBandwidthRr(0),
-            eDirection(MEDIA_DIRECTION_INVALID),
+            MediaBaseProfile(
+                    IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
             bISOfferCase(IMS_FALSE),
             bIsHold(IMS_FALSE),
             bKeepRedLevel(IMS_TRUE){};

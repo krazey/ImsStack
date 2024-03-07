@@ -146,6 +146,37 @@ public:
             }
         }
     };
+
+public:
+    IpAddress objIpAddress;
+    IMS_UINT32 nDataPort;
+    IMS_UINT32 nControlPort;
+    AString strTransportType;
+    IMS_UINT32 nRtcpInterval;
+    IMS_SINT32 nBandwidthAs;
+    IMS_SINT32 nBandwidthRs;
+    IMS_SINT32 nBandwidthRr;
+    MEDIA_DIRECTION eDirection;
+
+    MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
+            IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
+            IN const AString transportType = "RTP/AVP", IN const IMS_UINT32 rtcpInterval = 0,
+            IN const IMS_SINT32 bandwidthAs = 0, IN const IMS_SINT32 bandwidthRs = 0,
+            IN const IMS_SINT32 bandwidthRr = 0,
+            IN const MEDIA_DIRECTION direction = MEDIA_DIRECTION_INVALID) :
+            objIpAddress(ipAddress),
+            nDataPort(dataPort),
+            nControlPort(controlPort),
+            strTransportType(transportType),
+            nRtcpInterval(rtcpInterval),
+            nBandwidthAs(bandwidthAs),
+            nBandwidthRs(bandwidthRs),
+            nBandwidthRr(bandwidthRr),
+            eDirection(direction)
+    {
+    }
+
+    virtual ~MediaBaseProfile() {}
 };
 
 #endif
