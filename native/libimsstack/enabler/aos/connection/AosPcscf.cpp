@@ -49,9 +49,9 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_nSlotId(piAppContext->GetSlotId()),
         m_nChangedType(TYPE_CHANGED_DIFFERENT),
         m_bIsConfigured(IMS_FALSE),
-        m_nCurrentPcscfIndex(0),
         m_bIsDnsQueryRetry(IMS_FALSE),
         m_bOtherIpTypeRequired(IMS_FALSE),
+        m_nCurrentPcscfIndex(0),
         m_nDiscoveryMethodIndex(0)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
