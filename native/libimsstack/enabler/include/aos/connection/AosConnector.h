@@ -96,6 +96,14 @@ public:
         LISTENER_TYPE_UPDATED
     };
 
+    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
+    static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
+    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME_SEC = 20;
+    static const IMS_UINT32 READY_RECOVERY_BASE_TIME_SEC = 20;
+    static const IMS_UINT32 READY_RECOVERY_MAX_TIME_SEC = 1800;
+    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;
+    static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;
+
 protected:
     void ClearPending();
 
@@ -180,14 +188,6 @@ protected:
     IMS_BOOL m_bIsPcscfChangeIgnored;
 
     AString strTag;
-
-    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20;         // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;            // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;           // 1800 Sec.
-    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;           // 4 Sec.
-    static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;  // 2 Sec.
 
 protected:
     friend class AosApplication;
