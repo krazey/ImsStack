@@ -51,12 +51,12 @@ public:
     MOCK_METHOD(IMS_BOOL, IsInitialRegistrationRequiredInWifi,
             (IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed), (override));
     MOCK_METHOD(IMS_BOOL, IsResubscriptionStopped, (IN IMS_SINT32 nStatusCode), (override));
-    MOCK_METHOD(IMS_BOOL, ProcessFailed_StatusCode,
-            (IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed), (override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredByNotify, (IN IMS_UINT32 nFeature), (override));
     MOCK_METHOD(IMS_BOOL, IsRegAfterWaitRequiredByNotify, (IN IMS_UINT32 nFeature), (override));
     MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupportedWithStateChecked, (IN IMS_SINT32 nError),
             (override));
+    MOCK_METHOD(IMS_BOOL, ProcessFailed_StatusCode,
+            (IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed), (override));
     MOCK_METHOD(void, SetRequestCommand,
             (IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter),
             (override));

@@ -83,8 +83,6 @@ protected:
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed);
-
-public:
     virtual IMS_BOOL IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequired(
@@ -94,13 +92,11 @@ public:
     virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(
             IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
-    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
-
     virtual IMS_BOOL IsRegRequiredByNotify(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsWfcErrorMessageSupportedWithStateChecked(IN IMS_SINT32 nError);
+    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
 
-protected:
     virtual void SetRequestCommand(
             IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
     virtual void RequestCommand(

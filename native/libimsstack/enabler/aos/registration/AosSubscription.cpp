@@ -543,7 +543,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed)
 {
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
                                   ->IsExtraRegErrRetryCntSharedForRegAndSubRequired();
@@ -564,7 +564,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_B
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
 {
     IMS_SINT32 nRetryInfoSubTerminated =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRetryCountSubErrorSubTerminated();
@@ -602,7 +602,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     IMS_SINT32 nRetryInfoRegRequired =
@@ -639,7 +639,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     ImsVector<IMS_SINT32>& objErrRegRequiredWithNextPcscf =
@@ -663,7 +663,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
@@ -701,7 +701,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
 {
     ImsVector<IMS_SINT32>& objErrResubStopped =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorStoppingResub();
@@ -723,7 +723,35 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 n
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotify(IN IMS_UINT32 nFeature)
+{
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration());
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
+{
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime());
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChecked(
+        IN IMS_SINT32 nError)
+{
+    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetState() == STATE_UNSUBSCRIBING || GetState() == STATE_OFFLINE)
+    {
+        return IMS_FALSE;
+    }
+
+    return GET_N_CONFIG(m_piContext->GetSlotId())->IsWfcErrorMessageSupported(nError);
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     m_bIsErrChecked = IMS_FALSE;
@@ -776,34 +804,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     }
     m_bIsErrChecked = IMS_FALSE;
     return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotify(IN IMS_UINT32 nFeature)
-{
-    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration());
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
-{
-    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime());
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChecked(
-        IN IMS_SINT32 nError)
-{
-    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (GetState() == STATE_UNSUBSCRIBING || GetState() == STATE_OFFLINE)
-    {
-        return IMS_FALSE;
-    }
-
-    return GET_N_CONFIG(m_piContext->GetSlotId())->IsWfcErrorMessageSupported(nError);
 }
 
 PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
