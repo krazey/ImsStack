@@ -21,8 +21,8 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.BS");
 
 PUBLIC
-BaseSession::BaseSession(IN IMS_SINT32 nSlodId) :
-        m_nSlodId(nSlodId),
+BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
         m_piMediaSessionListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
         m_pRtpConfig(IMS_NULL),

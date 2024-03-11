@@ -50,7 +50,7 @@ public:
 
     static const IMS_SINT32 CAMERA_ID_NONE = -1;
 
-    explicit VideoMediaSession(IN IMS_SINT32 nSlodId = 0);
+    explicit VideoMediaSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~VideoMediaSession();
     void SetConfig(IN VideoConfiguration* pConfig);
 
