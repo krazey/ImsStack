@@ -606,48 +606,92 @@ TEST_F(AosConditionTest, CheckBadNetworkReturnsTrueWhenServiceTypeIsWifi)
     EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosConditionTest, Event_NotifyEvent_RoamingState)
+TEST_F(AosConditionTest, ShouldSetRoamingOffWhenNotifyEventRoamingOff)
 {
+    // GIVEN
     m_pAosCondition->Start();
 
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_OFF, IMS_ROAMING_STATE_OFF);
-    EXPECT_FALSE(m_pAosCondition->IsRoaming());
 
+    // THEN
+    EXPECT_FALSE(m_pAosCondition->IsRoaming());
+}
+
+TEST_F(AosConditionTest, ShouldSetRoamingOnWhenNotifyEventRoamingWithPsRoamingOn)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_ON, IMS_ROAMING_STATE_OFF);
-    EXPECT_TRUE(m_pAosCondition->IsRoaming());
 
-    m_pAosCondition->Event_NotifyEvent(
-            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_OFF, IMS_ROAMING_STATE_OFF);
-    EXPECT_FALSE(m_pAosCondition->IsRoaming());
-
-    m_pAosCondition->Event_NotifyEvent(
-            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_OFF, IMS_ROAMING_STATE_ON);
+    // THWN
     EXPECT_TRUE(m_pAosCondition->IsRoaming());
 }
 
-TEST_F(AosConditionTest, Event_NotifyEvent_VopsState)
+TEST_F(AosConditionTest, ShouldSetRoamingOnWhenNotifyEventRoamingWithCsRoamingOn)
 {
+    // GIVEN
     m_pAosCondition->Start();
 
+    // WHEN
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_OFF, IMS_ROAMING_STATE_ON);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCondition->IsRoaming());
+}
+
+TEST_F(AosConditionTest, ShouldSetVopsOnWhenNotifyEventWithVopsSupported)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_SUPPORTED, 0);
-    EXPECT_TRUE(m_pAosCondition->IsVopsSupported());
 
+    // THEN
+    EXPECT_TRUE(m_pAosCondition->IsVopsSupported());
+}
+
+TEST_F(AosConditionTest, ShouldSetVopsOffWhenNotifyEventWithVopsNotSupported)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(
             IMS_EVENT_IMS_VOICE_OVER_PS_STATE, IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
+
+    // WHEN
     EXPECT_FALSE(m_pAosCondition->IsVopsSupported());
 }
 
-TEST_F(AosConditionTest, Event_NotifyEvent_LteInfo)
+TEST_F(AosConditionTest, ShouldResetCombinedAttachWhenNotifyEventWithoutCombinedAttached)
 {
+    // GIVEN
     m_pAosCondition->Start();
 
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, 0);
-    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
 
+    // THEN
+    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
+}
+
+TEST_F(AosConditionTest, ShouldSetCombinedAttachWhenNotifyEventWithCombinedAttached)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
     m_pAosCondition->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, 0);
+
+    // THEN
     EXPECT_TRUE(m_pAosCondition->IsCombinedAttached());
 }
 
