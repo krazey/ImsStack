@@ -37,7 +37,7 @@ public:
     void CleanUp();
     void SetListener(IN IAosServiceAvailableListener* piListener);
     void RemoveListener(IN IAosServiceAvailableListener* piListener);
-    void RefreshServiceAvailablility();
+    void RefreshServiceAvailability();
     IMS_BOOL IsAvailable();
     IMS_UINT32 HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
 

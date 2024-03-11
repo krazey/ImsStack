@@ -75,6 +75,7 @@ public:
 
     NiceMock<MockIAosCallTracker> m_objMockIAosCallTracker;
     NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosBlock> m_objMockIAosBlock;
 
     MockIAosServiceAvailableListener m_objListener1;
     MockIAosServiceAvailableListener m_objListener2;
@@ -91,6 +92,8 @@ protected:
         // save origin pointer
         m_pOriginIAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
+
+        m_pAosServiceAvailable->SetBlock(&m_objMockIAosBlock);
     }
 
     virtual void TearDown() override
@@ -108,10 +111,10 @@ TEST_F(AosServiceAvailableTest, ShouldUpdateMemberVariableWhenCachedContextIsNul
     // GIVEN
     m_pAosServiceAvailable->SetAppContext(IMS_NULL);
 
-    EXPECT_CALL(m_objMockIAosAppContext, GetSlotId()).Times(1);
-    EXPECT_CALL(m_objMockIAosAppContext, GetBlock()).Times(1);
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration()).Times(1);
-    EXPECT_CALL(m_objMockIAosAppContext, GetConnection()).Times(1);
+    EXPECT_CALL(m_objMockIAosAppContext, GetSlotId());
+    EXPECT_CALL(m_objMockIAosAppContext, GetBlock());
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration());
+    EXPECT_CALL(m_objMockIAosAppContext, GetConnection());
 
     // WHEN
     m_pAosServiceAvailable->Init(&m_objMockIAosAppContext);
@@ -227,27 +230,25 @@ TEST_F(AosServiceAvailableTest, SucceedsRemoveListener)
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore)
+TEST_F(AosServiceAvailableTest, ShouldNotNotifyToListenersWhenAvailableStateIsSame)
 {
-    MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
-
-    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(0);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, GetBlockReasons(_, _));
+    EXPECT_CALL(m_objMockIAosBlock, PrintBlockReasons()).Times(0);
 
     m_pAosServiceAvailable->SetAvailableLastNotified(IMS_TRUE);
-    m_pAosServiceAvailable->RefreshServiceAvailablility();
+
+    // WHEN
+    m_pAosServiceAvailable->RefreshServiceAvailability();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
+TEST_F(AosServiceAvailableTest, ShouldNotifyToListenersWhenRefreshServiceAvailability)
 {
-    MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
-
-    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(1);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, GetBlockReasons(_, _));
+    EXPECT_CALL(m_objMockIAosBlock, PrintBlockReasons());
 
     ImsList<IAosServiceAvailableListener*> objListeners;
     objListeners.Append(&m_objListener1);
@@ -255,12 +256,16 @@ TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
     objListeners.Append(&m_objListener3);
     m_pAosServiceAvailable->SetListeners(objListeners);
 
-    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed()).Times(1);
-    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed()).Times(1);
-    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed()).Times(1);
+    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed());
+    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed());
+    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed());
 
     m_pAosServiceAvailable->SetAvailableLastNotified(IMS_FALSE);
-    m_pAosServiceAvailable->RefreshServiceAvailablility();
+
+    // WHEN
+    m_pAosServiceAvailable->RefreshServiceAvailability();
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosServiceAvailableTest, HandleEvent_Valid)

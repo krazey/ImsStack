@@ -214,13 +214,13 @@ PUBLIC VIRTUAL IMS_UINT32 AosCondition::CheckServiceAvailable(IN SERVICE_TYPE eT
 
     if (m_pAvailableCellular != IMS_NULL && (eType == SERVICE_CELLULAR || eType == SERVICE_WHOLE))
     {
-        m_pAvailableCellular->RefreshServiceAvailablility();
+        m_pAvailableCellular->RefreshServiceAvailability();
         nCheck |= CHECK_CELLULAR;
     }
 
     if (m_pAvailableWifi != IMS_NULL && (eType == SERVICE_WIFI || eType == SERVICE_WHOLE))
     {
-        m_pAvailableWifi->RefreshServiceAvailablility();
+        m_pAvailableWifi->RefreshServiceAvailability();
         nCheck |= CHECK_WIFI;
     }
 

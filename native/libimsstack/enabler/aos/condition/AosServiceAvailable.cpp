@@ -137,9 +137,9 @@ void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piList
 }
 
 PUBLIC
-void AosServiceAvailable::RefreshServiceAvailablility()
+void AosServiceAvailable::RefreshServiceAvailability()
 {
-    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailablility", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailability", 0, 0, 0);
     Notify();
 }
 
