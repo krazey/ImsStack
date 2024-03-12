@@ -36,58 +36,30 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::StrEq;
 
+#define DECLARE_USING(Base)                     \
+    using Base::WifiWatcher_NotifyStateChanged; \
+    using Base::NetworkPing_NotifyResult;       \
+    using Base::HandleCallStateChanged;         \
+    using Base::HandleAirplaneModeChanged;      \
+    using Base::HandleWifiConnectionChanged;    \
+    using Base::HandleLocationInfoChanged;      \
+    using Base::ProcessBadConnectionReported;   \
+    using Base::RequestNetPing;                 \
+    using Base::PingResultToString;
+
 class TestAosServiceAvailableWifi : public AosServiceAvailableWifi
 {
 public:
+    DECLARE_USING(AosServiceAvailableWifi)
+
     inline explicit TestAosServiceAvailableWifi() :
             AosServiceAvailableWifi()
     {
-    }
-
-    inline void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher) override
-    {
-        AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(pIWifiWatcher);
-    }
-
-    inline void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult) override
-    {
-        AosServiceAvailableWifi::NetworkPing_NotifyResult(piPing, nResult);
-    }
-
-    inline void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) override
-    {
-        AosServiceAvailableWifi::HandleCallStateChanged(nState, nStateEx);
-    }
-
-    inline void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override
-    {
-        AosServiceAvailableWifi::HandleAirplaneModeChanged(nState);
-    }
-
-    inline void HandleWifiConnectionChanged() override
-    {
-        AosServiceAvailableWifi::HandleWifiConnectionChanged();
-    }
-
-    inline void HandleLocationInfoChanged() override
-    {
-        AosServiceAvailableWifi::HandleLocationInfoChanged();
-    }
-
-    inline void ProcessBadConnectionReported()
-    {
-        AosServiceAvailableWifi::ProcessBadConnectionReported();
-    }
-
-    inline IMS_SINT32 RequestNetPing() { return AosServiceAvailableWifi::RequestNetPing(); }
-
-    inline const IMS_CHAR* PingResultToString(IN IMS_SINT32 nResult)
-    {
-        return AosServiceAvailableWifi::PingResultToString(nResult);
     }
 
     inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
@@ -128,9 +100,9 @@ class AosServiceAvailableWifiTest : public ::testing::Test
 public:
     TestAosServiceAvailableWifi* m_pServiceAvailableWifi;
     IAosNConfiguration* m_piOriginConfiguration;
-    MockIAosCallTracker m_objMockIAosCallTracker;
-    MockIAosRegistration m_objMockIAosRegistration;
-    MockIAosConnection m_objMockIAosConnection;
+    NiceMock<MockIAosCallTracker> m_objMockIAosCallTracker;
+    NiceMock<MockIAosRegistration> m_objMockIAosRegistration;
+    NiceMock<MockIAosConnection> m_objMockIAosConnection;
 
 protected:
     virtual void SetUp() override
