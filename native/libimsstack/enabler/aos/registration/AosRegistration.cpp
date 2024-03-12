@@ -3021,7 +3021,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReregister()
     if (!CheckRadioReadyAndSetTxnPending())
     {
         A_IMS_TRACE_I(REGID, "ProcessReregister :: txn is pending due to radio", 0, 0, 0);
-        SetState(STATE_REFRESHSTOP);
+        if (IsRadioWaiting())
+        {
+            m_nState = STATE_REFRESHSTOP;
+        }
+        else
+        {
+            SetState(STATE_REFRESHSTOP);
+        }
         return;
     }
 
@@ -4749,7 +4756,14 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
     if (!IsTransactionStarted())
     {
         m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
-        SetState(STATE_REFRESHSTOP);
+        if (IsRadioWaiting())
+        {
+            m_nState = STATE_REFRESHSTOP;
+        }
+        else
+        {
+            SetState(STATE_REFRESHSTOP);
+        }
         return;
     }
 
