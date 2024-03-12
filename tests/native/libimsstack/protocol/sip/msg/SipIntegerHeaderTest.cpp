@@ -195,14 +195,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    SipParameters* pParameters = pMinSeHeader->GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        pMinSeHeader->InitParameters(SIP_NULL);
-        pParameters = pMinSeHeader->GetParameters();
-    }
-    pParameters->AddParam("generic-param", "generic-value");
+    pMinSeHeader->AddParam("generic-param", "generic-value");
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("360;generic-param=generic-value", &(aBuffer[0]));
@@ -226,14 +219,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    pParameters = pSessionExpiresHeader->GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        pSessionExpiresHeader->InitParameters(SIP_NULL);
-        pParameters = pSessionExpiresHeader->GetParameters();
-    }
-    pParameters->AddParam("refresher", "uac");
+    pSessionExpiresHeader->AddParam("refresher", "uac");
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("2400;refresher=uac", &(aBuffer[0]));
@@ -338,11 +324,8 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     ASSERT_TRUE(pMinSeHeader != nullptr);
     EXPECT_EQ(SIP_TRUE,
             pMinSeHeader->DecodeHdr(const_cast<char*>("1400;generic-param=generic-value"), 32));
-    SipParameters* pParameters = pMinSeHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(1, pMinSeHeader->GetParamCount());
+    SipNameValue* pNameVal = pMinSeHeader->GetParam(0);
     EXPECT_STREQ("generic-param", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("generic-value", pNameVal->m_valueList.GetAt(0));
@@ -360,11 +343,8 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     ASSERT_TRUE(pSessionExpiresHeader != nullptr);
     EXPECT_EQ(SIP_TRUE,
             pSessionExpiresHeader->DecodeHdr(const_cast<char*>("1600;refresher=uas"), 18));
-    pParameters = pSessionExpiresHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList1 = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList1.GetCount());
-    pNameVal = objParameterList1.GetNameValNode(0);
+    EXPECT_EQ(1, pSessionExpiresHeader->GetParamCount());
+    pNameVal = pSessionExpiresHeader->GetParam(0);
     EXPECT_STREQ("refresher", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("uas", pNameVal->m_valueList.GetAt(0));

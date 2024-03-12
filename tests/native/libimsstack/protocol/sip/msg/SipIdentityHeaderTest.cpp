@@ -79,9 +79,7 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("alg", "ES256");
+    pHeader->AddParam("alg", "ES256");
 
     /* Signed identity digest, info and parameters present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
@@ -143,10 +141,7 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
     EXPECT_STREQ("eyJhbGci.VyaSI6WyJ-zJ6F1VOg", pHeader->GetSignedIdentityDigest());
     EXPECT_STREQ("1234", pHeader->GetInfo());
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& pSipParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(2, pSipParameterList.GetCount());
+    EXPECT_EQ(2, pHeader->GetParamCount());
 
     SipIdentityHeader* pCopyHeader = reinterpret_cast<SipIdentityHeader*>(
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, pHeader));

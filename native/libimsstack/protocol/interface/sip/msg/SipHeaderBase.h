@@ -163,7 +163,6 @@ private:
 public:
     explicit SipHeaderBase(SIP_INT32 eHdrType);
     SipHeaderBase(const SipHeaderBase& objHeader);
-    SIP_VOID InitParameters(SipParameters* pParameters);
     SIP_BOOL EncodeHeaderParameters(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
     SIP_BOOL EncodeParameters(AStringBuffer& objBuffer) const;
     virtual SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
@@ -178,7 +177,36 @@ public:
     virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     inline SIP_INT32 GetHdrType() const { return m_eHdrType; }
     inline SIP_VOID SetHdrType(SIP_INT32 eHdrType) { m_eHdrType = eHdrType; }
-    SipParameters* GetParameters() const;
+    inline SIP_UINT32 GetParamCount() const
+    {
+        return (m_pParameters != SIP_NULL) ? m_pParameters->GetParamCount() : 0;
+    }
+    inline SIP_BOOL IsParamPresent(const SIP_CHAR* pszName)
+    {
+        return (m_pParameters != SIP_NULL) ? m_pParameters->IsParamPresent(pszName) : SIP_FALSE;
+    }
+    inline SIP_UINT32 GetParamIndex(const SIP_CHAR* pszName) const
+    {
+        return m_pParameters->GetParamIndex(pszName);
+    }
+    SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
+    inline SIP_VOID RemoveParam(const SIP_CHAR* pszName)
+    {
+        if (m_pParameters != SIP_NULL)
+        {
+            m_pParameters->RemoveParam(pszName);
+        }
+    }
+    SIP_BOOL SetParam(
+            const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos = SIP_ZERO);
+    inline SipNameValue* GetParam(SIP_INT32 nPos) const
+    {
+        return (m_pParameters != SIP_NULL) ? m_pParameters->GetParam(nPos) : SIP_NULL;
+    }
+    inline SIP_CHAR* GetParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const
+    {
+        return (m_pParameters != SIP_NULL) ? m_pParameters->GetParamValue(pszName, nPos) : SIP_NULL;
+    }
     virtual SIP_BOOL IsValidHeader() const;
     virtual SIP_BOOL SetValue(const SIP_CHAR* pszValue);
     virtual const SIP_CHAR* GetValue() const;
@@ -190,6 +218,9 @@ protected:
     virtual ~SipHeaderBase();
     static SIP_BOOL FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
             SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd);
+
+private:
+    SIP_VOID InitParameters(SipParameters* pParameters);
 };
 
 class SipNameAddrHeader : public SipHeaderBase

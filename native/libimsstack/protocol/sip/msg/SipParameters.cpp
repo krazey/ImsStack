@@ -101,17 +101,15 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
     return SIP_TRUE;
 }
 
-SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
+SIP_VOID SipParameterList::RemoveParam(const SIP_CHAR* pszName)
 {
     if (pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        return;
     }
 
     SIP_UINT32 nSize = m_objPrmList.GetSize();
-
-    SIP_BOOL bFound = SIP_FALSE;
     SIP_UINT32 nIndex = SIP_ZERO;
 
     while (nIndex < nSize)
@@ -119,26 +117,16 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
         SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
         if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == 0)
         {
-            bFound = SIP_TRUE;
-            break;
+            pNameValue->SipDelete();
+            m_objPrmList.RemoveAt(nIndex);
+            return;
         }
         nIndex++;
     }
-
-    if (bFound == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Remove: Param Not found", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    m_objPrmList.GetAt(nIndex)->SipDelete();
-    m_objPrmList.RemoveAt(nIndex);
-
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipParameterList::FindElement(
-        const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_UINT32& nPos)
+        const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_INT32& nPos) const
 {
     SIP_UINT32 nSize = m_objPrmList.GetSize();
 
@@ -155,7 +143,7 @@ SIP_BOOL SipParameterList::FindElement(
     return SIP_FALSE;
 }
 
-SIP_BOOL SipParameterList::SetParamValue(
+SIP_BOOL SipParameterList::SetParam(
         const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
     if (pszName == SIP_NULL)
@@ -164,13 +152,10 @@ SIP_BOOL SipParameterList::SetParamValue(
     }
 
     SipNameValue* pNameValue = SIP_NULL;
-    SIP_UINT32 nTempPos = SIP_ZERO;
-
-    /*Check whether parameter already exists or not*/
-    SIP_BOOL bStatus = FindElement(pszName, pNameValue, nTempPos);
+    SIP_INT32 nTempPos = -1;
 
     /*If parameter not found add new entry*/
-    if ((bStatus == SIP_FALSE) || (pNameValue == SIP_NULL))
+    if (FindElement(pszName, pNameValue, nTempPos) == SIP_FALSE)
     {
         return Add(pszName, pszValue);
     }
@@ -211,7 +196,7 @@ SIP_BOOL SipParameterList::SetParamValue(
 }
 
 SIP_CHAR* SipParameterList::GetParamValue(
-        const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/)
+        const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/) const
 {
     if (pszName == SIP_NULL)
     {
@@ -219,10 +204,9 @@ SIP_CHAR* SipParameterList::GetParamValue(
     }
 
     SipNameValue* pNameValue = SIP_NULL;
-    SIP_UINT32 nPos1 = SIP_ZERO;
+    SIP_INT32 nPos1 = -1;
 
-    SIP_BOOL bStatus = FindElement(pszName, pNameValue, nPos1);
-    if ((bStatus == SIP_FALSE) || (pNameValue == SIP_NULL))
+    if (FindElement(pszName, pNameValue, nPos1) == SIP_FALSE)
     {
         return SIP_NULL;
     }
@@ -238,7 +222,7 @@ SIP_CHAR* SipParameterList::GetParamValue(
     return (pszElement != SIP_NULL) ? SipPf_Strdup(pszElement) : SIP_NULL;
 }
 
-SIP_BOOL SipParameterList::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
+SIP_BOOL SipParameterList::IsParamPresent(const SIP_CHAR* pszName) const
 {
     if (pszName == SIP_NULL)
     {
@@ -246,25 +230,22 @@ SIP_BOOL SipParameterList::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pn
     }
 
     SipNameValue* pNameValue = SIP_NULL;
+    SIP_INT32 nPos = -1;
 
-    return FindElement(pszName, pNameValue, *pnPos);
+    return FindElement(pszName, pNameValue, nPos);
 }
 
-SipNameValue* SipParameterList::GetParamNode(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
+SIP_INT32 SipParameterList::GetParamIndex(const SIP_CHAR* pszName) const
 {
     if (pszName == SIP_NULL)
     {
-        return SIP_NULL;
+        return -1;
     }
 
     SipNameValue* pNameValue = SIP_NULL;
-    SIP_BOOL bStatus = FindElement(pszName, pNameValue, *pnPos);
-    if ((bStatus == SIP_FALSE) || (pNameValue == SIP_NULL))
-    {
-        return SIP_NULL;
-    }
+    SIP_INT32 nPos = -1;
 
-    return pNameValue;
+    return FindElement(pszName, pNameValue, nPos) ? nPos : -1;
 }
 
 SIP_BOOL SipParameterList::Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
@@ -662,20 +643,19 @@ SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
     return m_objParameterList.Add(pszName, pszValue);
 }
 
-SIP_BOOL SipParameters::RemoveParam(const SIP_CHAR* pszName)
+SIP_VOID SipParameters::RemoveParam(const SIP_CHAR* pszName)
 {
-    return m_objParameterList.Remove(pszName);
+    m_objParameterList.RemoveParam(pszName);
 }
 
-SIP_BOOL SipParameters::SetParamValue(
-        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
+SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
-    return m_objParameterList.SetParamValue(pszName, pszValue, nPos);
+    return m_objParameterList.SetParam(pszName, pszValue, nPos);
 }
 
-SIP_BOOL SipParameters::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
+SIP_BOOL SipParameters::IsParamPresent(const SIP_CHAR* pszName) const
 {
-    return m_objParameterList.IsParamExists(pszName, pnPos);
+    return m_objParameterList.IsParamPresent(pszName);
 }
 
 SipParameterList& SipParameters::GetParameterList()
@@ -684,12 +664,7 @@ SipParameterList& SipParameters::GetParameterList()
 }
 
 SIP_CHAR* SipParameters::GetParamValue(
-        const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/)
+        const SIP_CHAR* pszName, SIP_UINT32 nPos /*= SIP_ZERO*/) const
 {
     return m_objParameterList.GetParamValue(pszName, nPos);
-}
-
-SipNameValue* SipParameters::GetParamNode(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
-{
-    return m_objParameterList.GetParamNode(pszName, pnPos);
 }

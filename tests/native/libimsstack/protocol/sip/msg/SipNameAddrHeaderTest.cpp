@@ -118,9 +118,7 @@ TEST_F(SipNameAddrHeaderTest, EncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     /* Encode with parameters */
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("param-name", "param-value");
+    pHeader->AddParam("param-name", "param-value");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ("DisplayName <www.absolute-uri.com/abcd>;param-name=param-value", &(aBuffer[0]));
@@ -139,7 +137,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("*"), 1));
     EXPECT_STREQ("*", pHeader->GetValue());
-    EXPECT_TRUE(nullptr == pHeader->GetParameters());
+    EXPECT_EQ(0, pHeader->GetParamCount());
 
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -158,7 +156,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
     pNameAddress = nullptr;
     pAddressSpec = nullptr;
 
-    EXPECT_TRUE(pHeader->GetParameters() == nullptr);
+    EXPECT_EQ(0, pHeader->GetParamCount());
 
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -178,7 +176,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
     pNameAddress = nullptr;
     pAddressSpec = nullptr;
 
-    EXPECT_TRUE(pHeader->GetParameters() == nullptr);
+    EXPECT_EQ(0, pHeader->GetParamCount());
 
     pHeader->SipDelete();
     pHeader = nullptr;
@@ -224,11 +222,8 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
     pNameAddress = nullptr;
     pAddressSpec = nullptr;
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));

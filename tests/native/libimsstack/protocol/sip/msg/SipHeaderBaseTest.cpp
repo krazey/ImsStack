@@ -43,35 +43,9 @@ TEST_F(SipHeaderBaseTest, CopyConstructor)
     pHeader = nullptr;
 
     EXPECT_STREQ("HeaderValue", pCopyHeader->GetValue());
-    EXPECT_TRUE(pCopyHeader->GetParameters() == nullptr);
+    EXPECT_EQ(0, pCopyHeader->GetParamCount());
 
-    pCopyHeader->InitParameters(SIP_NULL);
-    EXPECT_TRUE(pCopyHeader->GetParameters() != nullptr);
-
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, pCopyHeader);
     pCopyHeader->SipDelete();
-
-    EXPECT_STREQ("HeaderValue", pHeader->GetValue());
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-
-    pHeader->SipDelete();
-}
-
-TEST_F(SipHeaderBaseTest, InitParameters)
-{
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, nullptr);
-    ASSERT_TRUE(pHeader != nullptr);
-
-    pHeader->InitParameters(SIP_NULL);
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-
-    SipParameters* pParameters = new SipParameters();
-    pHeader->InitParameters(pParameters);
-
-    delete pParameters;
-
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-    pHeader->SipDelete();
 }
 
 TEST_F(SipHeaderBaseTest, IsValidHeader)
@@ -206,9 +180,7 @@ TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     /* Encode content-disposition with value and parameters */
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("handling", "required");
+    pHeader->AddParam("handling", "required");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -247,11 +219,8 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("render;handling=optional"), 24));
     EXPECT_STREQ("render", pHeader->GetValue());
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("handling", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("optional", pNameVal->m_valueList.GetAt(0));
@@ -295,11 +264,8 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("*;param-name=param-value"), 24));
     EXPECT_STREQ("*", pHeader->GetValue());
-    pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList1 = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList1.GetCount());
-    pNameVal = objParameterList1.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));

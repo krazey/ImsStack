@@ -147,15 +147,12 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(2, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(2, pHeader->GetParamCount());
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("icid-generated-at", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("192.0.6.8", pNameVal->m_valueList.GetAt(0));
-    pNameVal = objParameterList.GetNameValNode(1);
+    pNameVal = pHeader->GetParam(1);
     EXPECT_STREQ("orig-ioi", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("home1.net", pNameVal->m_valueList.GetAt(0));

@@ -130,13 +130,12 @@ SipParameterList* SipUri::GetHdrParamList()
     return m_pUriHdrParamList;
 }
 
-SIP_BOOL SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
+SIP_VOID SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
 {
     if (m_pUriHdrParamList != SIP_NULL)
     {
-        return m_pUriHdrParamList->Remove(pszName);
+        m_pUriHdrParamList->RemoveParam(pszName);
     }
-    return SIP_FALSE;
 }
 
 SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const

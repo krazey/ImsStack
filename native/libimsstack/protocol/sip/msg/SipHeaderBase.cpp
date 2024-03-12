@@ -183,11 +183,6 @@ SIP_VOID SipHeaderBase::InitParameters(SipParameters* pParameters)
     }
 }
 
-SipParameters* SipHeaderBase::GetParameters() const
-{
-    return m_pParameters;
-}
-
 SIP_BOOL SipHeaderBase::FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
         SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd)
 {
@@ -228,6 +223,25 @@ SIP_BOOL SipHeaderBase::FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
     }
 
     return SIP_TRUE;
+}
+
+SIP_BOOL SipHeaderBase::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue /*= SIP_NULL*/)
+{
+    if (m_pParameters == SIP_NULL)
+    {
+        InitParameters(SIP_NULL);
+    }
+    return m_pParameters->AddParam(pszName, pszValue);
+}
+
+SIP_BOOL SipHeaderBase::SetParam(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos /*= SIP_ZERO*/)
+{
+    if (m_pParameters == SIP_NULL)
+    {
+        InitParameters(SIP_NULL);
+    }
+    return m_pParameters->SetParam(pszName, pszValue, nPos);
 }
 
 SIP_BOOL SipHeaderBase::IsValidHeader() const
@@ -301,7 +315,7 @@ SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     if (m_pszValue == SIP_NULL)
     {
@@ -463,16 +477,7 @@ SipNameAddr* SipNameAddrHeader::GetNameAddr()
 
 SIP_CHAR* SipNameAddrHeader::GetTag()
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    return objParameterList.GetParamValue("tag");
+    return GetParamValue("tag");
 }
 
 SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -492,7 +497,7 @@ SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) c
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     if (m_pNameAddr == SIP_NULL)
     {

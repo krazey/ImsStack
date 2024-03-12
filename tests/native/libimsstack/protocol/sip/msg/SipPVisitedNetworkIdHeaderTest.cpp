@@ -70,7 +70,7 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     SIP_CHAR* pValue = const_cast<char*>("other.net");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ(pValue, pHeader->GetValue());
-    EXPECT_TRUE(nullptr == pHeader->GetParameters());
+    EXPECT_EQ(0, pHeader->GetParamCount());
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
@@ -80,11 +80,8 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     pValue = const_cast<char*>("Visited network number 1;level=7");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("level", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("7", pNameVal->m_valueList.GetAt(0));
@@ -97,7 +94,7 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     pValue = const_cast<char*>("\"Visited network number 1\"");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
-    EXPECT_TRUE(nullptr == pHeader->GetParameters());
+    EXPECT_EQ(0, pHeader->GetParamCount());
     pHeader->SipDelete();
 }
 

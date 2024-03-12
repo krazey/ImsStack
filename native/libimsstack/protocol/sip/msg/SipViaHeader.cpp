@@ -205,39 +205,12 @@ SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
 
 const SIP_CHAR* SipViaHeader::GetBranch() const
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    return objParameterList.GetParamValue("branch");
+    return GetParamValue("branch");
 }
 
 SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        InitParameters(SIP_NULL);
-        pParameters = GetParameters();
-    }
-
-    if (pParameters == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    if (pParameters->AddParam("branch", pszBranch) == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Set Branch failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    return SIP_TRUE;
+    return AddParam("branch", pszBranch);
 }
 
 SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
