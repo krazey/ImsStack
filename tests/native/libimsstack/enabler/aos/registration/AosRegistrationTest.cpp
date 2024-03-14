@@ -2314,6 +2314,19 @@ TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 }
 
+TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsWaiting)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
 TEST_F(AosRegistrationTest, StopReregisterProcessWhenRegisterFailsDueToCall)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
@@ -4186,6 +4199,23 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsStop
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
+            .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_)).WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+
+    EXPECT_FALSE(bDoImplicitRefresh);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest,
+        RefreshTimerExpiredStopsRefreshWhenTransactionIsStoppedAndRadioIsWaiting)
+{
+    IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
             .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
