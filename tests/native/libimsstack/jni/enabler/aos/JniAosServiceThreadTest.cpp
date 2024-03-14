@@ -25,16 +25,24 @@ class JniAosServiceThreadTest : public ::testing::Test
 {
 public:
     JniAosServiceThread* m_pJniAosServiceThread;
+    ImsList<AString> m_objFeatureTags;
 
 protected:
     virtual void SetUp() override
     {
         m_pJniAosServiceThread = new JniAosServiceThread();
         ASSERT_TRUE(m_pJniAosServiceThread != nullptr);
+
+        m_objFeatureTags = ImsList<AString>();
+        m_objFeatureTags.Append(AString("featureTag1"));
+        m_objFeatureTags.Append(AString("featureTag2"));
+        m_objFeatureTags.Append(AString("featureTag3"));
     }
 
     virtual void TearDown() override
     {
+        m_objFeatureTags.Clear();
+
         if (m_pJniAosServiceThread)
         {
             delete m_pJniAosServiceThread;
@@ -45,13 +53,8 @@ protected:
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistered)
 {
     // GIVEN
-    ImsList<AString> objFeatureTags = ImsList<AString>();
-    objFeatureTags.Append(AString("featureTag1"));
-    objFeatureTags.Append(AString("featureTag2"));
-    objFeatureTags.Append(AString("featureTag3"));
-
     // WHEN
-    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistered(0, 0, objFeatureTags);
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistered(0, 0, m_objFeatureTags);
 
     // THEN
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
@@ -60,13 +63,8 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistered)
 TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistering)
 {
     // GIVEN
-    ImsList<AString> objFeatureTags = ImsList<AString>();
-    objFeatureTags.Append(AString("featureTag1"));
-    objFeatureTags.Append(AString("featureTag2"));
-    objFeatureTags.Append(AString("featureTag3"));
-
     // WHEN
-    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistering(0, 0, objFeatureTags);
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistering(0, 0, m_objFeatureTags);
 
     // THEN
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
