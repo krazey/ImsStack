@@ -1755,22 +1755,25 @@ TEST_F(AosRegistrationTest, ReturnTrueIfRetryOnSamePcscfIsRequiredWhenSetNextPcs
     EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequired)
+TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequiredDecidedUsingRegRetryCountPerPcscf)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(3)
-            .WillOnce(Return(0))
-            .WillOnce(Return(2))
-            .WillOnce(Return(2));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(3));
+    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(0));
 
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(2)
-            .WillOnce(Return(3))
-            .WillOnce(Return(0));
+    IMS_BOOL bResult = m_pAosRegistration->IsRetryOnSamePcscfRequired();
 
-    EXPECT_FALSE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
-    EXPECT_TRUE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequiredDecidedUsingRegRetryCountOnSinglePcscf)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillOnce(Return(3));
+    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillOnce(Return(1));
+    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(0));
+
+    IMS_BOOL bResult = m_pAosRegistration->IsRetryOnSamePcscfRequired();
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, RegReinitiateMessageTriggersReinitiate)
@@ -2863,73 +2866,94 @@ TEST_F(AosRegistrationTest, ReportFailureIfSetOfPcscfFailWhenStartWithEveryPcscf
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy)
+TEST_F(AosRegistrationTest, StartRetryTimerIfCanIncreaseCountWhenStartWithNonZeroInterval)
 {
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count can be increased
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
-            .Times(2);
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
 
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfCanIncreaseCountWhenStartWithZeroInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count reaches max count
-    // succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+TEST_F(AosRegistrationTest, StartRetryTimerIfSucceedToSetNextPcscfWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count reaches max count
-    // fail to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(4));
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
 
-    // retry counter is not shared between REGISTER and SUBSCRIBE - Retry count can be increased
-    // succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // retry counter is not shared between REGISTER and SUBSCRIBE - Retry count can be increased
-    // fail to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(4));
+TEST_F(AosRegistrationTest, ResetPcscfTriedIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosPcscf, IsAllPcscfTried()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(10));
+
+    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTried());
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+}
+
+TEST_F(AosRegistrationTest,
+        ReportFailureDueToNoPcscfIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
 }
 
 TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_Update)
