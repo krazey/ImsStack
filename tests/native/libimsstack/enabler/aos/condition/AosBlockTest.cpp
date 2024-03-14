@@ -104,8 +104,7 @@ INSTANTIATE_TEST_SUITE_P(AosBlockTestInstantiation, AosBlockTest,
                 {BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, "WIFI_COUNTRY_CODE_UNAVAILABLE"},
                 {BLOCK_WIFI_AIRPLANE_MODE_ON,         "WIFI_AIRPLANE_MODE_ON"        },
                 {BLOCK_WIFI_NO_WIFI,                  "WIFI_NO_WIFI"                 },
-                {BLOCK_WIFI_TEMPORARILY_BLOCKED,      "WIFI_TEMPORARILY_BLOCKED"     },
-                {BLOCK_MAX,                           "INVALID"                      }
+                {BLOCK_WIFI_TEMPORARILY_BLOCKED,      "WIFI_TEMPORARILY_BLOCKED"     }
 }));
 
 TEST_F(AosBlockTest, FailsSetListenerWhenListenerIsNull)
@@ -773,4 +772,9 @@ TEST_P(AosBlockTest, BlockReasonToString)
 
     // THEN
     EXPECT_STREQ(objAosBlockParams.pszString, pszActual);
+}
+
+TEST_F(AosBlockTest, ReturnsInvalidWhenBlockReasonToStringWithInvalid)
+{
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_MAX), "INVALID");
 }
