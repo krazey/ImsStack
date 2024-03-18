@@ -81,6 +81,7 @@ using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::DoAll;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
@@ -2956,67 +2957,75 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_Update)
+TEST_F(AosRegistrationTest, TriggerOfflineRecoverWhenFlowRecoveryForUpdate)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objErrorCode;
-    objErrorCode.Clear();
     objErrorCode.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeWithRetryAfterTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrorCode));
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
+    ON_CALL(m_objMockIAosNConfiguration, GetReregErrCodeWithRetryAfterTime())
+            .WillByDefault(ReturnRef(objErrorCode));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("60")));
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EVERY_PCSCF - nRetryAfter is less than 0
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .Times(AnyNumber())
-            .WillOnce(ReturnRef(m_objEmptyImpus))
-            .WillRepeatedly(ReturnRef(m_objAvailableImpus));
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
 
-    // fail to CreateRegistration
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegistration, GetPreviousResponse()).WillByDefault(ReturnNull());
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objEmptyImpus));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
 
-    // succeed to CreateRegistration
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegistration, GetPreviousResponse()).WillByDefault(ReturnNull());
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
+}
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EVERY_PCSCF - nRetryAfter is greater than 0
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
+TEST_F(AosRegistrationTest, TriggerStartWithSpecifiedIntervalPolicyWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
 
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(AString("60")));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_OFFLINE_RECOVER);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillOnce(Return(IMS_TRUE));
 
-    // ActualWaitTimePolicy is AWT_POLICY_SPECIFIED_INTERVAL
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
     m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_300);
+}
 
-    // ActualWaitTimePolicy is AWT_POLICY_RFC_RULE
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+TEST_F(AosRegistrationTest, TriggerStartWithAvailableNextPcscfWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_300);
 }
 
