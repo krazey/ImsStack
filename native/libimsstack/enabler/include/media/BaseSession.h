@@ -28,7 +28,7 @@ class MediaEnvironment;
 class BaseSession
 {
 public:
-    explicit BaseSession(IN IMS_SINT32 nSlodId = 0);
+    explicit BaseSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~BaseSession();
 
     /**
@@ -94,7 +94,7 @@ public:
     virtual void SetAnbrMode(AnbrMode AnbrMode);
 
 protected:
-    IMS_SINT32 m_nSlodId;
+    IMS_SINT32 m_nSlotId;
     IMediaSessionListener* m_piMediaSessionListener;
     MediaEnvironment* m_pEnvironment;
     RtpConfig* m_pRtpConfig;

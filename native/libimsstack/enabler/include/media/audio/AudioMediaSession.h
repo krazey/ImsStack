@@ -66,7 +66,7 @@ public:
         CODEC_PCMU = 1 << 4,
     };
 
-    explicit AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
+    explicit AudioMediaSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~AudioMediaSession();
 
     /**

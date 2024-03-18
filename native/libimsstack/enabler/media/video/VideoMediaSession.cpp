@@ -116,7 +116,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     pVideoConfig->setDscp(m_pConfig->GetVideoDscp());
     pVideoConfig->setMaxMtuBytes(1500);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)
     {
