@@ -432,7 +432,7 @@ void AosSubscription::PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo)
     AString strLog;
     for (IMS_UINT32 i = 0; i < objRegInfo.GetSize(); i++)
     {
-        IRegInfoContact* piCurr = objRegInfo.GetAt(i);
+        const IRegInfoContact* piCurr = objRegInfo.GetAt(i);
 
         strLog.Append("[state/");
         strLog.Append(RegInfoStateToString(piCurr->GetState()));
@@ -527,8 +527,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
 {
     A_IMS_TRACE_I(AOSTAG, "ProcessFailureResponse_504", 0, 0, 0);
 
-    ISipMessage* piMsg = IMS_NULL;
-    piMsg = m_piRegSubscription->GetPreviousResponse();
+    const ISipMessage* piMsg = m_piRegSubscription->GetPreviousResponse();
 
     if (piMsg == IMS_NULL)
         return IMS_FALSE;
@@ -1079,7 +1078,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nSta
 
     for (IMS_UINT32 i = 0; i < objRegInfoRegistrations.GetSize(); ++i)
     {
-        IRegInfoRegistration* piRegInfo = objRegInfoRegistrations.GetAt(i);
+        const IRegInfoRegistration* piRegInfo = objRegInfoRegistrations.GetAt(i);
         if (piRegInfo != IMS_NULL)
         {
             objImpus.Append(piRegInfo->GetAor().ToString());
@@ -1104,13 +1103,10 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
 
     if (bHasBody == IMS_TRUE)
     {
-        IRegInfoRegistration* piRegInfo = IMS_NULL;
-        IRegInfoContact* piRegInfoContact = IMS_NULL;
-        ImsList<IRegInfoContact*> objContact;
-
         m_nAorState = IRegInfoContact::STATE_TERMINATED;
 
-        piRegInfo = m_piRegSubscription->GetRegInfo()->GetRegistration(m_strAor);
+        const IRegInfoRegistration* piRegInfo =
+                m_piRegSubscription->GetRegInfo()->GetRegistration(m_strAor);
         if (piRegInfo == IMS_NULL)
         {
             A_IMS_TRACE_I(AOSTAG, "RegInfo (%s) is not found", m_strAor.GetStr(), 0, 0);
@@ -1118,7 +1114,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
             return;
         }
 
-        objContact = piRegInfo->GetContacts();
+        ImsList<IRegInfoContact*> objContact = piRegInfo->GetContacts();
         if (objContact.GetSize() == 0)
         {
             A_IMS_TRACE_I(AOSTAG, "no contact of reg info", 0, 0, 0);
@@ -1127,7 +1123,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
 
         PrintRegInfo(objContact);
 
-        piRegInfoContact = GetRegInfoContact(objContact);
+        const IRegInfoContact* piRegInfoContact = GetRegInfoContact(objContact);
         if (piRegInfoContact == IMS_NULL)
         {
             A_IMS_TRACE_I(

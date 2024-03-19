@@ -141,7 +141,7 @@ void AosHandleMts::EnableAoS()
 
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
-    IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
 
     IMS_BOOL bSmsOverImsSupported = piConfig->IsSmsOverImsSupported();
     IMS_BOOL bSmsOverIpEnabled = piConfig->IsSmsOverIpEnabled();

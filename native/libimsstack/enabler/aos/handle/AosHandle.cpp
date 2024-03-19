@@ -390,7 +390,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nS
     A_IMS_TRACE_D(
             APPPROFILE, "SetReady :: bReady[%s], nService(%d)", _TRACE_B_(bReady), nService, 0);
 
-    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
     {
         piCallTracker->SetMtcReady();
