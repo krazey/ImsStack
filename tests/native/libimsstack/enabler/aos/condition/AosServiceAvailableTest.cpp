@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosCounter.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
@@ -39,13 +40,19 @@ const AString NAME = AString("AosServiceAvailable");
 
 class TestAosServiceAvailable : public AosServiceAvailable
 {
+private:
+    AosCounter* m_pCounter;
+
 public:
     DECLARE_USING(AosServiceAvailable)
 
     inline explicit TestAosServiceAvailable(const AString& strName) :
             AosServiceAvailable(strName)
     {
+        m_pCounter = new AosCounter();
     }
+
+    inline ~TestAosServiceAvailable() override { delete m_pCounter; }
 
     inline void SetAppContext(IN IAosAppContext* piContext) { m_piAppContext = piContext; }
 
@@ -63,6 +70,57 @@ public:
     inline void SetAvailableLastNotified(IN IMS_BOOL bAvailable)
     {
         m_bAvailableLastNotified = bAvailable;
+    }
+
+    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+
+    // Functions where calls are being counted
+    void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleCallStateChanged(nState, nStateEx);
+    }
+
+    void HandleNetworkStateChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleNetworkStateChanged();
+    }
+
+    void HandleBlockChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleBlockChanged(nState, nStateEx);
+    }
+
+    void HandleRoamingChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleRoamingChanged(nState);
+    }
+
+    void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleAirplaneModeChanged(nState);
+    }
+
+    void HandleVopsChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleVopsChanged(nState);
+    }
+
+    void HandleWifiConnectionChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleWifiConnectionChanged();
+    }
+
+    void HandleLocationInfoChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleLocationInfoChanged();
     }
 };
 
@@ -268,33 +326,47 @@ TEST_F(AosServiceAvailableTest, ShouldNotifyToListenersWhenRefreshServiceAvailab
     // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosServiceAvailableTest, HandleEvent_Valid)
+TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
 {
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1),
-            AosServiceAvailable::EVENT_AIRPLANE);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 0, 1),
-            AosServiceAvailable::EVENT_AIRPLANE);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1),
-            AosServiceAvailable::EVENT_ROAMING);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 0, 1),
-            AosServiceAvailable::EVENT_ROAMING);
+    // GIVEN
+    // WHEN
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_NETWORK, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1);
 
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1),
-            AosServiceAvailable::EVENT_VOPS);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1),
-            AosServiceAvailable::EVENT_LOCATION);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1),
-            AosServiceAvailable::EVENT_CALL);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_NETWORK, 1, 1),
-            AosServiceAvailable::EVENT_NETWORK);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1),
-            AosServiceAvailable::EVENT_WIFI_STATE);
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleCallStateChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleNetworkStateChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 1);
 }
 
-TEST_F(AosServiceAvailableTest, HandleEvent_Invalid)
+TEST_F(AosServiceAvailableTest, FailsInvokeFunctionWhenHandleEventWithInvalid)
 {
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(-1, 1, 1), -1);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(100, 1, 1), -1);
+    // GIVEN
+    IMS_SINT32 nInvalidEvent = AosServiceAvailable::EVENT_MAX;
+
+    // WHEN
+    m_pAosServiceAvailable->HandleEvent(nInvalidEvent, 1, 1);
+
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleCallStateChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleNetworkStateChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 0);
 }
 
 TEST_F(AosServiceAvailableTest, RequestCommand)
