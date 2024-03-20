@@ -207,25 +207,26 @@ public:
     /// Increase the SPI for sending REGISTER doing authentication
     static const IMS_UINT32 SPI_VALUE_TO_BE_INCREASED = 2;
 
-private:
-    IAosIpsecListener* m_piListener;
+protected:
     INetworkIpSec* m_piNetIpsec;
     IIpSecPolicy* m_piPolicy;
-    UeIpsecInfo* m_pUeInfo;
     PcscfIpsecInfo* m_pPcscfInfo;
+    IMS_BOOL m_bSaEstablished;
+    IMS_BOOL m_bIgnorePolicyExpired;
+
+private:
+    IAosIpsecListener* m_piListener;
+    UeIpsecInfo* m_pUeInfo;
     IMS_UINT32 m_nSecuProto;
     IMS_UINT32 m_nAuthAlgo;
     IMS_UINT32 m_nEncrAlgo;
     IMS_UINT32 m_nMode;
     IMS_BOOL m_bAddPolicy;
-    IMS_BOOL m_bSaEstablished;
-    IMS_BOOL m_bIgnorePolicyExpired;
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
 
 private:
     friend class AosIpsecTest;
-    friend class AosIpsecHelperTest;
 };
 
 /**
