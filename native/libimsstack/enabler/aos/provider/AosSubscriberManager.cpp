@@ -94,7 +94,7 @@ void AosSubscriberManager::AddListener(IN IAosSubscriberManagerListener* piListe
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -115,7 +115,7 @@ void AosSubscriberManager::RemoveListener(IN IAosSubscriberManagerListener* piLi
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -135,7 +135,7 @@ void AosSubscriberManager::AddListenerForMonitor(IN IAosSubscriberManagerListene
 
     for (IMS_UINT32 i = 0; i < m_objMonitorListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -156,7 +156,7 @@ void AosSubscriberManager::RemoveListenerForMonitor(IN IAosSubscriberManagerList
 
     for (IMS_UINT32 i = 0; i < m_objMonitorListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {

@@ -155,7 +155,7 @@ IMS_SINT32 AosUtil::GetMinExpiresValue(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
+IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg)
 {
     IMS_BOOL bInitialRegistration = IMS_FALSE;
 
@@ -164,7 +164,7 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
         ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
         if (!objBodyParts.IsEmpty())
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
             if (piBodyPart != IMS_NULL)
             {
                 AString strContentTypeHdr =
@@ -655,7 +655,7 @@ IMS_BOOL AosUtil::IsWifiTest() const
 PUBLIC
 IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const
 {
-    ILocationProperties* piLocation =
+    const ILocationProperties* piLocation =
             PhoneInfoService::GetPhoneInfoService()
                     ->GetLocationInfo(nSlotId)
                     ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);

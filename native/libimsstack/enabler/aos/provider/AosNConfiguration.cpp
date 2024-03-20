@@ -75,7 +75,7 @@ PUBLIC VIRTUAL void AosNConfiguration::SetListener(IN IAosNConfigurationListener
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosNConfigurationListener* piCurrListener = m_objListeners.GetAt(i);
+        const IAosNConfigurationListener* piCurrListener = m_objListeners.GetAt(i);
 
         if (piCurrListener == piListener)
         {
@@ -802,7 +802,7 @@ PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS
 
     A_IMS_TRACE_I(LOGTAG, "CarrierConfig_NotifyConfigChanged :: updated", 0, 0, 0);
 
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
 
     if (piCc == IMS_NULL)
     {

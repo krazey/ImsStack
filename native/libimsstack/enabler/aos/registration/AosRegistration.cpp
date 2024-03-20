@@ -442,7 +442,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_PATH:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -454,7 +454,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_LAST_PATH:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
                 if (piMessage != IMS_NULL)
                 {
                     strList = piMessage->GetHeaders(ISipHeader::PATH);
@@ -469,7 +469,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_SUPPORTED:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -481,7 +481,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_SERVICE_ROUTE:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -2100,7 +2100,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateFinalAddFeatureTag()
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 {
-    IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+    const IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
 
     AStringArray objImpu;
 
@@ -2122,8 +2122,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         else
         {
             A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
-            IRegistration* piRegistration = RegistrationManager::GetInstance()->GetRegistration(
-                    m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+            const IRegistration* piRegistration =
+                    RegistrationManager::GetInstance()->GetRegistration(
+                            m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
             objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
                                                    : piRegistration->GetAssociatedUris();
         }
@@ -5798,7 +5799,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
         piSipMsg->RemoveBodyParts();
     }
 
-    GeolocationPidfCreator* pPidfCreator =
+    const GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(m_nSlotId);
 
     if (pPidfCreator == IMS_NULL)
@@ -5947,7 +5948,7 @@ void AosRegistration::SetContactAddressConfiguration(IN IMS_BOOL bAdd)
             return;
         }
 
-        ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
+        const ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
 
         if (piMessage == IMS_NULL)
         {

@@ -223,7 +223,7 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceBlock()
 
 PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
 {
-    IAosNConfiguration* objConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
 
     m_objFeatureTagList.Clear();
 
@@ -242,17 +242,17 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
         m_objFeatureTagList.AddFeature(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
     }
 
-    if (objConfig->IsRttSupported())
+    if (piConfig->IsRttSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
     }
 
-    if (objConfig->IsVerstatForRegistrationSupported())
+    if (piConfig->IsVerstatForRegistrationSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::VERSTAT);
     }
 
-    if (objConfig->GetUssdMethod() != CarrierConfig::USSD_OVER_CS_ONLY)
+    if (piConfig->GetUssdMethod() != CarrierConfig::USSD_OVER_CS_ONLY)
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::USSI);
     }
@@ -715,7 +715,7 @@ void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
                   VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
     */
 
-    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
     {
         if (m_objBindedFeatureTagList.HasFeatureTag(
@@ -834,7 +834,8 @@ IMS_BOOL AosHandleMtc::ProcessHoldingVopsState(IN IMS_UINT32 nState)
 {
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
-        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        const IAosCallTracker* piCallTracker =
+                AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
         if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
         {
             m_nHoldingVopsState = nState;
@@ -858,7 +859,8 @@ IMS_BOOL AosHandleMtc::ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVo
 {
     if (nBarringFactorForVoice == 0)
     {
-        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        const IAosCallTracker* piCallTracker =
+                AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
         if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
         {
             m_bSsacHeld = IMS_TRUE;
