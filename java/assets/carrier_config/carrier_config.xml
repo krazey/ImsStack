@@ -303,7 +303,16 @@
     <boolean name="support_local_session_timer_bool" value="false"/>
     <boolean name="support_ecbm_for_volte_bool" value="false"/>
     <boolean name="support_ecbm_for_vowifi_bool" value="false"/>
-
+    <int name="location_policy_update_type_int" value="0"/>
+    <boolean name="location_allow_mock_location_update_bool" value="false"/>
+    <int name="location_acquisition_policy_int" value="0"/>
+    <int name="location_address_resolution_time_millis_int" value="2000"/>
+    <int name="location_validity_period_min_int" value="0"/>
+    <int name="location_address_validity_period_min_int" value="0"/>
+    <int name="location_tolerable_distance_int" value="0"/>
+    <int name="location_gps_searching_duration_sec_int" value="30"/>
+    <int name="location_geodetic_shape_int" value="0"/>
+    <boolean name="cellular_network_info_utc_offset_enabled_bool" value="false"/>
     <!-- Aos -->
     <boolean name="call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>

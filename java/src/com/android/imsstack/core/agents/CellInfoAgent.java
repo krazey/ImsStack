@@ -45,8 +45,7 @@ import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcm.DcUtils;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.carrier.CarrierInfo;
-import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
@@ -137,6 +136,14 @@ public class CellInfoAgent implements CellInfoInterface {
         }
     }
 
+    private final ConfigInterface.Listener mConfigListener = new ConfigInterface.Listener() {
+        @Override
+        public void onCarrierConfigChanged(int slotId, int subId) {
+            ImsLog.d(mSlotId, "carrier config is changed");
+            mTimeOffsetEnabledForUtcTimeFormat = isTimeOffsetEnabledForUtcTimeFormat();
+        }
+    };
+
     private final int mSlotId;
     // To listen events like the network type change.
     private final CellInfoHandler mCellInfoHandler;
@@ -166,7 +173,10 @@ public class CellInfoAgent implements CellInfoInterface {
     @Override
     public void init(Context context) {
         ImsLog.d(mSlotId, "init");
-        mTimeOffsetEnabledForUtcTimeFormat = isTimeOffsetEnabledForUtcTimeFormat();
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.addListener(mConfigListener);
+        }
     }
 
     @Override
@@ -174,6 +184,11 @@ public class CellInfoAgent implements CellInfoInterface {
         mCellInfoHandler.removeCallbacksAndMessages(null);
         stopTrackingCellInfo();
         mTimeOffsetEnabledForUtcTimeFormat = false;
+
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.removeListener(mConfigListener);
+        }
     }
 
     /**
@@ -559,16 +574,18 @@ public class CellInfoAgent implements CellInfoInterface {
         return new String[] { mcc, mnc, cid, tacOrLac, duplextMode };
     }
 
-    // TODO_CONFIG
     private boolean isTimeOffsetEnabledForUtcTimeFormat() {
-        SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(mSlotId);
-
-        // MTS: Legacy, MTC: carrier-id
-        if (cid != null && cid.getCarrierId() == 1678) {
-            return true;
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            return cc.getBoolean(
+                    CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL);
         }
-
         return false;
+    }
+
+    private ConfigInterface getConfigInterface() {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
     }
 
     private final class CellInfoListener extends TelephonyCallback implements

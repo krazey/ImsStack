@@ -32,8 +32,7 @@ import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.SensorManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.carrier.CarrierInfo;
-import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
@@ -110,7 +109,7 @@ public class LocationAgent implements LocationInterface {
             ImsLog.d(mSlotId, "Provider: " +
                     (location == null ? "null" : location.getProvider()));
 
-            // To prevent updating fron network provider repeatdly
+            // To prevent updating from network provider repeatedly
             if (LocationApi.isLocationFromNetwork(location)) {
                 if (mIsAleadyUpdatedFromNetwork == true) {
                     ImsLog.d(mSlotId, "Already update from network provider");
@@ -178,7 +177,7 @@ public class LocationAgent implements LocationInterface {
             mIsSmdRequested = false;
 
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING)) {
-                ImsLog.d(mSlotId, "Ignore, because periodic lcoation polling is not allowed");
+                ImsLog.d(mSlotId, "Ignore, because periodic location polling is not allowed");
             } else {
                 startTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL, (getUpdateInterval()*1000));
             }
@@ -230,6 +229,14 @@ public class LocationAgent implements LocationInterface {
         }
     };
 
+    private final ConfigInterface.Listener mConfigListener = new ConfigInterface.Listener() {
+        @Override
+        public void onCarrierConfigChanged(int slotId, int subId) {
+            ImsLog.d(mSlotId, "carrier config is changed");
+            initPolicy();
+        }
+    };
+
     public LocationAgent(int slotId) {
         ImsLog.d("LocationAgent" + slotId);
 
@@ -247,6 +254,11 @@ public class LocationAgent implements LocationInterface {
 
     @Override
     public void init(Context context) {
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.addListener(mConfigListener);
+        }
+
         initPolicy();
         mLocationApi.start();
     }
@@ -261,6 +273,11 @@ public class LocationAgent implements LocationInterface {
         stopTimer(ETimerType.TIMER_SEARCH_DURATION);
         stopTimer(ETimerType.TIMER_ASYNC_START);
         stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
+
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.removeListener(mConfigListener);
+        }
 
         mLocationRequestState = EReqState.STATE_IDLE;
         mGpsLocationRequested = false;
@@ -510,7 +527,7 @@ public class LocationAgent implements LocationInterface {
         startTimer(ETimerType.TIMER_SEARCH_DURATION, searchTime * 1000);
 
         if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING)) {
-            ImsLog.d(mSlotId, "Blocked, because periodic lcoation polling is not allowed");
+            ImsLog.d(mSlotId, "Blocked, because periodic location polling is not allowed");
         } else {
             stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
             startTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL,
@@ -1410,7 +1427,7 @@ public class LocationAgent implements LocationInterface {
     private void processLocationUpdateDone() {
         if (!requestSmd()) {
             if (mPolicy.hasPolicy(LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING)) {
-                ImsLog.d(mSlotId, "Blocked, because periodic lcoation polling is not allowed");
+                ImsLog.d(mSlotId, "Blocked, because periodic location polling is not allowed");
             } else {
                 stopTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL);
                 startTimer(ETimerType.TIMER_LOCATION_UPDATE_INTERVAL, (getUpdateInterval()*1000));
@@ -1431,58 +1448,51 @@ public class LocationAgent implements LocationInterface {
         LocationPolicy lp = null;
         int policy = LocationPolicy.POLICY_ENABLE_CACHED_LOCATION
                 | LocationPolicy.POLICY_USE_CACHED_LOCATION;
-        int addressResolutionTimeMillis = -1;
-        long validityPeriod = -1L;
-        SimCarrierId carrierId = CarrierInfo.getInstance().getCarrierId(mSlotId);
 
-        if (carrierId.getCarrierId() == 1) {
-            lp = getLocationPolicy();
-
-            policy |= LocationPolicy.POLICY_USE_CACHED_ADDRESS;
-            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
-            policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
-            policy |= LocationPolicy.POLICY_USE_FLP;
-            policy |= LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT;
-
-            addressResolutionTimeMillis = 1000;
-            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD;
-
-            lp.setAddressValidityPeriod(LocationPolicy.LOCATION_VALIDITY_PERIOD);
-            lp.setAddressTolerableDistance(150);
-            lp.setSearchDurationForGps(20);
-            lp.setShape(LocationPolicy.SHAPE_ELLIPSOID);
-        } else if (carrierId.getCarrierId() == 1187 || carrierId.getCarrierId() == 2119) {
-            lp = getLocationPolicy();
-
-            policy |= LocationPolicy.POLICY_NOTIFY_LOCATION_FIXED_FOR_INSTANT_REQUEST;
-            policy |= LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT;
-            policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
-            policy |= LocationPolicy.POLICY_USE_CACHED_ADDRESS;
-            policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
-            policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_VIA_OTHER_SCHEME;
-
-            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                    SubsInfoInterface.class, mSlotId);
-            if (subsInfo != null && subsInfo.isTestModeEnabled()) {
-                // For WFC E911 test which should be tested in Puerto Rico area,
-                // allow mock location
-                policy |= LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE;
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            int updateType = CarrierConfig.Assets.LOCATION_UPDATE_POLICY_NONE;
+            CarrierConfig cc = config.getCarrierConfig();
+            if (cc != null) {
+                updateType = cc.getInt(CarrierConfig.Assets.KEY_LOCATION_POLICY_UPDATE_TYPE_INT);
             }
 
-            addressResolutionTimeMillis = LocationPolicy.ADDRESS_RESOLUTION_RTD_TIME;
-            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD;
+            if ((CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED == updateType
+                    && ServiceCaps.isWfcEnabledByPlatform(mSlotId))
+                    || CarrierConfig.Assets.LOCATION_UPDATE_POLICY_ALWAYS == updateType) {
+                lp = getLocationPolicy();
 
-            lp.setAddressTolerableDistance(150);
-        } else if (carrierId.getCarrierId() == 1839
-                && ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
-            lp = getLocationPolicy();
+                policy |= cc.getInt(CarrierConfig.Assets.KEY_LOCATION_ACQUISITION_POLICY_INT);
+                if (cc.getBoolean(CarrierConfig.Assets
+                        .KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL)) {
+                    SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                            SubsInfoInterface.class, mSlotId);
+                    if (subsInfo != null && subsInfo.isTestModeEnabled()) {
+                        // For WFC E911 test which should be tested in Puerto Rico area,
+                        // allow mock location
+                        policy |= LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE;
+                    }
+                }
 
-            policy |= LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING;
-            policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
+                lp.setDefaultAddressResolutionTime(cc.getInt(
+                        CarrierConfig.Assets.KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT));
+                int validityMinutes = cc.getInt(
+                        CarrierConfig.Assets.KEY_LOCATION_VALIDITY_PERIOD_MIN_INT);
+                lp.setValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
+                validityMinutes = cc.getInt(
+                        CarrierConfig.Assets.KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT);
+                lp.setAddressValidityPeriod(validityMinutes * 60L * 1000L * 1000000L);
+                lp.setAddressTolerableDistance(cc.getInt(
+                        CarrierConfig.Assets.KEY_LOCATION_TOLERABLE_DISTANCE_INT));
+                lp.setSearchDurationForGps(cc.getInt(
+                        CarrierConfig.Assets.KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT));
+                int shape = cc.getInt(CarrierConfig.Assets.KEY_LOCATION_GEODETIC_SHAPE_INT);
+                lp.setShape(CarrierConfig.Assets.GEODETIC_SHAPE_ELLIPSOID == shape
+                        ? LocationPolicy.SHAPE_ELLIPSOID : LocationPolicy.SHAPE_CIRCLE);
+            }
+        }
 
-            addressResolutionTimeMillis = LocationPolicy.ADDRESS_RESOLUTION_MAX_TIME;
-            validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD_SHORT;
-        } else if (ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
+        if (lp == null && ServiceCaps.isWfcEnabledByPlatform(mSlotId)) {
             lp = getLocationPolicy();
 
             policy |= LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
@@ -1501,17 +1511,13 @@ public class LocationAgent implements LocationInterface {
         if (lp != null) {
             lp.setPolicy(policy);
 
-            if (addressResolutionTimeMillis > 0) {
-                lp.setDefaultAddressResolutionTime(addressResolutionTimeMillis);
-            }
-
-            if (validityPeriod > 0) {
-                lp.setValidityPeriod(validityPeriod);
-            }
-
             ImsLog.d(mSlotId, lp.toString());
 
             setLocationPolicy(lp);
         }
+    }
+
+    private ConfigInterface getConfigInterface() {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
     }
 }

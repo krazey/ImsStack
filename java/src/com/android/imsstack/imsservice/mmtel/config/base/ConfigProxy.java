@@ -377,45 +377,25 @@ public class ConfigProxy {
             return;
         }
 
-        SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
-
-        if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
-            return;
-        }
-
         SparseArray<ProvisioningItem> provisioningItems = ConfigUtils.getProvisioningItems();
 
-        int carrierId = id.getCarrierId();
+        ProvisioningItem item = provisioningItems.get(
+                ProvisioningManager.KEY_SIP_INVITE_CANCELLATION_TIMER_MS);
+        editor.putInt(item.getName(), 6);
 
-        if (carrierId == 1839) {//VZW
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_SIP_INVITE_CANCELLATION_TIMER_MS);
-            editor.putInt(item.getName(), 6);
+        item = provisioningItems.get(ProvisioningManager.KEY_TRANSITION_TO_LTE_DELAY_MS);
+        editor.putInt(item.getName(), 5);
 
-            item = provisioningItems.get(ProvisioningManager.KEY_TRANSITION_TO_LTE_DELAY_MS);
-            editor.putInt(item.getName(), 5);
+        item = provisioningItems.get(ProvisioningManager.KEY_ENABLE_SILENT_REDIAL);
+        editor.putInt(item.getName(), 1);
 
-            item = provisioningItems.get(ProvisioningManager.KEY_ENABLE_SILENT_REDIAL);
-            editor.putInt(item.getName(), 1);
+        item = provisioningItems.get(ProvisioningManager.KEY_REGISTRATION_DOMAIN_NAME);
+        editor.putString(item.getName(), "vzims.com");
 
-            item = provisioningItems.get(ProvisioningManager.KEY_REGISTRATION_DOMAIN_NAME);
-            editor.putString(item.getName(), "vzims.com");
+        /* Set default to ENABLED for EAB */
+        item = provisioningItems.get(ProvisioningManager.KEY_EAB_PROVISIONING_STATUS);
+        editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
 
-            /* Set default to ENABLED for EAB */
-            item = provisioningItems.get(ProvisioningManager.KEY_EAB_PROVISIONING_STATUS);
-            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
-        } else if (carrierId == 1890) {//KT
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS);
-            editor.putString(item.getName(), "volte.imskt.com");
-        }
-
-        if ((carrierId == 1890) || (carrierId == 1892)) {// KT or LGU+
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_SIP_KEEP_ALIVE_ENABLED);
-            editor.putInt(item.getName(),
-                    ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-        }
         editor.apply();
     }
 

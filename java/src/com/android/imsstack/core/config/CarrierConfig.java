@@ -473,6 +473,27 @@ public class CarrierConfig {
                 "support_ecbm_for_volte_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
                 "support_ecbm_for_vowifi_bool";
+        public static final String KEY_LOCATION_POLICY_UPDATE_TYPE_INT =
+                "location_policy_update_type_int";
+        public static final String KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL =
+                "location_allow_mock_location_update_bool";
+        public static final String KEY_LOCATION_ACQUISITION_POLICY_INT =
+                "location_acquisition_policy_int";
+        public static final String KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT =
+                "location_address_resolution_time_millis_int";
+        public static final String KEY_LOCATION_VALIDITY_PERIOD_MIN_INT =
+                "location_validity_period_min_int";
+        public static final String KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT =
+                "location_address_validity_period_min_int";
+        public static final String KEY_LOCATION_TOLERABLE_DISTANCE_INT =
+                "location_tolerable_distance_int";
+        public static final String KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT =
+                "location_gps_searching_duration_sec_int";
+        public static final String KEY_LOCATION_GEODETIC_SHAPE_INT =
+                "location_geodetic_shape_int";
+        public static final String KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL =
+                "cellular_network_info_utc_offset_enabled_bool";
+
         // Aos
         public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
                 "call_end_and_pdn_reactivation_by_reg_terminated_bool";
@@ -973,6 +994,15 @@ public class CarrierConfig {
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;
         public static final int IPV6_PREFERRED = 1;
+
+        // Indicates whether location information policy need to be updated using carrier config.
+        public static final int LOCATION_UPDATE_POLICY_NONE = 0;
+        public static final int LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED = 1;
+        public static final int LOCATION_UPDATE_POLICY_ALWAYS = 2;
+
+        // Indicates the type of PIDF-LO geodetic shape.
+        public static final int GEODETIC_SHAPE_CIRCLE = 0;
+        public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
 
         private Assets() {}
     }

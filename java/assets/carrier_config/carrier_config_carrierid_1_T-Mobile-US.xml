@@ -18,6 +18,14 @@
     <!-- Ims General -->
     <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <int name="location_policy_update_type_int" value="2"/>
+    <int name="location_acquisition_policy_int" value="610432"/>
+    <int name="location_address_resolution_time_millis_int" value="1000"/>
+    <int name="location_validity_period_min_int" value="30"/>
+    <int name="location_address_validity_period_min_int" value="30"/>
+    <int name="location_tolerable_distance_int" value="150"/>
+    <int name="location_gps_searching_duration_sec_int" value="20"/>
+    <int name="location_geodetic_shape_int" value="1"/>
     <!-- Aos -->
     <int name="ims.sip_preferred_transport_int" value="1"/>
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>

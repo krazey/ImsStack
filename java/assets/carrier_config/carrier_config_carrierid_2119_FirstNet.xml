@@ -27,6 +27,12 @@
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
     <boolean name="hide_mac_address_in_pani_header_bool" value="true"/>
     <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
+    <int name="location_policy_update_type_int" value="2"/>
+    <boolean name="location_allow_mock_location_update_bool" value="true"/>
+    <int name="location_acquisition_policy_int" value="86672"/>
+    <int name="location_address_resolution_time_millis_int" value="3000"/>
+    <int name="location_validity_period_min_int" value="30"/>
+    <int name="location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>

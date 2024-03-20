@@ -28,7 +28,9 @@
     <boolean name="support_ecbm_for_volte_bool" value="true"/>
     <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
-
+    <int name="location_policy_update_type_int" value="1"/>
+    <int name="location_acquisition_policy_int" value="131328"/>
+    <int name="location_validity_period_min_int" value="3"/>
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
