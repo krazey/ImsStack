@@ -905,12 +905,6 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[];
         // }
         // Bundle {
-        static const IMS_CHAR KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE[];
-        static const IMS_CHAR KEY_REREGISTRATION_ERROR_CODE_WITH_CALL_END_INT_ARRAY[];
-        static const IMS_CHAR
-                KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[];
-        // }
-        // Bundle {
         static const IMS_CHAR KEY_WFC_ERR_MESSAGE_BUNDLE[];
         static const IMS_CHAR KEY_WFC_ERR_REG_403_STRING[];
         static const IMS_CHAR KEY_WFC_ERR_REG_500_STRING[];
