@@ -3415,18 +3415,61 @@ TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenStartFailedWithRetryRequired
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfIpVersionChangeFailedWhenStartFailed)
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryIfIpVersionChangeFailedWhenStartFailedWithIpVersionFallback)
 {
     m_pAosRegistration->SetPcscfString("192.168.0.1");
-    IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
     ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
             .WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
             .WillByDefault(ReturnRef(objLocalIpv4Addr));
 
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfHasNextPcscfWhenStartFailedWithIpVersionFallback)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objPcscfs;
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
+
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerOfflineRecoverIfIpVersionChangeSucceedWhenStartFailedWithIpVersionFallback)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
+            .WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objPcscfs;
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
 TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNoRetryAfterWhenStartFailedWith503)
@@ -3534,258 +3577,6 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenStartFailedWithOtherResponse)
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_580);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
-}
-
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Success)
-{
-    // BEGIN uninteresting preparation
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
-
-    AString strHeader = AString("regtest");
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(strHeader));
-
-    EXPECT_CALL(m_objMockIAosService, NotifyRegistering(_, _, _)).Times(AnyNumber());
-
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
-    // END uninteresting preparation
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
-
-    AStringArray objPcscfsIpv6;
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::1"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
-
-    AStringArray objPcscfsIpv4;
-    objPcscfsIpv4.AddElement(AString("192.168.0.1"));
-    objPcscfsIpv4.AddElement(AString("192.168.0.2"));
-    objPcscfsIpv4.AddElement(AString("192.168.0.3"));
-
-    IpAddress objLocalIpa = IpAddress(AString("192.168.0.100"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpa));
-
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfsIpv4));
-    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(AnyNumber());
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
-            .Times(100);
-
-    for (IMS_SINT32 i = SipStatusCode::SC_500; i < SipStatusCode::SC_600; i++)
-    {
-        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objPcscfsIpv6));
-
-        m_pAosRegistration->SetPcscf();
-
-        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objPcscfsIpv4));
-
-        m_pAosRegistration->ProcessStartFailed_StatusCode(i);
-        EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    }
-}
-
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failure)
-{
-    // BEGIN uninteresting preparation
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetrySip503CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    // END uninteresting preparation
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    AString strIpv4Addr = "192.168.0.1";
-    m_pAosRegistration->SetPcscfString(strIpv4Addr);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-
-    IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
-    m_pAosRegistration->ProcessStartFailed_StatusCode(500);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-}
-
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNextPcscf)
-{
-    // BEGIN uninteresting preparation
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
-
-    AString strHeader = AString("regtest");
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(strHeader));
-
-    EXPECT_CALL(m_objMockIAosService, NotifyRegistering(_, _, _)).Times(AnyNumber());
-
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
-    // END uninteresting preparation
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
-
-    AStringArray objPcscfsIpv6;
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::1"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
-
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
-            .WillOnce(DoAll(SetArgReferee<0>(objPcscfsIpv6.GetElementAt(1)),
-                    SetArgReferee<1>(m_objPcscfPorts.GetAt(1)), Return(IMS_TRUE)));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillRepeatedly(Return(IMS_SUCCESS));
-
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-
-    m_pAosRegistration->ProcessStartFailed_StatusCode(500);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
 TEST_F(AosRegistrationTest, ProcessStartFailed_Others)
