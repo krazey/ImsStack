@@ -410,12 +410,12 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
         return AUDIO_CODEC_BITRATE_MAX;
     }
 
-    if (pNegotiatedPayload->objRtpMap.strPayloadType.Equals("AMR") ||
-            pNegotiatedPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
+    if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
+            pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
     {
         IMS_SINT32 nLargestModeSet = -1;
 
-        if (pNegotiatedPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
+        if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
             nLargestModeSet =
                     AudioProfileUtil::GetLargestModesetInFmtp("AMR-WB", pNegotiatedPayload) +
@@ -429,7 +429,7 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
             return (AUDIO_CODEC_BITRATE)nLargestModeSet;
         }
     }
-    else if (pNegotiatedPayload->objRtpMap.strPayloadType.Equals("EVS"))
+    else if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->pFmtp;
         if (pEvsFmtp == IMS_NULL)
@@ -2960,7 +2960,7 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
                 continue;
             }
 
-            if (comparedPayload->objRtpMap.strPayloadType.Equals("EVS"))
+            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
             {
                 AudioProfile::EvsFmtp* pCompareFmtp =
                         (AudioProfile::EvsFmtp*)comparedPayload->pFmtp;
@@ -3192,8 +3192,8 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
             continue;
         }
 
-        if (comparedPayload->objRtpMap.strPayloadType.Equals("AMR") ||
-                comparedPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
+        if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
+                comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
             AudioProfile::AmrFmtp* pCompareFmtp = (AudioProfile::AmrFmtp*)comparedPayload->pFmtp;
             AudioProfile::AmrFmtp* pReceivedFmtp = (AudioProfile::AmrFmtp*)pPayload->pFmtp;
@@ -3202,7 +3202,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
             {
                 continue;
             }
-            if (comparedPayload->objRtpMap.strPayloadType.Equals(
+            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
                         pPayload->objRtpMap.strPayloadType) == IMS_FALSE)
             {
                 continue;
@@ -3290,10 +3290,10 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
             continue;
         }
 
-        if (comparedPayload->objRtpMap.strPayloadType.Equals("PCMU") ||
-                comparedPayload->objRtpMap.strPayloadType.Equals("PCMA"))
+        if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") ||
+                comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
         {
-            if (comparedPayload->objRtpMap.strPayloadType.Equals(
+            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
                         pPayload->objRtpMap.strPayloadType) == IMS_FALSE)
             {
                 continue;
@@ -3826,8 +3826,8 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                 {
                     continue;
                 }
-                if (comparedPayload->objRtpMap.strPayloadType.Equals("AMR") ||
-                        comparedPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
+                if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
+                        comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
                 {
                     IMS_UINT32 pnNegoModeSetList = 0;
                     IMS_UINT32 pnNegoDefaultRtpModeSet = 0;
@@ -3841,7 +3841,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                         continue;
                     }
 
-                    if (comparedPayload->objRtpMap.strPayloadType.Equals(
+                    if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
                                 pDstPayload->objRtpMap.strPayloadType) == IMS_FALSE)
                     {
                         continue;
@@ -3911,7 +3911,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
             }
             else if (strCodecName.EqualsIgnoreCase("EVS"))
             {
-                if (comparedPayload->objRtpMap.strPayloadType.Equals("EVS"))
+                if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
                 {
                     IMS_UINT32 BandwidthNegoList;
                     IMS_UINT32 BitrateNegoList;
@@ -3985,7 +3985,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                 {
                     continue;
                 }
-                if (comparedPayload->objRtpMap.strPayloadType.Equals(
+                if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
                             pDstPayload->objRtpMap.strPayloadType))
                 {
                     IMS_TRACE_D("FindPayloadIndexFromProfile() Found G.711(%s) Found at[%d]",

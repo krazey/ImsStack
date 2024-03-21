@@ -1022,12 +1022,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     {
         return NO_MODESET;
     }
-    if (!strCodec.Equals("AMR") && !strCodec.Equals("AMR-WB") && !strCodec.Equals("EVS"))
+    if (!strCodec.EqualsIgnoreCase("AMR") && !strCodec.EqualsIgnoreCase("AMR-WB") &&
+            !strCodec.EqualsIgnoreCase("EVS"))
     {
         return NO_MODESET;
     }
 
-    if (strCodec.Equals("AMR") || strCodec.Equals("AMR-WB"))
+    if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
         AudioProfile::AmrFmtp* pAmrFmtp = reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp);
         if (pAmrFmtp == NULL)
@@ -1037,7 +1038,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
 
         if (pAmrFmtp->nModeSetList == 0)
         {
-            if (strCodec.Equals("AMR"))
+            if (strCodec.EqualsIgnoreCase("AMR"))
             {
                 return AMR_MAX_MODESET;
             }
@@ -1061,7 +1062,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
             return nModeSet;
         }
     }
-    else if (strCodec.Equals("EVS"))
+    else if (strCodec.EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pEvsFmtp = reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp);
         if (pEvsFmtp == NULL)
@@ -1124,12 +1125,13 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     {
         return NO_MODESET;
     }
-    if (!strCodec.Equals("AMR") && !strCodec.Equals("AMR-WB") && !strCodec.Equals("EVS"))
+    if (!strCodec.EqualsIgnoreCase("AMR") && !strCodec.EqualsIgnoreCase("AMR-WB") &&
+            !strCodec.EqualsIgnoreCase("EVS"))
     {
         return NO_MODESET;
     }
 
-    if (strCodec.Equals("AMR") || strCodec.Equals("AMR-WB"))
+    if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
         AudioProfile::AmrFmtp* pAmrFmtp = reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp);
         if (pAmrFmtp == NULL)
@@ -1148,7 +1150,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
             return pAmrFmtp->nDefaultRtpModeSet;
         }
     }
-    else if (strCodec.Equals("EVS"))
+    else if (strCodec.EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pEvsFmtp = reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp);
         if (pEvsFmtp == NULL)
