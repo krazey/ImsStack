@@ -1088,61 +1088,24 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // make"c" &"o" line of session level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddress))
-    {
-        IMS_TRACE_D("MakeSdpFromProfile() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
-                pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->objIpAddress.ToCharString(), 0);
-
-        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddress.ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddress.ToString());
-    }
+    SetSdpSessionIpAddress(pSessionDescriptor, pProfile);
 
     // make"m" line
     // ------"m=audio xxxx RTP/AVP 104 110 105 102 108 100"
-    AStringArray objAudioFormat;
-    AString strPayloadNum;
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
-    {
-        AudioProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.nPayloadNum);
-        objAudioFormat.AddElement(strPayloadNum);
-    }
-
-    // Set transport type and port number
-    pDescriptor->SetMediaDescription(
-            SdpMedia::TYPE_AUDIO, pProfile->nDataPort, SdpMedia::TRANSPORT_RTP_AVP, objAudioFormat);
+    SetSdpMediaDescription(pDescriptor, pProfile);
 
     // make bandwidth
     // ------"b=AS:xx"
     // ------"b=AS:xx"
     // ------"b=AS:xx"
-    if (pProfile->nBandwidthAs > 0)
-    {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->nBandwidthAs);
-
-        if (pProfile->nBandwidthRs >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->nBandwidthRs);
-        }
-
-        if (pProfile->nBandwidthRr >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->nBandwidthRr);
-        }
-    }
+    SetSdpMediaBandwidth(pDescriptor, pProfile);
 
     // make each payload
     // ------"a=rtpmap:104 AMR-WB/16000/1"
     // ------"a=fmtp:110 mode-set=2; octet-align=1"
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        AString strRtpmap, strFmtp;
+        AString strRtpmap, strFmtp, strPayloadNum;
 
         AudioProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
         if (pPayload == IMS_NULL)
@@ -4198,4 +4161,59 @@ AudioNego::OaModel* AudioNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
     }
 
     return IMS_NULL;
+}
+
+PRIVATE void AudioNego::SetSdpSessionIpAddress(
+        OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile)
+{
+    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddress))
+    {
+        IMS_TRACE_D("SetSdpSessionIpAddress() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
+                pSessionDescriptor->GetLocalAddress().ToCharString(),
+                pProfile->objIpAddress.ToCharString(), 0);
+
+        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddress.ToString());
+        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddress.ToString());
+    }
+}
+
+PRIVATE void AudioNego::SetSdpMediaDescription(
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    AStringArray objAudioFormat;
+    AString strPayloadNum;
+    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    {
+        AudioProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        if (pPayload == IMS_NULL)
+        {
+            continue;
+        }
+
+        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.nPayloadNum);
+        objAudioFormat.AddElement(strPayloadNum);
+    }
+
+    // Set transport type and port number
+    pDescriptor->SetMediaDescription(
+            SdpMedia::TYPE_AUDIO, pProfile->nDataPort, SdpMedia::TRANSPORT_RTP_AVP, objAudioFormat);
+}
+
+PRIVATE void AudioNego::SetSdpMediaBandwidth(
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pProfile->nBandwidthAs > 0)
+    {
+        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->nBandwidthAs);
+
+        if (pProfile->nBandwidthRs >= 0)
+        {
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->nBandwidthRs);
+        }
+
+        if (pProfile->nBandwidthRr >= 0)
+        {
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->nBandwidthRr);
+        }
+    }
 }

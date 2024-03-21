@@ -289,6 +289,11 @@ private:
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
+    void SetSdpSessionIpAddress(
+            OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
+    void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+    void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+
     ImsList<OaModel*> m_lstOaModel;
     AudioProfile m_objBaseProfile;
     MediaEnvironment* m_pEnvironment;
