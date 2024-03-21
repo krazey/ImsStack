@@ -255,6 +255,10 @@ protected:
     virtual void UpdateRegisteredRat(IN IMS_UINT32 nRegisteredRat);
     virtual void UpdateMonitorNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
+    // IAosApplication
+    void Init() override;
+    void CleanUp() override;
+
     // IAosConditionListener
     void Condition_Changed(IN IMS_UINT32 nReason = 0) override;
     void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
@@ -289,6 +293,15 @@ protected:
 
     // AosServicePhoneListener
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
+
+public:
+    static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;
+    static const IMS_UINT32 REG_STOP_WAITING_TIME_MILLIS = 1000;
+    static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
+    static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
+    static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
+    static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
+    static const IMS_UINT32 RAT_BLOCK_TIME_MILLIS = 720000;  // 12 MIN
 
 protected:
     enum
@@ -391,10 +404,6 @@ protected:
     };
 
 protected:
-    void Init() override;
-    void CleanUp() override;
-
-protected:
     IAosAppContext* m_piContext;
     IAosRegistration* m_piRegistration;
     IAosCallTracker* m_piCallTracker;
@@ -438,13 +447,5 @@ protected:
     IMS_BOOL m_bDataRoaming;
 
     AString m_strTag;
-
-    static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;
-    static const IMS_UINT32 REG_STOP_WAITING_TIME_MILLIS = 1000;
-    static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
-    static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
-    static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
-    static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
-    static const IMS_UINT32 RAT_BLOCK_TIME_MILLIS = 720000;  // 12 MIN
 };
 #endif  // AOS_APPLICATION_H_

@@ -71,6 +71,7 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::DoAll;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
@@ -88,7 +89,8 @@ enum
     TIMER_APP_CONNECTED,
     TIMER_APP_TERMINATED,
     TIMER_PDN_BLOCKED,
-    TIMER_IMS_ESTABLISHMENT
+    TIMER_IMS_ESTABLISHMENT,
+    TIMER_RAT_BLOCK
 };
 
 enum
@@ -161,103 +163,118 @@ enum
     PENDING_REG_UPDATE_HELD = 0x40
 };
 
-#define DECLARE_USING(Base)                          \
-    using Base::GetState;                            \
-    using Base::ClearOffReason;                      \
-    using Base::ClearPending;                        \
-    using Base::GetNetworkTypeForImsRegState;        \
-    using Base::SetOffReason;                        \
-    using Base::SetImsCall;                          \
-    using Base::SetPublishState;                     \
-    using Base::SetRegRecoveryHeld;                  \
-    using Base::ResetBlock;                          \
-    using Base::NotifyDeregistered;                  \
-    using Base::AddRatBlock;                         \
-    using Base::ClearRatBlocks;                      \
-    using Base::PerformRatBlockActions;              \
-    using Base::IsEmergency;                         \
-    using Base::IsStateMessage;                      \
-    using Base::IsNotReady;                          \
-    using Base::IsEqualOrLessState;                  \
-    using Base::IsRegRecoveryHeld;                   \
-    using Base::IsImsCall;                           \
-    using Base::IsPublished;                         \
-    using Base::IsAllDetached;                       \
-    using Base::IsTimerRunning;                      \
-    using Base::IsRegTypeNormal;                     \
-    using Base::IsRegStateUpdatedByNrLteRatChange;   \
-    using Base::IsPdnDisconnectRequired;             \
-    using Base::IsPlmnBlockRequired;                 \
-    using Base::IsBlockRat;                          \
-    using Base::CreateAosCondition;                  \
-    using Base::CreateAosConnector;                  \
-    using Base::CreateAosLocationStarter;            \
-    using Base::AddEventListener;                    \
-    using Base::RemoveEventListener;                 \
-    using Base::SetNetTrackerListener;               \
-    using Base::SetAppType;                          \
-    using Base::SetAppState;                         \
-    using Base::SetCleanState;                       \
-    using Base::IsUpdateAvailable;                   \
-    using Base::IsRegReconfigAvailable;              \
-    using Base::IsReconfigHandleChanged;             \
-    using Base::IsRequestCmdHeldByCondition;         \
-    using Base::IsAllHandleDetached;                 \
-    using Base::IsConditionTimerSkippedDueToTimer;   \
-    using Base::IsRegUpdatedByNrLteRatChange;        \
-    using Base::CleanAll;                            \
-    using Base::ClearConnection;                     \
-    using Base::ClearConnector;                      \
-    using Base::GetReportState;                      \
-    using Base::OnMessage;                           \
-    using Base::ProcessMessage;                      \
-    using Base::PreprocessStateMessage;              \
-    using Base::StateNotReady_Condition;             \
-    using Base::StateReady_Connection;               \
-    using Base::StateNotReady_Connection;            \
-    using Base::StateReady_Condition;                \
-    using Base::StateConnecting_Condition;           \
-    using Base::StateConnecting_Connection;          \
-    using Base::StateConnecting_Registration;        \
-    using Base::StateConnected_Condition;            \
-    using Base::StateConnected_Registration;         \
-    using Base::StateConnected_Connection;           \
-    using Base::StateUpdating_Condition;             \
-    using Base::StateUpdating_Connection;            \
-    using Base::ProcessConnectionUpdated;            \
-    using Base::StateUpdating_Registration;          \
-    using Base::StateDisconnecting_Condition;        \
-    using Base::StateDisconnecting_Registration;     \
-    using Base::ProcessDisconnectingState;           \
-    using Base::ProcessNetworkEvent;                 \
-    using Base::ProcessRegControlEvent;              \
-    using Base::ProcessRegTerminated;                \
-    using Base::ProcessRegFailed_Terminated;         \
-    using Base::StateDisconnecting_Connection;       \
-    using Base::ProcessRegInternalFailed;            \
-    using Base::ProcessPingCommand;                  \
-    using Base::ProcessPdnDisconnect;                \
-    using Base::ProcessAppActivatedTimerExpired;     \
-    using Base::ProcessAppConnectedTimerExpired;     \
-    using Base::ProcessAppTerminatedTimerExpired;    \
-    using Base::ProcessReconfigTimerExpired;         \
-    using Base::ProcessRoamingState;                 \
-    using Base::ProcessRegBlockedTimerExpired;       \
-    using Base::ProcessRegStopTimerExpired;          \
-    using Base::ProcessPdnBlockedTimerExpired;       \
-    using Base::ProcessImsEstablishmentTimerExpired; \
-    using Base::ProcessPdnBlockWithTime;             \
-    using Base::ProcessPlmnBlock;                    \
-    using Base::UpdateRegRecoveryHeld;               \
-    using Base::UpdateRegStopHeld;                   \
-    using Base::StartTimer;                          \
-    using Base::StopTimer;                           \
-    using Base::ClearTimers;                         \
-    using Base::UpdateRegisteredRat;                 \
-    using Base::UpdateMonitorNotify;                 \
-    using Base::ProcessRegTerminating;               \
-    using Base::Init;                                \
-    using Base::CleanUp;
+#define DECLARE_USING(Base)                              \
+    using Base::GetState;                                \
+    using Base::ClearOffReason;                          \
+    using Base::ClearPending;                            \
+    using Base::GetNetworkTypeForImsRegState;            \
+    using Base::SetOffReason;                            \
+    using Base::SetImsCall;                              \
+    using Base::SetPublishState;                         \
+    using Base::SetRegRecoveryHeld;                      \
+    using Base::ResetBlock;                              \
+    using Base::NotifyDeregistered;                      \
+    using Base::AddRatBlock;                             \
+    using Base::ClearRatBlocks;                          \
+    using Base::PerformRatBlockActions;                  \
+    using Base::IsEmergency;                             \
+    using Base::IsStateMessage;                          \
+    using Base::IsNotReady;                              \
+    using Base::IsEqualOrLessState;                      \
+    using Base::IsRegRecoveryHeld;                       \
+    using Base::IsImsCall;                               \
+    using Base::IsPublished;                             \
+    using Base::IsAllDetached;                           \
+    using Base::IsTimerRunning;                          \
+    using Base::IsRegTypeNormal;                         \
+    using Base::IsRegStateUpdatedByNrLteRatChange;       \
+    using Base::IsPdnDisconnectRequired;                 \
+    using Base::IsPlmnBlockRequired;                     \
+    using Base::IsBlockRat;                              \
+    using Base::CreateAosCondition;                      \
+    using Base::CreateAosConnector;                      \
+    using Base::CreateAosLocationStarter;                \
+    using Base::AddEventListener;                        \
+    using Base::RemoveEventListener;                     \
+    using Base::SetNetTrackerListener;                   \
+    using Base::SetAppType;                              \
+    using Base::SetAppState;                             \
+    using Base::SetCleanState;                           \
+    using Base::IsUpdateAvailable;                       \
+    using Base::IsReconfigHandleChanged;                 \
+    using Base::IsRequestCmdHeldByCondition;             \
+    using Base::IsAllHandleDetached;                     \
+    using Base::IsConditionTimerSkippedDueToTimer;       \
+    using Base::IsRegUpdatedByNrLteRatChange;            \
+    using Base::CleanAll;                                \
+    using Base::ClearConnection;                         \
+    using Base::ClearConnector;                          \
+    using Base::GetReportState;                          \
+    using Base::OnMessage;                               \
+    using Base::ProcessMessage;                          \
+    using Base::PreprocessStateMessage;                  \
+    using Base::StateNotReady_Condition;                 \
+    using Base::StateReady_Connection;                   \
+    using Base::StateNotReady_Connection;                \
+    using Base::StateReady_Condition;                    \
+    using Base::StateConnecting_Condition;               \
+    using Base::StateConnecting_Connection;              \
+    using Base::StateConnecting_Registration;            \
+    using Base::StateConnected_Condition;                \
+    using Base::StateConnected_Registration;             \
+    using Base::StateConnected_Connection;               \
+    using Base::StateUpdating_Condition;                 \
+    using Base::StateUpdating_Connection;                \
+    using Base::ProcessConnectionUpdated;                \
+    using Base::StateUpdating_Registration;              \
+    using Base::StateDisconnecting_Condition;            \
+    using Base::StateDisconnecting_Registration;         \
+    using Base::ProcessDisconnectingState;               \
+    using Base::ProcessNetworkEvent;                     \
+    using Base::ProcessRegControlEvent;                  \
+    using Base::ProcessRegTerminated;                    \
+    using Base::ProcessRegFailed_Terminated;             \
+    using Base::StateDisconnecting_Connection;           \
+    using Base::ProcessRegInternalFailed;                \
+    using Base::ProcessPingCommand;                      \
+    using Base::ProcessPdnDisconnect;                    \
+    using Base::ProcessAppActivatedTimerExpired;         \
+    using Base::ProcessAppConnectedTimerExpired;         \
+    using Base::ProcessAppTerminatedTimerExpired;        \
+    using Base::ProcessReconfigTimerExpired;             \
+    using Base::ProcessRoamingState;                     \
+    using Base::ProcessRegBlockedTimerExpired;           \
+    using Base::ProcessRegStopTimerExpired;              \
+    using Base::ProcessPdnBlockedTimerExpired;           \
+    using Base::ProcessImsEstablishmentTimerExpired;     \
+    using Base::ProcessPdnBlockWithTime;                 \
+    using Base::ProcessImsEstablishmentStart;            \
+    using Base::ProcessPlmnBlock;                        \
+    using Base::Report_Request;                          \
+    using Base::UpdateRegRecoveryHeld;                   \
+    using Base::UpdateRegStopHeld;                       \
+    using Base::StartTimer;                              \
+    using Base::StopTimer;                               \
+    using Base::ClearTimers;                             \
+    using Base::UpdateConnectedServices;                 \
+    using Base::UpdateRegisteredRat;                     \
+    using Base::UpdateMonitorNotify;                     \
+    using Base::Init;                                    \
+    using Base::CleanUp;                                 \
+    using Base::Condition_Changed;                       \
+    using Base::Condition_RequestCommand;                \
+    using Base::Connector_Activated;                     \
+    using Base::Connector_Deactivated;                   \
+    using Base::Connector_Updated;                       \
+    using Base::Registration_StateChanged;               \
+    using Base::CallTracker_StateChanged;                \
+    using Base::NetTracker_StatusChanged;                \
+    using Base::NConfiguration_NotifyConfigChanged;      \
+    using Base::Event_NotifyEvent;                       \
+    using Base::Timer_TimerExpired;                      \
+    using Base::RegistrationControl_ControlRegistration; \
+    using Base::ServicePhone_LocationInfoChanged;        \
+    using Base::ProcessRegTerminating;
 
 class TestAosApplication : public AosApplication
 {
@@ -274,6 +291,13 @@ public:
         m_pUtil = AosUtil::GetInstance();
     }
 
+    inline IMS_BOOL IsRegReconfigAvailable() override { return m_bRegReconfigAvailable; }
+
+    inline void SetRegReconfigAvailable(IN IMS_BOOL bIsAvailable)
+    {
+        m_bRegReconfigAvailable = bIsAvailable;
+    }
+
     inline void AddFeature(IN IMS_UINT32 nAdd) { m_pUtil->AddFeature(nAdd, m_nRegPending); }
 
     inline void RemoveFeature(IN IMS_UINT32 nRemove)
@@ -286,6 +310,14 @@ public:
         return m_pUtil->IsFeatureOn(nFeature, m_nRegPending);
     }
 
+    inline ITimer* GetReconfigTimer() const { return m_piReconfigTimer; }
+    inline ITimer* GetMsgConditionTimer() const { return m_piMsgConditionTimer; }
+    inline ITimer* GetRegStopTimer() const { return m_piRegStopTimer; }
+    inline ITimer* GetRegBlockedTimer() const { return m_piRegBlockedTimer; }
+    inline ITimer* GetAppActivatedTimer() const { return m_piAppActivatedTimer; }
+    inline ITimer* GetAppConnectedTimer() const { return m_piAppConnectedTimer; }
+    inline ITimer* GetAppTerminatedTimer() const { return m_piAppTerminatedTimer; }
+    inline ITimer* GetPdnBlockedTimer() const { return m_piPdnBlockedTimer; }
     inline ITimer* GetImsEstablishmentTimer() const { return m_piImsEstablishmentTimer; }
 
     inline void SetImsEstablishmentTimer(IN ITimer* piTimer)
@@ -294,30 +326,13 @@ public:
     }
 
     inline void SetRecoverReason(IN IMS_UINT32 nReason) { m_nRecoverReason = nReason; }
+    inline void SetRat(IN IMS_UINT32 nRat) { m_nRat = nRat; }
+    inline void SetLteAttachState(IN IMS_UINT32 nLteAttachState)
+    {
+        m_nLteAttachState = nLteAttachState;
+    }
+    inline void SetLteExtraInfo(IN IMS_UINT32 nLteExtraInfo) { m_nLteExtraInfo = nLteExtraInfo; }
 
-    // TEST : ProcessPdnDisconnect
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldSetStateWithNotReadyWhenIsImsCall);
-    FRIEND_TEST(AosApplicationTest,
-            ProcessPdnDisconnectShouldSetOffReasonWithRegTerminationWhenIsImsCall);
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldNotSetOffReasonWhenIsNotImsCall);
-    FRIEND_TEST(AosApplicationTest,
-            ProcessPdnDisconnectShouldStopConnectorWhenOffReasonIsDataPermanentlyFailed);
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldStartRatBlockTimerWhenTypeRatBlock);
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldAddRatBlockWhenTypeRatBlock);
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenTypeRatBlock);
-    FRIEND_TEST(AosApplicationTest,
-            ProcessPdnDisconnectShouldNotifyDeregisteredWithPlmnBlockWithTimeOutWhenNr);
-    FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach);
-    FRIEND_TEST(AosApplicationTest,
-            ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteInfoExtraIsNotNone);
-    FRIEND_TEST(AosApplicationTest,
-            ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNotPlmnBlockConfig);
-
-    FRIEND_TEST(AosApplicationTest, ImsEstablishmentStart);
-    FRIEND_TEST(AosApplicationTest, Callback);
-    FRIEND_TEST(AosApplicationTest, UpdateConnectedServices);
-
-public:
     void SetAosCondition(IN AosCondition* pCondition)
     {
         if (pCondition == IMS_NULL)
@@ -367,19 +382,6 @@ public:
         }
     }
 
-    void SetRat(IN IMS_UINT32 nRat) { m_nRat = nRat; }
-
-    void SetLteAttachState(IN IMS_UINT32 nLteAttachState) { m_nLteAttachState = nLteAttachState; }
-
-    void SetLteExtraInfo(IN IMS_UINT32 nLteExtraInfo) { m_nLteExtraInfo = nLteExtraInfo; }
-
-    void SetRegReconfigAvailable(IN IMS_BOOL bIsAvailable)
-    {
-        m_bRegReconfigAvailable = bIsAvailable;
-    }
-
-    inline IMS_BOOL IsRegReconfigAvailable() override { return m_bRegReconfigAvailable; }
-
 private:
     AosCondition* m_pOrigAosCondition;
     AosConnector* m_pOrigAosConnector;
@@ -400,22 +402,22 @@ public:
     IAosService* m_piAosService;
     IAosRetryRepository* m_piAosRetryRepository;
 
-    MockAosCondition m_objMockAosCondition;
-    MockAosConnector m_objMockAosConnector;
-    MockIAosAppContext m_objMockIAosAppContext;
-    MockIAosBlock m_objMockIAosBlock;
-    MockIAosCallTracker m_objMockIAosCallTracker;
-    MockIAosConnection m_objMockIAosConnection;
-    MockIAosHandle m_objMockIAosHandle;
-    MockIAosLocationStarter m_objMockIAosLocationStarter;
-    MockIAosNConfiguration m_objMockIAosNConfiguration;
-    MockIAosNetTracker m_objMockIAosNetTracker;
-    MockIAosPcscf m_objMockIAosPcscf;
-    MockIAosRegistration m_objMockIAosRegistration;
-    MockIAosRegStateManager m_objMockIAosRegStateManager;
-    MockIAosService m_objMockIAosService;
-    MockIAosRetryRepository m_objMockAosRetryRepository;
-    MockIImsAosMonitor m_objMockIImsAosMonitor;
+    NiceMock<MockAosCondition> m_objMockAosCondition;
+    NiceMock<MockAosConnector> m_objMockAosConnector;
+    NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosBlock> m_objMockIAosBlock;
+    NiceMock<MockIAosCallTracker> m_objMockIAosCallTracker;
+    NiceMock<MockIAosConnection> m_objMockIAosConnection;
+    NiceMock<MockIAosHandle> m_objMockIAosHandle;
+    NiceMock<MockIAosLocationStarter> m_objMockIAosLocationStarter;
+    NiceMock<MockIAosNConfiguration> m_objMockIAosNConfiguration;
+    NiceMock<MockIAosNetTracker> m_objMockIAosNetTracker;
+    NiceMock<MockIAosPcscf> m_objMockIAosPcscf;
+    NiceMock<MockIAosRegistration> m_objMockIAosRegistration;
+    NiceMock<MockIAosRegStateManager> m_objMockIAosRegStateManager;
+    NiceMock<MockIAosService> m_objMockIAosService;
+    NiceMock<MockIAosRetryRepository> m_objMockAosRetryRepository;
+    NiceMock<MockIImsAosMonitor> m_objMockIImsAosMonitor;
 
     AString m_strAppId = AString("ims.app.test");
     AString m_strServiceId = AString("ims.service.test");
@@ -2179,7 +2181,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStartRatBlockTimerWhenTypeR
     m_pTestAosApplication->ProcessPdnDisconnect();
 
     // THEN
-    EXPECT_TRUE(m_pTestAosApplication->IsTimerRunning(TestAosApplication::TIMER_RAT_BLOCK));
+    EXPECT_TRUE(m_pTestAosApplication->IsTimerRunning(TIMER_RAT_BLOCK));
 }
 
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldAddRatBlockWhenTypeRatBlock)
@@ -2188,7 +2190,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldAddRatBlockWhenTypeRatBlock
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK));
 
-    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
 
     // WHEN
     m_pTestAosApplication->ProcessPdnDisconnect();
@@ -2216,7 +2218,7 @@ TEST_F(AosApplicationTest,
 {
     // GIVEN
     m_pTestAosApplication->SetNetTrackerListener();
-    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_NR;
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);
 
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(
@@ -2235,8 +2237,8 @@ TEST_F(AosApplicationTest,
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAttach)
 {
     // GIVEN
-    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
-    m_pTestAosApplication->m_nLteAttachState = IMS_LTE_INFO_COMBINED_ATTACHED;
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
 
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(
@@ -2253,9 +2255,9 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldStopConnectorWhenCombinedAt
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteInfoExtraIsNotNone)
 {
     // GIVEN
-    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_LTE;
-    m_pTestAosApplication->m_nLteAttachState = IMS_LTE_INFO_COMBINED_ATTACHED;
-    m_pTestAosApplication->m_nLteExtraInfo = IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED;
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
+    m_pTestAosApplication->SetLteExtraInfo(IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED);
 
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(
@@ -2273,7 +2275,7 @@ TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotifyDeregisteredWhenLteIn
 TEST_F(AosApplicationTest, ProcessPdnDisconnectShouldNotNotifyDeregisterWhenIsNotPlmnBlockConfig)
 {
     // GIVEN
-    m_pTestAosApplication->m_nRat = NW_REPORT_RADIO_INVALID;
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
 
     ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
             .WillByDefault(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED));
@@ -2529,33 +2531,33 @@ TEST_F(AosApplicationTest, Callback)
     // TEST_F : Timer_TimerExpired
     m_pTestAosApplication->Timer_TimerExpired(IMS_NULL);
     m_pTestAosApplication->StartTimer(TIMER_RECONFIG_GUARD, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piReconfigTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetReconfigTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
     m_pTestAosApplication->StartTimer(TIMER_MSG_CONDITION, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piMsgConditionTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetMsgConditionTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_MSG_CONDITION));
     m_pTestAosApplication->StartTimer(TIMER_REG_STOP, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piRegStopTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetRegStopTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_REG_STOP));
     m_pTestAosApplication->StartTimer(TIMER_REG_BLOCKED, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piRegBlockedTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetRegBlockedTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_REG_BLOCKED));
     m_pTestAosApplication->StartTimer(TIMER_APP_ACTIVATED, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piAppActivatedTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetAppActivatedTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_APP_ACTIVATED));
     m_pTestAosApplication->StartTimer(TIMER_APP_CONNECTED, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piAppConnectedTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetAppConnectedTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_APP_CONNECTED));
     m_pTestAosApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piAppTerminatedTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetAppTerminatedTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_APP_TERMINATED));
     EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED, _)).Times(1);
     m_pTestAosApplication->StartTimer(TIMER_PDN_BLOCKED, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piPdnBlockedTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetPdnBlockedTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_PDN_BLOCKED));
     m_pTestAosApplication->SetImsCall(IMS_TRUE);
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
-    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->m_piImsEstablishmentTimer);
+    m_pTestAosApplication->Timer_TimerExpired(m_pTestAosApplication->GetImsEstablishmentTimer());
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
     m_pTestAosApplication->SetImsCall(IMS_FALSE);
     m_pTestAosApplication->ClearTimers();
