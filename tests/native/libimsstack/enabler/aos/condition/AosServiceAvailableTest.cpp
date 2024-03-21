@@ -369,24 +369,26 @@ TEST_F(AosServiceAvailableTest, FailsInvokeFunctionWhenHandleEventWithInvalid)
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 0);
 }
 
-TEST_F(AosServiceAvailableTest, RequestCommand)
+TEST_F(AosServiceAvailableTest, SucceedsNotifyToListenersWhenRequestCommand)
 {
-    m_pAosServiceAvailable->CleanUp();
+    // GIVEN
+    IMS_UINT32 nAnyCommand = AosCondition::REQUEST_STOP;
+    IMS_UINT32 nAnyReason = AosReason::NOT_SPECIFIED;
 
-    EXPECT_CALL(m_objListener1, ServiceAvailable_RequestCommand(_, _)).Times(4);
-
-    EXPECT_CALL(m_objListener2, ServiceAvailable_RequestCommand(_, _)).Times(4);
-
-    EXPECT_CALL(m_objListener3, ServiceAvailable_RequestCommand(_, _)).Times(4);
+    EXPECT_CALL(m_objListener1, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener2, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener3, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener4, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener5, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
     m_pAosServiceAvailable->SetListener(&m_objListener2);
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
+    m_pAosServiceAvailable->SetListener(&m_objListener4);
+    m_pAosServiceAvailable->SetListener(&m_objListener5);
 
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_STOP, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_DESTROY, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_RECOVER, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(
-            AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
+    // WHEN
+    m_pAosServiceAvailable->RequestCommand(nAnyCommand, nAnyReason);
+
+    // THEN : GIVEN conditions should be met.
 }
