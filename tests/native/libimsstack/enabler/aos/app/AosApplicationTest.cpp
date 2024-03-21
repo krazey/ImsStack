@@ -57,7 +57,6 @@
 #include "connection/AosConnection.h"
 #include "connection/AosConnector.h"
 #include "handle/AosFeatureTag.h"
-#include "registration/AosRegistration.h"
 #include "interface/AosInternalMsgDef.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosHandle.h"
@@ -67,6 +66,7 @@
 #include "provider/AosProvider.h"
 #include "provider/AosRetryRepository.h"
 #include "provider/AosStaticProfile.h"
+#include "provider/AosUtil.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -161,21 +161,109 @@ enum
     PENDING_REG_UPDATE_HELD = 0x40
 };
 
-class AppTestAosRegistration : public AosRegistration
-{
-    inline AppTestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
-            AosRegistration(piAppContext, strRegId)
-    {
-    }
-
-    friend class AosApplicationTest;
-
-public:
-private:
-};
+#define DECLARE_USING(Base)                          \
+    using Base::GetState;                            \
+    using Base::ClearOffReason;                      \
+    using Base::ClearPending;                        \
+    using Base::GetNetworkTypeForImsRegState;        \
+    using Base::SetOffReason;                        \
+    using Base::SetImsCall;                          \
+    using Base::SetPublishState;                     \
+    using Base::SetRegRecoveryHeld;                  \
+    using Base::ResetBlock;                          \
+    using Base::NotifyDeregistered;                  \
+    using Base::AddRatBlock;                         \
+    using Base::ClearRatBlocks;                      \
+    using Base::PerformRatBlockActions;              \
+    using Base::IsEmergency;                         \
+    using Base::IsStateMessage;                      \
+    using Base::IsNotReady;                          \
+    using Base::IsEqualOrLessState;                  \
+    using Base::IsRegRecoveryHeld;                   \
+    using Base::IsImsCall;                           \
+    using Base::IsPublished;                         \
+    using Base::IsAllDetached;                       \
+    using Base::IsTimerRunning;                      \
+    using Base::IsRegTypeNormal;                     \
+    using Base::IsRegStateUpdatedByNrLteRatChange;   \
+    using Base::IsPdnDisconnectRequired;             \
+    using Base::IsPlmnBlockRequired;                 \
+    using Base::IsBlockRat;                          \
+    using Base::CreateAosCondition;                  \
+    using Base::CreateAosConnector;                  \
+    using Base::CreateAosLocationStarter;            \
+    using Base::AddEventListener;                    \
+    using Base::RemoveEventListener;                 \
+    using Base::SetNetTrackerListener;               \
+    using Base::SetAppType;                          \
+    using Base::SetAppState;                         \
+    using Base::SetCleanState;                       \
+    using Base::IsUpdateAvailable;                   \
+    using Base::IsRegReconfigAvailable;              \
+    using Base::IsReconfigHandleChanged;             \
+    using Base::IsRequestCmdHeldByCondition;         \
+    using Base::IsAllHandleDetached;                 \
+    using Base::IsConditionTimerSkippedDueToTimer;   \
+    using Base::IsRegUpdatedByNrLteRatChange;        \
+    using Base::CleanAll;                            \
+    using Base::ClearConnection;                     \
+    using Base::ClearConnector;                      \
+    using Base::GetReportState;                      \
+    using Base::OnMessage;                           \
+    using Base::ProcessMessage;                      \
+    using Base::PreprocessStateMessage;              \
+    using Base::StateNotReady_Condition;             \
+    using Base::StateReady_Connection;               \
+    using Base::StateNotReady_Connection;            \
+    using Base::StateReady_Condition;                \
+    using Base::StateConnecting_Condition;           \
+    using Base::StateConnecting_Connection;          \
+    using Base::StateConnecting_Registration;        \
+    using Base::StateConnected_Condition;            \
+    using Base::StateConnected_Registration;         \
+    using Base::StateConnected_Connection;           \
+    using Base::StateUpdating_Condition;             \
+    using Base::StateUpdating_Connection;            \
+    using Base::ProcessConnectionUpdated;            \
+    using Base::StateUpdating_Registration;          \
+    using Base::StateDisconnecting_Condition;        \
+    using Base::StateDisconnecting_Registration;     \
+    using Base::ProcessDisconnectingState;           \
+    using Base::ProcessNetworkEvent;                 \
+    using Base::ProcessRegControlEvent;              \
+    using Base::ProcessRegTerminated;                \
+    using Base::ProcessRegFailed_Terminated;         \
+    using Base::StateDisconnecting_Connection;       \
+    using Base::ProcessRegInternalFailed;            \
+    using Base::ProcessPingCommand;                  \
+    using Base::ProcessPdnDisconnect;                \
+    using Base::ProcessAppActivatedTimerExpired;     \
+    using Base::ProcessAppConnectedTimerExpired;     \
+    using Base::ProcessAppTerminatedTimerExpired;    \
+    using Base::ProcessReconfigTimerExpired;         \
+    using Base::ProcessRoamingState;                 \
+    using Base::ProcessRegBlockedTimerExpired;       \
+    using Base::ProcessRegStopTimerExpired;          \
+    using Base::ProcessPdnBlockedTimerExpired;       \
+    using Base::ProcessImsEstablishmentTimerExpired; \
+    using Base::ProcessPdnBlockWithTime;             \
+    using Base::ProcessPlmnBlock;                    \
+    using Base::UpdateRegRecoveryHeld;               \
+    using Base::UpdateRegStopHeld;                   \
+    using Base::StartTimer;                          \
+    using Base::StopTimer;                           \
+    using Base::ClearTimers;                         \
+    using Base::UpdateRegisteredRat;                 \
+    using Base::UpdateMonitorNotify;                 \
+    using Base::ProcessRegTerminating;               \
+    using Base::Init;                                \
+    using Base::CleanUp;
 
 class TestAosApplication : public AosApplication
 {
+public:
+    DECLARE_USING(AosApplication)
+
     inline TestAosApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
             AosApplication(piAppContext, strAppId),
             m_pOrigAosCondition(IMS_NULL),
@@ -186,21 +274,27 @@ class TestAosApplication : public AosApplication
         m_pUtil = AosUtil::GetInstance();
     }
 
-    friend class AosApplicationTest;
+    inline void AddFeature(IN IMS_UINT32 nAdd) { m_pUtil->AddFeature(nAdd, m_nRegPending); }
 
-    FRIEND_TEST(AosApplicationTest, CreateAndDestroy);
-    FRIEND_TEST(AosApplicationTest, GetAndSet);
-    FRIEND_TEST(AosApplicationTest, IsPdnDisconnectRequired);
-    FRIEND_TEST(AosApplicationTest, Reconfig);
-    FRIEND_TEST(AosApplicationTest, OnMessage);
-    FRIEND_TEST(AosApplicationTest, ProcessMessage);
-    FRIEND_TEST(AosApplicationTest, RegRetryCount);
-    FRIEND_TEST(AosApplicationTest, StateMachinePreProcess);
-    FRIEND_TEST(AosApplicationTest, StateMachine);
-    FRIEND_TEST(AosApplicationTest, SetBlockPermanentDataFailedWhenStateReadyConnection);
-    FRIEND_TEST(AosApplicationTest, SetBlockPermanentDataFailedWhenStateConnectingConnection);
-    FRIEND_TEST(AosApplicationTest, Process);
-    FRIEND_TEST(AosApplicationTest, RegTerminating);
+    inline void RemoveFeature(IN IMS_UINT32 nRemove)
+    {
+        m_pUtil->RemoveFeature(nRemove, m_nRegPending);
+    }
+
+    inline IMS_BOOL IsFeatureOn(IN IMS_UINT32 nFeature) const
+    {
+        return m_pUtil->IsFeatureOn(nFeature, m_nRegPending);
+    }
+
+    inline ITimer* GetImsEstablishmentTimer() const { return m_piImsEstablishmentTimer; }
+
+    inline void SetImsEstablishmentTimer(IN ITimer* piTimer)
+    {
+        m_piImsEstablishmentTimer = piTimer;
+    }
+
+    inline void SetRecoverReason(IN IMS_UINT32 nReason) { m_nRecoverReason = nReason; }
+
     // TEST : ProcessPdnDisconnect
     FRIEND_TEST(AosApplicationTest, ProcessPdnDisconnectShouldSetStateWithNotReadyWhenIsImsCall);
     FRIEND_TEST(AosApplicationTest,
@@ -283,8 +377,6 @@ public:
     {
         m_bRegReconfigAvailable = bIsAvailable;
     }
-
-    inline void CreateAosCondition() override {}
 
     inline IMS_BOOL IsRegReconfigAvailable() override { return m_bRegReconfigAvailable; }
 
@@ -433,13 +525,11 @@ protected:
                 .WillRepeatedly(Return(&m_objMockIImsAosMonitor));
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
-        AosProvider::GetInstance()->SetCallTracker(
-                static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker), SLOT_ID);
+        AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
         EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(_)).Times(AnyNumber());
 
         m_piAosLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
-        AosProvider::GetInstance()->SetLocationStarter(
-                static_cast<IAosLocationStarter*>(&m_objMockIAosLocationStarter), SLOT_ID);
+        AosProvider::GetInstance()->SetLocationStarter(&m_objMockIAosLocationStarter, SLOT_ID);
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
@@ -453,29 +543,24 @@ protected:
                 .WillByDefault(Return(IMS_FALSE));
 
         m_piAosService = AosProvider::GetInstance()->GetService();
-        AosProvider::GetInstance()->SetService(
-                static_cast<IAosService*>(&m_objMockIAosService), SLOT_ID);
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService, SLOT_ID);
 
         m_piAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
-        AosProvider::GetInstance()->SetRetryRepository(
-                static_cast<IAosRetryRepository*>(&m_objMockAosRetryRepository), SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(&m_objMockAosRetryRepository, SLOT_ID);
 
         m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
-        AosProvider::GetInstance()->SetRegStateManager(
-                static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager), SLOT_ID);
+        AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager, SLOT_ID);
         EXPECT_CALL(m_objMockIAosRegStateManager, SetImsRegState(_, _)).Times(AnyNumber());
 
         m_pTestAosApplication =
-                new TestAosApplication(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                        m_pAosStaticProfile->GetId());
+                new TestAosApplication(&m_objMockIAosAppContext, m_pAosStaticProfile->GetId());
 
         ON_CALL(m_objMockAosCondition, IsReady()).WillByDefault(Return(IMS_FALSE));
 
         m_pTestAosApplication->SetAosCondition(&m_objMockAosCondition);
         m_pTestAosApplication->SetAosConnector(&m_objMockAosConnector);
 
-        m_pTestAosApplication->SetAosRegistration(
-                static_cast<IAosRegistration*>(&m_objMockIAosRegistration));
+        m_pTestAosApplication->SetAosRegistration(&m_objMockIAosRegistration);
     }
 
     virtual void TearDown() override
@@ -505,7 +590,7 @@ TEST_F(AosApplicationTest, CreateAndDestroy)
     m_pTestAosApplication->SetAosConnector(IMS_NULL);
 
     // TEST_F : CreateAosCondition
-    m_pTestAosApplication->AosApplication::CreateAosCondition();
+    m_pTestAosApplication->CreateAosCondition();
 
     // TEST_F : CreateAosConnector
     m_pTestAosApplication->CreateAosConnector();
@@ -760,7 +845,7 @@ TEST_F(AosApplicationTest, GetAndSet)
     EXPECT_EQ(m_pTestAosApplication->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
 
     // TEST_F : IsRegReconfigAvailable
-    EXPECT_TRUE(m_pTestAosApplication->AosApplication::IsRegReconfigAvailable());
+    EXPECT_TRUE(m_pTestAosApplication->IsRegReconfigAvailable());
 }
 
 TEST_F(AosApplicationTest, Reconfig)
@@ -1824,11 +1909,9 @@ TEST_F(AosApplicationTest, Process)
     m_pTestAosApplication->ProcessReconfigTimerExpired();
     // Not AllHandleDetached - Connecting state - PENDING_REG_RECOVERY_HELD feature on
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTING);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
     m_pTestAosApplication->ProcessReconfigTimerExpired();
-    m_pTestAosApplication->m_pUtil->RemoveFeature(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->RemoveFeature(PENDING_REG_RECOVERY_HELD);
     // Not AllHandleDetached - Connecting state - IsReconfigHandleChanged return true
     EXPECT_CALL(m_objMockIAosHandle, IsRegBinded())
             .WillOnce(Return(IMS_FALSE))
@@ -1846,15 +1929,11 @@ TEST_F(AosApplicationTest, Process)
     m_pTestAosApplication->ProcessReconfigTimerExpired();
     // IsOn return true - PENDING_IPCAN_HELD, PENDING_IPCAN_HELD on
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_IPCAN_HELD, m_pTestAosApplication->m_nRegPending);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_REG_UPDATE_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->AddFeature(PENDING_IPCAN_HELD);
+    m_pTestAosApplication->AddFeature(PENDING_REG_UPDATE_HELD);
     m_pTestAosApplication->ProcessReconfigTimerExpired();
-    m_pTestAosApplication->m_pUtil->RemoveFeature(
-            PENDING_IPCAN_HELD, m_pTestAosApplication->m_nRegPending);
-    m_pTestAosApplication->m_pUtil->RemoveFeature(
-            PENDING_REG_UPDATE_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->AddFeature(PENDING_IPCAN_HELD);
+    m_pTestAosApplication->RemoveFeature(PENDING_REG_UPDATE_HELD);
 
     // TEST_F : ProcessRoamingState
     m_pTestAosApplication->ProcessRoamingState(IMS_FALSE);  // No change
@@ -1866,7 +1945,7 @@ TEST_F(AosApplicationTest, Process)
     PlatformService* pTimerService =
             PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_TIMER);
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 123456);
-    ITimer* piTimer = m_pTestAosApplication->m_piImsEstablishmentTimer;
+    ITimer* piTimer = m_pTestAosApplication->GetImsEstablishmentTimer();
     PlatformContext::GetInstance()->SetService(
             PlatformContext::SERVICE_TIMER, &objTestTimerService);
     EXPECT_CALL(objTestTimerService.GetMockTimer(), SetTimer(120000, m_pTestAosApplication))
@@ -1874,7 +1953,7 @@ TEST_F(AosApplicationTest, Process)
     m_pTestAosApplication->ProcessRoamingState(IMS_FALSE);
     m_pTestAosApplication->ProcessRoamingState(IMS_TRUE);
     PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, pTimerService);
-    m_pTestAosApplication->m_piImsEstablishmentTimer = piTimer;
+    m_pTestAosApplication->SetImsEstablishmentTimer(piTimer);
     m_pTestAosApplication->StopTimer(TIMER_IMS_ESTABLISHMENT);
 
     // TEST_F : ProcessRegBlockedTimerExpired
@@ -1985,36 +2064,30 @@ TEST_F(AosApplicationTest, Process)
     EXPECT_FALSE(m_pTestAosApplication->UpdateRegRecoveryHeld());
     EXPECT_TRUE(m_pTestAosApplication->IsRegRecoveryHeld());
     // pending feature on, held
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
     m_pTestAosApplication->SetRegRecoveryHeld(IMS_FALSE);
     EXPECT_FALSE(m_pTestAosApplication->UpdateRegRecoveryHeld());
     EXPECT_TRUE(m_pTestAosApplication->IsRegRecoveryHeld());
     // pending feature on, not held - recover reason PCSCF_CHANGE
     m_pTestAosApplication->SetImsCall(IMS_FALSE);
-    m_pTestAosApplication->m_nRecoverReason = AoSRegRecoveryType::PCSCF_CHANGE;
+    m_pTestAosApplication->SetRecoverReason(AoSRegRecoveryType::PCSCF_CHANGE);
     EXPECT_TRUE(m_pTestAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pTestAosApplication->IsRegRecoveryHeld());
-    EXPECT_FALSE(m_pTestAosApplication->m_pUtil->IsFeatureOn(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending));
+    EXPECT_FALSE(m_pTestAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     // pending feature on, not held - recover reason SCSCF_RESTORATION_REQUIRED
     m_pTestAosApplication->SetRegRecoveryHeld(IMS_TRUE);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending);
-    m_pTestAosApplication->m_nRecoverReason = AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED;
+    m_pTestAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
+    m_pTestAosApplication->SetRecoverReason(AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED);
     EXPECT_TRUE(m_pTestAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pTestAosApplication->IsRegRecoveryHeld());
-    EXPECT_FALSE(m_pTestAosApplication->m_pUtil->IsFeatureOn(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending));
+    EXPECT_FALSE(m_pTestAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     // pending feature on, not held - recover reason other
     m_pTestAosApplication->SetRegRecoveryHeld(IMS_TRUE);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending);
-    m_pTestAosApplication->m_nRecoverReason = AoSRegRecoveryType::UNKNOWN;
+    m_pTestAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
+    m_pTestAosApplication->SetRecoverReason(AoSRegRecoveryType::UNKNOWN);
     EXPECT_TRUE(m_pTestAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pTestAosApplication->IsRegRecoveryHeld());
-    EXPECT_FALSE(m_pTestAosApplication->m_pUtil->IsFeatureOn(
-            PENDING_REG_RECOVERY_HELD, m_pTestAosApplication->m_nRegPending));
+    EXPECT_FALSE(m_pTestAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
 
     // TEST_F : UpdateRegStopHeld()
     EXPECT_FALSE(m_pTestAosApplication->UpdateRegStopHeld());
@@ -2421,17 +2494,12 @@ TEST_F(AosApplicationTest, Callback)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objRegUpdateRats));
     m_pTestAosApplication->StartTimer(TIMER_RECONFIG_GUARD, 1000);
-    m_pTestAosApplication->m_pUtil->AddFeature(
-            PENDING_IPCAN_HELD, m_pTestAosApplication->m_nRegPending);
-    m_pTestAosApplication->m_pUtil->RemoveFeature(
-            PENDING_REG_UPDATE_HELD, m_pTestAosApplication->m_nRegPending);
+    m_pTestAosApplication->AddFeature(PENDING_IPCAN_HELD);
+    m_pTestAosApplication->RemoveFeature(PENDING_REG_UPDATE_HELD);
     m_pTestAosApplication->NetTracker_StatusChanged();
-    EXPECT_FALSE(m_pTestAosApplication->m_pUtil->IsFeatureOn(
-            PENDING_IPCAN_HELD, m_pTestAosApplication->m_nRegPending));
-    EXPECT_TRUE(m_pTestAosApplication->m_pUtil->IsFeatureOn(
-            PENDING_REG_UPDATE_HELD, m_pTestAosApplication->m_nRegPending));
-    m_pTestAosApplication->m_pUtil->RemoveFeature(
-            PENDING_REG_UPDATE_HELD, m_pTestAosApplication->m_nRegPending);
+    EXPECT_FALSE(m_pTestAosApplication->IsFeatureOn(PENDING_IPCAN_HELD));
+    EXPECT_TRUE(m_pTestAosApplication->IsFeatureOn(PENDING_REG_UPDATE_HELD));
+    m_pTestAosApplication->RemoveFeature(PENDING_REG_UPDATE_HELD);
     m_pTestAosApplication->StopTimer(TIMER_RECONFIG_GUARD);
 
     // IsOn true, IsRegUpdatedByNrLteRatChange true, TIMER_RECONFIG_GUARD not running
