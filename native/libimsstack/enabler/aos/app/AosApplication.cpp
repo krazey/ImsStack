@@ -578,10 +578,9 @@ IMS_BOOL AosApplication::IsRegStateUpdatedByNrLteRatChange() const
     return IsRegTypeNormal();
 }
 
-PROTECTED
-IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
+PROTECTED IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 {
-    if (m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+    if (m_pCondition && m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
     {
         return IMS_TRUE;
     }
@@ -712,7 +711,10 @@ PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 
     SetState(nState);
 
-    m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
+    if (m_piRegistration)
+    {
+        m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
+    }
 }
 
 PROTECTED VIRTUAL void AosApplication::SetCleanState()
@@ -739,12 +741,12 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsUpdateAvailable()
     return bOk;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegReconfigAvailable()
+PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegReconfigAvailable() const
 {
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosApplication::IsReconfigHandleChanged()
+PROTECTED VIRTUAL IMS_BOOL AosApplication::IsReconfigHandleChanged() const
 {
     ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_BOOL bChanged = IMS_FALSE;
@@ -808,7 +810,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRequestCmdHeldByCondition(
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached()
+PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached() const
 {
     ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
@@ -827,12 +829,12 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosApplication::IsConditionTimerSkippedDueToTimer()
+PROTECTED VIRTUAL IMS_BOOL AosApplication::IsConditionTimerSkippedDueToTimer() const
 {
     return IsTimerRunning(TIMER_MSG_CONDITION);
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange()
+PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange() const
 {
     ImsVector<IMS_SINT32>& objRegUpdateRats =
             GET_N_CONFIG(m_nSlotId)->GetUpdateRegistrationWithRatChange();
@@ -873,7 +875,10 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
         ClearConnection();
     }
 
-    m_piRegistration->Destroy();
+    if (m_piRegistration)
+    {
+        m_piRegistration->Destroy();
+    }
 
     if (IsPdnDisconnectRequired())
     {

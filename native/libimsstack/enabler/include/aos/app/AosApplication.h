@@ -136,12 +136,12 @@ protected:
     virtual void SetCleanState();
 
     virtual IMS_BOOL IsUpdateAvailable();
-    virtual IMS_BOOL IsRegReconfigAvailable();
-    virtual IMS_BOOL IsReconfigHandleChanged();
+    virtual IMS_BOOL IsRegReconfigAvailable() const;
+    virtual IMS_BOOL IsReconfigHandleChanged() const;
     virtual IMS_BOOL IsRequestCmdHeldByCondition(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
-    virtual IMS_BOOL IsAllHandleDetached();
-    virtual IMS_BOOL IsConditionTimerSkippedDueToTimer();
-    virtual IMS_BOOL IsRegUpdatedByNrLteRatChange();
+    virtual IMS_BOOL IsAllHandleDetached() const;
+    virtual IMS_BOOL IsConditionTimerSkippedDueToTimer() const;
+    virtual IMS_BOOL IsRegUpdatedByNrLteRatChange() const;
 
     // Clean
     virtual void CleanAll(IN IMS_UINT32 nOffReason = AosReason::NONE);
