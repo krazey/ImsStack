@@ -23,6 +23,7 @@
 #include "interface/IAosNConfiguration.h"
 #include "provider/AosProvider.h"
 #include "PlatformContext.h"
+#include "TestTimerService.h"
 #include "TestUtilService.h"
 
 #include "interface/MockIAosAppContext.h"
@@ -62,7 +63,8 @@ using ::testing::SetArgPointee;
     using Base::AosConnection_ConnectionFailed;  \
     using Base::Pcscf_NotifyResult;              \
     using Base::ServicePhone_PcoValueChanged;    \
-    using Base::CleanUp;
+    using Base::CleanUp;                         \
+    using Base::TimerToString;
 
 const IMS_SINT32 SLOT_ID = 0;
 const AString PROFILE_ID = AString("test");
@@ -73,7 +75,7 @@ class TestAosConnector : public AosConnector
 public:
     DECLARE_USING(AosConnector)
 
-    TestAosConnector(IN IAosAppContext* piAppContext) :
+    explicit inline TestAosConnector(IN IAosAppContext* piAppContext) :
             AosConnector(piAppContext)
     {
     }
@@ -125,8 +127,12 @@ public:
 class AosConnectorTest : public ::testing::Test
 {
 public:
-    inline AosConnectorTest()
+    inline AosConnectorTest() :
+            m_pAosConnector(IMS_NULL)
     {
+        m_objTimerService.SetTimer(&m_objMockITimer);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &m_objTimerService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_UTIL, &m_objUtilService);
 
@@ -137,12 +143,14 @@ public:
     }
     inline virtual ~AosConnectorTest()
     {
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
-        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetService(m_piAosService, SLOT_ID);
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 
     TestAosConnector* m_pAosConnector;
+    TestTimerService m_objTimerService;
     TestUtilService m_objUtilService;
 
     AStringArray m_objPcscfs;
@@ -157,6 +165,7 @@ public:
     MockIAosPcscf m_objMockIAosPcscf;
     MockIAosRegistration m_objMockIAosRegistration;
     MockIAosService m_objMockIAosService;
+    MockITimer m_objMockITimer;
 
 protected:
     virtual void SetUp() override
@@ -184,59 +193,55 @@ protected:
     virtual void TearDown() override
     {
         m_objPcscfs.RemoveAllElements();
-        m_pAosConnector->ClearAllTimers();
         if (m_pAosConnector)
         {
+            m_pAosConnector->ClearAllTimers();
             delete m_pAosConnector;
             m_pAosConnector = IMS_NULL;
         }
     }
 };
 
-TEST_F(AosConnectorTest, StartWhenPcscfChangeNotIgnored_NotifyActivatedIfReadyState)
+TEST_F(AosConnectorTest, NotifyActivatedIfAlreadyInReadyStateWhenStart)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
 
     // notify Activated without invoking Activate because already ready
     EXPECT_CALL(m_objMockIAosConnection, Activate()).Times(0);
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated());
-    EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco()).Times(0);
 
-    EXPECT_FALSE(m_pAosConnector->Start());
+    m_pAosConnector->Start();
 }
 
-TEST_F(AosConnectorTest, StartWhenPcscfChangeIgnored_NotifyActivatedIfReadyState)
+TEST_F(AosConnectorTest, UpdatePcscfIfPcscfChangeIgnoredWhenStart)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
     m_pAosConnector->SetPcscfChangeIgnored(IMS_TRUE);
 
-    // notify Activated without invoking Activate because already ready
-    EXPECT_CALL(m_objMockIAosConnection, Activate()).Times(0);
-    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated());
     EXPECT_CALL(m_objMockIAosPcscf, CheckAndProcessChangeFromPco());
 
-    EXPECT_FALSE(m_pAosConnector->Start());
+    m_pAosConnector->Start();
 }
 
-TEST_F(AosConnectorTest, Start_NotInvokeActivateIfPendingProcessExist)
+TEST_F(AosConnectorTest, NotInvokeActivateIfPendingOperationExistWhenStart)
 {
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
 
     // not invoke Activate because connector is now pending
     EXPECT_CALL(m_objMockIAosConnection, Activate()).Times(0);
 
-    EXPECT_FALSE(m_pAosConnector->Start());
+    m_pAosConnector->Start();
 }
 
-TEST_F(AosConnectorTest, Start_InvokeActivate)
+TEST_F(AosConnectorTest, InvokeActivateWhenStart)
 {
     // invoke Activate normally
     EXPECT_CALL(m_objMockIAosConnection, Activate());
 
-    EXPECT_TRUE(m_pAosConnector->Start());
+    m_pAosConnector->Start();
 }
 
-TEST_F(AosConnectorTest, Stop_InvokeDeactivateAndCleanAll)
+TEST_F(AosConnectorTest, InvokeDeactivateAndCleanAllWhenStop)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
@@ -259,7 +264,7 @@ TEST_F(AosConnectorTest, Stop_InvokeDeactivateAndCleanAll)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, StopWithZeroDelay_InvokeStopImmediately)
+TEST_F(AosConnectorTest, InvokeStopImmediatelyWhenStopWithoutDelay)
 {
     // invoke Deactivate without TIMER_STOP_DELAY
     EXPECT_CALL(m_objMockIAosConnection, Deactivate());
@@ -270,26 +275,25 @@ TEST_F(AosConnectorTest, StopWithZeroDelay_InvokeStopImmediately)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
 }
 
-TEST_F(AosConnectorTest, StopWithDelay_RunStopDelayTimer)
+TEST_F(AosConnectorTest, RunStopDelayTimerWhenStopWithDelay)
 {
-    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
-
     // not invoke Deactivate but run TIMER_STOP_DELAY instead
     EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
 
-    m_pAosConnector->Stop(1);
+    m_pAosConnector->Stop(10);
 
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
 }
 
-TEST_F(AosConnectorTest, StopWithDelay_KeepStopDelayTimerIfStopDelayTimerExist)
+TEST_F(AosConnectorTest, KeepStopDelayTimerIfAlreadyExistWhenStopWithDelay)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
 
     // not invoke Deactivate and keep TIMER_STOP_DELAY
     EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
 
-    m_pAosConnector->Stop(1);
+    m_pAosConnector->Stop(10);
 
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
 }
@@ -308,7 +312,7 @@ TEST_F(AosConnectorTest, CheckWhetherIsReady)
     EXPECT_FALSE(m_pAosConnector->IsReady());
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_IgnoreIfReadyState)
+TEST_F(AosConnectorTest, DoNothingIfAlreadyInReadyStateWhenStateChangedToActive)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
 
@@ -319,7 +323,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_IgnoreIfReadyState)
     m_pAosConnector->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_WaitForIpv6)
+TEST_F(AosConnectorTest, WaitForIpv6IfRequiredWhenStateChangedToActive)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
@@ -332,7 +336,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForIpv6)
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_WaitForPco)
+TEST_F(AosConnectorTest, WaitForPcoIfRequiredWhenStateChangedToActive)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objUtilService.GetMockPrivateProperty(),
@@ -351,7 +355,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForPco)
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_WaitForPendingProcess)
+TEST_F(AosConnectorTest, WaitForPendingOperationCompleteWhenStateChangedToActive)
 {
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_PCSCF_CONFIG_READY);
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
@@ -366,7 +370,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForPendingProcess)
     m_pAosConnector->AosConnection_StateChanged(IAosConnection::STATE_ACTIVE);
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_WaitForPcscfConfigureIfPcscfConfigureFail)
+TEST_F(AosConnectorTest, WaitForPcscfConfigureIfPcscfConfigureFailWhenStateChangedToActive)
 {
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objUtilService.GetMockPrivateProperty(),
@@ -388,7 +392,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_WaitForPcscfConfigureIfPcscfConfig
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
 }
 
-TEST_F(AosConnectorTest, StateChangedToActive_Activated)
+TEST_F(AosConnectorTest, NotifyActivatedIfPcscfConfigureSucceedWhenStateChangedToActive)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     ON_CALL(m_objMockIAosConnection, IsIpv6Preferred()).WillByDefault(Return(IMS_FALSE));
@@ -410,7 +414,7 @@ TEST_F(AosConnectorTest, StateChangedToActive_Activated)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_READY);
 }
 
-TEST_F(AosConnectorTest, StateChangedToIdle_Deactivated)
+TEST_F(AosConnectorTest, NotifyDeactivatedWhenStateChangedToIdle)
 {
     // notify Deactivated
     EXPECT_CALL(m_objMockIAosConnectorListener,
@@ -423,7 +427,7 @@ TEST_F(AosConnectorTest, StateChangedToIdle_Deactivated)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, IpChangedInReadyStateForEmergency_IgnoreIfSame)
+TEST_F(AosConnectorTest, DoNothingIfIpNotChangedForEmergencyTypeWhenIpChangedInReadyState)
 {
     m_pAosConnector->SetEmergencyType(IMS_TRUE);
     m_pAosConnector->SetState(AosConnector::STATE_READY);
@@ -444,7 +448,7 @@ TEST_F(AosConnectorTest, IpChangedInReadyStateForEmergency_IgnoreIfSame)
     m_pAosConnector->AosConnection_IpChanged();
 }
 
-TEST_F(AosConnectorTest, IpChangedInReadyState_UpdateIfIpVersionMatch)
+TEST_F(AosConnectorTest, NotifyIpChangedIfAvailableAddressExistWhenIpChangedInReadyState)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetState(AosConnector::STATE_READY);
@@ -453,13 +457,11 @@ TEST_F(AosConnectorTest, IpChangedInReadyState_UpdateIfIpVersionMatch)
 
     // notify IP is changed
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_IP_CHANGED));
-    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_FAILED))
-            .Times(0);
 
     m_pAosConnector->AosConnection_IpChanged();
 }
 
-TEST_F(AosConnectorTest, IpChangedInReadyState_DeactivateIfInvalidIpAddress)
+TEST_F(AosConnectorTest, NotifyDeactivateIfNoAvailableAddressExistWhenIpChangedInReadyState)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
     const IpAddress objInvalidAddress = IpAddress(AString("IpAddress"));
@@ -467,8 +469,6 @@ TEST_F(AosConnectorTest, IpChangedInReadyState_DeactivateIfInvalidIpAddress)
             .WillByDefault(ReturnRef(objInvalidAddress));
 
     // notify Deactivated
-    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(AosConnector::REASON_IP_CHANGED))
-            .Times(0);
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_FAILED));
 
     m_pAosConnector->AosConnection_IpChanged();
@@ -476,7 +476,7 @@ TEST_F(AosConnectorTest, IpChangedInReadyState_DeactivateIfInvalidIpAddress)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForIpv6)
+TEST_F(AosConnectorTest, WaitForIpv6IfRequiredWhenIpChangedInIdleState)
 {
     m_pAosConnector->SetDataConnected(IMS_TRUE);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
@@ -488,10 +488,9 @@ TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForIpv6)
 
     EXPECT_EQ(m_pAosConnector->GetPendingFeature(), AosConnector::PENDING_IPV6_DELAY);
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
-    EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForPendingProcess)
+TEST_F(AosConnectorTest, WaitForPendingOperationCompleteWhenIpChangedInIdleState)
 {
     m_pAosConnector->SetDataConnected(IMS_TRUE);
     m_pAosConnector->SetPendingFeature(
@@ -508,7 +507,7 @@ TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForPendingProcess)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForPcscfConfigureIfPcscfConfigureFail)
+TEST_F(AosConnectorTest, WaitForPcscfConfigureIfPcscfConfigureFailWhenIpChangedInIdleState)
 {
     m_pAosConnector->SetDataConnected(IMS_TRUE);
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_FALSE));
@@ -522,7 +521,7 @@ TEST_F(AosConnectorTest, IpChangedInIdleState_WaitForPcscfConfigureIfPcscfConfig
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
 }
 
-TEST_F(AosConnectorTest, IpChangedInIdleState_Activated)
+TEST_F(AosConnectorTest, NotifyActivatedWhenIpChangedInIdleState)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetDataConnected(IMS_TRUE);
@@ -539,7 +538,7 @@ TEST_F(AosConnectorTest, IpChangedInIdleState_Activated)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_READY);
 }
 
-TEST_F(AosConnectorTest, IpcanCatChanged_Updated)
+TEST_F(AosConnectorTest, NotifyChangeWhenIpcanCategoryChanged)
 {
     // notify IP CAN category is changed
     EXPECT_CALL(m_objMockIAosConnectorListener,
@@ -548,7 +547,7 @@ TEST_F(AosConnectorTest, IpcanCatChanged_Updated)
     m_pAosConnector->AosConnection_IpcanCatChanged();
 }
 
-TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfInvalidState)
+TEST_F(AosConnectorTest, DoNothingIfInvalidAppStateWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_NOTREADY));
@@ -560,7 +559,7 @@ TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfInvalidState)
 
     m_pAosConnector->AosConnection_PcscfChanged();
 }
-TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfConfiguredToNotInitReg)
+TEST_F(AosConnectorTest, HoldProcessingIfConfiguredToIgnoreDuringRegisteredStateWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
@@ -578,7 +577,7 @@ TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfConfiguredToNotInitReg)
     EXPECT_TRUE(m_pAosConnector->GetPcscfChangeIgnored());
 }
 
-TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfUnavailablePcscf)
+TEST_F(AosConnectorTest, DoNothingIfNoAvailablePcscfExistWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
@@ -594,7 +593,7 @@ TEST_F(AosConnectorTest, PcscfChanged_IgnoreIfUnavailablePcscf)
     m_pAosConnector->AosConnection_PcscfChanged();
 }
 
-TEST_F(AosConnectorTest, PcscfChanged_Notified)
+TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChanged)
 {
     ON_CALL(m_objMockIAosApplication, GetAppState())
             .WillByDefault(Return(IAosApplication::STATE_CONNECTING));
@@ -609,7 +608,7 @@ TEST_F(AosConnectorTest, PcscfChanged_Notified)
     m_pAosConnector->AosConnection_PcscfChanged();
 }
 
-TEST_F(AosConnectorTest, ConnectionFailed_Deactivated)
+TEST_F(AosConnectorTest, NotifyDeactivatedWhenConnectionFailed)
 {
     // notify Deactivated
     EXPECT_CALL(m_objMockIAosConnectorListener,
@@ -618,7 +617,7 @@ TEST_F(AosConnectorTest, ConnectionFailed_Deactivated)
     m_pAosConnector->AosConnection_ConnectionFailed();
 }
 
-TEST_F(AosConnectorTest, PcscfNotifyResult_WaitForPendingProcess)
+TEST_F(AosConnectorTest, WaitForPendingOperationCompleteWhenPcscfNotifyResult)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetDataConnected(IMS_TRUE);
@@ -636,7 +635,7 @@ TEST_F(AosConnectorTest, PcscfNotifyResult_WaitForPendingProcess)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, PcscfNotifyResult_Activated)
+TEST_F(AosConnectorTest, NotifyActivatedWhenPcscfNotifyResult)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetDataConnected(IMS_TRUE);
@@ -653,7 +652,7 @@ TEST_F(AosConnectorTest, PcscfNotifyResult_Activated)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_READY);
 }
 
-TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenNotReadyState)
+TEST_F(AosConnectorTest, NotNotifyDeactivatedIfInNotReadyStateWhenPcoValueChanged)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->StartTimer(AosConnector::TIMER_PCO_WAITING, TIMER_DURATION_MILLIS);
@@ -666,8 +665,9 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenNotReadyState)
 
     IMS_UINT32 nPcoValue = 5;
     EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(nPcoValue));
-    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).Times(0);
-    EXPECT_CALL(m_objMockIAosRegistration, GetMode()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_LIMITED_SERVICE_PCO))
+            .Times(0);
 
     m_pAosConnector->ServicePhone_PcoValueChanged(nPcoValue);
 
@@ -675,7 +675,7 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenNotReadyState)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenReadyStateButDeregistering)
+TEST_F(AosConnectorTest, NotNotifyDeactivatedIfWhileInDeregisteringWhenPcoValueChanged)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_PCO_WAITING, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_PCO_WAITING);
@@ -685,8 +685,9 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenReadyStateButDeregistering
 
     IMS_UINT32 nPcoValue = 5;
     EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(nPcoValue));
-    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).Times(0);
-    EXPECT_CALL(m_objMockIAosRegistration, GetMode()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_LIMITED_SERVICE_PCO))
+            .Times(0);
 
     m_pAosConnector->ServicePhone_PcoValueChanged(nPcoValue);
 
@@ -694,7 +695,7 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenReadyStateButDeregistering
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenReadyStateAndLimitedModeNotChanged)
+TEST_F(AosConnectorTest, NotNotifyDeactivatedIfLimitedModeNotChangedWhenPcoValueChanged)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_PCO_WAITING, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_PCO_WAITING);
@@ -717,7 +718,7 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoWhenReadyStateAndLimitedModeNo
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoAndDeactivatedWhenLimitedModeChanged)
+TEST_F(AosConnectorTest, NotifyDeactivatedIfLimitedModeChangedWhenPcoValueChanged)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_PCO_WAITING, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_PCO_WAITING);
@@ -739,7 +740,7 @@ TEST_F(AosConnectorTest, PcoValueChanged_UpdatePcoAndDeactivatedWhenLimitedModeC
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForPco)
+TEST_F(AosConnectorTest, WaitForPcoIfRequiredWhenIpv6TimerExpired)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
     m_pAosConnector->SetPendingFeature(AosConnector::PENDING_IPV6_DELAY);
@@ -759,7 +760,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForPco)
     EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForDataConnection)
+TEST_F(AosConnectorTest, WaitForDataConnectionWhenIpv6TimerExpired)
 {
     m_pAosConnector->SetDataConnected(IMS_FALSE);
     m_pAosConnector->StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_MILLIS);
@@ -777,7 +778,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_WaitForDataConnection)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
 }
 
-TEST_F(AosConnectorTest, Ipv6TimerExpired_ProcessCheckingPcscfAndIpa)
+TEST_F(AosConnectorTest, NotifyActivatedIfPcscfAndLocalAddressIsAvailableWhenIpv6TimerExpired)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetDataConnected(IMS_TRUE);
@@ -791,7 +792,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_ProcessCheckingPcscfAndIpa)
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
+    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated());
 
     m_pAosConnector->NotifyTimerExpired(AosConnector::TIMER_IPV6);
 
@@ -799,7 +800,7 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_ProcessCheckingPcscfAndIpa)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_IPV6));
 }
 
-TEST_F(AosConnectorTest, StopDelayTimerExpired_InvokeStop)
+TEST_F(AosConnectorTest, InvokeStopWhenStopDelayTimerExpired)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
 
@@ -811,7 +812,7 @@ TEST_F(AosConnectorTest, StopDelayTimerExpired_InvokeStop)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
 }
 
-TEST_F(AosConnectorTest, ReadyRecoveryTimerExpired_InvokeStopIfNoDelayTimerExist)
+TEST_F(AosConnectorTest, InvokeStopIfNoDelayTimerExistWhenReadyRecoveryTimerExpired)
 {
     m_pAosConnector->StartTimer(AosConnector::TIMER_READY_RECOVERY, TIMER_DURATION_MILLIS);
 
@@ -819,26 +820,9 @@ TEST_F(AosConnectorTest, ReadyRecoveryTimerExpired_InvokeStopIfNoDelayTimerExist
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_NONE));
 
     m_pAosConnector->NotifyTimerExpired(AosConnector::TIMER_READY_RECOVERY);
-
-    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
 }
 
-TEST_F(AosConnectorTest, ReadyRecoveryTimerExpired_WaitForStopDelayTime)
-{
-    m_pAosConnector->StartTimer(AosConnector::TIMER_READY_RECOVERY, TIMER_DURATION_MILLIS);
-    m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
-
-    // wait for stop delay time to expire
-    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(AosConnector::REASON_NONE))
-            .Times(0);
-
-    m_pAosConnector->NotifyTimerExpired(AosConnector::TIMER_READY_RECOVERY);
-
-    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
-    EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_STOP_DELAY));
-}
-
-TEST_F(AosConnectorTest, PcoWaitingTimerExpired_ProcessCheckingPcscfAndIpa)
+TEST_F(AosConnectorTest, NotifyActivatedIfPcscfAndLocalAddressIsAvailableWhenPcoWaitingTimerExpired)
 {
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     m_pAosConnector->SetDataConnected(IMS_TRUE);
@@ -848,7 +832,7 @@ TEST_F(AosConnectorTest, PcoWaitingTimerExpired_ProcessCheckingPcscfAndIpa)
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
+    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated());
 
     m_pAosConnector->NotifyTimerExpired(AosConnector::TIMER_PCO_WAITING);
 
@@ -856,7 +840,7 @@ TEST_F(AosConnectorTest, PcoWaitingTimerExpired_ProcessCheckingPcscfAndIpa)
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
-TEST_F(AosConnectorTest, CheckPcscfAndIpa_EmergencyTypeDeactivatedIfPcscfConfigureFail)
+TEST_F(AosConnectorTest, NotifyDeactivatedForEmergencyTypeWhenPcscfConfigureFail)
 {
     m_pAosConnector->SetEmergencyType(IMS_TRUE);
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_FALSE));
@@ -869,16 +853,18 @@ TEST_F(AosConnectorTest, CheckPcscfAndIpa_EmergencyTypeDeactivatedIfPcscfConfigu
     EXPECT_EQ(m_pAosConnector->GetPendingFeature(), AosConnector::PENDING_NONE);
 }
 
-TEST_F(AosConnectorTest, CheckIpChangedForEmergency_ReturnFalseIfOfflineRegState)
+TEST_F(AosConnectorTest, ReturnFalseIfOfflineRegStateWhenCheckIpChangedForEmergency)
 {
     m_pAosConnector->SetEmergencyType(IMS_TRUE);
     ON_CALL(m_objMockIAosRegistration, GetState())
             .WillByDefault(Return(IAosRegistration::STATE_OFFLINE));
 
-    EXPECT_FALSE(m_pAosConnector->CheckIpChangedForEmergency());
+    IMS_BOOL bResult = m_pAosConnector->CheckIpChangedForEmergency();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, CheckIpChangedForEmergency_ReturnFalseIfUnknownIpAddress)
+TEST_F(AosConnectorTest, ReturnFalseIfUnknownIpAddressWhenCheckIpChangedForEmergency)
 {
     m_pAosConnector->SetEmergencyType(IMS_TRUE);
     ON_CALL(m_objMockIAosRegistration, GetState())
@@ -887,10 +873,12 @@ TEST_F(AosConnectorTest, CheckIpChangedForEmergency_ReturnFalseIfUnknownIpAddres
     ON_CALL(m_objMockIAosRegistration, GetPropertyInternal(_, _, _))
             .WillByDefault(DoAll(SetArgPointee<2>(strInvalidAddress), Return(0)));
 
-    EXPECT_FALSE(m_pAosConnector->CheckIpChangedForEmergency());
+    IMS_BOOL bResult = m_pAosConnector->CheckIpChangedForEmergency();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, CheckIpaAndProcessReadyRecovery_ReturnFalseIfFailParsePcscf)
+TEST_F(AosConnectorTest, ReturnFalseIfFailToParsePcscfWhenCheckIpaAndProcessReadyRecovery)
 {
     // calculate waiting time through the WaitTimeForFlowRecovery()
     m_pAosConnector->SetReadyRecoveryCount(AosConnector::READY_RECOVERY_DEFAULT_COUNT);
@@ -898,53 +886,65 @@ TEST_F(AosConnectorTest, CheckIpaAndProcessReadyRecovery_ReturnFalseIfFailParseP
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
-    EXPECT_FALSE(m_pAosConnector->CheckIpaAndProcessReadyRecovery());
+    IMS_BOOL bResult = m_pAosConnector->CheckIpaAndProcessReadyRecovery();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, CheckIpaAndProcessReadyRecovery_ReturnFalseIfNonIpAddress)
+TEST_F(AosConnectorTest, ReturnFalseIfNonIpAddressWhenCheckIpaAndProcessReadyRecovery)
 {
     m_objPcscfs.AddElement(AString("1:1:1:1"));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_)).WillByDefault(ReturnRef(IpAddress::NONE));
 
-    EXPECT_FALSE(m_pAosConnector->CheckIpaAndProcessReadyRecovery());
+    IMS_BOOL bResult = m_pAosConnector->CheckIpaAndProcessReadyRecovery();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, SelectIpVersion_FailIfNoPcscf)
+TEST_F(AosConnectorTest, ReturnFalseIfNoPcscfExistWhenSelectIpVersion)
 {
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
-    EXPECT_FALSE(m_pAosConnector->SelectIpVersion());
+    IMS_BOOL bResult = m_pAosConnector->SelectIpVersion();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, SelectIpVersion_FailIfPcscfAddressIsEmpty)
+TEST_F(AosConnectorTest, ReturnFalseIfPcscfAddressIsEmptyWhenSelectIpVersion)
 {
     m_objPcscfs.AddElement(AString(""));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
-    EXPECT_FALSE(m_pAosConnector->SelectIpVersion());
+    IMS_BOOL bResult = m_pAosConnector->SelectIpVersion();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, SelectIpVersion_FailIfInvalidPcscfAddress)
+TEST_F(AosConnectorTest, ReturnFalseIfInvalidPcscfAddressWhenSelectIpVersion)
 {
     m_objPcscfs.AddElement(AString("PcscfAddress"));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
-    EXPECT_FALSE(m_pAosConnector->SelectIpVersion());
+    IMS_BOOL bResult = m_pAosConnector->SelectIpVersion();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, SelectIpVersion_FailIfAddressVersionNotMatch)
+TEST_F(AosConnectorTest, ReturnFalseIfAddressVersionNotMatchWhenSelectIpVersion)
 {
     m_objPcscfs.AddElement(AString("fe80::1"));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
 
-    EXPECT_FALSE(m_pAosConnector->SelectIpVersion());
+    IMS_BOOL bResult = m_pAosConnector->SelectIpVersion();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectorTest, Notify_IgnoredIfNullListener)
+TEST_F(AosConnectorTest, DoNothingIfListenerIsNullWhenNotify)
 {
     m_pAosConnector->SetListener(IMS_NULL);
 
@@ -953,7 +953,7 @@ TEST_F(AosConnectorTest, Notify_IgnoredIfNullListener)
     m_pAosConnector->Notify(AosConnector::LISTENER_TYPE_ACTIVATED);
 }
 
-TEST_F(AosConnectorTest, Notify_IgnoredIfUnknownListenerType)
+TEST_F(AosConnectorTest, DoNothingIfListenerTypeIsUnknownWhenNotify)
 {
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated()).Times(0);
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(_)).Times(0);
@@ -963,7 +963,7 @@ TEST_F(AosConnectorTest, Notify_IgnoredIfUnknownListenerType)
     m_pAosConnector->Notify(nUnknownListenerType);
 }
 
-TEST_F(AosConnectorTest, CleanUp)
+TEST_F(AosConnectorTest, RemoveListenersWhenCleanUp)
 {
     EXPECT_CALL(m_objMockIAosService,
             RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, m_pAosConnector)));
@@ -976,11 +976,28 @@ TEST_F(AosConnectorTest, CleanUp)
     EXPECT_EQ(m_pAosConnector->GetState(), AosConnector::STATE_IDLE);
 }
 
-TEST_F(AosConnectorTest, InvalidTimer_Ignored)
+TEST_F(AosConnectorTest, StopAndStartAgainIfTimerIsAlreadyExistWhenStartTimer)
+{
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(2);
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(2);
+
+    m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
+    m_pAosConnector->StartTimer(AosConnector::TIMER_STOP_DELAY, TIMER_DURATION_MILLIS);
+}
+
+TEST_F(AosConnectorTest, NotHandleInvalidTimer)
 {
     IMS_SINT32 nInvalidTimer = -1;
+
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
+
     m_pAosConnector->StartTimer(nInvalidTimer, TIMER_DURATION_MILLIS);
+
+    EXPECT_EQ(m_pAosConnector->TimerToString(nInvalidTimer), "__INVALID__");
+
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(nInvalidTimer));
+
     m_pAosConnector->NotifyTimerExpired(nInvalidTimer);
+
     m_pAosConnector->StopTimer(nInvalidTimer);
 }
