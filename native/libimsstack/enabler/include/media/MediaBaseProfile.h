@@ -17,6 +17,10 @@
 #ifndef MEDIA_BASE_PROFILE_H_
 #define MEDIA_BASE_PROFILE_H_
 
+#include "ImsTypeDef.h"
+#include "IpAddress.h"
+#include "MediaDef.h"
+
 /**
  * The class is a base class of the Media (Audio/Video/Text) Profile.
  * Media Profile is used to keep the SDP negotiation information like

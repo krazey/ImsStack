@@ -17,8 +17,6 @@
 #ifndef AUDIO_PROFILE_H_
 #define AUDIO_PROFILE_H_
 
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
 #include "ImsMap.h"
 #include "MediaBaseProfile.h"
 

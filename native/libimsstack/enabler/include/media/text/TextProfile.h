@@ -17,8 +17,6 @@
 #ifndef TEXT_PROFILE_H_
 #define TEXT_PROFILE_H_
 
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
 #include "MediaBaseProfile.h"
 
 /**
