@@ -3245,48 +3245,47 @@ TEST_F(AosRegistrationTest, ReportFailureWhenStartFailedWithTxnTimeoutAndFailToT
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
-TEST_F(AosRegistrationTest, ProcessIpVersionChange)
+TEST_F(AosRegistrationTest, ReturnFalseIfNoChangedIpVersionInLocalAddressWhenIpVersionChange)
 {
-    AString strIpv4Addr = "192.168.0.1";
-    AString strIpv6Addr = "fc01:cafe::1";
-    m_pAosRegistration->SetPcscfString(strIpv4Addr);
-
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
     IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
-    IpAddress objLocalIpv6Addr(AString("fc01:abab:cdcd:efe0::1"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
-    EXPECT_FALSE(m_pAosRegistration->ProcessIpVersionChange());
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv4Addr));
 
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv6Addr));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
 
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnFalseIfNoChangedIpVersionInPcscfAddressWhenIpVersionChange)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objEmptyPcscfs;
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objEmptyPcscfs));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueIfSucceedToHandleChangeIpVersion)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
     AStringArray objPcscfs;
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
-    EXPECT_FALSE(m_pAosRegistration->ProcessIpVersionChange());
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
 
-    objPcscfs.AddElement(strIpv6Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
 
-    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(2);
-    EXPECT_CALL(m_objMockIAosPcscf, SetFirstPcscfIndex()).Times(2);
-    EXPECT_TRUE(m_pAosRegistration->ProcessIpVersionChange());
-
-    m_pAosRegistration->SetPcscfString(strIpv6Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
-    objPcscfs.RemoveAllElements();
-    objPcscfs.AddElement(strIpv4Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
-    EXPECT_TRUE(m_pAosRegistration->ProcessIpVersionChange());
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, TriggerPcscfSelectionWhenStartFailedWithStatusCodeForPcscfDiscovery)
@@ -3577,42 +3576,6 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenStartFailedWithOtherResponse)
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_580);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
-}
-
-TEST_F(AosRegistrationTest, ProcessStartFailed_Others)
-{
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillRepeatedly(ReturnRef(objExtraRegErrCode));
-    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
-
-    // ProcessAwtRecovery
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_NONE);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-
-    // REASON_CLIENT_SOCKET_ERROR - PDN reactivation is not required
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
-
-    // REASON_CLIENT_SOCKET_ERROR - PDN reactivation is required
-    objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_TRANSPORT);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(
-            m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).Times(AnyNumber()).WillOnce(Return(1));
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
-
-    // REG_ERROR_CODE_OTHER is exist in ExtraRegErrCode
-    objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_OTHER);
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_NONE);
 }
 
 TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode)
@@ -4277,15 +4240,53 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout)
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
 }
 
-TEST_F(AosRegistrationTest, RegistrationStartFailedWithOtherReason)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfErrorCodeOtherConfiguredWhenStartFailedWithOthers)
 {
-    // ProcessStartFailed_Others
     ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_OTHER);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillOnce(ReturnRef(objExtraRegErrCode));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objExtraRegErrCode));
 
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_NONE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerPdnReactivationIfRequiredWhenStartFailedWithSocketError)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryIfPdnReactivationNotRequiredWhenStartFailedWithSocketError)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfAwtRecoveryRequiredWhenStartFailedWithOthers)
+{
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_NONE);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
