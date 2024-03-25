@@ -55,6 +55,7 @@ const IMS_SINT32 SLOT_ID = 0;
 #define DECLARE_USING(Base)                                 \
     using Base::SetState;                                   \
     using Base::SetTerminated;                              \
+    using Base::StartTimer;                                 \
     using Base::IsRadioWaiting;                             \
     using Base::IsTrafficPriorityBlocked;                   \
     using Base::SetRadioWaiting;                            \
@@ -99,9 +100,6 @@ public:
     FRIEND_TEST(AosSubscriptionTest, Initialize);
     FRIEND_TEST(AosSubscriptionTest, CheckNotifyReceived);
     FRIEND_TEST(AosSubscriptionTest, RegSubscription_End);
-    FRIEND_TEST(AosSubscriptionTest, ProcessTimerExpired_StateInvalid);
-    FRIEND_TEST(AosSubscriptionTest, ProcessTimerExpired);
-    FRIEND_TEST(AosSubscriptionTest, Print);
 
 public:
     void SetRegSubscription(IN IRegSubscription* piRegSubscription)
@@ -216,8 +214,8 @@ public:
     MockIAosNetTracker m_objMockIAosNetTracker;
     MockISipMessage m_objMockSipMsg;
     MockIRegSubscription m_objMockIRegSubscription;
-    AString* m_pAor;
-    SipAddress* m_pContactAddress;
+    MockIRegInfo m_objMockIRegInfo;
+    MockIRegInfoRegistration m_objMockIRegInfoRegistration;
 
     MockIAosSubscriptionListener m_objMockIAosSubscriptionListener;
 
@@ -239,17 +237,15 @@ public:
     ImsVector<IMS_SINT32> m_objErrRegRequiredWithNextPcscf;
     ImsVector<IMS_SINT32> m_objErrResubStopped;
 
-    const AString ADDRESS1 = "sip:1234@ims.google.com:5060";
-    const AString ADDRESS2 = "sip:1234@ims.google.com";
-    const AString ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.invalid";
+    SipAddress m_objSipAddress = SipAddress("");
+    const AString m_strSipAddrWithPort = AString("sip:1234@ims.google.com:5060");
+    const AString m_strSipAddr = AString("sip:1234@ims.google.com");
+    const AString m_strAnonymousAddr = AString("sip:anonymous@anonymous.invalid");
 
 protected:
     virtual void SetUp() override
     {
         ConfigurationManager::GetInstance()->Initialize();
-
-        m_pAor = new AString(ADDRESS1);
-        m_pContactAddress = new SipAddress();
 
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
@@ -269,6 +265,10 @@ protected:
 
         ON_CALL(m_objMockIRegSubscription, GetPreviousResponse())
                 .WillByDefault(Return(&m_objMockSipMsg));
+        ON_CALL(m_objMockIRegSubscription, Subscribe()).WillByDefault(Return(IMS_SUCCESS));
+        ON_CALL(m_objMockIRegSubscription, GetRegInfo()).WillByDefault(Return(&m_objMockIRegInfo));
+        ON_CALL(m_objMockIRegInfo, GetRegistration(m_strSipAddrWithPort))
+                .WillByDefault(Return(&m_objMockIRegInfoRegistration));
 
         ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
                 .WillByDefault(Return(IMS_FALSE));
@@ -297,8 +297,7 @@ protected:
         ON_CALL(m_objMockIAosTransaction, StartTraffic(_, _)).WillByDefault(Return(IMS_TRUE));
 
         m_pAosSubscription = new TestAosSubscription(&m_objMockIAosAppContext,
-                static_cast<IRegSubscription*>(&m_objMockIRegSubscription), *m_pAor,
-                *m_pContactAddress);
+                &m_objMockIRegSubscription, m_strSipAddrWithPort, m_objSipAddress);
         ASSERT_TRUE(m_pAosSubscription != nullptr);
 
         m_pAosSubscription->SetListener(&m_objMockIAosSubscriptionListener);
@@ -307,16 +306,6 @@ protected:
 
     virtual void TearDown() override
     {
-        if (m_pAor)
-        {
-            delete m_pAor;
-        }
-
-        if (m_pContactAddress)
-        {
-            delete m_pContactAddress;
-        }
-
         if (m_pAosSubscription)
         {
             m_pAosSubscription->SetListener(IMS_NULL);
@@ -346,7 +335,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillRepeatedly(Return(static_cast<IRegInfo*>(&objMockIRegInfo)));
 
     MockIRegInfoRegistration objMockIRegInfoRegistration;
-    EXPECT_CALL(objMockIRegInfo, GetRegistration(*m_pAor))
+    EXPECT_CALL(objMockIRegInfo, GetRegistration(m_strSipAddrWithPort))
             .Times(AnyNumber())
             .WillOnce(ReturnNull())
             .WillOnce(ReturnNull())
@@ -384,7 +373,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillRepeatedly(Return(IRegInfoContact::EVENT_REGISTERED));
 
     SipAddress objSipAddress;
-    objSipAddress.Create(ANONYMOUS_ADDRESS);
+    objSipAddress.Create(m_strAnonymousAddr);
     EXPECT_CALL(objMockIRegInfoContact1, GetUri())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipAddress));
@@ -412,7 +401,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillRepeatedly(Return(IRegInfoContact::EVENT_REGISTERED));
 
     SipAddress objSipAddress2;
-    objSipAddress2.Create(ADDRESS1);
+    objSipAddress2.Create(m_strSipAddrWithPort);
     EXPECT_CALL(objMockIRegInfoContact2, GetUri())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objSipAddress2));
@@ -454,13 +443,13 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
     EXPECT_CALL(m_objMockAosRetryRepository, ResetRetryCount(0)).Times(1);
 
     SipAddress objContactAddr;
-    objContactAddr.Create(ADDRESS2);
+    objContactAddr.Create(m_strSipAddr);
     m_pAosSubscription->SetContactAddress(objContactAddr);
     m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
     EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
 
     objContactAddr.RemoveAllParameters();
-    objContactAddr.Create(ADDRESS1);
+    objContactAddr.Create(m_strSipAddrWithPort);
     m_pAosSubscription->SetContactAddress(objContactAddr);
 
     m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
@@ -590,116 +579,6 @@ TEST_F(AosSubscriptionTest, RegSubscription_End)
 
     m_pAosSubscription->NotifyListenerEvent(
             AMSG_REG_SUBSCRIPTION_TERMINATED, IRegSubscription::REASON_NO_EXPIRES, 0);
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
-}
-
-TEST_F(AosSubscriptionTest, ProcessTimerExpired_StateInvalid)
-{
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
-}
-
-TEST_F(AosSubscriptionTest, ProcessTimerExpired)
-{
-    IMS_UINT32 nCurrState = m_pAosSubscription->GetState();
-    m_pAosSubscription->Timer_TimerExpired(IMS_NULL);
-    EXPECT_EQ(m_pAosSubscription->GetState(), nCurrState);
-
-    // Timer_TimerExpired (piTimer != m_piRetryTimer) to do
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // ProcessTimerExpired() - return;
-    m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
-
-    // ProcessTimerExpired() - Subscription_CanBeTransmitted() == IMS_FALSE
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
-
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
-
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHSTOP);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // ProcessTimerExpired() - Subscription_CanBeTransmitted() == IMS_TRUE
-    // SendSubscribe() == IMS_FALSE m_piRegSubscription == IMS_NULL
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-
-    m_pAosSubscription->SetRegSubscription(IMS_NULL);
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBING);
-
-    // ProcessTimerExpired() - SendSubscribe() = IMS_TRUE Subscribe() == IMS_SUCCESS
-    m_pAosSubscription->SetRegSubscription(
-            static_cast<IRegSubscription*>(&m_objMockIRegSubscription));
-    EXPECT_CALL(m_objMockIRegSubscription, Subscribe())
-            .WillOnce(Return(IMS_FAILURE))
-            .WillRepeatedly(Return(IMS_SUCCESS));
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBING);
-
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSTOP);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
-
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHSTOP);
-    m_pAosSubscription->StartTimer(30);
-    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHING);
-}
-
-TEST_F(AosSubscriptionTest, Print)
-{
-    int nState = AosSubscription::STATE_OFFLINE;
-    while (nState <= AosSubscription::STATE_UNSUBSCRIBING)
-    {
-        m_pAosSubscription->SetState(nState);
-        m_pAosSubscription->StateToString(nState);
-        nState++;
-    }
-    m_pAosSubscription->StateToString(nState);
-
-    int nReason = IRegSubscription::REASON_NONE;
-    while (nReason <= IRegSubscription::REASON_NOTIFY_TERMINATED)
-    {
-        m_pAosSubscription->RegSubReasonToString(nReason);
-        nReason++;
-    }
-    m_pAosSubscription->RegSubReasonToString(nReason);
-
-    int nNotifyState = IRegInfoContact::STATE_CREATED;
-    while (nNotifyState <= IRegInfoContact::STATE_TERMINATED)
-    {
-        m_pAosSubscription->RegInfoStateToString(nNotifyState);
-        nNotifyState++;
-    }
-    m_pAosSubscription->RegInfoStateToString(nNotifyState);
-
-    int nEvent = IRegInfoContact::EVENT_REGISTERED;
-    while (nEvent <= IRegInfoContact::EVENT_REJECTED)
-    {
-        m_pAosSubscription->RegInfoEventToString(nEvent);
-        nEvent++;
-    }
-    m_pAosSubscription->RegInfoEventToString(nEvent);
-
-    m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
@@ -1968,4 +1847,114 @@ TEST_F(AosSubscriptionTest, NothingWhenPriorityChangedAndPriotyIsNotBlocked)
     m_pAosSubscription->Transaction_OnTrafficPriorityChanged();
 
     EXPECT_FALSE(m_pAosSubscription->IsTrafficPriorityBlocked());
+}
+
+/// Timer_TimerExpired()
+TEST_F(AosSubscriptionTest, NothingWhenTimerIsNullInTimerExpired)
+{
+    IMS_UINT32 nCurrState = m_pAosSubscription->GetState();
+    m_pAosSubscription->Timer_TimerExpired(IMS_NULL);
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), nCurrState);
+}
+
+/// Timer_TimerExpired() > ProcessTimerExpired()
+TEST_F(AosSubscriptionTest, MaintainStateWhenInvalidStateInProcessTimerExpired)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    m_pAosSubscription->StartTimer(30);
+
+    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
+}
+
+/// Timer_TimerExpired() > ProcessTimerExpired() > Start()
+TEST_F(AosSubscriptionTest, SubscribingStateWhenProcessTimerExpired)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_OFFLINE);
+    m_pAosSubscription->StartTimer(30);
+
+    m_pAosSubscription->Timer_TimerExpired(m_pAosSubscription->GetTimer());
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBING);
+}
+
+/// StateToString()
+TEST_F(AosSubscriptionTest, PrintState)
+{
+    EXPECT_STREQ(
+            "STATE_OFFLINE", m_pAosSubscription->StateToString(AosSubscription::STATE_OFFLINE));
+    EXPECT_STREQ("STATE_SUBSCRIBING",
+            m_pAosSubscription->StateToString(AosSubscription::STATE_SUBSCRIBING));
+    EXPECT_STREQ(
+            "STATE_SUBSTOP", m_pAosSubscription->StateToString(AosSubscription::STATE_SUBSTOP));
+    EXPECT_STREQ("STATE_SUBSCRIBED",
+            m_pAosSubscription->StateToString(AosSubscription::STATE_SUBSCRIBED));
+    EXPECT_STREQ("STATE_SUBREFRESHING",
+            m_pAosSubscription->StateToString(AosSubscription::STATE_SUBREFRESHING));
+    EXPECT_STREQ("STATE_SUBREFRESHSTOP",
+            m_pAosSubscription->StateToString(AosSubscription::STATE_SUBREFRESHSTOP));
+    EXPECT_STREQ("STATE_UNSUBSCRIBING",
+            m_pAosSubscription->StateToString(AosSubscription::STATE_UNSUBSCRIBING));
+    EXPECT_STREQ("__INVALID__", m_pAosSubscription->StateToString(1000));
+}
+
+/// RegSubReasonToString()
+TEST_F(AosSubscriptionTest, PrintReason)
+{
+    EXPECT_STREQ(
+            "REASON_NONE", m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_NONE));
+    EXPECT_STREQ("REASON_STATUS_CODE",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_STATUS_CODE));
+    EXPECT_STREQ("REASON_NO_EXPIRES",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_NO_EXPIRES));
+    EXPECT_STREQ("REASON_INTERNAL_ERROR",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_INTERNAL_ERROR));
+    EXPECT_STREQ("REASON_TRANSACTION_TIMEOUT",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_TRANSACTION_TIMEOUT));
+    EXPECT_STREQ("REASON_REFRESH_TIMEOUT",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_REFRESH_TIMEOUT));
+    EXPECT_STREQ("REASON_REFRESH_INTERNAL_ERROR",
+            m_pAosSubscription->RegSubReasonToString(
+                    IRegSubscription::REASON_REFRESH_INTERNAL_ERROR));
+    EXPECT_STREQ("REASON_NOTIFY_TERMINATED",
+            m_pAosSubscription->RegSubReasonToString(IRegSubscription::REASON_NOTIFY_TERMINATED));
+    EXPECT_STREQ("__INVALID__", m_pAosSubscription->RegSubReasonToString(37));
+}
+
+/// RegInfoStateToString()
+TEST_F(AosSubscriptionTest, PrintNotifyState)
+{
+    EXPECT_STREQ("STATE_CREATED",
+            m_pAosSubscription->RegInfoStateToString(IRegInfoContact::STATE_CREATED));
+    EXPECT_STREQ("STATE_ACTIVE",
+            m_pAosSubscription->RegInfoStateToString(IRegInfoContact::STATE_ACTIVE));
+    EXPECT_STREQ("STATE_TERMINATED",
+            m_pAosSubscription->RegInfoStateToString(IRegInfoContact::STATE_TERMINATED));
+    EXPECT_STREQ("__INVALID__", m_pAosSubscription->RegInfoStateToString(50));
+}
+
+/// RegInfoEventToString()
+TEST_F(AosSubscriptionTest, PrintRegInfoEvent)
+{
+    EXPECT_STREQ("EVENT_REGISTERED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_REGISTERED));
+    EXPECT_STREQ("EVENT_CREATED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_CREATED));
+    EXPECT_STREQ("EVENT_REFRESHED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_REFRESHED));
+    EXPECT_STREQ("EVENT_SHORTENED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_SHORTENED));
+    EXPECT_STREQ("EVENT_EXPIRED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_EXPIRED));
+    EXPECT_STREQ("EVENT_DEACTIVATED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_DEACTIVATED));
+    EXPECT_STREQ("EVENT_PROBATION",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_PROBATION));
+    EXPECT_STREQ("EVENT_UNREGISTERED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_UNREGISTERED));
+    EXPECT_STREQ("EVENT_REJECTED",
+            m_pAosSubscription->RegInfoEventToString(IRegInfoContact::EVENT_REJECTED));
+    EXPECT_STREQ("__INVALID__", m_pAosSubscription->RegInfoEventToString(90));
 }
