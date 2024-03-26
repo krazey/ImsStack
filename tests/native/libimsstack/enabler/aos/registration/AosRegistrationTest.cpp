@@ -3611,6 +3611,70 @@ TEST_F(AosRegistrationTest, TriggerPlmnBlockWhenUpdateFailedInRoaming)
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
 }
 
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfPolicyIs3gppWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetFirstPcscfWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
 TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenUpdateFailedWithRetryRequiredWithoutIpsec)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
@@ -3743,81 +3807,6 @@ TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenUpdateFailedWithOtherResponse
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_600);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
-}
-
-TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_305)
-{
-    m_pAosRegistration->SetImsCall(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // SIP_305_CODE_POLICY_3GPP
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - first PCSCF
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - fail to SetFirstPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - succeed to SetFirstPcscf
-    // fail to CreateRegistration
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .Times(AnyNumber())
-            .WillOnce(ReturnRef(m_objEmptyImpus))
-            .WillRepeatedly(ReturnRef(m_objAvailableImpus));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - succeed to SetFirstPcscf
-    // succeed to CreateRegistration
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_DEFAULT
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
-    ImsVector<IMS_SINT32> objErrWithoutIpsec;
-    objErrWithoutIpsec.Clear();
-    objErrWithoutIpsec.Add(SipStatusCode::SC_305);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-}
-
-TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500)
-{
-    m_pAosRegistration->SetImsCall(IMS_FALSE);
-    // return IMS_FALSE in ProcessUnpredictableFailureHeldByCall()
-    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
-            .WillByDefault(Return(IMS_TRUE));
-
-    // return IMS_FALSE in ProcessPlmnBlockOnUpdateFailure()
-    ON_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
-            .WillByDefault(Return(IMS_FALSE));
-
-    // for executing the ProcessDefaultFlowRecovery_Update
-    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillByDefault(Return(IMS_FALSE));
-
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_500);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
 TEST_F(AosRegistrationTest,
