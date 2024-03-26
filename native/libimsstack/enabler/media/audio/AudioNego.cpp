@@ -19,6 +19,7 @@
 #include "offeranswer/SdpAvCodec.h"
 
 #include "audio/AudioNego.h"
+#include "audio/AudioNegoAmr.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
@@ -1172,123 +1173,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 continue;
             }
 
-            // set mode-set
-            if (pAmrFmtp->nModeSetList != 0 && pAmrFmtp->bShowModeSet == IMS_TRUE)
-            {
-                AString strTemp, strMode;
-                IMS_UINT32 nModeSet;
-
-                for (nModeSet = 0; nModeSet <= MODESET_MAX_AMRWB; nModeSet++)
-                {
-                    IMS_UINT32 nMatch = (pAmrFmtp->nModeSetList) & (1 << nModeSet);
-                    if (nMatch)
-                    {
-                        if (strTemp.GetLength() > 0)
-                        {
-                            strTemp.Append(",");
-                        }
-
-                        strMode.Sprintf("%d", nModeSet);
-                        strTemp.Append(strMode);
-                    }
-                }
-
-                strFmtp.Append("mode-set=");
-                strFmtp.Append(strTemp);
-            }
-
-            // set octet-align
-            if (pAmrFmtp->bShow_OctetAlign == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("octet-align=%d", pAmrFmtp->nOctetAlign);
-                strFmtp.Append(strTemp);
-            }
-
-            // set mode-cahnge-capability
-            if (pAmrFmtp->bShowModeChangeCapability == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("mode-change-capability=%d", pAmrFmtp->nModeChangeCapability);
-                strFmtp.Append(strTemp);
-            }
-
-            // set mode-change-period
-            if (pAmrFmtp->bShowModeChangePeriod == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("mode-change-period=%d", pAmrFmtp->nModeChangePeriod);
-                strFmtp.Append(strTemp);
-            }
-
-            // set mode-change-neighbor
-            if (pAmrFmtp->bShowModeChangeNeighbor == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("mode-change-neighbor=%d", pAmrFmtp->nModeChangeNeighbor);
-                strFmtp.Append(strTemp);
-            }
-
-            // set max-red
-            if (pAmrFmtp->bShowMaxRed == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("max-red=%d", pAmrFmtp->nMaxRed);
-                strFmtp.Append(strTemp);
-            }
-
-            // ptime
-            if (pAmrFmtp->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME &&
-                    pAmrFmtp->bShowPtime == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("ptime=%d", pAmrFmtp->nPtime);
-                strFmtp.Append(strTemp);
-            }
-
-            // maxptime
-            if (pAmrFmtp->nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME &&
-                    pAmrFmtp->bShowMaxPtime == IMS_TRUE)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-
-                AString strTemp;
-                strTemp.Sprintf("maxptime=%d", pAmrFmtp->nMaxPtime);
-                strFmtp.Append(strTemp);
-            }
+            strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(pAmrFmtp);
         }
         else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
         {
