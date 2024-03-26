@@ -94,7 +94,7 @@ public:
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
 
-    SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
+    SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName);
 };
 
 class SipAddrSpec : public SipRefBase

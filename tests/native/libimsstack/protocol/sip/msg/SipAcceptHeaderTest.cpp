@@ -159,10 +159,8 @@ TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     /* Encode accept with value and parameters */
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("param-name", "param-value");
-    pParameters->AddParam("q", "0.1");
+    pHeader->AddParam("param-name", "param-value");
+    pHeader->AddParam("q", "0.1");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -199,18 +197,14 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
+    EXPECT_EQ(2, pHeader->GetParamCount());
 
-    EXPECT_EQ(2, objParameterList.GetCount());
-
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("q", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("0.4", pNameVal->m_valueList.GetAt(0));
 
-    pNameVal = objParameterList.GetNameValNode(1);
+    pNameVal = pHeader->GetParam(1);
     EXPECT_STREQ("level", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("1", pNameVal->m_valueList.GetAt(0));

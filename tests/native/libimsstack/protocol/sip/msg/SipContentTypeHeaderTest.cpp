@@ -132,9 +132,7 @@ TEST_F(SipContentTypeHeaderTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     /* Encode accept with value and parameters */
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("param-name", "param-value");
+    pHeader->AddParam("param-name", "param-value");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -170,11 +168,7 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    EXPECT_EQ(1, objParameterList.GetCount());
+    EXPECT_EQ(1, pHeader->GetParamCount());
     SIP_CHAR* pBoundary = pHeader->GetBoundary();
     ASSERT_TRUE(pBoundary != nullptr);
 
@@ -193,11 +187,7 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 
-    pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList1 = pParameters->GetParameterList();
-
-    EXPECT_EQ(1, objParameterList1.GetCount());
+    EXPECT_EQ(1, pHeader->GetParamCount());
     pBoundary = pHeader->GetBoundary();
     ASSERT_TRUE(pBoundary != nullptr);
 

@@ -111,8 +111,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_FALSE, pSipUri->RemoveHdrParam(const_cast<char*>("InvalidHeader")));
-    EXPECT_EQ(SIP_TRUE, pSipUri->RemoveHdrParam(const_cast<char*>("HeaderName")));
+    pSipUri->RemoveHdrParam(const_cast<char*>("HeaderName"));
     EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\
@@ -379,12 +378,12 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pUriParamList != nullptr);
 
     EXPECT_EQ(2, pUriParamList->GetCount());
-    SipNameValue* pNameVal = pUriParamList->GetNameValNode(0);
+    SipNameValue* pNameVal = pUriParamList->GetParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyUriparam-name", pNameVal->m_pszName);
     EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
 
-    pNameVal = pUriParamList->GetNameValNode(1);
+    pNameVal = pUriParamList->GetParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("uriparam-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
@@ -414,12 +413,12 @@ TEST_F(SipUriTest, DecodeSipUri)
     ASSERT_TRUE(pHeaderParamList != nullptr);
 
     EXPECT_EQ(2, pHeaderParamList->GetCount());
-    pNameVal = pHeaderParamList->GetNameValNode(0);
+    pNameVal = pHeaderParamList->GetParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyHeaderName", pNameVal->m_pszName);
     EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
 
-    pNameVal = pHeaderParamList->GetNameValNode(1);
+    pNameVal = pHeaderParamList->GetParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("HeaderName", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
@@ -448,12 +447,12 @@ uriparam-name=uriparam-value?OnlyHeaderName&HeaderName=HeaderValue"),
     ASSERT_TRUE(pUriParamList != nullptr);
 
     EXPECT_EQ(2, pUriParamList->GetCount());
-    pNameVal = pUriParamList->GetNameValNode(0);
+    pNameVal = pUriParamList->GetParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyUriparam-name", pNameVal->m_pszName);
     EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
 
-    pNameVal = pUriParamList->GetNameValNode(1);
+    pNameVal = pUriParamList->GetParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("uriparam-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
@@ -465,12 +464,12 @@ uriparam-name=uriparam-value?OnlyHeaderName&HeaderName=HeaderValue"),
     ASSERT_TRUE(pHeaderParamList != nullptr);
 
     EXPECT_EQ(2, pHeaderParamList->GetCount());
-    pNameVal = pHeaderParamList->GetNameValNode(0);
+    pNameVal = pHeaderParamList->GetParam(0);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("OnlyHeaderName", pNameVal->m_pszName);
     EXPECT_EQ(0, pNameVal->m_valueList.GetSize());
 
-    pNameVal = pHeaderParamList->GetNameValNode(1);
+    pNameVal = pHeaderParamList->GetParam(1);
     ASSERT_TRUE(pNameVal != nullptr);
     EXPECT_STREQ("HeaderName", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());

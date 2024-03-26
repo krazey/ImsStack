@@ -92,16 +92,7 @@ SIP_BOOL SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubtype)
 
 SIP_CHAR* SipContentTypeHeader::GetBoundary()
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    SIP_CHAR* pszVal = objParameterList.GetParamValue("boundary");
+    SIP_CHAR* pszVal = GetParamValue("boundary");
     SIP_CHAR* pszStripDquoteVal = StripDQUOTE(pszVal);
 
     if (pszStripDquoteVal == SIP_NULL)
