@@ -176,7 +176,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void AudioNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {

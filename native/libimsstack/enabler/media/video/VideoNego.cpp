@@ -187,7 +187,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {

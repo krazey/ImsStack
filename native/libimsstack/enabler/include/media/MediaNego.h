@@ -100,7 +100,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the negotiation succeed and IMS_FALSE when failed.
      * MediaNegoResult will be set when negotiation failed
      */
-    IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
+    IMS_BOOL NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
             OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
             OUT MediaNegoResult& errorReason);
 

@@ -72,7 +72,7 @@ public:
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;
     virtual MEDIA_CONTENT_TYPE GetSupportedMediaTypesFromSdp(
             IN IMS_UINTP nNegoId, IN ISession* pSession) override;
-    IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
+    IMS_BOOL NegotiateSdp(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
     IMS_BOOL RequestQos(

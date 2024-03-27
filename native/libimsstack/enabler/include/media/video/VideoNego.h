@@ -133,7 +133,7 @@ public:
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
      * @param eDir The media direction of the SDP
      */
-    virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
+    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
 

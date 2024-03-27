@@ -483,7 +483,7 @@ TEST_F(MediaSessionTest, testGetRemotePort)
     IMS_SINT32 eTextDirection = MEDIA_DIRECTION_INVALID;
 
     IMS_UINTP nNegoId = createVideoSession();
-    m_pSession->NegotiateSDP(nNegoId, m_pIsession, &eAudioDirection, &eVideoDirection,
+    m_pSession->NegotiateSdp(nNegoId, m_pIsession, &eAudioDirection, &eVideoDirection,
             &eTextDirection, eErrorReason);
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO), -1);
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_VIDEO), -1);

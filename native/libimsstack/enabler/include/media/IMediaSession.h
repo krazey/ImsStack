@@ -128,7 +128,7 @@ public:
      * @param errorReason The error reason when the negotiation is failed
      * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
      */
-    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
+    virtual IMS_BOOL NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
 

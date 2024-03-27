@@ -257,25 +257,25 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetSupportedMediaTypesFromSdp(
     return pMediaNego->GetSupportedMediaTypesFromSdp(pSession);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
         OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
         OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)
 {
     IMS_TRACE_I(
-            "NegotiateSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "NegotiateSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "NegotiateSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->NegotiateSDP(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
+    if (pMediaNego->NegotiateSdp(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
                 errorReason) == IMS_TRUE)
     {
-        IMS_TRACE_I("NegotiateSDP() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
+        IMS_TRACE_I("NegotiateSdp() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
 
         // set Access Network

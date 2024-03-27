@@ -35,7 +35,7 @@ public:
             (const));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp, (IN ISession * pSession),
             (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSDP,
+    MOCK_METHOD(IMS_BOOL, NegotiateSdp,
             (IN ISession * pSession, OUT IMS_SINT32& nAudioDirection,
                     OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
                     OUT MediaNegoResult& errorReason),
