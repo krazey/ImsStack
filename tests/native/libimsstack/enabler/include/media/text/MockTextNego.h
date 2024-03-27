@@ -29,7 +29,7 @@ public:
             TextNego(nSlotId){};
     MOCK_METHOD(void, CreateProfiles,
             (IN MediaEnvironment * pEnvironment, IN TextConfiguration* pConfig), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
                     IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),

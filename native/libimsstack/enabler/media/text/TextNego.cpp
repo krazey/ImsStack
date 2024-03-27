@@ -109,11 +109,11 @@ PUBLIC VIRTUAL void TextNego::CreateProfiles(
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL TextNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_D("FormSDP() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+    IMS_TRACE_D("FormSdp() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
             bEnforceReofferMode);
 
     switch (eNegoState)

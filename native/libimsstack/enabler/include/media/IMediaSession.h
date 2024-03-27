@@ -100,7 +100,7 @@ public:
      * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
      */
-    virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
+    virtual IMS_BOOL FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
             IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;

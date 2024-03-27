@@ -184,30 +184,30 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
     return bRet;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
         IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
         IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
+    IMS_TRACE_I("FormSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
             pSession, eMediaType);
-    IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
+    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
-    IMS_TRACE_D("FormSDP() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
+    IMS_TRACE_D("FormSdp() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
             bEnforceReofferMode, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->FormSDP(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
+    if (pMediaNego->FormSdp(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
                 bEnforceReofferMode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "FormSDP() - FormSDP Failed", 0, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - FormSdp Failed", 0, 0, 0);
         return IMS_FALSE;
     }
 

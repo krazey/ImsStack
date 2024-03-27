@@ -122,14 +122,14 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 }
 
 PUBLIC
-IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
         IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP(): eMediaType[%d], eNegoState[%x]", eMediaType, m_eNegoState, 0);
-    IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
+    IMS_TRACE_I("FormSdp(): eMediaType[%d], eNegoState[%x]", eMediaType, m_eNegoState, 0);
+    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
-    IMS_TRACE_D("FormSDP() - eMediaType [%d], bEnforceReofferMode[%d]", eMediaType,
+    IMS_TRACE_D("FormSdp() - eMediaType [%d], bEnforceReofferMode[%d]", eMediaType,
             bEnforceReofferMode, 0);
 
     if (m_pMediaEnvironment == IMS_NULL)
@@ -149,7 +149,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     m_pVideoNego == IMS_NULL) ||
             (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) && m_pTextNego == IMS_NULL))
     {
-        IMS_TRACE_E(0, "FormSDP() - INVALID : eMediaType[%d]", eMediaType, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - INVALID : eMediaType[%d]", eMediaType, 0, 0);
         return IMS_FALSE;
     }
 
@@ -177,7 +177,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
             eNeedToMakeMedia = (MEDIA_CONTENT_TYPE)((IMS_SINT32)eNeedToMakeMedia | MEDIA_TYPE_TEXT);
         }
 
-        IMS_TRACE_D("FormSDP() - Re-offer case. NeedToMakeMedia[%d]", eNeedToMakeMedia, 0, 0);
+        IMS_TRACE_D("FormSdp() - Re-offer case. NeedToMakeMedia[%d]", eNeedToMakeMedia, 0, 0);
     }
 
     // Get a list of media line
@@ -231,7 +231,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("FormSDP() - pSDPMedia[%" PFLS_x "], Type[%d]", pSDPMedia,
+            IMS_TRACE_D("FormSdp() - pSDPMedia[%" PFLS_x "], Type[%d]", pSDPMedia,
                     pSDPMedia->GetType(), 0);
 
             switch (pSDPMedia->GetType())
@@ -323,21 +323,21 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     break;
             }
 
-            IMS_TRACE_D("FormSDP() - m=audio[%d], m=video[%d], m=text[%d]", bAudioMLineSetted,
+            IMS_TRACE_D("FormSdp() - m=audio[%d], m=video[%d], m=text[%d]", bAudioMLineSetted,
                     bVideoMLineSetted, bTextMLineSetted);
         }
     }
 
-    // Send a "FormSDP" to each session
+    // Send a "FormSdp" to each session
     IMS_SINT32 nTotalAs = 0;
 
     if (pDescriptorForAudio != IMS_NULL)
     {
-        if (m_pAudioNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+        if (m_pAudioNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
                     pDescriptorForAudio, (MEDIA_DIRECTION)nAudioDirection,
                     bEnforceReofferMode) == IMS_FALSE)
         {
-            IMS_TRACE_E(0, "FormSDP() - Forming a m line of audio is failed", 0, 0, 0);
+            IMS_TRACE_E(0, "FormSdp() - Forming a m line of audio is failed", 0, 0, 0);
             return IMS_FALSE;
         }
         else
@@ -353,14 +353,14 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
     if (pDescriptorForVideo != IMS_NULL)
     {
-        if (m_pVideoNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+        if (m_pVideoNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
                     pDescriptorForVideo, (MEDIA_DIRECTION)nVideoDirection,
                     MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) == IMS_FALSE
                             ? IMS_TRUE
                             : IMS_FALSE,
                     bEnforceReofferMode) == IMS_FALSE)
         {
-            IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of video is failed", 0, 0, 0);
+            IMS_TRACE_E(0, "MediaNego::FormSdp() - Forming a m line of video is failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -377,14 +377,14 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
     if (pDescriptorForText != IMS_NULL)
     {
-        if (m_pTextNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
+        if (m_pTextNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
                     pDescriptorForText, (MEDIA_DIRECTION)nTextDirection,
                     MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) == IMS_FALSE
                             ? IMS_TRUE
                             : IMS_FALSE,
                     bEnforceReofferMode) == IMS_FALSE)
         {
-            IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of text is failed", 0, 0, 0);
+            IMS_TRACE_E(0, "MediaNego::FormSdp() - Forming a m line of text is failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -407,7 +407,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     {
         if (pMediaSessionConfig->IsSessionLevelBandwidth())
         {
-            IMS_TRACE_D("FormSDP() - Session level bandwidth [%d]", nTotalAs, 0, 0);
+            IMS_TRACE_D("FormSdp() - Session level bandwidth [%d]", nTotalAs, 0, 0);
             // remove session level bandwidth
             pSession->GetSessionDescriptor()->RemoveAllBandwidths();
             // add session level bandwidth
@@ -429,7 +429,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
         default:
             break;
     }
-    IMS_TRACE_D("FormSDP() - Done. NegoState[%d]", m_eNegoState, 0, 0);
+    IMS_TRACE_D("FormSdp() - Done. NegoState[%d]", m_eNegoState, 0, 0);
 
     return IMS_TRUE;
 }

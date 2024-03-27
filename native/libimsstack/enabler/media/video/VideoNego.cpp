@@ -127,14 +127,14 @@ void VideoNego::DestroyProfiles()
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
+    IMS_TRACE_I("FormSdp() - NegoState[%d], lstOaModel size[%d]", eNegoState,
             m_listOaModel.GetSize(), 0);
-    IMS_TRACE_I("FormSDP() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
-    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
+    IMS_TRACE_I("FormSdp() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
+    IMS_TRACE_D("FormSdp() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {

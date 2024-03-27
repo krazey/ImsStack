@@ -37,7 +37,7 @@ public:
     MOCK_METHOD(IMS_UINTP, CreateProfile, (IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
     MOCK_METHOD(IMS_BOOL, DestroyProfile, (IN IMS_UINTP nNegoID), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN IMS_UINTP nNegoId, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
                     IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
                     IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),

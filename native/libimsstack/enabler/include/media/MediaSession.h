@@ -66,7 +66,7 @@ public:
     IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
     IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
-    IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+    IMS_BOOL FormSdp(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
             IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;

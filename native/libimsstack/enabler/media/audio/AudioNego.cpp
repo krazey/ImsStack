@@ -117,13 +117,13 @@ PUBLIC VIRTUAL void AudioNego::CreateProfiles(
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_D("FormSDP() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
+    IMS_TRACE_D("FormSdp() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
             m_lstOaModel.GetSize());
-    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
+    IMS_TRACE_D("FormSdp() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {
@@ -134,7 +134,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         case STATE_NEGOTIATED:
             return FormReoffer(pSessionDescriptor, pDescriptor, eDir, bEnforceReofferMode);
         default:
-            IMS_TRACE_E(0, "FormSDP fail eNegoState[%d]", eNegoState, 0, 0);
+            IMS_TRACE_E(0, "FormSdp fail eNegoState[%d]", eNegoState, 0, 0);
             return IMS_FALSE;
     }
 }

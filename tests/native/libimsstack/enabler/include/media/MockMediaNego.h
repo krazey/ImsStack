@@ -28,7 +28,7 @@ public:
             MediaNego(nSlotId){};
     MOCK_METHOD(void, CreateProfile, (IN MediaEnvironment * pEnvironment), (const));
     MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (const));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (OUT ISession * pSession, IN MEDIA_CONTENT_TYPE eMediaType,
                     IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
                     IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
