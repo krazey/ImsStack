@@ -15,11 +15,11 @@
  */
 
 #include <gtest/gtest.h>
-
 #include "audio/AudioNegoAmr.h"
 
 const AString SEMICOLON = ";";
 const AString COMMA = ",";
+
 const AString MODESETLIST = "mode-set=0,1,2";
 const AString OCTETALIGN = "octet-align=1";
 const AString MODECHANGECAPABILITY = "mode-change-capability=2";
@@ -49,6 +49,7 @@ protected:
         m_pAmrFmtpFull->nMaxRed = 220;
         m_pAmrFmtpFull->nPtime = 20;
         m_pAmrFmtpFull->nMaxPtime = 240;
+
         m_pAmrFmtpFull->bShowModeSet = IMS_TRUE;
         m_pAmrFmtpFull->bShow_OctetAlign = IMS_TRUE;
         m_pAmrFmtpFull->bShowModeChangeCapability = IMS_TRUE;
@@ -144,14 +145,14 @@ TEST_F(AudioNegoAmrTest, TestAddOctetAlignToFmtp)
     EXPECT_EQ(strFmtp, OCTETALIGN);
 }
 
-TEST_F(AudioNegoAmrTest, TestAddModeSetCapabilityToFmtp)
+TEST_F(AudioNegoAmrTest, TestAddModeChangeCapabilityToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
-    AudioNegoAmr::AddModeSetCapabilityToFmtp(m_pAmrFmtpEmpty, strFmtp);
+    AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
-    AudioNegoAmr::AddModeSetCapabilityToFmtp(m_pAmrFmtpFull, strFmtp);
+    AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpFull, strFmtp);
     EXPECT_EQ(strFmtp, MODECHANGECAPABILITY);
 }
 

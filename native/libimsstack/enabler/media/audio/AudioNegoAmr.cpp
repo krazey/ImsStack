@@ -38,7 +38,7 @@ PUBLIC AString AudioNegoAmr::SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* amr
 
     AddModeSetListToFmtp(amrFmtp, strFmtp);
     AddOctetAlignToFmtp(amrFmtp, strFmtp);
-    AddModeSetCapabilityToFmtp(amrFmtp, strFmtp);
+    AddModeChangeCapabilityToFmtp(amrFmtp, strFmtp);
     AddModeChangePeriodToFmtp(amrFmtp, strFmtp);
     AddModeChangeNeighborToFmtp(amrFmtp, strFmtp);
     AddMaxRedToFmtp(amrFmtp, strFmtp);
@@ -108,10 +108,10 @@ PUBLIC void AudioNegoAmr::AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* profile,
     }
 }
 
-PUBLIC void AudioNegoAmr::AddModeSetCapabilityToFmtp(
+PUBLIC void AudioNegoAmr::AddModeChangeCapabilityToFmtp(
         IN AudioProfile::AmrFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddModeSetCapabilityToFmtp() mode-change-capability=%d, show=%d",
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, show=%d",
             profile->nModeChangeCapability, profile->bShowModeChangeCapability, 0);
 
     if (profile == IMS_NULL)

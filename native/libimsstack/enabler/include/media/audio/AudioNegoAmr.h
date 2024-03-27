@@ -28,7 +28,8 @@ public:
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
     static void AddModeSetListToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
     static void AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddModeSetCapabilityToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
+    static void AddModeChangeCapabilityToFmtp(
+            IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
     static void AddModeChangePeriodToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
     static void AddModeChangeNeighborToFmtp(
             IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
