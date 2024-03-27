@@ -151,7 +151,7 @@ public:
      * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
      * @param eNegoState The current negotiation state to decide to remove the OA model item
      */
-    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
+    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
     /**
      * @brief Set the local port number of the AudioProfile

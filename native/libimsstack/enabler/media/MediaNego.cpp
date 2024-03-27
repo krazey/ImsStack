@@ -732,21 +732,21 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
 }
 
 PUBLIC
-void MediaNego::FinalizeSDP(IN ISession* pSession)
+void MediaNego::FinalizeSdp(IN ISession* pSession)
 {
     if (pSession == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_D("FinalizeSDP - enter ISessionDescriptor[%" PFLS_x "]",
+    IMS_TRACE_D("FinalizeSdp - enter ISessionDescriptor[%" PFLS_x "]",
             reinterpret_cast<IMS_SINTP>(pSession->GetSessionDescriptor()), 0, 0);
 
     IMS_BOOL bNegotiated = IMS_FALSE;
 
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pAudioNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
 
         if (m_pAudioNego->GetNegotiatedCodec() != AUDIO_CODEC_NONE)
         {
@@ -756,7 +756,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pVideoNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
 
         if (m_pVideoNego->GetNegotiatedResolution() != VIDEO_RESOLUTION_INVALID)
             bNegotiated = IMS_TRUE;
@@ -764,7 +764,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
 
     if (m_pTextNego != IMS_NULL)
     {
-        m_pTextNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pTextNego->FinalizeSdp(pSession->GetSessionDescriptor(), m_eNegoState);
 
         if (m_pTextNego->GetNegotiatedCodec() != TEXT_CODEC_NONE)
         {
@@ -796,7 +796,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
         {
             if (pSession->RemoveMedia(pIMedia) == IMS_SUCCESS)
             {
-                IMS_TRACE_D("FinalizeSDP() remove IMedia[%d / %" PFLS_x "] SUCCESS", i, pIMedia, 0);
+                IMS_TRACE_D("FinalizeSdp() remove IMedia[%d / %" PFLS_x "] SUCCESS", i, pIMedia, 0);
             }
         }
     }

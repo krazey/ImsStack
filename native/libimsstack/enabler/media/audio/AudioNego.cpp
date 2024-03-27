@@ -196,7 +196,7 @@ PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
+PUBLIC VIRTUAL void AudioNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
@@ -224,7 +224,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
         if ((pLatestOaModel->IsAllProfileExist() &&
                     (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)) == IMS_FALSE)
         {
-            IMS_TRACE_I("FinalizeSDP() - Incomplete OaModel[%d]. Delete profile",
+            IMS_TRACE_I("FinalizeSdp() - Incomplete OaModel[%d]. Delete profile",
                     m_lstOaModel.GetSize() - 1, 0, 0);
             delete pLatestOaModel;
             m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
@@ -244,7 +244,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
             {
                 pTempOaModel->bConfirmedSession = IMS_TRUE;
                 bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSDP() - find comfirmed Session OaModel[%d]",
+                IMS_TRACE_D("FinalizeSdp() - find comfirmed Session OaModel[%d]",
                         m_lstOaModel.GetSize() - i, 0, 0);
                 break;
             }
@@ -255,7 +255,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
     // not select OaModel
     if (bFoundOaModel != IMS_TRUE && m_lstOaModel.GetSize() > 0)
     {
-        IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
+        IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
 }
 

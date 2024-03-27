@@ -109,7 +109,7 @@ public:
      *
      * @param pSession ISession instance to get the SDP descriptor
      */
-    void FinalizeSDP(IN ISession* pSession);
+    void FinalizeSdp(IN ISession* pSession);
 
     /**
      * @brief Set the negotiation state

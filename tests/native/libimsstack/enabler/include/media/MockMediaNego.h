@@ -40,7 +40,7 @@ public:
                     OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
                     OUT MediaNegoResult& errorReason),
             (const));
-    MOCK_METHOD(void, FinalizeSDP, (IN ISession * pSession), (const));
+    MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (const));
 
     MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (const));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (), (const));

@@ -149,7 +149,7 @@ public:
      * @param nNegoId The negotiation id to clean the SDP set
      * @param pSession ISession instance to get the SDP descriptor
      */
-    virtual void FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
+    virtual void FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 
     /**
      * @brief Runs target dialog to operate open/update/close session

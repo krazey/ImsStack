@@ -51,7 +51,7 @@ public:
             (override));
     MOCK_METHOD(IMS_BOOL, RequestQos, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
-    MOCK_METHOD(void, FinalizeSDP, (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
+    MOCK_METHOD(void, FinalizeSdp, (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
     MOCK_METHOD(IMS_BOOL, Run, (IN IMS_UINTP nNegoID), (override));
     MOCK_METHOD(IMS_BOOL, Terminate, (), (override));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (IN IMS_UINTP nNegoID), (override));

@@ -77,7 +77,7 @@ public:
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
     IMS_BOOL RequestQos(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
-    void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
+    void FinalizeSdp(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
     IMS_BOOL Run(IN IMS_UINTP nNegoID) override;
     IMS_BOOL Terminate() override;
     NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID) override;

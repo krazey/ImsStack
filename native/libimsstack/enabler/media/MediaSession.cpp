@@ -369,10 +369,10 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession)
+PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession)
 {
     IMS_TRACE_I(
-            "FinalizeSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "FinalizeSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     if (pSession == IMS_NULL)
     {
@@ -384,11 +384,11 @@ PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession*
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FinalizeSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FinalizeSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return;
     }
 
-    pMediaNego->FinalizeSDP(pSession);
+    pMediaNego->FinalizeSdp(pSession);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
