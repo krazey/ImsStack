@@ -411,102 +411,56 @@ protected:
             m_pAosStaticProfile->AddService(objService.GetAppId(), objService.GetServiceId());
         }
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(SLOT_ID));
-        EXPECT_CALL(m_objMockIAosAppContext, SetSlotId(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosAppContext, GetStaticProfile())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(m_pAosStaticProfile));
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(m_pAosStaticProfile->GetId()));
-
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
+                .WillByDefault(Return(m_pAosStaticProfile));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId())
+                .WillByDefault(ReturnRef(m_pAosStaticProfile->GetId()));
         ON_CALL(m_objMockIAosAppContext, GetBlock()).WillByDefault(Return(&m_objMockIAosBlock));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosConnection));
-        EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
-        EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosConnection, GetConnectionType())
+                .WillByDefault(Return(NetworkPolicy::APN_IMS));
+        ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
 
         m_objPcscfs.AddElement(AString("192.168.0.100"));
-        EXPECT_CALL(m_objMockIAosAppContext, GetPcscf())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosPcscf));
-        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(m_objPcscfs));
-        EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscfIndex())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
-        EXPECT_CALL(m_objMockIAosPcscf, GetChangedType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IAosPcscf::TYPE_CHANGED_SAME));
-        EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(AnyNumber());
+        ON_CALL(m_objMockIAosAppContext, GetPcscf()).WillByDefault(Return(&m_objMockIAosPcscf));
+        ON_CALL(m_objMockIAosPcscf, GetPcscfs()).WillByDefault(ReturnRef(m_objPcscfs));
+        ON_CALL(m_objMockIAosPcscf, GetNextPcscfIndex()).WillByDefault(Return(0));
+        ON_CALL(m_objMockIAosPcscf, GetChangedType())
+                .WillByDefault(Return(IAosPcscf::TYPE_CHANGED_SAME));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
-        EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-        EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-        EXPECT_CALL(m_objMockIAosNetTracker, IsRoaming())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
-        EXPECT_CALL(m_objMockIAosNetTracker, SetListener(_)).Times(AnyNumber());
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .WillByDefault(Return(&m_objMockIAosNetTracker));
+        ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
+                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+        ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+        ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_FALSE));
 
-        EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosRegistration));
-        EXPECT_CALL(m_objMockIAosRegistration, SetAppReady(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, Destroy()).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, SetListener(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, Start()).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, Update(_, _)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, Stop()).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, Reconfig()).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegistration, GetMode())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IAosRegistration::MODE_NORMAL));
-        EXPECT_CALL(m_objMockIAosRegistration, IsRefreshing())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_FALSE));
-        EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
+        ON_CALL(m_objMockIAosAppContext, GetRegistration())
+                .WillByDefault(Return(&m_objMockIAosRegistration));
+
+        ON_CALL(m_objMockIAosRegistration, GetMode())
+                .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+        ON_CALL(m_objMockIAosRegistration, IsRefreshing()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_TRUE));
 
         m_objHandles.Add(m_strServiceId, &m_objMockIAosHandle);
-        EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(m_objHandles));
-        EXPECT_CALL(m_objMockIAosHandle, GetAppId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(m_strAppId));
-        EXPECT_CALL(m_objMockIAosHandle, GetServiceId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(m_strServiceId));
-        EXPECT_CALL(m_objMockIAosHandle, GetMonitor())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIImsAosMonitor));
+        ON_CALL(m_objMockIAosAppContext, GetHandles()).WillByDefault(ReturnRef(m_objHandles));
+        ON_CALL(m_objMockIAosHandle, GetAppId()).WillByDefault(ReturnRef(m_strAppId));
+        ON_CALL(m_objMockIAosHandle, GetServiceId()).WillByDefault(ReturnRef(m_strServiceId));
+        ON_CALL(m_objMockIAosHandle, GetMonitor()).WillByDefault(Return(&m_objMockIImsAosMonitor));
 
         m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
-        EXPECT_CALL(m_objMockIAosCallTracker, RemoveListener(_)).Times(AnyNumber());
 
         m_piAosLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
         AosProvider::GetInstance()->SetLocationStarter(&m_objMockIAosLocationStarter, SLOT_ID);
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
+
         ON_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
@@ -524,7 +478,6 @@ protected:
 
         m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
         AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager, SLOT_ID);
-        EXPECT_CALL(m_objMockIAosRegStateManager, SetImsRegState(_, _)).Times(AnyNumber());
 
         m_pAosApplication =
                 new TestAosApplication(&m_objMockIAosAppContext, m_pAosStaticProfile->GetId());
@@ -533,7 +486,6 @@ protected:
 
         m_pAosApplication->SetAosCondition(&m_objMockAosCondition);
         m_pAosApplication->SetAosConnector(&m_objMockAosConnector);
-
         m_pAosApplication->SetAosRegistration(&m_objMockIAosRegistration);
     }
 
@@ -1252,6 +1204,8 @@ TEST_F(AosApplicationTest, ProcessMessage)
 
     // MSG_IPCAN_CHANGED
     // TEST_F : ProcessIpcanChanged
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
+
     objMessage.nMSG = MSG_IPCAN_CHANGED;
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED, _))
             .Times(1);
@@ -2580,6 +2534,8 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->Registration_StateChanged(0, 0);
 
     // TEST_F : CallTracker_StateChanged
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
+
     m_pAosApplication->CallTracker_StateChanged(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
     EXPECT_CALL(m_objMockIAosRegistration,
             RequestCmd(IAosRegistration::CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT, 0))
