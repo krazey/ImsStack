@@ -65,7 +65,6 @@
 
 #include "provider/AosProvider.h"
 #include "provider/AosRetryRepository.h"
-#include "provider/AosStaticProfile.h"
 #include "provider/AosUtil.h"
 
 using ::testing::_;
@@ -79,6 +78,7 @@ using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
 const IMS_SINT32 SLOT_ID = 0;
+AString PROFILE_ID = AString("test");
 
 enum
 {
@@ -365,7 +365,6 @@ class AosApplicationTest : public ::testing::Test
 {
 public:
     TestAosApplication* m_pAosApplication;
-    AosStaticProfile* m_pAosStaticProfile;
 
     IAosCallTracker* m_piAosCallTracker;
     IAosLocationStarter* m_piAosLocationStarter;
@@ -399,23 +398,8 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pAosStaticProfile = new AosStaticProfile();
-        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
-
-        ImsList<ImsServiceName> objServiceName =
-                ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetServiceProfile());
-
-        for (IMS_UINT32 i = 0; i < objServiceName.GetSize(); i++)
-        {
-            ImsServiceName objService = objServiceName.GetAt(i);
-            m_pAosStaticProfile->AddService(objService.GetAppId(), objService.GetServiceId());
-        }
-
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
-        ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
-                .WillByDefault(Return(m_pAosStaticProfile));
-        ON_CALL(m_objMockIAosAppContext, GetProfileId())
-                .WillByDefault(ReturnRef(m_pAosStaticProfile->GetId()));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
         ON_CALL(m_objMockIAosAppContext, GetBlock()).WillByDefault(Return(&m_objMockIAosBlock));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
@@ -479,8 +463,7 @@ protected:
         m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
         AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager, SLOT_ID);
 
-        m_pAosApplication =
-                new TestAosApplication(&m_objMockIAosAppContext, m_pAosStaticProfile->GetId());
+        m_pAosApplication = new TestAosApplication(&m_objMockIAosAppContext, PROFILE_ID);
 
         ON_CALL(m_objMockAosCondition, IsReady()).WillByDefault(Return(IMS_FALSE));
 
@@ -502,11 +485,6 @@ protected:
         {
             CleanUpAosApplication();
             delete m_pAosApplication;
-        }
-
-        if (m_pAosStaticProfile)
-        {
-            delete m_pAosStaticProfile;
         }
     }
 
