@@ -38,6 +38,18 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
     };
     private final SparseArray<PersistableBundle> mConfigs = new SparseArray<>();
     private final ArraySet<CarrierConfigChangeListenerRecord> mListenerRecords = new ArraySet<>();
+    private final PersistableBundle mDefaultConfig;
+
+    CarrierConfigManagerProxyImpl() {
+        mDefaultConfig = CarrierConfigManager.getDefaultConfig();
+        mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL, true);
+
+        // Sets the IMS service capabilities by default.
+        mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, true);
+        mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
+        mDefaultConfig.putBoolean(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
+    }
 
     @Override
     public boolean isConfigForIdentifiedCarrier(PersistableBundle bundle) {
@@ -51,7 +63,7 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
 
     @Override
     public @NonNull PersistableBundle getConfigForSubId(int subId) {
-        return mConfigs.get(subId, getDefaultConfig());
+        return mConfigs.get(subId, mDefaultConfig);
     }
 
     @Override
@@ -117,6 +129,22 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
             r.dispatchCarrierConfigChanged(
                     logicalSlotIndex, subscriptionId, carrierId, specificCarrierId);
         });
+    }
+
+    /**
+     * Sets the carrier configuration for the specified subscription.
+     *
+     * @param subId The subscription id.
+     * @param config The carrier configuration to be set.
+     */
+    public void setConfigForSubId(int subId, @NonNull PersistableBundle config) {
+        for (String generalKey : CONFIG_SUBSET_METADATA_KEYS) {
+            if (!config.containsKey(generalKey)) {
+                PersistableBundle defaultConfig = getDefaultConfig();
+                putConfigValue(config, generalKey, defaultConfig.get(generalKey));
+            }
+        }
+        mConfigs.put(subId, config);
     }
 
     private void putConfigValue(PersistableBundle config, String key, Object value) {

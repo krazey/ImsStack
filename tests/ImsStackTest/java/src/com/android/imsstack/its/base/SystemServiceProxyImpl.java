@@ -44,26 +44,6 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         mManagerProxies.put(SensorManagerProxy.class, new SensorManagerProxyImpl(mContext));
         mManagerProxies.put(SmsManagerProxy.class, new SmsManagerProxyImpl());
         mManagerProxies.put(ImsManagerProxy.class, new ImsManagerProxyImpl());
-
-        // Maps for concrete classes.
-        mManagerProxies.put(TelephonyManagerProxyImpl.class,
-                mManagerProxies.get(TelephonyManagerProxy.class));
-        mManagerProxies.put(CarrierConfigManagerProxyImpl.class,
-                mManagerProxies.get(CarrierConfigManagerProxy.class));
-        mManagerProxies.put(SubscriptionManagerProxyImpl.class,
-                mManagerProxies.get(SubscriptionManagerProxy.class));
-        mManagerProxies.put(ConnectivityManagerProxyImpl.class,
-                mManagerProxies.get(ConnectivityManagerProxy.class));
-        mManagerProxies.put(IpSecManagerProxyImpl.class,
-                mManagerProxies.get(IpSecManagerProxy.class));
-        mManagerProxies.put(LocationManagerProxyImpl.class,
-                mManagerProxies.get(LocationManagerProxy.class));
-        mManagerProxies.put(SensorManagerProxyImpl.class,
-                mManagerProxies.get(SensorManagerProxy.class));
-        mManagerProxies.put(SmsManagerProxyImpl.class,
-                mManagerProxies.get(SmsManagerProxy.class));
-        mManagerProxies.put(ImsManagerProxyImpl.class,
-                mManagerProxies.get(ImsManagerProxy.class));
     }
 
     /**
@@ -75,21 +55,6 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getSystemService(Class<T> clazz) {
-        Object proxy = mManagerProxies.get(clazz);
-        if (proxy == null) {
-            throw new IllegalArgumentException("Unknown system proxy: " + clazz);
-        }
-        return (T) proxy;
-    }
-
-    /**
-     * Returns a specific concrete system service corresponding to the given class.
-     *
-     * @param clazz A requested class name.
-     * @return A concrete system service object corresponding to the given class.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getSystemServiceImpl(Class<T> clazz) {
         Object proxy = mManagerProxies.get(clazz);
         if (proxy == null) {
             throw new IllegalArgumentException("Unknown system proxy: " + clazz);

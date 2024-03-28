@@ -490,10 +490,10 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void initUsimApplication() {
         mSimInfoRecord.setUsimAppType(TelephonyManager.APPTYPE_USIM);
-        mSimInfoRecord.setApplicationState(TelephonyManager.SIM_STATE_NOT_READY);
+        mSimInfoRecord.setApplicationState(TelephonyManager.SIM_STATE_LOADED);
         mSimInfoRecord.setCardState(TelephonyManager.SIM_STATE_PRESENT);
-        mSimInfoRecord.setState(TelephonyManager.SIM_STATE_NOT_READY);
-        mSimInfoRecord.setCarrierId(1911); // Test SIM
+        mSimInfoRecord.setState(TelephonyManager.SIM_STATE_READY);
+        mSimInfoRecord.setCarrierId(TestConstants.CARRIER_ID); // Test SIM
         mSimInfoRecord.setCarrierIdName(TestConstants.OPERATOR_ALPHA_LONG);
         mSimInfoRecord.setSpecificCarrierId(TelephonyManager.UNKNOWN_CARRIER_ID);
         if (mSubId == TestConstants.SUB_ID_1) {
@@ -507,7 +507,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(TestConstants.OPERATOR_ALPHA_LONG);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "0x00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "00");
     }
 
     /**
@@ -528,7 +528,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(null);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "0x00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_USIM, "00");
     }
 
     /**
@@ -547,14 +547,14 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         final String impi = String.format("%s%s%s@%s",
                 TestConstants.MCC, TestConstants.MNC, phoneNumber, domain);
         final String impuSip = String.format("sip:%s", impi);
-        final String impuTel = String.format("tel:%s", phoneNumber);
+        final String impuTel = String.format("sip:%s@%s", phoneNumber, domain);
         final List<Uri> impus = List.of(Uri.parse(impuSip), Uri.parse(impuTel));
 
         mSimInfoRecord.setIsimAppType(TelephonyManager.APPTYPE_ISIM);
         mSimInfoRecord.setIsimDomain(domain);
         mSimInfoRecord.setIsimPrivateUserIdentity(impi);
         mSimInfoRecord.setIsimPublicUserIdentities(impus);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "0x00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "00");
     }
 
     /**
@@ -566,7 +566,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
         mSimInfoRecord.setIsimDomain(null);
         mSimInfoRecord.setIsimPrivateUserIdentity(null);
         mSimInfoRecord.setIsimPublicUserIdentities(null);
-        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "0x00");
+        mSimInfoRecord.setServiceTable(TelephonyManager.APPTYPE_ISIM, "00");
     }
 
     /**
