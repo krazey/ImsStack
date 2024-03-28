@@ -17,12 +17,11 @@
 #ifndef AUDIO_NEGO_H_
 #define AUDIO_NEGO_H_
 
-#include "ImsSlot.h"
 #include "media/IMedia.h"
+#include "BaseNego.h"
 #include "ISession.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioProfile.h"
 #include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
 
@@ -30,7 +29,7 @@
  * @brief The class to negotiate and form the SDP attribute belong to the m=audio line
  *
  */
-class AudioNego : public ImsSlot
+class AudioNego : public BaseNego
 {
 public:
     /**
@@ -291,7 +290,6 @@ private:
 
     ImsList<OaModel*> m_lstOaModel;
     AudioProfile m_objBaseProfile;
-    MediaEnvironment* m_pEnvironment;
     AudioConfiguration* m_pConfig;
 };
 

@@ -17,16 +17,15 @@
 #ifndef VIDEO_NEGO_H_
 #define VIDEO_NEGO_H_
 
-#include "ImsSlot.h"
 #include "media/IMedia.h"
+#include "BaseNego.h"
 #include "ISession.h"
 #include "MediaDef.h"
 #include "video/VideoDef.h"
-#include "MediaEnvironment.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
-class VideoNego : ImsSlot
+class VideoNego : public BaseNego
 {
 public:
     class OaModel
@@ -294,9 +293,7 @@ private:
 
     ImsList<OaModel*> m_listOaModel;
     VideoProfile m_objBaseProfile;
-    MediaEnvironment* m_pEnvironment;
     VideoConfiguration* m_pConfig;
-    MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bNegotiatedCvoResult;
 };
 

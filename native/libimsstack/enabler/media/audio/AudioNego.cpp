@@ -37,10 +37,9 @@ __IMS_TRACE_TAG_USER_DECL__("MED.AN");
 
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
-        ImsSlot(nSlotId),
+        BaseNego(nSlotId),
         m_lstOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(AudioProfile()),
-        m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL)
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
@@ -48,7 +47,7 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
 
 PUBLIC
 AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
-        ImsSlot(objAudioNego.GetSlotId())
+        BaseNego(objAudioNego.GetSlotId())
 {
     copy(&objAudioNego);
 }

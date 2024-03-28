@@ -27,10 +27,9 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.TN");
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
-        ImsSlot(nSlotId),
+        BaseNego(nSlotId),
         m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(TextProfile()),
-        m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL)
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
@@ -38,7 +37,7 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
 
 PUBLIC
 TextNego::TextNego(IN const TextNego& objTextNego) :
-        ImsSlot(objTextNego.GetSlotId())
+        BaseNego(objTextNego.GetSlotId())
 {
     copy(&objTextNego);
 }
