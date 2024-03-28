@@ -55,13 +55,19 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-#define DECLARE_USING(Base)         \
-    using Base::RemoveBlock;        \
-    using Base::SetSuspendedReason; \
-    using Base::SetHandleState;     \
-    using Base::Init;               \
-    using Base::CleanUp;            \
-    using Base::IsHandleBlocked;
+#define DECLARE_USING(Base)                \
+    using Base::RemoveBlock;               \
+    using Base::SetSuspendedReason;        \
+    using Base::SetHandleState;            \
+    using Base::Init;                      \
+    using Base::CleanUp;                   \
+    using Base::IsHandleBlocked;           \
+    using Base::SetReason;                 \
+    using Base::ClearSuspendedReason;      \
+    using Base::GetAppState;               \
+    using Base::GetImsAosReason;           \
+    using Base::GetImsAosReasonForSuspend; \
+    using Base::IsEpdgEnabled;
 
 class TestAosHandle : public AosHandle
 {
@@ -249,27 +255,9 @@ protected:
 
     IImsAosInfo* GetAosInfo() { return m_pAosHandle->m_piInfo; }
 
-    void SetReason(IN IMS_UINT32 nReason) { m_pAosHandle->SetReason(nReason); }
-
     IMS_UINT32 GetReason() { return m_pAosHandle->m_nReason; }
 
-    void ClearSuspendedReason() { m_pAosHandle->ClearSuspendedReason(); }
-
-    IMS_UINT32 GetAppState() { return m_pAosHandle->GetAppState(); }
-
-    IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason)
-    {
-        return m_pAosHandle->GetImsAosReason(nAosReason);
-    }
-
-    IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason)
-    {
-        return m_pAosHandle->GetImsAosReasonForSuspend(nAosReason);
-    }
-
     void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_pAosHandle->m_bEpdgEnabled = bEnabled; }
-
-    IMS_BOOL IsEpdgEnabled() const { return m_pAosHandle->IsEpdgEnabled(); }
 
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const
     {
@@ -1472,67 +1460,67 @@ TEST_F(AosHandleTest, SetHandleState_Test)
 
 TEST_F(AosHandleTest, SetReason_Test)
 {
-    SetReason(AosReason::NONE);
+    m_pAosHandle->SetReason(AosReason::NONE);
     EXPECT_EQ(GetReason(), AosReason::NONE);
 
-    SetReason(AosReason::SRV_OUT);
+    m_pAosHandle->SetReason(AosReason::SRV_OUT);
     EXPECT_EQ(GetReason(), AosReason::SRV_OUT);
 
-    SetReason(AosReason::POWER_OFF);
+    m_pAosHandle->SetReason(AosReason::POWER_OFF);
     EXPECT_EQ(GetReason(), AosReason::POWER_OFF);
 
-    SetReason(AosReason::BAD_BATTERY);
+    m_pAosHandle->SetReason(AosReason::BAD_BATTERY);
     EXPECT_EQ(GetReason(), AosReason::BAD_BATTERY);
 
-    SetReason(AosReason::AIRPLANE_MODE);
+    m_pAosHandle->SetReason(AosReason::AIRPLANE_MODE);
     EXPECT_EQ(GetReason(), AosReason::AIRPLANE_MODE);
 
-    SetReason(AosReason::NO_LTE_COVERAGE);
+    m_pAosHandle->SetReason(AosReason::NO_LTE_COVERAGE);
     EXPECT_EQ(GetReason(), AosReason::NO_LTE_COVERAGE);
 
-    SetReason(AosReason::SERVICE_POLICY);
+    m_pAosHandle->SetReason(AosReason::SERVICE_POLICY);
     EXPECT_EQ(GetReason(), AosReason::SERVICE_POLICY);
 
-    SetReason(AosReason::SERVICE_BLOCKED);
+    m_pAosHandle->SetReason(AosReason::SERVICE_BLOCKED);
     EXPECT_EQ(GetReason(), AosReason::SERVICE_BLOCKED);
 
-    SetReason(AosReason::IMS_DISABLED);
+    m_pAosHandle->SetReason(AosReason::IMS_DISABLED);
     EXPECT_EQ(GetReason(), AosReason::IMS_DISABLED);
 
-    SetReason(AosReason::TTYMODEON);
+    m_pAosHandle->SetReason(AosReason::TTYMODEON);
     EXPECT_EQ(GetReason(), AosReason::TTYMODEON);
 
-    SetReason(AosReason::NOT_SPECIFIED);
+    m_pAosHandle->SetReason(AosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetReason(), AosReason::NOT_SPECIFIED);
 
-    SetReason(AosReason::IP_CHANGED);
+    m_pAosHandle->SetReason(AosReason::IP_CHANGED);
     EXPECT_EQ(GetReason(), AosReason::IP_CHANGED);
 
-    SetReason(AosReason::DATA_DISCONNECTED);
+    m_pAosHandle->SetReason(AosReason::DATA_DISCONNECTED);
     EXPECT_EQ(GetReason(), AosReason::DATA_DISCONNECTED);
 
-    SetReason(AosReason::DATA_CONNECTION_MAINTAIN);
+    m_pAosHandle->SetReason(AosReason::DATA_CONNECTION_MAINTAIN);
     EXPECT_EQ(GetReason(), AosReason::DATA_CONNECTION_MAINTAIN);
 
-    SetReason(AosReason::DATA_PERMANENTLY_FAILED);
+    m_pAosHandle->SetReason(AosReason::DATA_PERMANENTLY_FAILED);
     EXPECT_EQ(GetReason(), AosReason::DATA_PERMANENTLY_FAILED);
 
-    SetReason(AosReason::REG_FAILURE);
+    m_pAosHandle->SetReason(AosReason::REG_FAILURE);
     EXPECT_EQ(GetReason(), AosReason::REG_FAILURE);
 
-    SetReason(AosReason::REG_TERMINATED);
+    m_pAosHandle->SetReason(AosReason::REG_TERMINATED);
     EXPECT_EQ(GetReason(), AosReason::REG_TERMINATED);
 
-    SetReason(AosReason::INITIAL_REG_REQUESTED);
+    m_pAosHandle->SetReason(AosReason::INITIAL_REG_REQUESTED);
     EXPECT_EQ(GetReason(), AosReason::INITIAL_REG_REQUESTED);
 
-    SetReason(AosReason::REG_TERMINATING);
+    m_pAosHandle->SetReason(AosReason::REG_TERMINATING);
     EXPECT_EQ(GetReason(), AosReason::REG_TERMINATING);
 
-    SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
+    m_pAosHandle->SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
     EXPECT_EQ(GetReason(), AosReason::PCSCF_DISCOVERY_FAILED);
 
-    SetReason(AosReason::UNKNOWN);
+    m_pAosHandle->SetReason(AosReason::UNKNOWN);
     EXPECT_EQ(GetReason(), AosReason::UNKNOWN);
 }
 
@@ -1541,65 +1529,75 @@ TEST_F(AosHandleTest, ClearSuspendedReason_Test)
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     EXPECT_TRUE(m_pAosHandle->IsImsSuspended());
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     EXPECT_FALSE(m_pAosHandle->IsImsSuspended());
 }
 
 TEST_F(AosHandleTest, GetAppState_Test)
 {
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
-    EXPECT_EQ(GetAppState(), AosHandle::APP_STATE_CONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetAppState(), AosHandle::APP_STATE_CONNECTED);
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTING);
-    EXPECT_EQ(GetAppState(), AosHandle::APP_STATE_DISCONNECTING);
+    EXPECT_EQ(m_pAosHandle->GetAppState(), AosHandle::APP_STATE_DISCONNECTING);
 
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
-    EXPECT_EQ(GetAppState(), AosHandle::APP_STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetAppState(), AosHandle::APP_STATE_DISCONNECTED);
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
-    EXPECT_EQ(GetAppState(), AosHandle::APP_STATE_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetAppState(), AosHandle::APP_STATE_DISCONNECTED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReason_Test)
 {
-    EXPECT_EQ(GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(GetImsAosReason(AosReason::BAD_BATTERY), ImsAosReason::POWER_OFF);
-    EXPECT_EQ(GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
-    EXPECT_EQ(GetImsAosReason(AosReason::AIRPLANE_MODE), ImsAosReason::DATA_DISCONNECTED);
-    EXPECT_EQ(GetImsAosReason(AosReason::DATA_DISCONNECTED), ImsAosReason::DATA_DISCONNECTED);
-    EXPECT_EQ(GetImsAosReason(AosReason::NO_LTE_COVERAGE), ImsAosReason::NO_RAT_COVERAGE);
-    EXPECT_EQ(GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
-    EXPECT_EQ(GetImsAosReason(AosReason::SERVICE_BLOCKED), ImsAosReason::SERVICE_BLOCKED);
-    EXPECT_EQ(GetImsAosReason(AosReason::SRV_OUT), ImsAosReason::OUT_OF_SERVICE);
-    EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
-    EXPECT_EQ(GetImsAosReason(AosReason::INITIAL_REG_REQUESTED), ImsAosReason::REG_NEW_REQUIRED);
-    EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATING), ImsAosReason::REG_TERMINATING);
-    EXPECT_EQ(GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::BAD_BATTERY), ImsAosReason::POWER_OFF);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE),
+            ImsAosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
+            ImsAosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NO_LTE_COVERAGE),
+            ImsAosReason::NO_RAT_COVERAGE);
+    EXPECT_EQ(
+            m_pAosHandle->GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SERVICE_BLOCKED),
+            ImsAosReason::SERVICE_BLOCKED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SRV_OUT), ImsAosReason::OUT_OF_SERVICE);
+    EXPECT_EQ(
+            m_pAosHandle->GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::INITIAL_REG_REQUESTED),
+            ImsAosReason::REG_NEW_REQUIRED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::REG_TERMINATING),
+            ImsAosReason::REG_TERMINATING);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
 }
 
 TEST_F(AosHandleTest, GetImsAosReasonForSuspend_Test)
 {
-    EXPECT_EQ(GetImsAosReasonForSuspend(AosReason::SUSPEND_NONE), ImsAosReason::SUSPEND_NONE);
-    EXPECT_EQ(GetImsAosReasonForSuspend(AosReason::SUSPEND_NO_SERVICE),
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_NONE),
+            ImsAosReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_NO_SERVICE),
             ImsAosReason::SUSPEND_OUT_OF_SERVICE);
-    EXPECT_EQ(GetImsAosReasonForSuspend(AosReason::SUSPEND_NO_LTE_COVERAGE),
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_NO_LTE_COVERAGE),
             ImsAosReason::SUSPEND_NO_RAT_COVERAGE);
 
-    EXPECT_EQ(GetImsAosReasonForSuspend(AosReason::SUSPEND_CS_CALL), ImsAosReason::SUSPEND_NONE);
-    EXPECT_EQ(
-            GetImsAosReasonForSuspend(AosReason::SUSPEND_LOW_BATTERY), ImsAosReason::SUSPEND_NONE);
-    EXPECT_EQ(GetImsAosReasonForSuspend(AosReason::SUSPEND_INSTANTANEOUS_OFFLINE),
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_CS_CALL),
+            ImsAosReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_LOW_BATTERY),
+            ImsAosReason::SUSPEND_NONE);
+    EXPECT_EQ(m_pAosHandle->GetImsAosReasonForSuspend(AosReason::SUSPEND_INSTANTANEOUS_OFFLINE),
             ImsAosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleTest, IsEpdgEnabled_Test)
 {
     SetEpdgEnabled(IMS_TRUE);
-    EXPECT_TRUE(IsEpdgEnabled());
+    EXPECT_TRUE(m_pAosHandle->IsEpdgEnabled());
 
     SetEpdgEnabled(IMS_FALSE);
-    EXPECT_FALSE(IsEpdgEnabled());
+    EXPECT_FALSE(m_pAosHandle->IsEpdgEnabled());
 }
 
 TEST_F(AosHandleTest, IsEqualNetworkType_Test)
@@ -4250,7 +4248,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test1)
     // Expectation: no suspended reason is set, return false
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     EXPECT_FALSE(ProcessImsSuspended(0));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
@@ -4274,7 +4272,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test3)
     // Expectation: suspended reason is set, No call ImsAos_Suspended, return false
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetListener(IMS_NULL);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
 
@@ -4332,7 +4330,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test2)
     // Expectation: return false
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
 
     EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
 }
@@ -4343,7 +4341,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test3)
     // Expectation: reset the reason from suspended reason, return false
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     SetSuspendedReasonForTest((AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 
     EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
@@ -4356,10 +4354,10 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test4)
     // Expectation: reset the reason from suspended reason, set reason, return false
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     m_pAosHandle->SetListener(IMS_NULL);
-    SetReason(AosReason::SUSPEND_NONE);
+    m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 
     EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
@@ -4372,11 +4370,11 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
     // Expectation: no suspended reason, set reason, call ImsAos_Resumed(), return true
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
     m_pAosHandle->SetListener(piListener);
-    SetReason(AosReason::SUSPEND_NONE);
+    m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
     EXPECT_TRUE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
@@ -4385,9 +4383,9 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
 
     // Clean up
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetListener(IMS_NULL);
-    SetReason(AosReason::SUSPEND_NONE);
+    m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleTest, ProcessImsResumed_Test6)
@@ -4427,7 +4425,7 @@ TEST_F(AosHandleTest, CheckSuspended_Test1)
     // Test1: Suspended.
     // Expectation: Suspended reason-SUSPEND_NO_SERVICE, m_bNetSrvIn is false.
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
 
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_TRUE));
 
@@ -4442,7 +4440,7 @@ TEST_F(AosHandleTest, CheckSuspended_Test2)
     // Test2: Not suspended.
     // Expectation: Suspended reason-SUSPEND_NONE, m_bNetSrvIn is true.
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
 
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_FALSE));
 
@@ -4457,7 +4455,7 @@ TEST_F(AosHandleTest, ResetSuspendedReason_Test1)
     // Test1: reason-SUSPEND_NO_SERVICE
     // Expectation: reset the reason from suspended reason
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
@@ -4471,7 +4469,7 @@ TEST_F(AosHandleTest, ResetSuspendedReason_Test2)
     // Test2: reason-other than SUSPEND_NO_SERVICE
     // Expectation: no reset the reason from suspended reason
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
     SetSuspendedReasonForTest(AosReason::SUSPEND_NO_LTE_COVERAGE);
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
@@ -4479,7 +4477,7 @@ TEST_F(AosHandleTest, ResetSuspendedReason_Test2)
 
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
-    ClearSuspendedReason();
+    m_pAosHandle->ClearSuspendedReason();
 }
 
 TEST_F(AosHandleTest, ReportRegState_Test1)
