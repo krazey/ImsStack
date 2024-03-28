@@ -366,11 +366,11 @@ class AosApplicationTest : public ::testing::Test
 public:
     TestAosApplication* m_pAosApplication;
 
+    IAosNConfiguration* m_piAosNConfiguration;
+    IAosService* m_piAosService;
     IAosCallTracker* m_piAosCallTracker;
     IAosLocationStarter* m_piAosLocationStarter;
-    IAosNConfiguration* m_piAosNConfiguration;
     IAosRegStateManager* m_piAosRegStateManager;
-    IAosService* m_piAosService;
     IAosRetryRepository* m_piAosRetryRepository;
 
     NiceMock<MockAosCondition> m_objMockAosCondition;
@@ -398,53 +398,23 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ReplaceOriginWithMock();
+        SetDefaultValues();
+
+        // MockIAosAppContext
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
         ON_CALL(m_objMockIAosAppContext, GetBlock()).WillByDefault(Return(&m_objMockIAosBlock));
         ON_CALL(m_objMockIAosAppContext, GetConnection())
                 .WillByDefault(Return(&m_objMockIAosConnection));
-        ON_CALL(m_objMockIAosConnection, GetConnectionType())
-                .WillByDefault(Return(NetworkPolicy::APN_IMS));
-        ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
-
-        m_objPcscfs.AddElement(AString("192.168.0.100"));
         ON_CALL(m_objMockIAosAppContext, GetPcscf()).WillByDefault(Return(&m_objMockIAosPcscf));
-        ON_CALL(m_objMockIAosPcscf, GetPcscfs()).WillByDefault(ReturnRef(m_objPcscfs));
-        ON_CALL(m_objMockIAosPcscf, GetNextPcscfIndex()).WillByDefault(Return(0));
-        ON_CALL(m_objMockIAosPcscf, GetChangedType())
-                .WillByDefault(Return(IAosPcscf::TYPE_CHANGED_SAME));
-
         ON_CALL(m_objMockIAosAppContext, GetNetTracker())
                 .WillByDefault(Return(&m_objMockIAosNetTracker));
-        ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
-                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-        ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
-        ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_FALSE));
-
         ON_CALL(m_objMockIAosAppContext, GetRegistration())
                 .WillByDefault(Return(&m_objMockIAosRegistration));
-
-        ON_CALL(m_objMockIAosRegistration, GetMode())
-                .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
-        ON_CALL(m_objMockIAosRegistration, IsRefreshing()).WillByDefault(Return(IMS_FALSE));
-        ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_TRUE));
-
-        m_objHandles.Add(m_strServiceId, &m_objMockIAosHandle);
         ON_CALL(m_objMockIAosAppContext, GetHandles()).WillByDefault(ReturnRef(m_objHandles));
-        ON_CALL(m_objMockIAosHandle, GetAppId()).WillByDefault(ReturnRef(m_strAppId));
-        ON_CALL(m_objMockIAosHandle, GetServiceId()).WillByDefault(ReturnRef(m_strServiceId));
-        ON_CALL(m_objMockIAosHandle, GetMonitor()).WillByDefault(Return(&m_objMockIImsAosMonitor));
 
-        m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
-        AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
-
-        m_piAosLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
-        AosProvider::GetInstance()->SetLocationStarter(&m_objMockIAosLocationStarter, SLOT_ID);
-
-        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
-
+        // MockIAosNConfiguration
         ON_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_TRUE));
         ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
@@ -454,18 +424,40 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
                 .WillByDefault(Return(IMS_FALSE));
 
-        m_piAosService = AosProvider::GetInstance()->GetService();
-        AosProvider::GetInstance()->SetService(&m_objMockIAosService, SLOT_ID);
+        // MockIAosNetTracker
+        ON_CALL(m_objMockIAosNetTracker, GetNetworkType())
+                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+        ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+                .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+        ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_FALSE));
 
-        m_piAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
-        AosProvider::GetInstance()->SetRetryRepository(&m_objMockIAosRetryRepository, SLOT_ID);
+        // MockIAosRegistration
+        ON_CALL(m_objMockIAosRegistration, GetMode())
+                .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
+        ON_CALL(m_objMockIAosRegistration, IsRefreshing()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosRegistration, IsRegistered()).WillByDefault(Return(IMS_TRUE));
 
-        m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
-        AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager, SLOT_ID);
+        // MockIAosConnection
+        ON_CALL(m_objMockIAosConnection, GetConnectionType())
+                .WillByDefault(Return(NetworkPolicy::APN_IMS));
+        ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
 
-        m_pAosApplication = new TestAosApplication(&m_objMockIAosAppContext, PROFILE_ID);
+        // MockIAosHandle
+        ON_CALL(m_objMockIAosHandle, GetAppId()).WillByDefault(ReturnRef(m_strAppId));
+        ON_CALL(m_objMockIAosHandle, GetServiceId()).WillByDefault(ReturnRef(m_strServiceId));
+        ON_CALL(m_objMockIAosHandle, GetMonitor()).WillByDefault(Return(&m_objMockIImsAosMonitor));
 
+        // MockIAosPcscf
+        ON_CALL(m_objMockIAosPcscf, GetPcscfs()).WillByDefault(ReturnRef(m_objPcscfs));
+        ON_CALL(m_objMockIAosPcscf, GetNextPcscfIndex()).WillByDefault(Return(0));
+        ON_CALL(m_objMockIAosPcscf, GetChangedType())
+                .WillByDefault(Return(IAosPcscf::TYPE_CHANGED_SAME));
+
+        // MockAosCondition
         ON_CALL(m_objMockAosCondition, IsReady()).WillByDefault(Return(IMS_FALSE));
+
+        // Test subject
+        m_pAosApplication = new TestAosApplication(&m_objMockIAosAppContext, PROFILE_ID);
 
         m_pAosApplication->SetAosCondition(&m_objMockAosCondition);
         m_pAosApplication->SetAosConnector(&m_objMockAosConnector);
@@ -474,18 +466,53 @@ protected:
 
     virtual void TearDown() override
     {
-        AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager, SLOT_ID);
-        AosProvider::GetInstance()->SetRetryRepository(m_piAosRetryRepository, SLOT_ID);
-        AosProvider::GetInstance()->SetService(m_piAosService, SLOT_ID);
-        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
-        AosProvider::GetInstance()->SetLocationStarter(m_piAosLocationStarter, SLOT_ID);
-        AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
+        ClearDefaultValues();
+        RestoreOriginInstance();
 
         if (m_pAosApplication)
         {
             CleanUpAosApplication();
             delete m_pAosApplication;
         }
+    }
+
+    void ReplaceOriginWithMock()
+    {
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        m_piAosService = AosProvider::GetInstance()->GetService();
+        m_piAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
+        m_piAosLocationStarter = AosProvider::GetInstance()->GetLocationStarter();
+        m_piAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
+        m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
+
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration, SLOT_ID);
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService, SLOT_ID);
+        AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
+        AosProvider::GetInstance()->SetLocationStarter(&m_objMockIAosLocationStarter, SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(&m_objMockIAosRetryRepository, SLOT_ID);
+        AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager, SLOT_ID);
+    }
+
+    void RestoreOriginInstance()
+    {
+        AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager, SLOT_ID);
+        AosProvider::GetInstance()->SetRetryRepository(m_piAosRetryRepository, SLOT_ID);
+        AosProvider::GetInstance()->SetLocationStarter(m_piAosLocationStarter, SLOT_ID);
+        AosProvider::GetInstance()->SetCallTracker(m_piAosCallTracker, SLOT_ID);
+        AosProvider::GetInstance()->SetService(m_piAosService, SLOT_ID);
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+    }
+
+    void SetDefaultValues()
+    {
+        m_objHandles.Add(m_strServiceId, &m_objMockIAosHandle);
+        m_objPcscfs.AddElement(AString("192.168.0.100"));
+    }
+
+    void ClearDefaultValues()
+    {
+        m_objPcscfs.RemoveAllElements();
+        m_objHandles.Clear();
     }
 
     void CleanUpAosApplication()
