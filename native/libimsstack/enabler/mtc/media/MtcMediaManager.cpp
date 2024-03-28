@@ -288,7 +288,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
-    IMS_BOOL bResult = m_piMediaSession->FormSDP(nNegoId, piSession, eContents,
+    IMS_BOOL bResult = m_piMediaSession->FormSdp(nNegoId, piSession, eContents,
             m_pMediaInfo->eAudioDirection, m_pMediaInfo->eVideoDirection,
             m_pMediaInfo->eTextDirection, bAnswerForOfferlessReInvite);
 
@@ -313,7 +313,7 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
 
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
-    m_piMediaSession->NegotiateSDP(
+    m_piMediaSession->NegotiateSdp(
             nNegoId, piSession, &eAudioDirection, &eVideoDirection, &eTextDirection, eErrorReason);
 
     IMS_TRACE_D("NegotiateSdp : %d", eErrorReason, 0, 0);
@@ -353,7 +353,7 @@ PUBLIC
 void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 {
     IMS_TRACE_D("FinalizeSdp", 0, 0, 0);
-    m_piMediaSession->FinalizeSDP(GetMediaNegoId(piSession), piSession);
+    m_piMediaSession->FinalizeSdp(GetMediaNegoId(piSession), piSession);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessage)
