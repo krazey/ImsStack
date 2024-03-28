@@ -67,7 +67,10 @@ using ::testing::ReturnRef;
     using Base::GetAppState;               \
     using Base::GetImsAosReason;           \
     using Base::GetImsAosReasonForSuspend; \
-    using Base::IsEpdgEnabled;
+    using Base::IsEpdgEnabled;             \
+    using Base::IsEqualNetworkType;        \
+    using Base::IsCapabilityExisted;       \
+    using Base::IsCapabilityExistedForNetworkType;
 
 class TestAosHandle : public AosHandle
 {
@@ -258,22 +261,6 @@ protected:
     IMS_UINT32 GetReason() { return m_pAosHandle->m_nReason; }
 
     void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_pAosHandle->m_bEpdgEnabled = bEnabled; }
-
-    IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const
-    {
-        return m_pAosHandle->IsEqualNetworkType(nType, eType);
-    }
-
-    IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const
-    {
-        return m_pAosHandle->IsCapabilityExisted(nCapabilities, eCapability);
-    }
-
-    IMS_BOOL IsCapabilityExistedForNetworkType(
-            IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const
-    {
-        return m_pAosHandle->IsCapabilityExistedForNetworkType(nNetworkType, eCapability);
-    }
 
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const
     {
@@ -1602,48 +1589,48 @@ TEST_F(AosHandleTest, IsEpdgEnabled_Test)
 
 TEST_F(AosHandleTest, IsEqualNetworkType_Test)
 {
-    EXPECT_TRUE(IsEqualNetworkType(-1, AosNetworkType::NONE));
-    EXPECT_TRUE(IsEqualNetworkType(0, AosNetworkType::LTE));
-    EXPECT_TRUE(IsEqualNetworkType(1, AosNetworkType::IWLAN));
-    EXPECT_TRUE(IsEqualNetworkType(2, AosNetworkType::CROSS_SIM));
-    EXPECT_TRUE(IsEqualNetworkType(3, AosNetworkType::NR));
-    EXPECT_TRUE(IsEqualNetworkType(4, AosNetworkType::UTRAN));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::NONE));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::LTE));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::IWLAN));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::CROSS_SIM));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::NR));
+    EXPECT_TRUE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(-1, AosNetworkType::LTE));
-    EXPECT_FALSE(IsEqualNetworkType(-1, AosNetworkType::IWLAN));
-    EXPECT_FALSE(IsEqualNetworkType(-1, AosNetworkType::CROSS_SIM));
-    EXPECT_FALSE(IsEqualNetworkType(-1, AosNetworkType::NR));
-    EXPECT_FALSE(IsEqualNetworkType(-1, AosNetworkType::UTRAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::LTE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::IWLAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::CROSS_SIM));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::NR));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(-1, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(0, AosNetworkType::NONE));
-    EXPECT_FALSE(IsEqualNetworkType(0, AosNetworkType::IWLAN));
-    EXPECT_FALSE(IsEqualNetworkType(0, AosNetworkType::CROSS_SIM));
-    EXPECT_FALSE(IsEqualNetworkType(0, AosNetworkType::NR));
-    EXPECT_FALSE(IsEqualNetworkType(0, AosNetworkType::UTRAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::NONE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::IWLAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::CROSS_SIM));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::NR));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(0, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(1, AosNetworkType::NONE));
-    EXPECT_FALSE(IsEqualNetworkType(1, AosNetworkType::LTE));
-    EXPECT_FALSE(IsEqualNetworkType(1, AosNetworkType::CROSS_SIM));
-    EXPECT_FALSE(IsEqualNetworkType(1, AosNetworkType::NR));
-    EXPECT_FALSE(IsEqualNetworkType(1, AosNetworkType::UTRAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::NONE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::LTE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::CROSS_SIM));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::NR));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(1, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(2, AosNetworkType::NONE));
-    EXPECT_FALSE(IsEqualNetworkType(2, AosNetworkType::LTE));
-    EXPECT_FALSE(IsEqualNetworkType(2, AosNetworkType::IWLAN));
-    EXPECT_FALSE(IsEqualNetworkType(2, AosNetworkType::NR));
-    EXPECT_FALSE(IsEqualNetworkType(2, AosNetworkType::UTRAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::NONE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::LTE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::IWLAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::NR));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(2, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(3, AosNetworkType::NONE));
-    EXPECT_FALSE(IsEqualNetworkType(3, AosNetworkType::LTE));
-    EXPECT_FALSE(IsEqualNetworkType(3, AosNetworkType::IWLAN));
-    EXPECT_FALSE(IsEqualNetworkType(3, AosNetworkType::CROSS_SIM));
-    EXPECT_FALSE(IsEqualNetworkType(3, AosNetworkType::UTRAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::NONE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::LTE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::IWLAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::CROSS_SIM));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(3, AosNetworkType::UTRAN));
 
-    EXPECT_FALSE(IsEqualNetworkType(4, AosNetworkType::NONE));
-    EXPECT_FALSE(IsEqualNetworkType(4, AosNetworkType::LTE));
-    EXPECT_FALSE(IsEqualNetworkType(4, AosNetworkType::IWLAN));
-    EXPECT_FALSE(IsEqualNetworkType(4, AosNetworkType::CROSS_SIM));
-    EXPECT_FALSE(IsEqualNetworkType(4, AosNetworkType::NR));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::NONE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::LTE));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::IWLAN));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::CROSS_SIM));
+    EXPECT_FALSE(m_pAosHandle->IsEqualNetworkType(4, AosNetworkType::NR));
 }
 
 TEST_F(AosHandleTest, IsCapabilityExisted_Test)
@@ -1655,31 +1642,31 @@ TEST_F(AosHandleTest, IsCapabilityExisted_Test)
             static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
             static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
             static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::UT));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::SMS));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::UT));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::SMS));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
 
     nCapabilities = static_cast<IMS_UINT32>(AosCapability::VOICE);
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::UT));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::SMS));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::UT));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::SMS));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
 
     nCapabilities = static_cast<IMS_UINT32>(AosCapability::VIDEO);
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
-    EXPECT_TRUE(IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::UT));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::SMS));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
-    EXPECT_FALSE(IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::UT));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::SMS));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::CALL_COMPOSER));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::OPTIONS_UCE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExisted(nCapabilities, AosCapability::PRESENCE_UCE));
 }
 
 TEST_F(AosHandleTest, IsCapabilityExistedForNetworkType_Test)
@@ -1695,14 +1682,22 @@ TEST_F(AosHandleTest, IsCapabilityExistedForNetworkType_Test)
 
     SetCapabilities(objCapabilities);
 
-    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_LTE, AosCapability::VOICE));
-    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_LTE, AosCapability::VIDEO));
-    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
-    EXPECT_TRUE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
-    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_NR, AosCapability::VOICE));
-    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_NR, AosCapability::VIDEO));
-    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_GSM, AosCapability::VOICE));
-    EXPECT_FALSE(IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_GSM, AosCapability::VIDEO));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_LTE, AosCapability::VOICE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_LTE, AosCapability::VIDEO));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+    EXPECT_TRUE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_NR, AosCapability::VOICE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_NR, AosCapability::VIDEO));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_GSM, AosCapability::VOICE));
+    EXPECT_FALSE(m_pAosHandle->IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_GSM, AosCapability::VIDEO));
 }
 
 TEST_F(AosHandleTest, IsNetworkTypeMatchedToRat_Test)
