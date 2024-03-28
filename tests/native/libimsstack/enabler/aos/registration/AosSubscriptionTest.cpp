@@ -40,6 +40,7 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConnection.h"
 #include "private/ConfigurationManager.h"
+#include "AosCounter.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "registration/AosSubscription.h"
@@ -70,6 +71,7 @@ const IMS_SINT32 SLOT_ID = 0;
     using Base::IsWfcErrorMessageSupportedWithStateChecked; \
     using Base::ProcessFailed_StatusCode;                   \
     using Base::GetNextThrottlingTime;                      \
+    using Base::RegSubscription_NotifyReceived;             \
     using Base::RegSubscription_RefreshTimerExpired;        \
     using Base::Transaction_OnConnectionFailed;             \
     using Base::Transaction_OnTrafficPriorityChanged;
@@ -87,6 +89,9 @@ enum
 
 class TestAosSubscription : public AosSubscription
 {
+private:
+    AosCounter* m_pCounter;
+
 public:
     DECLARE_USING(AosSubscription)
 
@@ -95,13 +100,16 @@ public:
             IN const SipAddress& objContactAddress) :
             AosSubscription(piAppContext, piRegSubscription, strAoR, objContactAddress)
     {
+        m_pCounter = new AosCounter();
     }
 
+    inline ~TestAosSubscription() override { delete m_pCounter; }
+
     FRIEND_TEST(AosSubscriptionTest, Initialize);
-    FRIEND_TEST(AosSubscriptionTest, CheckNotifyReceived);
     FRIEND_TEST(AosSubscriptionTest, RegSubscription_End);
 
-public:
+    inline void SetAorState(IN IMS_SINT32 nAorState) { m_nAorState = nAorState; }
+
     void SetRegSubscription(IN IRegSubscription* piRegSubscription)
     {
         m_piRegSubscription = piRegSubscription;
@@ -135,10 +143,6 @@ public:
     {
         switch (nEvent)
         {
-            case AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED:
-                RegSubscription_NotifyReceived(GetState(), nReason, bHasBody);
-                break;
-
             case AMSG_REG_SUBSCRIPTION_STARTED:
                 RegSubscription_Started();
                 break;
@@ -166,6 +170,21 @@ public:
             default:
                 break;
         }
+    }
+
+    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+
+    // Functions where calls are being counted
+    void ProcessNotifyState_InvalidBody() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosSubscription::ProcessNotifyState_InvalidBody();
+    }
+
+    void ProcessNotifyState_Terminated(IN IMS_SINT32 nEvent) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosSubscription::ProcessNotifyState_Terminated(nEvent);
     }
 };
 
@@ -215,6 +234,7 @@ public:
     MockISipMessage m_objMockSipMsg;
     MockIRegSubscription m_objMockIRegSubscription;
     MockIRegInfo m_objMockIRegInfo;
+    MockIRegInfoContact m_objMockIRegInfoContact;
     MockIRegInfoRegistration m_objMockIRegInfoRegistration;
 
     MockIAosSubscriptionListener m_objMockIAosSubscriptionListener;
@@ -232,6 +252,7 @@ public:
     IAosTransaction* m_pOriginAosTransaction;
     MockIAosTransaction m_objMockIAosTransaction;
 
+    ImsList<IRegInfoContact*> m_objContact;
     ImsVector<IMS_SINT32> m_objRetryIntervals;
     ImsVector<IMS_SINT32> m_objRetryRandomIntervals;
     ImsVector<IMS_SINT32> m_objErrRegRequiredWithNextPcscf;
@@ -241,6 +262,7 @@ public:
     const AString m_strSipAddrWithPort = AString("sip:1234@ims.google.com:5060");
     const AString m_strSipAddr = AString("sip:1234@ims.google.com");
     const AString m_strAnonymousAddr = AString("sip:anonymous@anonymous.invalid");
+    const AString m_strQvalue = "";
 
 protected:
     virtual void SetUp() override
@@ -269,6 +291,13 @@ protected:
         ON_CALL(m_objMockIRegSubscription, GetRegInfo()).WillByDefault(Return(&m_objMockIRegInfo));
         ON_CALL(m_objMockIRegInfo, GetRegistration(m_strSipAddrWithPort))
                 .WillByDefault(Return(&m_objMockIRegInfoRegistration));
+
+        ON_CALL(m_objMockIRegInfoContact, GetRetryAfterValue()).WillByDefault(Return(30));
+        ON_CALL(m_objMockIRegInfoContact, GetExpiresValue()).WillByDefault(Return(3600));
+        ON_CALL(m_objMockIRegInfoContact, GetQValue()).WillByDefault(ReturnRef(m_strQvalue));
+
+        m_objContact.Clear();
+        ON_CALL(m_objMockIRegInfoRegistration, GetContacts()).WillByDefault(Return(m_objContact));
 
         ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
                 .WillByDefault(Return(IMS_FALSE));
@@ -321,254 +350,6 @@ TEST_F(AosSubscriptionTest, Initialize)
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(1);
 
     m_pAosSubscription->Initialize();
-}
-
-TEST_F(AosSubscriptionTest, CheckNotifyReceived)
-{
-    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_FALSE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    MockIRegInfo objMockIRegInfo;
-    EXPECT_CALL(m_objMockIRegSubscription, GetRegInfo())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IRegInfo*>(&objMockIRegInfo)));
-
-    MockIRegInfoRegistration objMockIRegInfoRegistration;
-    EXPECT_CALL(objMockIRegInfo, GetRegistration(m_strSipAddrWithPort))
-            .Times(AnyNumber())
-            .WillOnce(ReturnNull())
-            .WillOnce(ReturnNull())
-            .WillRepeatedly(
-                    Return(static_cast<IRegInfoRegistration*>(&objMockIRegInfoRegistration)));
-
-    EXPECT_CALL(m_objMockAosConfig, GetUsatRegEventDownloadPolicy())
-            .Times(4)
-            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD))
-            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD))
-            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD))
-            .WillOnce(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    ImsList<IRegInfoContact*> objContact;
-    objContact.Clear();
-
-    EXPECT_CALL(objMockIRegInfoRegistration, GetContacts()).Times(1).WillOnce(Return(objContact));
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    // RegInfoContact1
-    MockIRegInfoContact objMockIRegInfoContact1;
-    EXPECT_CALL(objMockIRegInfoContact1, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IRegInfoContact::STATE_ACTIVE));
-
-    EXPECT_CALL(objMockIRegInfoContact1, GetEvent())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IRegInfoContact::EVENT_REGISTERED));
-
-    SipAddress objSipAddress;
-    objSipAddress.Create(m_strAnonymousAddr);
-    EXPECT_CALL(objMockIRegInfoContact1, GetUri())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objSipAddress));
-
-    AString strQvalue = "";
-    EXPECT_CALL(objMockIRegInfoContact1, GetQValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strQvalue));
-
-    EXPECT_CALL(objMockIRegInfoContact1, GetRetryAfterValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(objMockIRegInfoContact1, GetExpiresValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3600));
-
-    // RegInfoContact2
-    MockIRegInfoContact objMockIRegInfoContact2;
-    EXPECT_CALL(objMockIRegInfoContact2, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IRegInfoContact::STATE_ACTIVE));
-    EXPECT_CALL(objMockIRegInfoContact2, GetEvent())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IRegInfoContact::EVENT_REGISTERED));
-
-    SipAddress objSipAddress2;
-    objSipAddress2.Create(m_strSipAddrWithPort);
-    EXPECT_CALL(objMockIRegInfoContact2, GetUri())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objSipAddress2));
-
-    strQvalue = "qvalue";
-    EXPECT_CALL(objMockIRegInfoContact2, GetQValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strQvalue));
-
-    EXPECT_CALL(objMockIRegInfoContact2, GetRetryAfterValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(30));
-
-    EXPECT_CALL(objMockIRegInfoContact2, GetExpiresValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3600));
-
-    objContact.Append(static_cast<IRegInfoContact*>(&objMockIRegInfoContact1));
-    objContact.Append(static_cast<IRegInfoContact*>(&objMockIRegInfoContact2));
-
-    EXPECT_CALL(objMockIRegInfoRegistration, GetContacts())
-            .Times(3)
-            .WillRepeatedly(Return(objContact));
-
-    // GetRegInfoContact() == IMS_NULL
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    EXPECT_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount())
-            .WillOnce(Return(5))
-            .WillRepeatedly(Return(0));
-
-    ImsList<AString> objImpus;
-    EXPECT_CALL(m_objMockAosService, NotifyRegEventState(200, objImpus)).Times(1);
-    EXPECT_CALL(m_objMockAosRetryRepository, ResetRetryCount(0)).Times(1);
-
-    SipAddress objContactAddr;
-    objContactAddr.Create(m_strSipAddr);
-    m_pAosSubscription->SetContactAddress(objContactAddr);
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
-
-    objContactAddr.RemoveAllParameters();
-    objContactAddr.Create(m_strSipAddrWithPort);
-    m_pAosSubscription->SetContactAddress(objContactAddr);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
-
-    // For STATE_TERMINATED
-    MockIRegInfoContact objMockIRegInfoContact3;
-    EXPECT_CALL(objMockIRegInfoContact3, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IRegInfoContact::STATE_TERMINATED));
-    EXPECT_CALL(objMockIRegInfoContact3, GetEvent())
-            .Times(14)
-            .WillOnce(Return(IRegInfoContact::EVENT_SHORTENED))
-            .WillOnce(Return(IRegInfoContact::EVENT_SHORTENED))
-            .WillOnce(Return(IRegInfoContact::EVENT_EXPIRED))
-            .WillOnce(Return(IRegInfoContact::EVENT_EXPIRED))
-            .WillOnce(Return(IRegInfoContact::EVENT_EXPIRED))
-            .WillOnce(Return(IRegInfoContact::EVENT_EXPIRED))
-            .WillOnce(Return(IRegInfoContact::EVENT_DEACTIVATED))
-            .WillOnce(Return(IRegInfoContact::EVENT_DEACTIVATED))
-            .WillOnce(Return(IRegInfoContact::EVENT_PROBATION))
-            .WillOnce(Return(IRegInfoContact::EVENT_PROBATION))
-            .WillOnce(Return(IRegInfoContact::EVENT_UNREGISTERED))
-            .WillOnce(Return(IRegInfoContact::EVENT_UNREGISTERED))
-            .WillOnce(Return(IRegInfoContact::EVENT_REJECTED))
-            .WillOnce(Return(IRegInfoContact::EVENT_REJECTED));
-
-    EXPECT_CALL(objMockIRegInfoContact3, GetUri())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objSipAddress2));
-
-    strQvalue = "";
-    EXPECT_CALL(objMockIRegInfoContact3, GetQValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strQvalue));
-
-    EXPECT_CALL(objMockIRegInfoContact3, GetRetryAfterValue())
-            .Times(AnyNumber())
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(30));
-
-    EXPECT_CALL(objMockIRegInfoContact3, GetExpiresValue())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3600));
-
-    objContact.Clear();
-    objContact.Append(static_cast<IRegInfoContact*>(&objMockIRegInfoContact3));
-
-    EXPECT_CALL(objMockIRegInfoRegistration, GetContacts())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(objContact));
-
-    // STATE_TERMINATE
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    EXPECT_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegWithWaitTime())
-            .Times(6)
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED));
-
-    EXPECT_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegistration())
-            .Times(4)
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_EXPIRED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_DEACTIVATED))
-            .WillOnce(Return(IAosNConfiguration::NOTIFY_TERMINATED_PROBATION));
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE))
-            .Times(1);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    // ReportNotifyEvent() - bRegRequired == TRUE
-    EXPECT_CALL(m_objMockAosConfig, GetNotifyWaitTime()).Times(2).WillRepeatedly(Return(60));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(2)
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE))
-            .Times(3);
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 60, IMS_FALSE))
-            .Times(1);
-
-    EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(
-                    AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_FALSE))
-            .Times(1);
-
-    EXPECT_CALL(m_objMockAosConfig,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
-
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
-    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
 }
 
 TEST_F(AosSubscriptionTest, RegSubscription_End)
@@ -1570,6 +1351,130 @@ TEST_F(AosSubscriptionTest, GetNextThrottlingTimeWhenRetryRandomIntervalshaveVal
     objRetryIntervals.Add(480);
     objRetryIntervals.Add(900);
     EXPECT_EQ(480000, m_pAosSubscription->GetNextThrottlingTime(objRetryIntervals));
+}
+
+/// RegSubscription_NotifyReceived()
+TEST_F(AosSubscriptionTest, NothingWhenNotifyReceivedWithoutBody)
+{
+    m_pAosSubscription->SetAorState(IRegInfoContact::STATE_CREATED);
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(
+            m_pAosSubscription->GetState(), 0, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_CREATED);
+}
+
+TEST_F(AosSubscriptionTest, CallProcessNotifyState_InvalidBodyIfRegInfoIsNullWhenNotifyReceived)
+{
+    // condition: USAT_REG_EVENT_NOT_DOWNLOAD in SetUp()
+    // call ProcessNotifyState_InvalidBody() When piRegInfo is null
+    ON_CALL(m_objMockIRegInfo, GetRegistration(m_strSipAddrWithPort)).WillByDefault(ReturnNull());
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+
+    EXPECT_EQ(m_pAosSubscription->GetInvokedCount("ProcessNotifyState_InvalidBody"), 1);
+}
+
+TEST_F(AosSubscriptionTest, NothingIfNoContactWhenNotifyReceived)
+{
+    m_pAosSubscription->SetAorState(IRegInfoContact::STATE_CREATED);
+    // All conditions in SetUp()
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
+}
+
+/// RegSubscription_NotifyReceived() - contact of reg info is not matched
+TEST_F(AosSubscriptionTest, TerminateAorStateWhenNotifyReceivedWithMismatchedContactWithActiveState)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    m_pAosSubscription->SetAorState(IRegInfoContact::STATE_CREATED);
+
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_ACTIVE));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_REGISTERED));
+    SipAddress objSipAddress = SipAddress(m_strSipAddrWithPort);
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress));
+
+    m_objContact.Append(&m_objMockIRegInfoContact);
+
+    SipAddress objContactAddr = SipAddress(m_strAnonymousAddr);
+    m_pAosSubscription->SetContactAddress(objContactAddr);
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
+}
+
+/// RegSubscription_NotifyReceived() - ProcessNotifyState_Active() with m_strSipAddrWithPort
+TEST_F(AosSubscriptionTest, ActiveAorStateWhenWhenNotifyReceivedWithMatchedContactWithActiveState)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    SipAddress objSipAddress = SipAddress(m_strSipAddrWithPort);
+    m_pAosSubscription->SetContactAddress(objSipAddress);
+
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_ACTIVE));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_REGISTERED));
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress));
+
+    // When the variable relate to "m_objContact" don't set here, it's not working.
+    m_objContact.Append(&m_objMockIRegInfoContact);
+    ON_CALL(m_objMockIRegInfoRegistration, GetContacts()).WillByDefault(Return(m_objContact));
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
+}
+
+/// RegSubscription_NotifyReceived() - ProcessNotifyState_Active() - contact address: m_strSipAddr
+TEST_F(AosSubscriptionTest,
+        ActiveAorStateWhenNotifyReceivedWithMatchedContactWithActiveStateWithoutPort)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    // contact address is without port
+    SipAddress objContactAddr = SipAddress(m_strSipAddr);
+    m_pAosSubscription->SetContactAddress(objContactAddr);
+
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_ACTIVE));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_REGISTERED));
+
+    SipAddress objSipAddress = SipAddress(m_strSipAddrWithPort);
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress));
+
+    // When the variable relate to "m_objContact" don't set here, it's not working.
+    m_objContact.Append(&m_objMockIRegInfoContact);
+    ON_CALL(m_objMockIRegInfoRegistration, GetContacts()).WillByDefault(Return(m_objContact));
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_ACTIVE);
+}
+
+/// RegSubscription_NotifyReceived() - ProcessNotifyState_Terminated()
+TEST_F(AosSubscriptionTest, TerminateStateWhenNotifyReceivedWithTerminateState)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    SipAddress objSipAddress = SipAddress(m_strSipAddrWithPort);
+    m_pAosSubscription->SetContactAddress(objSipAddress);
+
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_TERMINATED));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_SHORTENED));
+
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress));
+
+    // When the variable relate to "m_objContact" don't set here, it's not working.
+    m_objContact.Append(&m_objMockIRegInfoContact);
+    ON_CALL(m_objMockIRegInfoRegistration, GetContacts()).WillByDefault(Return(m_objContact));
+
+    m_pAosSubscription->RegSubscription_NotifyReceived(m_pAosSubscription->GetState(), 0, IMS_TRUE);
+
+    EXPECT_EQ(m_pAosSubscription->GetInvokedCount("ProcessNotifyState_Terminated"), 1);
+    EXPECT_EQ(m_pAosSubscription->GetAorState(), IRegInfoContact::STATE_TERMINATED);
 }
 
 /// RegSubscription_RefreshTimerExpired - CheckRadioReadyAndSetRadioWaiting() - IMS_TRUE
