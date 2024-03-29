@@ -93,7 +93,25 @@ using ::testing::ReturnRef;
     using Base::ProcessImsSuspended;               \
     using Base::ProcessImsResumed;                 \
     using Base::CheckSuspended;                    \
-    using Base::ResetSuspendedReason;
+    using Base::ResetSuspendedReason;              \
+    using Base::ReportRegState;                    \
+    using Base::ProcessCapabilitiesChanged;        \
+    using Base::ProcessNetworkChanged;             \
+    using Base::ProcessVopsStateChanged;           \
+    using Base::ProcessPsRoamingStateChanged;      \
+    using Base::IsSupportedNetworkType;            \
+    using Base::IsSupportedNetworkTypeForCellular; \
+    using Base::StateToString;                     \
+    using Base::MsgToString;                       \
+    using Base::RadioTypeToString;                 \
+    using Base::ServiceTypeToString;               \
+    using Base::ReevaluateUnavailableFeature;      \
+    using Base::Is3G;                              \
+    using Base::IsEmergencyService;                \
+    using Base::IsRoaming;                         \
+    using Base::StateConnecting;                   \
+    using Base::StateConnected;                    \
+    using Base::StateDisconnecting;
 
 class TestAosHandle : public AosHandle
 {
@@ -393,49 +411,6 @@ protected:
         m_pAosHandle->m_nSuspendedReason = nReason;
     }
 
-    void ReportRegState() { m_pAosHandle->ReportRegState(); }
-
-    void ProcessCapabilitiesChanged(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
-    {
-        m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
-    }
-
-    void ProcessNetworkChanged() { m_pAosHandle->ProcessNetworkChanged(); }
-
-    void ProcessVopsStateChanged(IN IMS_UINT32 nState)
-    {
-        m_pAosHandle->ProcessVopsStateChanged(nState);
-    }
-
-    void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState)
-    {
-        m_pAosHandle->ProcessPsRoamingStateChanged(nState);
-    }
-
-    IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const
-    {
-        return m_pAosHandle->IsSupportedNetworkType(nType);
-    }
-
-    IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
-    {
-        return m_pAosHandle->IsSupportedNetworkTypeForCellular(nType);
-    }
-
-    const IMS_CHAR* StateToString(IN IMS_UINT32 nState)
-    {
-        return m_pAosHandle->StateToString(nState);
-    }
-
-    const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg) { return m_pAosHandle->MsgToString(nMsg); }
-
-    const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nType)
-    {
-        return m_pAosHandle->RadioTypeToString(nType);
-    }
-
-    const IMS_CHAR* ServiceTypeToString() { return m_pAosHandle->ServiceTypeToString(); }
-
     void SetServiceType(IN IMS_UINT32 nType) { m_pAosHandle->m_nServiceType = nType; }
 
     void SetDataConnected(IN IMS_BOOL bConnected) { m_pAosHandle->m_bDataConnected = bConnected; }
@@ -452,22 +427,7 @@ protected:
         m_pAosHandle->m_objCapabilities = objNewCapabilities;
     }
 
-    void ReevaluateUnavailableFeature() { m_pAosHandle->ReevaluateUnavailableFeature(); }
-
-    IMS_BOOL Is3G(IN IMS_UINT32 nNetworkType) { return m_pAosHandle->Is3G(nNetworkType); }
-
-    IMS_BOOL IsEmergencyService() { return m_pAosHandle->IsEmergencyService(); }
-
-    IMS_BOOL IsRoaming() { return m_pAosHandle->IsRoaming(); }
-
     void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
-
-    IMS_BOOL StateConnecting(IN IMSMSG& objMSG) { return m_pAosHandle->StateConnecting(objMSG); }
-    IMS_BOOL StateConnected(IN IMSMSG& objMSG) { return m_pAosHandle->StateConnected(objMSG); }
-    IMS_BOOL StateDisconnecting(IN IMSMSG& objMSG)
-    {
-        return m_pAosHandle->StateDisconnecting(objMSG);
-    }
 
     IMS_BOOL IsCsVoiceAvailable() { return m_pAosHandle->m_bCsVoiceAvailable; }
 };
@@ -1692,7 +1652,7 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
     ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
     ASSERT_TRUE(pTestAosHandleEmergencyMts != nullptr);
 
-    EXPECT_FALSE(IsEmergencyService());
+    EXPECT_FALSE(m_pAosHandle->IsEmergencyService());
     EXPECT_TRUE(pTestAosHandleEmergencyMtc->AosHandle::IsEmergencyService());
     EXPECT_TRUE(pTestAosHandleEmergencyMts->AosHandle::IsEmergencyService());
 
@@ -1705,10 +1665,10 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
 TEST_F(AosHandleTest, IsRoaming_Test)
 {
     SetRoamingState(IMS_ROAMING_STATE_OFF);
-    EXPECT_EQ(IsRoaming(), IMS_ROAMING_STATE_OFF);
+    EXPECT_EQ(m_pAosHandle->IsRoaming(), IMS_ROAMING_STATE_OFF);
 
     SetRoamingState(IMS_ROAMING_STATE_ON);
-    EXPECT_EQ(IsRoaming(), IMS_ROAMING_STATE_ON);
+    EXPECT_EQ(m_pAosHandle->IsRoaming(), IMS_ROAMING_STATE_ON);
 }
 
 TEST_F(AosHandleTest, GetNetworkType_Test)
@@ -3738,7 +3698,7 @@ TEST_F(AosHandleTest, StateConnecting_Test7)
     SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
-    EXPECT_TRUE(StateConnecting(objMSG));
+    EXPECT_TRUE(m_pAosHandle->StateConnecting(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -3911,7 +3871,7 @@ TEST_F(AosHandleTest, StateConnected_Test10)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
-    EXPECT_TRUE(StateConnected(objMSG));
+    EXPECT_TRUE(m_pAosHandle->StateConnected(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -4120,7 +4080,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test13)
     SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_APP_INVALID*/, 0, 0);
-    EXPECT_TRUE(StateDisconnecting(objMSG));
+    EXPECT_TRUE(m_pAosHandle->StateDisconnecting(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -4441,7 +4401,7 @@ TEST_F(AosHandleTest, ReportRegState_Test1)
 
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, _)).Times(0);
 
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 }
 
 TEST_F(AosHandleTest, ReportRegState_Test2)
@@ -4455,7 +4415,7 @@ TEST_F(AosHandleTest, ReportRegState_Test2)
 
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, IMS_REG_ON)).Times(1);
 
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 }
 
 TEST_F(AosHandleTest, ReportRegState_Test3)
@@ -4466,13 +4426,13 @@ TEST_F(AosHandleTest, ReportRegState_Test3)
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, IMS_REG_OFF)).Times(3);
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 }
 
 TEST_F(AosHandleTest, ReportRegState_Test4)
@@ -4485,7 +4445,7 @@ TEST_F(AosHandleTest, ReportRegState_Test4)
 
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, _)).Times(0);
 
-    ReportRegState();
+    m_pAosHandle->ReportRegState();
 }
 
 TEST_F(AosHandleTest, NConfiguration_NotifyConfigChanged_Test1)
@@ -4554,55 +4514,55 @@ TEST_F(AosHandleTest, CallTracker_StateChanged_Test)
 
 TEST_F(AosHandleTest, ReevaluateUnavailableFeature_Test)
 {
-    ReevaluateUnavailableFeature();
+    m_pAosHandle->ReevaluateUnavailableFeature();
 }
 
 TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)
 {
-    ProcessCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
+    m_pAosHandle->ProcessCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
 {
-    ProcessNetworkChanged();
+    m_pAosHandle->ProcessNetworkChanged();
 }
 
 TEST_F(AosHandleTest, ProcessVopsStateChanged_Test)
 {
-    ProcessVopsStateChanged(0);
+    m_pAosHandle->ProcessVopsStateChanged(0);
 }
 
 TEST_F(AosHandleTest, ProcessPsRoamingStateChanged_Test)
 {
-    ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_OFF);
-    EXPECT_FALSE(IsRoaming());
+    m_pAosHandle->ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_OFF);
+    EXPECT_FALSE(m_pAosHandle->IsRoaming());
 
-    ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_ON);
-    EXPECT_TRUE(IsRoaming());
+    m_pAosHandle->ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_ON);
+    EXPECT_TRUE(m_pAosHandle->IsRoaming());
 }
 
 TEST_F(AosHandleTest, IsSupportedNetworkType_Test)
 {
-    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(IsSupportedNetworkType(NW_REPORT_RADIO_CDMA));
+    EXPECT_TRUE(m_pAosHandle->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosHandle->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(m_pAosHandle->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosHandle->IsSupportedNetworkType(NW_REPORT_RADIO_CDMA));
 }
 
 TEST_F(AosHandleTest, IsSupportedNetworkTypeForCellular_Test)
 {
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
+    EXPECT_TRUE(m_pAosHandle->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosHandle->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+    EXPECT_FALSE(m_pAosHandle->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosHandle->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_CDMA));
 }
 
 TEST_F(AosHandleTest, Is3G_Test)
 {
-    EXPECT_TRUE(Is3G(NW_REPORT_RADIO_WCDMA));
-    EXPECT_TRUE(Is3G(NW_REPORT_RADIO_HSPA));
-    EXPECT_FALSE(Is3G(NW_REPORT_RADIO_GSM));
-    EXPECT_FALSE(Is3G(NW_REPORT_RADIO_EDGE));
+    EXPECT_TRUE(m_pAosHandle->Is3G(NW_REPORT_RADIO_WCDMA));
+    EXPECT_TRUE(m_pAosHandle->Is3G(NW_REPORT_RADIO_HSPA));
+    EXPECT_FALSE(m_pAosHandle->Is3G(NW_REPORT_RADIO_GSM));
+    EXPECT_FALSE(m_pAosHandle->Is3G(NW_REPORT_RADIO_EDGE));
 }
 
 TEST_F(AosHandleTest, Event_NotifyEvent_Test)
@@ -4654,50 +4614,51 @@ TEST_F(AosHandleTest, ServiceSetting_RoamingPreferredVoiceNetworkChanged_Test)
 
 TEST_F(AosHandleTest, StateToString_Test)
 {
-    EXPECT_STREQ(StateToString(0 /*STATE_DISCONNECTED*/), "STATE_DISCONNECTED");
-    EXPECT_STREQ(StateToString(1 /*STATE_CONNECTING*/), "STATE_CONNECTING");
-    EXPECT_STREQ(StateToString(2 /*STATE_CONNECTED*/), "STATE_CONNECTED");
-    EXPECT_STREQ(StateToString(3 /*STATE_DISCONNECTING*/), "STATE_DISCONNECTING");
-    EXPECT_STREQ(StateToString(4 /*invalid*/), "__INVALID__");
+    EXPECT_STREQ(m_pAosHandle->StateToString(0 /*STATE_DISCONNECTED*/), "STATE_DISCONNECTED");
+    EXPECT_STREQ(m_pAosHandle->StateToString(1 /*STATE_CONNECTING*/), "STATE_CONNECTING");
+    EXPECT_STREQ(m_pAosHandle->StateToString(2 /*STATE_CONNECTED*/), "STATE_CONNECTED");
+    EXPECT_STREQ(m_pAosHandle->StateToString(3 /*STATE_DISCONNECTING*/), "STATE_DISCONNECTING");
+    EXPECT_STREQ(m_pAosHandle->StateToString(4 /*invalid*/), "__INVALID__");
 }
 
 TEST_F(AosHandleTest, MsgToString_Test)
 {
-    EXPECT_STREQ(MsgToString(0 /*HANDLE_MSG_BLOCK_STATUS*/), "HANDLE_MSG_BLOCK_STATUS");
-    EXPECT_STREQ(MsgToString(1 /*HANDLE_MSG_APP_STATUS*/), "HANDLE_MSG_APP_STATUS");
-    EXPECT_STREQ(MsgToString(2 /*HANDLE_MSG_INVALID*/), "__INVALID__");
+    EXPECT_STREQ(
+            m_pAosHandle->MsgToString(0 /*HANDLE_MSG_BLOCK_STATUS*/), "HANDLE_MSG_BLOCK_STATUS");
+    EXPECT_STREQ(m_pAosHandle->MsgToString(1 /*HANDLE_MSG_APP_STATUS*/), "HANDLE_MSG_APP_STATUS");
+    EXPECT_STREQ(m_pAosHandle->MsgToString(2 /*HANDLE_MSG_INVALID*/), "__INVALID__");
 }
 
 TEST_F(AosHandleTest, RadioTypeToString_Test)
 {
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_WLAN), "WLAN");
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_LTE), "LTE");
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_NR), "NR");
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_WCDMA), "3G");
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_HSPA), "3G");
-    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_CDMA), "__INVALID__");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_WLAN), "WLAN");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_LTE), "LTE");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_NR), "NR");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_WCDMA), "3G");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_HSPA), "3G");
+    EXPECT_STREQ(m_pAosHandle->RadioTypeToString(NW_REPORT_RADIO_CDMA), "__INVALID__");
 }
 
 TEST_F(AosHandleTest, ServiceTypeToString_Test)
 {
     SetServiceType(ImsAosService::MTC);
-    EXPECT_STREQ(ServiceTypeToString(), "mtc");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "mtc");
 
     SetServiceType(ImsAosService::MTS);
-    EXPECT_STREQ(ServiceTypeToString(), "mts");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "mts");
 
     SetServiceType(ImsAosService::EMERGENCY_MTC);
-    EXPECT_STREQ(ServiceTypeToString(), "mtc");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "mtc");
 
     SetServiceType(ImsAosService::EMERGENCY_MTS);
-    EXPECT_STREQ(ServiceTypeToString(), "mts");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "mts");
 
     SetServiceType(ImsAosService::UCE);
-    EXPECT_STREQ(ServiceTypeToString(), "uce");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "uce");
 
     SetServiceType(ImsAosService::SIP_CONTROLLER);
-    EXPECT_STREQ(ServiceTypeToString(), "sip_controller");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "sip_controller");
 
     SetServiceType(ImsAosService::NONE);
-    EXPECT_STREQ(ServiceTypeToString(), "invalid");
+    EXPECT_STREQ(m_pAosHandle->ServiceTypeToString(), "invalid");
 }
