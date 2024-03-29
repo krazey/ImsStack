@@ -39,6 +39,7 @@ public:
         EVENT_CONNECTION_FAILED = 1,
         EVENT_CONNECTION_SETUP_PREPARED = 2,
         EVENT_SSAC_STATE_CHANGED = 3,
+        EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED = 4,
     };
 
     IMS_UINT32 m_nEvent;
@@ -93,6 +94,19 @@ public:
     IMS_SINT32 m_nBarringTimeSecForVoice;
     IMS_SINT32 m_nBarringFactorForVideo;
     IMS_SINT32 m_nBarringTimeSecForVideo;
+};
+
+class ScsInfoParam : public OsImsRadioParam
+{
+public:
+    inline ScsInfoParam() :
+            OsImsRadioParam(EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED),
+            m_bIsSupported(IMS_FALSE)
+    {
+    }
+    inline virtual ~ScsInfoParam() {}
+
+    IMS_BOOL m_bIsSupported;
 };
 
 LOCAL
@@ -414,6 +428,13 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
                     pParam->m_nBarringTimeSecForVoice, pParam->m_nBarringFactorForVideo,
                     pParam->m_nBarringTimeSecForVideo);
         }
+        else if (pImsRadioParam->m_nEvent ==
+                OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED)
+        {
+            ScsInfoParam* pParam = reinterpret_cast<ScsInfoParam*>(pImsRadioParam);
+
+            NotifySimultaneousCallingSupportChanged(pParam->m_bIsSupported);
+        }
 
         delete pImsRadioParam;
     }
@@ -477,6 +498,14 @@ PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
             pParam->m_nBarringTimeSecForVoice = pParcel->readInt32();
             pParam->m_nBarringFactorForVideo = pParcel->readInt32();
             pParam->m_nBarringTimeSecForVideo = pParcel->readInt32();
+
+            osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+            break;
+        }
+        case OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED:
+        {
+            ScsInfoParam* pParam = new ScsInfoParam();
+            pParam->m_bIsSupported = (pParcel->readInt32() > 0) ? IMS_TRUE : IMS_FALSE;
 
             osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
@@ -564,6 +593,16 @@ PRIVATE void OsImsRadio::NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice,
         }
 
         pTmpListener->ImsRadio_OnSsacChanged(m_objSsacInfo);
+    }
+}
+
+PRIVATE void OsImsRadio::NotifySimultaneousCallingSupportChanged(IN IMS_BOOL bSupported)
+{
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->SetSimultaneousCallingSupported(GetSlotId(), bSupported);
     }
 }
 

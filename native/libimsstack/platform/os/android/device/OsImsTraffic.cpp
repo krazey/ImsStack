@@ -72,6 +72,11 @@ PUBLIC VIRTUAL void OsImsTraffic::Disable(IN IMS_SINT32 nSlotId)
 
 PUBLIC VIRTUAL IMS_BOOL OsImsTraffic::IsAllowed(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTrafficType)
 {
+    if (IsSimultaneousCallingSupported(nSlotId))
+    {
+        return IMS_TRUE;
+    }
+
     IMS_UINT32 nPriorityType = GetPriorityType(nTrafficType);
 
     if (nPriorityType == TRAFFIC_PRIORITY_EMERGENCY ||
@@ -204,6 +209,33 @@ PUBLIC VIRTUAL void OsImsTraffic::Stop(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTra
                     nHighPriorityType, nSlotId);
         }
 
+        PostMessage();
+    }
+}
+
+PUBLIC VIRTUAL void OsImsTraffic::SetSimultaneousCallingSupported(
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bSupported)
+{
+    LockGuard objLock(m_piLock);
+    Traffic* pTraffic = GetTraffic(nSlotId);
+
+    if (pTraffic == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pTraffic->IsSimultaneousCallingSupported() == bSupported)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("SetSimultaneousCallingSupported :: [%d] simultaneous calling support (%s)",
+            nSlotId, _TRACE_B_(bSupported), 0);
+
+    pTraffic->SetSimultaneousCallingSupported(bSupported);
+
+    if (bSupported)
+    {
         PostMessage();
     }
 }
@@ -473,6 +505,19 @@ PRIVATE IMS_BOOL OsImsTraffic::IsIdle() const
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE IMS_BOOL OsImsTraffic::IsSimultaneousCallingSupported(IN IMS_SINT32 nSlotId) const
+{
+    LockGuard objLock(m_piLock);
+    Traffic* pTraffic = GetTraffic(nSlotId);
+
+    if (pTraffic == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return pTraffic->IsSimultaneousCallingSupported();
 }
 
 PRIVATE IMS_BOOL OsImsTraffic::IsWlan(IN IMS_SINT32 nSlotId) const
