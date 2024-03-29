@@ -79,7 +79,21 @@ using ::testing::ReturnRef;
     using Base::ReevaluateBlocks;                  \
     using Base::UpdateIpcan;                       \
     using Base::PreProcessBlock;                   \
-    using Base::ProcessBlock;
+    using Base::ProcessBlock;                      \
+    using Base::ProcessFeatureBlock;               \
+    using Base::ProcessCheckBlock;                 \
+    using Base::ProcessUnavailableFeature;         \
+    using Base::ProcessUnavailableFeatureChanged;  \
+    using Base::BackupAllBlocks;                   \
+    using Base::HoldBlockForInvalidNetwork;        \
+    using Base::IsBlockForMobile;                  \
+    using Base::IsBlockForWifi;                    \
+    using Base::InitializeHoldingBlocksPolicy;     \
+    using Base::InitializeFeatureTags;             \
+    using Base::ProcessImsSuspended;               \
+    using Base::ProcessImsResumed;                 \
+    using Base::CheckSuspended;                    \
+    using Base::ResetSuspendedReason;
 
 class TestAosHandle : public AosHandle
 {
@@ -326,22 +340,7 @@ protected:
         m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Clear();
     }
 
-    void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
-    {
-        m_pAosHandle->ProcessFeatureBlock(nFeature, bBlocked);
-    }
-
-    IMS_BOOL ProcessCheckBlock(IN IMS_BOOL bRunStateMachine)
-    {
-        return m_pAosHandle->ProcessCheckBlock(bRunStateMachine);
-    }
-
     void SetBlocked(IMS_BOOL bBlocked) { m_pAosHandle->m_bBlocked = bBlocked; }
-
-    void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd)
-    {
-        m_pAosHandle->ProcessUnavailableFeature(nFeature, bAdd);
-    }
 
     IMS_UINT32 GetUnavailableFeatures()
     {
@@ -352,10 +351,6 @@ protected:
     {
         return m_pAosHandle->m_objBindedFeatureTagList.GetUnavailableFeatures();
     }
-
-    void ProcessUnavailableFeatureChanged() { m_pAosHandle->ProcessUnavailableFeatureChanged(); }
-
-    void BackupAllBlocks() { m_pAosHandle->BackupAllBlocks(); }
 
     void BackupBlocksForMobile()
     {
@@ -381,26 +376,7 @@ protected:
                 m_pAosHandle->m_nHoldingBlocksForWifi);
     }
 
-    IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
-    {
-        return m_pAosHandle->HoldBlockForInvalidNetwork(nBlock, bAdded);
-    }
-
-    IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const
-    {
-        return m_pAosHandle->IsBlockForMobile(nBlock);
-    }
-
-    IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const
-    {
-        return m_pAosHandle->IsBlockForWifi(nBlock);
-    }
-
     IMS_BOOL IsBlocked() const { return m_pAosHandle->m_bBlocked; }
-
-    void InitializeHoldingBlocksPolicy() { m_pAosHandle->InitializeHoldingBlocksPolicy(); }
-
-    void InitializeFeatureTags() { m_pAosHandle->InitializeFeatureTags(); }
 
     IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const
     {
@@ -412,26 +388,9 @@ protected:
         return m_pAosHandle->m_objFeatureTagList.AddFeatureTag(strName);
     }
 
-    IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason)
-    {
-        return m_pAosHandle->ProcessImsSuspended(nReason);
-    }
-
-    IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason)
-    {
-        return m_pAosHandle->ProcessImsResumed(nReason);
-    }
-
     void SetSuspendedReasonForTest(IN IMS_UINT32 nReason)
     {
         m_pAosHandle->m_nSuspendedReason = nReason;
-    }
-
-    void CheckSuspended() { m_pAosHandle->CheckSuspended(); }
-
-    void ResetSuspendedReason(IN IMS_UINT32 nReason)
-    {
-        m_pAosHandle->ResetSuspendedReason(nReason);
     }
 
     void ReportRegState() { m_pAosHandle->ReportRegState(); }
@@ -1390,8 +1349,8 @@ TEST_F(AosHandleTest, Init_CleanUp)
 
     EXPECT_TRUE(GetAosInfo() != nullptr);
     EXPECT_TRUE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_3G));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_3G));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_3G));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_3G));
 
     m_pAosHandle->CleanUp();
 }
@@ -1812,7 +1771,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test1)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_FALSE));
 
-    BackupAllBlocks();
+    m_pAosHandle->BackupAllBlocks();
 
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
@@ -1851,7 +1810,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
 
-    BackupAllBlocks();
+    m_pAosHandle->BackupAllBlocks();
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
@@ -1890,7 +1849,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
 
-    BackupAllBlocks();
+    m_pAosHandle->BackupAllBlocks();
 
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
@@ -1929,7 +1888,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
 
-    BackupAllBlocks();
+    m_pAosHandle->BackupAllBlocks();
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
@@ -2006,10 +1965,11 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test1)
 
     AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_TRUE));
+    EXPECT_FALSE(m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_TRUE));
     EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE));
+    EXPECT_FALSE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE));
     EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
@@ -2028,10 +1988,11 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test2)
     AddHoldingBlockForMobile(AosHandle::BLOCK_VOPS);
     m_pAosHandle->AddBlock(AosHandle::BLOCK_VOPS, m_pAosHandle->m_nBlocks);
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_FALSE));
+    EXPECT_FALSE(m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_FALSE));
     EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
 
-    EXPECT_TRUE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE));
+    EXPECT_TRUE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE));
     EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
@@ -2047,7 +2008,8 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
     EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }
 
@@ -2068,7 +2030,8 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
     EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }
 
@@ -2093,10 +2056,12 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test5)
     AddHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY);
     m_pAosHandle->AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, m_pAosHandle->m_nBlocks);
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE));
+    EXPECT_FALSE(m_pAosHandle->HoldBlockForInvalidNetwork(
+            AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE));
     EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
-    EXPECT_TRUE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_TRUE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE));
     EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
 }
 
@@ -2107,8 +2072,10 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test6)
 
     SetHoldingBlocksPolicyForTest();
 
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE));
-    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE));
+    EXPECT_FALSE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(
+            m_pAosHandle->HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE));
 }
 
 TEST_F(AosHandleTest, ReevaluateBlocks_Test1)
@@ -3375,10 +3342,10 @@ TEST_F(AosHandleTest, ProcessFeatureBlock_Test)
 
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
 
-    ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_FALSE);
+    m_pAosHandle->ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_FALSE);
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::MMTEL);
 
-    ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_TRUE);
+    m_pAosHandle->ProcessFeatureBlock(ImsAosFeature::MMTEL, IMS_TRUE);
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
 
     ClearFeatureTagList();
@@ -3392,7 +3359,7 @@ TEST_F(AosHandleTest, ProcessCheckBlock_Test1)
     m_pAosHandle->AddBlock(AosHandle::BLOCK_VOPS, m_pAosHandle->m_nBlocks);
     SetBlocked(IMS_TRUE);
 
-    EXPECT_FALSE(ProcessCheckBlock(IMS_TRUE));
+    EXPECT_FALSE(m_pAosHandle->ProcessCheckBlock(IMS_TRUE));
 }
 
 TEST_F(AosHandleTest, ProcessCheckBlock_Test2)
@@ -3407,7 +3374,7 @@ TEST_F(AosHandleTest, ProcessCheckBlock_Test2)
     AddFeature(ImsAosFeature::MMTEL);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
-    EXPECT_TRUE(ProcessCheckBlock(IMS_TRUE));
+    EXPECT_TRUE(m_pAosHandle->ProcessCheckBlock(IMS_TRUE));
 
     ClearFeatureTagList();
 }
@@ -3422,7 +3389,7 @@ TEST_F(AosHandleTest, ProcessCheckBlock_Test3)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
-    EXPECT_TRUE(ProcessCheckBlock(IMS_TRUE));
+    EXPECT_TRUE(m_pAosHandle->ProcessCheckBlock(IMS_TRUE));
     EXPECT_EQ(m_pAosHandle->GetState(), AosHandle::STATE_DISCONNECTING);
 
     ClearBlocks();
@@ -3439,7 +3406,7 @@ TEST_F(AosHandleTest, ProcessCheckBlock_Test4)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
-    EXPECT_TRUE(ProcessCheckBlock(IMS_TRUE));
+    EXPECT_TRUE(m_pAosHandle->ProcessCheckBlock(IMS_TRUE));
     EXPECT_EQ(m_pAosHandle->GetState(), AosHandle::STATE_CONNECTING);
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
@@ -3453,11 +3420,11 @@ TEST_F(AosHandleTest, ProcessUnavailableFeature_Test)
 
     EXPECT_EQ(GetUnavailableFeatures(), ImsAosFeature::NONE);
 
-    ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_TRUE);
+    m_pAosHandle->ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_TRUE);
     EXPECT_EQ(GetUnavailableFeatures(), ImsAosFeature::MMTEL);
     EXPECT_EQ(GetBindedUnavailableFeatures(), ImsAosFeature::MMTEL);
 
-    ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_FALSE);
+    m_pAosHandle->ProcessUnavailableFeature(ImsAosFeature::MMTEL, IMS_FALSE);
     EXPECT_EQ(GetUnavailableFeatures(), ImsAosFeature::NONE);
     EXPECT_EQ(GetBindedUnavailableFeatures(), ImsAosFeature::NONE);
 }
@@ -3479,7 +3446,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test1)
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
-    ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessUnavailableFeatureChanged();
 }
 
 TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
@@ -3501,7 +3468,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
             .Times(1);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
 
-    ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessUnavailableFeatureChanged();
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
 }
@@ -3531,7 +3498,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
 
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(1);
 
-    ProcessUnavailableFeatureChanged();
+    m_pAosHandle->ProcessUnavailableFeatureChanged();
 
     m_pAosHandle->SetListener(IMS_NULL);
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
@@ -3544,15 +3511,15 @@ TEST_F(AosHandleTest, IsBlockForMobile_Test)
     ClearHoldingBlocksPolicyForWifi();
     SetHoldingBlocksPolicyForWifi();
 
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_VOPS));
 
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_SMS_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_SMS_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForMobile(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
 
     ClearHoldingBlocksPolicyForWifi();
 }
@@ -3564,15 +3531,15 @@ TEST_F(AosHandleTest, IsBlockForWifi_Test)
     ClearHoldingBlocksPolicyForMobile();
     SetHoldingBlocksPolicyForMobile();
 
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_VOPS));
 
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_SMS_CAPABILITY));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_SMS_CAPABILITY));
+    EXPECT_TRUE(m_pAosHandle->IsBlockForWifi(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
 
     ClearHoldingBlocksPolicyForMobile();
 }
@@ -4183,7 +4150,7 @@ TEST_F(AosHandleTest, InitializeHoldingBlocksPolicy_Test1)
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
 
-    InitializeHoldingBlocksPolicy();
+    m_pAosHandle->InitializeHoldingBlocksPolicy();
 
     EXPECT_FALSE(GetHoldingBlocksPolicyForMobile().GetSize() > 0);
     EXPECT_FALSE(GetHoldingBlocksPolicyForWifi().GetSize() > 0);
@@ -4204,7 +4171,7 @@ TEST_F(AosHandleTest, InitializeHoldingBlocksPolicy_Test2)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
-    InitializeHoldingBlocksPolicy();
+    m_pAosHandle->InitializeHoldingBlocksPolicy();
 
     ASSERT_TRUE(GetHoldingBlocksPolicyForMobile().GetSize() == 1);
     EXPECT_EQ(GetHoldingBlocksPolicyForMobile().GetAt(0), AosHandle::BLOCK_3G);
@@ -4220,10 +4187,10 @@ TEST_F(AosHandleTest, InitializeFeatureTags_Test)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    InitializeFeatureTags();
+    m_pAosHandle->InitializeFeatureTags();
     EXPECT_TRUE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
 
-    InitializeFeatureTags();
+    m_pAosHandle->InitializeFeatureTags();
     EXPECT_FALSE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
 }
 
@@ -4234,7 +4201,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test1)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
     m_pAosHandle->ClearSuspendedReason();
-    EXPECT_FALSE(ProcessImsSuspended(0));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsSuspended(0));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
@@ -4248,7 +4215,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test2)
     m_pAosHandle->SetListener(piListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(1);
 
-    EXPECT_TRUE(ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_TRUE(m_pAosHandle->ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
 }
 
 TEST_F(AosHandleTest, ProcessImsSuspended_Test3)
@@ -4261,7 +4228,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test3)
     m_pAosHandle->SetListener(IMS_NULL);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(0);
 
-    EXPECT_FALSE(ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 }
 
@@ -4305,7 +4272,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test1)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
-    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 }
 
@@ -4317,7 +4284,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test2)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->ClearSuspendedReason();
 
-    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
 }
 
 TEST_F(AosHandleTest, ProcessImsResumed_Test3)
@@ -4329,7 +4296,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test3)
     m_pAosHandle->ClearSuspendedReason();
     SetSuspendedReasonForTest((AosReason::SUSPEND_NO_SERVICE | AosReason::SUSPEND_NO_LTE_COVERAGE));
 
-    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 }
 
@@ -4344,7 +4311,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test4)
     m_pAosHandle->SetListener(IMS_NULL);
     m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 
-    EXPECT_FALSE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_FALSE(m_pAosHandle->ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
     EXPECT_EQ(GetReason(), AosReason::SUSPEND_NO_SERVICE);
 }
@@ -4362,7 +4329,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
     m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Resumed()).Times(1);
-    EXPECT_TRUE(ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
+    EXPECT_TRUE(m_pAosHandle->ProcessImsResumed(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
     EXPECT_EQ(GetReason(), AosReason::SUSPEND_NO_SERVICE);
 
@@ -4414,7 +4381,7 @@ TEST_F(AosHandleTest, CheckSuspended_Test1)
 
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_TRUE));
 
-    CheckSuspended();
+    m_pAosHandle->CheckSuspended();
 
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
     EXPECT_FALSE(GetNetSrvIn());
@@ -4429,7 +4396,7 @@ TEST_F(AosHandleTest, CheckSuspended_Test2)
 
     EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_FALSE));
 
-    CheckSuspended();
+    m_pAosHandle->CheckSuspended();
 
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
     EXPECT_TRUE(GetNetSrvIn());
@@ -4444,7 +4411,7 @@ TEST_F(AosHandleTest, ResetSuspendedReason_Test1)
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
-    ResetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
+    m_pAosHandle->ResetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
 
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
@@ -4458,7 +4425,7 @@ TEST_F(AosHandleTest, ResetSuspendedReason_Test2)
     SetSuspendedReasonForTest(AosReason::SUSPEND_NO_LTE_COVERAGE);
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
-    ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
+    m_pAosHandle->ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
 
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_LTE_COVERAGE);
 
