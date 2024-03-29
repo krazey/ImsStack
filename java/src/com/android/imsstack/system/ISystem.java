@@ -213,4 +213,12 @@ public interface ISystem {
      */
     void notifySsacInfo(int event, int voiceFactor, int voiceTimeSec, int videoFactor,
             int videoTimeSec);
+
+    /**
+     * Notifies modem's simultaneous calling support information.
+     *
+     * @param event The current event.
+     * @param isSupported The information whether modem supports simultaneous calling.
+     */
+    void notifySimultaneousCallingSupportChanged(int event, boolean isSupported);
 }

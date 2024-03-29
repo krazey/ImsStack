@@ -75,6 +75,13 @@ public class ImsTrafficAgentTest {
 
     @Test
     @SmallTest
+    public void testTrafficIsAllowedIfSimultaneousCallingIsSupported() {
+        mImsTrafficAgent.setSimultaneousCallingSupported(true, SLOT0);
+        assertTrue(mImsTrafficAgent.isAllowed(ImsRadioInterface.TRAFFIC_TYPE_REGISTRATION, SLOT0));
+    }
+
+    @Test
+    @SmallTest
     public void testIsAllowed() {
         assertTrue(mImsTrafficAgent.isAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP, SLOT0));
     }

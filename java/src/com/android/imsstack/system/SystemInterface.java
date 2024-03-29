@@ -1027,6 +1027,22 @@ public class SystemInterface implements JniSystemListener {
         }
 
         @Override
+        public void notifySimultaneousCallingSupportChanged(int event, boolean supported) {
+            mExecutor.execute(() -> {
+                Parcel parcel = Parcel.obtain();
+                try {
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(supported ? 1 : 0);
+                    sendSystemEvent(parcel);
+                } finally {
+                    parcel.recycle();
+                }
+            });
+        }
+
+        @Override
         public void onAdvancedCallingSettingChanged() {
             notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
                     mMmTelFeatureRegistry.isAdvancedCallingSettingEnabled()
