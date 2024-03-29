@@ -78,7 +78,8 @@ using ::testing::ReturnRef;
     using Base::GetAosFeature;                     \
     using Base::ReevaluateBlocks;                  \
     using Base::UpdateIpcan;                       \
-    using Base::PreProcessBlock;
+    using Base::PreProcessBlock;                   \
+    using Base::ProcessBlock;
 
 class TestAosHandle : public AosHandle
 {
@@ -323,11 +324,6 @@ protected:
     void ClearHoldingBlocksPolicyForWifi()
     {
         m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Clear();
-    }
-
-    void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess)
-    {
-        m_pAosHandle->ProcessBlock(nBlock, bAdded, bPreProcess);
     }
 
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
@@ -2520,9 +2516,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test1)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Set
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_FALSE);
 
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
@@ -2530,40 +2526,42 @@ TEST_F(AosHandleTest, ProcessBlock_Test1)
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(),
             (ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_FALSE);
 
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::SMSIP);
 
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_FALSE);
 
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_SMS_CAPABILITY));
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
 
     // Reset
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_FALSE);
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(), ImsAosFeature::MMTEL);
 
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_FALSE);
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(),
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO));
 
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_FALSE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_FALSE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_FALSE);
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_SMS_CAPABILITY));
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
@@ -2604,13 +2602,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test2)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -2670,13 +2668,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test3)
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -2739,13 +2738,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test4)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -2811,13 +2810,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test5)
             .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -2882,13 +2882,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test6)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -2954,13 +2954,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test7)
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3014,13 +3015,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test8)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3076,13 +3077,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test9)
             .WillRepeatedly(Return(IMS_FALSE));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3138,13 +3140,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test10)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_TRUE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3201,13 +3203,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test11)
             .WillRepeatedly(Return(IMS_TRUE));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3263,13 +3266,13 @@ TEST_F(AosHandleTest, ProcessBlock_Test12)
             (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::SMSIP));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
@@ -3326,13 +3329,14 @@ TEST_F(AosHandleTest, ProcessBlock_Test13)
             .WillRepeatedly(Return(IMS_TRUE));
 
     // Execution
-    ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
-    ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOLTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOPS, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(
+            AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
+    m_pAosHandle->ProcessBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE, IMS_TRUE);
 
     // Checking result
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
