@@ -33,6 +33,8 @@
 #include "provider/AosStaticProfile.h"
 
 #include "../../../platform/interface/MockIPhoneInfoLocation.h"
+#include "../../interface/aos/MockIAosService.h"
+
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
 #include "interface/MockIAosConditionListener.h"
@@ -43,6 +45,7 @@
 #include "interface/MockIAosSubscriber.h"
 
 using ::testing::_;
+using ::testing::An;
 using ::testing::AnyNumber;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -53,6 +56,8 @@ const IMS_SINT32 SLOT_ID = 0;
 const AString PROFILE_ID = AString("test");
 
 #define DECLARE_USING(Base)                           \
+    using Base::AddAosServiceListener;                \
+    using Base::RemoveAosServiceListener;             \
     using Base::Event_NotifyEvent;                    \
     using Base::CallTracker_StateChanged;             \
     using Base::NetTracker_StatusChanged;             \
@@ -156,8 +161,11 @@ public:
     TestAosCondition* m_pAosCondition;
 
     AosBlock* m_pAosBlock;
-    IAosNConfiguration* m_piOriginConfiguration;
+    IAosNConfiguration* m_piAosNConfiguration;
+    IAosService* m_piAosService;
+
     NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosService> m_objMockIAosService;
     NiceMock<MockIAosConnection> m_objMockIAosConnection;
     NiceMock<MockIAosNetTracker> m_objMockIAosNetTracker;
     NiceMock<MockIAosSubscriber> m_objMockIAosSubscriber;
@@ -168,8 +176,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
+        ReplaceOriginWithMock();
 
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
 
@@ -197,6 +204,8 @@ protected:
 
     virtual void TearDown() override
     {
+        RestoreOriginInstance();
+
         if (m_pAosBlock)
         {
             delete m_pAosBlock;
@@ -206,8 +215,21 @@ protected:
         {
             delete m_pAosCondition;
         }
+    }
 
-        AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration);
+    void ReplaceOriginWithMock()
+    {
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        m_piAosService = AosProvider::GetInstance()->GetService();
+
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService);
+    }
+
+    void RestoreOriginInstance()
+    {
+        AosProvider::GetInstance()->SetService(m_piAosService);
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
 };
 
@@ -285,6 +307,54 @@ TEST_F(AosConditionTest, ShouldDeleteAvailableWifiWhenStop)
 
     // THEN
     EXPECT_EQ(m_pAosCondition->GetAvailableWifi(), nullptr);
+}
+
+TEST_F(AosConditionTest, SucceedsAddAosServiceListener)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>()));
+
+    // WHEN
+    m_pAosCondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosConditionTest, FailsAddAosServiceListenerWhenAosServiceIsNull)
+{
+    // GIVEN
+    AosProvider::GetInstance()->SetService(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosCondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosConditionTest, SucceedsRemoveAosServiceListener)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>()));
+
+    // WHEN
+    m_pAosCondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosConditionTest, FailsRemoveAosServiceListenerWhenAosServiceIsNull)
+{
+    // GIVEN
+    AosProvider::GetInstance()->SetService(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosCondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosConditionTest, SucceedsSetListener)

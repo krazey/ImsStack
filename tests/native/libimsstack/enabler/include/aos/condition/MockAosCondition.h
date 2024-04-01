@@ -41,8 +41,8 @@ public:
     MOCK_METHOD(void, PrintBlockReasons, (), (const, override));
     MOCK_METHOD(void, AddServiceAvailable, (), (override));
     MOCK_METHOD(void, RemoveServiceAvailable, (), (override));
-    MOCK_METHOD(IMS_BOOL, AddAosServiceListener, (), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveAosServiceListener, (), (override));
+    MOCK_METHOD(void, AddAosServiceListener, (), (override));
+    MOCK_METHOD(void, RemoveAosServiceListener, (), (override));
     MOCK_METHOD(void, AddEventListener, (), (override));
     MOCK_METHOD(void, RemoveEventListener, (), (override));
 };

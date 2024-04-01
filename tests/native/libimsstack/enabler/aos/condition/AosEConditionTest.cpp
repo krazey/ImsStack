@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "../../interface/aos/MockIAosService.h"
+
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConditionListener.h"
 
@@ -24,8 +26,10 @@
 #include "interface/IAosBlock.h"
 #include "condition/AosBlock.h"
 #include "condition/AosECondition.h"
+#include "provider/AosProvider.h"
 
 using ::testing::_;
+using ::testing::An;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnNull;
@@ -58,11 +62,16 @@ public:
     TestAosECondition* m_pAosECondition;
     AosBlock* m_pAosBlock;
 
+    IAosService* m_piAosService;
+
     NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosService> m_objMockIAosService;
 
 protected:
     virtual void SetUp() override
     {
+        ReplaceOriginWithMock();
+
         ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
         ON_CALL(m_objMockIAosAppContext, GetConnection()).WillByDefault(ReturnNull());
@@ -78,6 +87,8 @@ protected:
 
     virtual void TearDown() override
     {
+        RestoreOriginInstance();
+
         if (m_pAosBlock)
         {
             delete m_pAosBlock;
@@ -87,6 +98,15 @@ protected:
             delete m_pAosECondition;
         }
     }
+
+    void ReplaceOriginWithMock()
+    {
+        m_piAosService = AosProvider::GetInstance()->GetService();
+
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService);
+    }
+
+    void RestoreOriginInstance() { AosProvider::GetInstance()->SetService(m_piAosService); }
 };
 
 TEST_F(AosEConditionTest, ReturnsFalseWhenIsNotReady)
@@ -123,24 +143,52 @@ TEST_F(AosEConditionTest, ReturnsTrueWhenIsReady)
     EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosEConditionTest, ReturnsFalseAddAosServiceListenerWhenServiceNull)
+TEST_F(AosEConditionTest, SucceedsAddAosServiceListener)
 {
     // GIVEN
-    // WHEN
-    IMS_BOOL bResult = m_pAosECondition->AddAosServiceListener();
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>()));
 
-    // THEN
-    EXPECT_FALSE(bResult);
+    // WHEN
+    m_pAosECondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosEConditionTest, ReturnsFalseRemoveAosServiceListenerWhenServiceNull)
+TEST_F(AosEConditionTest, FailsAddAosServiceListenerWhenAosServiceIsNull)
 {
     // GIVEN
-    // WHEN
-    IMS_BOOL bResult = m_pAosECondition->RemoveAosServiceListener();
+    AosProvider::GetInstance()->SetService(IMS_NULL);
 
-    // THEN
-    EXPECT_FALSE(bResult);
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosECondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, SucceedsRemoveAosServiceListener)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>()));
+
+    // WHEN
+    m_pAosECondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, FailsRemoveAosServiceListenerWhenAosServiceIsNull)
+{
+    // GIVEN
+    AosProvider::GetInstance()->SetService(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosECondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosEConditionTest, InvokeConditionChangedWhenBlockChanged)
