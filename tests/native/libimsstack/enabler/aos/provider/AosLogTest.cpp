@@ -36,7 +36,7 @@ struct AosLogParams
 
 using AosLogTestForAppMessage = TestWithParam<AosLogParams>;
 
-TEST_P(AosLogTestForAppMessage, ReturnsValidStringForApplicationLogMessage)
+TEST_P(AosLogTestForAppMessage, ReturnsValidStringForAppMessage)
 {
     // GIVEN
     const AosLogParams& objAosLogParams = GetParam();
@@ -74,7 +74,7 @@ INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppMessage,
 
 using AosLogTestForAppPending = TestWithParam<AosLogParams>;
 
-TEST_P(AosLogTestForAppPending, ReturnsValidStringForApplicationPending)
+TEST_P(AosLogTestForAppPending, ReturnsValidStringForAppPending)
 {
     // GIVEN
     const AosLogParams& objAosLogParams = GetParam();
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppPending,
 
 using AosLogTestForAppRequest = TestWithParam<AosLogParams>;
 
-TEST_P(AosLogTestForAppRequest, ReturnsValidStringForApplicationRequest)
+TEST_P(AosLogTestForAppRequest, ReturnsValidStringForAppRequest)
 {
     // GIVEN
     const AosLogParams& objAosLogParams = GetParam();
@@ -138,23 +138,31 @@ INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppRequest,
                 {ImsAosControl::TRIGGER_FULL_NETWORK_REGISTRATION + 99, "__INVALID__"                    }
 }));
 
-TEST(AosLogTest, AppStateToString)
+using AosLogTestForAppState = TestWithParam<AosLogParams>;
+
+TEST_P(AosLogTestForAppState, ReturnsValidStringForAppState)
 {
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_NOTREADY),
-            "STATE_NOTREADY");
-    EXPECT_STREQ(
-            AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_READY), "STATE_READY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_CONNECTING),
-            "STATE_CONNECTING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_CONNECTED),
-            "STATE_CONNECTED");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_UPDATING),
-            "STATE_UPDATING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_DISCONNECTING),
-            "STATE_DISCONNECTING");
-    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(ApplicationLog::STATE_DISCONNECTING + 99),
-            "__INVALID__");
+    // GIVEN
+    const AosLogParams& objAosLogParams = GetParam();
+
+    // WHEN
+    IMS_UINT32 nValue = objAosLogParams.nValue;
+    const IMS_CHAR* pszString = objAosLogParams.pszString;
+
+    // THEN
+    EXPECT_STREQ(AosProvider::GetLog()->AppStateToString(nValue), pszString);
 }
+
+INSTANTIATE_TEST_SUITE_P(AosLogInstantiation, AosLogTestForAppState,
+        ValuesIn<AosLogParams>({
+                {ApplicationLog::STATE_NOTREADY,           "STATE_NOTREADY"     },
+                {ApplicationLog::STATE_READY,              "STATE_READY"        },
+                {ApplicationLog::STATE_CONNECTING,         "STATE_CONNECTING"   },
+                {ApplicationLog::STATE_CONNECTED,          "STATE_CONNECTED"    },
+                {ApplicationLog::STATE_UPDATING,           "STATE_UPDATING"     },
+                {ApplicationLog::STATE_DISCONNECTING,      "STATE_DISCONNECTING"},
+                {ApplicationLog::STATE_DISCONNECTING + 99, "__INVALID__"        }
+}));
 
 TEST(AosLogTest, AppTimerToString)
 {
