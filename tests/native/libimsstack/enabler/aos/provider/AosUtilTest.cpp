@@ -25,6 +25,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "msg/SipMessage.h"
+#include "msg/SipMsgUtil.h"
 #include "SipMessageBodyPart.h"
 #include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
@@ -39,6 +40,9 @@ class AosUtilTest : public ::testing::Test
 public:
     AosUtil* m_pAosUtil;
 
+    MockIRegistration m_objMockIRegistration;
+    MockISipMessage m_objMockISipMsg;
+
     enum
     {
         FEATURE_NONE = 0x0,
@@ -49,6 +53,9 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(m_objMockIRegistration, GetPreviousResponse())
+                .WillByDefault(Return(&m_objMockISipMsg));
+
         m_pAosUtil = new AosUtil();
         ASSERT_TRUE(m_pAosUtil != nullptr);
     }
@@ -62,74 +69,89 @@ protected:
     }
 };
 
-TEST_F(AosUtilTest, GetResponseCode)
+/// GetResponseCode()
+TEST_F(AosUtilTest, ReturnInvalidValueWhenSipMsgIsNullInGetResponseCode)
 {
-    EXPECT_EQ(-1, m_pAosUtil->GetResponseCode(IMS_NULL));
-
-    MockISipMessage objMockSipMsg;
-
-    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(403));
-    EXPECT_EQ(403, m_pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(200));
-    EXPECT_EQ(200, m_pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(m_pAosUtil->GetResponseCode(IMS_NULL), -1);
 }
 
-TEST_F(AosUtilTest, GetRetryAfterValue)
+TEST_F(AosUtilTest, ReturnStatusCodeWhenGetResponseCodeIsCalled)
 {
-    MockISipMessage objMockSipMsg;
-    MockIRegistration objMockIRegistration;
-    EXPECT_CALL(objMockIRegistration, GetPreviousResponse())
-            .WillOnce(ReturnNull())
-            .WillRepeatedly(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
+    // 403 return value
+    EXPECT_CALL(m_objMockISipMsg, GetStatusCode()).WillOnce(Return(403));
 
+    EXPECT_EQ(m_pAosUtil->GetResponseCode(&m_objMockISipMsg), 403);
+}
+
+/// GetRetryAfterValue()
+TEST_F(AosUtilTest, ReturnZeroValueWhenSipMsgIsNullInGetRetryAfterValue)
+{
+    ON_CALL(m_objMockIRegistration, GetPreviousResponse()).WillByDefault(ReturnNull());
+
+    EXPECT_EQ(m_pAosUtil->GetRetryAfterValue(&m_objMockIRegistration), 0);
+}
+
+TEST_F(AosUtilTest, ReturnZeroValueWhenThereIsNoRetryAfterValue)
+{
     AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
+    ON_CALL(m_objMockISipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillByDefault(Return(strHeader));
 
-    EXPECT_EQ(
-            0, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
-    EXPECT_EQ(
-            0, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
-
-    strHeader.Append("60");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-
-    EXPECT_EQ(
-            60, m_pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+    EXPECT_EQ(m_pAosUtil->GetRetryAfterValue(&m_objMockIRegistration), 0);
 }
 
-TEST_F(AosUtilTest, GetMinExpiresValue)
+TEST_F(AosUtilTest, ReturnRetryAfterValueWhenRetryAfterValueIsNormal)
 {
-    EXPECT_EQ(-1, m_pAosUtil->GetMinExpiresValue(IMS_NULL));
+    AString strHeader = "60";
+    ON_CALL(m_objMockISipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillByDefault(Return(strHeader));
 
-    MockISipMessage objMockSipMsg;
-    AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(-1, m_pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    strHeader.Append("600");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(600, m_pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_EQ(m_pAosUtil->GetRetryAfterValue(&m_objMockIRegistration), 60);
 }
 
-TEST_F(AosUtilTest, IsInitialRegistrationRequired)
+/// GetMinExpiresValue()
+TEST_F(AosUtilTest, ReturnInvalidValueWhenSipMsgIsNullInGetMinExpiresValue)
+{
+    EXPECT_EQ(m_pAosUtil->GetMinExpiresValue(IMS_NULL), -1);
+}
+
+TEST_F(AosUtilTest, ReturnInvalidValueWhenMinExpiresHeaderIsNone)
+{
+    AString strHeader = "";
+    ON_CALL(m_objMockISipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
+            .WillByDefault(Return(strHeader));
+
+    EXPECT_EQ(m_pAosUtil->GetMinExpiresValue(&m_objMockISipMsg), -1);
+}
+
+TEST_F(AosUtilTest, ReturnMinExpiresValueWhenThereIsMinExpiresHeader)
+{
+    AString strHeader = "600";
+    ON_CALL(m_objMockISipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
+            .WillByDefault(Return(strHeader));
+
+    EXPECT_EQ(m_pAosUtil->GetMinExpiresValue(&m_objMockISipMsg), 600);
+}
+
+/// IsInitialRegistrationRequired()
+TEST_F(AosUtilTest, ReturnFalseWhenSipMsgIsNullInInitRegRequired)
 {
     EXPECT_FALSE(m_pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
+}
 
+TEST_F(AosUtilTest, ReturnFalseWhenThereIsNoBodyInInitRegRequired)
+{
     ImsList<ISipMessageBodyPart*> objBodyParts;
-    objBodyParts.Clear();
+    ON_CALL(m_objMockISipMsg, GetBodyParts()).WillByDefault(Return(objBodyParts));
 
-    MockISipMessage objMockSipMsg;
-    EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
-    EXPECT_FALSE(
-            m_pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_FALSE(m_pAosUtil->IsInitialRegistrationRequired(&m_objMockISipMsg));
+}
 
+TEST_F(AosUtilTest, ReturnTrueWhenBodyHasActionWithInitialRegistration)
+{
+    ImsList<ISipMessageBodyPart*> objBodyParts;
     SipMessageBodyPart objBodyPart;
-    ISipMessageBodyPart* piBodyPart = static_cast<ISipMessageBodyPart*>(&objBodyPart);
+    ISipMessageBodyPart* piBodyPart = &objBodyPart;
 
     AString strContent = "";
     strContent.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -139,67 +161,79 @@ TEST_F(AosUtilTest, IsInitialRegistrationRequired)
     strContent.Append("<action>initial-registration</action>");
     strContent.Append("</alternative-service></ims-3gpp>");
     ByteArray objContent(strContent);
-
     piBodyPart->SetContent(objContent);
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/3gpp-ims+xml");
-
     objBodyParts.Append(piBodyPart);
+    ON_CALL(m_objMockISipMsg, GetBodyParts()).WillByDefault(Return(objBodyParts));
 
-    EXPECT_CALL(objMockSipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
-    EXPECT_TRUE(
-            m_pAosUtil->IsInitialRegistrationRequired(static_cast<ISipMessage*>(&objMockSipMsg)));
+    EXPECT_TRUE(m_pAosUtil->IsInitialRegistrationRequired(&m_objMockISipMsg));
 }
 
-TEST_F(AosUtilTest, IsParameterIncluded3)
+/// IsParameterIncluded() - three factors
+TEST_F(AosUtilTest, ReturnFalseWhenSipMsgIsNullInThreeFactorsParameterChecked)
 {
-    IMS_SINT32 nHeaderType = 0;
-    AString strParameter = "test";
-    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strParameter));
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, SipHeaderBase::ALLOW, AString("test")));
+}
 
-    MockISipMessage objMockSipMsg;
+TEST_F(AosUtilTest, ReturnFalseWhenHeaderIsEmptyInThreeFactorsParameterChecked)
+{
+    ON_CALL(m_objMockISipMsg, GetHeaders(SipHeaderBase::ALLOW, (AString::ConstNull())))
+            .WillByDefault(Return(ImsList<AString>()));
+
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
+            &m_objMockISipMsg, SipHeaderBase::ALLOW, AString("test")));
+}
+
+TEST_F(AosUtilTest, ReturnFalseWhenThereIsEmptyParameterInThreeFactorsParameterChecked)
+{
     ImsList<AString> objHeaders;
-    objHeaders.Clear();
-    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
-            .WillOnce(Return(objHeaders));
-    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
-            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
+    objHeaders.Append(AString(" "));
+    ON_CALL(m_objMockISipMsg, GetHeaders(SipHeaderBase::ALLOW, (AString::ConstNull())))
+            .WillByDefault(Return(objHeaders));
 
-    AString strHeader = "";
-    objHeaders.Append(strHeader);
-    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
-            .WillOnce(Return(objHeaders));
     EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
-            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
-
-    strHeader = "test";
-    objHeaders.Append(strHeader);
-    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
-            .WillOnce(Return(objHeaders));
-    EXPECT_TRUE(m_pAosUtil->IsParameterIncluded(
-            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strParameter));
+            &m_objMockISipMsg, SipHeaderBase::ALLOW, AString("test")));
 }
 
-TEST_F(AosUtilTest, IsParameterIncluded4)
+TEST_F(AosUtilTest, ReturnTrueWhenThereIsParameterInThreeFactorsParameterChecked)
 {
-    IMS_SINT32 nHeaderType = 0;
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString("test"));
+    ON_CALL(m_objMockISipMsg, GetHeaders(SipHeaderBase::ALLOW, (AString::ConstNull())))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_TRUE(m_pAosUtil->IsParameterIncluded(
+            &m_objMockISipMsg, SipHeaderBase::ALLOW, AString("test")));
+}
+
+/// IsParameterIncluded() - four factors
+TEST_F(AosUtilTest, ReturnFalseWhenSipMsgIsNullInFourFactorsParameterChecked)
+{
+    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, 0, AString("name"), AString("test")));
+}
+
+TEST_F(AosUtilTest, ReturnFalseWhenHeaderIsEmptyInFourFactorsParameterChecked)
+{
     AString strName = "name";
-    AString strParameter = "test";
-    EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strName, strParameter));
 
-    MockISipMessage objMockSipMsg;
-    ImsList<AString> objHeaders;
-    objHeaders.Clear();
-    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
+    ON_CALL(m_objMockISipMsg, GetHeaders(SipHeaderBase::ALLOW, strName))
+            .WillByDefault(Return(ImsList<AString>()));
+
     EXPECT_FALSE(m_pAosUtil->IsParameterIncluded(
-            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
+            &m_objMockISipMsg, SipHeaderBase::ALLOW, strName, AString("test")));
+}
 
-    AString strHeader = "";
-    objHeaders.Append(strHeader);
-    strHeader = "test";
-    objHeaders.Append(strHeader);
-    EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
+TEST_F(AosUtilTest, ReturnTrueWhenThereIsParameterInFourFactorsParameterChecked)
+{
+    AString strName = "name";
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString(" test "));
+    ON_CALL(m_objMockISipMsg, GetHeaders(SipHeaderBase::ALLOW, strName))
+            .WillByDefault(Return(objHeaders));
+
     EXPECT_TRUE(m_pAosUtil->IsParameterIncluded(
-            static_cast<ISipMessage*>(&objMockSipMsg), nHeaderType, strName, strParameter));
+            &m_objMockISipMsg, SipHeaderBase::ALLOW, strName, AString("test")));
 }
 
 TEST_F(AosUtilTest, GetLocalPort)
