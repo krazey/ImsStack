@@ -233,19 +233,10 @@ public class ImsStackMain {
         }
     }
 
-    private void handleCarrierConfigChanged(Intent intent) {
-        int subId = Sim.getExtraSubscriptionIndex(intent);
-        int slotId = Sim.getExtraSlotIndex(intent);
-        int carrierId = intent.getIntExtra(TelephonyManager.EXTRA_CARRIER_ID,
-                TelephonyManager.UNKNOWN_CARRIER_ID);
-        int specificCarrierId = intent.getIntExtra(TelephonyManager.EXTRA_SPECIFIC_CARRIER_ID,
-                TelephonyManager.UNKNOWN_CARRIER_ID);
-        boolean rebroadcastOnUnlock = intent.getBooleanExtra(
-                CarrierConfigManager.EXTRA_REBROADCAST_ON_UNLOCK, false);
-
+    private void handleCarrierConfigChanged(int slotId,
+            int subId, int carrierId, int specificCarrierId) {
         Log.d(TAG, "handleCarrierConfigChanged :: slotId=" + slotId + ", subId=" + subId
-                + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId
-                + ", rebroadcastOnUnlock=" + rebroadcastOnUnlock);
+                + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId);
 
         ImsCarrierResolver.Carrier carrier =
                 resolveImsCarrier(slotId, subId, carrierId, specificCarrierId);
@@ -259,16 +250,10 @@ public class ImsStackMain {
         }
 
         displayCarrierConfigs(slotId, subId);
-
-        if (rebroadcastOnUnlock) {
-            processCarrierConfigState(slotId, subId);
-        } else {
-            SlotState slotState = getSlotState(slotId);
-            slotState.setCarrierConfigChanged(true);
-            processCarrierConfigState(slotId, subId);
-            slotState.setCarrierConfigChanged(false);
-        }
-
+        SlotState slotState = getSlotState(slotId);
+        slotState.setCarrierConfigChanged(true);
+        processCarrierConfigState(slotId, subId);
+        slotState.setCarrierConfigChanged(false);
         processCarrierConfigStateForOtherSlots(slotId);
     }
 
@@ -473,19 +458,33 @@ public class ImsStackMain {
         }
     }
 
-    private final class IntentReceiver extends BroadcastReceiver {
+    private final class IntentReceiver extends BroadcastReceiver
+            implements CarrierConfigManager.CarrierConfigChangeListener {
 
         public void startListening() {
             IntentFilter filter = new IntentFilter();
             filter.addAction(TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED);
-            filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
             filter.addAction(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
 
             AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
+            CarrierConfigManagerProxy ccmp = AppContext.getInstance()
+                    .getSystemServiceProxy(CarrierConfigManagerProxy.class);
+            ccmp.registerCarrierConfigChangeListener(
+                    AppContext.getInstance().getMainExecutor(), this);
         }
 
         public void stopListening() {
             AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
+            CarrierConfigManagerProxy ccmp = AppContext.getInstance()
+                    .getSystemServiceProxy(CarrierConfigManagerProxy.class);
+            ccmp.unregisterCarrierConfigChangeListener(this);
+        }
+
+        @Override
+        public void onCarrierConfigChanged(int logicalSlotIndex, int subscriptionId, int carrierId,
+                int specificCarrierId) {
+            handleCarrierConfigChanged(logicalSlotIndex,
+                    subscriptionId, carrierId, specificCarrierId);
         }
 
         @Override
@@ -496,8 +495,6 @@ public class ImsStackMain {
 
             if (TelephonyManager.ACTION_SIM_APPLICATION_STATE_CHANGED.equals(action)) {
                 handleSimStateChanged(intent);
-            } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(action)) {
-                handleCarrierConfigChanged(intent);
             } else if (TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED.equals(action)) {
                 handleMultiSimConfigChanged(intent);
             }
