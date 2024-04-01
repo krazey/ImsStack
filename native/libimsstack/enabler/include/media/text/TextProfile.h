@@ -100,7 +100,6 @@ public:
     };
 
 public:
-    ImsList<Payload*> lstPayload;
     IMS_BOOL bIsHold;
     IMS_BOOL bKeepRedLevel;
 
@@ -108,11 +107,10 @@ public:
     TextProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
-            lstPayload(ImsList<Payload*>()),
             bIsHold(IMS_FALSE),
             bKeepRedLevel(IMS_TRUE){};
 
-    virtual ~TextProfile() { deletePayloads(); }
+    virtual ~TextProfile() {}
 
     TextProfile(IN TextProfile* profile) :
             MediaBaseProfile(profile)
@@ -124,9 +122,6 @@ public:
 
         bIsHold = profile->bIsHold;
         bKeepRedLevel = profile->bKeepRedLevel;
-
-        deletePayloads();
-        addPayloads(profile->lstPayload);
     }
 
     TextProfile(IN const TextProfile& obj) :
@@ -134,9 +129,6 @@ public:
     {
         bIsHold = obj.bIsHold;
         bKeepRedLevel = obj.bKeepRedLevel;
-
-        deletePayloads();
-        addPayloads(obj.lstPayload);
     }
 
     TextProfile& operator=(IN const TextProfile& obj)
@@ -146,9 +138,6 @@ public:
             MediaBaseProfile::operator=(obj);
             bIsHold = obj.bIsHold;
             bKeepRedLevel = obj.bKeepRedLevel;
-
-            deletePayloads();
-            addPayloads(obj.lstPayload);
         }
         return (*this);
     }
@@ -165,29 +154,10 @@ public:
                 bKeepRedLevel != obj.bKeepRedLevel);
     }
 
-private:
-    void deletePayloads()
+    Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {
-        while (lstPayload.GetSize() > 0)
-        {
-            TextProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
-        }
-    }
-
-    void addPayloads(IN ImsList<Payload*> payloadList)
-    {
-        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
-        {
-            TextProfile::Payload* pNewPayload = new TextProfile::Payload(*payloadList.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
+        BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
+        return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 };
 

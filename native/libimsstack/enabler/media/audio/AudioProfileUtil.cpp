@@ -414,7 +414,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 
     for (IMS_UINT32 i = 0; i < pAudioProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pAudioPayload = pAudioProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pAudioPayload = pAudioProfile->GetPayloadAt(i);
         if (pAudioPayload == IMS_NULL)
         {
             continue;

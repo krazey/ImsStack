@@ -376,7 +376,6 @@ public:
         DEFAULT_MAXPTIME = 240,
     };
 
-    ImsList<Payload*> lstPayload;
     IMS_SINT32 nPtime;
     IMS_SINT32 nMaxPtime;
     ImsVector<AString> objCandidateAttr;
@@ -389,7 +388,6 @@ public:
     AudioProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_SEND_RECEIVE),
-            lstPayload(ImsList<Payload*>()),
             nPtime(0),
             nMaxPtime(0),
             objCandidateAttr(ImsVector<AString>()),
@@ -398,7 +396,7 @@ public:
             bRtcpDisableBeforeSetup(IMS_FALSE),
             bAnbr(IMS_FALSE){};
 
-    virtual ~AudioProfile() { deletePayloads(); };
+    virtual ~AudioProfile(){};
 
     AudioProfile(IN AudioProfile* profile) :
             MediaBaseProfile(profile)
@@ -414,9 +412,6 @@ public:
         objRtcpXrAttr = profile->objRtcpXrAttr;
         bRtcpDisableBeforeSetup = profile->bRtcpDisableBeforeSetup;
         bAnbr = profile->bAnbr;
-
-        deletePayloads();
-        addPayloads(profile->lstPayload);
     }
 
     AudioProfile(IN const AudioProfile& obj) :
@@ -429,9 +424,6 @@ public:
         objRtcpXrAttr = obj.objRtcpXrAttr;
         bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
         bAnbr = obj.bAnbr;
-
-        deletePayloads();
-        addPayloads(obj.lstPayload);
     }
 
     AudioProfile& operator=(IN const AudioProfile& obj)
@@ -446,9 +438,6 @@ public:
             objRtcpXrAttr = obj.objRtcpXrAttr;
             bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
             bAnbr = obj.bAnbr;
-
-            deletePayloads();
-            addPayloads(obj.lstPayload);
         }
         return (*this);
     }
@@ -467,29 +456,10 @@ public:
                 bRtcpDisableBeforeSetup != obj.bRtcpDisableBeforeSetup || bAnbr != obj.bAnbr);
     }
 
-private:
-    void deletePayloads()
+    Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {
-        while (lstPayload.GetSize() > 0)
-        {
-            AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
-        }
-    }
-
-    void addPayloads(IN ImsList<Payload*> payloadList)
-    {
-        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
-        {
-            AudioProfile::Payload* pNewPayload = new AudioProfile::Payload(*payloadList.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
+        BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
+        return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 };
 

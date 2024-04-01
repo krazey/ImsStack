@@ -195,6 +195,7 @@ public:
     MEDIA_DIRECTION eDirection;
     CapaNego objCapaNego;
     IMS_SINT32 nNegotiatedPayloadIndex;
+    ImsList<BasePayload*> lstPayload;
 
     MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
             IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
@@ -212,11 +213,12 @@ public:
             nBandwidthRr(bandwidthRr),
             eDirection(direction),
             objCapaNego(CapaNego()),
-            nNegotiatedPayloadIndex(-1)
+            nNegotiatedPayloadIndex(-1),
+            lstPayload(ImsList<BasePayload*>())
     {
     }
 
-    virtual ~MediaBaseProfile() {}
+    virtual ~MediaBaseProfile() { DeletePayloads(); }
 
     MediaBaseProfile(MediaBaseProfile* profile)
     {
@@ -235,6 +237,9 @@ public:
         eDirection = profile->eDirection;
         objCapaNego = profile->objCapaNego;
         nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
+
+        DeletePayloads();
+        CopyPayloads(profile->lstPayload);
     }
 
     MediaBaseProfile(const MediaBaseProfile& obj)
@@ -250,6 +255,9 @@ public:
         eDirection = obj.eDirection;
         objCapaNego = obj.objCapaNego;
         nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+
+        DeletePayloads();
+        CopyPayloads(obj.lstPayload);
     }
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
@@ -267,6 +275,9 @@ public:
             eDirection = obj.eDirection;
             objCapaNego = obj.objCapaNego;
             nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+
+            DeletePayloads();
+            CopyPayloads(obj.lstPayload);
         }
         return (*this);
     }
@@ -288,6 +299,14 @@ public:
                 nBandwidthRs != obj.nBandwidthRs || nBandwidthRr != obj.nBandwidthRr ||
                 eDirection != obj.eDirection);
     }
+
+    virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
+    {
+        return (lstPayload.GetSize() > nIndex) ? lstPayload.GetAt(nIndex) : IMS_NULL;
+    }
+
+    void DeletePayloads();
+    void CopyPayloads(IN ImsList<BasePayload*> payloadList);
 };
 
 #endif

@@ -102,17 +102,7 @@ PUBLIC VIRTUAL void VideoNego::CreateProfiles(
 PUBLIC
 void VideoNego::DestroyProfiles()
 {
-    while (m_objBaseProfile.lstPayload.GetSize() > 0)
-    {
-        VideoProfile::Payload* pPayload = m_objBaseProfile.lstPayload.GetAt(0);
-
-        if (pPayload != IMS_NULL)
-        {
-            delete pPayload;
-        }
-
-        m_objBaseProfile.lstPayload.RemoveAt(0);
-    }
+    m_objBaseProfile.DeletePayloads();
 
     MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
 
@@ -419,7 +409,7 @@ VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
             return VIDEO_RESOLUTION_INVALID;
         }
 
-        VideoProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(0);
+        VideoProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(0);
 
         if (pPayload == IMS_NULL)
         {
@@ -901,7 +891,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        VideoProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;
@@ -934,7 +924,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
     {
         for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
         {
-            VideoProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+            VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
             if (pPayload != IMS_NULL)
             {
                 if (pPayload->objRtcpFbAttr.bTrrSupported == IMS_FALSE)
@@ -996,7 +986,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
         AString strResolutionAttr;
         VIDEO_RESOLUTION eResolution;
 
-        VideoProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;
@@ -1642,7 +1632,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             break;
         }
 
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(nPeerIndex);
+        pPeerPayload = pPeerProfile->GetPayloadAt(nPeerIndex);
 
         if (pPeerPayload == IMS_NULL)
         {
@@ -1655,7 +1645,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
                     nLocalIndex++)
             {
-                pLocalPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
+                pLocalPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
 
                 if (pLocalPayload == IMS_NULL)
                 {
@@ -1712,7 +1702,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             {
                                 // if find matching level fmtp, skip unmatched level payload
                                 VideoProfile::Payload* pPotentialPayload =
-                                        pLocalProfile->lstPayload.GetAt(nIndex);
+                                        pLocalProfile->GetPayloadAt(nIndex);
 
                                 if (pPotentialPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
                                             "H264"))
@@ -1873,7 +1863,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                                 pLocalProfile->nNegotiatedPayloadIndex != -1)
                         {
                             VideoProfile::Payload* pTempNegoLocalPayload =
-                                    pLocalProfile->lstPayload.GetAt(
+                                    pLocalProfile->GetPayloadAt(
                                             pLocalProfile->nNegotiatedPayloadIndex);
                             pTempNegoLocalPayload->objRtpMap.nPayloadNum =
                                     pPeerPayload->objRtpMap.nPayloadNum;
@@ -1899,7 +1889,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
                     nLocalIndex++)
             {
-                pLocalPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
+                pLocalPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
                 if (pLocalPayload == IMS_NULL)
                 {
                     continue;
@@ -2059,8 +2049,9 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                                 pLocalProfile->nNegotiatedPayloadIndex != -1)
                         {
                             VideoProfile::Payload* pTempNegoLocalPayload =
-                                    pLocalProfile->lstPayload.GetAt(
+                                    pLocalProfile->GetPayloadAt(
                                             pLocalProfile->nNegotiatedPayloadIndex);
+
                             pTempNegoLocalPayload->objRtpMap.nPayloadNum =
                                     pPeerPayload->objRtpMap.nPayloadNum;
                         }
@@ -2088,7 +2079,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 
     if (pNegotiatedProfile->lstPayload.GetSize() > 0)
     {
-        pNegotiatedPayload = pNegotiatedProfile->lstPayload.GetAt(0);
+        pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
     }
     else  // negotiated payload is not exist, use temporary payload
     {
@@ -2121,7 +2112,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
                         nLocalIndex++)
                 {
-                    VideoProfile::Payload* pPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
+                    VideoProfile::Payload* pPayload = pLocalProfile->GetPayloadAt(nLocalIndex);
                     VideoProfile::AvcFmtp* pTempLocalFmtp =
                             reinterpret_cast<VideoProfile::AvcFmtp*>(pPayload->pFmtp);
 
@@ -2194,8 +2185,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             pLocalProfile->nNegotiatedPayloadIndex != -1)
                     {
                         VideoProfile::Payload* pTempNegoLocalPayload =
-                                pLocalProfile->lstPayload.GetAt(
-                                        pLocalProfile->nNegotiatedPayloadIndex);
+                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+
                         pTempNegoLocalPayload->objRtpMap.nPayloadNum =
                                 pPeerPayload->objRtpMap.nPayloadNum;
                     }
@@ -2272,8 +2263,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             pLocalProfile->nNegotiatedPayloadIndex != -1)
                     {
                         VideoProfile::Payload* pTempNegoLocalPayload =
-                                pLocalProfile->lstPayload.GetAt(
-                                        pLocalProfile->nNegotiatedPayloadIndex);
+                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+
                         pTempNegoLocalPayload->objRtpMap.nPayloadNum =
                                 pPeerPayload->objRtpMap.nPayloadNum;
                     }
@@ -2569,7 +2560,8 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        VideoProfile::Payload* pOriginPayload = pProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pOriginPayload = pProfile->GetPayloadAt(i);
+
         if (pOriginPayload == IMS_NULL)
         {
             continue;
@@ -2792,7 +2784,7 @@ IMS_SINT32 VideoNego::FindPayloadIndexFromProfile(
     // find the index of negotiated payload
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        VideoProfile::Payload* comparedPayload = pProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
         if (comparedPayload == IMS_NULL)
             continue;
 

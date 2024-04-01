@@ -402,12 +402,12 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 
     if (pNegotiatedProfile->nNegotiatedPayloadIndex < 0)
     {
-        pNegotiatedPayload = pNegotiatedProfile->lstPayload.GetAt(0);
+        pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
     }
     else
     {
         pNegotiatedPayload =
-                pNegotiatedProfile->lstPayload.GetAt(pNegotiatedProfile->nNegotiatedPayloadIndex);
+                pNegotiatedProfile->GetPayloadAt(pNegotiatedProfile->nNegotiatedPayloadIndex);
     }
 
     if (pNegotiatedPayload == NULL)
@@ -504,11 +504,11 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
 
         if (pLatestOaModel->pNegotiatedProfile->nNegotiatedPayloadIndex < 0)
         {
-            pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(0);
+            pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(0);
         }
         else
         {
-            pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(
+            pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(
                     pLatestOaModel->pNegotiatedProfile->nNegotiatedPayloadIndex);
         }
 
@@ -583,8 +583,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
 
         for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize(); i++)
         {
-            AudioProfile::Payload* pPayload =
-                    pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(i);
+            AudioProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(i);
+
             if (pPayload == IMS_NULL)
             {
                 continue;
@@ -1109,7 +1109,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     {
         AString strRtpmap, strFmtp, strPayloadNum;
 
-        AudioProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;
@@ -1485,7 +1485,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pPayload = pPeerProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;
@@ -1538,7 +1538,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pDestPayload = pPeerProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(i);
         if (pDestPayload == IMS_NULL)
         {
             continue;
@@ -1558,7 +1558,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                         FindPayloadIndexFromProfile(pDestPayload->objRtpMap.strPayloadType,
                                 pLocalProfile, pDestPayload, bIsOfferReceived);
                 AudioProfile::AmrFmtp* pSrc_Fmtp =
-                        (AudioProfile::AmrFmtp*)pLocalProfile->lstPayload.GetAt(nSrcPayloadIndex)
+                        (AudioProfile::AmrFmtp*)pLocalProfile->GetPayloadAt(nSrcPayloadIndex)
                                 ->pFmtp;
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
                         *static_cast<AudioProfile::AmrFmtp*>(pDestPayload->pFmtp));
@@ -1592,8 +1592,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             pLocalProfile->nNegotiatedPayloadIndex != -1)
                     {
                         AudioProfile::Payload* pTempNegoSrcPayload =
-                                pLocalProfile->lstPayload.GetAt(
-                                        pLocalProfile->nNegotiatedPayloadIndex);
+                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+
                         pTempNegoSrcPayload->objRtpMap.nPayloadNum =
                                 pDestPayload->objRtpMap.nPayloadNum;
                     }
@@ -1623,7 +1623,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                         FindPayloadIndexFromProfile(pDestPayload->objRtpMap.strPayloadType,
                                 pLocalProfile, pDestPayload, bIsOfferReceived);
                 AudioProfile::EvsFmtp* pSrc_Fmtp =
-                        (AudioProfile::EvsFmtp*)pLocalProfile->lstPayload.GetAt(nSrcPayloadIndex)
+                        (AudioProfile::EvsFmtp*)pLocalProfile->GetPayloadAt(nSrcPayloadIndex)
                                 ->pFmtp;
                 AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp(
                         *reinterpret_cast<AudioProfile::EvsFmtp*>(pDestPayload->pFmtp));
@@ -1717,8 +1717,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             pLocalProfile->nNegotiatedPayloadIndex != -1)
                     {
                         AudioProfile::Payload* pTempNegoSrcPayload =
-                                pLocalProfile->lstPayload.GetAt(
-                                        pLocalProfile->nNegotiatedPayloadIndex);
+                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+
                         pTempNegoSrcPayload->objRtpMap.nPayloadNum =
                                 pDestPayload->objRtpMap.nPayloadNum;
                     }
@@ -1807,7 +1807,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     {
         for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
         {
-            AudioProfile::Payload* pDestPayload = pPeerProfile->lstPayload.GetAt(i);
+            AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(i);
+
             if (pDestPayload == IMS_NULL)
             {
                 continue;
@@ -2372,7 +2373,8 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
     {
         for (IMS_UINT32 i = 0; i < pLocalProfile->lstPayload.GetSize(); i++)
         {
-            AudioProfile::Payload* comparedPayload = pLocalProfile->lstPayload.GetAt(i);
+            AudioProfile::Payload* comparedPayload = pLocalProfile->GetPayloadAt(i);
+
             if (comparedPayload == IMS_NULL)
             {
                 continue;
@@ -2604,7 +2606,8 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* comparedPayload = pProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
+
         if (comparedPayload == IMS_NULL)
         {
             continue;
@@ -2702,7 +2705,8 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* comparedPayload = pProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
+
         if (comparedPayload == IMS_NULL)
         {
             continue;
@@ -3232,7 +3236,8 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
     {
         for (IMS_UINT32 i = 0; i < pLocalProfile->lstPayload.GetSize(); i++)
         {
-            AudioProfile::Payload* comparedPayload = pLocalProfile->lstPayload.GetAt(i);
+            AudioProfile::Payload* comparedPayload = pLocalProfile->GetPayloadAt(i);
+
             if (comparedPayload == IMS_NULL)
             {
                 continue;
@@ -3639,7 +3644,7 @@ PRIVATE void AudioNego::SetSdpMediaDescription(
     AString strPayloadNum;
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;

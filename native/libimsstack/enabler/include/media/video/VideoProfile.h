@@ -269,7 +269,6 @@ public:
     };
 
 public:
-    ImsList<Payload*> lstPayload;
     IMS_SINT32 nFrameRate;
     IMS_BOOL bSupportAvpf;
     IMS_SINT32 nCvoId;
@@ -279,13 +278,12 @@ public:
     VideoProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVPF", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
-            lstPayload(ImsList<Payload*>()),
             nFrameRate(0),
             bSupportAvpf(IMS_FALSE),
             nCvoId(-1),
             bSupportCapaNegoForAvpf(IMS_FALSE){};
 
-    virtual ~VideoProfile() { deletePayloads(); };
+    virtual ~VideoProfile() {}
 
     VideoProfile(IN VideoProfile* profile) :
             MediaBaseProfile(profile)
@@ -298,9 +296,6 @@ public:
         bSupportAvpf = profile->bSupportAvpf;
         nCvoId = profile->nCvoId;
         bSupportCapaNegoForAvpf = profile->bSupportCapaNegoForAvpf;
-
-        deletePayloads();
-        addPayloads(profile->lstPayload);
     }
 
     VideoProfile(IN const VideoProfile& obj) :
@@ -310,9 +305,6 @@ public:
         bSupportAvpf = obj.bSupportAvpf;
         nCvoId = obj.nCvoId;
         bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
-
-        deletePayloads();
-        addPayloads(obj.lstPayload);
     }
 
     VideoProfile& operator=(IN const VideoProfile& obj)
@@ -324,37 +316,15 @@ public:
             bSupportAvpf = obj.bSupportAvpf;
             nCvoId = obj.nCvoId;
             bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
-
-            deletePayloads();
-            addPayloads(obj.lstPayload);
         }
 
         return (*this);
     }
 
-private:
-    void deletePayloads()
+    Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
     {
-        while (lstPayload.GetSize() > 0)
-        {
-            VideoProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
-        }
-    }
-
-    void addPayloads(IN ImsList<Payload*> payloadList)
-    {
-        for (IMS_UINT32 i = 0; i < payloadList.GetSize(); i++)
-        {
-            VideoProfile::Payload* pNewPayload = new VideoProfile::Payload(*payloadList.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
+        BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
+        return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 };
 

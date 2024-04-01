@@ -89,14 +89,14 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     if (pLocalProfile->nNegotiatedPayloadIndex < 0)
     {
-        pLocalPayload = pLocalProfile->lstPayload.GetAt(0);
+        pLocalPayload = pLocalProfile->GetPayloadAt(0);
     }
     else
     {
-        pLocalPayload = pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
+        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
     }
 
-    pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
+    pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
     if (pLocalPayload == IMS_NULL || pNegoPayload == IMS_NULL)
     {

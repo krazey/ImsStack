@@ -345,7 +345,7 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
 
     while (pAudioProfile->lstPayload.GetSize() > 0)
     {
-        AudioProfile::Payload* pPayload = pAudioProfile->lstPayload.GetAt(0);
+        AudioProfile::Payload* pPayload = pAudioProfile->GetPayloadAt(0);
         if (pPayload != IMS_NULL)
         {
             delete pPayload;
@@ -1119,7 +1119,7 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
 
     for (IMS_UINT32 i = 0; i < pVideoProfile->lstPayload.GetSize(); i++)
     {
-        VideoProfile::Payload* pPayload = pVideoProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pPayload = pVideoProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL || pPayload->pFmtp == IMS_NULL)
         {
