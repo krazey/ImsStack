@@ -73,19 +73,14 @@ const IMS_SINT32 SLOT_ID = 0;
     using Base::GetNextThrottlingTime;                      \
     using Base::RegSubscription_NotifyReceived;             \
     using Base::RegSubscription_RefreshTimerExpired;        \
+    using Base::RegSubscription_Started;                    \
+    using Base::RegSubscription_StartFailed;                \
+    using Base::RegSubscription_Updated;                    \
+    using Base::RegSubscription_UpdateFailed;               \
+    using Base::RegSubscription_Removed;                    \
+    using Base::RegSubscription_Terminated;                 \
     using Base::Transaction_OnConnectionFailed;             \
     using Base::Transaction_OnTrafficPriorityChanged;
-
-enum
-{
-    AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED = 0,
-    AMSG_REG_SUBSCRIPTION_STARTED,
-    AMSG_REG_SUBSCRIPTION_START_FAILED,
-    AMSG_REG_SUBSCRIPTION_UPDATED,
-    AMSG_REG_SUBSCRIPTION_UPDATE_FAILED,
-    AMSG_REG_SUBSCRIPTION_REMOVED,
-    AMSG_REG_SUBSCRIPTION_TERMINATED
-};
 
 class TestAosSubscription : public AosSubscription
 {
@@ -110,67 +105,34 @@ public:
 
     inline void SetAorState(IN IMS_SINT32 nAorState) { m_nAorState = nAorState; }
 
-    void SetRegSubscription(IN IRegSubscription* piRegSubscription)
+    inline void SetRegSubscription(IN IRegSubscription* piRegSubscription)
     {
         m_piRegSubscription = piRegSubscription;
     }
 
-    void SetRetryCountSubTerminated(IN IMS_UINT32 nRetryCount)
+    inline void SetRetryCountSubTerminated(IN IMS_UINT32 nRetryCount)
     {
         m_nRetryCountSubTerminated = nRetryCount;
     }
 
-    void SetRetryCountRegRequired(IN IMS_UINT32 nRetryCount)
+    inline void SetRetryCountRegRequired(IN IMS_UINT32 nRetryCount)
     {
         m_nRetryCountRegRequired = nRetryCount;
     }
 
-    void SetThrottlingCount(IN IMS_UINT32 nThrottlingCount)
+    inline void SetThrottlingCount(IN IMS_UINT32 nThrottlingCount)
     {
         m_nThrottlingCount = nThrottlingCount;
     }
 
-    void SetContactAddress(IN const SipAddress& objContactAddress)
+    inline void SetContactAddress(IN const SipAddress& objContactAddress)
     {
         m_objContactAddress = objContactAddress;
     }
 
-    IMS_SINT32 GetAorState() { return m_nAorState; }
+    inline IMS_SINT32 GetAorState() { return m_nAorState; }
 
-    ITimer* GetTimer() { return m_piRetryTimer; }
-
-    void NotifyListenerEvent(IMS_UINT32 nEvent, IMS_SINT32 nReason, IN IMS_BOOL bHasBody)
-    {
-        switch (nEvent)
-        {
-            case AMSG_REG_SUBSCRIPTION_STARTED:
-                RegSubscription_Started();
-                break;
-
-            case AMSG_REG_SUBSCRIPTION_START_FAILED:
-                RegSubscription_StartFailed(nReason);
-                break;
-
-            case AMSG_REG_SUBSCRIPTION_UPDATED:
-                RegSubscription_Updated();
-                break;
-
-            case AMSG_REG_SUBSCRIPTION_UPDATE_FAILED:
-                RegSubscription_UpdateFailed(nReason);
-                break;
-
-            case AMSG_REG_SUBSCRIPTION_REMOVED:
-                RegSubscription_Removed();
-                break;
-
-            case AMSG_REG_SUBSCRIPTION_TERMINATED:
-                RegSubscription_Terminated(nReason);
-                break;
-
-            default:
-                break;
-        }
-    }
+    inline ITimer* GetTimer() { return m_piRetryTimer; }
 
     IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
 
@@ -354,12 +316,10 @@ TEST_F(AosSubscriptionTest, Initialize)
 
 TEST_F(AosSubscriptionTest, RegSubscription_End)
 {
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_REMOVED, IRegSubscription::REASON_NONE, 0);
+    m_pAosSubscription->RegSubscription_Removed();
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_TERMINATED, IRegSubscription::REASON_NO_EXPIRES, 0);
+    m_pAosSubscription->RegSubscription_Terminated(IRegSubscription::REASON_NO_EXPIRES);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
@@ -1231,8 +1191,7 @@ TEST_F(AosSubscriptionTest, RunSetRetryTimerWith3gppRetryRuleWhenStartFailed_Oth
     ON_CALL(m_objMockAosConfig, IsRegRetryIntervalsUsedForSub()).WillByDefault(Return(IMS_TRUE));
 
     // When UE calls ProcessStartFailed_Others()
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_INTERNAL_ERROR);
 
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
@@ -1264,8 +1223,7 @@ TEST_F(AosSubscriptionTest, RunSetRetryTimerWithRetryIntervalsWhenStartFailed_Ot
             .WillByDefault(ReturnRef(objRetryRandomIntervals));
 
     // When UE calls ProcessStartFailed_Others()
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_INTERNAL_ERROR);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1281,8 +1239,7 @@ TEST_F(AosSubscriptionTest, RunSetRetryTimerWithOnlyRetryIntervalsWhenStartFaile
     ON_CALL(m_objMockAosConfig, GetRegRetryIntervals()).WillByDefault(ReturnRef(objRetryIntervals));
 
     // When UE calls ProcessStartFailed_Others()
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_INTERNAL_ERROR);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1301,8 +1258,7 @@ TEST_F(AosSubscriptionTest,
     ON_CALL(m_objMockAosConfig, GetRegRetryIntervals()).WillByDefault(ReturnRef(objRetryIntervals));
 
     // When UE calls ProcessStartFailed_Others()
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_INTERNAL_ERROR);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1533,7 +1489,7 @@ TEST_F(AosSubscriptionTest, SubscribedStateWhenStartedCalled)
             Subscription_StateChanged(
                     AosSubscription::STATE_SUBSCRIBED, AosSubscription::REASON_SUB_ESTABLISHED));
 
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_STARTED, 0, 0);
+    m_pAosSubscription->RegSubscription_Started();
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
 }
 
@@ -1543,8 +1499,7 @@ TEST_F(AosSubscriptionTest, SubStopStateWhenStartFailedWithTransactionTimeout)
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBING);
     // All other conditions in SetUp()
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_TRANSACTION_TIMEOUT, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_TRANSACTION_TIMEOUT);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1571,8 +1526,7 @@ TEST_F(AosSubscriptionTest, ReturnBecauseErrProcessingIsDoneDueToInitRegRequired
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE));
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
@@ -1586,8 +1540,7 @@ TEST_F(AosSubscriptionTest, SubStopStateWhenStartFailedWithStatusCodeWithRetryAf
     ON_CALL(m_objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
             .WillByDefault(Return(strHeader));
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1598,8 +1551,7 @@ TEST_F(AosSubscriptionTest, SubStopStateWhenStartFailedWithStatusCodeButResponse
 
     ON_CALL(m_objMockIRegSubscription, GetPreviousResponse()).WillByDefault(ReturnNull());
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1608,8 +1560,7 @@ TEST_F(AosSubscriptionTest, SubStopStateWhenStartFailedWithInternalError)
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBING);
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
+    m_pAosSubscription->RegSubscription_StartFailed(IRegSubscription::REASON_INTERNAL_ERROR);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
@@ -1622,7 +1573,7 @@ TEST_F(AosSubscriptionTest, SubscribedStateWhenUpdatedCalled)
             Subscription_StateChanged(
                     AosSubscription::STATE_SUBSCRIBED, AosSubscription::REASON_SUB_ESTABLISHED));
 
-    m_pAosSubscription->NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_UPDATED, 0, 0);
+    m_pAosSubscription->RegSubscription_Updated();
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
 }
 
@@ -1632,8 +1583,7 @@ TEST_F(AosSubscriptionTest, SubRefreshStopStateWhenUpdateFailedWithTransactionTi
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
     // All other conditions in SetUp()
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_TRANSACTION_TIMEOUT, 0);
+    m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_TRANSACTION_TIMEOUT);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
 }
 
@@ -1657,8 +1607,7 @@ TEST_F(AosSubscriptionTest, ReturnBecauseErrProcessingIsDoneDueToRetryCounterWhe
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
@@ -1669,8 +1618,7 @@ TEST_F(AosSubscriptionTest, SubRefreshStopStateWhenUpdateFailedWithStatusCodeWit
 
     ON_CALL(m_objMockSipMsg, GetStatusCode()).WillByDefault(Return(404));
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
 }
 
@@ -1681,8 +1629,7 @@ TEST_F(AosSubscriptionTest, SubRefreshStopStateWhenUpdateFailedWithStatusCodeBut
 
     ON_CALL(m_objMockIRegSubscription, GetPreviousResponse()).WillByDefault(ReturnNull());
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
+    m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_STATUS_CODE);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
 }
 
@@ -1691,8 +1638,7 @@ TEST_F(AosSubscriptionTest, SubRefreshStopStateWhenUpdateFailedWithRefreshTimeou
 {
     m_pAosSubscription->SetState(AosSubscription::STATE_SUBREFRESHING);
 
-    m_pAosSubscription->NotifyListenerEvent(
-            AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_REFRESH_TIMEOUT, 0);
+    m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_REFRESH_TIMEOUT);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
 }
 
