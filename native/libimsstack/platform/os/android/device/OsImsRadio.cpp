@@ -619,6 +619,9 @@ PRIVATE GLOBAL const IMS_CHAR* OsImsRadio::EventToString(IN IMS_UINT32 nEvent)
         case OsImsRadioParam::EVENT_SSAC_STATE_CHANGED:
             return "EVENT_SSAC_STATE_CHANGED";
 
+        case OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED:
+            return "EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED";
+
         default:
             return "__INVALID__";
     }
