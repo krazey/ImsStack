@@ -699,7 +699,8 @@ public class ImsRadioAgent implements ImsRadioInterface {
                 return;
             }
 
-            ImsLog.d(mSlotId, "Simultaneous calling support = " + isSupported);
+            ImsLog.d(mSlotId,
+                    "Simultaneous calling support for SubId[" + mSubId + "] = " + isSupported);
 
             mIsSimultaneousCallingSupported = isSupported;
 
