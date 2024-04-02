@@ -54,11 +54,13 @@ using ::testing::ReturnRef;
 const IMS_SINT32 SLOT_ID = 0;
 
 #define DECLARE_USING(Base)                                 \
+    using Base::ReportNotifyEvent;                          \
     using Base::SetState;                                   \
     using Base::SetTerminated;                              \
     using Base::StartTimer;                                 \
     using Base::IsRadioWaiting;                             \
     using Base::IsTrafficPriorityBlocked;                   \
+    using Base::PrintRegInfo;                               \
     using Base::SetRadioWaiting;                            \
     using Base::SetTrafficPriorityBlocked;                  \
     using Base::IsRetryActionDueToRetryCounter;             \
@@ -71,6 +73,8 @@ const IMS_SINT32 SLOT_ID = 0;
     using Base::IsWfcErrorMessageSupportedWithStateChecked; \
     using Base::ProcessFailed_StatusCode;                   \
     using Base::GetNextThrottlingTime;                      \
+    using Base::ProcessNotifyState_Active;                  \
+    using Base::ProcessRegEventChange;                      \
     using Base::RegSubscription_NotifyReceived;             \
     using Base::RegSubscription_RefreshTimerExpired;        \
     using Base::RegSubscription_Started;                    \
@@ -269,6 +273,10 @@ protected:
         ON_CALL(m_objMockAosConfig, GetRegRetryCountResetPolicy()).WillByDefault(Return(0));
         ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorRegRequired()).WillByDefault(Return(0));
         ON_CALL(m_objMockAosConfig, GetRetryCountSubErrorSubTerminated()).WillByDefault(Return(0));
+        ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegistration())
+                .WillByDefault(Return(0));
+        ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegWithWaitTime())
+                .WillByDefault(Return(0));
         // m_objRetryIntervals.GetSize() = 0
         ON_CALL(m_objMockAosConfig, GetRegRetryIntervals())
                 .WillByDefault(ReturnRef(m_objRetryIntervals));
@@ -381,6 +389,108 @@ TEST_F(AosSubscriptionTest, NotCallUnsubscribeInStopWhenUnsubscriptionIsNotSuppo
 
     m_pAosSubscription->Stop();
     EXPECT_EQ(m_pAosSubscription->GetState(), nState);
+}
+
+/// ReportNotifyEvent()
+TEST_F(AosSubscriptionTest, RequestRegTerminatedWhenNotifyWithExpired)
+{
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_TERMINATED, 0, IMS_FALSE));
+
+    m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_EXPIRED);
+}
+
+TEST_F(AosSubscriptionTest, RequestRegRequiredWhenNotifyWithDeactivated)
+{
+    ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegistration())
+            .WillByDefault(Return(IAosNConfiguration::NOTIFY_TERMINATED_DEACTIVATED));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE));
+
+    m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_DEACTIVATED);
+}
+
+TEST_F(AosSubscriptionTest, RequestRegRequiredWithRetryAfterWhenNotifyWithProbationWithRetryAfter)
+{
+    ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegistration())
+            .WillByDefault(Return(IAosNConfiguration::NOTIFY_TERMINATED_PROBATION));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 30, IMS_FALSE));
+
+    m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_PROBATION, 30);
+}
+
+TEST_F(AosSubscriptionTest, RequestRegRequiredWithRetryAfterWhenNotifyWithUnregistered)
+{
+    ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegWithWaitTime())
+            .WillByDefault(Return(IAosNConfiguration::NOTIFY_TERMINATED_UNREGISTERED));
+    ON_CALL(m_objMockAosConfig, GetNotifyWaitTime()).WillByDefault(Return(10));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 10, IMS_FALSE));
+
+    m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_UNREGISTERED);
+}
+
+TEST_F(AosSubscriptionTest,
+        RequestRegRequiredWithNotifyTerminatedMsgWhenNotifyWithRejectedAndWfcErrMsgRequired)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+
+    ON_CALL(m_objMockAosConfig, GetNotifyEventForInitialRegistration())
+            .WillByDefault(Return(IAosNConfiguration::NOTIFY_TERMINATED_REJECTED));
+    // IsWfcErrorMessageSupportedWithStateChecked - IMS_TRUE;
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConfig,
+            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOTIFY_TERMINATED))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(
+                    AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG, 0, IMS_FALSE));
+
+    m_pAosSubscription->ReportNotifyEvent(AosSubscription::EVENT_REJECTED);
+}
+
+/// PrintRegInfo() - There are objRegInfo without QValue and objRegInfo with QValue.
+TEST_F(AosSubscriptionTest, CheckNumberOfGetQValueCallsWhenPrintRegInfoWithAndWithoutQValue)
+{
+    ImsList<IRegInfoContact*> objContact;
+
+    // RegInfoContact1
+    MockIRegInfoContact m_objMockIRegInfoContact;
+    ON_CALL(m_objMockIRegInfoContact, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_ACTIVE));
+    ON_CALL(m_objMockIRegInfoContact, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_REGISTERED));
+    SipAddress objSipAddress1 = SipAddress(m_strAnonymousAddr);
+    ON_CALL(m_objMockIRegInfoContact, GetUri()).WillByDefault(ReturnRef(objSipAddress1));
+
+    // RegInfoContact2
+    MockIRegInfoContact objMockIRegInfoContact2;
+    ON_CALL(objMockIRegInfoContact2, GetState())
+            .WillByDefault(Return(IRegInfoContact::STATE_TERMINATED));
+    ON_CALL(objMockIRegInfoContact2, GetEvent())
+            .WillByDefault(Return(IRegInfoContact::EVENT_UNREGISTERED));
+    SipAddress objSipAddress2 = SipAddress(m_strSipAddrWithPort);
+    ON_CALL(objMockIRegInfoContact2, GetUri()).WillByDefault(ReturnRef(objSipAddress2));
+    ON_CALL(objMockIRegInfoContact2, GetRetryAfterValue()).WillByDefault(Return(30));
+    ON_CALL(objMockIRegInfoContact2, GetExpiresValue()).WillByDefault(Return(3600));
+
+    objContact.Append(&m_objMockIRegInfoContact);
+    objContact.Append(&objMockIRegInfoContact2);
+
+    // strQvalue = "" for RegInfoContact1
+    EXPECT_CALL(m_objMockIRegInfoContact, GetQValue()).Times(1).WillOnce(ReturnRef(m_strQvalue));
+
+    AString strQvalue2 = "qvalue";
+    EXPECT_CALL(objMockIRegInfoContact2, GetQValue())
+            .Times(2)
+            .WillRepeatedly(ReturnRef(strQvalue2));
+
+    m_pAosSubscription->PrintRegInfo(objContact);
 }
 
 /// IsRetryActionDueToRetryCounter()
@@ -1307,6 +1417,36 @@ TEST_F(AosSubscriptionTest, GetNextThrottlingTimeWhenRetryRandomIntervalshaveVal
     objRetryIntervals.Add(480);
     objRetryIntervals.Add(900);
     EXPECT_EQ(480000, m_pAosSubscription->GetNextThrottlingTime(objRetryIntervals));
+}
+
+/// ProcessNotifyState_Active()
+TEST_F(AosSubscriptionTest, ResetRetryCountWhenRetryCountIsSharedInActiveState)
+{
+    ON_CALL(m_objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
+
+    // AosRetryRepository::TYPE_NORMAL = 0
+    EXPECT_CALL(m_objMockAosRetryRepository, ResetRetryCount(0));
+
+    m_pAosSubscription->ProcessNotifyState_Active(IRegInfoContact::STATE_ACTIVE);
+}
+
+/// ProcessRegEventChange()
+TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithUnconditionalDownload)
+{
+    ON_CALL(m_objMockAosConfig, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    const SipAddress objSipAddress = SipAddress("");
+    ON_CALL(m_objMockIRegInfoRegistration, GetAor()).WillByDefault(ReturnRef(objSipAddress));
+    ImsList<IRegInfoRegistration*> objRegInfoRegistrations;
+    objRegInfoRegistrations.Append(&m_objMockIRegInfoRegistration);
+    ON_CALL(m_objMockIRegInfo, GetRegistrations()).WillByDefault(Return(objRegInfoRegistrations));
+
+    EXPECT_CALL(m_objMockAosService, NotifyRegEventState(200, _));
+
+    m_pAosSubscription->ProcessRegEventChange(200);
 }
 
 /// RegSubscription_NotifyReceived()
