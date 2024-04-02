@@ -29,7 +29,7 @@ public:
             AudioNego(nSlotId){};
     MOCK_METHOD(void, CreateProfiles,
             (IN MediaEnvironment * pEnvironment, IN AudioConfiguration* pConfig), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
                     IN IMS_BOOL bEnforceReofferMode),
@@ -37,11 +37,11 @@ public:
     MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
             (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
             (override));
-    MOCK_METHOD(void, NegotiateSDP,
+    MOCK_METHOD(void, NegotiateSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
             (override));
-    MOCK_METHOD(void, FinalizeSDP,
+    MOCK_METHOD(void, FinalizeSdp,
             (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));
     MOCK_METHOD(IMS_BOOL, SetPort, (IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));

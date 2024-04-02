@@ -117,13 +117,13 @@ PUBLIC VIRTUAL void AudioNego::CreateProfiles(
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_D("FormSDP() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
+    IMS_TRACE_D("FormSdp() eNegoState[%d], eDir[%d] lstOaModel size[%d]", eNegoState, eDir,
             m_lstOaModel.GetSize());
-    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
+    IMS_TRACE_D("FormSdp() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {
@@ -134,7 +134,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         case STATE_NEGOTIATED:
             return FormReoffer(pSessionDescriptor, pDescriptor, eDir, bEnforceReofferMode);
         default:
-            IMS_TRACE_E(0, "FormSDP fail eNegoState[%d]", eNegoState, 0, 0);
+            IMS_TRACE_E(0, "FormSdp fail eNegoState[%d]", eNegoState, 0, 0);
             return IMS_FALSE;
     }
 }
@@ -176,7 +176,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void AudioNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {
@@ -196,7 +196,7 @@ PUBLIC VIRTUAL void AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
+PUBLIC VIRTUAL void AudioNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
@@ -224,7 +224,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
         if ((pLatestOaModel->IsAllProfileExist() &&
                     (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)) == IMS_FALSE)
         {
-            IMS_TRACE_I("FinalizeSDP() - Incomplete OaModel[%d]. Delete profile",
+            IMS_TRACE_I("FinalizeSdp() - Incomplete OaModel[%d]. Delete profile",
                     m_lstOaModel.GetSize() - 1, 0, 0);
             delete pLatestOaModel;
             m_lstOaModel.RemoveAt(m_lstOaModel.GetSize() - 1);
@@ -244,7 +244,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
             {
                 pTempOaModel->bConfirmedSession = IMS_TRUE;
                 bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSDP() - find comfirmed Session OaModel[%d]",
+                IMS_TRACE_D("FinalizeSdp() - find comfirmed Session OaModel[%d]",
                         m_lstOaModel.GetSize() - i, 0, 0);
                 break;
             }
@@ -255,7 +255,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
     // not select OaModel
     if (bFoundOaModel != IMS_TRUE && m_lstOaModel.GetSize() > 0)
     {
-        IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
+        IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
 }
 

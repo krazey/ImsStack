@@ -184,30 +184,30 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
     return bRet;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
         IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
         IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
+    IMS_TRACE_I("FormSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
             pSession, eMediaType);
-    IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
+    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
-    IMS_TRACE_D("FormSDP() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
+    IMS_TRACE_D("FormSdp() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
             bEnforceReofferMode, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->FormSDP(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
+    if (pMediaNego->FormSdp(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
                 bEnforceReofferMode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "FormSDP() - FormSDP Failed", 0, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - FormSdp Failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -257,25 +257,25 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetSupportedMediaTypesFromSdp(
     return pMediaNego->GetSupportedMediaTypesFromSdp(pSession);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
         OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
         OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)
 {
     IMS_TRACE_I(
-            "NegotiateSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "NegotiateSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "NegotiateSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->NegotiateSDP(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
+    if (pMediaNego->NegotiateSdp(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
                 errorReason) == IMS_TRUE)
     {
-        IMS_TRACE_I("NegotiateSDP() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
+        IMS_TRACE_I("NegotiateSdp() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
 
         // set Access Network
@@ -369,10 +369,10 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession)
+PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession)
 {
     IMS_TRACE_I(
-            "FinalizeSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "FinalizeSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     if (pSession == IMS_NULL)
     {
@@ -384,11 +384,11 @@ PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession*
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FinalizeSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FinalizeSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return;
     }
 
-    pMediaNego->FinalizeSDP(pSession);
+    pMediaNego->FinalizeSdp(pSession);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)

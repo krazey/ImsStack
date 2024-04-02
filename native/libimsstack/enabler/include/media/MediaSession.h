@@ -66,18 +66,18 @@ public:
     IMS_UINTP CreateProfile(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
     IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
-    IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+    IMS_BOOL FormSdp(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
             IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;
     virtual MEDIA_CONTENT_TYPE GetSupportedMediaTypesFromSdp(
             IN IMS_UINTP nNegoId, IN ISession* pSession) override;
-    IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
+    IMS_BOOL NegotiateSdp(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
     IMS_BOOL RequestQos(
             IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
-    void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
+    void FinalizeSdp(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
     IMS_BOOL Run(IN IMS_UINTP nNegoID) override;
     IMS_BOOL Terminate() override;
     NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID) override;

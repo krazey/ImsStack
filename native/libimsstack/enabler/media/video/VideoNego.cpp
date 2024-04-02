@@ -127,14 +127,14 @@ void VideoNego::DestroyProfiles()
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP() - NegoState[%d], lstOaModel size[%d]", eNegoState,
+    IMS_TRACE_I("FormSdp() - NegoState[%d], lstOaModel size[%d]", eNegoState,
             m_listOaModel.GetSize(), 0);
-    IMS_TRACE_I("FormSDP() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
-    IMS_TRACE_D("FormSDP() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
+    IMS_TRACE_I("FormSdp() - eDirection[%d], bDisable[%d]", eDirection, bDisable, 0);
+    IMS_TRACE_D("FormSdp() - EnforceReofferMode[%d]", bEnforceReofferMode, 0, 0);
 
     switch (eNegoState)
     {
@@ -187,7 +187,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {
@@ -207,7 +207,7 @@ PUBLIC VIRTUAL void VideoNego::NegotiateSDP(NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
+PUBLIC VIRTUAL void VideoNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
@@ -236,7 +236,7 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
         if ((pLatestOaModel->IsAllProfileExist() &&
                     (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)) == IMS_FALSE)
         {
-            IMS_TRACE_I("FinalizeSDP() - Incomplete OaModel[%d]. Delete profile",
+            IMS_TRACE_I("FinalizeSdp() - Incomplete OaModel[%d]. Delete profile",
                     m_listOaModel.GetSize() - 1, 0, 0);
             delete pLatestOaModel;
             m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -256,7 +256,7 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
             {
                 pTempOaModel->bConfirmedSession = IMS_TRUE;
                 bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSDP() - find comfirmed Session OaModel [%d]",
+                IMS_TRACE_D("FinalizeSdp() - find comfirmed Session OaModel [%d]",
                         m_listOaModel.GetSize() - i, 0, 0);
                 break;
             }
@@ -266,7 +266,7 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
     // SessionDescriptor key mismatch case handling, not select OaModel
     if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
     {
-        IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
+        IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
 }
 

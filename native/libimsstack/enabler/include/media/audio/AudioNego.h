@@ -117,7 +117,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
-    virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
             IN IMS_BOOL bEnforceReofferMode);
 
@@ -141,7 +141,7 @@ public:
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
      * @param eDir The media direction of the SDP
      */
-    virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
+    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
 
@@ -151,7 +151,7 @@ public:
      * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
      * @param eNegoState The current negotiation state to decide to remove the OA model item
      */
-    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
+    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
     /**
      * @brief Set the local port number of the AudioProfile

@@ -28,19 +28,19 @@ public:
             MediaNego(nSlotId){};
     MOCK_METHOD(void, CreateProfile, (IN MediaEnvironment * pEnvironment), (const));
     MOCK_METHOD(IMS_BOOL, Forking, (IN MediaNego * pMediaNego), (const));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (OUT ISession * pSession, IN MEDIA_CONTENT_TYPE eMediaType,
                     IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
                     IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
             (const));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp, (IN ISession * pSession),
             (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSDP,
+    MOCK_METHOD(IMS_BOOL, NegotiateSdp,
             (IN ISession * pSession, OUT IMS_SINT32& nAudioDirection,
                     OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
                     OUT MediaNegoResult& errorReason),
             (const));
-    MOCK_METHOD(void, FinalizeSDP, (IN ISession * pSession), (const));
+    MOCK_METHOD(void, FinalizeSdp, (IN ISession * pSession), (const));
 
     MOCK_METHOD(void, SetNegoState, (NEGO_STATE eNegoState), (const));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (), (const));

@@ -109,11 +109,11 @@ PUBLIC VIRTUAL void TextNego::CreateProfiles(
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL TextNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_D("FormSDP() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+    IMS_TRACE_D("FormSdp() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
             bEnforceReofferMode);
 
     switch (eNegoState)
@@ -167,7 +167,7 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void TextNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {
@@ -187,7 +187,7 @@ PUBLIC VIRTUAL void TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL void TextNego::FinalizeSDP(
+PUBLIC VIRTUAL void TextNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
@@ -216,7 +216,7 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
         if (!(pLatestOaModel->IsAllProfileExist() &&
                     (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)))
         {
-            IMS_TRACE_I("FinalizeSDP() - There is incomplete OaModel[%d]. Delete profile",
+            IMS_TRACE_I("FinalizeSdp() - There is incomplete OaModel[%d]. Delete profile",
                     m_listOaModel.GetSize() - 1, 0, 0);
             delete pLatestOaModel;
             m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -236,7 +236,7 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
             {
                 pTempOaModel->bConfirmedSession = IMS_TRUE;
                 bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSDP() - find comfirmed Session OaModel[%d]",
+                IMS_TRACE_D("FinalizeSdp() - find comfirmed Session OaModel[%d]",
                         m_listOaModel.GetSize() - i, 0, 0);
                 break;
             }
@@ -247,7 +247,7 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
     // not select OaModel
     if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
     {
-        IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
+        IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
 }
 
