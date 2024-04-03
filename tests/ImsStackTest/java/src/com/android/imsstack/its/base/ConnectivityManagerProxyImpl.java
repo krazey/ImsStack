@@ -37,7 +37,9 @@ import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -173,6 +175,21 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
             mImsNetworkRecord = new NetworkRecord(network, properties);
             mXcapNetworkRecord = new NetworkRecord(network, properties);
             mEmergencyNetworkRecord = new NetworkRecord(network, properties);
+        }
+    }
+
+    /**
+     * Replaces the PCSCF servers in this {@code LinkProperties} with the given {@link Collection}
+     * of {@link InetAddress} objects.
+     *
+     * @param pcscfServers The {@link Collection} of PCSCF servers to set.
+     */
+    public void setPcscfServers(@NonNull Collection<InetAddress> pcscfServers) {
+        if (mImsNetworkRecord != null) {
+            mImsNetworkRecord.setPcscfServers(pcscfServers);
+        }
+        if (mEmergencyNetworkRecord != null) {
+            mEmergencyNetworkRecord.setPcscfServers(pcscfServers);
         }
     }
 
@@ -362,7 +379,7 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
 
         NetworkRecord(Network network, LinkProperties properties) {
             mNetwork = network;
-            mLinkProperties = properties;
+            mLinkProperties = new LinkProperties(properties);
         }
 
         Network getNetwork() {
@@ -404,6 +421,10 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
             }
 
             mCapabilities = builder.build();
+        }
+
+        void setPcscfServers(@NonNull Collection<InetAddress> pcscfServers) {
+            mLinkProperties.setPcscfServers(pcscfServers);
         }
     }
 
