@@ -312,6 +312,21 @@ public:
         m_pCounter->AddCount(__IMS_FUNC__);
         AosRegistration::ProcessStandardPcscfSelection(nRetryAfter);
     }
+    void ProcessRequiredWfcErrMessage_403() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_403();
+    }
+    void ProcessRequiredWfcErrMessage_500() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_500();
+    }
+    void ProcessRequiredWfcErrMessage_Others() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_Others();
+    }
 
 private:
     AosCounter* m_pCounter;
@@ -524,6 +539,8 @@ protected:
                 .WillByDefault(Return(340));
         ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
                 .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_UDP));
+        ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+                .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
         ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
@@ -532,6 +549,8 @@ protected:
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
 
@@ -4348,19 +4367,37 @@ TEST_F(AosRegistrationTest, StartRetryTimerIfAwtRecoveryRequiredWhenStartFailedW
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWith403)
 {
     ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
     ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
-    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_403"), 1);
+}
+
+TEST_F(AosRegistrationTest,
+        NotifyDeregisteredWithNotSupportedCountryWhenWfcErrMessageRequiredFor403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(AString("NotSupportedCountry")));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+}
+
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg403WhenWfcErrMessageRequiredFor403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
             .WillByDefault(Return(m_strLocationProperties));
@@ -4368,144 +4405,93 @@ TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403));
 
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrMessage)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReason)
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor403)
 {
     m_pAosRegistration->SetImsReasonCode(
             AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY);
-    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(AString("NotSupportedCountry")));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+}
+
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWith500)
+{
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
+    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
     ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
-    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_500"), 1);
+}
+
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg500WhenWfcErrMessageRequiredFor500)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
+}
+
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor500)
+{
+    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_REG_500);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
 
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500)
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWithOthers)
 {
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
-
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_600));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_600);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
 
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500));
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_Others"), 1);
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_NotSupportErrMessage)
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithOtherFailuresWhenWfcErrMessageRequiredForOthers)
 {
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_DuplicateReason)
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredForOthers)
 {
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
+    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
 
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
 
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // Set duplicate reason
-    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_REG_500);
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
 }
 
 TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures)
