@@ -96,15 +96,15 @@ public:
     IMS_SINT32 m_nBarringTimeSecForVideo;
 };
 
-class ScsInfoParam : public OsImsRadioParam
+class SccsInfoParam : public OsImsRadioParam
 {
 public:
-    inline ScsInfoParam() :
+    inline SccsInfoParam() :
             OsImsRadioParam(EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED),
             m_bIsSupported(IMS_FALSE)
     {
     }
-    inline virtual ~ScsInfoParam() {}
+    inline virtual ~SccsInfoParam() {}
 
     IMS_BOOL m_bIsSupported;
 };
@@ -431,7 +431,7 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
         else if (pImsRadioParam->m_nEvent ==
                 OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED)
         {
-            ScsInfoParam* pParam = reinterpret_cast<ScsInfoParam*>(pImsRadioParam);
+            SccsInfoParam* pParam = reinterpret_cast<SccsInfoParam*>(pImsRadioParam);
 
             NotifySimultaneousCallingSupportChanged(pParam->m_bIsSupported);
         }
@@ -504,7 +504,7 @@ PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
         }
         case OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED:
         {
-            ScsInfoParam* pParam = new ScsInfoParam();
+            SccsInfoParam* pParam = new SccsInfoParam();
             pParam->m_bIsSupported = (pParcel->readInt32() > 0) ? IMS_TRUE : IMS_FALSE;
 
             osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
