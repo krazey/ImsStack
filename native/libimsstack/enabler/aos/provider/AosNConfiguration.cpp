@@ -594,11 +594,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMaxCount() const
     return m_objExtraRegErr.nExtraRegErrMaxCnt;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMinCount() const
-{
-    return m_objExtraRegErr.nExtraRegErrMinCnt;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
 {
     return m_objAsset.nRegPcscfUpdatePolicy;
@@ -865,8 +860,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT);
         m_objExtraRegErr.nExtraRegErrMaxCnt =
                 piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT);
-        m_objExtraRegErr.nExtraRegErrMinCnt =
-                piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT);
         m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached = piCcBundle->GetInt(
                 CarrierConfig::Assets::
                         KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT);
@@ -886,10 +879,9 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "KEY_EXTRA_REG_ERR_BUNDLE :: FinalType(%d), Policy(%d), MaxCnt(%d)",
                 m_objExtraRegErr.nExtraRegErrFinalType, m_objExtraRegErr.nExtraRegErrPolicy,
                 m_objExtraRegErr.nExtraRegErrMaxCnt);
-        A_IMS_TRACE_D(LOGTAG, "MinCnt(%d), RetryCntShared(%d), ReRegRoaming(%d)",
-                m_objExtraRegErr.nExtraRegErrMinCnt,
+        A_IMS_TRACE_D(LOGTAG, "RetryCntShared(%d), ReregRoaming(%d)",
                 m_objExtraRegErr.bExtraRegErrRetryCntSharedForRegAndSub,
-                m_objExtraRegErr.bExtraReregFailureWithErrCodeInRoaming);
+                m_objExtraRegErr.bExtraReregFailureWithErrCodeInRoaming, 0);
         A_IMS_TRACE_D(LOGTAG, "Pcscfs Repeated Cnt: EPS 5GS only(%d), LTE Combined(%d)",
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached,
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, 0);
@@ -903,7 +895,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         for (int i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objExtraRegErr.objExtraReregErrCode.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "ReRegErrCode(%d), ", nValue, 0, 0);
+            A_IMS_TRACE_D(LOGTAG, "ReregErrCode(%d), ", nValue, 0, 0);
         }
         nSize = m_objExtraRegErr.objExtraRegErrWaitTimeSec.GetSize();
         for (int i = 0; i < nSize; i++)

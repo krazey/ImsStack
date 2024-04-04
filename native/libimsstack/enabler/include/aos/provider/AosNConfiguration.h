@@ -134,7 +134,6 @@ public:
     IMS_SINT32 GetExtraRegErrFinalType() const override;
     IMS_SINT32 GetExtraRegErrPolicy() const override;
     IMS_SINT32 GetExtraRegErrMaxCount() const override;
-    IMS_SINT32 GetExtraRegErrMinCount() const override;
     IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const override;
     IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const override;
     IMS_SINT32 GetGeolocationPidfFormingPolicy() const override;

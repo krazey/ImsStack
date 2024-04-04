@@ -401,7 +401,6 @@
         <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="false"/>
         <int name="extra_reg_err_final_type_int" value="0"/>
         <int name="extra_reg_err_max_cnt_int" value="0"/>
-        <int name="extra_reg_err_min_cnt_int" value="0"/>
         <int name="extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="0"/>
         <int name="extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="0"/>
         <int name="extra_reg_err_policy_int" value="0"/>

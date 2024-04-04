@@ -122,7 +122,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrFinalType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetExtraRegErrMinCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));

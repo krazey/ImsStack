@@ -196,7 +196,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
                     Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
                     Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
-                    Assets.KEY_EXTRA_REG_ERR_MIN_CNT_INT,
                     Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
                     Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
                     Assets.KEY_EXTRA_REG_ERR_POLICY_INT,

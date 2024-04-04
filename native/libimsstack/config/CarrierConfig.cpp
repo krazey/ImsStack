@@ -816,7 +816,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[] =
         "extra_reg_err_final_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT[] = "extra_reg_err_max_cnt_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT[] = "extra_reg_err_min_cnt_int";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[] =
                 "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";

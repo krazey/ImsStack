@@ -907,9 +907,6 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT, -1))
             .WillOnce(Return(0));
 
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT, -1))
-            .WillOnce(Return(0));
-
     EXPECT_CALL(objExtraRegErr,
             GetInt(CarrierConfig::Assets::
                             KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
@@ -1131,7 +1128,6 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsExtraRegErrRetryCntSharedForRegAndSubRequired());
     EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrFinalType());
     EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrMaxCount());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrMinCount());
     EXPECT_EQ(1, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached());
     EXPECT_EQ(2, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
     EXPECT_EQ(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED,

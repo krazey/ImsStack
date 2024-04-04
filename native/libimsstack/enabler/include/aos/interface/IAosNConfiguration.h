@@ -440,9 +440,9 @@ public:
     virtual IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const = 0;
 
     /**
-     * @brief Flag specifying if WFC error message is support.
+     * @brief Flag specifying if WFC error message is supported.
      *
-     * @return IMS_TRUE if support, else IMS_FALSE
+     * @return IMS_TRUE if supported, else IMS_FALSE
      */
     virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
 
@@ -937,17 +937,6 @@ public:
      * @return IMS_SINT32 Return max of the extra error
      */
     virtual IMS_SINT32 GetExtraRegErrMaxCount() const = 0;
-
-    /**
-     * @brief Indicate the minimum number for retries when registration or reregistration fails.
-     *
-     *        In case of initial registration, it is retried with the next PCSCF that is available.
-     *        But in case of reregistration, it is retried with the same PCSCF according to
-     *        the minimum number of times.
-     *
-     * @return IMS_SINT32 Return min of the extra error
-     */
-    virtual IMS_SINT32 GetExtraRegErrMinCount() const = 0;
 
     /**
      * @brief Indicate which the PCSCF address  to use when the PCSCF address are changed
