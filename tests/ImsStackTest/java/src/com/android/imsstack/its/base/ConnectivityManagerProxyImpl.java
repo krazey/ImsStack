@@ -49,14 +49,22 @@ import java.util.concurrent.Executor;
  */
 public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
     private static final long DEFAULT_EVENT_DELAY_TIME_MILLIS = 20; // 20 ms
+    private static final int APN_DEFAULT = 0;
+    private static final int APN_IMS = 1;
+    private static final int APN_EMERGENCY = 2;
+    private static final int APN_XCAP = 3;
+    private static final int APN_MAX = 4;
     private final ArraySet<NetworkCallbackRecord> mNetworkCallbackRecords = new ArraySet<>();
     private final ArraySet<QosCallbackRecord> mQosCallbackRecords = new ArraySet<>();
     private final SparseArray<LinkProperties> mLinkProperties = new SparseArray<>();
     private int mQosSessionBearerType = 0;
-    private NetworkRecord mDefaultNetworkRecord;
-    private NetworkRecord mImsNetworkRecord;
-    private NetworkRecord mXcapNetworkRecord;
-    private NetworkRecord mEmergencyNetworkRecord;
+    private final NetworkRecord[] mNetworkRecords = new NetworkRecord[APN_MAX];
+
+    ConnectivityManagerProxyImpl() {
+        for (int i = 0; i < mNetworkRecords.length; ++i) {
+            mNetworkRecords[i] = null;
+        }
+    }
 
     @Override
     public void registerQosCallback(@NonNull final QosSocketInfo socketInfo,
@@ -112,12 +120,11 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
 
     @Override
     public @Nullable LinkProperties getLinkProperties(@Nullable Network network) {
-        if (mImsNetworkRecord == null) {
+        NetworkRecord nr = mNetworkRecords[APN_IMS];
+        if (nr == null) {
             return null;
         }
-        return mImsNetworkRecord.isSameNetwork(network)
-                ? mImsNetworkRecord.getLinkProperties()
-                : null;
+        return nr.isSameNetwork(network) ? nr.getLinkProperties() : null;
     }
 
     @Override
@@ -166,15 +173,51 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
      */
     public void setNetwork(@Nullable Network network, @Nullable LinkProperties properties) {
         if (network == null) {
-            mDefaultNetworkRecord = null;
-            mImsNetworkRecord = null;
-            mXcapNetworkRecord = null;
-            mEmergencyNetworkRecord = null;
+            for (int i = 0; i < mNetworkRecords.length; ++i) {
+                mNetworkRecords[i] = null;
+            }
         } else {
-            mDefaultNetworkRecord = new NetworkRecord(network, properties);
-            mImsNetworkRecord = new NetworkRecord(network, properties);
-            mXcapNetworkRecord = new NetworkRecord(network, properties);
-            mEmergencyNetworkRecord = new NetworkRecord(network, properties);
+            for (int i = 0; i < mNetworkRecords.length; ++i) {
+                if (mNetworkRecords[i] == null) {
+                    mNetworkRecords[i] = new NetworkRecord(network, properties);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the network information with the specified {@link Network} and {@link LinkProperties}.
+     * If the {@link Network} object is null, all the network records will be set to null.
+     *
+     * @param network The {@link Network} object identifying the network.
+     * @param properties The {@link LinkProperties} for the specified network.
+     * @param capability The network capability. Possible values are:
+     *                   {@link NetworkCapabilities#NET_CAPABILITY_IMS},
+     *                   {@link NetworkCapabilities#NET_CAPABILITY_XCAP},
+     *                   {@link NetworkCapabilities#NET_CAPABILITY_EIMS}.
+     */
+    public void setNetwork(@Nullable Network network, @Nullable LinkProperties properties,
+            int capability) {
+        int apnType = APN_MAX;
+
+        if (capability == NetworkCapabilities.NET_CAPABILITY_IMS) {
+            apnType = APN_IMS;
+        } else if (capability == NetworkCapabilities.NET_CAPABILITY_EIMS) {
+            apnType = APN_EMERGENCY;
+        } else if (capability == NetworkCapabilities.NET_CAPABILITY_XCAP) {
+            apnType = APN_XCAP;
+        } else if (capability == NetworkCapabilities.NET_CAPABILITY_INTERNET) {
+            apnType = APN_DEFAULT;
+        }
+
+        if (apnType == APN_MAX) {
+            return;
+        }
+
+        if (network == null) {
+            mNetworkRecords[apnType] = null;
+        } else if (mNetworkRecords[apnType] == null) {
+            mNetworkRecords[apnType] = new NetworkRecord(network, properties);
         }
     }
 
@@ -185,11 +228,11 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
      * @param pcscfServers The {@link Collection} of PCSCF servers to set.
      */
     public void setPcscfServers(@NonNull Collection<InetAddress> pcscfServers) {
-        if (mImsNetworkRecord != null) {
-            mImsNetworkRecord.setPcscfServers(pcscfServers);
+        if (mNetworkRecords[APN_IMS] != null) {
+            mNetworkRecords[APN_IMS].setPcscfServers(pcscfServers);
         }
-        if (mEmergencyNetworkRecord != null) {
-            mEmergencyNetworkRecord.setPcscfServers(pcscfServers);
+        if (mNetworkRecords[APN_EMERGENCY] != null) {
+            mNetworkRecords[APN_EMERGENCY].setPcscfServers(pcscfServers);
         }
     }
 
@@ -351,13 +394,13 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
 
     private NetworkRecord getNetworkRecord(NetworkCallbackRecord ncr) {
         if (ncr.isForDefaultNetwork()) {
-            return mDefaultNetworkRecord;
+            return mNetworkRecords[APN_DEFAULT];
         } else if (ncr.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
-            return mImsNetworkRecord;
+            return mNetworkRecords[APN_IMS];
         } else if (ncr.hasCapability(NetworkCapabilities.NET_CAPABILITY_XCAP)) {
-            return mXcapNetworkRecord;
+            return mNetworkRecords[APN_XCAP];
         } else if (ncr.hasCapability(NetworkCapabilities.NET_CAPABILITY_EIMS)) {
-            return mEmergencyNetworkRecord;
+            return mNetworkRecords[APN_EMERGENCY];
         }
         return null;
     }
@@ -486,6 +529,7 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
         private final NetworkRequest mRequest;
         private final NetworkCallback mCallback;
         private final Handler mScheduler;
+        private boolean mAvailable = false;
 
         NetworkCallbackRecord(NetworkRequest request, NetworkCallback callback, Handler scheduler) {
             mRequest = request;
@@ -506,9 +550,10 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
         }
 
         void dispatchNetworkAvailable(NetworkRecord nr) {
-            if (nr == null || nr.getCapabilities() == null) {
+            if (nr == null || nr.getCapabilities() == null || mAvailable) {
                 return;
             }
+            mAvailable = true;
             mScheduler.postDelayed(() -> {
                 mCallback.onAvailable(nr.getNetwork());
                 mCallback.onCapabilitiesChanged(nr.getNetwork(), nr.getCapabilities());
@@ -517,6 +562,7 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
         }
 
         void dispatchNetworkUnavailable() {
+            mAvailable = false;
             mScheduler.postDelayed(() -> {
                 mCallback.onUnavailable();
             }, DEFAULT_EVENT_DELAY_TIME_MILLIS);
@@ -535,6 +581,7 @@ public class ConnectivityManagerProxyImpl implements ConnectivityManagerProxy {
             if (nr == null) {
                 return;
             }
+            mAvailable = false;
             mScheduler.postDelayed(() -> {
                 mCallback.onLost(nr.getNetwork());
             }, DEFAULT_EVENT_DELAY_TIME_MILLIS);
