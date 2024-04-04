@@ -45,5 +45,9 @@ android_test {
         "android.test.base",
         "android.test.runner",
     ],
+    jni_libs: [
+        "libimsstack",
+    ],
     test_suites: ["general-tests"],
+    //test_config: "AndroidTest.xml",
 }
