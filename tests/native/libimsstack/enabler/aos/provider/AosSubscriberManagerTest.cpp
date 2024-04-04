@@ -281,6 +281,8 @@ public:
     TestAosSubscriberManager* m_pSubscriberManager;
 
     TestPhoneInfoService m_objPhoneInfoService;
+    IAosService* m_piAosService;
+
     MockISubscriberConfig m_objMockISubscriberConfig;
     MockISubscriberConfig m_objMockISubscriberConfigFake;
     MockISubscriberInfo m_objMockISubscriberInfo;
@@ -311,6 +313,9 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &m_objPhoneInfoService);
 
+        m_piAosService = AosProvider::GetInstance()->GetService();
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService);
+
         m_pSubscriberManager = new TestAosSubscriberManager(IMS_SLOT_0);
         ASSERT_TRUE(m_pSubscriberManager != nullptr);
 
@@ -329,6 +334,7 @@ protected:
             delete m_pSubscriberManager;
         }
 
+        AosProvider::GetInstance()->SetService(m_piAosService);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 
@@ -2115,7 +2121,6 @@ TEST_F(AosSubscriberManagerTest, ClearIsimRecoveryWhenProcessIsimRecoveryWithSup
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
-    AosProvider::GetInstance()->SetService(&m_objMockIAosService, 0);
     EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(1);
 
     // WHEN
@@ -2137,7 +2142,6 @@ TEST_F(AosSubscriberManagerTest, FailedProcessIsimRecoveryWhenTimerIsRunning)
     m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 
-    AosProvider::GetInstance()->SetService(&m_objMockIAosService, 0);
     EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(0);
 
     // WHEN
