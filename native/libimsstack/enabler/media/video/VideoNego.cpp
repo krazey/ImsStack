@@ -28,12 +28,10 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.VN");
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
-        ImsSlot(nSlotId),
+        BaseNego(nSlotId),
         m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(VideoProfile()),
-        m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL),
-        m_eSessionType(MEDIA_TYPE_INVALID),
         m_bNegotiatedCvoResult(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
@@ -41,7 +39,7 @@ PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
 
 PUBLIC
 VideoNego::VideoNego(IN const VideoNego& obj) :
-        ImsSlot(obj.GetSlotId())
+        BaseNego(obj.GetSlotId())
 {
     Copy(&obj);
 }

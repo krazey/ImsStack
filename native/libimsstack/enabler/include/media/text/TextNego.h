@@ -17,20 +17,19 @@
 #ifndef TEXT_NEGO_H_
 #define TEXT_NEGO_H_
 
-#include "ImsSlot.h"
 #include "media/IMedia.h"
+#include "BaseNego.h"
 #include "ISession.h"
 #include "MediaDef.h"
 #include "config/TextConfiguration.h"
 #include "text/TextDef.h"
-#include "text/TextProfile.h"
 #include "text/TextProfileUtil.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
  *
  */
-class TextNego : public ImsSlot
+class TextNego : public BaseNego
 {
 public:
     /**
@@ -247,7 +246,6 @@ private:
 
     ImsList<OaModel*> m_listOaModel;
     TextProfile m_objBaseProfile;
-    MediaEnvironment* m_pEnvironment;
     TextConfiguration* m_pConfig;
 };
 
