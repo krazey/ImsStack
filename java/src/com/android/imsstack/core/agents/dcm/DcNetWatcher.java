@@ -77,8 +77,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     public static final int POLICY_RAT_WLAN = 0x00000080;
 
     public static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
-    public static final int EVENT_VOLTE_LTE_STATE_INFO = 2002;
-    public static final int EVENT_NR_REGISTRATION_INFO = 2006;
 
     // Variables--------------------------------------------------
     private Context mContext;
@@ -126,7 +124,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private int mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
     private int mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
-    private int mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
 
     private ISystem mSystem;
     private int mSlotId = 0;
@@ -238,7 +235,6 @@ public class DcNetWatcher implements IDcNetWatcher {
         mEmcbs = false;
         mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
         mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
-        mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
     }
 
     @Override
@@ -341,11 +337,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     // Voice service state in ServiceState
     public int getVoiceServiceState() {
         return mVoiceServiceState;
-    }
-
-    @Override
-    public int getNrRegistrationInfo() {
-        return mNrRegistrationInfo;
     }
 
     @Override
@@ -481,14 +472,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     @Override
     public void setVoiceRatFromTelephonyManager(int nVoiceRat) {
         mVoiceRatFromTm = nVoiceRat;
-    }
-
-    @Override
-    public void setNrRegistrationInfo(int state, int reason) {
-        if (mDcNetWatcherHandler != null) {
-            Message.obtain(mDcNetWatcherHandler, EVENT_NR_REGISTRATION_INFO, state, reason)
-                    .sendToTarget();
-        }
     }
 
     @Override
@@ -722,7 +705,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private boolean isEmergencyOnlyForVonr() {
         // TODO: check EMERGENCY_ATTACHED
-        return (mNrRegistrationInfo == ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION);
+        return false;
     }
 
     private static boolean is1xRtt(int rat) {
@@ -1130,12 +1113,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                     case EVENT_AIRPLANE_MODE_CHANGED:
                         handleAirplaneModeChanged(msg);
                         break;
-                    case EVENT_VOLTE_LTE_STATE_INFO:
-                        // TODO: will be implemented
-                        break;
-                    case EVENT_NR_REGISTRATION_INFO:
-                        handleNrRegistrationInfo(msg.arg1, msg.arg2);
-                        break;
                     default:
                         break;
                 }
@@ -1204,33 +1181,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                 for (Listener l : mListeners) {
                     l.onAirplaneModeChanged(mAirplaneMode);
                 }
-            }
-        }
-
-        private void handleNrRegistrationInfo(int state, int reason) {
-            if (!isNrRegistrationInfoValid(state)) {
-                return;
-            }
-
-            if (mNrRegistrationInfo != state) {
-                mNrRegistrationInfo = state;
-                for (Listener l : mListeners) {
-                    l.onDataServiceStateChanged(state);
-                }
-
-                mSystem.notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO, state, reason);
-            }
-        }
-
-        private boolean isNrRegistrationInfoValid(int state) {
-            switch (state) {
-                case ImsEventDef.IMS_NR_INFO_REGISTRATION: // FALL-THROUGH
-                case ImsEventDef.IMS_NR_INFO_DEREGISTRATION: // FALL-THROUGH
-                case ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION:
-                    return true;
-
-                default:
-                    return false;
             }
         }
     }
