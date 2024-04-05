@@ -33,6 +33,7 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
 import java.util.List;
@@ -45,6 +46,9 @@ public final class ImsRegistrationWrapper {
     private RegistrationListener mRegistrationListener;
     private final RegistrationCallback mRegistrationCallback = new RegistrationCallback();
     private final Handler mHandler;
+    private final SingleLatch mRegisteredLatch = new SingleLatch("ImsRegistered");
+    private final SingleLatch mDeregisteredLatch = new SingleLatch("ImsDeregistered");
+    private boolean mRegistered;
 
     interface RegistrationListener {
         /**
@@ -198,10 +202,39 @@ public final class ImsRegistrationWrapper {
         }
     }
 
+    /**
+     * Checks whether IMS registration is successfully completed or not.
+     *
+     * @return {@code true} if IMS registration is successfully done, {@code false} otherwise.
+     */
+    public boolean isRegistered() {
+        return mRegistered;
+    }
+
+    /**
+     * Waits for IMS registered.
+     */
+    public void waitForRegistered() {
+        mRegisteredLatch.await(SingleLatch.LONG_TIMEOUT_MS);
+    }
+
+    /**
+     * Waits for IMS deregistered.
+     */
+    public void waitForDeregistered() {
+        mDeregisteredLatch.await();
+    }
+
     private void invokeOnRegistered(@NonNull ImsRegistrationAttributes attributes) {
         mHandler.post(() -> {
+            boolean registered = mRegistered;
+            mRegistered = true;
             if (mRegistrationListener != null) {
                 mRegistrationListener.onRegistered(attributes);
+            }
+            if (!registered) {
+                mRegisteredLatch.countDown();
+                mDeregisteredLatch.init();
             }
         });
     }
@@ -218,8 +251,14 @@ public final class ImsRegistrationWrapper {
             @RegistrationManager.SuggestedAction int suggestedAction,
             @ImsRegistrationImplBase.ImsRegistrationTech int imsRadioTech) {
         mHandler.post(() -> {
+            boolean registered = mRegistered;
+            mRegistered = false;
             if (mRegistrationListener != null) {
                 mRegistrationListener.onDeregistered(info, suggestedAction, imsRadioTech);
+            }
+            if (registered) {
+                mDeregisteredLatch.countDown();
+                mRegisteredLatch.init();
             }
         });
     }

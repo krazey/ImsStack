@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
+import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
 import java.io.FileDescriptor;
@@ -79,6 +80,7 @@ public class WifiAgent {
     private boolean mIsWifiEnabled;
     private boolean mIsWifiConnected;
     private final Set<Listener> mListeners = new HashSet<>();
+    private final SingleLatch mWifiConnectedLatch = new SingleLatch("Wi-Fi connected");
 
     /**
      * Returns the singleton instance of {@link WifiAgent}.
@@ -303,6 +305,13 @@ public class WifiAgent {
         }
     }
 
+    /**
+     * Waits for the Wi-Fi connection ready.
+     */
+    public void waitForWifiConnected() {
+        mWifiConnectedLatch.await();
+    }
+
     private void registerNetworkCallback() {
         if (mNetworkCallback != null) {
             return;
@@ -342,6 +351,7 @@ public class WifiAgent {
         logi("handleNetworkLost: network=" + network);
         setWifiConnected(false);
         resetNetworkInfo();
+        mWifiConnectedLatch.init();
     }
 
     private void handleLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
@@ -349,6 +359,7 @@ public class WifiAgent {
         mNetwork = network;
         mLinkProperties = linkProperties;
         setWifiConnected(true);
+        mWifiConnectedLatch.countDown();
     }
 
     private void unregisterNetworkCallback() {
@@ -411,6 +422,10 @@ public class WifiAgent {
             logi("setWifiEnabled: " + mIsWifiEnabled + " >> " + isEnabled);
             mIsWifiEnabled = isEnabled;
             notifyWifiStateChanged();
+
+            if (!mIsWifiEnabled) {
+                mWifiConnectedLatch.init();
+            }
         }
     }
 

@@ -26,23 +26,25 @@ android_test {
         "src/**/*.java",
     ],
     resource_dirs: [
-        "res"
+        "res",
     ],
     javacflags: [
         "-Xlint",
     ],
-    static_libs:[
+    static_libs: [
         "androidx.test.core",
         "androidx.test.rules",
         "frameworks-base-testutils",
         "imsstack",
         "junit",
+        "mockito-target",
         "platform-test-annotations",
         "testables",
         "truth",
     ],
     libs: [
         "android.test.base",
+        "android.test.mock",
         "android.test.runner",
     ],
     test_suites: ["general-tests"],

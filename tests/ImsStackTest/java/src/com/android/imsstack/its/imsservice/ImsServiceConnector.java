@@ -35,6 +35,7 @@ import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.mmtel.sms.ImsSmsWrapper;
 import com.android.imsstack.its.imsservice.mmtel.ut.ImsUtWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
 /**
@@ -46,6 +47,7 @@ public final class ImsServiceConnector {
     private static ImsServiceConnector sImsServiceConnector = null;
     private static TestImsService sImsService;
 
+    private final SingleLatch mImsServiceConnectedLatch = new SingleLatch("ImsService");
     private IImsServiceController mImsServiceBinder;
     private ImsServiceConnection mServiceConnection;
     private ImsMmTelFeatureWrapper mMmTelFeatureWrapper;
@@ -61,6 +63,22 @@ public final class ImsServiceConnector {
             sImsServiceConnector = new ImsServiceConnector();
         }
         return sImsServiceConnector;
+    }
+
+    /**
+     * Checks whether the service connection is in progress or not.
+     *
+     * @return {@code true} if the service connection is in progress, {@code false} otherwise.
+     */
+    public boolean isConnectionInProgress() {
+        return mServiceConnection != null;
+    }
+
+    /**
+     * Waits for the ImsService's connection ready.
+     */
+    public void waitForServiceConnected() {
+        mImsServiceConnectedLatch.await();
     }
 
     /**
@@ -131,6 +149,8 @@ public final class ImsServiceConnector {
             AppContext.getInstance().unbindService(mServiceConnection);
             mServiceConnection = null;
         }
+
+        mImsServiceConnectedLatch.init();
     }
 
     private void createMmTelWrappers(@NonNull IImsMmTelFeature mmtelFeature) {
@@ -188,6 +208,7 @@ public final class ImsServiceConnector {
 
         try {
             mImsServiceBinder.enableIms(TestConstants.SLOT0, TestConstants.SUB_ID_1);
+            mImsServiceBinder.notifyImsServiceReadyForFeatureCreation();
 
             IImsRegistration registration = mImsServiceBinder.getRegistration(
                     TestConstants.SLOT0, TestConstants.SUB_ID_1);
@@ -217,6 +238,7 @@ public final class ImsServiceConnector {
         public void onServiceConnected(ComponentName className, IBinder service) {
             logi("onServiceConnected = " + className + " / " + service);
             notifyOnServiceConnected(service);
+            mImsServiceConnectedLatch.countDown();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -225,8 +247,8 @@ public final class ImsServiceConnector {
         }
     };
 
-    private static class TestImsService extends ImsService {
-        TestImsService() {
+    public static class TestImsService extends ImsService {
+        public TestImsService() {
             sImsService = this;
         }
     }
