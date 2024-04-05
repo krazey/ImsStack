@@ -970,5 +970,6 @@ TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetryWithOtherIpType)
 
 TEST_F(AosPcscfTest, TimerToStringForInvalidType)
 {
-    EXPECT_EQ(m_pAosPcscf->TimerToString(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100), "__INVALID__");
+    EXPECT_STREQ(
+            m_pAosPcscf->TimerToString(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100), "__INVALID__");
 }

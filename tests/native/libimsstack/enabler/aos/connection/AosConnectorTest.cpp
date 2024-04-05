@@ -993,7 +993,7 @@ TEST_F(AosConnectorTest, NotHandleInvalidTimer)
 
     m_pAosConnector->StartTimer(nInvalidTimer, TIMER_DURATION_MILLIS);
 
-    EXPECT_EQ(m_pAosConnector->TimerToString(nInvalidTimer), "__INVALID__");
+    EXPECT_STREQ(m_pAosConnector->TimerToString(nInvalidTimer), "__INVALID__");
 
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(nInvalidTimer));
 
