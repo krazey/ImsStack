@@ -20,6 +20,7 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpRtcpFeedback.h"
 #include "video/VideoNego.h"
+#include "video/VideoNegoHevc.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "MediaResourceManager.h"
@@ -1070,72 +1071,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
                 continue;
             }
 
-            if (pHevcFmtp->bShow_Profile)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append("; ");
-                }
-                AString strTemp;
-                strTemp.Sprintf("profile-id=%d", pHevcFmtp->nProfile);
-                strFmtp.Append(strTemp);
-            }
-
-            if (pHevcFmtp->bShow_Level)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append("; ");
-                }
-                AString strTemp;
-                strTemp.Sprintf("level-id=%d", pHevcFmtp->nLevel);
-                strFmtp.Append(strTemp);
-            }
-            /*
-                        if (pHevcFmtp->bShow_PacketizationMode)
-                        {
-                            if (strFmtp.GetLength() > 0)
-                            {
-                                strFmtp.Append("; ");
-                            }
-                            AString strTemp;
-                            strTemp.Sprintf("packetization-mode=%d", pHevcFmtp->nPacketizationMode);
-                            strFmtp.Append(strTemp);
-                        }
-            */
-            if (pHevcFmtp->bShow_SpropParam)
-            {
-                ImsList<AString> objSplitComma = pHevcFmtp->strSpropParam.Split(',');
-
-                if (objSplitComma.GetSize() == 3)
-                {
-                    if (strFmtp.GetLength() > 0)
-                    {
-                        strFmtp.Append("; ");
-                    }
-
-                    pHevcFmtp->strVps = objSplitComma.GetAt(0);
-                    pHevcFmtp->strSps = objSplitComma.GetAt(1);
-                    pHevcFmtp->strPps = objSplitComma.GetAt(2);
-
-                    if (pHevcFmtp->strVps.GetLength() > 0 || pHevcFmtp->strSps.GetLength() > 0 ||
-                            pHevcFmtp->strPps.GetLength() > 0)
-                    {
-                        AString strTemp;
-
-                        strTemp.Sprintf("sprop-vps=%s", pHevcFmtp->strVps.GetStr());
-                        strFmtp.Append(strTemp);
-                        strFmtp.Append("; ");
-
-                        strTemp.Sprintf("sprop-sps=%s", pHevcFmtp->strSps.GetStr());
-                        strFmtp.Append(strTemp);
-                        strFmtp.Append("; ");
-
-                        strTemp.Sprintf("sprop-pps=%s", pHevcFmtp->strPps.GetStr());
-                        strFmtp.Append(strTemp);
-                    }
-                }
-            }
+            strFmtp = VideoNegoHevc::SetSdpFmtpFromHevcFmtp(pHevcFmtp);
 
             eResolution = pHevcFmtp->eResolution;
         }
