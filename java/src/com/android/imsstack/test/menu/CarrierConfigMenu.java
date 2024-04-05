@@ -21,7 +21,6 @@ import android.os.PersistableBundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.ImsRtt;
 import android.telephony.CarrierConfigManager.ImsVoice;
@@ -61,8 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("deprecation")
-public class CarrierConfigMenu extends PreferenceActivity {
+public class CarrierConfigMenu extends AppCompatActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
 
@@ -302,11 +300,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
         ImsLog.d(mSlotId, "CarrierConfigMenu: onResume");
 
         initTestConfig();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     @VisibleForTesting

@@ -17,6 +17,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="test_config_editor"
     android:title="TestConfig Editor">
+    <PreferenceScreen/> <!-- Empty row for title bar. -->
     <CheckBoxPreference android:title="IMS Disabled"
         android:key="test_ims_disabled"
         android:summaryOn="IMS off" android:summaryOff="IMS on"
@@ -49,6 +50,7 @@
     </CheckBoxPreference>
     <PreferenceScreen android:title="Subscriber"
         android:key="screen_subscriber">
+        <PreferenceScreen/> <!-- Empty for first row. -->
         <EditTextPreference android:title="Home Domain Name"
             android:key="subscriber_home_domain_name"
             android:dialogMessage="">
@@ -68,6 +70,7 @@
     </EditTextPreference>
     <PreferenceScreen android:title="User-Agent"
         android:key="screen_user_agent">
+        <PreferenceScreen/> <!-- Empty for first row. -->
         <CheckBoxPreference android:title="Use predefined UA String"
             android:key="user_agent_use_predefined_ua_string"
             android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
