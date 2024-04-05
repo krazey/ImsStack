@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_NEGO_AVC_H_
-#define VIDEO_NEGO_AVC_H_
+#ifndef VIDEO_NEGO_HEVC_H_
+#define VIDEO_NEGO_HEVC_H_
 
 #include "video/VideoProfile.h"
 

@@ -20,6 +20,7 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpRtcpFeedback.h"
 #include "video/VideoNego.h"
+#include "video/VideoNegoAvc.h"
 #include "video/VideoNegoHevc.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
@@ -1026,38 +1027,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
                 continue;
             }
 
-            if (pAvcFmtp->bShow_ProfileLevelId)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-                AString strTemp;
-                strTemp.Sprintf("profile-level-id=%s", pAvcFmtp->strProfileLevelId.GetStr());
-                strFmtp.Append(strTemp);
-            }
-
-            if (pAvcFmtp->bShow_PacketizationMode)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-                AString strTemp;
-                strTemp.Sprintf("packetization-mode=%d", pAvcFmtp->nPacketizationMode);
-                strFmtp.Append(strTemp);
-            }
-
-            if (pAvcFmtp->bShow_SpropParam)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append(";");
-                }
-                AString strTemp;
-                strTemp.Sprintf("sprop-parameter-sets=%s", pAvcFmtp->strSpropParam.GetStr());
-                strFmtp.Append(strTemp);
-            }
+            strFmtp = VideoNegoAvc::SetSdpFmtpFromAvcFmtp(pAvcFmtp);
 
             eResolution = pAvcFmtp->eResolution;
         }
