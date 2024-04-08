@@ -64,7 +64,6 @@ SystemListenerHolder::SystemListenerHolder() :
     IMS_UINT32 nCategories[] = {
             SystemConstants::CATEGORY_NETWORK,
             SystemConstants::CATEGORY_WIFI,
-            SystemConstants::CATEGORY_CALL,
             SystemConstants::CATEGORY_POWER,
             SystemConstants::CATEGORY_TIMER,
             SystemConstants::CATEGORY_CONFIG,
@@ -204,8 +203,6 @@ PRIVATE GLOBAL const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UIN
             return "CATEGORY_NETWORK";
         case SystemConstants::CATEGORY_WIFI:
             return "CATEGORY_WIFI";
-        case SystemConstants::CATEGORY_CALL:
-            return "CATEGORY_CALL";
         case SystemConstants::CATEGORY_POWER:
             return "CATEGORY_POWER";
         case SystemConstants::CATEGORY_TIMER:
@@ -343,10 +340,6 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     {
         NotifyWifiCategory(nSlotId, nCmd, in);
     }
-    else if ((nCmd & SystemConstants::CATEGORY_CALL) == SystemConstants::CATEGORY_CALL)
-    {
-        NotifyCallCategory(nSlotId, nCmd, in);
-    }
     else if ((nCmd & SystemConstants::CATEGORY_POWER) == SystemConstants::CATEGORY_POWER)
     {
         NotifyPowerCategory(nSlotId, nCmd, in);
@@ -398,7 +391,6 @@ void System::AddListener(
 
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CALL, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_TIMER, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
@@ -423,7 +415,6 @@ void System::RemoveListener(
     RemoveListenerIfCategoryMatched(
             nCategory, SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CALL, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(
             nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(
@@ -1809,51 +1800,6 @@ void System::NotifyWifiCategory(
     else
     {
         IMS_TRACE_D("CATEGORY_WIFI :: Cmd (%u) is not handled", nCmd, 0, 0);
-        return;
-    }
-
-    for (IMS_UINT32 i = 0; i < pListeners->GetSize(); ++i)
-    {
-        ISystemListener* piListener = pListeners->GetAt(i);
-
-        if (piListener != IMS_NULL)
-        {
-            piListener->System_NotifyEvent(nEvent, nWParam, nLParam);
-        }
-    }
-}
-
-PRIVATE
-void System::NotifyCallCategory(
-        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
-{
-    SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CALL);
-
-    if (pListeners == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_SINT32 nEvent = IMS_SYSTEM_INVALID;
-    IMS_UINTP nWParam = 0;
-    IMS_UINTP nLParam = 0;
-    AString strNumber;
-
-    if (nCmd == SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED)
-    {
-        nEvent = IMS_SYSTEM_CSCALL_STATE_CHANGED;
-        nWParam = in.readInt32();
-
-        String16 str16Number = in.readString16();
-        String8 str8Number(str16Number);
-
-        strNumber = str8Number.c_str();
-        nLParam = reinterpret_cast<IMS_UINTP>(strNumber.GetStr());
-    }
-    else
-    {
-        IMS_TRACE_D("CATEGORY_CALL :: Cmd (%u) is not handled", nCmd, 0, 0);
         return;
     }
 

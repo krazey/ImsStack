@@ -111,19 +111,6 @@ TEST_F(SystemTest, NotifyData)
 
     EXPECT_EQ(1, out.readInt32());
 
-    /* Call Notify Data for CATEGORY_CALL*/
-    in.setDataPosition(0);
-    out.setDataPosition(0);
-    in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED);
-    in.writeInt32(2);
-    in.setDataPosition(0);
-
-    m_pSystem->NotifyData(in, out);
-    out.setDataPosition(0);
-
-    EXPECT_EQ(1, out.readInt32());
-
     /* Call Notify Data for CATEGORY_POWER*/
     in.setDataPosition(0);
     out.setDataPosition(0);
@@ -381,22 +368,6 @@ TEST_F(SystemTest, AddAndRemoveListener)
     EXPECT_EQ(1, out.readInt32());
     EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(AnyNumber());
 
-    /* Call CATEGORY_CALL listener*/
-    m_pSystem->AddListener(SystemConstants::CATEGORY_CALL, &m_objMockISystemListener, 0);
-
-    in.setDataPosition(0);
-    out.setDataPosition(0);
-    in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED);
-    in.writeInt32(2);
-    in.setDataPosition(0);
-
-    m_pSystem->NotifyData(in, out);
-    out.setDataPosition(0);
-
-    EXPECT_EQ(1, out.readInt32());
-    EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(AnyNumber());
-
     /* Call CATEGORY_POWER listener*/
     m_pSystem->AddListener(SystemConstants::CATEGORY_POWER, &m_objMockISystemListener, 0);
 
@@ -525,22 +496,6 @@ TEST_F(SystemTest, AddAndRemoveListener)
     in.writeInt32(0);
     in.writeInt32(SystemConstants::NOTIFY_WIFI_STATE_CHANGED);
     in.writeInt32(WIFI_STATE_DISABLED);
-    in.setDataPosition(0);
-
-    m_pSystem->NotifyData(in, out);
-    out.setDataPosition(0);
-
-    EXPECT_EQ(1, out.readInt32());
-    EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(0);
-
-    /* Call CATEGORY_CALL listener*/
-    m_pSystem->RemoveListener(SystemConstants::CATEGORY_CALL, &m_objMockISystemListener, 0);
-
-    in.setDataPosition(0);
-    out.setDataPosition(0);
-    in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED);
-    in.writeInt32(2);
     in.setDataPosition(0);
 
     m_pSystem->NotifyData(in, out);

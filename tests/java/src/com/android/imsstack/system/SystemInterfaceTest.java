@@ -455,24 +455,6 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testNotifyVoiceCallStateChanged() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        system.notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_VOICE_CALL_STATE_CHANGED, data.readInt());
-            assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, data.readInt());
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
     public void testNotifyConfigurationChanged() throws Exception {
         setUpSystemInterface();
         ISystem system = setUpSystemWithLooper();
