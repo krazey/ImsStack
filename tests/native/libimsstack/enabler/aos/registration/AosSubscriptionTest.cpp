@@ -104,9 +104,6 @@ public:
 
     inline ~TestAosSubscription() override { delete m_pCounter; }
 
-    FRIEND_TEST(AosSubscriptionTest, Initialize);
-    FRIEND_TEST(AosSubscriptionTest, RegSubscription_End);
-
     inline void SetAorState(IN IMS_SINT32 nAorState) { m_nAorState = nAorState; }
 
     inline void SetRegSubscription(IN IRegSubscription* piRegSubscription)
@@ -313,22 +310,14 @@ protected:
     }
 };
 
-TEST_F(AosSubscriptionTest, Initialize)
+/// Initialize()
+TEST_F(AosSubscriptionTest, SetRefreshPolicyAndSetListenerWhenInitialize)
 {
-    EXPECT_CALL(m_objMockIRegSubscription, SetRefreshPolicy(0, 1200, 50, 600)).Times(1);
-    EXPECT_CALL(m_objMockIRegSubscription, SetListener(m_pAosSubscription)).Times(1);
-    EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIRegSubscription, SetRefreshPolicy(0, 1200, 50, 600));
+    EXPECT_CALL(m_objMockIRegSubscription, SetListener(m_pAosSubscription));
+    EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _));
 
     m_pAosSubscription->Initialize();
-}
-
-TEST_F(AosSubscriptionTest, RegSubscription_End)
-{
-    m_pAosSubscription->RegSubscription_Removed();
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
-
-    m_pAosSubscription->RegSubscription_Terminated(IRegSubscription::REASON_NO_EXPIRES);
-    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
 /// Start()
@@ -1783,6 +1772,37 @@ TEST_F(AosSubscriptionTest, SubRefreshStopStateWhenUpdateFailedWithRefreshTimeou
 
     m_pAosSubscription->RegSubscription_UpdateFailed(IRegSubscription::REASON_REFRESH_TIMEOUT);
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
+}
+
+/// RegSubscription_Removed()
+TEST_F(AosSubscriptionTest, OfflineStateWhenRemoved)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_UNSUBSCRIBING);
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_StateChanged(
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_REMOVED));
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_NONE, 0, IMS_FALSE))
+            .Times(0);
+
+    m_pAosSubscription->RegSubscription_Removed();
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
+}
+
+/// RegSubscription_Terminated()
+TEST_F(AosSubscriptionTest, OfflineStateWhenTerminated)
+{
+    m_pAosSubscription->SetState(AosSubscription::STATE_SUBSCRIBED);
+    m_pAosSubscription->SetTerminated(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosSubscriptionListener,
+            Subscription_Request(AosSubscription::CMD_SUB_REQUIRED, 0, IMS_FALSE));
+
+    m_pAosSubscription->RegSubscription_Terminated(IRegSubscription::REASON_NO_EXPIRES);
+
+    EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 }
 
 /// Transaction_OnConnectionFailed():
