@@ -108,16 +108,6 @@ public interface ISystem {
     void notifyServiceStateChanged(int serviceState);
 
     /**
-     * Notifies the voice call (CS / IMS) state.
-     *
-     * @param state the call state (TelephonyManager.CALL_STATE_*)
-     *            {@link TelephonyManager.CALL_STATE_IDLE} (0)
-     *            {@link TelephonyManager.CALL_STATE_RINGING} (1)
-     *            {@link TelephonyManager.CALL_STATE_OFFHOOK} (2)
-     */
-    void notifyVoiceCallStateChanged(int state);
-
-    /**
      * Notifies the changes of the IMS configuration.
      *
      * @param configs the configuration items to be updated

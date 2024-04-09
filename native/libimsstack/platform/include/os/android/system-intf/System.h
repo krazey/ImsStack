@@ -219,8 +219,6 @@ private:
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyWifiCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyCallCategory(
-            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyPowerCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyTimerCategory(
