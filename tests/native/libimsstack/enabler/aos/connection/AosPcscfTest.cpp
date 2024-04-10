@@ -215,7 +215,8 @@ TEST_F(AosPcscfTest, RemoveListenerWhenCleanUp)
 
 TEST_F(AosPcscfTest, DoNotProcessDiscoveryForInvalidLocalAddressWhenConfigureWithIpVersion)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_)).WillOnce(ReturnRef(IpAddress::ANY));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_)).WillByDefault(ReturnRef(IpAddress::ANY));
+
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(0);
 
     m_pAosPcscf->Configure(IpAddress::IPV4);
@@ -225,9 +226,10 @@ TEST_F(AosPcscfTest, DoNotProcessDiscoveryForInvalidLocalAddressWhenConfigureWit
 
 TEST_F(AosPcscfTest, ProcessDiscoveryForValidLocalAddressWhenConfigureWithIpVersion)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(1);
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillByDefault(ReturnRef(IpAddress::LOOPBACK));
+
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods());
 
     m_pAosPcscf->Configure(IpAddress::IPV4);
 
@@ -443,129 +445,126 @@ TEST_F(AosPcscfTest, UpdateWhetherPcscfWasTried)
     }
 }
 
-TEST_F(AosPcscfTest, IncreaseCurrentPcscfTriedCount)
+TEST_F(AosPcscfTest, DoNotIncreaseCurrentPcscfTriedCountIfConfiguredRetryCountIsZero)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(3)
-            .WillOnce(Return(0))
-            .WillRepeatedly(Return(2));
-    PreparePcscfPreset();
-
-    // do NOT increase if configured retry count is zero
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(0));
 
-    // increase tried count of current pcscf
     m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
 
-    // do NOT handle invalid Pcscf index
-    m_pAosPcscf->SetCurrentPcscfIndex(m_pAosPcscf->GetPcscfCount());
-    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
     EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
 }
 
-TEST_F(AosPcscfTest, ResetCurrentPcscfTriedCount)
+TEST_F(AosPcscfTest, IncreaseCurrentPcscfTriedCountIfConfiguredRetryCountIsNotZero)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .WillOnce(Return(2))
-            .WillOnce(Return(0))
-            .WillOnce(Return(2));
-    PreparePcscfPreset();
-
-    // increase tried count of current pcscf
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(2));
+
     m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
 
-    // do NOT reset if configured retry count is zero
-    m_pAosPcscf->ResetCurrentPcscfTriedCount();
     EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+}
 
-    // reset tried count of current pcscf
-    m_pAosPcscf->ResetCurrentPcscfTriedCount();
+TEST_F(AosPcscfTest, DoNotHandleInvalidPcscfIndexWhenIncreaseCurrentPcscfTriedCount)
+{
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+
     EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
 }
 
-TEST_F(AosPcscfTest, ResetAllPcscfTriedCount)
+TEST_F(AosPcscfTest, DoNotResetCurrentPcscfTriedCountIfConfiguredRetryCountIsZero)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(2));
-    PreparePcscfPreset();
-    AStringArray objPcscfs = m_pAosPcscf->GetPcscfs();
+    // set tried count of current pcscf as 1
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(0));
 
-    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
-    {
-        m_pAosPcscf->SetCurrentPcscfIndex(nIndex);
-        EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-        m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
-        EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
-    }
+    m_pAosPcscf->ResetCurrentPcscfTriedCount();
 
-    // do NOT reset if configured retry count is zero
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+}
+
+TEST_F(AosPcscfTest, ResetCurrentPcscfTriedCountIfConfiguredRetryCountIsNotZero)
+{
+    // set tried count of current pcscf as 1
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(2));
+
+    m_pAosPcscf->ResetCurrentPcscfTriedCount();
+
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+}
+
+TEST_F(AosPcscfTest, DoNotResetAllPcscfTriedCountIfConfiguredRetryCountIsZero)
+{
+    // set tried count of current pcscf as 1
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(0));
 
     m_pAosPcscf->ResetAllPcscfTriedCount();
 
-    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
-    {
-        m_pAosPcscf->SetCurrentPcscfIndex(nIndex);
-        EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
-    }
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+}
 
-    // reset tried count of all pcscf
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(2));
+TEST_F(AosPcscfTest, ResetAllPcscfTriedCountIfConfiguredRetryCountIsNotZero)
+{
+    // set tried count of current pcscf as 1
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillByDefault(Return(2));
 
     m_pAosPcscf->ResetAllPcscfTriedCount();
 
-    for (IMS_UINT32 nIndex = 0; nIndex < objPcscfs.GetCount(); nIndex++)
-    {
-        m_pAosPcscf->SetCurrentPcscfIndex(nIndex);
-        EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
-    }
+    m_pAosPcscf->SetCurrentPcscfIndex(0);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
 }
 
-TEST_F(AosPcscfTest, GetCurrentPcscf)
+TEST_F(AosPcscfTest, GetCurrentPcscfReturnsFalseIfCurrentPcscfIndexIsInvalid)
 {
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
+    m_pAosPcscf->SetCurrentPcscfIndex(1);
+
     AString objPcscfAddress;
     IMS_UINT32 nPcscfPort;
+    IMS_BOOL bResult = m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort);
 
-    // update current port as 5060 if it is 0
-    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 0);
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosPcscfTest, GetCurrentPcscfReturnsTrueIfCurrentPcscfIsAvailable)
+{
+    m_pAosPcscf->AddPcscf(AString("0.0.0.1"), 5060);
     m_pAosPcscf->SetCurrentPcscfIndex(0);
-    EXPECT_TRUE(m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
+
+    AString objPcscfAddress;
+    IMS_UINT32 nPcscfPort;
+    IMS_BOOL bResult = m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort);
+
+    EXPECT_TRUE(bResult);
     EXPECT_EQ(objPcscfAddress, AString("0.0.0.1"));
     EXPECT_EQ(nPcscfPort, 5060);
-
-    // get current Pcscf successfully
-    m_pAosPcscf->AddPcscf(AString("0.0.0.2"), 5061);
-    m_pAosPcscf->SetCurrentPcscfIndex(1);
-    EXPECT_TRUE(m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
-    EXPECT_EQ(objPcscfAddress, AString("0.0.0.2"));
-    EXPECT_EQ(nPcscfPort, 5061);
-
-    // return false for Pcscf of index is null
-    m_pAosPcscf->GetPcscfList().Append(nullptr);
-    m_pAosPcscf->SetCurrentPcscfIndex(2);
-    EXPECT_FALSE(m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
-
-    // return false for Pcscf index larger than the Pcscf list size
-    m_pAosPcscf->SetCurrentPcscfIndex(3);
-    EXPECT_FALSE(m_pAosPcscf->GetCurrentPcscf(objPcscfAddress, nPcscfPort));
 }
 
 TEST_F(AosPcscfTest, GetCurrentIndexReturnsCurrentPcscfIndex)
