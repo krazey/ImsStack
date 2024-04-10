@@ -331,7 +331,10 @@ public class ImsStackMain {
     private void displayCarrierConfigs(int phoneId, int subId) {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        PersistableBundle b = ccmp.getConfigForSubId(subId);
+        PersistableBundle b = ccmp.getConfigForSubId(subId,
+                CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL);
 
         boolean voLteEnabled = b.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL);
         boolean vtEnabled = b.getBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL);
@@ -355,7 +358,8 @@ public class ImsStackMain {
     private boolean isCarrierConfigLoaded(int subId) {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        return ccmp.isConfigForIdentifiedCarrier(ccmp.getConfigForSubId(subId));
+        return ccmp.isConfigForIdentifiedCarrier(ccmp.getConfigForSubId(
+                subId, CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL));
     }
 
     private static ImsCarrierResolver.Carrier resolveImsCarrier(int slotId, int subId,

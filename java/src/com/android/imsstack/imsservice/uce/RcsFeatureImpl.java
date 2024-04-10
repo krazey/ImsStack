@@ -132,7 +132,9 @@ public class RcsFeatureImpl extends RcsFeature {
     private int getCapabilities() {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        PersistableBundle b = ccmp.getConfigForSubId(mIContext.getSubId());
+        PersistableBundle b = ccmp.getConfigForSubId(mIContext.getSubId(),
+                CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL,
+                CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
         int capabilities = RcsImsCapabilities.CAPABILITY_TYPE_NONE;
         boolean isPresenceEnabled =
                 b.getBoolean(CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL);

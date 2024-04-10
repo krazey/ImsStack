@@ -19,6 +19,7 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,7 +31,9 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.carrier.SimCarrierId;
 
 import org.junit.After;
 import org.junit.Before;
@@ -119,6 +122,19 @@ public class ConfigAgentTest {
         });
 
         mConfigAgent.removeListener(mListener);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetCarrierConfigWhenUpdateCarrierConfig() {
+        mConfigAgent.init(mTestAppContext.getContext());
+
+        SimCarrierId scid = new SimCarrierId.Builder().build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        CarrierConfigManagerProxy ccmp =
+                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
     }
 
     private void processAllMessages() {

@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /** A class for providing the configuration related information. */
 public class ConfigAgent implements ConfigInterface {
@@ -255,25 +256,19 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle getCarrierConfig(int subId) {
+        String[] imsConfigKeys = Stream.of(CarrierConfig.IMS_COMMON_KEYS,
+                CarrierConfig.IMS_PREFIX_KEYS, CarrierConfig.IMS_VOICE_PREFIX_KEYS,
+                CarrierConfig.IMS_SMS_PREFIX_KEYS, CarrierConfig.IMS_RTT_PREFIX_KEYS,
+                CarrierConfig.IMS_EMERGENCY_PREFIX_KEYS, CarrierConfig.IMS_VT_PREFIX_KEYS,
+                CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS)
+                    .flatMap(Stream::of)
+                    .toArray(String[]::new);
+
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        PersistableBundle configs = new PersistableBundle();
+
         // If an invalid subId is used, this bundle will contain default values.
-        PersistableBundle b = ccmp.getConfigForSubId(subId);
-
-        // IMS common configuration from all the carrier configs.
-        for (String key : CarrierConfig.IMS_COMMON_KEYS) {
-            addConfig(key, b, configs);
-        }
-
-        // IMS configuration with the IMS prefix from all the carrier configs.
-        for (String key : b.keySet()) {
-            if (isKeyForIms(key)) {
-                addConfig(key, b, configs);
-            }
-        }
-
-        return configs;
+        return ccmp.getConfigForSubId(subId, imsConfigKeys);
     }
 
     private PersistableBundle loadCarrierConfig(int subId, SimCarrierId id) {
@@ -387,46 +382,6 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         return config;
-    }
-
-    private static void addConfig(String key,
-            PersistableBundle src, PersistableBundle dst) {
-        if (key.endsWith("_string")) {
-            dst.putString(key, src.getString(key));
-        } else if (key.endsWith("_string_array")) {
-            dst.putStringArray(key, src.getStringArray(key));
-        } else if (key.endsWith("_int")) {
-            dst.putInt(key, src.getInt(key));
-        } else if (key.endsWith("_long")) {
-            dst.putLong(key, src.getLong(key));
-        } else if (key.endsWith("_double")) {
-            dst.putDouble(key, src.getDouble(key));
-        } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
-            dst.putBoolean(key, src.getBoolean(key));
-        } else if (key.endsWith("_int_array")) {
-            dst.putIntArray(key, src.getIntArray(key));
-        } else if (key.endsWith("_double_array")) {
-            dst.putDoubleArray(key, src.getDoubleArray(key));
-        } else if (key.endsWith("_bool_array")) {
-            dst.putBooleanArray(key, src.getBooleanArray(key));
-        } else if (key.endsWith("_long_array")) {
-            dst.putLongArray(key, src.getLongArray(key));
-        } else if (key.endsWith("_bundle")) {
-            dst.putPersistableBundle(key, src.getPersistableBundle(key));
-        } else if (key.equals(
-                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
-            dst.putBoolean(key, src.getBoolean(key));
-        }
-    }
-
-    private static boolean isKeyForIms(String key) {
-        for (String prefix : CarrierConfig.IMS_KEY_PREFIXES) {
-            if (key.startsWith(prefix)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static boolean checkFilters(XmlPullParser parser, SimCarrierId id) {

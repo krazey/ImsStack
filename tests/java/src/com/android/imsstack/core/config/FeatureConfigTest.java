@@ -18,6 +18,7 @@ package com.android.imsstack.core.config;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -78,7 +79,7 @@ public class FeatureConfigTest {
         bundle.putBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL, true);
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        when(ccmp.getConfigForSubId(eq(TestAppContext.SUB_ID_1))).thenReturn(bundle);
+        when(ccmp.getConfigForSubId(eq(TestAppContext.SUB_ID_1), any())).thenReturn(bundle);
 
         FeatureConfig.init(TestAppContext.SLOT0);
         assertTrue(FeatureConfig.isEnabled(TestAppContext.SLOT0, FeatureConfig.VOLTE));

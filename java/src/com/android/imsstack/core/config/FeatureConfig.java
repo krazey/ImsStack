@@ -59,7 +59,13 @@ public final class FeatureConfig {
         CarrierConfigManagerProxy ccmp =
                 AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
         // If an invalid subId is used, this bundle will contain default values.
-        PersistableBundle config = ccmp.getConfigForSubId(MSimUtils.getSubId(slotId));
+        PersistableBundle config = ccmp.getConfigForSubId(MSimUtils.getSubId(slotId),
+                CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL,
+                CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_PUBLISH_BOOL,
+                CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
         ArrayMap<String, Integer> features = new ArrayMap<>();
         boolean available;
         StringBuilder sb = new StringBuilder();
