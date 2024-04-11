@@ -97,12 +97,23 @@ public:
     inline TestAosSubscription(IN IAosAppContext* piAppContext,
             IN IRegSubscription* piRegSubscription, IN const AString& strAoR,
             IN const SipAddress& objContactAddress) :
-            AosSubscription(piAppContext, piRegSubscription, strAoR, objContactAddress)
+            AosSubscription(piAppContext, piRegSubscription, strAoR, objContactAddress),
+            m_pCounter(IMS_NULL)
     {
         m_pCounter = new AosCounter();
     }
 
-    inline ~TestAosSubscription() override { delete m_pCounter; }
+    ~TestAosSubscription() override
+    {
+        if (m_pCounter)
+        {
+            delete m_pCounter;
+            m_pCounter = IMS_NULL;
+        }
+    }
+
+    TestAosSubscription(IN const TestAosSubscription&) = delete;
+    TestAosSubscription& operator=(IN const TestAosSubscription&) = delete;
 
     inline void SetAorState(IN IMS_SINT32 nAorState) { m_nAorState = nAorState; }
 
@@ -154,7 +165,8 @@ public:
 class AosSubscriptionTest : public ::testing::Test
 {
 public:
-    AosSubscriptionTest()
+    AosSubscriptionTest() :
+            m_pAosSubscription(IMS_NULL)
     {
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
@@ -365,7 +377,7 @@ TEST_F(AosSubscriptionTest, CallUnsubscribeInStopWhenUnsubscriptionIsSupported)
 {
     ON_CALL(m_objMockIAosConfig, IsUnSubscription()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIRegSubscription, Unsubscribe()).Times(1);
+    EXPECT_CALL(m_objMockIRegSubscription, Unsubscribe());
 
     m_pAosSubscription->Stop();
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_UNSUBSCRIBING);
@@ -492,11 +504,9 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstInit)
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED))
-            .Times(1);
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(1);
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
 
     EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_FALSE));
 }
@@ -509,8 +519,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenRetryCountIsNeedToIncreaseAgainstRefre
     ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(0)).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(1);
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
 
     EXPECT_TRUE(m_pAosSubscription->IsRetryActionDueToRetryCounter(IMS_TRUE));
 }
@@ -648,12 +657,10 @@ TEST_F(AosSubscriptionTest, ReturnFalseWhenRetryCountForRegRequiredIsReached)
     // ReportState() if result is true.
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
             Subscription_StateChanged(
-                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED))
-            .Times(1);
+                    AosSubscription::STATE_OFFLINE, AosSubscription::REASON_SUB_FAILED));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE))
-            .Times(1);
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED, 0, IMS_FALSE));
 
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationRequired(403, IMS_FALSE));
 }
@@ -693,8 +700,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsReache
             .WillByDefault(ReturnRef(objErrRegRequiredWithNextPcscf));
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(1);
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
 
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(403, IMS_FALSE));
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
@@ -712,8 +718,7 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhenErrForRegRequiredWithNextPcscfIsMatche
     m_pAosSubscription->SetTerminated(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosSubscriptionListener,
-            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE))
-            .Times(1);
+            Subscription_Request(AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF, 0, IMS_FALSE));
 
     EXPECT_TRUE(m_pAosSubscription->IsInitialRegistrationWithNextPcscfRequired(603, IMS_TRUE));
     EXPECT_EQ(m_pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
@@ -1237,8 +1242,6 @@ TEST_F(AosSubscriptionTest, ReturnTrueWhen504WithXmlAgainstInitAndRefresh)
 TEST_F(AosSubscriptionTest, ReturnTrueWhen504WithoutXml)
 {
     ImsList<ISipMessageBodyPart*> objBodyParts;
-    SipMessageBodyPart objBodyPart;
-    const ISipMessageBodyPart* piBodyPart = static_cast<ISipMessageBodyPart*>(&objBodyPart);
 
     // nStatusCode == SipStatusCode::SC_504 GetBodyParts empty;
     EXPECT_CALL(m_objMockISipMsg, GetBodyParts()).WillOnce(Return(objBodyParts));
