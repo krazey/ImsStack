@@ -216,7 +216,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
             Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
                     Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)),
+                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT)),
             Map.entry(Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
                     Assets.KEY_WFC_ERR_REG_403_STRING,
                     Assets.KEY_WFC_ERR_REG_500_STRING,

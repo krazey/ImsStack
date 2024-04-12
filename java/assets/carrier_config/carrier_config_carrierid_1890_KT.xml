@@ -42,7 +42,7 @@
 
     <!-- Aos -->
     <boolean name="call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
-    <boolean name="initialize_ipsec_setting_with_new_pcscf_bool" value="true"/>
+    <boolean name="init_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <int name="reg_out_of_service_policy_int" value="1"/>
     <int name="reg_retry_cnt_on_single_pcscf_int" value="1"/>
     <int name="reg_retry_cnt_with_ipsec_on_auth_failure_int" value="0"/>
@@ -59,7 +59,7 @@
     </int-array>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle name="sub_err_code_for_terminated_bundle">
-        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="1"/>
+        <int name="sub_err_code_for_terminated_with_retry_max_cnt_int" value="1"/>
         <int-array name="sub_err_code_for_terminated_int_array" num="1">
             <item value="489"/>
         </int-array>

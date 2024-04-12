@@ -1040,7 +1040,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT);
+                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT);
         m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY);
         piCcBundle->ReleaseBundle();
@@ -1224,8 +1224,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
-    m_objAsset.bInitializeIpsecWithNewPcscf = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
+    m_objAsset.bInitializeIpsecWithNewPcscf =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(

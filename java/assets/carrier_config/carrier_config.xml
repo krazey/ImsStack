@@ -321,7 +321,7 @@
     <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="ims_dereg_on_3g_network_bool" value="false"/>
-    <boolean name="initialize_ipsec_setting_with_new_pcscf_bool" value="false"/>
+    <boolean name="init_ipsec_setting_with_new_pcscf_bool" value="false"/>
     <boolean name="no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
     <boolean name="reg_contact_validation_bool" value="false"/>
@@ -446,7 +446,7 @@
     </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle name="sub_err_code_for_terminated_bundle">
-        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="0"/>
+        <int name="sub_err_code_for_terminated_with_retry_max_cnt_int" value="0"/>
         <int-array name="sub_err_code_for_terminated_int_array" num="0">
         </int-array>
     </pbundle>

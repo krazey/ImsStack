@@ -712,8 +712,8 @@ public class CarrierConfig {
                 "ignore_vops_for_volte_enable_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 "ims_dereg_on_3g_network_bool";
-        public static final String KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
-                "initialize_ipsec_setting_with_new_pcscf_bool";
+        public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
+                "init_ipsec_setting_with_new_pcscf_bool";
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
                 "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
@@ -896,8 +896,8 @@ public class CarrierConfig {
         // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE =
                 "sub_err_code_for_terminated_bundle";
-        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT =
-                "sub_err_code_for_terminated_with_retry_max_count_int";
+        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT =
+                "sub_err_code_for_terminated_with_retry_max_cnt_int";
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
                 "sub_err_code_for_terminated_int_array";
         // }
