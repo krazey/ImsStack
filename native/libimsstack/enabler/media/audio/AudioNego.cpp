@@ -1564,7 +1564,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pAmrFmtp->nModeSetList = nNegoModeSetList;
                 pAmrFmtp->nDefaultRtpModeSet = nNegoDefaultRtpModeSet;
 
-                pAmrFmtp->bSCREnable = pSrc_Fmtp->bSCREnable;
+                pAmrFmtp->bDtx = pSrc_Fmtp->bDtx;
 
                 pAmrFmtp->bShowModeChangeCapability = pSrc_Fmtp->bShowModeChangeCapability;
                 pAmrFmtp->nModeChangeCapability = pSrc_Fmtp->nModeChangeCapability;
@@ -1630,7 +1630,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pEvsFmtp->nBrList = BitrateNegoList;
                 pEvsFmtp->nModeSetList = ModeSetNegoList;
 
-                if (pEvsFmtp->nDtx != pSrc_Fmtp->nDtx)
+                if (pEvsFmtp->bDtx != pSrc_Fmtp->bDtx)
                 {
                     IMS_TRACE_D("MakeNegotiatedProfile() - DTX updated in the destination profile",
                             0, 0, 0);
@@ -1695,7 +1695,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     if (((pEvsFmtp->nBrList & 0x10) != 0) && ((pEvsFmtp->nBrList & 0xFFE0) == 0))
                     {
                         pEvsFmtp->nModeSetList = 0x07;  // mode-set = 0,1,2;
-                        pEvsFmtp->bShowModeSetList = IMS_TRUE;
+                        pEvsFmtp->bShowModeSet = IMS_TRUE;
                         IMS_TRACE_D("MakeNegotiatedProfile() - add EVS mode-set", 0, 0, 0);
                     }
                 }
@@ -2007,7 +2007,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("dtx") == IMS_TRUE)
         {
-            pFmtp->nDtx = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
+            pFmtp->bDtx = (IMS_BOOL)objSplitEqual.GetAt(1).ToInt32();
             pFmtp->bShowDtx = IMS_TRUE;
         }
         else if (objSplitEqual.GetAt(0).Equals("hf-only") == IMS_TRUE)
@@ -2142,7 +2142,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
                 pFmtp->nModeSetList = (pFmtp->nModeSetList | (1 << nModeSet));
             }
-            pFmtp->bShowModeSetList = IMS_TRUE;
+            pFmtp->bShowModeSet = IMS_TRUE;
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {
@@ -2523,7 +2523,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         else if (objSplitEqual.GetAt(0).Equals("octet-align") == IMS_TRUE)
         {
             pFmtp->nOctetAlign = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShow_OctetAlign = IMS_TRUE;
+            pFmtp->bShowOctetAlign = IMS_TRUE;
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {

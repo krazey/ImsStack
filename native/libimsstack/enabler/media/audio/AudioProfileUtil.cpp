@@ -198,13 +198,13 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultModeSetList();
             pAmrFmtp->bShowModeSet = pAmrConfig->GetShowModeSet();
 
-            pAmrFmtp->bShow_OctetAlign = IMS_FALSE;
+            pAmrFmtp->bShowOctetAlign = IMS_FALSE;
             if (pAmrConfig->GetOctetAlign() != -1)
             {
                 pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
                 if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->nModeSetList == 0)
                 {
-                    pAmrFmtp->bShow_OctetAlign = IMS_TRUE;
+                    pAmrFmtp->bShowOctetAlign = IMS_TRUE;
                 }
             }
             else
@@ -273,7 +273,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
                 pAmrFmtp->bShowMaxPtime = IMS_FALSE;
             }
-            pAmrFmtp->bSCREnable = pAmrConfig->GetDtx();
+            pAmrFmtp->bDtx = pAmrConfig->GetDtx();
 
             if (pAmrConfig->GetSamplingRate() == 8000)
             {
@@ -342,7 +342,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             // Mode set list
             pEvsFmtp->nModeSetList = pEvsConfig->GetAmrWbIoModeSetList();
             pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultModeSetList();
-            pEvsFmtp->bShowModeSetList = pEvsConfig->GetShowAmrwbIoModeSet();
+            pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrwbIoModeSet();
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
@@ -428,17 +428,8 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pEvsFmtp->bShowMaxRed = IMS_FALSE;
             }
 
-            pEvsFmtp->nDtx = pEvsConfig->GetDtx();
+            pEvsFmtp->bDtx = pEvsConfig->GetDtx();
             pEvsFmtp->bShowDtx = pEvsConfig->GetShowDtx();
-
-            if (pEvsConfig->GetDtxRecv() == IMS_TRUE)  // true or Not Present
-            {
-                pEvsFmtp->nDtx_Recv = pEvsFmtp->nDtx;
-            }
-            else
-            {
-                pEvsFmtp->nDtx_Recv = pEvsConfig->GetDtxRecv();
-            }
 
             if (pEvsConfig->GetHfOnly() == -1)  // Not Present
             {

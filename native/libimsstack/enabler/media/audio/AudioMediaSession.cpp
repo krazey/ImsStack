@@ -246,8 +246,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             if (pLocalPayload != IMS_NULL && pLocalPayload->pFmtp != IMS_NULL)
             {
                 objAudioConfig.setDtxEnabled(
-                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->pFmtp)
-                                        ->bSCREnable));
+                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->pFmtp)->bDtx));
             }
         }
 
@@ -281,10 +280,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
         objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
         // AMR DTX on/off by source codec
-        objAudioConfig.setDtxEnabled((IMS_BOOL)pFmtp->nDtx);
-
-        // TODO_MEDIA need to add DtxRecv
-        // objAudioConfig.setDtxRecvEnabled((IMS_BOOL)pFmtp->nDtxRecv);
+        objAudioConfig.setDtxEnabled(pFmtp->bDtx);
 
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
