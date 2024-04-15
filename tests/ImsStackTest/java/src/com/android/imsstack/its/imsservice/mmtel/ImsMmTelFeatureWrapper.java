@@ -58,7 +58,7 @@ public final class ImsMmTelFeatureWrapper {
     private final Set<MmTelListener> mMmTelListeners = new CopyOnWriteArraySet<MmTelListener>();
     private final Handler mHandler;
 
-    interface IncomingCallListener {
+    public interface IncomingCallListener {
         /**
          * Notifies an incoming call.
          */
@@ -151,13 +151,13 @@ public final class ImsMmTelFeatureWrapper {
     /**
      * Creates a {@link ImsCallProfile} from the service capabilities & IMS registration state.
      *
-     * @param callSessionType a service type that is specified in {@link ImsCallProfile}.
+     * @param serviceType a service type that is specified in {@link ImsCallProfile}.
      * @param callType a call type that is specified in {@link ImsCallProfile}.
      * @return a {@link ImsCallProfile} object.
      */
-    public @Nullable ImsCallProfile createCallProfile(int callSessionType, int callType) {
+    public @Nullable ImsCallProfile createCallProfile(int serviceType, int callType) {
         try {
-            return mIImsMmTelFeature.createCallProfile(callSessionType, callType);
+            return mIImsMmTelFeature.createCallProfile(serviceType, callType);
         } catch (RemoteException e) {
             loge(e.toString());
             return null;
@@ -172,9 +172,10 @@ public final class ImsMmTelFeatureWrapper {
      *
      * @param profile a call profile to make the call.
      */
-    public @Nullable ImsCallSessionWrapper createCallSession(@NonNull ImsCallProfile profile) {
+    public @Nullable ImsCallSessionWrapper createCallSession(@NonNull ImsCallProfile profile,
+            @NonNull ImsCallSessionWrapper.Listener listener) {
         IImsCallSession callSession = createImsCallSession(profile);
-        return (callSession != null) ? new ImsCallSessionWrapper(callSession) : null;
+        return (callSession != null) ? new ImsCallSessionWrapper(callSession, listener) : null;
     }
 
     /**
@@ -192,7 +193,6 @@ public final class ImsMmTelFeatureWrapper {
             loge(e.toString());
         }
     }
-
 
     /**
      * For determining if the outgoing call, designated by the outgoing {@link String}s,

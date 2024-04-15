@@ -17,9 +17,14 @@ package com.android.imsstack.its.imsservice.mmtel.call;
 
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.CallQuality;
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsConferenceState;
+import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.ImsSuppServiceNotification;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase.State;
 
 import androidx.annotation.NonNull;
@@ -36,10 +41,20 @@ import java.util.List;
  */
 public final class ImsCallSessionWrapper {
     @NonNull private final IImsCallSession mIImsCallSession;
+    @NonNull private final IImsCallSessionListenerProxy mIImsCallSessionListenerProxy;
+    @NonNull private final Listener mListener;
 
     /** Constructor. */
-    public ImsCallSessionWrapper(@NonNull IImsCallSession callSession) {
+    public ImsCallSessionWrapper(@NonNull IImsCallSession callSession,
+            @NonNull Listener listener) {
         mIImsCallSession = callSession;
+        mListener = listener;
+        mIImsCallSessionListenerProxy = new IImsCallSessionListenerProxy();
+        try {
+            mIImsCallSession.setListener(mIImsCallSessionListenerProxy);
+        } catch (RemoteException e) {
+            loge(e.toString());
+        }
     }
 
     /**
@@ -51,6 +66,10 @@ public final class ImsCallSessionWrapper {
         } catch (RemoteException e) {
             loge(e.toString());
         }
+    }
+
+    public @NonNull IImsCallSessionListenerProxy getCallSessionListenerProxy() {
+        return mIImsCallSessionListenerProxy;
     }
 
     /**
@@ -554,5 +573,201 @@ public final class ImsCallSessionWrapper {
 
     private static void loge(String s) {
         Log.e(Log.TAG, "ImsCallSessionWrapper: " + s);
+    }
+
+    /**
+    * A listener interface for monitoring events related to IMS call sessions.
+    */
+    public interface Listener {
+        /**
+         * Called when a call session is initiating.
+         *
+         * @param profile The call profile {@link ImsCallProfile} containing information about the
+         *                call session.
+         */
+        default void callSessionInitiating(ImsCallProfile profile) {};
+
+        /**
+         * Called when a call session is in progress.
+         *
+         * @param profile The media profile {@link ImsCallProfile} containing information about the
+         *                call session.
+         */
+        default void callSessionProgressing(ImsStreamMediaProfile profile) {};
+
+        /**
+         * Called when a call session is successfully initiated.
+         *
+         * @param profile The call profile {@link ImsCallProfile} containing information about the
+         *                call session.
+         */
+        default void callSessionInitiated(ImsCallProfile profile) {};
+
+        /**
+         * Called when initiating a call session fails.
+         *
+         * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
+         */
+        default void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {};
+
+        /**
+         * Called when the initiation of a call session fails after it has been initiated.
+         *
+         * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
+         */
+        default void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {};
+
+        /**
+         * Called when a call session is terminated.
+         *
+         * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the termination.
+         */
+        default void callSessionTerminated(ImsReasonInfo reasonInfo) {};
+    }
+
+    /**
+    * A proxy class implementing the IImsCallSessionListener interface to handle IMS call session
+    * events. This class acts as a bridge between the IImsCallSessionListener interface and the
+    * actual listener implementation.
+    */
+    private class IImsCallSessionListenerProxy extends IImsCallSessionListener.Stub {
+        @Override
+        public void callSessionInitiating(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionProgressing(ImsStreamMediaProfile profile) {}
+
+        @Override
+        public void callSessionInitiated(ImsCallProfile profile) {
+            mListener.callSessionInitiated(profile);
+        }
+
+        @Override
+        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {
+            mListener.callSessionInitiatingFailed(reasonInfo);
+        }
+
+        @Override
+        public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionTerminated(ImsReasonInfo reasonInfo) {
+            mListener.callSessionTerminated(reasonInfo);
+        }
+
+        @Override
+        public void callSessionHeld(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionHoldReceived(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionResumed(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionResumeReceived(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionMergeComplete(IImsCallSession newSession) {}
+
+        @Override
+        public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionUpdated(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionUpdateReceived(ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionConferenceExtended(IImsCallSession newSession,
+                ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionConferenceExtendFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionConferenceExtendReceived(IImsCallSession newSession,
+                ImsCallProfile profile) {}
+
+        @Override
+        public void callSessionInviteParticipantsRequestDelivered() {}
+
+        @Override
+        public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionRemoveParticipantsRequestDelivered() {}
+
+        @Override
+        public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionConferenceStateUpdated(ImsConferenceState state) {}
+
+        @Override
+        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {}
+
+        @Override
+        public void callSessionMayHandover(int srcNetworkType, int targetNetworkType) {}
+
+        @Override
+        public void callSessionHandover(int srcNetworkType, int targetNetworkType,
+                ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionHandoverFailed(int srcNetworkType, int targetNetworkType,
+                ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionTtyModeReceived(int mode) {}
+
+        public void callSessionMultipartyStateChanged(boolean isMultiParty) {}
+
+        @Override
+        public void callSessionSuppServiceReceived(ImsSuppServiceNotification suppServiceInfo) {}
+
+        @Override
+        public void callSessionRttModifyRequestReceived(ImsCallProfile callProfile) {}
+
+        @Override
+        public void callSessionRttModifyResponseReceived(int status) {}
+
+        @Override
+        public void callSessionRttMessageReceived(String rttMessage) {}
+
+        @Override
+        public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {}
+
+        @Override
+        public void callSessionTransferred() {}
+
+        @Override
+        public void callSessionTransferFailed(@Nullable ImsReasonInfo reasonInfo) {}
+
+        @Override
+        public void callSessionDtmfReceived(char dtmf) {}
+
+        @Override
+        public void callQualityChanged(CallQuality callQuality) {}
+
+        @Override
+        public void callSessionRtpHeaderExtensionsReceived(
+                @NonNull List<RtpHeaderExtension> extensions) {}
+
+        @Override
+        public void callSessionSendAnbrQuery(int mediaType, int direction, int bitsPerSecond) {}
     }
 }
