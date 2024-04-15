@@ -907,6 +907,55 @@ TEST_F(AosApplicationTest, SucceedsRemoveListenerForConfigurationWhenCleanUp)
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosApplicationTest, ShouldSetServiceConnectingBlockWhenReconfigAndStateIsReady)
+{
+    // GIVEN
+    m_pAosApplication->SetAppState(IAosApplication::STATE_READY);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_SERVICE_CONNECTING, IMS_TRUE));
+
+    // WHEN
+    m_pAosApplication->Reconfig();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ShouldSetServiceConnectingBlockWhenReconfigAndStateIsNotReady)
+{
+    // GIVEN
+    m_pAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_SERVICE_CONNECTING, IMS_TRUE));
+
+    // WHEN
+    m_pAosApplication->Reconfig();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ShouldNotSetServiceConnectingBlockWhenReconfigAndStateIsGreaterThanReady)
+{
+    // GIVEN
+    m_pAosApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_SERVICE_CONNECTING, IMS_TRUE)).Times(0);
+
+    // WHEN
+    m_pAosApplication->Reconfig();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosApplicationTest, ShouldStartReconfigGuardTimerWhenReconfig)
+{
+    // GIVEN
+    // WHEN
+    m_pAosApplication->Reconfig();
+
+    // THEN
+    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
+}
+
 TEST_F(AosApplicationTest, GetAndSet)
 {
     // TEST_F : GetActivityName
@@ -1120,17 +1169,6 @@ TEST_F(AosApplicationTest, GetAndSet)
 
     // TEST_F : IsRegReconfigAvailable
     EXPECT_TRUE(m_pAosApplication->IsRegReconfigAvailable());
-}
-
-TEST_F(AosApplicationTest, Reconfig)
-{
-    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_SERVICE_CONNECTING, IMS_TRUE));
-
-    // TEST_F : IsEqualOrLessState
-    m_pAosApplication->SetAppState(IAosApplication::STATE_READY);
-    m_pAosApplication->Reconfig();
-    EXPECT_TRUE(m_pAosApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
-    m_pAosApplication->StopTimer(TIMER_RECONFIG_GUARD);
 }
 
 TEST_F(AosApplicationTest, IsPdnDisconnectRequired)
