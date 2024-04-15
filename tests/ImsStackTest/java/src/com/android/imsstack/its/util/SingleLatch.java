@@ -65,6 +65,7 @@ public class SingleLatch {
 
     /**
      * Waits for the event completion with the given timeout value.
+     * Fails the associated test if the event does not complete within the timeout period.
      *
      * @param millis The timeout value for waiting.
      */
@@ -81,6 +82,28 @@ public class SingleLatch {
 
         if (!completed) {
             fail("Failed to wait for " + mTag + " for " + millis + "ms.");
+        }
+    }
+
+    /**
+     * Waits for the timeout with the given timeout value.
+     * Fails the associated test if the event completes within the timeout period.
+     *
+     * @param millis The timeout value for waiting.
+     */
+    public void awaitTimeout(long millis) {
+        boolean completed = false;
+
+        try {
+            if (mLatch != null) {
+                completed = mLatch.await(millis, TimeUnit.MILLISECONDS);
+            }
+        } catch (InterruptedException e) {
+            Log.d(Log.TAG, "await interrupted: " + e.toString());
+        }
+
+        if (completed) {
+            fail("Event " + mTag + " interrupted unexpectedly within " + millis + "ms.");
         }
     }
 
