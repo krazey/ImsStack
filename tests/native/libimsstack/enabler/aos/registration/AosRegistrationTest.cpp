@@ -123,7 +123,6 @@ using ::testing::SetArgReferee;
     using Base::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy; \
     using Base::ProcessForbiddenFailed;                                       \
     using Base::ProcessIpVersionChange;                                       \
-    using Base::ProcessOfflineRecoverTimerExpired;                            \
     using Base::ProcessPendingPlmnBlockOnUpdateFailure;                       \
     using Base::ProcessPendingTransaction;                                    \
     using Base::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure;             \
@@ -139,7 +138,6 @@ using ::testing::SetArgReferee;
     using Base::ProcessStartFailed_Others;                                    \
     using Base::ProcessStartFailed_StatusCode;                                \
     using Base::ProcessStartFailed_TxnTimeout;                                \
-    using Base::ProcessStopRetryTimerExpired;                                 \
     using Base::ProcessSubReinitiate;                                         \
     using Base::ProcessSubscriberFailed;                                      \
     using Base::ProcessUpdateFailed_Others;                                   \
@@ -2810,7 +2808,6 @@ TEST_F(AosRegistrationTest, StartRetryTimerWhenFlowRecoveryForStartIfSetOfNextPc
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
 
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
 }
 
 TEST_F(AosRegistrationTest, TryingNextPcscfSucceedWhenFlowRecoveryForStart)
@@ -4840,134 +4837,6 @@ TEST_F(AosRegistrationTest, RegTerminatedReportsFailureAsTerminatedReason)
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosRegistrationTest, DoNothingIfStateIsNotOfflineWhenOfflineRecoverTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-}
-
-TEST_F(AosRegistrationTest, DoNothingIfAppIsNotReadyWhenOfflineRecoverTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    m_pAosRegistration->SetAppReady(IMS_FALSE);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-}
-
-TEST_F(AosRegistrationTest,
-        AddTrafficPendingIfTransactionIsNotStartedWhenOfflineRecoverTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    m_pAosRegistration->SetAppReady(IMS_TRUE);
-    m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-
-    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-}
-
-TEST_F(AosRegistrationTest,
-        TryRegistrationIfSucceedToCreateRegistrationWhenOfflineRecoverTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    m_pAosRegistration->SetAppReady(IMS_TRUE);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .WillByDefault(ReturnRef(m_objAvailableImpus));
-    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
-
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-}
-
-TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenOfflineRecoverTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    m_pAosRegistration->SetAppReady(IMS_TRUE);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .WillByDefault(ReturnRef(m_objEmptyImpus));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-}
-
-TEST_F(AosRegistrationTest, DoNothingIfRetryWasNotHeldWhenStopRetryTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-}
-
-TEST_F(AosRegistrationTest, AddTrafficPendingIfTransactionIsNotStartedWhenStopRetryTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->SetImsCall(IMS_TRUE);
-
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-
-    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
-    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-}
-
-TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToSendRegisterWhenStopRetryTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
-
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-}
-
-TEST_F(AosRegistrationTest, ReportFailureIfFailToSendRegisterWhenStopRetryTimerExpired)
-{
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
-
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-}
-
 TEST_F(AosRegistrationTest, SubscriptionStateChangedWhenRegistrationIsNullDoesNothing)
 {
     m_pAosRegistration->Destroy();
@@ -5325,38 +5194,7 @@ TEST_F(AosRegistrationTest,
     GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
 }
 
-TEST_F(AosRegistrationTest, StopTimer)
-{
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_OFFLINE_RECOVER);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_REFRESH);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_EXPIRED);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_MODE);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_TRANSACTION);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_INTERNAL_ERROR);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
-}
-
-TEST_F(AosRegistrationTest, ClearTimer)
+TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecoverTimer)
 {
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
@@ -5375,52 +5213,238 @@ TEST_F(AosRegistrationTest, ClearTimer)
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+}
 
+TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndStopRetryTimer)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
     m_pAosRegistration->ClearRetryTimers();
+
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(IMS_NULL);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+}
+
+TEST_F(AosRegistrationTest,
+        DoNothingExceptStopTimerIfStateIsNotOfflineWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, DoNothingExceptStopTimerIfAppIsNotReadyWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_FALSE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest,
+        AddTrafficPendingIfTransactionIsNotStartedWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest,
+        TryRegistrationIfSucceedToCreateRegistrationWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objAvailableImpus));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objEmptyImpus));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, DoNothingExceptStopTimerIfRetryWasNotHeldWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, TimerExpired)
+TEST_F(AosRegistrationTest, AddTrafficPendingIfTransactionIsNotStartedWhenStopRetryTimerExpired)
 {
-    m_pAosRegistration->Timer_TimerExpired(IMS_NULL);
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToSendRegisterWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSendRegisterWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, StopRefreshTimerWhenRefreshTimerExpired)
+{
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_REFRESH));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
 
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+}
+
+TEST_F(AosRegistrationTest, StopExpiredTimerWhenExpiredTimerExpired)
+{
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_EXPIRED));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
 
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+}
+
+TEST_F(AosRegistrationTest, StopModeTimerWhenModeTimerExpired)
+{
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_MODE));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
 
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+}
+
+TEST_F(AosRegistrationTest, StopTransactionTimerWhenTransactionTimerExpired)
+{
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_TRANSACTION));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
 
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, RestoreActiveBindingsIfRegisteredWhenInternalTimerExpired)
+{
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
     EXPECT_CALL(m_objMockIRegistration, RestoreActiveBindings()).Times(1);
+
     m_pAosRegistration->Timer_TimerExpired(
             m_pAosRegistration->GetTimer(AosRegistration::TIMER_INTERNAL_ERROR));
+
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
 }
 
