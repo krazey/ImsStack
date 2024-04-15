@@ -364,23 +364,61 @@ TEST_F(AosServiceAvailableWifiTest,
     EXPECT_EQ(m_pServiceAvailableWifi->GetInvokedCount("HandleWifiConnectionChanged"), 0);
 }
 
-TEST_F(AosServiceAvailableWifiTest, NetworkPing_NotifyResult_PingStateDeadPeer)
+TEST_F(AosServiceAvailableWifiTest, ShouldChangeStateToDetectedWhenPingNotifyResultIsDeadPeer)
 {
+    // GIVEN
     m_pServiceAvailableWifi->SetBadNetworkState(
             AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
+
+    // WHEN
     m_pServiceAvailableWifi->NetworkPing_NotifyResult(
             IMS_NULL, INetworkPing::PING_STATUS_DEAD_PEER);
 
+    // THEN
     EXPECT_EQ(m_pServiceAvailableWifi->GetBadNetworkState(),
             AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
 }
 
-TEST_F(AosServiceAvailableWifiTest, NetworkPing_NotifyResult_PingStateTimedout)
+TEST_F(AosServiceAvailableWifiTest, ShouldChangeStateToDetectedWhenPingNotifyResultIsTimeout)
 {
+    // GIVEN
     m_pServiceAvailableWifi->SetBadNetworkState(
             AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
+
+    // WHEN
     m_pServiceAvailableWifi->NetworkPing_NotifyResult(IMS_NULL, INetworkPing::PING_STATUS_TIMEDOUT);
 
+    // THEN
+    EXPECT_EQ(m_pServiceAvailableWifi->GetBadNetworkState(),
+            AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
+}
+
+TEST_F(AosServiceAvailableWifiTest,
+        ShouldChangeStateToNoneWhenPingNotifyResultIsNotDeadPeerOrTimeout)
+{
+    // GIVEN
+    m_pServiceAvailableWifi->SetBadNetworkState(
+            AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
+
+    // WHEN
+    m_pServiceAvailableWifi->NetworkPing_NotifyResult(IMS_NULL, INetworkPing::PING_STATUS_PENDING);
+
+    // THEN
+    EXPECT_EQ(m_pServiceAvailableWifi->GetBadNetworkState(),
+            AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
+}
+
+TEST_F(AosServiceAvailableWifiTest, ShouldNotChangeStateWhenCurrentBadNetworkStateIsNotChecking)
+{
+    // GIVEN
+    m_pServiceAvailableWifi->SetBadNetworkState(
+            AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
+
+    // WHEN
+    m_pServiceAvailableWifi->NetworkPing_NotifyResult(
+            IMS_NULL, INetworkPing::PING_STATUS_DEAD_PEER);
+
+    // THEN
     EXPECT_EQ(m_pServiceAvailableWifi->GetBadNetworkState(),
             AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
 }
