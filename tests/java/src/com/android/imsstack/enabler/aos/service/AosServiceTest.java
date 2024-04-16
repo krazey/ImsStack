@@ -44,6 +44,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
@@ -101,6 +102,7 @@ public class AosServiceTest extends ImsStackTest {
     @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock IAosRegistrationListener mMockAosRegistrationListener;
     @Mock IAosInfoListener mMockAosInfoListener;
+    @Mock LocationInterface mMockLocationInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock IDcNetWatcher mMockDcNetWatcher;
 
@@ -123,6 +125,8 @@ public class AosServiceTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                LocationInterface.class, mMockLocationInterface, SLOT_0);
 
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
 
@@ -138,6 +142,7 @@ public class AosServiceTest extends ImsStackTest {
 
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
 
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
 
@@ -406,16 +411,6 @@ public class AosServiceTest extends ImsStackTest {
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
     }
 
-    @Test
-    public void notifyLocationInfo() {
-        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
-                LocationInfo.COUNTRY_CHANGED);
-
-        mAosService.notifyLocationInfo(LocationInfo.COUNTRY_CHANGED);
-
-        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
-    }
-
     // currently, not used
     @Test
     public void notifyMobileDataLimit() {
@@ -679,6 +674,34 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.onPreciseCallStateChanged(preciseCallState);
 
         verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onLastKnownCountryUpdated_notifyCountryChanged() {
+        ArgumentCaptor<LocationInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(LocationInterface.Listener.class);
+        verify(mMockLocationInterface).addListener(listenerCaptor.capture());
+
+        LocationInterface.Listener listener = listenerCaptor.getValue();
+        listener.onLastKnownCountryUpdated();
+
+        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                LocationInfo.COUNTRY_CHANGED);
+        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
+    }
+
+    @Test
+    public void onInstantRequestedLocationUpdated_notifyLocationUpdatedByRequest() {
+        ArgumentCaptor<LocationInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(LocationInterface.Listener.class);
+        verify(mMockLocationInterface).addListener(listenerCaptor.capture());
+
+        LocationInterface.Listener listener = listenerCaptor.getValue();
+        listener.onInstantRequestedLocationUpdated();
+
+        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                LocationInfo.FIXED);
+        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
     }
 
     @Test

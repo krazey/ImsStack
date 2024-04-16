@@ -49,6 +49,37 @@ public interface LocationInterface extends IAgent {
     public @interface LocationCategory {}
 
     /**
+     * Listener interface to receive the change notification of location information.
+     */
+    interface Listener {
+        /**
+         * Notifies that last known country code is changed.
+         */
+        default void onLastKnownCountryUpdated() {
+        }
+
+        /**
+         * Notifies that location information has been updated by the request.
+         */
+        default void onInstantRequestedLocationUpdated() {
+        }
+    }
+
+    /**
+     * Adds a listener to receive notification for the location information change.
+     *
+     * @param listener The listener to be set.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
+     *
+     * @param listener The listener to be removed.
+     */
+    void removeListener(Listener listener);
+
+    /**
      * Initializes last known location information.
      */
     void initLastKnownLocation();
