@@ -54,8 +54,6 @@ import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
-import com.android.imsstack.core.agents.Sim;
-import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -96,7 +94,6 @@ public class ApnTest {
     @Mock private IAosRegistration mMockIAosReg;
     @Mock private Network mMockNetwork;
     @Mock private MsgProcInterface mMockMsgProc;
-    @Mock private SimInterface mMockSimInterface;
 
     private ContextFixture mContextFixture;
     private Context mContext;
@@ -851,18 +848,6 @@ public class ApnTest {
         verify(mMockMsgProc).procMsg(any(Message.class));
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mApn.mNetworkType);
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApn.mPreciseDcState);
-    }
-
-    @Test
-    public void testIsAllSimAbsentOrLocked() throws Exception {
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT0);
-        when(mMockSimInterface.getSimState())
-                .thenReturn(Sim.STATE_ABSENT)
-                .thenReturn(Sim.STATE_READY);
-
-        assertTrue(mApn.isAllSimAbsentOrLocked());
-        assertFalse(mApn.isAllSimAbsentOrLocked());
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
     }
 
     @Test
