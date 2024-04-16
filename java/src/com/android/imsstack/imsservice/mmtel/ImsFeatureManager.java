@@ -18,10 +18,8 @@ package com.android.imsstack.imsservice.mmtel;
 import android.os.Handler;
 import android.telephony.ims.feature.MmTelFeature;
 
-import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.Sim;
-import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.AgentUtils;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
@@ -189,7 +187,7 @@ public class ImsFeatureManager {
     private void updateFeatureCapabilityForUt() {
         disableFeature(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT);
 
-        if (isAllSimAbsent()) {
+        if (AgentUtils.isAllSimAbsent()) {
             log("Ut :: No SIM inserted");
             return;
         }
@@ -206,22 +204,6 @@ public class ImsFeatureManager {
 
     private static WifiInterface getWifiInterface() {
         return AgentFactory.getInstance().getAgent(WifiInterface.class);
-    }
-
-    private static boolean isAllSimAbsent() {
-        boolean allSimAbsent = true;
-        int activeSimCount = DeviceConfig.getActiveSimCount();
-
-        for (int i = 0; i < activeSimCount; ++i) {
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
-            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
-            if (simState != Sim.STATE_ABSENT) {
-                allSimAbsent = false;
-                break;
-            }
-        }
-
-        return allSimAbsent;
     }
 
     private static void log(String s) {

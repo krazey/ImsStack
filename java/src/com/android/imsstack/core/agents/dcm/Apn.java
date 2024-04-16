@@ -39,10 +39,9 @@ import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.AgentUtils;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
-import com.android.imsstack.core.agents.Sim;
-import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -399,7 +398,7 @@ public abstract class Apn extends Handler implements IApn {
             int subId = MSimUtils.getSubId(mSlotId);
 
             if (mType.getType() == DcConstants.TYPE_EMERGENCY) {
-                if (isAllSimAbsentOrLocked() && !MSimUtils.isValidSubId(subId)) {
+                if (AgentUtils.isAllSimAbsentOrLocked() && !MSimUtils.isValidSubId(subId)) {
                     setSubId = false;
                 }
             }
@@ -652,22 +651,6 @@ public abstract class Apn extends Handler implements IApn {
         for (Listener l : mListeners) {
             l.onHandoverStateChanged(handoverState, networkType, failCause);
         }
-    }
-
-    protected boolean isAllSimAbsentOrLocked() {
-        boolean allSimAbsentOrLocked = true;
-        int activeSimCount = DeviceConfig.getActiveSimCount();
-
-        for (int i = 0; i < activeSimCount; ++i) {
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
-            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
-            if (simState != Sim.STATE_ABSENT && simState != Sim.STATE_LOCKED) {
-                allSimAbsentOrLocked = false;
-                break;
-            }
-        }
-
-        return allSimAbsentOrLocked;
     }
 
     protected static ConnectivityManagerProxy getConnectivityManagerProxy() {
