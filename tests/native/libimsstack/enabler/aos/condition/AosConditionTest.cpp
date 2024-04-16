@@ -160,7 +160,6 @@ class AosConditionTest : public ::testing::Test
 public:
     TestAosCondition* m_pAosCondition;
 
-    AosBlock* m_pAosBlock;
     IAosNConfiguration* m_piAosNConfiguration;
     IAosService* m_piAosService;
 
@@ -196,20 +195,12 @@ protected:
         m_pAosCondition = new TestAosCondition(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosCondition != nullptr);
 
-        m_pAosBlock = new AosBlock(&m_objMockIAosAppContext);
-        ASSERT_TRUE(m_pAosBlock != nullptr);
-
-        m_pAosCondition->SetAosBlock(m_pAosBlock);
+        m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
     }
 
     virtual void TearDown() override
     {
         RestoreOriginInstance();
-
-        if (m_pAosBlock)
-        {
-            delete m_pAosBlock;
-        }
 
         if (m_pAosCondition)
         {
@@ -257,28 +248,16 @@ TEST_F(AosConditionTest, ShouldCreateAvailableWifiWhenStart)
     EXPECT_NE(m_pAosCondition->GetAvailableWifi(), nullptr);
 }
 
-TEST_F(AosConditionTest, ShouldSetBlockWithAosIncompletedWhenStart)
+TEST_F(AosConditionTest, ShouldSetStartBlockWhenStart)
 {
     // GIVEN
-    EXPECT_FALSE(m_pAosCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_SUBSCRIBER_INCOMPLETED, _));
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_AOS_INCOMPLETED, _));
 
     // WHEN
     m_pAosCondition->Start();
 
-    // THEN
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
-}
-
-TEST_F(AosConditionTest, ShouldSetBlockWithSubscriberIncompletedWhenStart)
-{
-    // GIVEN
-    EXPECT_FALSE(m_pAosCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED));
-
-    // WHEN
-    m_pAosCondition->Start();
-
-    // THEN
-    EXPECT_TRUE(m_pAosCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED));
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosConditionTest, ShouldDeleteAvailableCellularWhenStop)
@@ -373,51 +352,32 @@ TEST_F(AosConditionTest, SucceedsSetListener)
 
 TEST_F(AosConditionTest, SucceedsSetBlock)
 {
-    // GIVEN : Only block reasons corresponding to boundary values are checked.
-    m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_EPS_FALLBACK_STARTED);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_VOPS_OFF);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_AC_INCOMPLETED, _));
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON, _));
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _));
 
     // WHEN
-    IMS_BOOL bResult1 = m_pAosCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED);
-    IMS_BOOL bResult2 = m_pAosCondition->IsReasonBlocked(BLOCK_EPS_FALLBACK_STARTED);
-    IMS_BOOL bResult3 = m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    IMS_BOOL bResult4 = m_pAosCondition->IsReasonBlocked(BLOCK_CELLULAR_VOPS_OFF);
-    IMS_BOOL bResult5 = m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_BAD_CONNECTION);
-    IMS_BOOL bResult6 = m_pAosCondition->IsReasonBlocked(BLOCK_WIFI_TEMPORARILY_BLOCKED);
+    m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
+    m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
 
-    // THEN
-    EXPECT_TRUE(bResult1);
-    EXPECT_TRUE(bResult2);
-    EXPECT_TRUE(bResult3);
-    EXPECT_TRUE(bResult4);
-    EXPECT_TRUE(bResult5);
-    EXPECT_TRUE(bResult6);
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosConditionTest, SucceedsResetBlock)
 {
-    // GIVEN : Only block reasons corresponding to boundary values are checked.
-    m_pAosCondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->SetBlock(BLOCK_EPS_FALLBACK_STARTED);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->SetBlock(BLOCK_CELLULAR_VOPS_OFF);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->SetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AC_INCOMPLETED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _));
 
     // WHEN
     m_pAosCondition->ResetBlock(BLOCK_AC_INCOMPLETED);
-    m_pAosCondition->ResetBlock(BLOCK_EPS_FALLBACK_STARTED);
     m_pAosCondition->ResetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    m_pAosCondition->ResetBlock(BLOCK_CELLULAR_VOPS_OFF);
     m_pAosCondition->ResetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    m_pAosCondition->ResetBlock(BLOCK_WIFI_TEMPORARILY_BLOCKED);
 
-    // THEN
-    EXPECT_TRUE(m_pAosBlock->IsCleared());
+    // THEN : GIVEN conditions should be met.
 }
 
 TEST_F(AosConditionTest, ReturnTrueWhenCellularServiceIsReady)
@@ -774,7 +734,6 @@ TEST_F(AosConditionTest, ShouldSetCsCallStartedBlockWhenStateChangedInCaseOfCsAn
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     // WHEN
     m_pAosCondition->CallTracker_StateChanged(IAosCallTracker::TYPE_CS, CallState::OFFHOOK);
@@ -789,7 +748,6 @@ TEST_F(AosConditionTest, ShouldResetCsCallStartedBlockWhenStateChangedInCaseOfCs
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     // WHEN
     m_pAosCondition->CallTracker_StateChanged(IAosCallTracker::TYPE_CS, CallState::IDLE);
@@ -804,8 +762,6 @@ TEST_F(AosConditionTest, ShouldNotDoAnythingWhenStateChangedInCaseOfNotCs)
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     // WHEN
     m_pAosCondition->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
@@ -866,8 +822,6 @@ TEST_F(AosConditionTest, SetBlockWhenSubscriberStateChangedWithRefreshStarted)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     // WHEN
     m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::REFRESH_STARTED);
 
@@ -899,8 +853,6 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStarted
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->SetRefreshStarted(IMS_FALSE);
     EXPECT_FALSE(m_pAosCondition->IsRefreshStarted());
 
@@ -912,8 +864,6 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStarted
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->SetRefreshStarted(IMS_TRUE);
     EXPECT_TRUE(m_pAosCondition->IsRefreshStarted());
 
@@ -924,8 +874,6 @@ TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshFailed)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::REFRESH_FAILED);
 }
@@ -962,8 +910,6 @@ TEST_F(AosConditionTest, ServicePhone_AosStart)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->ServicePhone_AosStart();
 }
@@ -1081,8 +1027,6 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_RetryFailure)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->ServicePhone_PhoneNumberStateChanged(
             IMS_FALSE, PhoneNumberState::RETRY_FAILURE);
 }
@@ -1091,8 +1035,6 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimStat
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->ServicePhone_PhoneNumberStateChanged(
             IMS_FALSE, PhoneNumberState::RETRY_SUCCESS);
@@ -1103,8 +1045,6 @@ TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->ServicePhone_PlmnChanged();
 }
 
@@ -1114,8 +1054,6 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNull)
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->ServicePhone_PowerOff();
 }
@@ -1130,8 +1068,6 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNotNull)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->ServicePhone_PowerOff();
 }
 
@@ -1144,8 +1080,6 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->ServiceSetting_AirplaneChanged(IMS_TRUE);
 }
@@ -1160,8 +1094,6 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_False)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->ServiceSetting_AirplaneChanged(IMS_FALSE);
 }
 
@@ -1169,8 +1101,6 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_TRUE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
@@ -1184,8 +1114,6 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_On)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
@@ -1196,8 +1124,6 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
@@ -1214,8 +1140,6 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
 }
 
@@ -1227,8 +1151,6 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->SetCombinedAttached(IMS_TRUE);
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
@@ -1243,8 +1165,6 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->SetCombinedAttached(IMS_TRUE);
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_FALSE);
 }
@@ -1255,8 +1175,6 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport)
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_FALSE);
@@ -1388,8 +1306,6 @@ TEST_F(AosConditionTest, AddHold_Roaming)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_CELLULAR_ROAMING, _));
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_ROAMING, IMS_TRUE);
 }
 
@@ -1397,8 +1313,6 @@ TEST_F(AosConditionTest, AddHold_ImsService)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_IMS_DISABLED, _));
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
@@ -1408,8 +1322,6 @@ TEST_F(AosConditionTest, AddHold_IsNotEventReset)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
 
@@ -1417,8 +1329,6 @@ TEST_F(AosConditionTest, AddHold_UninterestingEvent)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_NONE, IMS_FALSE);
 }
@@ -1428,8 +1338,6 @@ TEST_F(AosConditionTest, RemoveHold_Roaming)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_CELLULAR_ROAMING, _));
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_ROAMING, IMS_TRUE);
 }
 
@@ -1437,8 +1345,6 @@ TEST_F(AosConditionTest, RemoveHold_ImsService)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_IMS_DISABLED, _));
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_TRUE);
 }
@@ -1448,8 +1354,6 @@ TEST_F(AosConditionTest, RemoveHold_IsNotEventReset)
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
-
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
 }
 
@@ -1457,8 +1361,6 @@ TEST_F(AosConditionTest, RemoveHold_UninterestingEvent)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_NONE, IMS_FALSE);
 }
@@ -1483,7 +1385,6 @@ TEST_F(AosConditionTest, RequestCommand_ListenerIsNotNull)
 TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsGreaterThanOne)
 {
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1505,7 +1406,6 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsGreaterThanOne)
 TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsOne)
 {
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1526,7 +1426,6 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_ImpuCountIsOne)
 TEST_F(AosConditionTest, UpdateRegistrationMode_NoBlockReason)
 {
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_FALSE));
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
@@ -1548,7 +1447,6 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_NoBlockReason)
 TEST_F(AosConditionTest, UpdateRegistrationMode_IsNotReady)
 {
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _)).WillRepeatedly(Return(IMS_TRUE));
-    m_pAosCondition->SetAosBlock(&m_objMockIAosBlock);
 
     EXPECT_CALL(m_objMockIAosAppContext, GetSubscriber())
             .Times(AnyNumber())
