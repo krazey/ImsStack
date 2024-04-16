@@ -5197,6 +5197,121 @@ TEST_F(AosRegistrationTest,
     GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
 }
 
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfGeoLocationInfoIsNotRequired)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, RemovePreviousBodyWhenAddLocationHeaderBodyWithResubmit)
+{
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockISipMessage, RemoveBodyParts());
+
+    m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_RESUBMIT);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithoutPosition)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithPosition)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest,
+        AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithPositionAndCountry)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(
+                    Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithoutCivic)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_CIVIC));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfPidfFormingPolicyIsInvalid)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    IMS_SINT32 nInvalidPidfFormingPolicy = 0;
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(nInvalidPidfFormingPolicy));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
 TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecoverTimer)
 {
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
@@ -5577,35 +5692,4 @@ TEST_F(AosRegistrationTest, StopSubscriptionReturnsTrueIfSucceedToStop)
     IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
 
     EXPECT_TRUE(bResult);
-}
-
-TEST_F(AosRegistrationTest, AddLocationHeaderBody)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // IsGeolocationInfoRequired return false
-    EXPECT_FALSE(m_pAosRegistration->AddLocationHeaderBody(
-            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL));
-
-    // IsGeolocationInfoRequired return true
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockISipMessage, RemoveBodyParts()).Times(1);
-    EXPECT_FALSE(m_pAosRegistration->AddLocationHeaderBody(
-            &m_objMockISipMessage, IMessageMediator::MESSAGE_RESUBMIT));
 }
