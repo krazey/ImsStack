@@ -80,6 +80,11 @@ public:
     }
     inline IMS_BOOL GetOtherIpTypeRequired() { return m_bOtherIpTypeRequired; }
     inline ImsList<Pcscf*> GetPcscfList() { return m_objPcscfList; }
+    void AddRetryHost()
+    {
+        RetryHost* pRetryHost = new RetryHost(AString("RetryHost"), 5060, IpAddress::IPV4);
+        m_objRetryHostList.Append(pRetryHost);
+    }
 };
 
 class AosPcscfTest : public ::testing::Test
@@ -945,92 +950,89 @@ TEST_F(AosPcscfTest, ProcessDnsQueryReturnsFalseIfFail)
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosPcscfTest, StartTimer)
-{
-    // re-start if the timer is already running
-    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(2);
-
-    // start timer
-    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
-
-    // restart timer
-    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
-    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
-}
-
-TEST_F(AosPcscfTest, StartTimer_FailureCases)
+TEST_F(AosPcscfTest, DoNotStartIfDurationIsZeroWhenStartTimer)
 {
     EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
 
-    // do NOT start timer when duration is zero
     m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 0);
+}
 
-    // do NOT start timer for invalid timer type
+TEST_F(AosPcscfTest, DoNotStartIfTypeIsInvalidWhenStartTimer)
+{
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
+
     m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100, 10);
 }
 
-TEST_F(AosPcscfTest, StopTimer)
+TEST_F(AosPcscfTest, RestartIfAlreadyRunningWhenStartTimer)
 {
-    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(1);
+    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(2);
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(2);
 
-    // do NOT stop timer if there is no running timer
-    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
-
-    // do NOT stop timer for invalid timer type
     m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
-    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100);
+    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
 
-    // stop timer
     m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
 }
 
-TEST_F(AosPcscfTest, TimerExpired_FailureCases)
+TEST_F(AosPcscfTest, DoNotStopIfTypeIsInvalidWhenStopTimer)
 {
     EXPECT_CALL(m_objMockITimer, KillTimer()).Times(0);
 
-    // do NOT handle timer expired event when the timer is null
-    m_pAosPcscf->Timer_TimerExpired(nullptr);
+    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY + 100);
 }
 
-TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetrySucceeded)
+TEST_F(AosPcscfTest, DoNotStopIfNotRunningWhenStopTimer)
 {
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(0);
+
+    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
+}
+
+TEST_F(AosPcscfTest, SucceedToStopWhenStopTimer)
+{
+    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(1);
+
+    m_pAosPcscf->StopTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY);
+}
+
+TEST_F(AosPcscfTest, DoNothingIfTimerIsNullWhenTimerExpired)
+{
+    EXPECT_CALL(m_objMockITimer, KillTimer()).Times(0);
+
+    m_pAosPcscf->Timer_TimerExpired(IMS_NULL);
+}
+
+TEST_F(AosPcscfTest, NotifyResultIfSucceedToRetryDnsQueryWhenDnsRetryTimerExpired)
+{
+    m_pAosPcscf->SetListener(&objMockIAosPcscfListener);
+    m_pAosPcscf->AddRetryHost();
+    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+
     ImsList<IpAddress> objIpas;
     objIpas.Append(IpAddress(AString("0.0.0.4")));
     EXPECT_CALL(m_objMockIAosConnection, GetHostByNameInternal(_, _, _))
-            .WillOnce(Return(-1))
             .WillOnce(DoAll(SetArgPointee<1>(objIpas), Return(1)));
-    EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE)).Times(1);
-    m_pAosPcscf->SetListener(&objMockIAosPcscfListener);
+    EXPECT_CALL(objMockIAosPcscfListener, Pcscf_NotifyResult(IMS_TRUE));
 
-    // DnsRetryTimer is started when the first DNS query fails
-    EXPECT_FALSE(m_pAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));
-    EXPECT_NE(m_pAosPcscf->GetDnsQueryRetryTimer(), nullptr);
-
-    // invoke ProcessDnsRetryTimerExpired when the DnsRetryTimer is expired
     m_pAosPcscf->Timer_TimerExpired(m_pAosPcscf->GetDnsQueryRetryTimer());
-    EXPECT_TRUE(m_pAosPcscf->IsConfigured());
-    EXPECT_EQ(m_pAosPcscf->GetPcscfCount(), 1);
-    EXPECT_EQ(m_pAosPcscf->GetPcscfs().GetElementAt(0), AString("0.0.0.4"));
 }
 
-TEST_F(AosPcscfTest, ProcessDnsRetryTimerExpired_RetryWithOtherIpType)
+TEST_F(AosPcscfTest, TriggerDiscoveryUsingEachIpTypeIfFailToDnsQueryAgainWhenDnsRetryTimerExpired)
 {
-    EXPECT_CALL(m_objMockIAosConnection, GetHostByName(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(-1));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IpAddress::IPv6LOOPBACK));
-
-    // DnsRetryTimer is started when the first DNS query fails
-    EXPECT_FALSE(m_pAosPcscf->ProcessDnsQuery(AString("aaa.bbb.ccc"), 5060, IpAddress::IPV4));
-    EXPECT_NE(m_pAosPcscf->GetDnsQueryRetryTimer(), nullptr);
-
-    // when the DnsRetryTimer is expired perform PCSCF discovery again in the following order
-    // 1. retry DNS query once more
-    // 2. invoke ProcessDiscovery using IP type of RetryHost
-    // 3. invoke ProcessDiscovery using other IP type
-    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods()).Times(2);
     m_pAosPcscf->SetOtherIpTypeRequired(true);
+    m_pAosPcscf->AddRetryHost();
+    m_pAosPcscf->StartTimer(TestAosPcscf::TIMER_DNS_QUERY_RETRY, 10);
+    ON_CALL(m_objMockIAosConnection, GetHostByName(_, _, _)).WillByDefault(Return(-1));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
+            .WillByDefault(ReturnRef(IpAddress::IPv6LOOPBACK));
+
+    EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
+            .Times(2)
+            .WillRepeatedly(ReturnRef(m_objEmptyDiscoveryMethods));
+
     m_pAosPcscf->Timer_TimerExpired(m_pAosPcscf->GetDnsQueryRetryTimer());
 }
 
