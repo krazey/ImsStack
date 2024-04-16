@@ -5451,38 +5451,132 @@ TEST_F(AosRegistrationTest, RestoreActiveBindingsIfRegisteredWhenInternalTimerEx
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
 }
 
-TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfRegistrationIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(IMS_NULL, &m_objMockAosSubscription,
+            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfFailToCreate)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    ON_CALL(m_objMockIRegistration, CreateSubscription(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsTrueIfSucceedToCreate)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    ON_CALL(m_objMockIRegistration, CreateSubscription(_))
+            .WillByDefault(Return(&m_objMockIRegSubscription));
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsTrueIfSucceedToDestroy)
 {
     m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
 
-    // StartSubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->StartSubscription(IMS_TRUE));
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
 
-    // StopSubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->StopSubscription());
+    EXPECT_TRUE(bResult);
+}
 
-    // DestroySubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->DestroySubscription());
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
 
-    // StartSubscription - m_pSubscription is null
-    EXPECT_FALSE(m_pAosRegistration->StartSubscription(IMS_TRUE));
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
 
-    // StopSubscription - m_pSubscription is null
-    EXPECT_FALSE(m_pAosRegistration->StopSubscription());
+    EXPECT_FALSE(bResult);
+}
 
-    // CreateSubscription - piRegSubscription is null
-    EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(nullptr))
-            .WillRepeatedly(Return(&m_objMockIRegSubscription));
-    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
 
-    // CreateSubscription - m_piRegistration and piRegSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
 
-    // CreateSubscription - m_piRegistration is null
-    m_pAosRegistration->Destroy();
-    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsTrueIfSucceedToStart)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsTrueIfSucceedToStop)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, AddLocationHeaderBody)
