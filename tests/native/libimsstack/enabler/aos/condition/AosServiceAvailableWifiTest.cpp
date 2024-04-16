@@ -65,6 +65,9 @@ public:
 
     inline ~TestAosServiceAvailableWifi() override { delete m_pCounter; }
 
+    inline TestAosServiceAvailableWifi(IN const TestAosServiceAvailableWifi&) = delete;
+    inline TestAosServiceAvailableWifi& operator=(IN const TestAosServiceAvailableWifi&) = delete;
+
     inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 
     inline void SetCallTracker(IN IAosCallTracker* pIAosCallTracker)

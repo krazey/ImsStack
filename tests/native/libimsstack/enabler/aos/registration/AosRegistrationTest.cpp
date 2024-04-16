@@ -202,6 +202,9 @@ public:
     }
     inline ~TestAosRegistration() override { delete m_pCounter; }
 
+    inline TestAosRegistration(IN const TestAosRegistration&) = delete;
+    inline TestAosRegistration& operator=(IN const TestAosRegistration&) = delete;
+
     inline IRegistration* GetRegistration() override { return m_piRegistrationInstance; }
     inline AosSubscription* GetSubscription(IN IRegSubscription*) override
     {

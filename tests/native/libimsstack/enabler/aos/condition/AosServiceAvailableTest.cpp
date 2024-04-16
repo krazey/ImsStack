@@ -54,6 +54,9 @@ public:
 
     inline ~TestAosServiceAvailable() override { delete m_pCounter; }
 
+    inline TestAosServiceAvailable(IN const TestAosServiceAvailable&) = delete;
+    inline TestAosServiceAvailable& operator=(IN const TestAosServiceAvailable&) = delete;
+
     inline void SetAppContext(IN IAosAppContext* piContext) { m_piAppContext = piContext; }
 
     inline ImsList<IAosServiceAvailableListener*> GetListeners() { return m_objListeners; }
