@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
 import android.telephony.DataFailCause;
 import android.telephony.ims.ImsMmTelManager;
@@ -510,6 +511,54 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testchangeCapabilities_WithoutSmsCapability() {
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager.ImsSms
+                .KEY_SMS_OVER_IMS_SUPPORTED_BOOL)))
+                .thenReturn(false);
+
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager.ImsSms
+                .KEY_SMS_OVER_IMS_SUPPORTED_BOOL)))
+                .thenReturn(true);
+
+        int[] emptyArray = new int[0];
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY))
+                .thenReturn(emptyArray);
+
+        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
+    public void testchangeCapabilities_WithSmsCapability() {
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager.ImsSms
+                .KEY_SMS_OVER_IMS_SUPPORTED_BOOL)))
+                .thenReturn(true);
+        int[] intArray = {AccessNetworkType.EUTRAN, AccessNetworkType.IWLAN,
+                AccessNetworkType.UTRAN, AccessNetworkType.NGRAN};
+
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY))
+                .thenReturn(intArray);
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs(
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.SMS);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.SMS);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.UTRAN,
+                IAosRegistrationListener.Capability.SMS);
+
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.Capability.SMS);
+
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
     public void testchangeCapabilities_OnIgnoreDataEnbledForVideo() {
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
                 .KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)))
@@ -764,6 +813,7 @@ public class ImsRegistrationTrackerTest {
 
         verify(mMockHandler).post(any(Runnable.class));
     }
+
     @Test
     public void testConfigListener() {
         ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
