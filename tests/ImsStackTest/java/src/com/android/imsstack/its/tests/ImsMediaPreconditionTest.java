@@ -1,0 +1,148 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.its.tests;
+
+import static com.android.imsstack.its.base.TestConstants.SLOT0;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.net.QosSession;
+import android.os.PersistableBundle;
+import android.telephony.imsmedia.ImsMediaManager;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.its.base.SystemProxyResolver;
+import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
+import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
+import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.tests.call.TestCall;
+import com.android.imsstack.its.util.SingleLatch;
+
+import java.util.concurrent.Executors;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
+public class ImsMediaPreconditionTest extends ImsStackTestBase {
+    private final SingleLatch mEventLatch = new SingleLatch(BootupTest.class.getSimpleName());
+    private PersistableBundle mConfig = null;
+    private ImsRegistrationWrapper mImsRegistration;
+    private ImsMmTelFeatureWrapper mMmTelFeature;
+    private int mTestMode = -1;
+
+    @Before
+    public void setUp() throws Exception {
+        TelephonyManagerProxyImpl telephony =
+                SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
+        // TODO: Need to be removed when ImsService can handle the startImsTraffic.
+        telephony.setHalVersion(-2, -2);
+        setUpBase(SLOT0);
+        mImsRegistration = mImsServiceConnector.getRegistration();
+        mMmTelFeature = mImsServiceConnector.getMmTelFeature();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        tearDownBase(SLOT0);
+    }
+
+    @Test
+    public void testTriggerSetTestMode() throws Exception {
+        logi("start testTriggerSetTestMode");
+        mTestMode = 1;
+
+        ImsMediaCallback callback = new ImsMediaCallback();
+        ImsMediaManager imsMediaManager = new ImsMediaManager(AppContext.getInstance(),
+                Executors.newSingleThreadExecutor(), callback);
+
+        assertTrue(callback.setMediaManager(imsMediaManager));
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        assertEquals(callback.getMediaManager().getTestMode(), 1);
+
+        callback.release();
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+
+        startImsStack(SLOT0, mConfig);
+        enableAllMmTelCapabilities();
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+
+        mConnectivityManagerProxy.setQosSessionBearerType(QosSession.TYPE_EPS_BEARER);
+        mConnectivityManagerProxy.notifyNetworkAvailable(APN_IMS);
+        // Verify that IMS registration is successfully completed within a certain period of time.
+        mImsRegistration.waitForRegistered();
+        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        mConnectivityManagerProxy.notifyQosSessionAvailable();
+
+        final TestCall call = new TestCall(mMmTelFeature);
+        call.startVoiceCall();
+
+        assertEquals(callback.getMediaManager().getTestMode(), 1);
+        logi("end testTriggerSetTestMode");
+    }
+
+    /**
+     * Implements Interface to receive callbacks when the ImsMediaManager is connected
+     * or disconnected.
+     */
+    private class ImsMediaCallback implements ImsMediaManager.OnConnectedCallback {
+        private ImsMediaManager mImsMediaManager;
+
+        public boolean setMediaManager(ImsMediaManager imsMediaManager) {
+            logi("ImsMediaPrecondition - setMediaManager");
+            mImsMediaManager = imsMediaManager;
+            if (mImsMediaManager == null) {
+                logi("return false");
+                return false;
+            }
+            return true;
+        }
+
+        public ImsMediaManager getMediaManager() {
+            logi("ImsMediaPrecondition - getMediaManager");
+            return mImsMediaManager;
+        }
+
+        public void release() {
+            logi("ImsMediaPrecondition release");
+            mImsMediaManager.release();
+        }
+
+        @Override
+        public void onConnected() {
+            logi("ImsMediaPrecondition - connected");
+            if (mImsMediaManager == null) {
+                logi("ImsMediaManager is null");
+                return;
+            }
+
+            mImsMediaManager.setTestMode(mTestMode);
+            logi("ImsMediaPrecondition - setTestMode - " + mTestMode);
+        }
+
+        @Override
+        public void onDisconnected() {
+            logi("ImsMediaPrecondition - disconnected");
+        }
+    }
+}
