@@ -37,7 +37,10 @@ import com.android.imsstack.util.Log;
 import java.util.List;
 
 /**
- * IMS call session interface wrapper.
+ * IMS call session interface wrapper. It contains only simple logic to call remote methods of
+ * IImsCallSessions object and receives the notification.
+ * The users of this class can be notified call events by implement
+ * {@link ImsCallSessionWrapper#Listener}.
  */
 public final class ImsCallSessionWrapper {
     @NonNull private final IImsCallSession mIImsCallSession;
@@ -623,6 +626,16 @@ public final class ImsCallSessionWrapper {
          * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the termination.
          */
         default void callSessionTerminated(ImsReasonInfo reasonInfo) {};
+
+        /**
+         * Called when a call session has received a USSD message.
+         *
+         * @param mode The mode of the USSD message, either
+         *             {@link ImsCallSessionImplBase#USSD_MODE_NOTIFY} or
+         *             {@link ImsCallSessionImplBase#USSD_MODE_REQUEST}.
+         * @param ussdMessage The USSD message.
+         */
+        default void callSessionUssdMessageReceived(int mode, String ussdMessage) {};
     }
 
     /**
@@ -718,7 +731,9 @@ public final class ImsCallSessionWrapper {
         public void callSessionConferenceStateUpdated(ImsConferenceState state) {}
 
         @Override
-        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {}
+        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
+            mListener.callSessionUssdMessageReceived(mode, ussdMessage);
+        }
 
         @Override
         public void callSessionMayHandover(int srcNetworkType, int targetNetworkType) {}

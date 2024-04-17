@@ -17,45 +17,21 @@ package com.android.imsstack.its.tests;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
-import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.ims.ImsCallProfile;
-import android.telephony.ims.ImsReasonInfo;
-import android.telephony.ims.aidl.IImsCallSessionListener;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.android.ims.internal.IImsCallSession;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
-import com.android.imsstack.its.imsservice.mmtel.call.ImsCallSessionWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.util.SingleLatch;
 
 public class CallTestBase extends ImsStackTestBase {
     protected final SingleLatch mEventLatch = new SingleLatch(CallTestBase.class.getSimpleName());
-    // TODO: Considering to move these SingleLatchs into ImsCallSessionWrapper.
-    protected final SingleLatch mInitiatedLatch = new SingleLatch("CallInitiated");
-    protected final SingleLatch mTerminatedLatch = new SingleLatch("CallTerminated");
-    protected final SingleLatch mIncomingCallLatch = new SingleLatch("OnIncomingCall");
-    protected final SingleLatch mUnexpectedEventLatch =
-            new SingleLatch("UnexpectedCallTermination");
-    protected final CallSessionListener mCallSessionListener = new CallSessionListener();
-    protected final IncomingCallListener mIncomingCallListener = new IncomingCallListener();
 
     protected ImsRegistrationWrapper mImsRegistration = null;
     protected ImsMmTelFeatureWrapper mMmTelFeature = null;
-    protected PersistableBundle mConfig = null;
-    protected boolean mTestCompleted;
-    protected int mExpectedReason;
-    protected ImsCallSessionWrapper mIncomingCallSessionWrapper = null;
 
-    public CallTestBase() {
-        mTestCompleted = false;
-        mExpectedReason = ImsReasonInfo.CODE_UNSPECIFIED;
-    }
+    protected PersistableBundle mConfig = null;
 
     protected void performRegistration() {
         startImsStack(SLOT0, mConfig);
@@ -69,15 +45,6 @@ public class CallTestBase extends ImsStackTestBase {
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
     }
 
-    protected @NonNull ImsCallSessionWrapper createAndStartVoiceCall() {
-        ImsCallProfile callProfile = mMmTelFeature.createCallProfile(
-                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VOICE);
-        ImsCallSessionWrapper callSession =
-                mMmTelFeature.createCallSession(callProfile, mCallSessionListener);
-        callSession.start("1234567890", callProfile);
-        return callSession;
-    }
-
     // TODO: Move into CallTestUtilities / CallTestConfigManager.
     protected void turnOffQosAndPrecondition() {
         if (mConfig == null) {
@@ -87,42 +54,5 @@ public class CallTestBase extends ImsStackTestBase {
                 CarrierConfig.Assets.KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT, 0);
         mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
-    }
-
-    protected class CallSessionListener implements ImsCallSessionWrapper.Listener {
-        @Override
-        public void callSessionInitiated(ImsCallProfile profile) {
-            logd("CallSessionListener.callSessionInitiated");
-            mInitiatedLatch.countDownAndInit();
-        }
-
-        @Override
-        public void callSessionTerminated(ImsReasonInfo reasonInfo) {
-            logd("CallSessionListener.callSessionTerminated : " + reasonInfo.mCode);
-            if (mTestCompleted) {
-                logd("CallSessionListener.callSessionTerminated : ignore after completion");
-                return;
-            }
-
-            if (reasonInfo.mCode != mExpectedReason) {
-                loge("CallSessionListener.callSessionTerminated : unexpected reason");
-                mUnexpectedEventLatch.countDown();
-            } else {
-                logi("CallSessionListener.callSessionTerminated : expected reason");
-                mTerminatedLatch.countDownAndInit();
-            }
-        }
-    }
-
-    protected class IncomingCallListener implements ImsMmTelFeatureWrapper.IncomingCallListener {
-        @Override
-        public @Nullable IImsCallSessionListener onIncomingCall(
-                @NonNull IImsCallSession c, @Nullable String callId, @Nullable Bundle extras) {
-            logi("IncomingCallListener.onIncomingCall");
-            mIncomingCallSessionWrapper = new ImsCallSessionWrapper(c, mCallSessionListener);
-
-            mIncomingCallLatch.countDownAndInit();
-            return mIncomingCallSessionWrapper.getCallSessionListenerProxy();
-        }
     }
 }

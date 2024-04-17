@@ -17,7 +17,7 @@ package com.android.imsstack.its.tests;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
@@ -26,8 +26,7 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
-import com.android.imsstack.its.imsservice.mmtel.call.ImsCallSessionWrapper;
-import com.android.imsstack.its.util.SingleLatch;
+import com.android.imsstack.its.imsservice.mmtel.call.TestCall;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,39 +63,42 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 200 - ACK
 
-        ImsCallSessionWrapper callSession = createAndStartVoiceCall();
+        final TestCall call = new TestCall(mMmTelFeature);
+        call.startVoiceCall();
+        call.expectWithin(10000).initiated();
 
-        // Checks that the call is initiated within 10s.
-        mInitiatedLatch.await(DEFAULT_CALL_INITIATED_TIMER_IN_MILLIS);
-
-        assertTrue(callSession.getState() == ImsCallSessionImplBase.State.ESTABLISHED);
-
-        mTestCompleted = true;
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        assertEquals(call.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
     }
 
     @Test
     public void testCallNormalClearingByUser() throws Exception {
         turnOffQosAndPrecondition();
         performRegistration();
-        logi("testCallNormalClearing - TISS: 200");
+        logi("testCallNormalClearingByUser - TISS: 200");
 
         // TODO: SetUpTiss : INVITE - 100 - 200 - ACK - BYE - 200
 
-        ImsCallSessionWrapper callSession = createAndStartVoiceCall();
-        mInitiatedLatch.await(DEFAULT_CALL_INITIATED_TIMER_IN_MILLIS);
+        TestCall call = new TestCall(mMmTelFeature);
+        call.startVoiceCall();
+        call.expectWithin(10000).not().terminated();
+        call.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
+        call.expect().terminated(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED);
+    }
 
-        // Terminates the call 10s after being initiated.
-        // Use awaitTimeout() to check abnormal call termination.
-        mUnexpectedEventLatch.awaitTimeout(10000);
+    @Test
+    public void testCallNormalClearingByRemote() throws Exception {
+        turnOffQosAndPrecondition();
+        performRegistration();
+        logi("testCallNormalClearingByRemote - TISS: 200");
 
-        mExpectedReason = ImsReasonInfo.CODE_USER_TERMINATED;
-        callSession.terminate(mExpectedReason);
+        // TODO: SetUpTiss : INVITE - 100 - 200 - ACK - BYE - 200
 
-        mTerminatedLatch.await(1000);
-        mTestCompleted = true;
-        // To guarantee receiving 200 OK for BYE. Otherwise, socket is closed before receiving it.
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        TestCall call = new TestCall(mMmTelFeature);
+        call.startVoiceCall();
+        call.expectWithin(10000).not().terminated();
+        call.expect().terminated(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
     }
 
     @Test
@@ -107,12 +109,11 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 603 - ACK
 
-        createAndStartVoiceCall();
-        mExpectedReason = ImsReasonInfo.CODE_SIP_USER_REJECTED;
-        mTerminatedLatch.await(10000);
-
-        mTestCompleted = true;
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        TestCall call = new TestCall(mMmTelFeature);
+        call.startVoiceCall();
+        call.expectWithin(10000).not().terminated();
+        call.expect().terminated(
+                reason -> reason.getCode() == ImsReasonInfo.CODE_SIP_USER_REJECTED);
     }
 
     @Test
@@ -123,21 +124,16 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 183 - PRACK - 200 - 180 - PRACK - 200 - 200 - ACK
 
-        mImsServiceConnector.getMmTelFeature().setIncomingCallListener(mIncomingCallListener);
+        TestCall call = new TestCall(mMmTelFeature);
+        call.expectWithin(10000).incomingCall();
 
-        mIncomingCallLatch.await(10000);
         logi("testMtCallSetup - incoming call received");
 
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
-
         logi("testMtCallSetup - accept call");
-        mIncomingCallSessionWrapper.accept(SLOT0, null);
+        call.acceptAsVoice();
+        call.expect().initiated();
 
-        assertTrue(mIncomingCallSessionWrapper.getState()
-                == ImsCallSessionImplBase.State.ESTABLISHED);
-
-        mTestCompleted = true;
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
+        assertEquals(call.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
     }
 
     @Test
@@ -148,23 +144,17 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 183 - PRACK - 200 - 180 - PRACK - 200 - 486 - ACK
 
-        mImsServiceConnector.getMmTelFeature().setIncomingCallListener(mIncomingCallListener);
+        TestCall call = new TestCall(mMmTelFeature);
+        call.expectWithin(10000).incomingCall();
 
-        mIncomingCallLatch.await(10000);
         logi("testMtCallSetup - incoming call received");
 
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
-
         logi("testMtCallSetup - reject call");
-        mIncomingCallSessionWrapper.reject(ImsReasonInfo.CODE_USER_DECLINE);
+        call.reject(ImsReasonInfo.CODE_USER_DECLINE);
+        call.expect().terminated();
 
-        logi("testMtCallSetup - state:" + mIncomingCallSessionWrapper.getState());
-        assertTrue(mIncomingCallSessionWrapper.getState()
-                == ImsCallSessionImplBase.State.TERMINATED);
+        assertEquals(call.getState(), ImsCallSessionImplBase.State.TERMINATED);
 
         // TODO: Check SIP status code by TISS.
-
-        mTestCompleted = true;
-        mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
     }
 }
