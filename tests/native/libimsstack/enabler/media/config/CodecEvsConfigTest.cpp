@@ -41,6 +41,11 @@ static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecEvsConfig::DEFAULT_MODECHANGE_PERIOD;
 static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecEvsConfig::DEFAULT_MODECHANGE_NEIGHBOR;
 
+MATCHER_P(IsSameKey, key, "")
+{
+    return IMS_StrCmp(arg, key) == 0;
+}
+
 class CodecEvsConfigTest : public ::testing::Test {
 public:
     CodecEvsConfig* m_pConfig;
@@ -79,7 +84,7 @@ protected:
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 };

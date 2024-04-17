@@ -41,6 +41,11 @@ static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SP
 
 using ::testing::Return;
 
+MATCHER_P(IsSameKey, key, "")
+{
+    return IMS_StrCmp(arg, key) == 0;
+}
+
 class CodecAvcConfigTest : public ::testing::Test {
 public:
     CodecAvcConfig* m_pConfig;
@@ -79,7 +84,7 @@ protected:
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pVideoBundle));
-        ON_CALL(*m_pVideoBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pVideoSubBundle));
     }
 };

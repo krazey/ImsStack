@@ -43,6 +43,11 @@ static const IMS_SINT32 DEFAULT_LEVEL = CodecHevcConfig::DEFAULT_HEVC_LEVEL;
 
 using ::testing::Return;
 
+MATCHER_P(IsSameKey, key, "")
+{
+    return IMS_StrCmp(arg, key) == 0;
+}
+
 class CodecHevcConfigTest : public ::testing::Test {
 public:
     CodecHevcConfig* m_pConfig;
@@ -81,7 +86,7 @@ protected:
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pVideoBundle));
-        ON_CALL(*m_pVideoBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pVideoSubBundle));
     }
 };

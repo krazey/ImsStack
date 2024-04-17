@@ -38,6 +38,11 @@ static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAmrConfig::DEFAULT_MODECHANGE_PERIOD;
 static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = CodecAmrConfig::DEFAULT_MODECHANGE_NEIGHBOR;
 
+MATCHER_P(IsSameKey, key, "")
+{
+    return IMS_StrCmp(arg, key) == 0;
+}
+
 class CodecAmrConfigTest : public ::testing::Test {
 public:
     ICarrierConfig* m_piCc;
@@ -82,7 +87,7 @@ protected:
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 
@@ -94,7 +99,7 @@ protected:
         ON_CALL(*m_pMockICarrierConfig,
                 GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pAudioBundle));
-        ON_CALL(*m_pAudioBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pAudioBundle, GetBundle(IsSameKey(strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pAudioSubBundle));
     }
 };
