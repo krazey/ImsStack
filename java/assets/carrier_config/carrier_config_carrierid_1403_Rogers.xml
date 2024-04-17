@@ -20,6 +20,7 @@
 
     <!-- Aos -->
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="true"/>
 
     <!-- MTC -->
     <int name="ims.request_uri_type_int" value="1"/>
