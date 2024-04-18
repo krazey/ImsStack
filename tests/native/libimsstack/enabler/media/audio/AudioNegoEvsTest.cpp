@@ -54,8 +54,7 @@ protected:
         m_pEvsFmtpFull = new AudioProfile::EvsFmtp();
         m_pEvsFmtpFull->nPtime = 20;
         m_pEvsFmtpFull->nMaxPtime = 240;
-        m_pEvsFmtpFull->nDtx = 1;
-        m_pEvsFmtpFull->nDtx_Recv = 0;
+        m_pEvsFmtpFull->bDtx = 1;
         m_pEvsFmtpFull->nHfOnly = 1;
         m_pEvsFmtpFull->nEvsModeSwitch = 1;
         m_pEvsFmtpFull->nMaxRed = 220;
@@ -86,7 +85,7 @@ protected:
         m_pEvsFmtpFull->bShowModeChangePeriod = IMS_TRUE;
         m_pEvsFmtpFull->bShowModeChangeNeighbor = IMS_TRUE;
         m_pEvsFmtpFull->bSendCmr = IMS_TRUE;
-        m_pEvsFmtpFull->bShowModeSetList = IMS_TRUE;
+        m_pEvsFmtpFull->bShowModeSet = IMS_TRUE;
     }
     virtual void TearDown() override
     {

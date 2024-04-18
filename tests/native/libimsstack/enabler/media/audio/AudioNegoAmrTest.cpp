@@ -51,7 +51,7 @@ protected:
         m_pAmrFmtpFull->nMaxPtime = 240;
 
         m_pAmrFmtpFull->bShowModeSet = IMS_TRUE;
-        m_pAmrFmtpFull->bShow_OctetAlign = IMS_TRUE;
+        m_pAmrFmtpFull->bShowOctetAlign = IMS_TRUE;
         m_pAmrFmtpFull->bShowModeChangeCapability = IMS_TRUE;
         m_pAmrFmtpFull->bShowModeChangePeriod = IMS_TRUE;
         m_pAmrFmtpFull->bShowModeChangeNeighbor = IMS_TRUE;

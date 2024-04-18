@@ -91,14 +91,14 @@ PUBLIC void AudioNegoAmr::AddModeSetListToFmtp(IN AudioProfile::AmrFmtp* profile
 PUBLIC void AudioNegoAmr::AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& fmtp)
 {
     IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, show=%d", profile->nOctetAlign,
-            profile->bShow_OctetAlign, 0);
+            profile->bShowOctetAlign, 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShow_OctetAlign == IMS_TRUE)
+    if (profile->bShowOctetAlign == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
