@@ -568,7 +568,6 @@ PRIVATE IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->nControlPort = 0;
     }
 
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_TRUE;
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
@@ -666,8 +665,6 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         IMS_TRACE_D("FormAnswer() - set direction[%d]", eDir, 0, 0);
         pNewOaModel->pNegotiatedProfile->eDirection = eDir;
     }
-
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_FALSE;
 
     // Make the SDP from profile
     return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
@@ -794,7 +791,6 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         }
     }
 
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_TRUE;
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile

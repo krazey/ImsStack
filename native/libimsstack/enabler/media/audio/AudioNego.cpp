@@ -816,8 +816,6 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         IMS_TRACE_I("FormAnswer() - update audio direction[%d]", eDir, 0, 0);
     }
 
-    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_FALSE;
-
     // Make the SDP from profile
     IMS_BOOL bSDPMade =
             MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
@@ -959,7 +957,6 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->objRtcpXrAttr = m_objBaseProfile.objRtcpXrAttr;
     }
 
-    pNewOaModel->pLocalProfile->bIsOfferCase = IMS_TRUE;
     m_lstOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile

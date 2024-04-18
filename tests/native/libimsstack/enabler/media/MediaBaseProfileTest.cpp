@@ -225,6 +225,19 @@ TEST(MediaBaseProfileTest, TestBasePayloadSetRtpMap)
     delete basePayload;
 }
 
+TEST(MediaBaseProfileTest, TestCapaNegoCreation)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    EXPECT_EQ(capaNego->mapTransportCapa.GetSize(), 0);
+    EXPECT_EQ(capaNego->mapAttributeCapa.GetSize(), 0);
+    EXPECT_EQ(capaNego->lstPotentialConfig.GetSize(), 0);
+    EXPECT_EQ(capaNego->strNegotiatedAcfg, AString::ConstNull());
+    EXPECT_EQ(capaNego->bIsAttCapaInPcfg, IMS_FALSE);
+
+    delete capaNego;
+}
+
 TEST(MediaBaseProfileTest, TestMediaBaseProfileCreation)
 {
     MediaBaseProfile* baseProfile1 = new MediaBaseProfile();

@@ -17,6 +17,7 @@
 #ifndef MEDIA_BASE_PROFILE_H_
 #define MEDIA_BASE_PROFILE_H_
 
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
 #include "MediaDef.h"
@@ -158,6 +159,25 @@ public:
     };
 
 public:
+    class CapaNego
+    {
+    public:
+        ImsMap<IMS_SINT32, AString> mapTransportCapa;
+        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
+        ImsList<AString> lstPotentialConfig;
+        AString strNegotiatedAcfg;
+        IMS_BOOL bIsAttCapaInPcfg;
+
+    public:
+        CapaNego() :
+                mapTransportCapa(ImsMap<IMS_SINT32, AString>()),
+                mapAttributeCapa(ImsMap<IMS_SINT32, AString>()),
+                lstPotentialConfig(ImsList<AString>()),
+                strNegotiatedAcfg(AString::ConstNull()),
+                bIsAttCapaInPcfg(IMS_FALSE){};
+    };
+
+public:
     IpAddress objIpAddress;
     IMS_UINT32 nDataPort;
     IMS_UINT32 nControlPort;
@@ -167,6 +187,8 @@ public:
     IMS_SINT32 nBandwidthRs;
     IMS_SINT32 nBandwidthRr;
     MEDIA_DIRECTION eDirection;
+    CapaNego objCapaNego;
+    IMS_SINT32 nNegotiatedPayloadIndex;
 
     MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
             IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
@@ -182,7 +204,9 @@ public:
             nBandwidthAs(bandwidthAs),
             nBandwidthRs(bandwidthRs),
             nBandwidthRr(bandwidthRr),
-            eDirection(direction)
+            eDirection(direction),
+            objCapaNego(CapaNego()),
+            nNegotiatedPayloadIndex(-1)
     {
     }
 
@@ -203,6 +227,8 @@ public:
         nBandwidthRs = profile->nBandwidthRs;
         nBandwidthRr = profile->nBandwidthRr;
         eDirection = profile->eDirection;
+        objCapaNego = profile->objCapaNego;
+        nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
     }
 
     MediaBaseProfile(const MediaBaseProfile& obj)
@@ -216,6 +242,8 @@ public:
         nBandwidthRs = obj.nBandwidthRs;
         nBandwidthRr = obj.nBandwidthRr;
         eDirection = obj.eDirection;
+        objCapaNego = obj.objCapaNego;
+        nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
     }
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
@@ -231,6 +259,8 @@ public:
             nBandwidthRs = obj.nBandwidthRs;
             nBandwidthRr = obj.nBandwidthRr;
             eDirection = obj.eDirection;
+            objCapaNego = obj.objCapaNego;
+            nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
         }
         return (*this);
     }

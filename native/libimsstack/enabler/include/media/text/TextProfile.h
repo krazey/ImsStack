@@ -101,7 +101,6 @@ public:
 
 public:
     ImsList<Payload*> lstPayload;
-    IMS_BOOL bISOfferCase;
     IMS_BOOL bIsHold;
     IMS_BOOL bKeepRedLevel;
 
@@ -110,7 +109,6 @@ public:
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
             lstPayload(ImsList<Payload*>()),
-            bISOfferCase(IMS_FALSE),
             bIsHold(IMS_FALSE),
             bKeepRedLevel(IMS_TRUE){};
 
@@ -124,7 +122,6 @@ public:
             return;
         }
 
-        bISOfferCase = profile->bISOfferCase;
         bIsHold = profile->bIsHold;
         bKeepRedLevel = profile->bKeepRedLevel;
 
@@ -135,7 +132,6 @@ public:
     TextProfile(IN const TextProfile& obj) :
             MediaBaseProfile(obj)
     {
-        bISOfferCase = obj.bISOfferCase;
         bIsHold = obj.bIsHold;
         bKeepRedLevel = obj.bKeepRedLevel;
 
@@ -148,7 +144,6 @@ public:
         if (this != &obj)
         {
             MediaBaseProfile::operator=(obj);
-            bISOfferCase = obj.bISOfferCase;
             bIsHold = obj.bIsHold;
             bKeepRedLevel = obj.bKeepRedLevel;
 
@@ -160,14 +155,14 @@ public:
 
     bool operator==(IN const TextProfile& obj) const
     {
-        return (MediaBaseProfile::operator==(obj) && bISOfferCase == obj.bISOfferCase &&
-                bIsHold == obj.bIsHold && bKeepRedLevel == obj.bKeepRedLevel);
+        return (MediaBaseProfile::operator==(obj) && bIsHold == obj.bIsHold &&
+                bKeepRedLevel == obj.bKeepRedLevel);
     }
 
     bool operator!=(IN const TextProfile& obj) const
     {
-        return (MediaBaseProfile::operator!=(obj) || bISOfferCase != obj.bISOfferCase ||
-                bIsHold != obj.bIsHold || bKeepRedLevel != obj.bKeepRedLevel);
+        return (MediaBaseProfile::operator!=(obj) || bIsHold != obj.bIsHold ||
+                bKeepRedLevel != obj.bKeepRedLevel);
     }
 
 private:
