@@ -1434,8 +1434,8 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             pPayload->pFmtp = pHevcFmtp;
 
             // Create Resolution from SDP -- true: image attr, false: spropParam
-            pHevcFmtp->eResolution = GetResolutionFromSdp(
-                    VIDEO_CODEC_HEVC, strImageAttrFromSdp, strFrameSizeFromSdp, pHevcFmtp->strSps);
+            pHevcFmtp->eResolution = GetResolutionFromSdp(VIDEO_CODEC_HEVC, strImageAttrFromSdp,
+                    strFrameSizeFromSdp, pHevcFmtp->strSpropParam);
 
             // Create AVPF attributes
             if (pProfile->bSupportAvpf == IMS_TRUE)
@@ -2470,6 +2470,10 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
 
     ImsList<AString> objSplitColon = strFmtp.Split(';');
 
+    AString strVps = AString::ConstNull();
+    AString strSps = AString::ConstNull();
+    AString strPps = AString::ConstNull();
+
     for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
     {
         if (objSplitColon.GetAt(i).GetLength() == 0)
@@ -2506,15 +2510,15 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("sprop-vps") == IMS_TRUE)
         {
-            pFmtp->strVps = objSplitEqual.GetAt(1);
+            strVps = objSplitEqual.GetAt(1);
         }
         else if (objSplitEqual.GetAt(0).Equals("sprop-sps") == IMS_TRUE)
         {
-            pFmtp->strSps = objSplitEqual.GetAt(1);
+            strSps = objSplitEqual.GetAt(1);
         }
         else if (objSplitEqual.GetAt(0).Equals("sprop-pps") == IMS_TRUE)
         {
-            pFmtp->strPps = objSplitEqual.GetAt(1);
+            strPps = objSplitEqual.GetAt(1);
         }
         else if (objSplitEqual.GetAt(0).Equals("packetization-mode") == IMS_TRUE)
         {
@@ -2528,14 +2532,14 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
         }
     }
 
-    if (!pFmtp->strVps.IsNULL() && !pFmtp->strSps.IsNULL() && !pFmtp->strPps.IsNULL())
+    if (!strVps.IsNULL() && !strSps.IsNULL() && !strPps.IsNULL())
     {
         AString strTemp;
-        strTemp.Append(pFmtp->strVps);
+        strTemp.Append(strVps);
         strTemp.Append(",");
-        strTemp.Append(pFmtp->strSps);
+        strTemp.Append(strSps);
         strTemp.Append(",");
-        strTemp.Append(pFmtp->strPps);
+        strTemp.Append(strPps);
 
         pFmtp->strSpropParam = strTemp;
         pFmtp->bShow_SpropParam = IMS_TRUE;

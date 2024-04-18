@@ -29,117 +29,33 @@ class VideoProfile : public MediaBaseProfile
 {
 public:
     /**
-     * HevcFmtp attributes are used within the SDP to carry HEVC parameters that provide
-     * extra configuration details about a specific HEVC codec used in the RTP stream.
+     * VideoFmtp attributes are used within the SDP to carry video parameters that provide
+     * extra configurations for the specific video codecs described in the rtpmap.
      */
-    class HevcFmtp : public BaseFmtp
+    class VideoFmtp : public BaseFmtp
     {
     public:
         VIDEO_RESOLUTION eResolution;
         IMS_SINT32 nBitrate;
         IMS_SINT32 nFrameRate;
         IMS_SINT32 nAs;
-        VIDEO_PROFILE_HEVC nProfile;
-        IMS_SINT32 nLevel;
-        AString strVps;
-        AString strSps;
-        AString strPps;
-        AString strSpropParam;
-        IMS_SINT32 nPacketizationMode;
-        IMS_BOOL bShow_Profile;
-        IMS_BOOL bShow_Level;
-        IMS_BOOL bShow_SpropParam;
-        IMS_BOOL bShow_PacketizationMode;
-
-    public:
-        explicit HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
-                eResolution(VIDEO_RESOLUTION_INVALID),
-                nBitrate(0),
-                nFrameRate(30),
-                nAs(0),
-                nProfile(HEVC_PROFILE_NONE),
-                nLevel(),
-                nPacketizationMode(1),
-                bShow_Profile(IMS_FALSE),
-                bShow_Level(IMS_FALSE),
-                bShow_SpropParam(IMS_FALSE),
-                bShow_PacketizationMode(IMS_FALSE)
-        {
-            if (pFmtp == IMS_NULL)
-            {
-                return;
-            }
-
-            eResolution = pFmtp->eResolution;
-            nBitrate = pFmtp->nBitrate;
-            nFrameRate = pFmtp->nFrameRate;
-            nAs = pFmtp->nAs;
-            nProfile = pFmtp->nProfile;
-            nLevel = pFmtp->nLevel;
-            strVps = pFmtp->strVps;
-            strSps = pFmtp->strSps;
-            strPps = pFmtp->strPps;
-            strSpropParam = pFmtp->strSpropParam;
-            nPacketizationMode = pFmtp->nPacketizationMode;
-            bShow_Profile = pFmtp->bShow_Profile;
-            bShow_Level = pFmtp->bShow_Level;
-            bShow_SpropParam = pFmtp->bShow_SpropParam;
-            bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
-        };
-
-        HevcFmtp(IN const VIDEO_RESOLUTION resol, IN const VIDEO_PROFILE_HEVC profile,
-                IN const IMS_UINT32 level, IN const IMS_UINT32 packetization,
-                IN const AString& sprop) :
-                eResolution(resol),
-                nBitrate(0),
-                nFrameRate(30),
-                nAs(0),
-                nProfile(profile),
-                nLevel(level),
-                strVps(sprop),
-                strSps(sprop),
-                strPps(sprop),
-                strSpropParam(sprop),
-                nPacketizationMode(packetization),
-                bShow_Profile(IMS_FALSE),
-                bShow_Level(IMS_FALSE),
-                bShow_SpropParam(IMS_FALSE),
-                bShow_PacketizationMode(IMS_FALSE){};
-
-        virtual ~HevcFmtp(){};
-    };
-
-public:
-    /**
-     * AvcFmtp attributes are used within the SDP to carry AVC parameters that provide
-     * extra configuration details about a specific AVC codec used in the RTP stream.
-     */
-    class AvcFmtp : public BaseFmtp
-    {
-    public:
-        VIDEO_RESOLUTION eResolution;
-        IMS_SINT32 nBitrate;
-        IMS_SINT32 nFrameRate;
-        IMS_SINT32 nAs;
-        VIDEO_PROFILE_AVC nProfile;
+        IMS_UINT32 nProfile;
         IMS_UINT32 nLevel;
-        AString strProfileLevelId;
         IMS_SINT32 nPacketizationMode;
         AString strSpropParam;
-        IMS_BOOL bShow_ProfileLevelId;
         IMS_BOOL bShow_PacketizationMode;
         IMS_BOOL bShow_SpropParam;
 
     public:
-        explicit AvcFmtp(IN AvcFmtp* pFmtp = IMS_NULL) :
+        explicit VideoFmtp(IN VideoFmtp* pFmtp = IMS_NULL) :
                 eResolution(VIDEO_RESOLUTION_INVALID),
                 nBitrate(0),
-                nFrameRate(15),
+                nFrameRate(0),
                 nAs(0),
                 nProfile(AVC_PROFILE_NONE),
-                nLevel(12),
+                nLevel(0),
                 nPacketizationMode(1),
-                bShow_ProfileLevelId(IMS_FALSE),
+                strSpropParam(AString::ConstNull()),
                 bShow_PacketizationMode(IMS_FALSE),
                 bShow_SpropParam(IMS_FALSE)
         {
@@ -154,33 +70,99 @@ public:
             nAs = pFmtp->nAs;
             nProfile = pFmtp->nProfile;
             nLevel = pFmtp->nLevel;
-
-            strProfileLevelId = pFmtp->strProfileLevelId;
             nPacketizationMode = pFmtp->nPacketizationMode;
             strSpropParam = pFmtp->strSpropParam;
-
-            bShow_ProfileLevelId = pFmtp->bShow_ProfileLevelId;
             bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
             bShow_SpropParam = pFmtp->bShow_SpropParam;
         };
 
-        AvcFmtp(IN const VIDEO_RESOLUTION resol, IN const VIDEO_PROFILE_AVC profile,
-                IN const IMS_UINT32& level, IN const AString& profileLevelID,
-                IN const IMS_UINT32& packetization, IN const AString& sprop) :
+        VideoFmtp(IN const VIDEO_RESOLUTION resol, IN const IMS_SINT32 bitrate,
+                IN const IMS_SINT32 frameRate, IN const IMS_SINT32 as, IN const IMS_UINT32 profile,
+                IN const IMS_UINT32 level, IN const IMS_UINT32 packetization,
+                IN const AString sprop) :
                 eResolution(resol),
-                nBitrate(0),
-                nFrameRate(15),
-                nAs(0),
+                nBitrate(bitrate),
+                nFrameRate(frameRate),
+                nAs(as),
                 nProfile(profile),
                 nLevel(level),
-                strProfileLevelId(profileLevelID),
                 nPacketizationMode(packetization),
                 strSpropParam(sprop),
-                bShow_ProfileLevelId(IMS_FALSE),
                 bShow_PacketizationMode(IMS_FALSE),
                 bShow_SpropParam(IMS_FALSE){};
 
+        virtual ~VideoFmtp(){};
+    };
+
+    /**
+     * AvcFmtp attributes are used within the SDP to carry AVC parameters that provide
+     * extra configurations for the specific video codecs described in the rtpmap.
+     */
+    class AvcFmtp : public VideoFmtp
+    {
+    public:
+        AString strProfileLevelId;
+        IMS_BOOL bShow_ProfileLevelId;
+
+    public:
+        explicit AvcFmtp(IN AvcFmtp* pFmtp = IMS_NULL) :
+                VideoFmtp(pFmtp),
+                strProfileLevelId(AString::ConstNull()),
+                bShow_ProfileLevelId(IMS_FALSE)
+        {
+            if (pFmtp == IMS_NULL)
+            {
+                return;
+            }
+            strProfileLevelId = pFmtp->strProfileLevelId;
+            bShow_ProfileLevelId = pFmtp->bShow_ProfileLevelId;
+        };
+
+        AvcFmtp(IN const VIDEO_RESOLUTION resol, IN const IMS_UINT32 bitrate,
+                IN const IMS_UINT32 frameRate, IN const IMS_UINT32 as, IN const IMS_UINT32 profile,
+                IN const IMS_UINT32 level, IN const AString profileLevelID,
+                IN const IMS_UINT32 packetization, IN const AString sprop) :
+                VideoFmtp(resol, bitrate, frameRate, as, profile, level, packetization, sprop),
+                strProfileLevelId(profileLevelID),
+                bShow_ProfileLevelId(IMS_FALSE){};
+
         virtual ~AvcFmtp(){};
+    };
+
+    /**
+     * HevcFmtp attributes are used within the SDP to carry HEVC parameters that provide
+     * extra configurations for the specific video codecs described in the rtpmap.
+     */
+    class HevcFmtp : public VideoFmtp
+    {
+    public:
+        IMS_BOOL bShow_Profile;
+        IMS_BOOL bShow_Level;
+
+    public:
+        explicit HevcFmtp(IN HevcFmtp* pFmtp = IMS_NULL) :
+                VideoFmtp(pFmtp),
+                bShow_Profile(IMS_FALSE),
+                bShow_Level(IMS_FALSE)
+        {
+            if (pFmtp == IMS_NULL)
+            {
+                return;
+            }
+
+            bShow_Profile = pFmtp->bShow_Profile;
+            bShow_Level = pFmtp->bShow_Level;
+        };
+
+        HevcFmtp(IN const VIDEO_RESOLUTION resol, IN const IMS_UINT32 bitrate,
+                IN const IMS_UINT32 frameRate, IN const IMS_UINT32 as,
+                IN const VIDEO_PROFILE_HEVC profile, IN const IMS_UINT32 level,
+                IN const IMS_UINT32 packetization, IN const AString& sprop) :
+                VideoFmtp(resol, bitrate, frameRate, as, profile, level, packetization, sprop),
+                bShow_Profile(IMS_FALSE),
+                bShow_Level(IMS_FALSE){};
+
+        virtual ~HevcFmtp(){};
     };
 
 public:

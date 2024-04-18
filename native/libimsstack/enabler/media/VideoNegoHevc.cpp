@@ -126,28 +126,31 @@ PUBLIC void VideoNegoHevc::AddSpropParamsToFmtp(
 
         if (objSplitComma.GetSize() == 3)
         {
-            profile->strVps = objSplitComma.GetAt(0);
-            profile->strSps = objSplitComma.GetAt(1);
-            profile->strPps = objSplitComma.GetAt(2);
+            AString strVps = AString::ConstNull();
+            AString strSps = AString::ConstNull();
+            AString strPps = AString::ConstNull();
 
-            if (profile->strVps.GetLength() > 0 || profile->strSps.GetLength() > 0 ||
-                    profile->strPps.GetLength() > 0)
+            strVps = objSplitComma.GetAt(0);
+            strSps = objSplitComma.GetAt(1);
+            strPps = objSplitComma.GetAt(2);
+
+            if (strVps.GetLength() > 0 || strSps.GetLength() > 0 || strPps.GetLength() > 0)
             {
                 AString strTemp;
 
                 AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-                strTemp.Sprintf("sprop-vps=%s", profile->strVps.GetStr());
+                strTemp.Sprintf("sprop-vps=%s", strVps.GetStr());
                 fmtp.Append(strTemp);
 
                 AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-                strTemp.Sprintf("sprop-sps=%s", profile->strSps.GetStr());
+                strTemp.Sprintf("sprop-sps=%s", strSps.GetStr());
                 fmtp.Append(strTemp);
 
                 AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
-                strTemp.Sprintf("sprop-pps=%s", profile->strPps.GetStr());
+                strTemp.Sprintf("sprop-pps=%s", strPps.GetStr());
                 fmtp.Append(strTemp);
             }
         }

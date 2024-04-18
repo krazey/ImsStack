@@ -671,9 +671,9 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile)
+IMS_UINT32 VideoMediaSession::convertAvcProfile(IN IMS_UINT32 nProfile)
 {
-    switch (eProfile)
+    switch (nProfile)
     {
         case AVC_PROFILE_B:
             return VideoConfig::AVC_PROFILE_BASELINE;
@@ -691,9 +691,9 @@ IMS_UINT32 VideoMediaSession::convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertHevcProfile(IN VIDEO_PROFILE_HEVC eProfile)
+IMS_UINT32 VideoMediaSession::convertHevcProfile(IN IMS_UINT32 nProfile)
 {
-    switch (eProfile)
+    switch (nProfile)
     {
         case HEVC_PROFILE_MAIN:
             return VideoConfig::HEVC_PROFILE_MAIN;
