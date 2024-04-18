@@ -45,6 +45,7 @@ public class LocationAgentTest {
     @Mock private ConfigInterface mConfigInterface;
     @Mock private CarrierConfig mCarrierConfig;
     @Mock private SubsInfoInterface mSubsInfoInterface;
+    @Mock private LocationInterface.Listener mLocationInfoListener;
 
     private TestAppContext mTestAppContext;
     private LocationAgent mLocationAgent;
@@ -61,11 +62,13 @@ public class LocationAgentTest {
 
         mLocationAgent = new LocationAgent(SLOT0);
         mLocationAgent.init(mTestAppContext.getContext());
+        mLocationAgent.addListener(mLocationInfoListener);
     }
 
     @After
     public void tearDown() throws Exception {
         if (mLocationAgent != null) {
+            mLocationAgent.removeListener(mLocationInfoListener);
             mLocationAgent.cleanup();
             mLocationAgent = null;
         }
@@ -130,5 +133,27 @@ public class LocationAgentTest {
         assertEquals(addressTolerableDistance, lp.getAddressTolerableDistance());
         assertEquals(gpsSearchingDuration, lp.getSearchDurationForGps());
         assertEquals(LocationPolicy.SHAPE_ELLIPSOID, lp.getShape());
+    }
+
+    @Test
+    @SmallTest
+    public void testNotifyListenersWhenLastKnownCountryChanged() {
+        LocationPolicy lp = mLocationAgent.getLocationPolicy();
+        lp.setPolicy(LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT);
+        mLocationAgent.setLocationPolicy(lp);
+
+        mLocationAgent.notifyEventOnLastKnownCountryChanged("KR", "US");
+
+        verify(mLocationInfoListener).onLastKnownCountryUpdated();
+    }
+
+    @Test
+    @SmallTest
+    public void testNotifyListenersWhenLocationFixed() {
+        mLocationAgent.startInstantLocationUpdate();
+
+        mLocationAgent.notifyEventOnLocationFixedForInstantRequest();
+
+        verify(mLocationInfoListener).onInstantRequestedLocationUpdated();
     }
 }

@@ -121,14 +121,6 @@ public interface IAosInfo {
     void notifyIsimState(int state);
 
     /**
-     * Called to notify the change of location information.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param state {@code state} is type of {@link LocationInfo}.
-     */
-    void notifyLocationInfo(int state);
-
-    /**
      * Called to notify the change of mobile data limit.
      * Native Listener : IAosServicePhoneListener.
      *

@@ -34,18 +34,18 @@ import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ServiceCaps;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * A class for providing the location information to report the device's location to the network.
@@ -236,6 +236,8 @@ public class LocationAgent implements LocationInterface {
             initPolicy();
         }
     };
+
+    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     public LocationAgent(int slotId) {
         ImsLog.d("LocationAgent" + slotId);
@@ -454,6 +456,16 @@ public class LocationAgent implements LocationInterface {
                 startTimer(ETimerType.TIMER_ASYNC_START, 100);
             }
         }
+    }
+
+    @Override
+    public void addListener(Listener listener) {
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(Listener listener) {
+        mListeners.remove(listener);
     }
 
     private boolean requestLocationUpdates() {
@@ -992,7 +1004,8 @@ public class LocationAgent implements LocationInterface {
         return null;
     }
 
-    private void notifyEventOnLastKnownCountryChanged(
+    @VisibleForTesting
+    protected void notifyEventOnLastKnownCountryChanged(
             String oldCountryCode, String newCountryCode) {
         if (!mPolicy.hasPolicy(LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT)) {
             return;
@@ -1000,14 +1013,14 @@ public class LocationAgent implements LocationInterface {
 
         if (!GeocoderProxy.UNKNOWN_COUNTRY.equals(oldCountryCode)
                 && !GeocoderProxy.UNKNOWN_COUNTRY.equals(newCountryCode)) {
-            IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-            if (aosInfo != null) {
-                aosInfo.notifyLocationInfo(LocationInfo.COUNTRY_CHANGED);
+            for (Listener l : mListeners) {
+                l.onLastKnownCountryUpdated();
             }
         }
     }
 
-    private void notifyEventOnLocationFixedForInstantRequest() {
+    @VisibleForTesting
+    protected void notifyEventOnLocationFixedForInstantRequest() {
         synchronized (mLock) {
             if (mInstantLocationInfoRequested) {
                 mInstantLocationInfoRequested = false;
@@ -1016,9 +1029,8 @@ public class LocationAgent implements LocationInterface {
             }
         }
 
-        IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
-        if (aosInfo != null) {
-            aosInfo.notifyLocationInfo(LocationInfo.FIXED);
+        for (Listener l : mListeners) {
+            l.onInstantRequestedLocationUpdated();
         }
     }
 

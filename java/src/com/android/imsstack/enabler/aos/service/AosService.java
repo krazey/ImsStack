@@ -31,6 +31,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -71,6 +72,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public static final int PCO_TARGET_ID = 0xff00;
     public static final int PCO_NONE_VALUE = 0;
 
+    private final LocationInterface.Listener mLocationListener = new LocationInterface.Listener() {
+        @Override
+        public void onLastKnownCountryUpdated() {
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.COUNTRY_CHANGED);
+        }
+
+        @Override
+        public void onInstantRequestedLocationUpdated() {
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.FIXED);
+        }
+    };
     private Handler mHandler;
 
     @VisibleForTesting
@@ -176,6 +188,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             phoneState.addNotifier(mNotifier);
         }
 
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.addListener(mLocationListener);
+        }
+
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
             dnw.addListener(this);
@@ -201,6 +219,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
             dnw.removeListener(this);
+        }
+
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.removeListener(mLocationListener);
         }
 
         if (mNotifier != null) {
@@ -353,11 +377,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     @Override
     public void notifyIsimState(int state) {
         sendRequest(IIAosService.J2N_NOTIFY_ISIM_STATE, state);
-    }
-
-    @Override
-    public void notifyLocationInfo(int state) {
-        sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, state);
     }
 
     @Override
