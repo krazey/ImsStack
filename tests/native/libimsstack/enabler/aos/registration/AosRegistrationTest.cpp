@@ -906,40 +906,28 @@ TEST_F(AosRegistrationTest, ClearRetryCountCommandClearsConsecutiveFailureCount)
     EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
 }
 
-TEST_F(AosRegistrationTest, IpsecCommandForEnableWhileSupportIpsecTriggersDefaultFlowRecovery)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenRequestToSetIpsecEnable)
 {
-    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
-    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
-    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillOnce(Return(IMS_FALSE));
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_ENABLE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, IpsecCommandForDisableUpdatesIpsecSupportedStatus)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenRequestToSetIpsecDisable)
 {
-    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
-
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_DISABLE);
 
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, UninterestedIpsecCommandDoesNothing)
+TEST_F(AosRegistrationTest, DoNothingWhenRequestToSetIpsecWithInitReason)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined()).Times(0);
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_INIT);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 0);
 }
 
 TEST_F(AosRegistrationTest, RefreshRegInfoCommandTriggersRecalculateCallerCapabilities)
@@ -2769,6 +2757,42 @@ TEST_F(AosRegistrationTest, TriggerImsiBasedSubscriberUsingNextPuidWhenSubscribe
     IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryForStartIfIpsecSupportingStatusIsNotChangedWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_TRUE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
 }
 
 TEST_F(AosRegistrationTest, TriggerStartWithEveryPcscfPolicyWhenFlowRecoveryForStart)
