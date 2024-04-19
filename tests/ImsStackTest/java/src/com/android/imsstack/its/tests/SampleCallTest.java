@@ -37,6 +37,7 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 public class SampleCallTest extends CallTestBase {
     private static final int DEFAULT_CALL_INITIATED_TIMER_IN_MILLIS = 10000;
+    private TestCall mCall = null;
 
     @Before
     public void setUp() throws Exception {
@@ -48,6 +49,7 @@ public class SampleCallTest extends CallTestBase {
 
         mImsRegistration = mImsServiceConnector.getRegistration();
         mMmTelFeature = mImsServiceConnector.getMmTelFeature();
+        mCall = new TestCall(mMmTelFeature);
     }
 
     @After
@@ -63,11 +65,10 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 200 - ACK
 
-        final TestCall call = new TestCall(mMmTelFeature);
-        call.startVoiceCall();
-        call.expectWithin(10000).initiated();
+        mCall.startVoiceCall();
+        mCall.expectWithin(10000).initiated();
 
-        assertEquals(call.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
     }
 
     @Test
@@ -78,11 +79,11 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 200 - ACK - BYE - 200
 
-        TestCall call = new TestCall(mMmTelFeature);
-        call.startVoiceCall();
-        call.expectWithin(10000).not().terminated();
-        call.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
-        call.expect().terminated(
+        mCall.startVoiceCall();
+        mCall.expect().initiated();
+        mCall.await(2000).nothing();
+        mCall.terminate(ImsReasonInfo.CODE_USER_TERMINATED);
+        mCall.expect().terminated(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED);
     }
 
@@ -94,11 +95,11 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 200 - ACK - BYE - 200
 
-        TestCall call = new TestCall(mMmTelFeature);
-        call.startVoiceCall();
-        call.expectWithin(10000).not().terminated();
-        call.expect().terminated(
+        mCall.startVoiceCall();
+        mCall.expect().initiated();
+        mCall.expect().terminated(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE);
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.TERMINATED);
     }
 
     @Test
@@ -109,10 +110,8 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 100 - 603 - ACK
 
-        TestCall call = new TestCall(mMmTelFeature);
-        call.startVoiceCall();
-        call.expectWithin(10000).not().terminated();
-        call.expect().terminated(
+        mCall.startVoiceCall();
+        mCall.expect().terminated(
                 reason -> reason.getCode() == ImsReasonInfo.CODE_SIP_USER_REJECTED);
     }
 
@@ -124,16 +123,15 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 183 - PRACK - 200 - 180 - PRACK - 200 - 200 - ACK
 
-        TestCall call = new TestCall(mMmTelFeature);
-        call.expectWithin(10000).incomingCall();
+        mCall.expectWithin(10000).incomingCall();
 
         logi("testMtCallSetup - incoming call received");
 
         logi("testMtCallSetup - accept call");
-        call.acceptAsVoice();
-        call.expect().initiated();
+        mCall.acceptAsVoice();
+        mCall.expect().initiated();
 
-        assertEquals(call.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
     }
 
     @Test
@@ -144,16 +142,16 @@ public class SampleCallTest extends CallTestBase {
 
         // TODO: SetUpTiss : INVITE - 183 - PRACK - 200 - 180 - PRACK - 200 - 486 - ACK
 
-        TestCall call = new TestCall(mMmTelFeature);
-        call.expectWithin(10000).incomingCall();
+        mCall.expectWithin(10000).incomingCall();
 
         logi("testMtCallSetup - incoming call received");
 
         logi("testMtCallSetup - reject call");
-        call.reject(ImsReasonInfo.CODE_USER_DECLINE);
-        call.expect().terminated();
+        mCall.await(2000).nothing();
+        mCall.reject(ImsReasonInfo.CODE_USER_DECLINE);
+        mCall.expect().terminated();
 
-        assertEquals(call.getState(), ImsCallSessionImplBase.State.TERMINATED);
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.TERMINATED);
 
         // TODO: Check SIP status code by TISS.
     }
