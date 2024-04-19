@@ -699,7 +699,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_
         "plmn_block_with_timeout_on_voice_call_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL[] =
         "reg_contact_validation_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL[] =
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL[] =
         "reg_retry_with_ip_ver_fallback_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
         "remove_old_sa_on_establishing_sa_bool";
@@ -805,7 +805,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATIO
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
         "supported_roaming_rats_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
-        "vowifi_sub_error_code_for_init_reg_int_array";
+        "vowifi_sub_err_code_for_init_reg_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE[] = "extra_reg_err_bundle";
 const IMS_CHAR

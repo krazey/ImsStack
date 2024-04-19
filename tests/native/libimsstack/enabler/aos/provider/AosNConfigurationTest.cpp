@@ -538,7 +538,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL, IMS_FALSE))

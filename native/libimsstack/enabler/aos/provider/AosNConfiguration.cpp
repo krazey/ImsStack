@@ -1233,7 +1233,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bRegContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
     m_objAsset.bRequiredCdmalessFeatureTag =
