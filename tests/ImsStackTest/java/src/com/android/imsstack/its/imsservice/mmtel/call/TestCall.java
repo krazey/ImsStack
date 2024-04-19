@@ -282,11 +282,11 @@ public class TestCall {
                 mLatch.countDownAndInit();
             }
 
-            return mCallSession.getCallSessionListenerProxy();
+            return mCallSessionListener;
         }
     }
 
-    private class CallSessionListener implements ImsCallSessionWrapper.Listener {
+    private class CallSessionListener extends ImsCallSessionWrapper.ImsCallSessionListener {
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {
             mEventRecords.put(CallEvent.Type.SESSION_INITIATED, new CallEvent.EventRecord(profile));

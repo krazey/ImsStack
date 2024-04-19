@@ -44,17 +44,14 @@ import java.util.List;
  */
 public final class ImsCallSessionWrapper {
     @NonNull private final IImsCallSession mIImsCallSession;
-    @NonNull private final IImsCallSessionListenerProxy mIImsCallSessionListenerProxy;
-    @NonNull private final Listener mListener;
 
     /** Constructor. */
+    @SuppressWarnings("deprecation") // setListener
     public ImsCallSessionWrapper(@NonNull IImsCallSession callSession,
-            @NonNull Listener listener) {
+            @NonNull IImsCallSessionListener listener) {
         mIImsCallSession = callSession;
-        mListener = listener;
-        mIImsCallSessionListenerProxy = new IImsCallSessionListenerProxy();
         try {
-            mIImsCallSession.setListener(mIImsCallSessionListenerProxy);
+            mIImsCallSession.setListener(listener);
         } catch (RemoteException e) {
             loge(e.toString());
         }
@@ -69,10 +66,6 @@ public final class ImsCallSessionWrapper {
         } catch (RemoteException e) {
             loge(e.toString());
         }
-    }
-
-    public @NonNull IImsCallSessionListenerProxy getCallSessionListenerProxy() {
-        return mIImsCallSessionListenerProxy;
     }
 
     /**
@@ -579,16 +572,18 @@ public final class ImsCallSessionWrapper {
     }
 
     /**
-    * A listener interface for monitoring events related to IMS call sessions.
-    */
-    public interface Listener {
+     * A class implementing the IImsCallSessionListener interface to handle IMS call session events.
+     * This class provides default (empty) implementations of the interface.
+     */
+    public static class ImsCallSessionListener extends IImsCallSessionListener.Stub {
         /**
          * Called when a call session is initiating.
          *
          * @param profile The call profile {@link ImsCallProfile} containing information about the
          *                call session.
          */
-        default void callSessionInitiating(ImsCallProfile profile) {};
+        @Override
+        public void callSessionInitiating(ImsCallProfile profile) {}
 
         /**
          * Called when a call session is in progress.
@@ -596,7 +591,8 @@ public final class ImsCallSessionWrapper {
          * @param profile The media profile {@link ImsCallProfile} containing information about the
          *                call session.
          */
-        default void callSessionProgressing(ImsStreamMediaProfile profile) {};
+        @Override
+        public void callSessionProgressing(ImsStreamMediaProfile profile) {}
 
         /**
          * Called when a call session is successfully initiated.
@@ -604,69 +600,32 @@ public final class ImsCallSessionWrapper {
          * @param profile The call profile {@link ImsCallProfile} containing information about the
          *                call session.
          */
-        default void callSessionInitiated(ImsCallProfile profile) {};
+        @Override
+        public void callSessionInitiated(ImsCallProfile profile) {}
 
         /**
          * Called when initiating a call session fails.
          *
          * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
          */
-        default void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {};
+        @Override
+        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {}
 
         /**
          * Called when the initiation of a call session fails after it has been initiated.
          *
          * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the failure.
          */
-        default void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {};
+        @Override
+        public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {}
 
         /**
          * Called when a call session is terminated.
          *
          * @param reasonInfo Information about the reason {@link ImsReasonInfo} for the termination.
          */
-        default void callSessionTerminated(ImsReasonInfo reasonInfo) {};
-
-        /**
-         * Called when a call session has received a USSD message.
-         *
-         * @param mode The mode of the USSD message, either
-         *             {@link ImsCallSessionImplBase#USSD_MODE_NOTIFY} or
-         *             {@link ImsCallSessionImplBase#USSD_MODE_REQUEST}.
-         * @param ussdMessage The USSD message.
-         */
-        default void callSessionUssdMessageReceived(int mode, String ussdMessage) {};
-    }
-
-    /**
-    * A proxy class implementing the IImsCallSessionListener interface to handle IMS call session
-    * events. This class acts as a bridge between the IImsCallSessionListener interface and the
-    * actual listener implementation.
-    */
-    private class IImsCallSessionListenerProxy extends IImsCallSessionListener.Stub {
         @Override
-        public void callSessionInitiating(ImsCallProfile profile) {}
-
-        @Override
-        public void callSessionProgressing(ImsStreamMediaProfile profile) {}
-
-        @Override
-        public void callSessionInitiated(ImsCallProfile profile) {
-            mListener.callSessionInitiated(profile);
-        }
-
-        @Override
-        public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {
-            mListener.callSessionInitiatingFailed(reasonInfo);
-        }
-
-        @Override
-        public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {}
-
-        @Override
-        public void callSessionTerminated(ImsReasonInfo reasonInfo) {
-            mListener.callSessionTerminated(reasonInfo);
-        }
+        public void callSessionTerminated(ImsReasonInfo reasonInfo) {}
 
         @Override
         public void callSessionHeld(ImsCallProfile profile) {}
@@ -730,10 +689,16 @@ public final class ImsCallSessionWrapper {
         @Override
         public void callSessionConferenceStateUpdated(ImsConferenceState state) {}
 
+        /**
+         * Called when the a call session has received a USSD message.
+         *
+         * @param mode The mode of the USSD message, either
+         *             {@link ImsCallSessionImplBase#USSD_MODE_NOTIFY} or
+         *             {@link ImsCallSessionImplBase#USSD_MODE_REQUEST}.
+         * @param ussdMessage The USSD message.
+         */
         @Override
-        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
-            mListener.callSessionUssdMessageReceived(mode, ussdMessage);
-        }
+        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {}
 
         @Override
         public void callSessionMayHandover(int srcNetworkType, int targetNetworkType) {}

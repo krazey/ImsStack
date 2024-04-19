@@ -173,7 +173,7 @@ public final class ImsMmTelFeatureWrapper {
      * @param profile a call profile to make the call.
      */
     public @Nullable ImsCallSessionWrapper createCallSession(@NonNull ImsCallProfile profile,
-            @NonNull ImsCallSessionWrapper.Listener listener) {
+            @NonNull IImsCallSessionListener listener) {
         IImsCallSession callSession = createImsCallSession(profile);
         return (callSession != null) ? new ImsCallSessionWrapper(callSession, listener) : null;
     }
