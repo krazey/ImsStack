@@ -140,6 +140,7 @@ public class TestCall {
     /** Waits for a specified event to occur within a defined time period. */
     private class TimedExpectation extends Expectation {
         private @NonNull final Runnable mWait;
+        private final int mWaitingTimeInMillis;
 
         /**
          * @param needAssert If true, the test fails when the event doesn't occur.
@@ -161,6 +162,12 @@ public class TestCall {
                     mLatch.awaitTimeout(waitingTimeInMillis);
                 }
             };
+            mWaitingTimeInMillis = waitingTimeInMillis;
+        }
+
+        @Override
+        public void nothing() {
+            mLatch.sleep(mWaitingTimeInMillis);
         }
 
         @Override
@@ -196,6 +203,9 @@ public class TestCall {
 
     /** Checks the event records whether a specific event has been triggered before. */
     private class EventTriggerExpectation extends Expectation {
+        @Override
+        public void nothing() {}
+
         @Override
         public void incomingCall() {
             final @Nullable CallEvent.EventRecord record =

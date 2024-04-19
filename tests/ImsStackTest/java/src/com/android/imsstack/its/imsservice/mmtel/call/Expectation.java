@@ -37,6 +37,9 @@ public abstract class Expectation {
         return mExpectToBeTriggered;
     }
 
+    /** Expects nothing. */
+    public abstract void nothing();
+
     /** Expects there's an incoming call. */
     public abstract void incomingCall();
 
