@@ -71,10 +71,10 @@ public:
     virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* pNetConnection) override;
 
     /** Get the network connection type */
-    IMS_SINT32 GetNetworkType() const { return m_nMediaConnectionType; }
+    virtual IMS_SINT32 GetNetworkType() const { return m_nMediaConnectionType; }
 
     /** Get the mtu size */
-    IMS_SINT32 GetMtu() const { return m_nMtu; }
+    virtual IMS_SINT32 GetMtu() const { return m_nMtu; }
 
 private:
     static IMS_SINT32 ConvertNetworkType(IN INetworkConnection* pNetConnection);

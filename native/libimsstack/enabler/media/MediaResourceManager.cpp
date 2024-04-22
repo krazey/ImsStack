@@ -26,6 +26,13 @@
 
 #define MEDIA_RESOURCEMNGR_IP_ADDR_LEN 46
 
+#define MTU_MOBILE                     1500
+#define MTU_EPDG                       1280
+#define SIZE_OF_IP_SEC                 60
+#define SIZE_OF_IPV6                   60
+#define SIZE_OF_IPV4                   40
+#define SIZE_OF_RTP                    20 + 8  // rtp + header extension (cvo)
+
 __IMS_TRACE_TAG_USER_DECL__("MED.RM");
 
 PUBLIC MediaResourceManager::MediaResourceManager(IN IMS_SINT32 nSlotId) :
@@ -33,7 +40,7 @@ PUBLIC MediaResourceManager::MediaResourceManager(IN IMS_SINT32 nSlotId) :
         m_nPdnType(-1),
         m_bIsIpv6(IMS_FALSE),
         m_nNetworkType(MediaNetworkConnectionWatcher::UNKNOWN),
-        m_nMtu(1500),
+        m_nMtu(0),
         m_lstUsedRtpPort(ImsList<IMS_UINT32>()),
         m_pNetworkConnectionWatcher(IMS_NULL)
 {
@@ -197,17 +204,40 @@ PUBLIC IMS_BOOL MediaResourceManager::UpdatePdn(
     return IMS_TRUE;
 }
 
-IMS_SINT32 MediaResourceManager::GetNetworkType()
+PUBLIC IMS_SINT32 MediaResourceManager::GetNetworkType()
 {
     return m_nNetworkType;
 }
 
-IMS_SINT32 MediaResourceManager::GetMtu()
+PUBLIC IMS_SINT32 MediaResourceManager::GetMtu()
 {
     return m_nMtu;
 }
 
-void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType)
+PUBLIC IMS_SINT32 MediaResourceManager::GetRtpFragmentSize()
+{
+    IMS_SINT32 nMtu = GetMtu();
+    if (nMtu == 0)
+    {
+        nMtu = m_pNetworkConnectionWatcher->GetMtu();
+        if (nMtu == 0)
+        {
+            nMtu = (GetNetworkType() == MediaNetworkConnectionWatcher::IWLAN) ? MTU_EPDG
+                                                                              : MTU_MOBILE;
+        }
+    }
+
+    nMtu -= SIZE_OF_IP_SEC;
+    nMtu -= (m_bIsIpv6) ? SIZE_OF_IPV6 : SIZE_OF_IPV4;
+    nMtu -= SIZE_OF_RTP;
+
+    IMS_TRACE_D("GetRtpFragmentSize() - mtu[%d], m_bIsIpv6[%d], network type[%d]", nMtu, m_bIsIpv6,
+            GetNetworkType());
+
+    return nMtu;
+}
+
+PUBLIC void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType)
 {
     IMS_TRACE_D("OnNetworkConnectionChanged() - NetworkType[%d]", nRatType, 0, 0);
     m_nNetworkType = nRatType;
@@ -216,7 +246,7 @@ void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32 nRatTy
             IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
 }
 
-void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
+PUBLIC void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
 {
     IMS_TRACE_D("OnMediaMtuChanged() - Mtu[%d]", nMtu, 0, 0);
     m_nMtu = nMtu;
