@@ -45,6 +45,7 @@
     <boolean name="emc_call_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
     <boolean name="init_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="false"/>
+    <int name="reg_actual_wait_time_policy_int" value="1"/>
     <int name="reg_out_of_service_policy_int" value="1"/>
     <int name="reg_retry_cnt_on_single_pcscf_int" value="1"/>
     <int name="reg_retry_cnt_with_ipsec_on_auth_failure_int" value="0"/>
