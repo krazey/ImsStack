@@ -451,6 +451,36 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork)
     return IMS_TRUE;
 }
 
+PROTECTED
+IMS_BOOL MediaSession::OnMediaMtuChanged()
+{
+    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    {
+        m_objVideoController.SetMtu(GetMtu());
+        m_objVideoController.UpdateSession();
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_SINT32 MediaSession::GetMtu()
+{
+    IMS_SINT32 nMtu = -1;
+
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+    if (pMediaManager != IMS_NULL)
+    {
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+        if (pResourceMngr != IMS_NULL)
+        {
+            nMtu = pResourceMngr->GetRtpFragmentSize();
+        }
+    }
+
+    return nMtu;
+}
+
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
 {
     IMS_TRACE_I(
@@ -1059,7 +1089,7 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             bRet = OnChangeNetworkConnection(pParam);
             break;
         case IJniMedia::CHANGE_MTU:
-            /** TODO: add implementation */
+            bRet = OnMediaMtuChanged();
             break;
         case IJniMedia::NOTIFY_ANBR_RECEIVED:
             bRet = OnNotifyAnbrReceived(pParam);

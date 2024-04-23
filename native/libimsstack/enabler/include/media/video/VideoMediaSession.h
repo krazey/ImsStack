@@ -69,7 +69,14 @@ public:
      *
      * @param nAccessNetwork : AccessNetwork information
      */
-    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
+    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
+     * @brief Set MTU size in the VideoConfig
+     *
+     * @param nMtu : The MTU size to be set to VideoConfig
+     */
+    void SetMtu(IN IMS_SINT32 nMtu);
 
     /**
      * @brief Update MediaQualityThreshold parameters and send it to the java

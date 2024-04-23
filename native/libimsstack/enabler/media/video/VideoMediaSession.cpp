@@ -293,13 +293,24 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 }
 
 PUBLIC
-void VideoMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+void VideoMediaSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 {
     if (m_pRtpConfig != NULL)
     {
         m_pRtpConfig->setAccessNetwork(nAccessNetwork);
         IMS_TRACE_D("UpdateAccessNetwork() - accessNetwork[%d]", m_pRtpConfig->getAccessNetwork(),
                 0, 0);
+    }
+}
+
+PUBLIC
+void VideoMediaSession::SetMtu(IN IMS_SINT32 nMtu)
+{
+    if (m_pRtpConfig != NULL)
+    {
+        VideoConfig* pVideoConfig = static_cast<VideoConfig*>(m_pRtpConfig);
+        pVideoConfig->setMaxMtuBytes(nMtu);
+        IMS_TRACE_D("SetMtu() - mtu[%d]", pVideoConfig->getMaxMtuBytes(), 0, 0);
     }
 }
 
