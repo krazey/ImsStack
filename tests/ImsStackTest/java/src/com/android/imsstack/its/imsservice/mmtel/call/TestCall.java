@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import com.android.ims.internal.IImsCallSession;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.util.SingleLatch;
+import com.android.imsstack.util.Log;
 
 import java.util.EnumMap;
 import java.util.function.IntPredicate;
@@ -79,7 +80,6 @@ public class TestCall {
 
     /** Triggers {@link ImsCallSessionWrapper#accept} with parameters for a voice call. */
     public void acceptAsVoice() {
-        // TODO: need to set profile?
         accept(ImsCallProfile.CALL_TYPE_VOICE, null);
     }
 
@@ -100,6 +100,7 @@ public class TestCall {
 
     /** Waits an event for a given time. Just continues when a timeout occurs. */
     public @NonNull Expectation await(int millis) {
+        resetExpectation();
         return new TimedExpectation(false, millis);
     }
 
@@ -114,7 +115,10 @@ public class TestCall {
         return new TimedExpectation(true, millis);
     }
 
-    /** Checks for an event that have already been triggered. */
+    /**
+     * Checks for an event that have already been triggered.
+     * {@link TestCall#await} and {@link TestCall#expectWithin} reset the history.
+     */
     public @NonNull Expectation expectToHaveBeen() {
         return new EventTriggerExpectation();
     }
@@ -264,19 +268,20 @@ public class TestCall {
         private boolean assertTriggered(@Nullable CallEvent.EventRecord record) {
             if (isExpectToBeTriggered()) {
                 if (record == null) {
-                    fail("The event with the given parameter is expected but not triggered.");
+                    fail("The event is expected but it hasn't been triggered.");
                 }
                 return true;    // Pass, continue to check parameters.
             } else {
                 if (record != null) {
-                    fail("The event with the given parameter is not expected but triggered.");
+                    fail("The event with the given parameters is not expected"
+                            + " but has been triggered.");
                 }
                 return false;   // Pass, no need to check parameters.
             }
         }
 
         private void failByUnexpectedParameters() {
-            fail("The event is triggered with unexpected parameters.");
+            fail("The event has been triggered with unexpected parameters");
         }
     }
 
@@ -284,6 +289,8 @@ public class TestCall {
         @Override
         public @Nullable IImsCallSessionListener onIncomingCall(
                 @NonNull IImsCallSession c, @Nullable String callId, @Nullable Bundle extras) {
+            Log.d(Log.TAG, "onIncomingCall");
+
             mEventRecords.put(CallEvent.Type.MMTEL_INCOMING_CALL, new CallEvent.EventRecord());
 
             mCallSession = new ImsCallSessionWrapper(c, mCallSessionListener);
@@ -299,6 +306,8 @@ public class TestCall {
     private class CallSessionListener extends ImsCallSessionWrapper.ImsCallSessionListener {
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {
+            Log.d(Log.TAG, "callSessionInitiated - profile: " + profile);
+
             mEventRecords.put(CallEvent.Type.SESSION_INITIATED, new CallEvent.EventRecord(profile));
 
             if (mExpectedEvent.is(CallEvent.Type.SESSION_INITIATED)
@@ -310,6 +319,8 @@ public class TestCall {
 
         @Override
         public void callSessionTerminated(ImsReasonInfo reason) {
+            Log.d(Log.TAG, "callSessionTerminated - reason: " + reason);
+
             mEventRecords.put(CallEvent.Type.SESSION_TERMINATED, new CallEvent.EventRecord(reason));
 
             if (mExpectedEvent.is(CallEvent.Type.SESSION_TERMINATED)
@@ -321,6 +332,9 @@ public class TestCall {
 
         @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
+            Log.d(Log.TAG, "callSessionUssdMessageReceived - "
+                    + "mode: " + mode + " ussdMessage: " + ussdMessage);
+
             mEventRecords.put(CallEvent.Type.SESSION_USSD_MESSAGE_RECEIVED,
                     new CallEvent.EventRecord(mode, ussdMessage));
 
