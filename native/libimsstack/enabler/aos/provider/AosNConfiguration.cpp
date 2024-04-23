@@ -1215,9 +1215,9 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
+            CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
@@ -1270,11 +1270,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nContactUserInfoPolicyForNonRegMessage = piCc->GetInt(
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
-    m_objAsset.nEmcRegRetryMaxCnt =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT);
+    m_objAsset.nEmcRegRetryMaxCnt = piCc->GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT);
     m_objAsset.nEmcRegRetryTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
     m_objAsset.nImsEstablishmentTimeSec =
@@ -1306,11 +1305,11 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nRegRetryTimerFPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT);
     m_objAsset.nRegTimerForEmcCallMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT);
     m_objAsset.nReregRetry305Policy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT);
     m_objAsset.nRoamingPreferredEmcReg =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
     m_objAsset.nUsatRegEventDownloadPolicy =

@@ -112,7 +112,7 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {
-            return config.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
+            return config.getInt(CarrierConfig.Assets.KEY_EPDN_PREFERRED_IPTYPE_INT,
                     CarrierConfig.Assets.IPV6_PREFERRED);
         }
         return CarrierConfig.Assets.IPV6_PREFERRED;
