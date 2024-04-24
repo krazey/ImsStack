@@ -78,11 +78,10 @@ public interface SystemConstants {
 
     // For UICC (ISIM)
     int GET_ISIM_STATE = CATEGORY_BASE + 151;
-    int READ_ISIM_FILE_ATTR = CATEGORY_BASE + 152;
-    int READ_ISIM_RECORD = CATEGORY_BASE + 153;
-    int REQUEST_ISIM_AUTH = CATEGORY_BASE + 154;
+    int GET_ISIM_RECORD = CATEGORY_BASE + 152;
+    int REQUEST_ISIM_AUTH = CATEGORY_BASE + 153;
     // For UICC (USIM)
-    int REQUEST_USIM_AUTH = CATEGORY_BASE + 155;
+    int REQUEST_USIM_AUTH = CATEGORY_BASE + 154;
 
     /**
      * Call-related information

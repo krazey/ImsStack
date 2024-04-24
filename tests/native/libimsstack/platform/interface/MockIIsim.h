@@ -26,18 +26,15 @@ public:
     inline MockIIsim() {}
     inline virtual ~MockIIsim() {}
 
-    MOCK_METHOD(void, ClearRecords, (), (override));
     MOCK_METHOD(IDigestAka*, CreateDigestAka, (), (override));
-    MOCK_METHOD(IMS_RESULT, GetField, (IN IMS_SINT32 nField), (override));
-    MOCK_METHOD(IMS_RESULT, GetHomeDomainName, (), (override));
-    MOCK_METHOD(IMS_RESULT, GetImpi, (), (override));
-    MOCK_METHOD(IMS_RESULT, GetImpu, (), (override));
+    MOCK_METHOD(AString, GetHomeDomainName, (), (const, override));
+    MOCK_METHOD(AString, GetImpi, (), (const override));
+    MOCK_METHOD(AStringArray, GetImpu, (), (const override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsReady, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsLoadCompleted, (), (const override));
     MOCK_METHOD(void, AddListener, (IN IIsimListener * piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IIsimListener * piListener), (override));
-    MOCK_METHOD(IMS_RESULT, Start, (IN IMS_SINT32 nEFs), (override));
-    MOCK_METHOD(IMS_RESULT, Init, (), (override));
+    MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Release, (), (override));
 };
 

@@ -76,8 +76,8 @@ public:
 
 public:
     // Result of REQUEST_USIM_AUTH(String nonce, int owner)
-    // SimAgent#NOTIFICATION_USIM_AUTH (106)
-    static const int NOTIFICATION_USIM_AUTH = 106;
+    // SimAgent#NOTIFICATION_USIM_AUTH (201)
+    static const int NOTIFICATION_USIM_AUTH = 201;
 
 private:
     ImsList<OsUsimDigestAka*> m_objDigestAkas;

@@ -65,10 +65,8 @@ public:
             (override));
     // For UICC (ISIM)
     MOCK_METHOD(AString, GetIsimState, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_SINT32, ReadIsimFileAttributes, (IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId),
+    MOCK_METHOD(AStringArray, GetIsimRecord, (IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId),
             (override));
-    MOCK_METHOD(IMS_SINT32, ReadIsimRecord,
-            (IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(IMS_RESULT, RequestIsimAuthentication,
             (IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId), (override));
     // For UICC (USIM)

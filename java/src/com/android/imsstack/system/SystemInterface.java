@@ -37,6 +37,7 @@ import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -83,8 +84,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_CARRIER_CONFIG, "GET_CARRIER_CONFIG"),
             Map.entry(SystemConstants.SEND_EVENT, "SEND_EVENT"),
             Map.entry(SystemConstants.GET_ISIM_STATE, "GET_ISIM_STATE"),
-            Map.entry(SystemConstants.READ_ISIM_FILE_ATTR, "READ_ISIM_FILE_ATTR"),
-            Map.entry(SystemConstants.READ_ISIM_RECORD, "READ_ISIM_RECORD"),
+            Map.entry(SystemConstants.GET_ISIM_RECORD, "GET_ISIM_RECORD"),
             Map.entry(SystemConstants.REQUEST_ISIM_AUTH, "REQUEST_ISIM_AUTH"),
             Map.entry(SystemConstants.REQUEST_USIM_AUTH, "REQUEST_USIM_AUTH"),
             Map.entry(SystemConstants.GET_NETWORK_TYPE, "GET_NETWORK_TYPE"),
@@ -874,46 +874,6 @@ public class SystemInterface implements JniSystemListener {
         }
 
         @Override
-        public void notifyIsimFileAttributesResponse(int event,
-                int fileId, int size, String[] values) {
-            mExecutor.execute(() -> {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(fileId);
-                    parcel.writeInt(size);
-                    for (int i = 0;  i < size; ++i) {
-                        parcel.writeString(values[i]);
-                    }
-                    sendSystemEvent(parcel);
-                } finally {
-                    parcel.recycle();
-                }
-            });
-        }
-
-        @Override
-        public void notifyIsimRecordResponse(int event,
-                int fileId, int index, String value) {
-            mExecutor.execute(() -> {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(fileId);
-                    parcel.writeInt(index);
-                    parcel.writeString(value);
-                    sendSystemEvent(parcel);
-                } finally {
-                    parcel.recycle();
-                }
-            });
-        }
-
-        @Override
         public void notifyIsimAuthenticationResponse(int event, String response, long owner) {
             mExecutor.execute(() -> {
                 Parcel parcel = Parcel.obtain();
@@ -1122,8 +1082,7 @@ public class SystemInterface implements JniSystemListener {
                     handleSystemCallForNetwork(method, in, fd, out);
                     break;
                 case SystemConstants.GET_ISIM_STATE: // fall through
-                case SystemConstants.READ_ISIM_FILE_ATTR: // fall through
-                case SystemConstants.READ_ISIM_RECORD: // fall through
+                case SystemConstants.GET_ISIM_RECORD: // fall through
                 case SystemConstants.REQUEST_ISIM_AUTH: // fall through
                 case SystemConstants.REQUEST_USIM_AUTH:
                     handleSystemCallForSim(method, in, out);
@@ -1384,15 +1343,14 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_ISIM_STATE:
                     out.writeString(mSystemCall.getIsimState());
                     break;
-                case SystemConstants.READ_ISIM_FILE_ATTR: {
+                case SystemConstants.GET_ISIM_RECORD: {
                     int fileId = in.readInt();
-                    out.writeInt(mSystemCall.readIsimFileAttributes(fileId));
-                    break;
-                }
-                case SystemConstants.READ_ISIM_RECORD: {
-                    int fileId = in.readInt();
-                    int index = in.readInt();
-                    out.writeInt(mSystemCall.readIsimRecord(fileId, index));
+                    List<String> record = mSystemCall.getIsimRecord(fileId);
+                    out.writeInt(record.size());
+
+                    for (String s : record) {
+                        out.writeString(s);
+                    }
                     break;
                 }
                 case SystemConstants.REQUEST_ISIM_AUTH: {

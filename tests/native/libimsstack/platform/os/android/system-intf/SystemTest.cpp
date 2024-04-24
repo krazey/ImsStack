@@ -777,42 +777,35 @@ TEST_F(SystemTest, GetIsimState)
     EXPECT_EQ(m_pSystem->GetIsimState(0), strValue);
 }
 
-TEST_F(SystemTest, ReadIsimFileAttributes)
+TEST_F(SystemTest, GetIsimRecord)
 {
     m_pSystem->SetCallback(IMS_NULL);
 
-    EXPECT_EQ(m_pSystem->ReadIsimFileAttributes(OsIsim::EF_ID_IMPU, 0), IMS_FAILURE);
+    AStringArray objRecords = m_pSystem->GetIsimRecord(OsIsim::EF_ID_IMPI, IMS_SLOT_0);
+    ASSERT_TRUE(objRecords.IsEmpty());
 
     m_pSystem->SetCallback(&m_objMockSystemCallback);
 
+    AString strImpi("1111@ims.mnc001.mcc001.3gppnetwork.org");
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->ReadIsimFileAttributes(OsIsim::EF_ID_IMPI, 0), IMS_SUCCESS);
+            .Times(1)
+            .WillOnce(Invoke(
+                    [strImpi](Unused, android::Parcel& out, Unused)
+                    {
+                        out.writeInt32(1);
+                        out.writeString16(String16(strImpi.GetStr()));
+                        out.setDataPosition(0);
+                        return 1;
+                    }));
+    objRecords = m_pSystem->GetIsimRecord(OsIsim::EF_ID_IMPI, IMS_SLOT_0);
+    ASSERT_EQ(strImpi, objRecords.GetElementAt(0));
 
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->ReadIsimFileAttributes(OsIsim::EF_ID_IMPU, 0), IMS_FAILURE);
-}
 
-TEST_F(SystemTest, ReadIsimRecord)
-{
-    m_pSystem->SetCallback(IMS_NULL);
-
-    EXPECT_EQ(m_pSystem->ReadIsimRecord(OsIsim::EF_ID_IMPI, 1, 0), IMS_FAILURE);
-
-    m_pSystem->SetCallback(&m_objMockSystemCallback);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->ReadIsimRecord(OsIsim::EF_ID_IMPU, 1, 0), IMS_SUCCESS);
-
-    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_EQ(m_pSystem->ReadIsimRecord(OsIsim::EF_ID_DOMAIN, 1, 0), IMS_FAILURE);
+    objRecords = m_pSystem->GetIsimRecord(OsIsim::EF_ID_IMPI, IMS_SLOT_0);
+    ASSERT_TRUE(objRecords.IsEmpty());
 }
 
 TEST_F(SystemTest, RequestIsimAuthentication)

@@ -26,12 +26,6 @@ public:
     inline MockIIsimListener() = default;
     inline ~MockIIsimListener() = default;
 
-    MOCK_METHOD(void, Isim_OnField, (IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues),
-            (override));
-    MOCK_METHOD(void, Isim_OnHomeDomainName, (IN const ByteArray& objDomainName), (override));
-    MOCK_METHOD(void, Isim_OnImpi, (IN const ByteArray& objImpi), (override));
-    MOCK_METHOD(void, Isim_OnImpu, (IN const ImsList<ByteArray>& objImpus), (override));
-    MOCK_METHOD(void, Isim_OnError, (IN IMS_SINT32 nErrorCode), (override));
     MOCK_METHOD(void, Isim_OnStateChanged, (IN IMS_SINT32 nState), (override));
 };
 

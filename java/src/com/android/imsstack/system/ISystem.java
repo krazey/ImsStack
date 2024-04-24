@@ -132,26 +132,6 @@ public interface ISystem {
     void notifyIsimState(int event, String state);
 
     /**
-     * Notifies the ISIM file attributes response to the native module.
-     *
-     * @param event The current event.
-     * @param fileId The file id to be responded.
-     * @param size The size of the specified file id.
-     * @param values The content of the specified file id.
-     */
-    void notifyIsimFileAttributesResponse(int event, int fileId, int size, String[] values);
-
-    /**
-     * Notifies the ISIM record response to the native module.
-     *
-     * @param event The current event.
-     * @param fileId The file id to be responded.
-     * @param index The index of the specified file id.
-     * @param value The content of the specified file id.
-     */
-    void notifyIsimRecordResponse(int event, int fileId, int index, String value);
-
-    /**
      * Notifies the ISIM authentication response to the native module.
      *
      * @param event The current event.
