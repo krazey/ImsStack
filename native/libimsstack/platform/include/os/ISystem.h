@@ -54,9 +54,7 @@ public:
     virtual IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) = 0;
     // For UICC (ISIM)
     virtual AString GetIsimState(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 ReadIsimRecord(
-            IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId) = 0;
+    virtual AStringArray GetIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_RESULT RequestIsimAuthentication(
             IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId) = 0;
     // For UICC (USIM)

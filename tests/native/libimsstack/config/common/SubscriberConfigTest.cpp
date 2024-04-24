@@ -16,8 +16,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "ImsEventDef.h"
-#include "ImsTypeDef.h"
 #include "MockISubscriberConfigListener.h"
 #include "MockISubscriberInfoListener.h"
 #include "PlatformContext.h"
@@ -42,6 +40,28 @@ namespace android
 class SubscriberConfigTest : public ::testing::Test
 {
 public:
+    inline SubscriberConfigTest() :
+            m_nImpuRefIndex(1),
+            m_strDomain("ims.mnc001.mcc001.3gppnetwork.org"),
+            m_strImpi("1111@ims.mnc001.mcc001.3gppnetwork.org"),
+            m_pSubscriberConfig(IMS_NULL),
+            m_piIsimListener(IMS_NULL),
+            m_pConfigBase(IMS_NULL)
+    {
+        m_objImpu.AddElement("sip:1111@ims.mnc001.mcc001.3gppnetwork.org");
+        m_objImpu.AddElement("tel:1111");
+
+        m_objPcscfs.AddElement("192.168.0.1");
+        m_objPcscfs.AddElement("192.168.0.2");
+    }
+
+public:
+    IMS_SINT32 m_nImpuRefIndex;
+    AString m_strDomain;
+    AString m_strImpi;
+    AStringArray m_objImpu;
+    AStringArray m_objPcscfs;
+
     MockISubscriberConfigListener m_objSubscriberConfigListener;
     MockIIsim m_objIsim;
     MockISubscriberInfoListener m_objSubInfoListener;
@@ -69,27 +89,18 @@ protected:
 
         m_objPhoneInfoService.SetIsim(&m_objIsim);
 
-        EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
-                GetString(Eq(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING), _))
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(AString("phone-context")));
-
         m_pSubscriberConfig = new SubscriberConfig(IMS_SLOT_0, "subscriber");
-
         ISubscriberConfig* piSubConfig = static_cast<ISubscriberConfig*>(m_pSubscriberConfig);
         piSubConfig->SetListener(&m_objSubscriberConfigListener);
         m_piIsimListener = static_cast<IIsimListener*>(m_pSubscriberConfig);
         m_pConfigBase = static_cast<ConfigBase*>(m_pSubscriberConfig);
         m_pSubscriberConfig->SetSubscriberInfoListener(&m_objSubInfoListener);
+        SetUpPersistentProperties();
 
-        AString strPcscfs = "10.34.14.4, 10.34.14.5";
-        ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-                GetPersistent(Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST),
-                        Eq(IMS_SLOT_0)))
-                .WillByDefault(Return(strPcscfs));
-
-        EXPECT_CALL(m_objUtilService.GetMockPrivateProperty(), SetPersistentBoolean(_, _, _))
-                .Times(AnyNumber());
+        EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
+                GetString(Eq(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING), _))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(m_strDomain));
 
         EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
                 GetInt(Eq(CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT), _))
@@ -99,7 +110,7 @@ protected:
         EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
                 GetInt(Eq(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT), _))
                 .Times(AnyNumber())
-                .WillRepeatedly(Return(1));
+                .WillRepeatedly(Return(m_nImpuRefIndex));
 
         ImsVector<IMS_SINT32> objImsIdentity;
         objImsIdentity.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
@@ -132,309 +143,152 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
+
+    void SetUpIsimInit()
+    {
+        EXPECT_CALL(m_objIsim, Init()).Times(1);
+        EXPECT_CALL(m_objIsim, AddListener(_)).Times(1);
+    }
+
+    void SetUpIsimRecords(IMS_SINT32 nCount)
+    {
+        EXPECT_CALL(m_objIsim, GetImpi()).Times(nCount).WillRepeatedly(Return(m_strImpi));
+        EXPECT_CALL(m_objIsim, GetImpu()).Times(nCount).WillRepeatedly(Return(m_objImpu));
+        EXPECT_CALL(m_objIsim, GetHomeDomainName())
+                .Times(nCount)
+                .WillRepeatedly(Return(m_strDomain));
+    }
+
+    void SetUpPersistentProperties()
+    {
+        ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+                GetPersistent(Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME),
+                        Eq(IMS_SLOT_0)))
+                .WillByDefault(Return(m_strDomain));
+
+        ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+                GetPersistent(
+                        Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI), Eq(IMS_SLOT_0)))
+                .WillByDefault(Return(m_strImpi));
+
+        ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+                GetPersistent(
+                        Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST), Eq(IMS_SLOT_0)))
+                .WillByDefault(Return(m_objImpu.ToString()));
+
+        ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+                GetPersistent(Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST),
+                        Eq(IMS_SLOT_0)))
+                .WillByDefault(Return(m_objPcscfs.ToString()));
+
+        EXPECT_CALL(m_objUtilService.GetMockPrivateProperty(), SetPersistentBoolean(_, _, _))
+                .Times(AnyNumber());
+    }
+
+    void StartSubscriberConfig()
+    {
+        IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
+        piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
+    }
 };
 
 TEST_F(SubscriberConfigTest, Init)
 {
     EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(), AddListener(_)).Times(1);
-
     EXPECT_TRUE(m_pSubscriberConfig->Init());
 
     ASSERT_TRUE(m_pSubscriberConfig->GetSubscriberInfo() != nullptr);
     EXPECT_TRUE(m_pSubscriberConfig->IsAkaSupported());
     EXPECT_TRUE(m_pSubscriberConfig->IsIsimSupported());
     EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), AString::ConstNull());
-    EXPECT_EQ(m_pSubscriberConfig->GetPhoneContext(), AString("phone-context"));
+    EXPECT_EQ(m_pSubscriberConfig->GetPhoneContext(), m_strDomain);
     EXPECT_EQ(m_pSubscriberConfig->GetIndexOfPrimaryPublicUserId(), 1);
     ASSERT_TRUE(m_pSubscriberConfig->GetPrivateUserId().IsNull());
     ASSERT_TRUE(m_pSubscriberConfig->GetPublicUserId().IsNull());
-    AStringArray objPublicUserIds = m_pSubscriberConfig->GetPublicUserIds();
+    const AStringArray& objPublicUserIds = m_pSubscriberConfig->GetPublicUserIds();
     EXPECT_EQ(objPublicUserIds.GetCount(), 0);
 }
 
-TEST_F(SubscriberConfigTest, InitProvisioning)
-{
-    EXPECT_CALL(m_objIsim, Init()).Times(1).WillOnce(Return(IMS_SUCCESS));
-
-    IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    EXPECT_CALL(m_objIsim, Init()).Times(2).WillOnce(Return(IMS_FAILURE));
-
-    // Isim Init failed so retry
-    ITimerListener* piTimerListener;
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, _))
-            .Times(1)
-            .WillOnce(Invoke(
-                    [&](Unused, ITimerListener* pListener)
-                    {
-                        piTimerListener = pListener;
-                        return 1;
-                    }));
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    piTimerListener->Timer_TimerExpired(static_cast<ITimer*>(&m_objTimerService.GetMockTimer()));
-}
-
-TEST_F(SubscriberConfigTest, StartProvisioning)
+TEST_F(SubscriberConfigTest, UpdateIsimRecords)
 {
     EXPECT_TRUE(m_pSubscriberConfig->Init());
-
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_IDLE);
-
-    EXPECT_CALL(m_objIsim, Init()).Times(2).WillRepeatedly(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, IsReady()).Times(AnyNumber()).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objIsim, AddListener(_)).Times(2);
-    EXPECT_CALL(m_objIsim, GetState()).Times(6).WillRepeatedly(Return(IIsim::STATE_INIT));
-
-    IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    // Isim Start failed so retry
-    EXPECT_CALL(m_objIsim, Start(_)).Times(6).WillRepeatedly(Return(IMS_FAILURE));
-    ITimerListener* piTimerListener;
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, _))
-            .Times(6)
-            .WillRepeatedly(Invoke(
-                    [&](Unused, ITimerListener* pListener)
-                    {
-                        piTimerListener = pListener;
-                        return 1;
-                    }));
-
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-    ASSERT_TRUE(piTimerListener != nullptr);
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-
-    EXPECT_CALL(m_objIsim, Start(_)).Times(AnyNumber()).WillRepeatedly(Return(IMS_SUCCESS));
-    piTimerListener->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-
-    EXPECT_CALL(m_objIsim, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IIsim::STATE_READY));
-    EXPECT_CALL(m_objIsim, GetImpi()).Times(1).WillOnce(Return(IMS_FAILURE));
-
-    // Isim Init : start provisioning but GetImpi is failed
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(1);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    // Isim Init : start provisioning but GetImpi is success
-    EXPECT_CALL(m_objIsim, GetImpi()).Times(AnyNumber()).WillRepeatedly(Return(IMS_SUCCESS));
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    // Received Impi
-    ByteArray objRecord("1111@test.ims.com");
-
-    m_piIsimListener->Isim_OnImpi(objRecord);
-    EXPECT_EQ(m_pSubscriberConfig->GetPrivateUserId(), AString("1111@test.ims.com"));
-
-    // Isim Init : start provisioning but GetImpu is failed
-    EXPECT_CALL(m_objIsim, GetImpu()).Times(1).WillOnce(Return(IMS_FAILURE));
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(1);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    // Isim Init : start provisioning but GetImpu is success
-    EXPECT_CALL(m_objIsim, GetImpu()).Times(AnyNumber()).WillRepeatedly(Return(IMS_SUCCESS));
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    // While provisioning is going on calling Isim state changed to refreshing
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshStarted()).Times(2);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHING);
-
-    // Received Impi
-    ByteArray objImpiRecord("sip:1111@test.ims.com");
-    ImsList<ByteArray> objValues;
-    objValues.Append(objImpiRecord);
-
-    m_piIsimListener->Isim_OnImpu(objValues);
-    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserId(), AString("sip:1111@test.ims.com"));
-
-    // Isim Init : start provisioning but GetHomeDomainName is failed
-    EXPECT_CALL(m_objIsim, GetHomeDomainName()).Times(1).WillOnce(Return(IMS_FAILURE));
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(1);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    // Isim Init : start provisioning but GetHomeDomainName is success
-    EXPECT_CALL(m_objIsim, GetHomeDomainName())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_SUCCESS));
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_READY);
-
-    // Received HomeDomain
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_InitCompleted()).Times(1);
-    ByteArray objHomeDomainRecord("test.ims.com");
-
-    m_piIsimListener->Isim_OnHomeDomainName(objHomeDomainRecord);
-    EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), AString("test.ims.com"));
-
-    // Calling INIT after provisioned
+    // Two public user identities.
     EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(2);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-    m_pSubscriberConfig->Refresh();
-}
+    SetUpIsimInit();
+    SetUpIsimRecords(1);
 
-TEST_F(SubscriberConfigTest, ReadIsimRecord)
-{
-    EXPECT_TRUE(m_pSubscriberConfig->Init());
+    StartSubscriberConfig();
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
 
-    EXPECT_CALL(m_objIsim, Init()).Times(1).WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, IsReady()).Times(AnyNumber()).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objIsim, AddListener(_)).Times(1);
-    EXPECT_CALL(m_objIsim, GetState()).Times(2).WillRepeatedly(Return(IIsim::STATE_INIT));
-
-    IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    ImsList<ByteArray> objValues;
-    m_piIsimListener->Isim_OnField(IIsim::FIELD_IST, objValues);
-
-    ByteArray objIstRecord("80000000000000");
-    objValues.Append(objIstRecord);
-    m_piIsimListener->Isim_OnField(IIsim::FIELD_IST, objValues);
-
-    EXPECT_CALL(m_objIsim, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IIsim::STATE_READY));
-    EXPECT_CALL(m_objIsim, GetImpi()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetImpu()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetHomeDomainName())
-            .Times(2)
-            .WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-
-    AString strPcscf("1.1.1.5");
-    ByteArray objPcscfRecord(strPcscf);
-    objValues.Clear();
-    objValues.Append(objPcscfRecord);
-
-    m_piIsimListener->Isim_OnField(IIsim::FIELD_PCSCF_ADDRESS, objValues);
-
-    ServerAddress* pSa = m_pSubscriberConfig->GetPcscfAddress();
-    EXPECT_EQ(pSa->GetAddress(), strPcscf);
-    ImsVector<ServerAddress*> objPcscfs;
-    objPcscfs = m_pSubscriberConfig->GetPcscfAddresses();
-    EXPECT_FALSE(objPcscfs.IsEmpty());
-    EXPECT_EQ(objPcscfs.GetSize(), 2);
-    EXPECT_EQ((objPcscfs.GetAt(0))->GetAddress(), strPcscf);
-    EXPECT_TRUE((objPcscfs.GetAt(1))->GetAddress().IsNull());
-
-    objValues.Clear();
-    objValues.Append(ByteArray::ConstNull());
-    m_piIsimListener->Isim_OnField(IIsim::FIELD_PCSCF_ADDRESS, objValues);
-
-    pSa = m_pSubscriberConfig->GetPcscfAddress();
-    EXPECT_TRUE(pSa->GetAddress().IsNull());
-    objPcscfs = m_pSubscriberConfig->GetPcscfAddresses();
-    EXPECT_FALSE(objPcscfs.IsEmpty());
-    EXPECT_EQ(objPcscfs.GetSize(), 2);
-    EXPECT_TRUE((objPcscfs.GetAt(0))->GetAddress().IsNull());
-    EXPECT_TRUE((objPcscfs.GetAt(1))->GetAddress().IsNull());
-
-    // Calling REFRESHED after provisioned
-    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(1);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHED);
+    EXPECT_EQ(m_strImpi, m_pSubscriberConfig->GetPrivateUserId());
+    EXPECT_EQ(m_strDomain, m_pSubscriberConfig->GetHomeDomainName());
+    EXPECT_EQ(m_objImpu.GetElementAt(0),
+            m_pSubscriberConfig->GetPublicUserId(IImsSubscriberInfo::IMPU_SIP));
+    EXPECT_EQ(m_objImpu.GetElementAt(1),
+            m_pSubscriberConfig->GetPublicUserId(IImsSubscriberInfo::IMPU_TEL));
 }
 
 TEST_F(SubscriberConfigTest, IsimRefresh)
 {
     EXPECT_TRUE(m_pSubscriberConfig->Init());
-
-    EXPECT_CALL(m_objIsim, Init()).Times(1).WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, IsReady()).Times(AnyNumber()).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objIsim, AddListener(_)).Times(1);
-    EXPECT_CALL(m_objIsim, Start(_)).Times(AnyNumber()).WillRepeatedly(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IIsim::STATE_READY));
-
-    IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshStarted()).Times(3);
-    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(1);
-
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHING);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-
-    EXPECT_CALL(m_objIsim, GetImpi()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetImpu()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetHomeDomainName())
-            .Times(2)
-            .WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-
-    // Isim in Refresing state, provisioning done with Impi, Impu, HomeDomain no records
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHING);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_INIT);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_REFRESH_ERROR);
-
+    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshStarted()).Times(1);
     EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshCompleted()).Times(1);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHED);
+    // Two public user identities and ISIM state changed twice.
+    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(4);
+    SetUpIsimInit();
+    SetUpIsimRecords(2);
+
+    StartSubscriberConfig();
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_REFRESHING);
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
 }
 
-TEST_F(SubscriberConfigTest, IsimError)
+TEST_F(SubscriberConfigTest, RefreshWhenIsimEnabled)
 {
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(2);
+    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_InitCompleted()).Times(1);
+    // SUBSCRIBER_INFO_REMOVE_ALL and count of IMPU.
+    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(3);
+    EXPECT_CALL(m_objIsim, IsLoadCompleted()).Times(1).WillOnce(Return(IMS_TRUE));
+    SetUpIsimInit();
+    SetUpIsimRecords(1);
 
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_REFRESH_REG_FAILED);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_INTERFACE_CHANNEL_ERROR);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_REFRESH_ERROR);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_READ_DENIED);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_CARD_REMOVED);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_NO_ISIM_APPLICATION);
-    MockISubscriberConfigListener objSubscriberConfigListener;
-    ISubscriberConfig* piSubConfig = static_cast<ISubscriberConfig*>(m_pSubscriberConfig);
-    EXPECT_CALL(objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(1);
-    piSubConfig->SetListener(&objSubscriberConfigListener);
-    piSubConfig->RemoveListener(&objSubscriberConfigListener);
-}
-
-TEST_F(SubscriberConfigTest, Refresh)
-{
-    EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(), GetInt(_, _)).Times(1);
-
-    ImsVector<IMS_SINT32> objImsIdentity;
-    objImsIdentity.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
-
-    EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY))
-            .Times(1)
-            .WillOnce(Return(objImsIdentity));
-
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistent(Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME),
-                    Eq(IMS_SLOT_0)))
-            .WillByDefault(Return(AString("test2.ims.com")));
-
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistent(Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI), Eq(IMS_SLOT_0)))
-            .WillByDefault(Return(AString("1111@test2.ims.com")));
-
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
-            GetPersistent(
-                    Eq(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST), Eq(IMS_SLOT_0)))
-            .WillByDefault(Return(AString("sip:1112@test2.ims.com, tel:1112")));
-
-    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(1);
-
-    // Refresh with Usim
+    StartSubscriberConfig();
     m_pSubscriberConfig->Refresh();
 
     EXPECT_EQ(m_pSubscriberConfig->GetSubscriberCount(), 1);
     ASSERT_TRUE(m_pSubscriberConfig->GetSubscriberInfoEx(0) != nullptr);
-    EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), AString("test2.ims.com"));
-    EXPECT_EQ(m_pSubscriberConfig->GetPrivateUserId(), AString("1111@test2.ims.com"));
-    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserId(), AString("sip:1112@test2.ims.com"));
-    AStringArray strPublicUserIds;
-    strPublicUserIds.AddElement("sip:1112@test2.ims.com");
-    strPublicUserIds.AddElement("tel:1112");
-    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(0),
-            strPublicUserIds.GetElementAt(0));
-    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(1),
-            strPublicUserIds.GetElementAt(1));
-    EXPECT_EQ(m_pSubscriberConfig->GetScscfAddress(), AString("test2.ims.com"));
+    EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), m_strDomain);
+    EXPECT_EQ(m_pSubscriberConfig->GetPrivateUserId(), m_strImpi);
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserId(), m_objImpu.GetElementAt(m_nImpuRefIndex));
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(0), m_objImpu.GetElementAt(0));
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(1), m_objImpu.GetElementAt(1));
+    EXPECT_EQ(m_pSubscriberConfig->GetScscfAddress(), m_strDomain);
+    EXPECT_TRUE(m_pSubscriberConfig->IsAuthRealmLenient());
+}
+
+TEST_F(SubscriberConfigTest, RefreshWhenIsimDisabled)
+{
+    ImsVector<IMS_SINT32> objImsIdentity;
+    objImsIdentity.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
+    EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
+            GetIntArray(Eq(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY)))
+            .Times(1)
+            .WillOnce(Return(objImsIdentity));
+    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_InitCompleted()).Times(1);
+    // SUBSCRIBER_INFO_REMOVE_ALL and count of IMPU.
+    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(3);
+
+    m_pSubscriberConfig->Refresh();
+
+    EXPECT_EQ(m_pSubscriberConfig->GetSubscriberCount(), 1);
+    ASSERT_TRUE(m_pSubscriberConfig->GetSubscriberInfoEx(0) != nullptr);
+    EXPECT_EQ(m_pSubscriberConfig->GetHomeDomainName(), m_strDomain);
+    EXPECT_EQ(m_pSubscriberConfig->GetPrivateUserId(), m_strImpi);
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserId(), m_objImpu.GetElementAt(0));
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(0), m_objImpu.GetElementAt(0));
+    EXPECT_EQ(m_pSubscriberConfig->GetPublicUserIds().GetElementAt(1), m_objImpu.GetElementAt(1));
+    EXPECT_EQ(m_pSubscriberConfig->GetScscfAddress(), m_strDomain);
     EXPECT_TRUE(m_pSubscriberConfig->IsAuthRealmLenient());
 }
 
@@ -507,7 +361,7 @@ TEST_F(SubscriberConfigTest, Update)
             .Times(AnyNumber())
             .WillRepeatedly(Return(objImsIdentity));
 
-    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(3);
+    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(5);
 
     EXPECT_TRUE(piConfigurable->Update(
             IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM, AString("false")));
@@ -518,23 +372,20 @@ TEST_F(SubscriberConfigTest, Update)
     EXPECT_TRUE(m_pSubscriberConfig->IsUsimSupported());
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_HOME_DOMAIN_NAME));
-    EXPECT_TRUE(
-            piConfigurable->Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, AString("two.tmus.com")));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, m_strDomain));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPI));
-    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPI, AString("1111@test2.ims.com")));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPI, m_strImpi));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPU_PRIMARY_REF_INDEX));
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPU_PRIMARY_REF_INDEX, AString("1")));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPU_0));
     EXPECT_FALSE(piConfigurable->Update(IConfigurable::CP_I_IMPU_9));
-    EXPECT_TRUE(
-            piConfigurable->Update(IConfigurable::CP_I_IMPU_0, AString("sip:1111@two.tmus.com")));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_IMPU_0, m_objImpu.GetElementAt(0)));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_PHONE_CONTEXT));
-    EXPECT_TRUE(
-            piConfigurable->Update(IConfigurable::CP_I_PHONE_CONTEXT, AString("phone-context")));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_PHONE_CONTEXT, m_strDomain));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_AUTH_USERNAME));
     EXPECT_TRUE(
@@ -555,7 +406,7 @@ TEST_F(SubscriberConfigTest, Update)
     EXPECT_FALSE(m_pSubscriberConfig->IsAkaSupported());
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SERVER_SCSCF));
-    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SERVER_SCSCF, AString("scscf.com")));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SERVER_SCSCF, m_strDomain));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_PCSCF_DISCOVERY_METHODS));
     EXPECT_TRUE(
@@ -583,68 +434,45 @@ TEST_F(SubscriberConfigTest, Update)
     EXPECT_FALSE(piConfigurable->Update(IConfigurable::CP_I_MAX));
 }
 
-TEST_F(SubscriberConfigTest, ConfigChanged)
+TEST_F(SubscriberConfigTest, CarrierConfigChanged)
 {
-    MockISubscriberConfigListener objSubscriberConfigListener;
-    ISubscriberConfig* piSubConfig = static_cast<ISubscriberConfig*>(m_pSubscriberConfig);
-
-    piSubConfig->SetListener(&objSubscriberConfigListener);
-    m_pSubscriberConfig->SetSubscriberInfoListener(&m_objSubInfoListener);
-    m_piIsimListener = static_cast<IIsimListener*>(m_pSubscriberConfig);
-
-    EXPECT_TRUE(m_pSubscriberConfig->Init());
-
-    EXPECT_CALL(m_objIsim, Init()).Times(1).WillOnce(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, IsReady()).Times(AnyNumber()).WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objIsim, AddListener(_)).Times(1);
-    EXPECT_CALL(m_objIsim, Start(_)).Times(AnyNumber()).WillRepeatedly(Return(IMS_SUCCESS));
-    EXPECT_CALL(m_objIsim, GetState())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IIsim::STATE_READY));
-
-    IAsyncConfig* piAsyncConfig = static_cast<IAsyncConfig*>(m_pSubscriberConfig);
-    piAsyncConfig->HandleMessage(IAsyncConfig::ACMSG_START, 0, 0);
-
-    EXPECT_CALL(m_objIsim, GetImpi()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetImpu()).Times(2).WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-    EXPECT_CALL(m_objIsim, GetHomeDomainName())
-            .Times(2)
-            .WillRepeatedly(Return(IIsim::RESULT_NO_RECORDS));
-
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_READY);
-    // Calling carrier config changed as USIM
-    ICarrierConfigListener* piCarrierConfigListener =
-            static_cast<ICarrierConfigListener*>(m_pSubscriberConfig);
-    piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_1);
-
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshStarted()).Times(1);
-    EXPECT_CALL(m_objSubInfoListener, SubscriberInfo_UpdateImpu(_, _, _, _)).Times(2);
-
-    piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
-
-    // USIM info
-    ImsVector<IMS_SINT32> objImsIdentity;
-    objImsIdentity.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
-
+    ImsVector<IMS_SINT32> objImsIdentityUsim;
+    objImsIdentityUsim.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM);
+    ImsVector<IMS_SINT32> objImsIdentityIsim;
+    objImsIdentityIsim.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
     EXPECT_CALL(m_objConfigService.GetMockCarrierConfig(),
             GetIntArray(Eq(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY)))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(objImsIdentity));
+            .WillOnce(Return(objImsIdentityIsim))   // Init
+            .WillOnce(Return(objImsIdentityUsim))   // CarrierConfig_NotifyConfigChanged
+            .WillOnce(Return(objImsIdentityUsim))   // UpdateAllConfigs
+            .WillOnce(Return(objImsIdentityIsim))   // CarrierConfig_NotifyConfigChanged
+            .WillOnce(Return(objImsIdentityIsim));  // UpdateAllConfigs
+    EXPECT_TRUE(m_pSubscriberConfig->Init());
+    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshStarted()).Times(2);
+    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_RefreshCompleted()).Times(2);
+    EXPECT_CALL(m_objIsim, IsLoadCompleted()).Times(1).WillOnce(Return(IMS_TRUE));
+    SetUpIsimInit();
+    SetUpIsimRecords(2);
 
+    StartSubscriberConfig();
+    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_LOADED);
+
+    ICarrierConfigListener* piCarrierConfigListener =
+            static_cast<ICarrierConfigListener*>(m_pSubscriberConfig);
+    // SIM slot mismatched.
+    piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_1);
+
+    // ISIM disabled and carrier configuration changed.
     piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
 
-    // Calling Isim records for USIM supported carrier
-    ImsList<ByteArray> objValues;
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_InitCompleted()).Times(0);
-    m_piIsimListener->Isim_OnField(IIsim::FIELD_PCSCF_ADDRESS, objValues);
-    m_piIsimListener->Isim_OnHomeDomainName(ByteArray::ConstNull());
-    m_piIsimListener->Isim_OnImpi(ByteArray::ConstNull());
-    m_piIsimListener->Isim_OnImpu(objValues);
-    EXPECT_CALL(m_objSubscriberConfigListener, SubscriberConfig_NotifyError(_)).Times(0);
-    m_piIsimListener->Isim_OnError(IIsim::ERROR_NO_ISIM_APPLICATION);
-    m_piIsimListener->Isim_OnStateChanged(IIsim::STATE_IDLE);
+    EXPECT_FALSE(m_pSubscriberConfig->IsIsimSupported());
+    EXPECT_TRUE(m_pSubscriberConfig->IsProvisioningDone());
 
-    piSubConfig->RemoveListener(&objSubscriberConfigListener);
+    // ISIM enabled and carrier configuration changed.
+    piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
+
+    EXPECT_TRUE(m_pSubscriberConfig->IsIsimSupported());
+    EXPECT_TRUE(m_pSubscriberConfig->IsProvisioningDone());
 }
 
 TEST_F(SubscriberConfigTest, FakeSubscriber)

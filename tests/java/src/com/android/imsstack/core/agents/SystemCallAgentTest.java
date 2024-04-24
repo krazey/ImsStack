@@ -18,10 +18,13 @@ package com.android.imsstack.core.agents;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -54,12 +57,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class SystemCallAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int ISIM_EF_IMPI = 0x6F02;
-
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
     @Mock private ConfigInterface mConfigInterface;
@@ -222,32 +224,53 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testReadIsimFileAttributes() {
-        int result = mSystemCallAgent.readIsimFileAttributes(ISIM_EF_IMPI);
+    public void testGetIsimRecord() {
+        when(mSimAgent.getIsimImpi()).thenReturn("impi");
+        List<String> record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_OK, result);
-        verify(mSimAgent).readIsimFileAttributes(eq(ISIM_EF_IMPI));
+        assertEquals(1, record.size());
+        assertEquals("impi", record.get(0));
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        result = mSystemCallAgent.readIsimFileAttributes(ISIM_EF_IMPI);
+        when(mSimAgent.getIsimDomain()).thenReturn("domain");
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_DOMAIN);
 
-        assertEquals(SystemCallInterface.RESULT_FAIL, result);
-        verifyNoMoreInteractions(mSimAgent);
+        assertEquals(1, record.size());
+        assertEquals("domain", record.get(0));
+
+        when(mSimAgent.getIsimImpu()).thenReturn(List.of("impu"));
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPU);
+
+        assertEquals(1, record.size());
+        assertEquals("impu", record.get(0));
     }
 
     @Test
     @SmallTest
-    public void testReadIsimRecord() {
-        int result = mSystemCallAgent.readIsimRecord(ISIM_EF_IMPI, 0);
+    public void testGetIsimRecordWhenContentNullOrEmpty() {
+        when(mSimAgent.getIsimImpi()).thenReturn(null);
+        List<String> record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_OK, result);
-        verify(mSimAgent).readIsimRecord(eq(ISIM_EF_IMPI), eq(0));
+        assertTrue(record.isEmpty());
+
+        when(mSimAgent.getIsimDomain()).thenReturn(null);
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_DOMAIN);
+
+        assertTrue(record.isEmpty());
+
+        when(mSimAgent.getIsimImpu()).thenReturn(Collections.emptyList());
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPU);
+
+        assertTrue(record.isEmpty());
+
+        int unknownFileId = 0x6FFF;
+        record = mSystemCallAgent.getIsimRecord(unknownFileId);
+
+        assertTrue(record.isEmpty());
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        result = mSystemCallAgent.readIsimRecord(ISIM_EF_IMPI, 0);
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_FAIL, result);
-        verifyNoMoreInteractions(mSimAgent);
+        assertTrue(record.isEmpty());
     }
 
     @Test

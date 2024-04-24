@@ -500,55 +500,36 @@ AString System::GetIsimState(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId)
+AStringArray System::GetIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId)
 {
-    IMS_SINT32 nResult = IMS_FAILURE;
-
     if (m_pCallback == IMS_NULL)
     {
-        return nResult;
+        return AStringArray::ConstNull();
     }
 
     android::Parcel in;
     android::Parcel out;
 
     in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::READ_ISIM_FILE_ATTR);
+    in.writeInt32(SystemConstants::GET_ISIM_RECORD);
     in.writeInt32(nFileId);
 
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
-        nResult = IMS_SUCCESS;
+        AStringArray objRecords;
+        IMS_SINT32 nCount = out.readInt32();
+
+        for (IMS_SINT32 i = 0; i < nCount; ++i)
+        {
+            String16 str16Temp = out.readString16();
+            String8 str8Temp(str16Temp);
+            objRecords.AddElement(AString(str8Temp.c_str()));
+        }
+
+        return objRecords;
     }
 
-    return nResult;
-}
-
-PUBLIC
-IMS_SINT32 System::ReadIsimRecord(
-        IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId)
-{
-    IMS_SINT32 nResult = IMS_FAILURE;
-
-    if (m_pCallback == IMS_NULL)
-    {
-        return nResult;
-    }
-
-    android::Parcel in;
-    android::Parcel out;
-
-    in.writeInt32(nSlotId);
-    in.writeInt32(SystemConstants::READ_ISIM_RECORD);
-    in.writeInt32(nFileId);
-    in.writeInt32(nIndex);
-
-    if (m_pCallback->SendDataToJava(in, out) == 1)
-    {
-        nResult = IMS_SUCCESS;
-    }
-
-    return nResult;
+    return AStringArray::ConstNull();
 }
 
 PUBLIC

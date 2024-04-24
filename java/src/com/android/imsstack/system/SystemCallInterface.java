@@ -16,14 +16,16 @@
 
 package com.android.imsstack.system;
 
-import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import java.io.FileDescriptor;
+import java.util.List;
 
 /** An interface for providing the system call. */
 public interface SystemCallInterface {
@@ -90,21 +92,12 @@ public interface SystemCallInterface {
     String getIsimState();
 
     /**
-     * Reads the file attributes of the specified ISIM record.
+     * Returns the list of the specified ISIM record.
      *
      * @param fileId The file id to be read.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     * @return The list of ISIM record.
      */
-    int readIsimFileAttributes(int fileId);
-
-    /**
-     * Reads the value of the specified ISIM record.
-     *
-     * @param fileId The file id to be read.
-     * @param index The index of the record for the given file.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
-     */
-    int readIsimRecord(int fileId, int index);
+    @NonNull List<String> getIsimRecord(int fileId);
 
     /**
      * Returns the response of ISIM authentication for the specified application type.

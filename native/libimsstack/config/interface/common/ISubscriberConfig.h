@@ -221,39 +221,11 @@ public:
     virtual const AStringArray& GetPublicUserIds() const = 0;
 
 public:
-    /// Error code when the provisioning failed
+    /// Error codes when the provisioning failed
     enum
     {
         ERROR_UNSPECIFIED = 0,
-        ERROR_INIT_FAILED,
-        ERROR_UPDATE_FAILED,
-        ERROR_ALL_CONFIG_DELETED,
         ERROR_NO_ISIM_APPLICATION
-    };
-
-    /// Contents of IST (ISIM Service Table)
-    enum
-    {
-        IST_1_NONE = 0x00,
-
-        /// P-CSCF address
-        IST_1_P_CSCF = 0x01,
-        /// Generic Bootstrapping Architecture (GBA)
-        IST_1_GBA = 0x02,
-        /// HTTP Digest
-        IST_1_HTTP_DIGEST = 0x04,
-        /// GBA-based Local Key Establishment Mechanism
-        IST_1_GBA_BASED_LKEM = 0x08,
-        /// Support of P-CSCF dicovery for IMS Local Break Out
-        IST_1_P_CSCF_DISCOVERY_FOR_IMS_LBO = 0x10,
-        /// Short Message Storage
-        IST_1_SMS = 0x20,
-        /// Short Message Status Reports
-        IST_1_SMSR = 0x40,
-        /// Support for SM-over-IP including data download via SMS-PP as defined in TS 31.111
-        IST_1_SM_OVER_IP = 0x80,
-
-        IST_1_MAX
     };
 
     /// Subscription attributes
