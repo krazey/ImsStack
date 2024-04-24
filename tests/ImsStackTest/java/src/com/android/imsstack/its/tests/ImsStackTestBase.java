@@ -103,7 +103,7 @@ public class ImsStackTestBase {
     protected final ImsServiceConnector mImsServiceConnector = ImsServiceConnector.getInstance();
     private final SingleLatch mEventLatch = new SingleLatch("ImsStackTestBase");
 
-    ImsStackTestBase() {
+    public ImsStackTestBase() {
         mBroadcastReceiverProxy = SystemProxyResolver.getBroadcastReceiverProxy();
         mCarrierConfigManagerProxy = SystemProxyResolver.getCarrierConfigManagerProxy();
         mConnectivityManagerProxy = SystemProxyResolver.getConnectivityManagerProxy();
@@ -389,7 +389,10 @@ public class ImsStackTestBase {
         mmTelFeature.changeCapabilitiesConfiguration(request, null);
     }
 
-    protected void disableAllMmTelCapabilities() {
+    /**
+     * Disables all MMTEL capabilities.
+     */
+    public void disableAllMmTelCapabilities() {
         changeMmTelCapability(false, CAPABILITY_TYPE_VOICE,
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
         changeMmTelCapability(false, CAPABILITY_TYPE_VIDEO,
@@ -400,7 +403,10 @@ public class ImsStackTestBase {
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
     }
 
-    protected void enableAllMmTelCapabilities() {
+    /**
+     * Enables all MMTEL capabilities.
+     */
+    public void enableAllMmTelCapabilities() {
         changeMmTelCapability(true, CAPABILITY_TYPE_VOICE,
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
         changeMmTelCapability(true, CAPABILITY_TYPE_VIDEO,
