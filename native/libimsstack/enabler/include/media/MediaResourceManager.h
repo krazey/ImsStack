@@ -77,11 +77,15 @@ public:
 
     /** Get the mtu size */
     IMS_SINT32 GetMtu();
+
+    /** Get the rtp fragment size from mtu */
+    IMS_SINT32 GetRtpFragmentSize();
+
     /* IMediaNetworkConnectionListener Interface Impl */
     void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType) override;
     void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
 
-private:
+protected:
     IMS_SINT32 m_nSlotId;
     IMS_SINT32 m_nPdnType;
     IMS_BOOL m_bIsIpv6;

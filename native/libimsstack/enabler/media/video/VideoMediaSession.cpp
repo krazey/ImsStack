@@ -120,7 +120,12 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     if (pMediaManager != IMS_NULL)
     {
-        pVideoConfig->setMaxMtuBytes(pMediaManager->GetResourceManager()->GetMtu());
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+
+        if (pResourceMngr != IMS_NULL)
+        {
+            pVideoConfig->setMaxMtuBytes(pResourceMngr->GetRtpFragmentSize());
+        }
     }
 
     IMS_SINT32 nVideoDirection;
