@@ -41,8 +41,11 @@ import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.its.base.BroadcastReceiverProxyImpl;
@@ -247,24 +250,23 @@ public class ImsStackTestBase {
     /**
      * Starts the ImsStack for the specified slot.
      *
-     * @param config The test configuration to be set.
      * @param slotId The slot id.
+     * @param config The test configuration to be set.
      */
-    public void startImsStack(int slotId, PersistableBundle config) {
-        startImsStack(slotId, config, TelephonyManager.SIM_STATE_LOADED);
+    public void startImsStack(int slotId, @Nullable PersistableBundle config) {
+        startImsStack(slotId, TelephonyManager.SIM_STATE_LOADED, config);
     }
 
     /**
      * Starts the ImsStack for the specified slot.
      *
-     * @param config The test configuration to be set.
      * @param slotId The slot id.
      * @param simApplicationState The USIM application state to be configured.
+     * @param config The test configuration to be set.
      */
-    public void startImsStack(int slotId, PersistableBundle config, int simApplicationState) {
-        if (config != null) {
-            writeTestConfig(config);
-        }
+    public void startImsStack(int slotId, int simApplicationState,
+            @Nullable PersistableBundle config) {
+        writeTestConfig(slotId, config);
         initSystemProxies(slotId, simApplicationState);
         triggerInService(slotId);
         int subId = getSubId(slotId);
@@ -279,14 +281,11 @@ public class ImsStackTestBase {
     /**
      * Starts the ImsStack for the specified slot with no service state.
      *
-     * @param config The test configuration to be set.
      * @param slotId The slot id.
+     * @param config The test configuration to be set.
      */
-    public void startImsStackWithNoService(int slotId, PersistableBundle config) {
-        if (config != null) {
-            writeTestConfig(config);
-        }
-
+    public void startImsStackWithNoService(int slotId, @Nullable PersistableBundle config) {
+        writeTestConfig(slotId, config);
         initSystemProxies(slotId, TelephonyManager.SIM_STATE_LOADED);
         triggerOutOfService(slotId);
         int subId = getSubId(slotId);
@@ -362,32 +361,44 @@ public class ImsStackTestBase {
      * changed for each test, the corresponding test should overwrite the configuration first
      * before running the test case.
      *
-     * @param config The test configuration to be set.
+     * @param slotId The slot id.
+     * @param config The test configuration to be set. If {@code config} is null, the test
+     *               configuration will be clear.
      */
-    public void writeTestConfig(@NonNull PersistableBundle config) {
-        if (config == null) {
-            return;
-        }
+    public void writeTestConfig(int slotId, @Nullable PersistableBundle config) {
+        ConfigInterface ci = AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
 
-        AppContext.getInstance().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+        // When a ConfigAgent is created once and maintained,
+        // the cached test configuration needs to be updated.
+        if (ci != null) {
+            PersistableBundle testConfig = ci.readTestConfig();
 
-        if (!config.isEmpty()) {
-            OutputStream os = null;
-
-            try {
-                os = AppContext.getInstance().openFileOutput(
-                        CarrierConfig.TEST_CARRIER_CONFIG_FILE,
-                        Context.MODE_APPEND);
-                config.writeToStream(os);
-                Log.d(Log.TAG, "writeTestConfig: Ok");
-                return;
-            } catch (IOException e) {
-                Log.d(Log.TAG, "writeTestConfig: " + e.toString());
-            } finally {
-                ImsUtils.closeQuietly(os);
+            if (config != null) {
+                testConfig.putAll(config);
+            } else {
+                testConfig.clear();
             }
+        } else {
+            AppContext.getInstance().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
 
-            fail("Initializing the test configuration failed.");
+            if (config != null && !config.isEmpty()) {
+                OutputStream os = null;
+
+                try {
+                    os = AppContext.getInstance().openFileOutput(
+                            CarrierConfig.TEST_CARRIER_CONFIG_FILE,
+                            Context.MODE_APPEND);
+                    config.writeToStream(os);
+                    Log.d(Log.TAG, "writeTestConfig: Ok");
+                    return;
+                } catch (IOException e) {
+                    Log.d(Log.TAG, "writeTestConfig: " + e.toString());
+                } finally {
+                    ImsUtils.closeQuietly(os);
+                }
+
+                fail("Initializing the test configuration failed.");
+            }
         }
     }
 
