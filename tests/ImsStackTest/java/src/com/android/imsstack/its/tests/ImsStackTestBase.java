@@ -44,6 +44,7 @@ import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.its.base.BroadcastReceiverProxyImpl;
 import com.android.imsstack.its.base.CarrierConfigManagerProxyImpl;
 import com.android.imsstack.its.base.ConnectivityManagerProxyImpl;
@@ -154,8 +155,9 @@ public class ImsStackTestBase {
      * Initializes the default values of the system proxies.
      *
      * @param slotId The slot id.
+     * @param simApplicationState The USIM application state to be configured.
      */
-    public void initSystemProxies(int slotId) {
+    public void initSystemProxies(int slotId, int simApplicationState) {
         int subId = getSubId(slotId);
         ImsMmTelManagerProxyImpl imsMmTel = getImsMmTelManagerProxy(subId);
         if (imsMmTel != null) {
@@ -173,6 +175,7 @@ public class ImsStackTestBase {
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
         telephony.setDefaultValues();
+        telephony.setSimApplicationState(simApplicationState);
         // TODO: Need to be removed when ImsService can handle the startImsTraffic.
         telephony.setHalVersion(-2, -2);
     }
@@ -194,7 +197,7 @@ public class ImsStackTestBase {
      */
     public void setUpBase(int slotId) {
         setUpNetwork(slotId);
-        setUpImsService();
+        setUpImsService(slotId);
     }
 
     /**
@@ -221,12 +224,24 @@ public class ImsStackTestBase {
 
     /**
      * Sets up the ImsService.
+     *
+     * @param slotId The slot id.
      */
-    public void setUpImsService() {
+    public void setUpImsService(int slotId) {
         if (!mImsServiceConnector.isConnectionInProgress()) {
             mImsServiceConnector.start();
         }
         mImsServiceConnector.waitForServiceConnected();
+
+        ImsServiceController.start(AppContext.getInstance(), slotId);
+        setUpMmTelFeature();
+    }
+
+    /**
+     * Sets up the MmTel feature.
+     */
+    public void setUpMmTelFeature() {
+        mImsServiceConnector.createMmTelWrappers();
     }
 
     /**
@@ -236,11 +251,21 @@ public class ImsStackTestBase {
      * @param slotId The slot id.
      */
     public void startImsStack(int slotId, PersistableBundle config) {
+        startImsStack(slotId, config, TelephonyManager.SIM_STATE_LOADED);
+    }
+
+    /**
+     * Starts the ImsStack for the specified slot.
+     *
+     * @param config The test configuration to be set.
+     * @param slotId The slot id.
+     * @param simApplicationState The USIM application state to be configured.
+     */
+    public void startImsStack(int slotId, PersistableBundle config, int simApplicationState) {
         if (config != null) {
             writeTestConfig(config);
         }
-
-        initSystemProxies(slotId);
+        initSystemProxies(slotId, simApplicationState);
         triggerInService(slotId);
         int subId = getSubId(slotId);
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
@@ -262,7 +287,7 @@ public class ImsStackTestBase {
             writeTestConfig(config);
         }
 
-        initSystemProxies(slotId);
+        initSystemProxies(slotId, TelephonyManager.SIM_STATE_LOADED);
         triggerOutOfService(slotId);
         int subId = getSubId(slotId);
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);

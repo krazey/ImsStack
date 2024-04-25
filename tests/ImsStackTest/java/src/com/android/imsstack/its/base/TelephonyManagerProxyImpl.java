@@ -490,7 +490,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
      */
     public void initUsimApplication() {
         mSimInfoRecord.setUsimAppType(TelephonyManager.APPTYPE_USIM);
-        mSimInfoRecord.setApplicationState(TelephonyManager.SIM_STATE_LOADED);
+        mSimInfoRecord.setApplicationState(TelephonyManager.SIM_STATE_NOT_READY);
         mSimInfoRecord.setCardState(TelephonyManager.SIM_STATE_PRESENT);
         mSimInfoRecord.setState(TelephonyManager.SIM_STATE_READY);
         mSimInfoRecord.setCarrierId(TestConstants.CARRIER_ID); // Test SIM

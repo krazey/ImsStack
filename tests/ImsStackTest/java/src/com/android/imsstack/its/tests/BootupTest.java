@@ -48,7 +48,6 @@ public class BootupTest extends ImsStackTestBase {
         telephony.setHalVersion(-2, -2);
 
         setUpBase(SLOT0);
-        mImsServiceConnector.createMmTelWrappers();
 
         mImsRegistration = mImsServiceConnector.getRegistration();
     }
