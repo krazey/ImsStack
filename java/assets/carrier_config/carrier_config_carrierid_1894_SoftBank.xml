@@ -36,7 +36,7 @@
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
-    <int name="reg_timer_for_emc_call_millis_int" value="8000"/>
+    <int name="reg_timer_for_ecall_millis_int" value="8000"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

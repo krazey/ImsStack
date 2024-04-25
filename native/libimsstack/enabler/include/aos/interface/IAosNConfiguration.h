@@ -547,13 +547,13 @@ public:
      *
      *       Specify the number of emergency registration retry attempt to P-CSCFs. UE will try
      *       emergency registration with specified number of P-CSCFs when
-     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer has expired. If the
+     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer has expired. If the
      *       number is zero, UE will try registration on every P-CSCFs once. If the number of
      *       P-CSCF is less than a given number and UE's default retry policy is a
      *       CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF, UE will try
      *       registration from the first P-CSCF again after attempting on all P-CSCFs.
      *       If UE doesn't support emerg-reg-retry defined in 3GPP 24.229, which is configured by
-     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, this configuration is
+     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT, this configuration is
      *       discarded.
      *
      * @return IMS_SINT32 Return the retry attempt count
@@ -569,7 +569,7 @@ public:
      *        been stopped or expired. Upon this timer expiry, the UE considers that the emergency
      *        registration attempt for this P-CSCF has failed. The UE may retry registration on
      *        a different P-CSCF if available and restart the
-     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
+     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
      *        more available P-CSCFs, the UE shall stop the
      *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer by
      *        considering the emergency registration has failed. If the value is zero, it considers
@@ -640,7 +640,7 @@ public:
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
      *        the emergency call attempt as failed, and stop the
-     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer, if running.
+     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer, if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */

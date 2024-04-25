@@ -702,10 +702,10 @@ public class CarrierConfig {
                 "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
-        public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
-                "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
-        public static final String KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL =
-                "emc_reg_on_random_pcscf_bool";
+        public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
+                "ecall_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
+                "ereg_on_random_pcscf_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
@@ -761,11 +761,11 @@ public class CarrierConfig {
 
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
                 "contact_user_info_policy_for_non_reg_message_int";
-        public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
-                "emc_preferred_iptype_int";
-        public static final String KEY_EMC_REG_RETRY_MAX_CNT_INT = "emc_reg_retry_max_cnt_int";
-        public static final String KEY_EMC_REG_RETRY_TIMER_MILLIS_INT =
-                "emc_reg_retry_timer_millis_int";
+        public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
+                "epdn_preferred_iptype_int";
+        public static final String KEY_EREG_RETRY_MAX_CNT_INT = "ereg_retry_max_cnt_int";
+        public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
+                "ereg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
@@ -791,12 +791,11 @@ public class CarrierConfig {
                 "reg_retry_default_policy_int";
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
                 "reg_retry_timer_f_policy_int";
-        public static final String KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT =
-                "reg_timer_for_emc_call_millis_int";
+        public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
+                "reg_timer_for_ecall_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
                 "rereg_retry_305_policy_int";
-        public static final String KEY_ROAMING_PREFERRED_EMC_REG_INT =
-                "roaming_preferred_emc_reg_int";
+        public static final String KEY_ROAMING_PREFERRED_EREG_INT = "roaming_preferred_ereg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =

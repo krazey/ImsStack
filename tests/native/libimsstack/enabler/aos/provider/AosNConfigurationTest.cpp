@@ -505,12 +505,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::
-                               KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
@@ -606,12 +606,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT, -1))
             .WillOnce(Return(1));
-    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
-    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT, -1))
             .WillOnce(Return(2));
     EXPECT_CALL(
-            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, -1))
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT, -1))
             .WillOnce(Return(3000));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT, -1))
@@ -654,13 +654,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_NONE));
-    EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT, -1))
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
-    EXPECT_CALL(
-            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT, -1))
             .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
