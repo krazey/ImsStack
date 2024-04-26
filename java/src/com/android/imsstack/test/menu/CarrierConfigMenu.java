@@ -43,7 +43,6 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -1157,11 +1156,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     }
 
     private static void readConfigKeys(String fileName, Collection<String> configKeys) {
-        InputStream is = null;
-
-        try {
-            is = AppContext.getInstance().getAssets().open(fileName);
-
+        try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(is, "utf-8");
@@ -1176,8 +1171,6 @@ public class CarrierConfigMenu extends AppCompatActivity {
             }
         } catch (IOException | XmlPullParserException e) {
             ImsLog.e("readConfigKeys: " + e.toString());
-        } finally {
-            ImsUtils.closeQuietly(is);
         }
     }
 

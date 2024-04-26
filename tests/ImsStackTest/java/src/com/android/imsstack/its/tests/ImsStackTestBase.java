@@ -67,7 +67,6 @@ import com.android.imsstack.its.core.agents.WifiAgent;
 import com.android.imsstack.its.imsservice.ImsServiceConnector;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.util.SingleLatch;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 
 import java.io.IOException;
@@ -382,19 +381,14 @@ public class ImsStackTestBase {
             AppContext.getInstance().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
 
             if (config != null && !config.isEmpty()) {
-                OutputStream os = null;
-
-                try {
-                    os = AppContext.getInstance().openFileOutput(
-                            CarrierConfig.TEST_CARRIER_CONFIG_FILE,
-                            Context.MODE_APPEND);
+                try (OutputStream os = AppContext.getInstance().openFileOutput(
+                        CarrierConfig.TEST_CARRIER_CONFIG_FILE,
+                        Context.MODE_APPEND)) {
                     config.writeToStream(os);
                     Log.d(Log.TAG, "writeTestConfig: Ok");
                     return;
                 } catch (IOException e) {
                     Log.d(Log.TAG, "writeTestConfig: " + e.toString());
-                } finally {
-                    ImsUtils.closeQuietly(os);
                 }
 
                 fail("Initializing the test configuration failed.");

@@ -32,7 +32,6 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -103,10 +102,8 @@ public class ConfigAgent implements ConfigInterface {
             return mTestConfig;
         }
 
-        InputStream is = null;
-
-        try {
-            is = AppContext.getInstance().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+        try (InputStream is = AppContext.getInstance().openFileInput(
+                CarrierConfig.TEST_CARRIER_CONFIG_FILE)) {
             mTestConfig = PersistableBundle.readFromStream(is);
         } catch (FileNotFoundException e) {
             ImsLog.d(mSlotId, "readTestConfig: not found");
@@ -114,8 +111,6 @@ public class ConfigAgent implements ConfigInterface {
         } catch (Exception e) {
             ImsLog.d(mSlotId, "readTestConfig: " + e.toString());
             mTestConfig = new PersistableBundle();
-        } finally {
-            ImsUtils.closeQuietly(is);
         }
 
         return mTestConfig;
@@ -130,19 +125,14 @@ public class ConfigAgent implements ConfigInterface {
         AppContext.getInstance().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
 
         if (!config.isEmpty()) {
-            OutputStream os = null;
-
-            try {
-                os = AppContext.getInstance().openFileOutput(
-                        CarrierConfig.TEST_CARRIER_CONFIG_FILE,
-                        Context.MODE_APPEND);
+            try (OutputStream os = AppContext.getInstance().openFileOutput(
+                    CarrierConfig.TEST_CARRIER_CONFIG_FILE,
+                    Context.MODE_APPEND)) {
                 config.writeToStream(os);
                 ImsLog.d(mSlotId, "writeTestConfig: Ok");
                 return true;
             } catch (IOException e) {
                 ImsLog.d(mSlotId, "writeTestConfig: " + e.toString());
-            } finally {
-                ImsUtils.closeQuietly(os);
             }
 
             return false;
@@ -285,11 +275,7 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle loadCarrierConfigFromXml(String fileName, SimCarrierId id) {
-        InputStream is = null;
-
-        try {
-            is = AppContext.getInstance().getAssets().open(fileName);
-
+        try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             synchronized (this) {
                 if (mFactory == null) {
                     mFactory = XmlPullParserFactory.newInstance();
@@ -303,8 +289,6 @@ public class ConfigAgent implements ConfigInterface {
         } catch (IOException | XmlPullParserException e) {
             ImsLog.e(mSlotId, "loadCarrierConfigFromXml: " + e.toString());
             return new PersistableBundle();
-        } finally {
-            ImsUtils.closeQuietly(is);
         }
     }
 
