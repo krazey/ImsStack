@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.tests;
+package com.android.imsstack.its.tests.call;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
@@ -23,6 +23,7 @@ import android.telephony.CarrierConfigManager;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.tests.ImsStackTestBase;
 import com.android.imsstack.its.util.SingleLatch;
 
 public class CallTestBase extends ImsStackTestBase {

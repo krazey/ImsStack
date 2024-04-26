@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.imsservice.mmtel.call;
+package com.android.imsstack.its.tests.call;
 
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;

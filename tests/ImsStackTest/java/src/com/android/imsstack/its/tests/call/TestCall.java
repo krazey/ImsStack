@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.imsservice.mmtel.call;
+package com.android.imsstack.its.tests.call;
 
 import static org.junit.Assert.fail;
 
@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
+import com.android.imsstack.its.imsservice.mmtel.call.ImsCallSessionWrapper;
 import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 

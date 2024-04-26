@@ -26,7 +26,8 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.its.base.SystemProxyResolver;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
-import com.android.imsstack.its.imsservice.mmtel.call.TestCall;
+import com.android.imsstack.its.tests.call.CallTestBase;
+import com.android.imsstack.its.tests.call.TestCall;
 
 import org.junit.After;
 import org.junit.Before;
