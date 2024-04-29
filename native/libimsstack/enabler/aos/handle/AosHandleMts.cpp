@@ -21,6 +21,8 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
 #include "provider/AosProvider.h"
+#include "provider/AosUtil.h"
+
 #include "handle/AosHandleMts.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
@@ -43,6 +45,8 @@ AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& st
             static_cast<IMS_UINT32>(AosCapability::SMS));
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::SMS));
+    m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
 }
 
 PUBLIC VIRTUAL AosHandleMts::~AosHandleMts()
@@ -61,6 +65,24 @@ PUBLIC VIRTUAL void AosHandleMts::NConfiguration_NotifyConfigChanged()
     }
 
     AosHandle::NConfiguration_NotifyConfigChanged();
+}
+
+PUBLIC VIRTUAL void AosHandleMts::NetTracker_StatusChanged()
+{
+    if (AosUtil::GetInstance()->IsWifiTest())
+    {
+        return;
+    }
+
+    AosHandle::NetTracker_StatusChanged();
+
+    IMS_UINT32 nCurrNetworkType = GetNetworkType();
+
+    if (nCurrNetworkType != m_nNetworkType)
+    {
+        m_nNetworkType = nCurrNetworkType;
+        ProcessNetworkChanged();
+    }
 }
 
 PROTECTED
@@ -103,42 +125,6 @@ PROTECTED VIRTUAL void AosHandleMts::Init()
     AosHandle::Init();
 }
 
-/* jryou::TODO
-PROTECTED VIRTUAL
-void AosHandleMts::EnableAoS()
-{
-    IMS_BOOL bSmsOverIpNetwork = IMS_FALSE;
-    A_IMS_TRACE_I(APPPROFILE, "EnableAos()", 0, 0, 0);
-
-    IConfigBuffer* piConfigBuffer =
-            Configuration::GetInstance()->CreateConfig("ims.service.mts", m_nSlotId);
-    if (piConfigBuffer != IMS_NULL)
-    {
-        if (piConfigBuffer->CaptureSection("sdm") != IMS_FALSE)
-        {
-            bSmsOverIpNetwork = piConfigBuffer->ReadValueBoolean("sms_over_ip_network");
-            piConfigBuffer->ReleaseSection();
-        }
-        piConfigBuffer->Destroy();
-    }
-
-    if(bSmsOverIpNetwork == IMS_TRUE )
-    {
-        A_IMS_TRACE_I(APPPROFILE,
-                "AosHandleMts::EnableAos() enableAos() due to sms_over_ip_network is true",
-                0, 0, 0);
-        AosHandle::EnableAoS();
-    }
-    else
-    {
-        A_IMS_TRACE_I(APPPROFILE,
-                "AosHandleMts::EnableAos() disableAos() due to sms_over_ip_network is false",
-                0, 0, 0);
-        AosHandle::DisableAoS();
-    }
-}
-*/
-
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
     m_bBlocked = IsHandleBlocked();
@@ -158,34 +144,31 @@ PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
 }
 
 PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
-        IN const ImsMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
-    /* jryou:: Temp blocked until GII is changed to consider SMS capability.
-    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
-            objCapabilities.GetSize(), 0, 0);
-
-    for (IMS_UINT32 i = 0; i < objCapabilities.GetSize(); i++)
+    if (IsEmergencyService())
     {
-        IMS_UINT32 nType = objCapabilities.GetKeyAt(i);
-        IMS_UINT32 nCapabilities = objCapabilities.GetValueAt(i);
-        IMS_UINT32 nChangedCapabilities = m_objCapabilities.GetValue(nType) ^ nCapabilities;
-        IMS_UINT32 nCurrentRat = GetNetworkType();
-
-        if ((nType == static_cast<IMS_UINT32>(AosNetworkType::LTE) &&
-                nCurrentRat == NW_REPORT_RADIO_LTE) ||
-                (nType == static_cast<IMS_UINT32>(AosNetworkType::NR) &&
-                nCurrentRat == NW_REPORT_RADIO_NR))
-        {
-            if (nChangedCapabilities & static_cast<IMS_UINT32>(AosCapability::SMS))
-            {
-                ProcessBlock(BLOCK_SMS_CAPABILITY,
-                        (nCapabilities & static_cast<IMS_UINT32>(AosCapability::SMS)) == 0);
-            }
-        }
-
-        m_objCapabilities.SetValue(nType, nCapabilities);
+        return;
     }
-    */
+
+    AosHandle::ProcessCapabilitiesChanged(objNewCapabilities);
+
+    if (!IsSupportedNetworkType(m_nNetworkType) && !Is3G(m_nNetworkType))
+    {
+        return;
+    }
+
+    ProcessBlock(BLOCK_SMS_CAPABILITY,
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::SMS), IMS_FALSE);
+}
+
+PROTECTED VIRTUAL void AosHandleMts::ProcessNetworkChanged()
+{
+    if (IsSupportedNetworkType(m_nNetworkType) || Is3G(m_nNetworkType))
+    {
+        ProcessBlock(BLOCK_SMS_CAPABILITY,
+                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::SMS), IMS_FALSE);
+    }
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const

@@ -161,6 +161,8 @@ public:
 
     inline IImsAosListener* GetListener() { return m_piListener; }
     inline void SetNotify(IN IMS_BOOL bNotify) { m_bNotify = bNotify; }
+    inline ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_objCapabilities; }
+    inline void SetServiceType(IN IMS_UINT32 nServiceType) { m_nServiceType = nServiceType; }
 
     FRIEND_TEST(AosHandleTest, Constructor);
     FRIEND_TEST(AosHandleTest, NetTracker_StatusChanged_Test9);
@@ -419,6 +421,33 @@ protected:
     void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
 
     IMS_BOOL IsCsVoiceAvailable() { return m_pAosHandle->m_bCsVoiceAvailable; }
+
+    IMS_BOOL IsEqualCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objSrcCapabilities,
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objDestCapabilities)
+    {
+        if (objSrcCapabilities.GetSize() != objDestCapabilities.GetSize())
+        {
+            return IMS_FALSE;
+        }
+
+        for (IMS_UINT32 i = 0; i < objSrcCapabilities.GetSize(); i++)
+        {
+            IMS_UINT32 nNetworkType = objSrcCapabilities.GetKeyAt(i);
+
+            if (objDestCapabilities.GetIndexOfKey(nNetworkType) < 0)
+            {
+                return IMS_FALSE;
+            }
+
+            if (objSrcCapabilities.GetValue(nNetworkType) !=
+                    objDestCapabilities.GetValue(nNetworkType))
+            {
+                return IMS_FALSE;
+            }
+        }
+
+        return IMS_TRUE;
+    }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -446,6 +475,15 @@ TEST_F(AosHandleTest, Constructor)
     ASSERT_TRUE(pTestAosHandle != nullptr);
 
     EXPECT_EQ(pTestAosHandle->GetState(), AosHandle::STATE_DISCONNECTED);
+
+    EXPECT_TRUE(pTestAosHandle->m_objCapabilities.GetIndexOfKey(
+                        static_cast<IMS_UINT32>(AosNetworkType::LTE)) >= 0);
+    EXPECT_TRUE(pTestAosHandle->m_objCapabilities.GetIndexOfKey(
+                        static_cast<IMS_UINT32>(AosNetworkType::IWLAN)) >= 0);
+    EXPECT_TRUE(pTestAosHandle->m_objCapabilities.GetIndexOfKey(
+                        static_cast<IMS_UINT32>(AosNetworkType::NR)) >= 0);
+    EXPECT_TRUE(pTestAosHandle->m_objCapabilities.GetIndexOfKey(
+                        static_cast<IMS_UINT32>(AosNetworkType::UTRAN)) >= 0);
 
     delete pTestAosHandle;
 
@@ -4438,9 +4476,86 @@ TEST_F(AosHandleTest, ReevaluateUnavailableFeature_Test)
     m_pAosHandle->ReevaluateUnavailableFeature();
 }
 
-TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)
+TEST_F(AosHandleTest, SetAllCapabilitiesToNoneIfNoCapability)
 {
-    m_pAosHandle->ProcessCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    // WHEN
+    m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandle->GetCapabilities(), objExpectedCapabilities));
+}
+
+TEST_F(AosHandleTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
+{
+    // GIVEN
+    m_pAosHandle->SetServiceType(ImsAosService::EMERGENCY_MTC);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    // WHEN
+    m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandle->GetCapabilities(), objExpectedCapabilities));
+}
+
+TEST_F(AosHandleTest, SetCapabilityToTheGivenValue)
+{
+    // GIVEN
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+
+    // WHEN
+    m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsEqualCapabilities(m_pAosHandle->GetCapabilities(), objNewCapabilities));
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)

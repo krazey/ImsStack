@@ -123,6 +123,15 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
     m_strTagWithServiceType.Sprintf(
             "%d:%s:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr(), ServiceTypeToString());
 
+    m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
     SetHandleState(STATE_DISCONNECTED);
 
     IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
@@ -701,6 +710,11 @@ IMS_BOOL AosHandle::IsCapabilityExistedForNetworkType(
             break;
 
         default:
+            if (Is3G(nNetworkType))
+            {
+                nCapabilities =
+                        m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::UTRAN));
+            }
             break;
     }
 
@@ -1186,9 +1200,36 @@ PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN
 }
 
 PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
-        IN const ImsMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
-    // Implemented in child
+    if (IsEmergencyService())
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
+            objNewCapabilities.GetSize(), 0, 0);
+
+    for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); i++)
+    {
+        IMS_UINT32 nCapaNetworkType = m_objCapabilities.GetKeyAt(i);
+
+        // Network type is not existed in the new capabilities (=no capabilities)
+        if (objNewCapabilities.GetIndexOfKey(nCapaNetworkType) < 0)
+        {
+            m_objCapabilities.SetValue(
+                    nCapaNetworkType, static_cast<IMS_UINT32>(AosCapability::NONE));
+            continue;
+        }
+
+        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
+
+        A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
+                nCapaNetworkType[%d], nNewCapabilities[%x], m_nNetworkType[%s]",
+                nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
+
+        m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
+    }
 }
 
 PROTECTED VIRTUAL void AosHandle::ProcessDataConnectionChanged()
