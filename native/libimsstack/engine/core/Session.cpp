@@ -75,7 +75,6 @@ Session::Session(IN Service* pService) :
         m_bTerminateMethodBye(IMS_FALSE),
         m_bSessionUpdateNotificationInProgress(IMS_FALSE),
         m_bImplicitRoutingRequired(IMS_FALSE),
-        m_bAckWithSdpInProgress(IMS_FALSE),
         m_nConfigValue(CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE),
         m_nCompletedListenerCalls(0),
         m_nTerminationReason(TERMINATION_REASON_UNKNOWN),
@@ -2148,12 +2147,6 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
                     m_piSessionListener->OnSession_Started(this);
                 }
             }
-
-            // ACK_WITH_SDP_IN_PROGRESS
-            if (m_bAckWithSdpInProgress)
-            {
-                m_bAckWithSdpInProgress = IMS_FALSE;
-            }
             return IMS_TRUE;
         case AMSG_SESSION_START_FAILED:
             if (m_piSessionListener != IMS_NULL)
@@ -2183,13 +2176,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
             }
 
             // RACE_CONDITION : SESSION_UPDATE
-            SetSessionUpdateNotificationState(IMS_FALSE);
-
-            // ACK_WITH_SDP_IN_PROGRESS
-            if (m_bAckWithSdpInProgress)
-            {
-                m_bAckWithSdpInProgress = IMS_FALSE;
-            }
+            SetSessionUpdateNotificationInProgress(IMS_FALSE);
             return IMS_TRUE;
         case AMSG_SESSION_UPDATE_FAILED:
             if (m_piSessionListener != IMS_NULL)
@@ -2198,7 +2185,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
             }
 
             // RACE_CONDITION : SESSION_UPDATE
-            SetSessionUpdateNotificationState(IMS_FALSE);
+            SetSessionUpdateNotificationInProgress(IMS_FALSE);
             return IMS_TRUE;
         case AMSG_SESSION_UPDATE_RECEIVED:
             if (m_piSessionListener != IMS_NULL)
@@ -2307,22 +2294,11 @@ PROTECTED VIRTUAL IMS_BOOL Session::DispatchMessage(IN ImsMessage& objMsg)
         }
         case AMSG_SESSION_DELAYED_DIALOG_TRANSACTION_RECEIVED:
         {
-            // ACK_WITH_SDP_IN_PROGRESS
             ISipServerConnection* piSsc = reinterpret_cast<ISipServerConnection*>(objMsg.nLparam);
 
             if (piSsc != IMS_NULL)
             {
-                const SipMethod& objMethod = piSsc->GetMethod();
-
-                if (m_bAckWithSdpInProgress &&
-                        (objMethod.Equals(SipMethod::INVITE) ||
-                                objMethod.Equals(SipMethod::UPDATE)))
-                {
-                    // To avoid an infinite loop, clear the flag
-                    m_bAckWithSdpInProgress = IMS_FALSE;
-                    IMS_TRACE_D("CriticalError :: AckWithSDPInProgress is cleared", 0, 0, 0);
-                }
-
+                IMS_TRACE_I("Handle DELAYED_DIALOG_TRANSACTION_RECEIVED", 0, 0, 0);
                 Dialog_NotifyRequest(piSsc);
             }
             return IMS_TRUE;
@@ -2812,7 +2788,7 @@ PROTECTED VIRTUAL void Session::NotifySipError(
                     // RACE_CONDITION : SESSION_UPDATE
                     if (nOldState == STATE_RENEGOTIATING)
                     {
-                        SetSessionUpdateNotificationState(IMS_TRUE);
+                        SetSessionUpdateNotificationInProgress(IMS_TRUE);
                     }
 
                     // It contains the incoming INVITE case when the error is occurred
@@ -2907,7 +2883,7 @@ PROTECTED VIRTUAL void Session::NotifySipError(
 
             SetState(STATE_ESTABLISHED);
             // RACE_CONDITION : SESSION_UPDATE
-            SetSessionUpdateNotificationState(IMS_TRUE);
+            SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
             PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
             break;
@@ -3360,11 +3336,9 @@ PROTECTED VIRTUAL IMS_BOOL Session::Dialog_NotifyRequest(IN ISipServerConnection
     ISipMessage* piSipMsg = piSsc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    IMS_TRACE_I(
-            "Dialog_NotifyRequest - %s request received...", objMethod.ToString().GetStr(), 0, 0);
+    IMS_TRACE_I("Dialog_NotifyRequest: %s request received", objMethod.ToString().GetStr(), 0, 0);
 
-    // FIX_TIMING_ISSUE: ACK_WITH_SDP_IN_PROGRESS
-    if (m_bAckWithSdpInProgress &&
+    if (IsSessionUpdateNotificationInProgress() &&
             (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::UPDATE)) &&
             (piSipMsg->GetSdpBodyPart() != IMS_NULL))
     {
@@ -4202,7 +4176,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUpdate(IN ISipClientConnec
             {
                 SetState(STATE_ESTABLISHED);
                 // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
+                SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
                 PostMessage(AMSG_SESSION_UPDATED, 0, 0);
             }
@@ -4226,7 +4200,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUpdate(IN ISipClientConnec
             {
                 SetState(STATE_ESTABLISHED);
                 // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
+                SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
                 PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
             }
@@ -4244,7 +4218,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleResponseToUpdate(IN ISipClientConnec
 
             SetState(STATE_ESTABLISHED);
             // RACE_CONDITION : SESSION_UPDATE
-            SetSessionUpdateNotificationState(IMS_TRUE);
+            SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
             PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
         }
@@ -5279,12 +5253,6 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
 
     if ((nState == STATE_ESTABLISHING) || (nState == STATE_REESTABLISHING))
     {
-        // ACK_WITH_SDP_IN_PROGRESS
-        if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
-        {
-            m_bAckWithSdpInProgress = IMS_TRUE;
-        }
-
         // Notify the session establishment to MEDIA
 
         // Cease the 2xx retransmission
@@ -5314,6 +5282,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
         {
             SetState(STATE_ESTABLISHED);
 
+            SetSessionUpdateNotificationInProgress(IMS_TRUE);
             PostMessage(AMSG_SESSION_UPDATED, 0, 0);
 
             CloseConnection(IMessage::SESSION_UPDATE);
@@ -5348,6 +5317,7 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
         }
         else
         {
+            SetSessionUpdateNotificationInProgress(IMS_TRUE);
             PostMessage(AMSG_SESSION_UPDATED, 0, 0);
 
             CloseConnection(IMessage::SESSION_UPDATE);
@@ -6198,7 +6168,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
                 {
                     SetState(STATE_ESTABLISHED);
                     // RACE_CONDITION : SESSION_UPDATE
-                    SetSessionUpdateNotificationState(IMS_TRUE);
+                    SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
                     PostMessage(AMSG_SESSION_UPDATED, 0, 0);
                     return IMS_SUCCESS;
@@ -6263,7 +6233,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
                 {
                     SetState(STATE_ESTABLISHED);
                     // RACE_CONDITION : SESSION_UPDATE
-                    SetSessionUpdateNotificationState(IMS_TRUE);
+                    SetSessionUpdateNotificationInProgress(IMS_TRUE);
 
                     PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
                 }
@@ -6350,7 +6320,7 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
 
                 SetState(STATE_ESTABLISHED);
                 // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
+                SetSessionUpdateNotificationInProgress(IMS_TRUE);
                 RestoreOfferAnswerState();
                 RestoreEx();
 
