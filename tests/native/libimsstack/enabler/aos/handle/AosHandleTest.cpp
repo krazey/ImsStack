@@ -147,6 +147,21 @@ public:
     void ClearFeatureTagList() { m_objFeatureTagList.Clear(); }
     void ClearBindedFeatureTagList() { m_objBindedFeatureTagList.Clear(); }
 
+    void AddFeature(IN IMS_UINT32 nFeature) { m_objFeatureTagList.AddFeature(nFeature); }
+
+    void AddBindedFeature(IN IMS_UINT32 nFeature)
+    {
+        m_objBindedFeatureTagList.AddFeature(nFeature);
+    }
+
+    void AddUnavailableFeature(IN IMS_UINT32 nFeature)
+    {
+        m_objBindedFeatureTagList.AddUnavailableFeature(nFeature);
+    }
+
+    inline IImsAosListener* GetListener() { return m_piListener; }
+    inline void SetNotify(IN IMS_BOOL bNotify) { m_bNotify = bNotify; }
+
     FRIEND_TEST(AosHandleTest, Constructor);
     FRIEND_TEST(AosHandleTest, NetTracker_StatusChanged_Test9);
     FRIEND_TEST(AosHandleTest, IsEmergencyService_Test);
@@ -262,25 +277,6 @@ protected:
         AosProvider::GetInstance()->SetService(m_piAosService);
         AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager);
     }
-
-    void AddFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandle->m_objFeatureTagList.AddFeature(nFeature);
-    }
-
-    void AddBindedFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandle->m_objBindedFeatureTagList.AddFeature(nFeature);
-    }
-
-    void AddUnavailableFeature(IN IMS_UINT32 nFeature)
-    {
-        m_pAosHandle->m_objBindedFeatureTagList.AddUnavailableFeature(nFeature);
-    }
-
-    IImsAosListener* GetListener() { return m_pAosHandle->m_piListener; }
-
-    void SetNotify(IN IMS_BOOL bNotify) { m_pAosHandle->m_bNotify = bNotify; }
 
     IMS_BOOL GetNotify() { return m_pAosHandle->m_bNotify; }
 
@@ -640,8 +636,8 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_NoChange)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
-    AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::MMTEL);
 
     m_pAosHandle->ProcessFeatureTagChange();
 }
@@ -652,7 +648,7 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_INVALID)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
     m_pAosHandle->SetState(AosHandle::STATE_INVALID);
 
     m_pAosHandle->ProcessFeatureTagChange();
@@ -664,7 +660,7 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_DISCONNECTED)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
 
     m_pAosHandle->ProcessFeatureTagChange();
@@ -676,7 +672,7 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_DISCONNECTING)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTING);
 
     m_pAosHandle->ProcessFeatureTagChange();
@@ -688,7 +684,7 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_CONNECTING)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
 
     m_pAosHandle->ProcessFeatureTagChange();
@@ -700,7 +696,7 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_CONNECTED)
 
     m_pAosHandle->ClearFeatureTagList();
     m_pAosHandle->ClearBindedFeatureTagList();
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
 
     m_pAosHandle->ProcessFeatureTagChange();
@@ -720,13 +716,13 @@ TEST_F(AosHandleTest, SetListener_Test)
 {
     IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
     m_pAosHandle->SetListener(piListener);
-    EXPECT_EQ(GetListener(), piListener);
+    EXPECT_EQ(m_pAosHandle->GetListener(), piListener);
 }
 
 TEST_F(AosHandleTest, App_Notify_Null_Listener)
 {
     m_pAosHandle->SetListener(IMS_NULL);
-    ASSERT_EQ(GetListener(), nullptr);
+    ASSERT_EQ(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(0);
@@ -747,9 +743,9 @@ TEST_F(AosHandleTest, App_Notify_Null_Listener)
 TEST_F(AosHandleTest, App_Notify_No_Notify)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
     ASSERT_FALSE(GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
@@ -771,9 +767,9 @@ TEST_F(AosHandleTest, App_Notify_No_Notify)
 TEST_F(AosHandleTest, App_Notify_STATE_INVALID)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_TRUE);
+    m_pAosHandle->SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_INVALID);
@@ -783,9 +779,9 @@ TEST_F(AosHandleTest, App_Notify_STATE_INVALID)
 TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_TRUE);
+    m_pAosHandle->SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTED);
@@ -796,9 +792,9 @@ TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
 TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_TRUE);
+    m_pAosHandle->SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTING);
@@ -809,9 +805,9 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
 TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_TRUE);
+    m_pAosHandle->SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
     EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
@@ -829,9 +825,9 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
 TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTING)
 {
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
-    SetNotify(IMS_TRUE);
+    m_pAosHandle->SetNotify(IMS_TRUE);
     ASSERT_TRUE(GetNotify());
 
     m_pAosHandle->SetState(AosHandle::STATE_DISCONNECTING);
@@ -863,8 +859,8 @@ TEST_F(AosHandleTest, GetFeatures_Mmtel_Video_Binded_And_No_Unavailable)
 {
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
 
-    AddBindedFeature(ImsAosFeature::MMTEL);
-    AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::VIDEO);
 
     EXPECT_EQ(m_pAosHandle->GetFeatures(), (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO));
 }
@@ -873,9 +869,9 @@ TEST_F(AosHandleTest, GetFeatures_Mmtel_Video_Binded_And_Mmtel_Unavailable)
 {
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
 
-    AddBindedFeature(ImsAosFeature::MMTEL);
-    AddBindedFeature(ImsAosFeature::VIDEO);
-    AddUnavailableFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddUnavailableFeature(ImsAosFeature::MMTEL);
 
     EXPECT_EQ(m_pAosHandle->GetFeatures(), ImsAosFeature::VIDEO);
 }
@@ -884,8 +880,8 @@ TEST_F(AosHandleTest, GetFeatures_Mmtel_Binded_And_Mmtel_Unavailable)
 {
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
 
-    AddBindedFeature(ImsAosFeature::MMTEL);
-    AddUnavailableFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddUnavailableFeature(ImsAosFeature::MMTEL);
 
     EXPECT_EQ(m_pAosHandle->GetFeatures(), ImsAosFeature::NONE);
 }
@@ -923,7 +919,7 @@ TEST_F(AosHandleTest, SetSuspendedReason_GetSuspendedReason)
 TEST_F(AosHandleTest, IsFeatureConnected_Test)
 {
     m_pAosHandle->SetState(AosHandle::STATE_CONNECTED);
-    AddBindedFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddBindedFeature(ImsAosFeature::MMTEL);
 
     EXPECT_TRUE(m_pAosHandle->IsFeatureConnected(ImsAosFeature::MMTEL));
     EXPECT_FALSE(m_pAosHandle->IsFeatureConnected(ImsAosFeature::VIDEO));
@@ -2427,9 +2423,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test1)
     m_pAosHandle->ClearBlocks();
     m_pAosHandle->ClearFeatureTagList();
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_FALSE(m_pAosHandle->IsHandleBlocked());
     EXPECT_EQ(m_pAosHandle->GetFeatureTagList().GetFeatures(),
@@ -2505,9 +2501,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test2)
     SetHoldingBlocksPolicyForWifi();
     SetDataConnected(IMS_FALSE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2641,9 +2637,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test4)
     SetHoldingBlocksPolicyForWifi();
     SetDataConnected(IMS_FALSE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2790,9 +2786,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test6)
     SetDataConnected(IMS_FALSE);
     SetEpdgEnabled(IMS_FALSE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -2937,9 +2933,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test8)
     SetHoldingBlocksPolicyForWifi();
     SetDataConnected(IMS_TRUE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3067,9 +3063,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test10)
     SetDataConnected(IMS_TRUE);
     SetEpdgEnabled(IMS_FALSE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3198,9 +3194,9 @@ TEST_F(AosHandleTest, ProcessBlock_Test12)
     SetDataConnected(IMS_TRUE);
     SetEpdgEnabled(IMS_TRUE);
 
-    AddFeature(ImsAosFeature::MMTEL);
-    AddFeature(ImsAosFeature::VIDEO);
-    AddFeature(ImsAosFeature::SMSIP);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::VIDEO);
+    m_pAosHandle->AddFeature(ImsAosFeature::SMSIP);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -3354,7 +3350,7 @@ TEST_F(AosHandleTest, ProcessCheckBlock_Test2)
     m_pAosHandle->ClearFeatureTagList();
     SetBlocked(IMS_FALSE);
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    AddFeature(ImsAosFeature::MMTEL);
+    m_pAosHandle->AddFeature(ImsAosFeature::MMTEL);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
     EXPECT_TRUE(m_pAosHandle->ProcessCheckBlock(IMS_TRUE));
@@ -3439,7 +3435,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetListener(IMS_NULL);
-    ASSERT_EQ(GetListener(), nullptr);
+    ASSERT_EQ(m_pAosHandle->GetListener(), nullptr);
 
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
@@ -3464,7 +3460,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
-    ASSERT_NE(GetListener(), nullptr);
+    ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
@@ -3534,7 +3530,7 @@ TEST_F(AosHandleTest, StateDisconnected_Test1)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3553,7 +3549,7 @@ TEST_F(AosHandleTest, StateDisconnected_Test2)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
 
@@ -3572,7 +3568,7 @@ TEST_F(AosHandleTest, StateDisconnected_Test3)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
 
@@ -3590,7 +3586,7 @@ TEST_F(AosHandleTest, StateDisconnected_Test4)
     // Expectation: state-disconnected, no need to notify.
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTED);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
     m_pAosHandle->OnStateMessage(objMSG);
@@ -3606,7 +3602,7 @@ TEST_F(AosHandleTest, StateConnecting_Test1)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3626,7 +3622,7 @@ TEST_F(AosHandleTest, StateConnecting_Test2)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
 
@@ -3646,7 +3642,7 @@ TEST_F(AosHandleTest, StateConnecting_Test3)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     AosFeatureTagList objTestFeatureTagList, objTestBindedFeatureTagList;
     objTestFeatureTagList.AddFeature(
@@ -3673,7 +3669,7 @@ TEST_F(AosHandleTest, StateConnecting_Test4)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
     m_pAosHandle->SetRegBinded(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
 
@@ -3692,7 +3688,7 @@ TEST_F(AosHandleTest, StateConnecting_Test5)
     // Expectation: need to notify
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
 
@@ -3705,7 +3701,7 @@ TEST_F(AosHandleTest, StateConnecting_Test6)
     // Expectation: no need to notify
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
@@ -3718,7 +3714,7 @@ TEST_F(AosHandleTest, StateConnecting_Test7)
     // Expectation: no need to notify
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
     EXPECT_TRUE(m_pAosHandle->StateConnecting(objMSG));
@@ -3733,7 +3729,7 @@ TEST_F(AosHandleTest, StateConnected_Test1)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3754,7 +3750,7 @@ TEST_F(AosHandleTest, StateConnected_Test2)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3775,7 +3771,7 @@ TEST_F(AosHandleTest, StateConnected_Test3)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(0);
 
@@ -3795,7 +3791,7 @@ TEST_F(AosHandleTest, StateConnected_Test4)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTING);
     m_pAosHandle->SetRequestType(IAosHandle::ATTACH);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     AosFeatureTagList objTestFeatureTagList, objTestBindedFeatureTagList;
     objTestFeatureTagList.AddFeature(
@@ -3821,7 +3817,7 @@ TEST_F(AosHandleTest, StateConnected_Test5)
     // Expectation: state-connecting, need to notify
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
 
@@ -3836,7 +3832,7 @@ TEST_F(AosHandleTest, StateConnected_Test6)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
@@ -3852,7 +3848,7 @@ TEST_F(AosHandleTest, StateConnected_Test7)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
@@ -3905,7 +3901,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test1)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3923,7 +3919,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test2)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosApplication, Reconfig()).Times(1);
 
@@ -3942,7 +3938,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test3)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
 
@@ -3957,7 +3953,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test4)
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTED, 0);
 
@@ -3973,7 +3969,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test5)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_TRUE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
 
@@ -3989,7 +3985,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test6)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
 
@@ -4005,7 +4001,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test7)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_CONNECTED, 0);
 
@@ -4021,7 +4017,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test8)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_TRUE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
 
@@ -4037,7 +4033,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test9)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_TRUE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
 
@@ -4053,7 +4049,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test10)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
 
@@ -4069,7 +4065,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test11)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
 
@@ -4084,7 +4080,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test12)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, 4 /*Invalid app status*/, 0);
     m_pAosHandle->OnStateMessage(objMSG);
@@ -4100,7 +4096,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test13)
     m_pAosHandle->SetHandleState(AosHandle::STATE_DISCONNECTING);
     m_pAosHandle->SetRegBinded(IMS_FALSE);
     SetBlocked(IMS_FALSE);
-    SetNotify(IMS_FALSE);
+    m_pAosHandle->SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_APP_INVALID*/, 0, 0);
     EXPECT_TRUE(m_pAosHandle->StateDisconnecting(objMSG));
