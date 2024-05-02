@@ -55,6 +55,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
 
     @After
     public void tearDown() throws Exception {
+        disableAllMmTelCapabilities();
         tearDownBase(SLOT0);
     }
 
@@ -74,7 +75,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
              +g.3gpp.smsip.
          */
 
-        boolean isRegistered = mRegistrationHelper.performRegistration(this);
+        RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
+                .build();
+
+        boolean isRegistered = mRegistrationHelper.performRegistration(this, info);
 
         assertTrue(isRegistered);
 
@@ -102,6 +107,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
          */
 
         RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
                 .setEnableCapabilityRequest(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE)
                 .build();
 
@@ -132,6 +138,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
          */
 
         RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
                 .setEnableCapabilityRequest(CAPABILITY_TYPE_SMS, REGISTRATION_TECH_LTE)
                 .build();
 
@@ -161,7 +168,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
              following parameter: 3GPP-E-UTRAN.
          */
 
-        boolean isRegistered = mRegistrationHelper.performRegistration(this);
+        RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
+                .build();
+
+        boolean isRegistered = mRegistrationHelper.performRegistration(this, info);
 
         assertTrue(isRegistered);
 
@@ -193,6 +204,7 @@ public class BasicRegistrationTest extends RegistrationTestBase {
                 .build();
 
         RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
                 .setEnableCapabilityRequest(CAPABILITY_TYPE_SMS, REGISTRATION_TECH_LTE)
                 .setServiceState(ss)
                 .build();
@@ -229,7 +241,11 @@ public class BasicRegistrationTest extends RegistrationTestBase {
               the Min-Expires within 1 second.
          */
 
-        mRegistrationHelper.performRegistration(this);
+        RegistrationInfo info = new RegistrationInfo.Builder()
+                .setConfig(mConfig)
+                .build();
+
+        mRegistrationHelper.performRegistration(this, info);
 
         /*
           TODO : Assertion from TISS

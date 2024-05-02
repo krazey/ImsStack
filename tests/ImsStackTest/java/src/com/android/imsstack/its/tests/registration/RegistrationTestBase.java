@@ -26,11 +26,10 @@ public class RegistrationTestBase extends ImsStackTestBase {
     protected TelephonyManagerProxyImpl mTelephony;
     protected ImsRegistrationWrapper mImsRegistration;
     protected RegistrationHelper mRegistrationHelper;
+    protected PersistableBundle mConfig = null;
 
     protected void setRegistrationBaseConfig(int slotId) {
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
-
-        writeTestConfig(slotId, config);
+        mConfig = new PersistableBundle();
+        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
     }
 }
