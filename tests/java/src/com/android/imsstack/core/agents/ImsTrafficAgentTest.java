@@ -22,40 +22,41 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.content.Context;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ImsTrafficAgentTest {
     @Mock private ImsTrafficInterface.PriorityListener mPriorityListener;
-    @Mock private Context mContext;
 
     private TestableLooper mTestableLooper;
+    private TestAppContext mTestAppContext;
     private ImsTrafficAgent mImsTrafficAgent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
         DeviceConfig.setSimCount(2, 2);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mImsTrafficAgent = new ImsTrafficAgent();
-        mImsTrafficAgent.init(mContext);
+        mImsTrafficAgent.init(mTestAppContext.getContext());
         mImsTrafficAgent.addListener(mPriorityListener);
     }
 
@@ -67,14 +68,9 @@ public class ImsTrafficAgentTest {
             mImsTrafficAgent = null;
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-
         DeviceConfig.setSimCount(1, 1);
-        AppContext.deinit();
-        mContext = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test

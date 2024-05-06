@@ -20,7 +20,6 @@
 #include "IMtcCallStateListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ServiceTimer.h"
 #include "SipStatusCode.h"
 #include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceEventNotifier.h"
@@ -32,6 +31,8 @@
 #include "conferencecall/IConferenceOperationQueueListener.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
+#include "helper/IMtcTimerListener.h"
+#include "helper/MtcTimerWrapper.h"
 #include <memory>
 
 class IMtcContext;
@@ -50,7 +51,7 @@ class ConferenceController :
         public IConferenceReferenceListener,
         public IConferenceController,
         public IConferenceOperationQueueListener,
-        public ITimerListener
+        public IMtcTimerListener
 {
 public:
     explicit ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
@@ -75,8 +76,8 @@ public:
     void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN IMS_SINT32 nSipFragCode,
             IN ReferSubscriptionState eState) override;
 
-    // ITimerListener interfaces implementation.
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
+    // IMtcTimerListener interfaces implementation.
+    void OnTimerExpired(IN IMS_SINT32 nType) override;
 
     inline void SetListener(IConferenceControllerListener* piListener)
     {
@@ -211,11 +212,12 @@ protected:
     std::unique_ptr<ConferenceOperationQueue> m_pOperationQueue;
     ConferenceSubscription* m_pSubscription;
     ImsList<IConferenceReference*> m_objIConfReferences;
-    ITimer* m_piTimer;
+    std::unique_ptr<MtcTimerWrapper> m_pTimer;
 
     IMS_UINT32 m_nConditionFinalSipfragTimer;
     IMS_SINT32 m_nState;
 
+    static const IMS_UINT32 TIMER_FINAL_SIPFRAG_WAIT = 0;
     static const IMS_UINT32 TIME_FINAL_SIPFRAG_WAIT = 3000;
 };
 

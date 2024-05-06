@@ -16,11 +16,10 @@
 #include "SipDatatypes.h"
 #include "SipDebug.h"
 #include "SipStackError.h"
-
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
-#include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
 #define MIN(a, b)                ((a) < (b)) ? (a) : (b)
@@ -51,7 +50,7 @@ static SIP_BOOL InvSerFsm_IdleStRecvInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 
         if (pNewTxnKey != SIP_NULL)
         {
-            delete pNewTxnKey;
+            pNewTxnKey->SipDelete();
         }
         return SIP_FALSE;
     }
@@ -61,7 +60,7 @@ static SIP_BOOL InvSerFsm_IdleStRecvInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 
     if (bStatus == SIP_FALSE)
     {
-        delete pNewTxnKey;
+        pNewTxnKey->SipDelete();
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "InvSerFsm_IdleStRecvInvReqEvt:Adding Txn into DB Fails \n", SIP_ZERO, SIP_ZERO);

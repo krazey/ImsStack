@@ -480,6 +480,8 @@ public class CarrierConfig {
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL =
+                "emc_reg_on_random_pcscf_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
@@ -498,8 +500,6 @@ public class CarrierConfig {
                 "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
-        public static final String KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL =
-                "request_ims_pdn_without_mmtel_bool";
         public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
                 "required_cdmaless_feature_tag_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
@@ -539,6 +539,9 @@ public class CarrierConfig {
                 "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
                 "emc_preferred_iptype_int";
+        public static final String KEY_EMC_REG_RETRY_MAX_CNT_INT = "emc_reg_retry_max_cnt_int";
+        public static final String KEY_EMC_REG_RETRY_TIMER_MILLIS_INT =
+                "emc_reg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
@@ -576,8 +579,6 @@ public class CarrierConfig {
                 "usat_reg_event_download_policy_int";
         public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
 
-        public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =
-                "emergency_pcscf_retry_wait_time_sec_int_array";
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 "permanent_pdn_failure_int_array";
         public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =

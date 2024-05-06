@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipStatusLine.h"
 #include "SipDatatypes.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMessage.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipStatusLine.h"
+#include "platform/SipString.h"
 
 SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase) :
         m_pszSipVersion(SipPf_Strdup(SIP_SIPVER)),

@@ -369,7 +369,7 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             break;
 
         case CMD_SCSCF_RESTORATION:
-            ProcessScscfRestoration();
+            ProcessScscfRestoration(nReason);
             break;
 
         case CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT:
@@ -1077,8 +1077,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
             ProcessRegRequiredWithNextPcscf();
             break;
 
-        case MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF:
-            ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        case MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            ProcessScscfRestoration(objMsg.nWparam);
             break;
 
         case MSG_REG_TERMINATED_BY_NOTIFY:
@@ -2842,9 +2842,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateIpcan()
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration()
+PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
+        IN IMS_UINT32 nUnavailableTimeForCurrentPcscf)
 {
-    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration()", 0, 0, 0);
+    A_IMS_TRACE_I(REGID, "ProcessScscfRestoration() :: nUnavailableTimeForCurrentPcscf (%d)",
+            nUnavailableTimeForCurrentPcscf, 0, 0);
 
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
 
@@ -2853,11 +2855,18 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration()
         return;
     }
 
-    piPcscf->RemoveCurrentPcscf();
+    if (nUnavailableTimeForCurrentPcscf > 0)
+    {
+        piPcscf->SetCurrentPcscfInvalid(IMS_TRUE, nUnavailableTimeForCurrentPcscf);
+    }
+    else
+    {
+        piPcscf->SetCurrentPcscfInvalid();
+    }
 
     Destroy();
 
-    if (piPcscf->GetPcscfCount() > 0)
+    if (SetNextPcscf(IMS_FALSE))
     {
         Start();
     }
@@ -4349,7 +4358,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         {
             case SipStatusCode::SC_403:  // FALL-THROUGH
             case SipStatusCode::SC_408:  // FALL-THROUGH
-            case SipStatusCode::SC_500:  // FALL-THROUGH
             case SipStatusCode::SC_504:
                 ProcessReinitiate(IMS_FALSE);
                 return;
@@ -5527,8 +5535,9 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
         case AosSubscription::CMD_REG_REQUIRED_WITH_NEXT_PCSCF:
             PostMessage(MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
             break;
-        case AosSubscription::CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF:
-            PostMessage(MSG_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF, 0, 0);
+        case AosSubscription::CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            PostMessage(MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION,
+                    static_cast<IMS_UINT32>(nRetryAfter), 0);
             break;
         case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
         {

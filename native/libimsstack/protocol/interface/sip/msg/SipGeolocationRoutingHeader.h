@@ -30,8 +30,6 @@ public:
     /*Copy constructor*/
     SipGeolocationRoutingHeader(const SipGeolocationRoutingHeader& objHeader);
 
-    /*destructor*/
-    ~SipGeolocationRoutingHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -45,5 +43,8 @@ public:
     {
         return (m_pGeoLocationRoutingList == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipGeolocationRoutingHeader();
 };
 #endif  //__SIP_GEOLOCATION_ROUTING_HEADER_H__

@@ -32,8 +32,11 @@ public:
      * @param nMsg Enum of message defined in IJniMedia.h
      * @param nCallKey The key to identify the media session instance
      * @param pParam The message parameter, it is defined in IJniMedia.h
+     *
+     * @return IMS_BOOL return IMS_TRUE when SendMessage is successful, otherwise return IMS_FALSE.
      */
-    virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) = 0;
+    virtual IMS_BOOL SendMessage(
+            IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) = 0;
 };
 
 #endif

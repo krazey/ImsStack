@@ -39,8 +39,8 @@ import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.test.ImsTestHelper;
 import com.android.imsstack.test.ImsTestMode;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.SystemUtils;
 
 /**
  * A main entry point of starting and stopping the ImsStack core component.
@@ -70,7 +70,7 @@ public class ImsStackMain {
                 ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS, Log.DEFAULT_LOG_OPTIONS, 0);
         boolean debugEnabled = ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, 0);
-        Log.init(SystemUtils.hexStringToInt(logOptions), debugEnabled);
+        Log.init(ImsUtils.hexStringToInt(logOptions), debugEnabled);
         Log.i(TAG, "start");
 
         DeviceConfig.init(AppContext.getInstance());

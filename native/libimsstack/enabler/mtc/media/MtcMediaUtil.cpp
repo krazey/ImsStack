@@ -16,6 +16,7 @@
 
 #include "MtcDef.h"
 #include "media/MtcMediaUtil.h"
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -118,6 +119,42 @@ PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromMediaContents(
     }
 
     return eMediaTypes;
+}
+
+PUBLIC GLOBAL std::vector<IMS_UINT32> MtcMediaUtil::GetMediaTypeListFromCallType(
+        IN CallType eCallType)
+{
+    switch (eCallType)
+    {
+        case CallType::VOIP:
+            return {MEDIATYPE_AUDIO};
+        case CallType::VT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO};
+        case CallType::RTT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_TEXT};
+        case CallType::VIDEO_RTT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        default:  // CallType::UNKNOWN
+            return {};
+    }
+}
+
+PUBLIC GLOBAL std::vector<IMS_UINT32> MtcMediaUtil::GetUnusedMediaTypeListFromCallType(
+        IN CallType eCallType)
+{
+    switch (eCallType)
+    {
+        case CallType::UNKNOWN:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        case CallType::VOIP:
+            return {MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        case CallType::VT:
+            return {MEDIATYPE_TEXT};
+        case CallType::RTT:
+            return {MEDIATYPE_VIDEO};
+        default:  // CallType::VIDEO_RTT
+            return {};
+    }
 }
 
 PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromMediaTypes(

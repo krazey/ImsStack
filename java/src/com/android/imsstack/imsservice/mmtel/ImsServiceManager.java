@@ -31,7 +31,6 @@ import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.ImsStackRegistry;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
@@ -612,12 +611,10 @@ public class ImsServiceManager {
                 return;
             }
 
-            if (ImsConstants.USE_CARRIER_CONFIG) {
-                // Non-VoLte SIM
-                if (getVoLteServiceFeaturesFromPlatformConfig(slotId) == 0) {
-                    logi("No VoLte services");
-                    mVoLteServiceFeatures[slotId] = 0;
-                }
+            // Non-VoLte SIM
+            if (getVoLteServiceFeaturesFromPlatformConfig(slotId) == 0) {
+                logi("No VoLte services");
+                mVoLteServiceFeatures[slotId] = 0;
             }
         }
     }

@@ -16,11 +16,14 @@
 
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "Configuration.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
@@ -62,12 +65,18 @@ public:
     MockISession objSession;
     MockIMtcImsEventReceiver objImsEventReceiver;
     Ims3gppData objIms3gppData;
+    TestConfigService* m_pConfigService;
 
     StartErrorHandler* pHandler;
 
 protected:
     virtual void SetUp() override
     {
+        m_pConfigService = new TestConfigService();
+        m_pConfigService->SetCarrierConfig(&(m_pConfigService->GetMockCarrierConfig()));
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objMessageUtils, GetCauseFromReasonHeader).WillByDefault(Return(-1));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objMtcService));
@@ -95,6 +104,9 @@ protected:
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
+        delete m_pConfigService;
         delete pConfigurationProxy;
         delete pHandler;
     }
@@ -676,31 +688,39 @@ TEST_F(StartErrorHandlerTest, Handle500Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
 }
 
-TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigEnabled)
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigEnabledWithCallingAos)
 {
     SetCsfbConfig(SipStatusCode::SC_503);
     SetMessageCode(SipStatusCode::SC_503);
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
-            .WillByDefault(Return(0));
+            .WillByDefault(Return(-1));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigDisabled)
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigDisabledWithCallingAos)
 {
     SetMessageCode(SipStatusCode::SC_503);
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
-            .WillByDefault(Return(0));
+            .WillByDefault(Return(-1));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
 }
 
-TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigEnabled)
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigEnabledWithCallingAos)
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetCsfbConfig(SipStatusCode::SC_503);
     SetMessageCode(SipStatusCode::SC_503);
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
 
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
@@ -708,16 +728,21 @@ TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigEnable
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
                     _));
 
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigDisabled)
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigDisabledWithOutCallingAos)
 {
     IMS_SINT32 nAnyRetryAfter = 10;
     SetMessageCode(SipStatusCode::SC_503);
     ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
             .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
+    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
 
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
@@ -725,6 +750,7 @@ TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigDisabl
             AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000,
                     _));
 
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "10000"));
 }
 

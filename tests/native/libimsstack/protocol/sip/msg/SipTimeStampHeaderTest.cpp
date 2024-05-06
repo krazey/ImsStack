@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipTimeStampHeader.h"
 
 namespace android

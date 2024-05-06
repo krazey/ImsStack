@@ -29,8 +29,6 @@ public:
     SipCSeqHeader();
     SipCSeqHeader(const SipCSeqHeader& objHeader);
 
-    /*destructor*/
-    ~SipCSeqHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -51,5 +49,8 @@ public:
     inline SIP_UINT32 GetCSeq() const { return m_nSeq; }
 
     SIP_BOOL IsValidHeader() const override;
+
+private:
+    ~SipCSeqHeader();
 };
 #endif  //__SIP_CSEQ_HEADER_H__

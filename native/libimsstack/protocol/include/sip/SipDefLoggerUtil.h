@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_DEFLOGGERUTIL_H__
-#define __SIP_DEFLOGGERUTIL_H__
+#ifndef __SIP_DEF_LOGGER_UTIL_H__
+#define __SIP_DEF_LOGGER_UTIL_H__
 
-#include "SipDatatypes.h"
 #include "ISipLoggerUtil.h"
+#include "SipDatatypes.h"
 
 #define MAX_FILENAME_SIZE 256
 
@@ -32,4 +32,4 @@ public:
             const SIP_CHAR* pszFormat, ...) override;
 };
 
-#endif
+#endif  //__SIP_DEF_LOGGER_UTIL_H__

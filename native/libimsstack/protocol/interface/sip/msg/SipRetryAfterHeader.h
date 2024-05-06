@@ -33,9 +33,6 @@ public:
 
     SipRetryAfterHeader(const SipRetryAfterHeader& objHeader);
 
-    /*destructor*/
-    ~SipRetryAfterHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -57,5 +54,8 @@ public:
     inline const SIP_CHAR* GetComment() const { return m_pszComment; }
 
     inline SIP_BOOL IsValidHeader() const override { return SIP_TRUE; }
+
+private:
+    ~SipRetryAfterHeader();
 };
 #endif  //__SIP_RETRY_AFTER_HEADER_H__

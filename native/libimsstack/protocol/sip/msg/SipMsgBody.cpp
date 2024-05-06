@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipMsgUtil.h"
-#include "msg/SipMsgBody.h"
-#include "msg/SipMessage.h"
-#include "platform/SipMemory.h"
 #include "SipDebug.h"
+#include "msg/SipMessage.h"
+#include "msg/SipMsgBody.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
 #define MAX_BODY_SIZE 1500

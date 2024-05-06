@@ -17,7 +17,6 @@ package com.android.imsstack.test;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +35,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosDebug;
 import com.android.imsstack.test.menu.ImsConfigMenu;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -79,7 +79,7 @@ public class DebugScreen extends Activity {
     private void handleCreate() {
         // Check slotId and build type.
         mSlotId = getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, MSimUtils.INVALID_SLOT_ID);
-        if (mSlotId < 0 || !Build.IS_USERDEBUG) {
+        if (mSlotId < 0 || ImsUtils.IS_USER) {
             showToast("Not support Debug Screen!");
             finish();
             return;

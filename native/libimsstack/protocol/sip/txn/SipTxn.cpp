@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "txn/SipTxn.h"
-#include "txn/SipTxnFsm.h"
-
 #include "SipConfiguration.h"
 #include "SipDebug.h"
+#include "SipStackError.h"
 #include "SipUtil.h"
 #include "platform/SipString.h"
 #include "txn/SipTimeoutData.h"
-#include "SipStackError.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnFsm.h"
 
 SipTxn::SipTxn() :
         m_eTxnType(SipTxn::INVALID_TXN),
@@ -72,7 +71,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
     if (*pnError == E_ERR_PF_MALLOCFAILED)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxn Malloc Failed \n", SIP_ZERO, SIP_ZERO);
-        delete m_pTxnKey;
+        m_pTxnKey->SipDelete();
         m_pTxnKey = SIP_NULL;
     }
 

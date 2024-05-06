@@ -42,6 +42,30 @@ public:
         STATE_PAUSED,
     };
 
+    enum MEDIA_DIRECTION_ANBR
+    {
+        /** The media direction for Anbr is none (default value). */
+        DIRECTION_NONE = 0,
+        /** The media direction for Anbr is uplink */
+        DIRECTION_UPLINK,
+        /** The media direction for Anbr is downlink */
+        DIRECTION_DOWNLINK
+    };
+
+    enum CodecType_ANBR
+    {
+        /** Adaptive Multi-Rate */
+        CODEC_AMR = 1 << 0,
+        /** Adaptive Multi-Rate Wide Band */
+        CODEC_AMR_WB = 1 << 1,
+        /** Enhanced Voice Services */
+        CODEC_EVS = 1 << 2,
+        /** G.711 A-law i.e. Pulse Code Modulation using A-law */
+        CODEC_PCMA = 1 << 3,
+        /** G.711 μ-law i.e. Pulse Code Modulation using μ-law */
+        CODEC_PCMU = 1 << 4,
+    };
+
     explicit AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~AudioMediaSession();
 
@@ -69,7 +93,7 @@ public:
     void SetConfig(IN AudioConfiguration* pConfig);
 
     /**
-     * @brief Set AudioConfig for libimsmedia from src/dest/negotiated profile
+     * @brief Set AudioConfig for libpixelimsmedia from src/dest/negotiated profile
      * @param nAccessNetwork : AccessNetwork information
      * @param pLocalProfile : local profile of the SDP negotiation
      * @param pPeerProfile : peer profile of the SDP negotiation
@@ -170,6 +194,32 @@ public:
      */
     IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType);
 
+    /**
+     * @brief Update the sdp negotiation result on whether to support anbr feature
+     *
+     * @param anbrEnabled Anbr negotiation result, if it is true, anbr feature can be supported on
+     * both devices.
+     * @return IMS_BOOL Return IMS_TRUE, when the update is done successfully, IMS_FALSE when it is
+     * failed
+     */
+    IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled);
+
+    /**
+     * @brief Notify the received ANBR information such as mediaType, bitrate and direction received
+     * from the network
+     *
+     * @param anbrMediaType mediaType such as audio and video
+     * @param anbrDirection media stream direction to change the bitrate
+     * @param anbrBitrate bitrate the network wants to change
+     * @return IMS_BOOL Return IMS_TRUE if the parameter is passed successfully, IMS_FALSE if it is
+     * failed
+     */
+    IMS_BOOL NotifyAnbrReceived(
+            IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
+
+private:
+    IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType);
+
 protected:
     AudioConfiguration* m_pConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;
@@ -177,6 +227,7 @@ protected:
     IMS_SINT32 m_nLocalPort;
     ImsList<IMS_UINTP> m_listNegoId;
     IMS_SINT32 m_nInactivityTimer;
+    IMS_BOOL m_bAnbrEnabled;
 };
 
 #endif

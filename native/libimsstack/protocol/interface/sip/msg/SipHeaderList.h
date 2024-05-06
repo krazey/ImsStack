@@ -27,7 +27,6 @@ private:
 public:
     explicit SipHeaderList(SIP_INT32 eHdrType);
     SipHeaderList(const SipHeaderList& objHeaderList);
-    ~SipHeaderList();
     static SipHeaderBase* GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHeader);
     inline SIP_BOOL Encode(AStringBuffer& /*objBuffer*/, SIP_BOOL /*bParams*/) const override
     {
@@ -47,6 +46,9 @@ public:
     void RemoveHdr(SIP_UINT32 nIndex);
 
     inline SIP_UINT32 GetSize() const { return m_headerList.GetSize(); }
+
+private:
+    ~SipHeaderList();
 };
 
 #endif  //__SIP_HEADER_LIST_H__

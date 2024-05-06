@@ -29,8 +29,6 @@ public:
     SipPrivacyHeader();
     SipPrivacyHeader(const SipPrivacyHeader& objHeader);
 
-    /*destructor*/
-    ~SipPrivacyHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -46,5 +44,8 @@ public:
     {
         return (m_objPrivacyList.GetSize() > 0) ? SIP_TRUE : SIP_FALSE;
     }
+
+private:
+    ~SipPrivacyHeader();
 };
 #endif  //__SIP_PRIVACY_HEADER_H__

@@ -103,6 +103,9 @@ protected:
 
     void ResetBlock(IN BLOCK_REASON nReason);
     void NotifyDeregistered(IN AosReasonCode eReason);
+    void AddRatBlock();
+    void ClearRatBlocks();
+    void PerformRatBlockActions(IN IMS_BOOL bStart);
 
     IMS_BOOL IsEmergency() const;
     IMS_BOOL IsStateMessage(IN IMS_UINT32 nMsg) const;
@@ -117,6 +120,7 @@ protected:
     IMS_BOOL IsRegStateUpdatedByNrLteRatChange() const;
     IMS_BOOL IsPdnDisconnectRequired() const;
     IMS_BOOL IsPlmnBlockRequired() const;
+    IMS_BOOL IsBlockRat(IN IMS_UINT32 nRat) const;
 
     // Create
     virtual void CreateAosCondition();
@@ -147,7 +151,7 @@ protected:
     virtual IMS_UINT32 GetReportState();
 
     // ImsActivityEx
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
     // Message
     virtual IMS_BOOL ProcessMessage(IN IMSMSG& objMsg);
@@ -225,7 +229,7 @@ protected:
     virtual void ProcessRegStopTimerExpired();
     virtual void ProcessPdnBlockedTimerExpired();
     virtual void ProcessImsEstablishmentTimerExpired();
-
+    virtual void ProcessRatBlockTimerExpired();
     virtual void ProcessPdnBlock();
     virtual void ProcessPdnBlockWithTime();
 
@@ -356,7 +360,8 @@ protected:
         TIMER_APP_CONNECTED,
         TIMER_APP_TERMINATED,
         TIMER_PDN_BLOCKED,
-        TIMER_IMS_ESTABLISHMENT
+        TIMER_IMS_ESTABLISHMENT,
+        TIMER_RAT_BLOCK
     };
 
     enum
@@ -407,11 +412,13 @@ protected:
     ITimer* m_piAppTerminatedTimer;
     ITimer* m_piPdnBlockedTimer;
     ITimer* m_piImsEstablishmentTimer;
+    ITimer* m_piRatBlockTimer;
 
     AString m_strAppId;
     IMS_UINT32 m_nAppType;
     IMS_UINT32 m_nOffReason;
     IMS_UINT32 m_nRat;
+    IMS_UINT32 m_nBlockedRats;
     AosRegistrationType m_eRegType;
     IMS_UINT32 m_nReportState;
     IMS_UINT32 m_nRegPending;
@@ -438,5 +445,6 @@ protected:
     static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
     static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
     static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
+    static const IMS_UINT32 RAT_BLOCK_TIME_MILLIS = 720000;  // 12 MIN
 };
 #endif  // AOS_APPLICATION_H_

@@ -24,6 +24,20 @@
     </int-array>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="2"/>
 
+    <!-- MTC -->
+    <int name="ims.request_uri_type_int" value="1"/>
+    <int-array name="imsvoice.srvcc_type_int_array" num="4">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+    </int-array>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
+    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
+    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <int name="imswfc.country_code_int" value="1"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>

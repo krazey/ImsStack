@@ -46,13 +46,13 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext) :
         m_nSlotId(m_piAppContext->GetSlotId()),
         m_piListener(IMS_NULL),
         m_pAvailableCellular(IMS_NULL),
-        m_pAvailableWiFi(IMS_NULL),
+        m_pAvailableWifi(IMS_NULL),
         m_piBlock(m_piAppContext->GetBlock()),
         m_eServiceType(GetServiceType()),
         m_bIsRefreshStarted(IMS_FALSE),
         m_bIsCombinedAttached(IMS_FALSE),
         m_bCellServiceAvailable(IMS_FALSE),
-        m_bWiFiServiceAvailable(IMS_FALSE),
+        m_bWifiServiceAvailable(IMS_FALSE),
         m_bIsTtyOn(IMS_FALSE),
         m_nHoldEvents(HOLD_EVENT_NONE),
         m_nListeners(LISTENER_ALL)
@@ -62,14 +62,7 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext) :
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosCondition = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosCondition), this);
 
-    IAosConnection* piAosConnection = m_piAppContext->GetConnection();
-    IMS_SINT32 nCnxType = (piAosConnection != IMS_NULL) ? piAosConnection->GetConnectionType()
-                                                        : NetworkPolicy::APN_NONE;
-
-    if ((nCnxType == NetworkPolicy::APN_WIFI) || (nCnxType == NetworkPolicy::APN_EMERGENCY))
-    {
-        RemoveListener(LISTENER_NETTRACKER);
-    }
+    Init();
 }
 
 PUBLIC VIRTUAL AosCondition::~AosCondition()
@@ -203,15 +196,15 @@ PUBLIC VIRTUAL IMS_BOOL AosCondition::IsReady()
     }
     else if (m_eServiceType == SERVICE_WIFI)
     {
-        bReturn = m_bWiFiServiceAvailable;
+        bReturn = m_bWifiServiceAvailable;
     }
     else  // if (m_eServiceType == SERVICE_WHOLE)
     {
-        bReturn = (m_bCellServiceAvailable || m_bWiFiServiceAvailable);
+        bReturn = (m_bCellServiceAvailable || m_bWifiServiceAvailable);
     }
 
     A_IMS_TRACE_I(APPPROFILE, "IsReady(%s) - Cellular(%s), WiFi(%s)", _TRACE_B_(bReturn),
-            _TRACE_B_(m_bCellServiceAvailable), _TRACE_B_(m_bWiFiServiceAvailable));
+            _TRACE_B_(m_bCellServiceAvailable), _TRACE_B_(m_bWifiServiceAvailable));
     return bReturn;
 }
 
@@ -225,9 +218,9 @@ PUBLIC VIRTUAL IMS_UINT32 AosCondition::CheckServiceAvailable(IN SERVICE_TYPE eT
         nCheck |= CHECK_CELLULAR;
     }
 
-    if (m_pAvailableWiFi != IMS_NULL && (eType == SERVICE_WIFI || eType == SERVICE_WHOLE))
+    if (m_pAvailableWifi != IMS_NULL && (eType == SERVICE_WIFI || eType == SERVICE_WHOLE))
     {
-        m_pAvailableWiFi->RefreshServiceAvailablility();
+        m_pAvailableWifi->RefreshServiceAvailablility();
         nCheck |= CHECK_WIFI;
     }
 
@@ -239,14 +232,14 @@ PUBLIC VIRTUAL IMS_BOOL AosCondition::CheckBadNetwork(IN SERVICE_TYPE eType)
     A_IMS_TRACE_D(APPPROFILE, "CheckBadNetwork :: Type[%d]", eType, 0, 0);
     IMS_BOOL bCheck = IMS_FALSE;
 
-    if (m_pAvailableWiFi == IMS_NULL || eType != SERVICE_WIFI)
+    if (m_pAvailableWifi == IMS_NULL || eType != SERVICE_WIFI)
     {
         return bCheck;
     }
 
     if (m_bCellServiceAvailable)
     {
-        m_pAvailableWiFi->StartToCheckNetworkConnection();
+        m_pAvailableWifi->StartToCheckNetworkConnection();
         bCheck = IMS_TRUE;
     }
     else
@@ -271,21 +264,21 @@ PROTECTED VIRTUAL void AosCondition::AddServiceAvailable()
     m_pAvailableCellular->Init(m_piAppContext);
     m_pAvailableCellular->SetListener(this);
 
-    m_pAvailableWiFi = new AosServiceAvailableWifi();
-    m_pAvailableWiFi->Init(m_piAppContext);
-    m_pAvailableWiFi->SetListener(this);
+    m_pAvailableWifi = new AosServiceAvailableWifi();
+    m_pAvailableWifi->Init(m_piAppContext);
+    m_pAvailableWifi->SetListener(this);
 }
 
 PROTECTED VIRTUAL void AosCondition::RemoveServiceAvailable()
 {
     A_IMS_TRACE_D(APPPROFILE, "RemoveServiceAvailable", 0, 0, 0);
 
-    if (m_pAvailableWiFi != IMS_NULL)
+    if (m_pAvailableWifi != IMS_NULL)
     {
-        m_pAvailableWiFi->RemoveListener(this);
-        m_pAvailableWiFi->CleanUp();
-        delete m_pAvailableWiFi;
-        m_pAvailableWiFi = IMS_NULL;
+        m_pAvailableWifi->RemoveListener(this);
+        m_pAvailableWifi->CleanUp();
+        delete m_pAvailableWifi;
+        m_pAvailableWifi = IMS_NULL;
     }
 
     if (m_pAvailableCellular != IMS_NULL)
@@ -409,7 +402,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
         UpdateRegistrationMode();
     }
 
-    IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
+    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
 
     switch (nState)
     {
@@ -461,14 +454,14 @@ PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_U
 PROTECTED VIRTUAL void AosCondition::ServiceAvailable_Changed()
 {
     m_bCellServiceAvailable = m_pAvailableCellular->IsAvailable();
-    m_bWiFiServiceAvailable = m_pAvailableWiFi->IsAvailable();
+    m_bWifiServiceAvailable = m_pAvailableWifi->IsAvailable();
 
     A_IMS_TRACE_I(APPPROFILE, "ServiceAvailable_Changed :: cellular(%s) , wifi(%s)",
-            _TRACE_B_(m_bCellServiceAvailable), _TRACE_B_(m_bWiFiServiceAvailable), 0);
+            _TRACE_B_(m_bCellServiceAvailable), _TRACE_B_(m_bWifiServiceAvailable), 0);
 
     if (m_bCellServiceAvailable == IMS_FALSE)
     {
-        if (m_pAvailableWiFi->StopToCheckNetworkConnection())
+        if (m_pAvailableWifi->StopToCheckNetworkConnection())
         {
             // MSG_AVAILABLE_CHECK is posted again
             return;
@@ -491,7 +484,7 @@ PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
 
-    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
 
     if (piNConfig == IMS_NULL)
     {
@@ -567,6 +560,19 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn
     }
 
     ProcessTtyEvent(bIsOn);
+}
+
+PROTECTED
+void AosCondition::Init()
+{
+    IAosConnection* piAosConnection = m_piAppContext->GetConnection();
+    IMS_SINT32 nCnxType = (piAosConnection != IMS_NULL) ? piAosConnection->GetConnectionType()
+                                                        : NetworkPolicy::APN_NONE;
+
+    if ((nCnxType == NetworkPolicy::APN_WIFI) || (nCnxType == NetworkPolicy::APN_EMERGENCY))
+    {
+        RemoveListener(LISTENER_NETTRACKER);
+    }
 }
 
 PROTECTED
@@ -882,9 +888,9 @@ void AosCondition::SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState
 
     if (eServiceType == SERVICE_WIFI || eServiceType == SERVICE_WHOLE)
     {
-        if (m_pAvailableWiFi != IMS_NULL)
+        if (m_pAvailableWifi != IMS_NULL)
         {
-            m_pAvailableWiFi->HandleEvent(eEvent, nState, nStateEx);
+            m_pAvailableWifi->HandleEvent(eEvent, nState, nStateEx);
         }
     }
 }
@@ -906,7 +912,7 @@ IMS_BOOL AosCondition::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nRea
 PROTECTED
 void AosCondition::UpdateRegistrationMode() const
 {
-    IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
+    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
 
     if (m_piBlock->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) && piSubscriber->IsReady())
     {

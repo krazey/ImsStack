@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SIP_MSGUTIL_H__
-#define __SIP_MSGUTIL_H__
+#ifndef __SIP_MSG_UTIL_H__
+#define __SIP_MSG_UTIL_H__
 
-#include "SipDatatypes.h"
 #include "SipAbnfUtil.h"
+#include "SipDatatypes.h"
 #include "msg/SipHeaderBase.h"
 
 #define SIP_SIP_VERSION               "SIP/2.0"
@@ -260,4 +260,4 @@ public:
     static void Init();
     static SIP_INT32 GetHdrType(const SIP_CHAR* pszHdrName);
 };
-#endif
+#endif  //__SIP_MSG_UTIL_H__

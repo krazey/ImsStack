@@ -27,53 +27,83 @@ using ::testing::Return;
 
 const IMS_SINT32 SLOT_ID = 0;
 
+class TestAosRetryRepository : public AosRetryRepository
+{
+public:
+    inline TestAosRetryRepository(IN IMS_SINT32 nSlotId) :
+            AosRetryRepository(nSlotId)
+    {
+    }
+
+    void SetRetryCount(IN IMS_SINT32 nRetryCount) { m_nRetryCount = nRetryCount; }
+
+    void SetEmcRetryCount(IN IMS_SINT32 nEmcRetryCount) { m_nEmergencyRetryCount = nEmcRetryCount; }
+};
+
 class AosRetryRepositoryTest : public ::testing::Test
 {
 public:
-    AosRetryRepository* pAosRetryRepository;
+    AosRetryRepositoryTest()
+    {
+        m_piOriginAosNConfig = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosConfig, SLOT_ID);
+    }
+
+    virtual ~AosRetryRepositoryTest()
+    {
+        AosProvider::GetInstance()->SetNConfiguration(m_piOriginAosNConfig, SLOT_ID);
+    }
+
+    TestAosRetryRepository* m_pAosRetryRepository;
+
+    IAosNConfiguration* m_piOriginAosNConfig;
+    MockIAosNConfiguration m_objMockIAosConfig;
 
 protected:
     virtual void SetUp() override
     {
-        pAosRetryRepository = new AosRetryRepository(SLOT_ID);
-        ASSERT_TRUE(pAosRetryRepository != nullptr);
+        m_pAosRetryRepository = new TestAosRetryRepository(SLOT_ID);
+        ASSERT_TRUE(m_pAosRetryRepository != nullptr);
+
+        ON_CALL(m_objMockIAosConfig, GetExtraRegErrMaxCount()).WillByDefault(Return(5));
     }
 
     virtual void TearDown() override
     {
-        if (pAosRetryRepository) {
-            delete pAosRetryRepository;
+        if (m_pAosRetryRepository)
+        {
+            delete m_pAosRetryRepository;
         }
-    }
-
-    void SetRetryCount(IN IMS_SINT32 nRetryCount, IN IMS_SINT32 nEmergencyRetryCount)
-    {
-        pAosRetryRepository->m_nRetryCount = nRetryCount;
-        pAosRetryRepository->m_nEmergencyRetryCount = nEmergencyRetryCount;
     }
 };
 
-TEST_F(AosRetryRepositoryTest, IncreaseCount)
+TEST_F(AosRetryRepositoryTest, IncreaseCountWhenIncreaseIsRequested)
 {
-    IAosNConfiguration* pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-    MockIAosNConfiguration objMockAosConfig;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
+    m_pAosRetryRepository->SetRetryCount(0);
+    EXPECT_TRUE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
+}
 
-    EXPECT_CALL(objMockAosConfig, GetExtraRegErrMaxCount()).WillRepeatedly(Return(5));
+TEST_F(AosRetryRepositoryTest, IncreaseCountWhenIncreaseIsRequestedWithinMax)
+{
+    m_pAosRetryRepository->SetRetryCount(2);
+    EXPECT_TRUE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
+}
 
-    SetRetryCount(0, 0);
-    EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
-    SetRetryCount(0, 0);
-    EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
+TEST_F(AosRetryRepositoryTest, ResetCountWhenCurrentCountIsMax)
+{
+    m_pAosRetryRepository->SetRetryCount(5);
+    EXPECT_FALSE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
+}
 
-    SetRetryCount(5, 3);
-    EXPECT_FALSE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
-    EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
+TEST_F(AosRetryRepositoryTest, IncreaseCountWhenIncreaseIsRequestedForEmc)
+{
+    m_pAosRetryRepository->SetEmcRetryCount(0);
+    EXPECT_TRUE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
+}
 
-    EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
-    EXPECT_FALSE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
-    EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
-
-    AosProvider::GetInstance()->SetNConfiguration(pOriginAosNConfiguration, SLOT_ID);
+TEST_F(AosRetryRepositoryTest, IncreaseAndResetCountWhenIncreaseIsRequestedForEmcUntilMax)
+{
+    m_pAosRetryRepository->SetEmcRetryCount(3);
+    EXPECT_TRUE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
+    EXPECT_FALSE(m_pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
 }

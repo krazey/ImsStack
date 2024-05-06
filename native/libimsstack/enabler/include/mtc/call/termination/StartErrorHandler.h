@@ -82,7 +82,8 @@ private:
     IMS_BOOL IsRoaming() const;
     IMS_BOOL IsEpsOnlyAttach() const;
 
-    void ControlAos(IMS_UINT32 nCommand) const;
+    void ControlAos(IN IMS_UINT32 nCommand) const;
+    void RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const;
     AString GetPathHeader() const;
     AString GetServiceRouteHeader() const;
     AString GetSupported() const;

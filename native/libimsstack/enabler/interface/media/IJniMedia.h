@@ -51,6 +51,7 @@ public:
             IJNIMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
             IJNIMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
             IJNIMEDIA_CASE_ENUM(REQUEST_QOS);
+            IJNIMEDIA_CASE_ENUM(REQUEST_UPDATE_ANBR_ENABLED_CONFIG);
             IJNIMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
             IJNIMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
             IJNIMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
@@ -67,6 +68,8 @@ public:
             IJNIMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
             IJNIMEDIA_CASE_ENUM(NOTIFY_MEDIA_DETACH);
             IJNIMEDIA_CASE_ENUM(SEND_DTMF);
+            IJNIMEDIA_CASE_ENUM(TRIGGER_ANBR_QUERY);
+            IJNIMEDIA_CASE_ENUM(NOTIFY_ANBR_RECEIVED);
             IJNIMEDIA_CASE_ENUM(SETSURFACE_CMD);
             IJNIMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
             IJNIMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
@@ -121,6 +124,8 @@ public:
     static const IMS_SINT32 REQUEST_HEADER_EXTENSION = IJNIMEDIA + 9;
     /** send request qos callback */
     static const IMS_SINT32 REQUEST_QOS = IJNIMEDIA + 10;
+    /** send notify ANBR command */
+    static const IMS_SINT32 REQUEST_UPDATE_ANBR_ENABLED_CONFIG = IJNIMEDIA + 12;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_END = IJNIMEDIA + 49;
 
     // Requests to ImsMedia VideoSession
@@ -171,6 +176,10 @@ public:
     static const IMS_SINT32 NOTIFY_QOS_INFO = IJNIMEDIA_IND + 18;
     /** request from the Ui to send a dtmf digit to the audio session */
     static const IMS_SINT32 SEND_DTMF = IJNIMEDIA_IND + 19;
+    /** notification of trigger Anbr Query in the target session during the streaming */
+    static const IMS_SINT32 TRIGGER_ANBR_QUERY = IJNIMEDIA_IND + 20;
+    /** notification of the Anbr parameters to the audio session */
+    static const IMS_SINT32 NOTIFY_ANBR_RECEIVED = IJNIMEDIA_IND + 21;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IND_IDX_END = IJNIMEDIA_IND + 49;
 
     // Notifications for video
@@ -251,6 +260,16 @@ enum
     SURFACE_FAR = 1,
     SURFACE_NEAR = 2,
 };
+
+/** Anbr Negotiation Result Type */
+typedef enum
+{
+    ANBR_DISABLED = 0,
+    ANBR_ENABLED_AUDIO = (0x00000001 << 0),
+    ANBR_ENABLED_VIDEO = (0x00000001 << 1),
+    ANBR_ENABLED_AUDIOVIDEO = ANBR_ENABLED_AUDIO | ANBR_ENABLED_VIDEO,
+    ANBR_NOTUSED
+} ANBR_NEGOTIATION_TYPE;
 
 class ImsMediaMsgParamBase
 {
@@ -421,6 +440,32 @@ public:
 
 public:
     IMS_SINT32 m_nResponse;
+};
+
+class ImsMediaMsgAnbrNegotiationParam : public ImsMediaResponseParamBase
+{
+public:
+    explicit ImsMediaMsgAnbrNegotiationParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+            ImsMediaResponseParamBase(type),
+            m_bAnbrNegotiationType(IMS_FALSE){};
+
+public:
+    IMS_BOOL m_bAnbrNegotiationType;
+};
+
+class ImsMediaMsgAnbrReceivedParam : public ImsMediaResponseParamBase
+{
+public:
+    explicit ImsMediaMsgAnbrReceivedParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+            ImsMediaResponseParamBase(type),
+            m_nAnbrMediaType(-1),
+            m_nAnbrDirection(-1),
+            m_nAnbrBitrate(-1){};
+
+public:
+    IMS_SINT32 m_nAnbrMediaType;
+    IMS_SINT32 m_nAnbrDirection;
+    IMS_SINT32 m_nAnbrBitrate;
 };
 
 class ImsMediaVideoParam : public ImsMediaMsgParamBase

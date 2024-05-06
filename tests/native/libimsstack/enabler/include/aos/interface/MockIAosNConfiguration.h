@@ -59,6 +59,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmcRegOnRandomPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
@@ -92,6 +93,8 @@ public:
     MOCK_METHOD(IMS_SINT32, GetUssdMethod, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredIpType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyPreferredIpType, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetEmcRegRetryMaxCnt, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetEmcRegRetryTimerMillis, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPcscfPort, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSipPreferredTransport, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIpv4MtuSize, (), (const, override));
@@ -157,7 +160,6 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetRegErrCodeWithoutIpsec, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
-    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetRegErrCodeForPcscfDiscovery, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetReregErrCodeForCallEnd, (), (override));
     MOCK_METHOD(

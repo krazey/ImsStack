@@ -44,12 +44,11 @@ import android.net.NetworkRequest;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.BroadcastReceiverProxy;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.base.TestAppContext;
@@ -60,7 +59,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -72,7 +70,8 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class WifiAgentTest {
     private static final int TEST_NETWORK_ID = 100;
     private static final String TEST_IFACE_NAME = "test_wlan0";
@@ -96,7 +95,6 @@ public class WifiAgentTest {
     private final LinkProperties mLinkProperties;
     private final NetworkCapabilities mNetworkCapabilities;
     private final List<InetAddress> mHostAddrs;
-    private ContextFixture mContextFixture;
     private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
     private WifiAgent mWifiAgent;
@@ -124,15 +122,14 @@ public class WifiAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
-        mTestAppContext.setUp();
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
 
         mBroadcastReceiverProxy = mTestAppContext.getBroadcastReceiverProxy();
         mConnectivityManagerProxy =
                 mTestAppContext.getSystemServiceProxy(ConnectivityManagerProxy.class);
         SystemInterface.setSystemInterface(mSystemInterface);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         when(mNetwork.getNetId()).thenReturn(TEST_NETWORK_ID);
         when(mNetwork.getAllByName(eq(TEST_HOST_NAME)))
@@ -151,20 +148,15 @@ public class WifiAgentTest {
             mWifiAgent = null;
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-
         SystemInterface.setSystemInterface(null);
         mSystemInterface = null;
         mWifiListener = null;
         mNetwork = null;
         mBroadcastReceiverProxy = null;
         mConnectivityManagerProxy = null;
-        mContextFixture = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test

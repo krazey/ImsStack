@@ -22,8 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
@@ -81,9 +79,7 @@ public class ImsRegistrationTracker {
     private List<Pair<Integer, Integer>> mCapabilities;
     private ConfigListener mConfigListener = null;
     private ContentObserver mDataRoamingSettingObserver = null;
-
-    @VisibleForTesting
-    public MessageHandler mHandler = null;
+    private IDcNetWatcher.Listener mNetWatcherListener;
 
     private class ConfigListener extends ConfigurationListener {
         @Override
@@ -110,7 +106,7 @@ public class ImsRegistrationTracker {
         mRegImpl.setRegistrationTracker(this);
 
         if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
-            mHandler = new MessageHandler();
+            addNetWatcherListener();
             ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
             if (isr != null) {
                 ImsConfigImpl configImpl = isr.getConfig();
@@ -122,9 +118,7 @@ public class ImsRegistrationTracker {
         }
 
         if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-            if (mHandler == null) {
-                mHandler = new MessageHandler();
-            }
+            addNetWatcherListener();
             registerDataRoamingSettingObserver();
         }
     }
@@ -136,9 +130,7 @@ public class ImsRegistrationTracker {
         mRegTracker.clear();
         mCapabilities.clear();
 
-        if (mHandler != null) {
-            mHandler.clear();
-        }
+        removeNetWatcherListener();
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
         if (isr != null && mConfigListener != null) {
             ImsConfigImpl configImpl = isr.getConfig();
@@ -295,11 +287,6 @@ public class ImsRegistrationTracker {
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
         return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);
-    }
-
-    @VisibleForTesting
-    protected Handler getMessageHandler() {
-        return mHandler;
     }
 
     @VisibleForTesting
@@ -468,49 +455,35 @@ public class ImsRegistrationTracker {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class MessageHandler extends Handler {
-        private boolean mInitCompleted = false;
-        public static final int EVENT_ROAMING_STATE_CHANGED = 1;
-
-        MessageHandler() {
-            super(mContext.getDefaultLooper());
-            init();
-        }
-
-        public void init() {
-            if (!mInitCompleted) {
-                IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
-                if (dcnw != null) {
-                    dcnw.registerForRoamingStateChanged(this,
-                            EVENT_ROAMING_STATE_CHANGED, null);
-                }
-                mInitCompleted = true;
+    private void addNetWatcherListener() {
+        if (mNetWatcherListener == null) {
+            IDcNetWatcher dnw = getDcNetWatcher(mContext.getSlotId());
+            if (dnw != null) {
+                mNetWatcherListener = new NetWatcherListener();
+                dnw.addListener(mNetWatcherListener);
             }
         }
+    }
 
-        public void clear() {
-            IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
-            if (dcnw != null) {
-                dcnw.unregisterForRoamingStateChanged(this);
+    private void removeNetWatcherListener() {
+        if (mNetWatcherListener != null) {
+            IDcNetWatcher dnw = getDcNetWatcher(mContext.getSlotId());
+            if (dnw != null) {
+                dnw.removeListener(mNetWatcherListener);
             }
-            mInitCompleted = false;
+            mNetWatcherListener = null;
         }
+    }
 
+    private class NetWatcherListener implements IDcNetWatcher.Listener {
         @Override
-        public void handleMessage(Message msg) {
-            logi("MessageHandler :: msg=" + msg.what);
-
-            switch (msg.what) {
-                case EVENT_ROAMING_STATE_CHANGED: {
-                    CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
-                    if (capabilityPairs != null) {
-                        mRegTracker.changeCapabilities(capabilityPairs);
-                    }
-                    break;
+        public void onRoamingStateChanged(boolean roaming) {
+            mContext.getDefaultHandler().post(() -> {
+                CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+                if (capabilityPairs != null) {
+                    mRegTracker.changeCapabilities(capabilityPairs);
                 }
-                default:
-                    break;
-            }
+            });
         }
     }
 
@@ -711,11 +684,7 @@ public class ImsRegistrationTracker {
             }
 
             if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
-                if (mHandler == null) {
-                    mHandler = new MessageHandler();
-                } else {
-                    mHandler.init();
-                }
+                addNetWatcherListener();
                 ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
                 if (isr != null) {
                     ImsConfigImpl configImpl = isr.getConfig();
@@ -729,11 +698,7 @@ public class ImsRegistrationTracker {
             }
 
             if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-                if (mHandler == null) {
-                    mHandler = new MessageHandler();
-                } else {
-                    mHandler.init();
-                }
+                addNetWatcherListener();
                 registerDataRoamingSettingObserver();
             }
 
@@ -762,9 +727,7 @@ public class ImsRegistrationTracker {
             }
             mAosReg = null;
 
-            if (mHandler != null) {
-                mHandler.clear();
-            }
+            removeNetWatcherListener();
         }
 
         private int convertToTelephonyCapability(int capability) {

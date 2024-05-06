@@ -27,13 +27,14 @@ class IElement;
 class DialogInfo
 {
 public:
-    explicit DialogInfo(IN_OUT ImsList<Dialog*>& objDialogs);
+    DialogInfo();
     ~DialogInfo();
     DialogInfo(IN const DialogInfo&) = delete;
     DialogInfo& operator=(IN const DialogInfo&) = delete;
 
     IMS_RESULT Update(IN IElement* piElementDialogInfo);
 
+    inline const ImsList<Dialog*>& GetDialogs() const { return m_objDialogs; }
     inline IMS_UINT32 GetState() const { return m_nState; }
     inline IMS_UINT32 GetVersion() const { return m_nVersion; }
     inline const AString& GetEntity() const { return m_strEntity; }
@@ -59,7 +60,7 @@ public:
     };
 
 private:
-    ImsList<Dialog*>& m_objDialogs;
+    ImsList<Dialog*> m_objDialogs;
 
     IMS_UINT32 m_nVersion;
     IMS_UINT32 m_nState;

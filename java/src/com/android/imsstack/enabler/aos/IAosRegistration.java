@@ -131,7 +131,6 @@ public interface IAosRegistration {
         public static final int IMS_SERVICE = 3;
         public static final int IMS_SUBSCRIBER = 4;
         public static final int DATA_CONNECTING = 5;
-        public static final int PDN_CAPABILITY_CHANGED = 6;
 
         /* From modem */
         public static final int RADIO_SIM_REMOVED = 11;

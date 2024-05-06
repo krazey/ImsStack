@@ -30,7 +30,7 @@ import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SystemUtils;
+import com.android.imsstack.util.ImsUtils;
 
 /**
  * A class that handles location for emergency call.
@@ -247,9 +247,9 @@ public class ImsLocationHelper {
             if (ImsLog.isDebuggable()) {
                 logi("Location information :: timeLag=" + timeLag
                         + "; " + locationUpdateTime
-                        + "(" + SystemUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
+                        + "(" + ImsUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
                         + " >> " + currentTime
-                        + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
+                        + "(" + ImsUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
             } else {
                 logi("Location information :: timeLag=" + timeLag
                         + "; " + locationUpdateTime + " >> " + currentTime);

@@ -43,7 +43,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.MessageQueue;
-import android.os.RegistrantList;
 import android.os.StrictMode;
 import android.provider.BlockedNumberContract;
 import android.provider.DeviceConfig;
@@ -99,7 +98,6 @@ public abstract class ImsStackTest {
     }
 
     // Mocked classes
-    protected RegistrantList mRegistrantList;
     protected ServiceState mServiceState;
     protected Singleton<IActivityManager> mIActivityManagerSingleton;
     protected IActivityManager mIActivityManager;
@@ -242,7 +240,6 @@ public abstract class ImsStackTest {
     protected void setUp(String tag) throws Exception {
         sLogTag = tag;
         enableStrictMode();
-        mRegistrantList = Mockito.mock(RegistrantList.class);
         mServiceState = Mockito.mock(ServiceState.class);
         mIActivityManagerSingleton = Mockito.mock(Singleton.class);
         mIActivityManager = Mockito.mock(IActivityManager.class);

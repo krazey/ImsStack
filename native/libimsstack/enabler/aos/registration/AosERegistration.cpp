@@ -75,13 +75,6 @@ PUBLIC VIRTUAL void AosERegistration::Start()
     {
         SetMode(MODE_NORMAL);
         SetFakeReg(IMS_FALSE);
-
-        // TODO: need to start the timer from the pdn establishment
-        IMS_SINT32 nERegTimer = GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis();
-        if (nERegTimer > 0)
-        {
-            StartTimer(TIMER_TRANSACTION, nERegTimer);
-        }
     }
 
     AosRegistration::Start();
@@ -219,12 +212,21 @@ PROTECTED VIRTUAL void AosERegistration::CleanUp()
 
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::CreateRegistration()
 {
-    if (!IsFakeRegistration())
+    if (IsFakeRegistration())
     {
-        ProcessRearrangePcscf();
+        return AosRegistration::CreateRegistration();
     }
 
-    return AosRegistration::CreateRegistration();
+    ProcessRearrangePcscf();
+
+    IMS_BOOL bResult = AosRegistration::CreateRegistration();
+
+    if (bResult)
+    {
+        StartRegRetryTimer();
+    }
+
+    return bResult;
 }
 
 PROTECTED VIRTUAL void AosERegistration::DestroyRegistration()
@@ -348,28 +350,6 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT3
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStopRetryTimerExpired()
-{
-    StopTimer(TIMER_STOP_RETRY);
-
-    m_nConsecutiveFailure++;
-    ClearAuthChallengedCount();
-
-    if (IsRetryAllowed() && SetNextPcscf() && SendRegister(IMS_TRUE))
-    {
-        SetState(STATE_REGISTERING);
-
-        if (GetRetryTime() > 0)
-        {
-            StartTimer(TIMER_STOP_RETRY, GetRetryTime() * 1000);
-        }
-
-        return;
-    }
-
-    ProcessFakeMode();
-}
-
 PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
@@ -379,17 +359,25 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
         return;
     }
 
+    m_nConsecutiveFailure++;
+    ClearAuthChallengedCount();
+
+    if (IsRetryAllowed() && SetNextPcscf() && SendRegister(IMS_TRUE))
+    {
+        StartRegRetryTimer();
+        return;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration() ==
             CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
     {
         A_IMS_TRACE_I(REGID, "ProcessTransactionTimerExpired :: try the fake E-REG", 0, 0, 0);
+
         ProcessFakeMode();
         return;
     }
-    else
-    {
-        ProcessUnpredictableFailure();
-    }
+
+    ProcessUnpredictableFailure();
 }
 
 PROTECTED VIRTUAL void AosERegistration::SetRefreshPolicy()
@@ -456,7 +444,6 @@ PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
 
 PROTECTED VIRTUAL void AosERegistration::Registration_Started()
 {
-    StopTimer(TIMER_STOP_RETRY);
     StopTimer(TIMER_TRANSACTION);
     SetTraffic(IMS_FALSE);
     AosRegistration::Registration_Started();
@@ -577,20 +564,6 @@ PROTECTED VIRTUAL void AosERegistration::ClearCbm()
     m_pEModeInfo->SetScbm(IMS_FALSE);
     m_pEModeInfo->SetCbmBeginTime(0);
     m_pEModeInfo->SetReRegTryTime(0);
-}
-
-PROTECTED IMS_UINT32 AosERegistration::GetRetryTime()
-{
-    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
-    IMS_UINT32 nRetryMaxCount = objWaitTime.GetSize();
-
-    if (nRetryMaxCount == 0)
-    {
-        return 0;
-    }
-
-    return (m_nConsecutiveFailure < nRetryMaxCount) ? objWaitTime.GetAt(m_nConsecutiveFailure)
-                                                    : objWaitTime.GetAt(nRetryMaxCount - 1);
 }
 
 PROTECTED void AosERegistration::CallbackModeChanged(
@@ -727,9 +700,14 @@ PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const
 
 PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
 {
-    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
+    IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryMaxCnt();
+    if (nMaxRetryCnt == 0)
+    {
+        AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();
+        return (m_nConsecutiveFailure < objPcscfs.GetCount());
+    }
 
-    return m_nConsecutiveFailure < objWaitTime.GetSize();
+    return m_nConsecutiveFailure <= nMaxRetryCnt;
 }
 
 PROTECTED void AosERegistration::ProcessReRegStart()
@@ -766,30 +744,25 @@ PROTECTED void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegi
 
 PROTECTED void AosERegistration::ProcessRearrangePcscf()
 {
-    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
-
-    IMS_UINT32 nRetryMaxCount = objWaitTime.GetSize();
-    AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();
-
-    if (nRetryMaxCount == 0)
+    if (!GET_N_CONFIG(m_nSlotId)->IsEmcRegOnRandomPcscf())
     {
         return;
     }
 
-    if (GetRetryTime() > 0)
-    {
-        StartTimer(TIMER_STOP_RETRY, GetRetryTime() * 1000);
-    }
+    AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();
+    IMS_UINT32 nNumOfPcscfs = objPcscfs.GetCount();
 
-    if (objPcscfs.GetCount() < static_cast<IMS_SINT32>(nRetryMaxCount))
+    if (nNumOfPcscfs < 2)
     {
+        A_IMS_TRACE_D(
+                REGID, "ProcessRearrangePcscf :: don't need to rearrange (%d)", nNumOfPcscfs, 0, 0);
         return;
     }
 
     AStringArray objNewPcscfs;
-    for (IMS_UINT32 nAt = 0; nAt < nRetryMaxCount; ++nAt)
+    for (IMS_UINT32 nAt = 0; nAt < nNumOfPcscfs; ++nAt)
     {
-        IMS_UINT32 nRange = nRetryMaxCount - nAt;
+        IMS_UINT32 nRange = nNumOfPcscfs - nAt;
 
         if (nRange > 1)
         {
@@ -805,6 +778,9 @@ PROTECTED void AosERegistration::ProcessRearrangePcscf()
         else
         {
             objNewPcscfs.AddElement(objPcscfs.GetElementAt(0));
+
+            A_IMS_TRACE_D(REGID, "ProcessRearrangePcscf :: range (1) , position (0) , pcscf (%s)",
+                    objPcscfs.GetElementAt(0).GetStr(), 0, 0);
         }
     }
 
@@ -841,6 +817,16 @@ PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bR
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
     m_bReinitiationRequested = bRequest;
+}
+
+PROTECTED void AosERegistration::StartRegRetryTimer()
+{
+    IMS_SINT32 nERegRetryTimer = GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryTimerMillis();
+
+    if (nERegRetryTimer > 0)
+    {
+        StartTimer(TIMER_TRANSACTION, nERegRetryTimer);
+    }
 }
 
 PROTECTED VIRTUAL IMS_UINT32 AosERegistration::GetPreferredRegScheme()

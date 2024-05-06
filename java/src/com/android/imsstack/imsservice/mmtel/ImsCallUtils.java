@@ -38,7 +38,6 @@ import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.ImsConstants;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
 import java.util.LinkedHashMap;
@@ -604,13 +603,8 @@ public class ImsCallUtils {
         }
     }
 
-    public static boolean isGoogleNativeCompliant(ICallContext context) {
-        return ImsConstants.USE_GOOGLE_NATIVE_APPS;
-    }
-
     public static boolean isCallOnNativeAppsAndCountryKR(ICallContext context) {
-        return ImsConstants.USE_GOOGLE_NATIVE_APPS
-                && "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
+        return "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
     }
 
     public static boolean isCallTypeChanged(int callType, int otherCallType) {

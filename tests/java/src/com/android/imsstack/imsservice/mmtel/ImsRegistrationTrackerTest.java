@@ -18,9 +18,20 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Message;
+import android.os.Handler;
 import android.telephony.CarrierConfigManager;
 import android.telephony.DataFailCause;
 import android.telephony.ims.ImsMmTelManager;
@@ -46,21 +57,12 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListene
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.MessageExecutor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -84,6 +86,7 @@ public class ImsRegistrationTrackerTest {
     @Mock SettingsProxy mSettingsProxy;
     @Mock CarrierConfig mMockCarrierConfig;
     @Mock ConfigInterface mMockConfigInterface;
+    @Mock Handler mMockHandler;
     @Mock IDcNetWatcher mMockIDcNetWatcher;
     @Mock IBaseContext mMockBaseContext;
     @Mock ImsRegistrationTracker.CapabilityUpdateListener mMockCapabilityListener;
@@ -108,8 +111,7 @@ public class ImsRegistrationTrackerTest {
         when(mMockBaseContext.getContext()).thenReturn(mTestAppContext.getContext());
         when(mMockBaseContext.getDefaultLooper())
                 .thenReturn(AppContext.getInstance().getMainLooper());
-        when(mMockBaseContext.getDefaultLooper())
-                .thenReturn(AppContext.getInstance().getMainLooper());
+        when(mMockBaseContext.getDefaultHandler()).thenReturn(mMockHandler);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mTestAppContext.getContext().getSharedPreferences(anyString(), anyInt()))
                 .thenReturn(mSp);
@@ -583,9 +585,6 @@ public class ImsRegistrationTrackerTest {
             capabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                     IAosRegistrationListener.Capability.VOICE);
 
-            int eventVoiceRoaming = 1;
-            mRegTracker.getMessageHandler().handleMessage(
-                    Message.obtain(mRegTracker.getMessageHandler(), eventVoiceRoaming));
             assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
         } finally {
             serviceManager.dispose();
@@ -742,8 +741,7 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
 
         listener.onImsServiceStarted(SLOT0);
-        verify(mMockIDcNetWatcher, times(1)).registerForRoamingStateChanged(
-                mRegTracker.getMessageHandler(), 1, null);
+        verify(mMockIDcNetWatcher, times(1)).addListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -752,21 +750,20 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
 
         listener.onImsServiceStopped(SLOT0);
-        verify(mMockIDcNetWatcher).unregisterForRoamingStateChanged(
-                mRegTracker.getMessageHandler());
+        verify(mMockIDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
-    public void testRoamingObserver() {
-        assertNotNull(mRegTracker.getMessageHandler());
-        Message msg = Message.obtain();
-        msg.what = 1;
-        msg.obj = null;
-        mRegTracker.getMessageHandler().handleMessage(msg);
+    public void testOnRoamingStateChanged() {
+        ArgumentCaptor<IDcNetWatcher.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mMockIDcNetWatcher).addListener(listenerCaptor.capture());
+        IDcNetWatcher.Listener listener = listenerCaptor.getValue();
+        assertNotNull(listener);
+        listener.onRoamingStateChanged(true);
 
-        assertEquals(null, mRegTracker.createCapabilityPairsFromCapabilities());
+        verify(mMockHandler).post(any(Runnable.class));
     }
-
     @Test
     public void testConfigListener() {
         ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();

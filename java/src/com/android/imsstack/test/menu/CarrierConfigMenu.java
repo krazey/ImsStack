@@ -44,7 +44,7 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -1185,7 +1185,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         } catch (IOException | XmlPullParserException e) {
             ImsLog.e("readConfigKeys: " + e.toString());
         } finally {
-            IoUtils.closeQuietly(is);
+            ImsUtils.closeQuietly(is);
         }
     }
 

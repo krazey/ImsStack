@@ -58,6 +58,7 @@ private:
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyMediaDetach(IN IMS_SINT32 nMsg);
     void OnSendDtmf(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnVideoMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void ConvertString(IN const String16& strSource, OUT AString& strDest);
 

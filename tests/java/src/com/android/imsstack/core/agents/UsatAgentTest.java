@@ -28,20 +28,19 @@ import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 import android.telephony.TelephonyManager;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -49,10 +48,11 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Set;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class UsatAgentTest {
     private static final byte[] USIM_SERVICE_TABLE =
-            SimUtils.hexStringToBytes("000000FF00000000000000F0FF");
+            ImsUtils.hexStringToBytes("000000FF00000000000000F0FF");
     private static final String SEND_ENVELOPE_OK = "9000";
     private static final String SEND_ENVELOPE_ERROR = "9300";
     /** MO SMS control */
@@ -67,7 +67,6 @@ public class UsatAgentTest {
     @Mock private SimInterface mSimInterface;
     @Mock private Usat.Listener mListener;
 
-    private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
     private TelephonyManagerProxy mTelephonyManagerProxy;
@@ -77,15 +76,14 @@ public class UsatAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
-        mTestAppContext.setUp();
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         when(mSimInterface.getSlotId()).thenReturn(SLOT0);
 
         mUsatAgent = new UsatAgent(mSimInterface);
-        mTestableLooper = new TestableLooper(mUsatAgent.getLooper());
     }
 
     @After
@@ -94,18 +92,13 @@ public class UsatAgentTest {
             mUsatAgent.removeCallbacksAndMessages(null);
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-
         mUsatAgent = null;
         mTelephonyManagerProxy = null;
         mListener = null;
         mSimInterface = null;
-        mContextFixture = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test

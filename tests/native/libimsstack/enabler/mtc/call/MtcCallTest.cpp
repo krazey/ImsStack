@@ -47,7 +47,7 @@
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockILastComeFirstServedHelper.h"
 #include "helper/MockIPassiveTimerHolder.h"
-#include "helper/MtcTimerWrapper.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
@@ -108,6 +108,13 @@ protected:
                 .WillByDefault(Return(pSessionInterfaceHolder));
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
+
+        ON_CALL(objContext, CreateTimer)
+                .WillByDefault(Invoke(
+                        []()
+                        {
+                            return std::make_unique<MockMtcTimerWrapper>();
+                        }));
     }
 
     virtual void TearDown() override

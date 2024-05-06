@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,7 +55,7 @@ public class ConfigXmlUtilsTest {
 
     @After
     public void tearDown() throws Exception {
-        IoUtils.closeQuietly(mInputStream);
+        ImsUtils.closeQuietly(mInputStream);
         mInputStream = null;
         mParser = null;
     }
@@ -428,7 +428,7 @@ public class ConfigXmlUtilsTest {
 
     private void setUpXmlParser(String xml) throws XmlPullParserException {
         if (mInputStream != null) {
-            IoUtils.closeQuietly(mInputStream);
+            ImsUtils.closeQuietly(mInputStream);
             mInputStream = null;
         }
         try {

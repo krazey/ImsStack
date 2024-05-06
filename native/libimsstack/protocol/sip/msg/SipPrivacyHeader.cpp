@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "SipDebug.h"
-#include "msg/SipPrivacyHeader.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipPrivacyHeader.h"
 #include "platform/SipString.h"
 
 SipPrivacyHeader::SipPrivacyHeader() :

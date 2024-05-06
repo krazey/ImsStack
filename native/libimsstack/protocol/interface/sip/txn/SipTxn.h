@@ -16,14 +16,14 @@
 #ifndef __SIP_TXN_H__
 #define __SIP_TXN_H__
 
-#include "txn/SipTxn.h"
 #include "ISipUserData.h"
+#include "SipRefBase.h"
 #include "SipTimerContext.h"
+#include "msg/SipMessage.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
-#include "msg/SipMessage.h"
-#include "SipRefBase.h"
-#include "transport/SipTransportInfo.h"
 
 #define TXN_OPT_FETCH  0
 #define TXN_OPT_CREATE 1
@@ -245,8 +245,6 @@ public:
     SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
             SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
 
-    virtual ~SipTxn();
-
     SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
     SIP_BOOL AbortTxn();
 
@@ -301,6 +299,9 @@ public:
     SIP_VOID InitRetransmissionInfo();
 
     SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
+
+private:
+    virtual ~SipTxn();
 };
 
 /*Timer Callback API*/

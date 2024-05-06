@@ -25,9 +25,6 @@ public:
     explicit SipInfoBase(SIP_INT32 eHdrType);
     SipInfoBase(const SipInfoBase& objHeader);
 
-    /*destructor*/
-    ~SipInfoBase();
-
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
@@ -37,5 +34,8 @@ public:
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipInfoBase();
 };
 #endif  //__SIP_INFO_BASE_H__

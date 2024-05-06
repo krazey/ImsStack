@@ -61,7 +61,8 @@ public:
 
     // TODO: temp inline. move to cpp
     inline void NotifyJniEnablerSet() override {}
-    void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
+    virtual IMS_BOOL SendMessage(
+            IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
     /**
      * @brief Creates a MediaSession instacne with the service type and assign the jni thread
@@ -72,14 +73,14 @@ public:
      * match with the call session
      * @return IMediaSession* created IMediaSession instance
      */
-    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey);
+    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey) override;
 
     /**
      * @brief Destroys the MediaSession instance
      *
      * @param pSession The instance to destroy
      */
-    void DestroySession(IN const IMediaSession* piSession);
+    void DestroySession(IN const IMediaSession* piSession) override;
 
     /**
      * @brief Gets MediaSession instance
@@ -99,15 +100,15 @@ public:
     /**
      * @brief Sends a request message from native to java layer
      *
-     * @param eEvent enum of message event. It is define in IJniMedia.h
+     * @param eEvent enum of message event. It is defined in IJniMedia.h
      * @param nCallKey The key to identify the call session
      * @param param additional message parameters
-     * @return IMS_BOOL
+     * @return IMS_BOOL IMS_TRUE for success, IMS_FALSE for failure
      */
-    IMS_BOOL handleRequestMsg(
+    virtual IMS_BOOL HandleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
 
-private:
+protected:
     static const IMS_UINT32 TIME_WAIT_MEDIA_RESPONSE = 5000;
 
     MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId);

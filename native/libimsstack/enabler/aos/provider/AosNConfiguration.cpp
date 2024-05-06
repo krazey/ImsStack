@@ -265,6 +265,11 @@ AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() cons
     return m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmcRegOnRandomPcscf() const
+{
+    return m_objAsset.bEmcRegOnRandomPcscf;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHeld() const
 {
     return m_objAsset.bHoldRegWithIpcanChangedDuringImsCall;
@@ -442,6 +447,16 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredIpType() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyPreferredIpType() const
 {
     return m_objAsset.nEmcPreferredIpType;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmcRegRetryMaxCnt() const
+{
+    return m_objAsset.nEmcRegRetryMaxCnt;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmcRegRetryTimerMillis() const
+{
+    return m_objAsset.nEmcRegRetryTimerMillis;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPcscfPort() const
@@ -757,11 +772,6 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetr
     return m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime;
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
-{
-    return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
-}
-
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeForPcscfDiscovery()
 {
     return m_objAsset.objRegErrCodeForPcscfDiscovery;
@@ -839,7 +849,7 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
     InitBundle(piCc);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
 {
     // AosExtraRegErrBundle
@@ -1089,7 +1099,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 {
     /* aosp_carrier_config */
@@ -1205,7 +1215,7 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
     m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
@@ -1214,6 +1224,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
+    m_objAsset.bEmcRegOnRandomPcscf =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
@@ -1267,6 +1279,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
             piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
+    m_objAsset.nEmcRegRetryMaxCnt =
+            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT);
+    m_objAsset.nEmcRegRetryTimerMillis =
+            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
     m_objAsset.nImsEstablishmentTimeSec =
@@ -1309,8 +1325,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT);
     m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);
 
-    m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
     m_objAsset.objRegErrCodeForPcscfDiscovery = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =
@@ -1335,7 +1349,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
 }
 
-PRIVATE
+PROTECTED
 void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 {
     ImsVector<IMS_SINT32> objAuthAlgo =

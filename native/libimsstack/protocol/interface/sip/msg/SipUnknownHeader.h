@@ -28,9 +28,6 @@ public:
     /*constructor*/
     SipUnknownHeader();
 
-    /*destructor*/
-    ~SipUnknownHeader();
-
     SipUnknownHeader(const SipUnknownHeader& objHeader);
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
@@ -55,5 +52,8 @@ public:
     {
         return (m_pszHdrName == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipUnknownHeader();
 };
 #endif  //__SIP_UNKNOWN_HEADER_H__

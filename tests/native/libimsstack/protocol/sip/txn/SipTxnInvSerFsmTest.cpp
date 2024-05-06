@@ -15,13 +15,13 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
-#include "transport/SipTransportInfo.h"
-#include "SipStackCallback.h"
-#include "txn/SipTimeoutData.h"
 
 extern SIP_BOOL MockFsm_FetchTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
 extern SIP_BOOL MockFsm_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**);
@@ -118,7 +118,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_IdleState)
     pTxn->RemoveFromTxnPool();
     pTxn->SipDelete();
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 
     SipRequestLine* pReqLine = pSipMsg->GetReqLine();
     ASSERT_TRUE(pReqLine != nullptr);
@@ -137,7 +137,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_IdleState)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
 TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
@@ -189,7 +189,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
 
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
@@ -259,7 +259,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
     delete pTxnFsmData;
     delete pSipTranspParam;
     delete pSipUserData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 }
 
@@ -299,7 +299,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
 
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
@@ -325,7 +325,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
 
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
@@ -361,7 +361,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_COMPLETED_ST]
                               [SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT](pTxn, pTxnFsmData, &nError));
 
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;

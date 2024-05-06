@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_INFO_H
-#define _SIP_TXN_INFO_H
-
-#include "txn/SipTxn.h"
+#ifndef __SIP_TXN_INFO_H__
+#define __SIP_TXN_INFO_H__
 
 #include "msg/SipMessage.h"
-
 #include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
 
 class SipTxnInfo
 {
@@ -47,4 +45,4 @@ public:
     SIP_BOOL bTxnCreated;
 };
 
-#endif
+#endif  //__SIP_TXN_INFO_H__

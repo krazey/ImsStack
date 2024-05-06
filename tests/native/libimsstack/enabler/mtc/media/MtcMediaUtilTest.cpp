@@ -22,6 +22,7 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "media/MtcMediaUtil.h"
+#include <algorithm>
 #include <gtest/gtest.h>
 
 using ::testing::AnyNumber;
@@ -36,6 +37,12 @@ protected:
     virtual void SetUp() override {}
 
     virtual void TearDown() override {}
+
+    template <typename T>
+    IMS_BOOL contains(IN const std::vector<T>& list, T element)
+    {
+        return std::find(list.begin(), list.end(), element) != list.end();
+    }
 };
 
 TEST_F(MtcMediaUtilTest, GetCallTypeFromMediaTypes)
@@ -147,6 +154,63 @@ TEST_F(MtcMediaUtilTest, GetMediaTypesFromMediaContents)
 
     eMediaContents = MEDIA_TYPE_NOTUSED;
     EXPECT_EQ(MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaContents), MEDIATYPE_NONE);
+}
+
+TEST_F(MtcMediaUtilTest, GetMediaTypeListFromCallType)
+{
+    std::vector<IMS_UINT32> lstVoip = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VOIP);
+    EXPECT_EQ(lstVoip.size(), 1);
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+
+    std::vector<IMS_UINT32> lstVt = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VT);
+    EXPECT_EQ(lstVt.size(), 2);
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+
+    std::vector<IMS_UINT32> lstRtt = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::RTT);
+    EXPECT_EQ(lstRtt.size(), 2);
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstVideoRtt =
+            MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VIDEO_RTT);
+    EXPECT_EQ(lstVideoRtt.size(), 3);
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstUnknown =
+            MtcMediaUtil::GetMediaTypeListFromCallType(CallType::UNKNOWN);
+    EXPECT_EQ(lstUnknown.size(), 0);
+}
+
+TEST_F(MtcMediaUtilTest, GetUnusedMediaTypeListFromCallType)
+{
+    std::vector<IMS_UINT32> lstVoip =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VOIP);
+    EXPECT_EQ(lstVoip.size(), 2);
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstVt = MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VT);
+    EXPECT_EQ(lstVt.size(), 1);
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstRtt =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::RTT);
+    EXPECT_EQ(lstRtt.size(), 1);
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+
+    std::vector<IMS_UINT32> lstVideoRtt =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VIDEO_RTT);
+    EXPECT_EQ(lstVideoRtt.size(), 0);
+
+    std::vector<IMS_UINT32> lstUnknown =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::UNKNOWN);
+    EXPECT_EQ(lstUnknown.size(), 3);
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
 }
 
 TEST_F(MtcMediaUtilTest, GetMediaContentsFromMediaTypes)

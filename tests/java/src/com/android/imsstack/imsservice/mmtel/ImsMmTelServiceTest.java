@@ -390,28 +390,26 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testOnIncomingCallReceived() {
-        String callId = "1";
-        final ImsCallSessionImpl callSesison;
         assertThrows(IllegalArgumentException.class,
                 () -> mMmTelFeature.makeIncomingCall(null));
 
-        callSesison = Mockito.mock(ImsCallSessionImpl.class);
+        final ImsCallSessionImpl callSession = Mockito.mock(ImsCallSessionImpl.class);
         mMockImsCallApp =  null;
         assertThrows(IllegalArgumentException.class,
-                () -> mMmTelFeature.makeIncomingCall(callSesison));
+                () -> mMmTelFeature.makeIncomingCall(callSession));
 
+        String callId = "1";
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
         when(mMockImsContext.getDefaultHandler()).thenReturn(new Handler(Looper.getMainLooper()));
-        when(callSesison.getProperty(ImsCallProfile.EXTRA_USSD)).thenReturn(null);
-        when(callSesison.getCallId()).thenReturn(callId);
-        mMmTelFeature.makeIncomingCall(callSesison);
-        verify(mMockImsCallApp, times(1)).takeCallSession(callSesison);
-        verify(callSesison, times(1)).alertUser();
+        when(callSession.getProperty(eq(ImsCallProfile.EXTRA_USSD))).thenReturn(null, "true");
+        when(callSession.getCallId()).thenReturn(callId);
+        mMmTelFeature.makeIncomingCall(callSession);
+        verify(mMockImsCallApp, times(1)).takeCallSession(callSession);
+        verify(callSession, times(1)).alertUser();
 
-        when(callSesison.getProperty(ImsCallProfile.EXTRA_USSD)).thenReturn("true");
-        mMmTelFeature.makeIncomingCall(callSesison);
-        verify(mMockImsCallApp, times(2)).takeCallSession(callSesison);
-        verify(callSesison, times(1)).alertUser();
+        mMmTelFeature.makeIncomingCall(callSession);
+        verify(mMockImsCallApp, times(2)).takeCallSession(callSession);
+        verify(callSession, times(1)).alertUser();
     }
 
     @Test

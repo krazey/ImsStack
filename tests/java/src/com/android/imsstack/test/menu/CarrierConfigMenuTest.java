@@ -53,7 +53,7 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -465,7 +465,7 @@ public class CarrierConfigMenuTest {
         } catch (IOException | XmlPullParserException e) {
             defaultConfig = new PersistableBundle();
         } finally {
-            IoUtils.closeQuietly(is);
+            ImsUtils.closeQuietly(is);
             factory = null;
             parser = null;
         }

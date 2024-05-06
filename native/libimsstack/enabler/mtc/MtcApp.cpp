@@ -39,10 +39,12 @@
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/CallStateProxy.h"
 #include "helper/LastComeFirstServedHelper.h"
+#include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
 #include <functional>
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -174,6 +176,11 @@ PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<voi
     }
     // object is deleted by itself
     return new OperationAsyncRunner(m_nSlotId, objOperation);
+}
+
+PUBLIC VIRTUAL std::unique_ptr<MtcTimerWrapper> MtcApp::CreateTimer()
+{
+    return std::make_unique<MtcTimerWrapper>();
 }
 
 PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper()

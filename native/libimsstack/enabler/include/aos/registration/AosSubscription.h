@@ -60,8 +60,8 @@ protected:
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
-    void ReportState(
-            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0, IN IMS_BOOL bAwt = IMS_FALSE);
+    void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_BOOL bAwt = IMS_FALSE,
+            IN IMS_SINT32 nRetryAfter = 0);
     void ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter = 0);
 
     void SetState(IN IMS_UINT32 nState);
@@ -101,8 +101,10 @@ public:
     virtual IMS_BOOL IsWfcErrorMessageSupportedWithStateChecked(IN IMS_SINT32 nError);
 
 protected:
-    virtual void SetRequestCommand(IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand);
-    virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
+    virtual void SetRequestCommand(
+            IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
+    virtual void RequestCommand(
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
     virtual void ProcessStartFailed_Others(IN IMS_SINT32 nReason);
@@ -186,7 +188,7 @@ public:
         CMD_NONE = 0,
         CMD_REG_REQUIRED,
         CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
-        CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF,
+        CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION,
         CMD_REG_REQUIRED_WITH_SUB_403_MSG,
         CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
         CMD_REG_TERMINATED,
@@ -196,21 +198,27 @@ public:
 
 protected:
     IRegSubscription* m_piRegSubscription;
-
     IAosAppContext* m_piContext;
+
+    /// this is used when running refresh timer
     ITimer* m_piRetryTimer;
 
+    /// throttling count for calculating  retry timer
     IMS_UINT32 m_nThrottlingCount;
 
-    // for matching reg info contact
+    /// for matching reg info contact
     SipAddress m_objContactAddress;
 
     AString m_strTag;
 
-    // public user identity for getting reg info
+    /// public user identity for getting reg info
     AString m_strAor;
-    // state of AoR of NOTIFY
+    /// state of AoR of NOTIFY
     IMS_SINT32 m_nAorState;
+
+    /// retry count for requesting another procedure
+    IMS_UINT32 m_nRetryCountSubTerminated;
+    IMS_UINT32 m_nRetryCountRegRequired;
 
 private:
     IAosSubscriptionListener* m_piListener;
@@ -220,16 +228,10 @@ private:
     IMS_BOOL m_bIsRadioWaiting;
     IMS_BOOL m_bIsTrafficPriorityBlocked;
 
-    IMS_UINT32 m_nRetryCountSubTerminated;
-    IMS_UINT32 m_nRetryCountRegRequired;
-
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;
     static const IMS_UINT32 REFRESH_POLICY_CRITERIA_INTERVAL_FOR_RETRY = 1200;
     static const IMS_UINT32 REFRESH_POLICY_RATIO_VALUE_BELOW_THE_CRITERIA = 50;
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;
-
-private:
-    friend class AosSubscriptionTest;
 };
 
 #endif  // AOS_SUBSCRIPTION_H_

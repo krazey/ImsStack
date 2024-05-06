@@ -63,7 +63,6 @@ public:
     SipTxnKey();
     SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError);
     SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError);
-    virtual ~SipTxnKey();
 
     SIP_VOID Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError);
 
@@ -98,6 +97,7 @@ public:
     SIP_INT32 CompareKeysForRPR(SipTxnKey* pGeneratedKey);
 
 private:
+    virtual ~SipTxnKey();
     SIP_VOID Clear();
 };
 

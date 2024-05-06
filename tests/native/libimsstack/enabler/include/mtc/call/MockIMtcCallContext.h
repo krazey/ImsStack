@@ -23,6 +23,7 @@
 #include "call/IMtcCallContext.h"
 #include <gmock/gmock.h>
 #include <functional>
+#include <memory>
 
 class CallConnectionIdManager;
 class CurrentLocationDiscoveryController;
@@ -109,6 +110,7 @@ public:
     MOCK_METHOD(IMtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
     MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
+    MOCK_METHOD(std::unique_ptr<MtcTimerWrapper>, CreateTimer, (), (override));
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
     MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));

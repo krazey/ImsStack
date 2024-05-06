@@ -31,12 +31,17 @@ protected:
 TEST_F(SipMessageBodyPartTest, Clone)
 {
     AString strContent("This is a text message.");
-    SipMsgBody objMsgBody;
-    objMsgBody.SetMsgBuffer(strContent.GetStr(), strContent.GetLength());
+    SipMsgBody* pMsgBody = new SipMsgBody();
 
-    SipMessageBodyPart objMsgBodyPart(&objMsgBody);
+    ASSERT_TRUE(pMsgBody != nullptr);
+
+    pMsgBody->SetMsgBuffer(strContent.GetStr(), strContent.GetLength());
+
+    SipMessageBodyPart objMsgBodyPart(pMsgBody);
     SipMessageBodyPart* pClonedMsgBodyPart =
             static_cast<SipMessageBodyPart*>(objMsgBodyPart.Clone());
+
+    pMsgBody->SipDelete();
 
     ASSERT_TRUE(pClonedMsgBodyPart != nullptr);
 

@@ -41,7 +41,7 @@
     <uses-permission android:name="android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="com.android.telephony.permission.USE_IMSMEDIA" />
+    <uses-permission android:name="com.android.telephony.permission.USE_PIXELIMSMEDIA" />
     <uses-permission android:name="com.android.telephony.permission.USE_IMS_CALL_EXT_FEATURE"/>
 
     <application
@@ -53,7 +53,7 @@
         android:usesCleartextTraffic="true"
         android:debuggable="true">
         <service
-            android:name="com.android.imsstack.imsservice.ImsService"
+            android:name="com.android.imsstack.its.imsservice.ImsServiceConnector$TestImsService"
             android:exported="true"
             android:persistent="true"
             android:singleUser="true"

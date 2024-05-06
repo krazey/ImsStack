@@ -49,7 +49,7 @@ cc_defaults {
         "libimsstack_engine_headers",
         "libimsstack_platform_headers",
         "libimsstack_protocol_headers",
-        "libimsmedia_config_headers",
+        "libpixelimsmedia_config_headers",
         "libimsstack_test_enabler_headers",
         "libimsstack_test_engine_headers",
         "libimsstack_test_platform_headers",
@@ -62,7 +62,7 @@ cc_defaults {
         "libimsstack-jni",
         "libimsstack-platform",
         "libimsstack-protocol",
-        "libimsmedia_config",
+        "libpixelimsmedia_config",
     ],
 }
 

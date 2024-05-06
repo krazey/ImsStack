@@ -37,8 +37,8 @@ import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.test.DebugScreen;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.SystemUtils;
 
 @SuppressWarnings("deprecation")
 public class TestConfigMenu extends PreferenceActivity {
@@ -386,7 +386,7 @@ public class TestConfigMenu extends PreferenceActivity {
                         value = "0x" + value;
                     }
 
-                    int logOptions = SystemUtils.hexStringToInt(value);
+                    int logOptions = ImsUtils.hexStringToInt(value);
 
                     if (logOptions >= 0 && value.length() <= 10) {
                         key = ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS;

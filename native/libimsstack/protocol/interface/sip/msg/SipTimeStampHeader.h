@@ -34,8 +34,6 @@ public:
     /*Copy Constructor*/
     SipTimeStampHeader(const SipTimeStampHeader& objHeader);
 
-    /*destructor*/
-    ~SipTimeStampHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -61,5 +59,8 @@ public:
     {
         return (m_pszTimeVal == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipTimeStampHeader();
 };
 #endif  //__SIP_TIME_STAMP_HEADER_H__

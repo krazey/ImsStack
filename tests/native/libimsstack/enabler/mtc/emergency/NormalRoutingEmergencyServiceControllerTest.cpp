@@ -128,3 +128,15 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, NormalCallTerminatesDoesNoth
     pController->OnCallStateChanged(
             0, IMtcCall::State::TERMINATING, IMtcCallStateListener::Type::VOIP, IMS_FALSE, 0);
 }
+
+TEST_F(NormalRoutingEmergencyServiceControllerTest, GetRoutingPdnTypeReturnsNormal)
+{
+    EXPECT_EQ(pController->GetRoutingPdnType(), EmergencyCallRoutingPdn::NORMAL);
+}
+
+TEST_F(NormalRoutingEmergencyServiceControllerTest, OnTotalCallStateChangedDoesNothing)
+{
+    const IMtcCall::State ANY_STATE = IMtcCall::State::IDLE;
+    pController->OnTotalCallStateChanged(ANY_STATE);
+    // Nothing to be checked.
+}

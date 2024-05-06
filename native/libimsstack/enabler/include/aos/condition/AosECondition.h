@@ -33,14 +33,14 @@ protected:
     inline void AddEventListener() final{};
     inline void RemoveEventListener() final{};
 
-    IMS_BOOL AddAosServiceListener() final;
-    IMS_BOOL RemoveAosServiceListener() final;
+    IMS_BOOL AddAosServiceListener() override;
+    IMS_BOOL RemoveAosServiceListener() override;
 
     // IAosBlockListener
-    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) final;
+    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
 
     // AosServicePhoneListener
-    void ServicePhone_AosStart() final;
+    void ServicePhone_AosStart() override;
     inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) final{};
     inline void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};

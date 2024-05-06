@@ -111,6 +111,20 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
     pEpsFbTrigger->StartWatchdog();
 }
 
+TEST_F(EpsFallbackTriggerTest, StartWatchdogResetsExistingTimer)
+{
+    IMS_SINT32 nAnyWatchdogTime = 6000;
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(nAnyWatchdogTime));
+    pEpsFbTrigger->StartWatchdog();
+
+    EXPECT_CALL(objTimer, KillTimer);
+    EXPECT_CALL(objTimer, SetTimer(nAnyWatchdogTime, pEpsFbTrigger));
+    pEpsFbTrigger->StartWatchdog();
+
+    EXPECT_CALL(objTimer, KillTimer);  // By the destructor
+}
+
 TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfQosAndNotInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
@@ -203,6 +217,21 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIf
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))
             .Times(1);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(EpsFallbackTriggerTest, TimerExpiredWithoutStartDoesNotTriggerEpsFallback)
+{
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
+    pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(EpsFallbackTriggerTest, InvalidTimerExpiredDoesNotTriggerEpsFallback)
+{
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
+    pEpsFbTrigger->Timer_TimerExpired(IMS_NULL);
+
+    MockITimer objDifferentTimer;
+    pEpsFbTrigger->Timer_TimerExpired(&objDifferentTimer);
 }
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackTriggersEpsFallback)

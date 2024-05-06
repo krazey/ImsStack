@@ -16,7 +16,6 @@
 
 #include "AString.h"
 #include "AStringBuffer.h"
-#include "Configuration.h"
 #include "ICapabilities.h"
 #include "ICoreService.h"
 #include "IMessage.h"
@@ -33,6 +32,8 @@
 #include "Sip.h"
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
+#include "common/ICoreServiceConfig.h"
+#include "common/IMediaConfig.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcCapabilityQueryHandler.h"
@@ -42,8 +43,11 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcCapabilityQueryHandler::MtcCapabilityQueryHandler(IN IMtcContext& objContext) :
-        m_objContext(objContext)
+MtcCapabilityQueryHandler::MtcCapabilityQueryHandler(IN IMtcContext& objContext,
+        IN const ICoreServiceConfig* piCoreServiceConfig, IN const IMediaConfig* piMediaConfig) :
+        m_objContext(objContext),
+        m_piCoreServiceConfig(piCoreServiceConfig),
+        m_piMediaConfig(piMediaConfig)
 {
 }
 
@@ -64,8 +68,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcCapabilityQueryHandler::MessageMediator_AdjustMessa
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcCapabilityQueryHandler::HandleIncomingCapabilityQuery(
-        IN ICoreService* piService, IN ICapabilities* piCapabilities, IN const AString& strAppId,
-        IN const AString& strServiceId, IN IMS_UINT32 nFeatures)
+        IN ICoreService* piService, IN ICapabilities* piCapabilities, IN IMS_UINT32 nFeatures)
 {
     IMS_TRACE_D("HandleIncomingCapabilityQuery", 0, 0, 0);
     if (piCapabilities == IMS_NULL)
@@ -88,8 +91,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcCapabilityQueryHandler::HandleIncomingCapabilityQue
 
     SetHeaderForCapabilityQuery(piMessage);
     IMS_SINT32 nFlags = ICapabilities::FLAG_RESPONSE_DEFAULT;
-    if (SetBodyForCapabilityQuery(piService, piMessage, strAppId, strServiceId, nFeatures) ==
-            IMS_FAILURE)
+    if (SetBodyForCapabilityQuery(piService, piMessage, nFeatures) == IMS_FAILURE)
     {
         nFlags |= ICapabilities::FLAG_ADD_SDP_BODY_PART;
     }
@@ -115,9 +117,8 @@ void MtcCapabilityQueryHandler::SetHeaderForCapabilityQuery(IN IMessage* piMessa
 }
 
 PRIVATE
-IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService* piService,
-        IN IMessage* piMessage, IN const AString& strAppId, IN const AString& strServiceId,
-        IN IMS_UINT32 nFeatures)
+IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(
+        IN ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures)
 {
     // session-level description
     AString strSDP;
@@ -126,16 +127,8 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
         return IMS_FAILURE;
     }
 
-    const IAppConfig* piAppConfig =
-            Configuration::GetInstance()->GetAppConfig(strAppId, m_objContext.GetSlotId());
-    const ICoreServiceConfig* piCoreServiceConfig =
-            piAppConfig ? piAppConfig->GetCoreServiceConfig(strServiceId) : IMS_NULL;
-    const IMediaConfig* piMediaConfig =
-            Configuration::GetInstance()->GetMediaConfig(m_objContext.GetSlotId());
-
     // audio media description
-    const AStringArray& objAudioCap =
-            GetMediaCapability(piCoreServiceConfig, piMediaConfig, IMediaConfig::STREAM_AUDIO);
+    const AStringArray& objAudioCap = GetMediaCapability(IMediaConfig::STREAM_AUDIO);
 
     if (objAudioCap.IsEmpty())
     {
@@ -147,8 +140,7 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
     {
         // video media description
         SdpMediaDescription objStreamVideoDesc;
-        const AStringArray& objVideoCap =
-                GetMediaCapability(piCoreServiceConfig, piMediaConfig, IMediaConfig::STREAM_VIDEO);
+        const AStringArray& objVideoCap = GetMediaCapability(IMediaConfig::STREAM_VIDEO);
 
         if (!objStreamVideoDesc.Decode(objVideoCap))
         {
@@ -168,16 +160,15 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
 }
 
 PRIVATE VIRTUAL const AStringArray& MtcCapabilityQueryHandler::GetMediaCapability(
-        IN const ICoreServiceConfig* piCoreServiceConfig, IN const IMediaConfig* piMediaConfig,
         IN IMS_SINT32 nMediaType) const
 {
-    if (!piCoreServiceConfig || !piMediaConfig)
+    if (!m_piCoreServiceConfig || !m_piMediaConfig)
     {
         IMS_TRACE_E(0, "config is null", 0, 0, 0);
         return AStringArray::ConstNull();
     }
 
-    return piMediaConfig->GetMediaProfile(piCoreServiceConfig->GetMediaProfile(), nMediaType);
+    return m_piMediaConfig->GetMediaProfile(m_piCoreServiceConfig->GetMediaProfile(), nMediaType);
 }
 
 PRIVATE

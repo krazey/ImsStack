@@ -72,8 +72,7 @@ protected:
 
         TextProfile::Payload* pLocalRedPayload = new TextProfile::Payload();
         pLocalRedPayload->SetRtpMap(100, "red", 1000);
-        TextProfile::RedFmtp* pLocalRedFmtp = new TextProfile::RedFmtp(3, 99);
-        pLocalRedPayload->pFmtp = reinterpret_cast<void*>(pLocalRedFmtp);
+        pLocalRedPayload->pFmtp = new TextProfile::RedFmtp(3, 99);
         m_pLocalProfile->lstPayload.Append(pLocalRedPayload);
 
         m_pPeerProfile = new TextProfile(*m_pLocalProfile);

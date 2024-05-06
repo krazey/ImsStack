@@ -53,8 +53,7 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_bDataConnected(IMS_FALSE),
         m_bEmergencyType(IMS_FALSE),
         m_bIsTerminating(IMS_FALSE),
-        m_bIsPcscfChangeIgnored(IMS_FALSE),
-        m_bIsPdnDeactivationRequired(IMS_FALSE)
+        m_bIsPcscfChangeIgnored(IMS_FALSE)
 {
     strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -123,7 +122,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
 PUBLIC VIRTUAL void AosConnector::Stop()
 {
     m_piConnection->Deactivate();
-    m_bIsPdnDeactivationRequired = IMS_FALSE;
     CleanAll();
     Notify(LISTENER_TYPE_DEACTIVATED);
 }
@@ -159,16 +157,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::IsReady() const
     }
 
     return (m_nState == STATE_READY);
-}
-
-PUBLIC VIRTUAL void AosConnector::SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired)
-{
-    m_bIsPdnDeactivationRequired = bIsRequired;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosConnector::IsPdnDeactivationRequired()
-{
-    return m_bIsPdnDeactivationRequired;
 }
 
 PROTECTED

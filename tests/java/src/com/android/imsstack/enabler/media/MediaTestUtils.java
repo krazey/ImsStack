@@ -25,6 +25,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AmrParams;
+import android.telephony.imsmedia.AnbrMode;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.EvsParams;
 import android.telephony.imsmedia.MediaQualityStatus;
@@ -72,6 +73,10 @@ public class MediaTestUtils {
     private static final String CANONICAL_NAME = "name";
     private static final int RTCP_PORT = 50011;
     private static final int RTCP_INTERVAL = 500;
+
+    // AnbrMode
+    private static final int ANBR_UPLINK_MODE = 1;
+    private static final int ANBR_DOWNLINK_MODE = 2;
 
     // CallQuality
     private static final int DOWNLINK_CALLQUALITY_LEVEL = CallQuality.CALL_QUALITY_GOOD;
@@ -149,6 +154,7 @@ public class MediaTestUtils {
                 .setRxPayloadTypeNumber(RX_PAYLOAD)
                 .setTxPayloadTypeNumber(TX_PAYLOAD)
                 .setSamplingRateKHz(SAMPLING_RATE)
+                .setAnbrMode(createAnbrMode())
                 .setPtimeMillis(PTIME)
                 .setMaxPtimeMillis(MAX_PTIME)
                 .setDtxEnabled(DTX_ENABLED)
@@ -186,6 +192,13 @@ public class MediaTestUtils {
             .setHeaderFullOnly(USE_HEADER_FULL_ONLY)
             .setCodecModeRequest(CMR)
             .build();
+    }
+
+    private static AnbrMode createAnbrMode() {
+        return new AnbrMode.Builder()
+        .setAnbrUplinkCodecMode(ANBR_UPLINK_MODE)
+        .setAnbrDownlinkCodecMode(ANBR_DOWNLINK_MODE)
+        .build();
     }
 
     static List<RtpHeaderExtension> createRtpExtensions() {

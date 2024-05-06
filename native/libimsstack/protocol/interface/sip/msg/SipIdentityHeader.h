@@ -25,9 +25,6 @@ public:
     SipIdentityHeader();
     SipIdentityHeader(const SipIdentityHeader& objHeader);
 
-    /*destructor*/
-    ~SipIdentityHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -49,6 +46,9 @@ public:
         return ((m_pSignedIdentityDigest == SIP_NULL) || (m_pInfo == SIP_NULL)) ? SIP_FALSE
                                                                                 : SIP_TRUE;
     }
+
+private:
+    ~SipIdentityHeader();
 
 private:
     SIP_CHAR* m_pSignedIdentityDigest;

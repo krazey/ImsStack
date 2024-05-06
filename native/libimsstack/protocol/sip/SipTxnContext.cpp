@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipTxnContext.h"
 #include "SipTimerContext.h"
+#include "SipTxnContext.h"
 
 SipTxnContext::SipTxnContext() :
         pSipTimerContext(new SipTimerContext()),

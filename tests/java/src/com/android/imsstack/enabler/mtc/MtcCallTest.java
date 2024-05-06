@@ -763,6 +763,13 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testNotifyAnbr() {
+        mTestMtcCall.notifyAnbr(1, 1, 244);
+
+        verify(mMtcMediaSession, times(1)).notifyAnbr(eq(1), eq(1), eq(244));
+    }
+
+    @Test
     public void testGetMediaSession() {
         assertEquals(mMtcMediaSession, mTestMtcCall.getMediaSession());
     }

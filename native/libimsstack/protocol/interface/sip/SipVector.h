@@ -353,4 +353,4 @@ inline void SipVector<T>::Shrink()
     }
 }
 
-#endif  // __SIP_VECTOR_H__
+#endif  //__SIP_VECTOR_H__

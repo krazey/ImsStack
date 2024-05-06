@@ -111,10 +111,12 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_piAppTerminatedTimer(IMS_NULL),
         m_piPdnBlockedTimer(IMS_NULL),
         m_piImsEstablishmentTimer(IMS_NULL),
+        m_piRatBlockTimer(IMS_NULL),
         m_strAppId(strAppId),
         m_nAppType(TYPE_NORMAL),
         m_nOffReason(AosReason::NONE),
         m_nRat(NW_REPORT_RADIO_INVALID),
+        m_nBlockedRats(NW_REPORT_RADIO_INVALID),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nReportState(APP_DISCONNECTED),
         m_nRegPending(PENDING_NONE),
@@ -157,7 +159,7 @@ PUBLIC VIRTUAL void AosApplication::Reconfig()
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
-        IN IMS_UINT32 nCmdType, IN IMS_UINT32 /* nReason */ /* = 0 */)
+        IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason /* = 0 */)
 {
     A_IMS_TRACE_I(APPID, "RequestCmd :: Cmd (%s)",
             AosProvider::GetLog()->AppRequestToString(nCmdType), 0, 0);
@@ -211,7 +213,8 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
-            PostMessage(MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, 0);
+            PostMessage(
+                    MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, nReason);
             break;
 
         case ImsAosControl::IPSEC_DISABLED:
@@ -420,7 +423,42 @@ void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
     if (piService != IMS_NULL)
     {
         A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
-        piService->NotifyDeregistered(GetNetworkTypeForImsRegState(), eReason);
+        piService->NotifyDeregistered((eReason == AosReasonCode::CLEAR_RAT_BLOCKS)
+                        ? AosNetworkType::NONE
+                        : GetNetworkTypeForImsRegState(),
+                eReason);
+    }
+}
+
+PROTECTED
+void AosApplication::AddRatBlock()
+{
+    m_nBlockedRats |= m_nRat;
+}
+
+PROTECTED
+void AosApplication::ClearRatBlocks()
+{
+    m_nBlockedRats = NW_REPORT_RADIO_INVALID;
+}
+
+PROTECTED
+void AosApplication::PerformRatBlockActions(IN IMS_BOOL bStart)
+{
+    A_IMS_TRACE_D(APPID, "PerformRatBlockActions :: %s", _TRACE_B_(bStart), 0, 0);
+
+    if (bStart)
+    {
+        StartTimer(TIMER_RAT_BLOCK, RAT_BLOCK_TIME_MILLIS);
+        AddRatBlock();
+        m_pCondition->SetBlock(BLOCK_CELLULAR_RAT_BLOCK);
+        CleanAll();
+    }
+    else
+    {
+        StopTimer(TIMER_RAT_BLOCK);
+        ClearRatBlocks();
+        m_pCondition->ResetBlock(BLOCK_CELLULAR_RAT_BLOCK);
     }
 }
 
@@ -520,6 +558,11 @@ IMS_BOOL AosApplication::IsTimerRunning(IN IMS_UINT32 nType) const
         return (m_piImsEstablishmentTimer != IMS_NULL);
     }
 
+    if (nType == TIMER_RAT_BLOCK)
+    {
+        return (m_piRatBlockTimer != IMS_NULL);
+    }
+
     return IMS_FALSE;
 }
 
@@ -570,6 +613,12 @@ IMS_BOOL AosApplication::IsPlmnBlockRequired() const
     return IMS_TRUE;
 }
 
+PROTECTED
+IMS_BOOL AosApplication::IsBlockRat(IN IMS_UINT32 nRat) const
+{
+    return m_nBlockedRats & nRat;
+}
+
 PROTECTED VIRTUAL void AosApplication::CreateAosCondition()
 {
     if (m_nAppType == TYPE_NORMAL)
@@ -593,7 +642,7 @@ PROTECTED VIRTUAL void AosApplication::CreateAosConnector()
 PROTECTED VIRTUAL void AosApplication::CreateAosLocationStarter(
         IN IMS_BOOL bInitiation /* = IMS_TRUE */)
 {
-    IAosLocationStarter* piLs = AosProvider::GetInstance()->GetLocationStarter(m_nSlotId);
+    const IAosLocationStarter* piLs = AosProvider::GetInstance()->GetLocationStarter(m_nSlotId);
 
     if (piLs != IMS_NULL)
     {
@@ -830,11 +879,6 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
     {
         ProcessPdnDisconnect();
         ClearOffReason();
-    }
-
-    if (m_pConnector->IsPdnDeactivationRequired())
-    {
-        m_pConnector->Stop();
     }
 }
 
@@ -1210,11 +1254,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
 PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg)
 {
     /* Abnormal network connection error between P-CSCF and S-CSCF has been detected.
-     * The case is explained in 3GPP 24.229 5.1.2A 1.6.
+     * The case is explained in 3GPP 24.229 5.1.2A.1.6.
      * It is sure that current P-CSCF is no longer available for any IMS services. */
 
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
-    A_IMS_TRACE_I(APPID, "ProcessScscfRestoration :: reason (%d)", nReason, 0, 0);
+    IMS_UINT32 nUnavailableTimeForCurrentPcscf = LONG_TO_INT(objMsg.nLparam);
+    A_IMS_TRACE_I(APPID,
+            "ProcessScscfRestoration :: reason (%d), nUnavailableTimeForCurrentPcscf (%d)", nReason,
+            nUnavailableTimeForCurrentPcscf, 0);
 
     if (IsRegRecoveryHeld())
     {
@@ -1224,7 +1271,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
         return;
     }
 
-    m_piRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 0);
+    m_piRegistration->RequestCmd(
+            IAosRegistration::CMD_SCSCF_RESTORATION, nUnavailableTimeForCurrentPcscf);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegRetryCount(IN IMSMSG& objMsg)
@@ -1894,6 +1942,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nRea
     ClearOffReason();
     SetAppState(STATE_CONNECTED);
     UpdateRegisteredRat(m_piContext->GetNetTracker()->GetNetworkType());
+    PerformRatBlockActions(IMS_FALSE);
     Report_StateChanged();
 
     UpdateConnectedServices(IMS_FALSE);
@@ -2094,6 +2143,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     {
         ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK);
         m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+        return;
+    }
+
+    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_RAT_BLOCK)
+    {
+        PerformRatBlockActions(IMS_TRUE);
+        NotifyDeregistered(AosReasonCode::RAT_BLOCK);
         return;
     }
 
@@ -2309,6 +2365,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
     }
 
     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRatBlockTimerExpired()
+{
+    NotifyDeregistered(AosReasonCode::CLEAR_RAT_BLOCKS);
+    m_pConnector->Stop();
+    PerformRatBlockActions(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlock() {}
@@ -2578,6 +2641,10 @@ PROTECTED VIRTUAL void AosApplication::StartTimer(IN IMS_UINT32 nType, IN IMS_UI
             ppiTimer = &m_piImsEstablishmentTimer;
             break;
 
+        case TIMER_RAT_BLOCK:
+            ppiTimer = &m_piRatBlockTimer;
+            break;
+
         default:
             return;
     }
@@ -2631,6 +2698,10 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
 
         case TIMER_IMS_ESTABLISHMENT:
             ppiTimer = &m_piImsEstablishmentTimer;
+            break;
+
+        case TIMER_RAT_BLOCK:
+            ppiTimer = &m_piRatBlockTimer;
             break;
 
         default:
@@ -2951,6 +3022,18 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
         }
     }
 
+    if (IsBlockRat(nNewRat))
+    {
+        A_IMS_TRACE_D(APPID, "NetTracker_StatusChanged :: New RAT(0x%x), Blocked RATs(0x%x)",
+                nNewRat, m_nBlockedRats, 0);
+        PerformRatBlockActions(IMS_TRUE);
+    }
+    else if (m_pCondition->IsReasonBlocked(BLOCK_CELLULAR_RAT_BLOCK))
+    {
+        StopTimer(TIMER_RAT_BLOCK);
+        m_pCondition->ResetBlock(BLOCK_CELLULAR_RAT_BLOCK);
+    }
+
     m_nRat = nNewRat;
 }
 
@@ -2958,7 +3041,7 @@ PROTECTED VIRTUAL void AosApplication::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPID, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
 
-    IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
+    const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
 
     if (piNConfig == IMS_NULL)
     {
@@ -3060,6 +3143,12 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
         ProcessImsEstablishmentTimerExpired();
         return;
     }
+
+    if (piTimer == m_piRatBlockTimer)
+    {
+        ProcessRatBlockTimerExpired();
+        return;
+    }
 }
 
 PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
@@ -3086,21 +3175,6 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
             }
         }
 
-        return;
-    }
-
-    if (eCause == AosControlCause::PDN_CAPABILITY_CHANGED)
-    {
-        m_pConnector->SetPdnDeactivationRequired(IMS_TRUE);
-        if (IsImsCall())
-        {
-            m_pUtil->AddFeature(PENDING_REG_STOP_HELD, m_nRegPending);
-        }
-        else
-        {
-            ProcessDisconnectingState();
-            PostMessage(MSG_REG_STOP, 0, 0);
-        }
         return;
     }
 

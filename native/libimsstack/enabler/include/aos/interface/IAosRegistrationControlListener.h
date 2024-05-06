@@ -84,7 +84,6 @@ enum class AosControlCause
     IMS_SERVICE = 3,
     IMS_SUBSCRIBER = 4,
     DATA_CONNECTING = 5,
-    PDN_CAPABILITY_CHANGED = 6,
 
     /* From modem */
     RADIO_SIM_REMOVED = 11,

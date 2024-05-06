@@ -29,6 +29,7 @@
 class MockIMediaSession : public IMediaSession
 {
 public:
+    MockIMediaSession() {}
     virtual ~MockIMediaSession() {}
     MOCK_METHOD(
             void, SetMtcListener, (IN IMediaSessionClientListener* pISessionListener), (override));

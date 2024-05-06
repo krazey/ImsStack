@@ -151,6 +151,7 @@ public class CellInfoAgent implements CellInfoInterface {
     private final ArrayMap<Integer, ImsCellInfo> mCellInfoPerAccessNetworkType =
             new ArrayMap<>(ACCESS_NETWORK_TYPE_TO_TELEPHONY_NETWORK_TYPE.size());
     private boolean mTimeOffsetEnabledForUtcTimeFormat;
+    private IDcNetWatcher.Listener mNetWatcherListener;
 
     public CellInfoAgent(int slotId) {
         mSlotId = slotId;
@@ -208,12 +209,12 @@ public class CellInfoAgent implements CellInfoInterface {
             mCellInfoListener = new CellInfoListener(subId);
             mCellInfoListener.register();
 
-            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-            if (dnw != null) {
-                dnw.registerForRatChanged(mCellInfoHandler,
-                        EVENT_NETWORK_TYPE_CHANGED, null);
-                dnw.registerForVoiceRatChanged(mCellInfoHandler,
-                        EVENT_VOICE_NETWORK_TYPE_CHANGED, null);
+            if (mNetWatcherListener == null) {
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if (dnw != null) {
+                    mNetWatcherListener = new NetWatcherListener();
+                    dnw.addListener(mNetWatcherListener);
+                }
             }
 
             ImsLog.i(mSlotId, "CellInfo: start");
@@ -228,10 +229,12 @@ public class CellInfoAgent implements CellInfoInterface {
             mCellInfoListener.unregister();
             mCellInfoListener = null;
 
-            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-            if (dnw != null) {
-                dnw.unregisterForRatChanged(mCellInfoHandler);
-                dnw.unregisterForVoiceRatChanged(mCellInfoHandler);
+            if (mNetWatcherListener != null) {
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if (dnw != null) {
+                    dnw.removeListener(mNetWatcherListener);
+                }
+                mNetWatcherListener = null;
             }
         }
     }
@@ -590,6 +593,18 @@ public class CellInfoAgent implements CellInfoInterface {
         @Override
         public void onCellInfoChanged(@NonNull List<CellInfo> cellInfo) {
             updateAllCellInfo(cellInfo);
+        }
+    }
+
+    private final class NetWatcherListener implements IDcNetWatcher.Listener {
+        @Override
+        public void onDataNetworkTypeChanged() {
+            mCellInfoHandler.sendEmptyMessage(EVENT_NETWORK_TYPE_CHANGED);
+        }
+
+        @Override
+        public void onVoiceNetworkTypeChanged() {
+            mCellInfoHandler.sendEmptyMessage(EVENT_VOICE_NETWORK_TYPE_CHANGED);
         }
     }
 

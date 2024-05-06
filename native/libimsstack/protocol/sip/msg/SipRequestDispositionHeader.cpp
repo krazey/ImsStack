@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipRequestDispositionHeader.h"
 #include "SipDatatypes.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipRequestDispositionHeader.h"
+#include "platform/SipString.h"
 
 SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {"proxy", "redirect",
         "cancel", "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",

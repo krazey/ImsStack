@@ -28,10 +28,11 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR ELEMENT_DIALOG_INFO[] = "dialog-info";
 
+LOCAL const ImsList<Dialog*> EMPTY_DIALOGS;
+
 PUBLIC
 DialogInfoManager::DialogInfoManager() :
-        m_pLastDialogInfo(nullptr),
-        m_objDialogs(ImsList<Dialog*>())
+        m_pLastDialogInfo(nullptr)
 {
     IMS_TRACE_I("+DialogInfoManager", 0, 0, 0);
 }
@@ -49,11 +50,6 @@ IMS_RESULT DialogInfoManager::Update(IN const AString& strEventPackage)
 
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
     DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
-
-    if (pDocumentBuilder == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
 
     IDocument* piDocument = pDocumentBuilder->Parse(strEventPackage);
     pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);
@@ -82,17 +78,24 @@ IMS_RESULT DialogInfoManager::Update(IN const AString& strEventPackage)
         return IMS_FAILURE;
     }
 
-    m_pLastDialogInfo = std::make_unique<DialogInfo>(m_objDialogs);
-
-    if (m_pLastDialogInfo->Update(piElement) == IMS_FAILURE)
+    DialogInfo* pNewDialogInfo = new DialogInfo();
+    if (pNewDialogInfo->Update(piElement) == IMS_FAILURE)
     {
         IMS_TRACE_E(0, "Update DialogInfo failed", 0, 0, 0);
+        delete pNewDialogInfo;
         piDocument->DestroyDocument();
         return IMS_FAILURE;
     }
 
+    m_pLastDialogInfo.reset(pNewDialogInfo);
+
     piDocument->DestroyDocument();
     return IMS_SUCCESS;
+}
+
+VIRTUAL PUBLIC const ImsList<Dialog*>& DialogInfoManager::GetDialogs() const
+{
+    return m_pLastDialogInfo ? m_pLastDialogInfo->GetDialogs() : EMPTY_DIALOGS;
 }
 
 VIRTUAL PUBLIC IMS_UINT32 DialogInfoManager::GetState() const

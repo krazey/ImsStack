@@ -17,7 +17,6 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
-import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -49,9 +48,6 @@ public class ApnXcap extends Apn {
     // Interface implementation methods --------------------------
     @Override
     public void cleanup() {
-        if (mDcNetWatcher != null) {
-            mDcNetWatcher.unregisterForAirplaneModeChanged(this);
-        }
         super.cleanup();
     }
 
@@ -101,13 +97,7 @@ public class ApnXcap extends Apn {
         registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
         registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
         registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
-        registerHandler(EVENT_AIRPLANE_MODE_CHANGED, new HandleAirplanemodeChanged());
         registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-
-        //register message handler to DcNetWatcher
-        if (mDcNetWatcher != null) {
-            mDcNetWatcher.registerForAirplaneModeChanged(this, EVENT_AIRPLANE_MODE_CHANGED, null);
-        }
     }
 
     private boolean procWaitingLocalAddressForIpv6() {
@@ -208,31 +198,6 @@ public class ApnXcap extends Apn {
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "apn is delayed, data is updated");
             updateDataState();
-        }
-    }
-
-    private class HandleAirplanemodeChanged implements MsgProcInterface {
-        @Override
-        public void procMsg(Message msg) {
-            AsyncResult ar = (AsyncResult) msg.obj;
-
-            if (ar == null) {
-                ImsLog.d(mSlotId, "ar is null");
-                return;
-            }
-
-            Boolean radiooff = (Boolean) ar.result;
-
-            if (radiooff == null) {
-                ImsLog.d(mSlotId, "radiooff is null");
-                return;
-            }
-
-            ImsLog.i(mSlotId, "airplane mode = " + radiooff.booleanValue());
-
-            if (radiooff.booleanValue()) {
-                disconnect();
-            }
         }
     }
 

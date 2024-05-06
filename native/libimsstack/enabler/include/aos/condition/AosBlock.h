@@ -47,12 +47,12 @@ public:
 
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
-private:
+protected:
     void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable);
     static IMS_UINT32 GetBlockType(IN BLOCK_REASON eReason);
     static const IMS_CHAR* ServiceTypeToString(IN SERVICE_TYPE eType);
 
-private:
+protected:
     enum
     {
         BLOCK_COMMON = 0,
@@ -73,9 +73,6 @@ private:
 
     AString m_strTag;
     ImsList<IMS_UINT32> objServiceBlockReasons;
-
-private:
-    friend class AosBlockTest;
 };
 
 #endif  // AOS_BLOCK_H_

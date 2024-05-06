@@ -105,13 +105,13 @@ public class SuppInfo implements Parcelable {
             objSuppService.add(tService);
         }
 
-        logIn("init");
+        logLn("init");
     }
     public SuppInfo(Parcel source) {
         readFromParcel(source);
     }
 
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - size[" + objSuppService.size() + "]");
 
         for (int index = 0; index < objSuppService.size(); index++) {
@@ -298,11 +298,11 @@ public class SuppInfo implements Parcelable {
 
         }
 
-        logIn("read");
+        logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        logIn("write");
+        logLn("write");
 
         dest.writeInt(objSuppService.size());
 

@@ -31,8 +31,6 @@ public:
     SipContentTypeHeader();
     SipContentTypeHeader(const SipContentTypeHeader& objHeader);
 
-    /*destructor*/
-    ~SipContentTypeHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -56,5 +54,8 @@ public:
 
     SIP_CHAR* StripDQUOTE(const SIP_CHAR* pszStr);
     SIP_BOOL IsValidHeader() const override;
+
+private:
+    ~SipContentTypeHeader();
 };
 #endif  //__SIP_CONTENT_TYPE_HEADER_H__

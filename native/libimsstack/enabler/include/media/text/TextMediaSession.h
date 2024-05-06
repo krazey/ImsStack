@@ -49,7 +49,7 @@ public:
     void SetConfig(IN TextConfiguration* pConfig);
 
     /**
-     * @brief Set TextConfig for libimsmedia from src/dest/negotiated profile
+     * @brief Set TextConfig for libpixelimsmedia from src/dest/negotiated profile
      * @param pLocalProfile : local profile of the SDP negotiation
      * @param pPeerProfile : peer profile of the SDP negotiation
      * @param pNegoProfile : negotiated profile of the SDP negotiation

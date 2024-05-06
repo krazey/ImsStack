@@ -69,9 +69,6 @@ public:
     /*constructor*/
     SipDateHeader();
 
-    /*destructor*/
-    ~SipDateHeader();
-
     SipDateHeader(const SipDateHeader& objHeader);
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
@@ -120,5 +117,8 @@ public:
                 ? SIP_FALSE
                 : SIP_TRUE;
     }
+
+private:
+    ~SipDateHeader();
 };
 #endif  //__SIP_DATE_HEADER_H__

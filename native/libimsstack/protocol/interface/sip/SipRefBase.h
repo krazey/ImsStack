@@ -33,10 +33,12 @@ protected:
 
 public:
     SipRefBase();
-    virtual ~SipRefBase();
     SIP_VOID Increment();
     SIP_VOID Decrement();
     virtual SIP_VOID SipDelete();
+
+protected:
+    virtual ~SipRefBase();
 
 private:
     SipRefBase& operator=(IN const SipRefBase& objRHS);

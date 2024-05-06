@@ -108,8 +108,5 @@ private:
     ISipConfigV* m_piSipConfigV;
 
     IMS_BOOL m_bIsWifiTest;
-
-private:
-    friend class AosUtilTest;
 };
 #endif  // AOS_UTIL_H_

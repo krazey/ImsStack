@@ -16,7 +16,10 @@
 
 #include "AString.h"
 #include "CarrierConfig.h"
+#include "Configuration.h"
 #include "IMessage.h"
+#include "ISipConfig.h"
+#include "ISipConfigV.h"
 #include "ISipHeader.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
@@ -450,12 +453,14 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503);
     }
 
-    IMS_SINT32 nRetryAfterInMillis = m_objContext.GetMessageUtils().GetHeaderValueInt(
-                                             &objMessage, ISipHeader::RETRY_AFTER_ANY) *
-            1000;
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    RegisterWithNextPcscfIfRequired(nRetryAfter);
+
     IMS_BOOL bCsfbRequired = IsRetry1xRequiredForNormalCall(objMessage);
-    if (nRetryAfterInMillis > 0)
+    if (nRetryAfter > 0)
     {
+        IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
         m_objContext.GetPassiveTimerHolder().AddTimer(
                 IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfterInMillis);
         if (!bCsfbRequired)
@@ -772,12 +777,35 @@ IMS_BOOL StartErrorHandler::IsEpsOnlyAttach() const
 }
 
 PRIVATE
-void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
+void StartErrorHandler::ControlAos(IN IMS_UINT32 nCommand) const
 {
     IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(nCommand);
+    }
+}
+
+PRIVATE
+void StartErrorHandler::RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        if (nRetryAfter <= 0)
+        {
+            pAosConnector->RegisterWithNextPcscf(0);
+            return;
+        }
+
+        if (nRetryAfter * 1000 > Configuration::GetInstance()
+                                         ->GetSipConfig(m_objContext.GetSlotId())
+                                         ->GetSipConfigV()
+                                         ->GetTimerValue(ISipConfigV::TIMER_B))
+        {
+            pAosConnector->RegisterWithNextPcscf(nRetryAfter);
+            return;
+        }
     }
 }
 

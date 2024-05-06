@@ -955,6 +955,31 @@ public class ImsCallSessionCallback {
         });
     }
 
+    /**
+     * Called to deliver the Anbr query.
+     *
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE through
+     *        RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+     *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    public void invokeSendAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+        postAndRunTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mListener == null) {
+                        return;
+                    }
+                    mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
+                } catch (Throwable t) {
+                    log(t, "invokeSendAnbrQuery");
+                }
+            }
+        });
+    }
+
     private void closeSession(ImsCallSessionImplBase session, Throwable t) {
         Throwable cause = t.getCause();
 

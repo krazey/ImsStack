@@ -36,9 +36,6 @@ public:
 
     SipWarningHeader(const SipWarningHeader& objHeader);
 
-    /*destructor*/
-    ~SipWarningHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -67,5 +64,8 @@ public:
     inline const SIP_CHAR* GetWarnText() const { return m_pszWarnText; }
 
     SIP_BOOL IsValidHeader() const override;
+
+private:
+    ~SipWarningHeader();
 };
 #endif  //__SIP_WARNING_HEADER_H__

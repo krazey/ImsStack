@@ -26,6 +26,7 @@
 namespace android
 {
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -60,6 +61,26 @@ TEST_F(CallConnectionIdManagerTest, IdleStateChangedDoesNothing)
 }
 
 TEST_F(CallConnectionIdManagerTest, TotalCallStateOtherThanIdleChangedDoesNothing)
+{
+    pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::ALERTING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+
+    // clang-format off
+    std::vector<IMtcCallStateListener::State> objCallStates{
+            IMtcCallStateListener::State::OUTGOING, IMtcCallStateListener::State::INCOMING,
+            IMtcCallStateListener::State::ALERTING, IMtcCallStateListener::State::UPDATING,
+            IMtcCallStateListener::State::TERMINATING};
+    // clang-format on
+    for (IMtcCallStateListener::State eCallState : objCallStates)
+    {
+        pIdManager->OnTotalCallStateChanged(eCallState);
+    }
+
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+}
+
+TEST_F(CallConnectionIdManagerTest, IdleTotalCallStateChangedDoesNothingIfThereIsNoCalls)
 {
     pIdManager->OnTotalCallStateChanged(IMtcCallStateListener::State::IDLE);
 }
@@ -100,7 +121,9 @@ TEST_F(CallConnectionIdManagerTest, AddAndAddAndRemoveAndAdd)
             IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
 
     EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+    EXPECT_EQ(1, pIdManager->GetIndex(CALL_KEY_1TO1_A));
     EXPECT_EQ(CALL_KEY_1TO1_B, pIdManager->GetCallKey(2));
+    EXPECT_EQ(2, pIdManager->GetIndex(CALL_KEY_1TO1_B));
 
     pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::TERMINATING,
             IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
@@ -160,6 +183,31 @@ TEST_F(CallConnectionIdManagerTest, ConferenceParticipantTerminatedDoesNotRemove
     EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
 }
 
+TEST_F(CallConnectionIdManagerTest,
+        ConferenceParticipantTerminatedDoesNotRemoveIdInMultipleConferenceCalls)
+{
+    pIdManager->OnConferenceCallStarted(&objConferenceController, IMS_TRUE);
+    pIdManager->OnConferenceCallStarted(&objConferenceController, IMS_TRUE);
+
+    EXPECT_CALL(objConferenceController, GetCallStatusInConference(_))
+            .WillOnce(Return(IndividualCallState::IDLE))   // by IsConferenceHost()
+            .WillOnce(Return(IndividualCallState::IDLE));  // by IsConferenceHost()
+
+    pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::OUTGOING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+
+    EXPECT_CALL(objConferenceController, GetCallStatusInConference(_))
+            .WillOnce(Return(IndividualCallState::IDLE))     // by IsConferenceHost()
+            .WillOnce(Return(IndividualCallState::IDLE))     // by IsConferenceHost()
+            .WillOnce(Return(IndividualCallState::IDLE))     // by IsConferenceParticipant()
+            .WillOnce(Return(IndividualCallState::JOINED));  // by IsConferenceParticipant()
+
+    pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::TERMINATING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+}
+
 TEST_F(CallConnectionIdManagerTest, ConferenceCallTerminatedRemovesParticipantId)
 {
     ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_CONFERENCE))
@@ -180,6 +228,24 @@ TEST_F(CallConnectionIdManagerTest, ConferenceCallTerminatedRemovesParticipantId
     EXPECT_EQ(0, pIdManager->GetCallKey(1));
 }
 
+TEST_F(CallConnectionIdManagerTest, ConferenceCallTerminatedDoesNotRemoveNonParticipantCalls)
+{
+    ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_CONFERENCE))
+            .WillByDefault(Return(IndividualCallState::HOST));
+    ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_1TO1_A))
+            .WillByDefault(Return(IndividualCallState::IDLE));
+    pIdManager->OnConferenceCallStarted(&objConferenceController, IMS_TRUE);
+    pIdManager->OnCallStateChanged(CALL_KEY_CONFERENCE, IMtcCallStateListener::State::OUTGOING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+    pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::OUTGOING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+
+    pIdManager->OnCallStateChanged(CALL_KEY_CONFERENCE, IMtcCallStateListener::State::TERMINATING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
+}
+
 TEST_F(CallConnectionIdManagerTest, OnConferenceParticipantDisconnectedRemovesParticipantId)
 {
     ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_CONFERENCE))
@@ -195,6 +261,23 @@ TEST_F(CallConnectionIdManagerTest, OnConferenceParticipantDisconnectedRemovesPa
     pIdManager->OnConferenceParticipantDisconnected(1);
 
     EXPECT_EQ(0, pIdManager->GetCallKey(1));
+}
+
+TEST_F(CallConnectionIdManagerTest, OnConferenceParticipantDisconnectedWithInvalidIdDoesNothing)
+{
+    ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_CONFERENCE))
+            .WillByDefault(Return(IndividualCallState::HOST));
+    ON_CALL(objConferenceController, GetCallStatusInConference(CALL_KEY_1TO1_A))
+            .WillByDefault(Return(IndividualCallState::JOINED));
+    pIdManager->OnConferenceCallStarted(&objConferenceController, IMS_TRUE);
+    pIdManager->OnCallStateChanged(CALL_KEY_CONFERENCE, IMtcCallStateListener::State::OUTGOING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+    pIdManager->OnCallStateChanged(CALL_KEY_1TO1_A, IMtcCallStateListener::State::OUTGOING,
+            IMtcCallStateListener::Type::VOIP, IMS_FALSE, IMS_FALSE);
+
+    pIdManager->OnConferenceParticipantDisconnected(0);
+
+    EXPECT_EQ(CALL_KEY_1TO1_A, pIdManager->GetCallKey(1));
 }
 
 TEST_F(CallConnectionIdManagerTest, DoubleOutgoingStateChangedDoesNotAddId)

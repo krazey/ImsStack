@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIPTXNLISTENER_H__
-#define __ISIPTXNLISTENER_H__
+#ifndef __INTERFACE_SIP_TXN_LISTENER_H__
+#define __INTERFACE_SIP_TXN_LISTENER_H__
 
 #include "SipDatatypes.h"
 
@@ -32,4 +32,4 @@ public:
     /* read only txn key */
     virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData) = 0;
 };
-#endif  //__ISIPTXNLISTENER_H__
+#endif  //__INTERFACE_SIP_TXN_LISTENER_H__

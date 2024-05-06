@@ -67,12 +67,37 @@ TEST_F(SrvccStateManagerTest, SetStateNotifiesListener)
     pManager->UpdateSrvccState(eAnyState);
 }
 
+TEST_F(SrvccStateManagerTest, UpdateSrvccStateTwiceWithSameStateDoesNothing)
+{
+    SrvccState eAnyState = SrvccState::STARTED;
+    MockISrvccStateListener objListener;
+    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState)).Times(1);
+
+    pManager->AddListener(&objListener);
+
+    pManager->UpdateSrvccState(eAnyState);
+    pManager->UpdateSrvccState(eAnyState);
+}
+
 TEST_F(SrvccStateManagerTest, SetStateDoesNotNotifyListenerAfterRemoveListener)
 {
     SrvccState eAnyState = SrvccState::STARTED;
     MockISrvccStateListener objListener;
     EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState)).Times(0);
 
+    pManager->AddListener(&objListener);
+    pManager->RemoveListener(&objListener);
+
+    pManager->UpdateSrvccState(eAnyState);
+}
+
+TEST_F(SrvccStateManagerTest, AddListenerTwiceWithSameListenerDoesNothing)
+{
+    SrvccState eAnyState = SrvccState::STARTED;
+    MockISrvccStateListener objListener;
+    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState)).Times(0);
+
+    pManager->AddListener(&objListener);
     pManager->AddListener(&objListener);
     pManager->RemoveListener(&objListener);
 

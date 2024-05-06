@@ -40,8 +40,6 @@ public:
             const SIP_CHAR* pszRsnPhrase);
 
     SipStatusLine(const SipStatusLine& objHeader);
-    /*destructor*/
-    ~SipStatusLine();
 
     /*Function for encoding*/
     SIP_BOOL EncodeStatusLine(SIP_CHAR** ppCurrPos);
@@ -66,5 +64,8 @@ public:
     inline const SIP_CHAR* GetSipVersion() const { return m_pszSipVersion; }
 
     inline const SIP_CHAR* GetRsnPhrase() const { return m_pszRsnPhrase; }
+
+private:
+    ~SipStatusLine();
 };
 #endif  //__SIP_STATUS_LINE_H__

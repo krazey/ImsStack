@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipMsgUtil.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
 #include "msg/SipHeaders.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 #define NUM_OF_MANDATORY_HEADERS 5
 

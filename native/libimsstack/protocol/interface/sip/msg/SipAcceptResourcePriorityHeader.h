@@ -29,9 +29,6 @@ public:
     SipAcceptResourcePriorityHeader();
     SipAcceptResourcePriorityHeader(const SipAcceptResourcePriorityHeader& objHeader);
 
-    /*destructor*/
-    ~SipAcceptResourcePriorityHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -51,5 +48,8 @@ public:
     inline const SIP_CHAR* GetNameSpace() const { return m_pszNameSpace; }
 
     inline const SIP_CHAR* GetResourcePriority() const { return m_pszRPriority; }
+
+private:
+    ~SipAcceptResourcePriorityHeader();
 };
 #endif  //__SIP_ACCEPT_RESOURCE_PRIORITY_HEADER_H__

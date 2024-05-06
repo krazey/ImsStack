@@ -27,8 +27,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-#define AOSTAG         m_strTag.GetStr()
-#define PONG_WAIT_TIME 10000
+#define AOSTAG m_strTag.GetStr()
 
 PUBLIC
 AosKeepAlive::AosKeepAlive(IN IMS_SINT32 nSlotId) :
@@ -74,9 +73,9 @@ void AosKeepAlive::Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong /*
     m_nKeepAliveTime = nRepeatTime;
     StartTimer(TIMER_KEEP_ALIVE, m_nKeepAliveTime);
 
-    if (bCheckingPong && (nRepeatTime > PONG_WAIT_TIME))
+    if (bCheckingPong && (nRepeatTime > PONG_WAIT_TIME_MILLIS))
     {
-        StartTimer(TIMER_PONG_WAIT, PONG_WAIT_TIME);
+        StartTimer(TIMER_PONG_WAIT, PONG_WAIT_TIME_MILLIS);
         SetCheckingPong(IMS_TRUE);
     }
     else
@@ -136,7 +135,7 @@ void AosKeepAlive::ProcessKeepAliveTimerExpired()
 
     if (IsPongChecked())
     {
-        StartTimer(TIMER_PONG_WAIT, PONG_WAIT_TIME);
+        StartTimer(TIMER_PONG_WAIT, PONG_WAIT_TIME_MILLIS);
     }
 
     SendPing();

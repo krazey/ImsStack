@@ -18,12 +18,12 @@
 
 #define SIP_BADMESSAGE_PARSING
 
-#include "msg/SipHeaders.h"
-#include "msg/SipMsgBody.h"
-#include "msg/SipRequestLine.h"
 #ifdef SIP_BADMESSAGE_PARSING
 #include "msg/SipBadHeader.h"
 #endif
+#include "msg/SipHeaders.h"
+#include "msg/SipMsgBody.h"
+#include "msg/SipRequestLine.h"
 
 /**
   This class represents one SIP message. The stack user can create a suitable message by setting
@@ -116,7 +116,6 @@ private:
 
 public:
     SipMessage();
-    ~SipMessage();
     explicit SipMessage(SIP_INT32 eSipMsgType);
     SipMessage(const SipMessage& objSipMsg);
     SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
@@ -201,5 +200,8 @@ public:
             SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType);
 
     static SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
+
+private:
+    ~SipMessage();
 };
 #endif  //__SIP_MESSAGE_H__

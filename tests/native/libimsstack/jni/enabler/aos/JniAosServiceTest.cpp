@@ -26,8 +26,6 @@
 #include "../../interface/aos/MockIAosService.h"
 
 using ::testing::_;
-using ::testing::AnyNumber;
-using ::testing::Return;
 
 using namespace android;
 
@@ -57,9 +55,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosService, NotifyJniEnablerSet())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return());
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::AOS_SERVICE, &m_objMockIAosService);
 
@@ -79,43 +74,56 @@ protected:
     }
 };
 
-TEST_F(JniAosServiceTest, SendData_REQUEST_REGISTRATION)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenRequestRegistration)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_REQUEST_REGISTRATION);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, UpdateSipDelegateRegistration()).Times(1);
+    EXPECT_CALL(m_objMockIAosService, UpdateSipDelegateRegistration());
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_REQUEST_DEREGISTRATION)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenRequestDeregistration)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_REQUEST_DEREGISTRATION);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, TriggerSipDelegateDeregistration()).Times(1);
+    EXPECT_CALL(m_objMockIAosService, TriggerSipDelegateDeregistration());
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_REQUEST_FULL_REGISTRATION)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenRequestFullRegistration)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_REQUEST_FULL_REGISTRATION);
     objParcel.writeInt32(488);
     objParcel.writeString16(String16("testSipReason"));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, TriggerFullNetworkRegistration(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, TriggerFullNetworkRegistration(_, _));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_REQUEST_CAPABILITIES_CHANGED)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenRequestCapabilitiesChanged)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_REQUEST_CAPABILITIES_CHANGED);
     objParcel.writeInt32(3);
@@ -130,13 +138,17 @@ TEST_F(JniAosServiceTest, SendData_REQUEST_CAPABILITIES_CHANGED)
             static_cast<IMS_UINT32>(AosCapability::UT));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyCapabilitiesChanged(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyCapabilitiesChanged(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_REQUEST_CONTROL_REGISTRATION)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenRequestControlRegistration)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_REQUEST_CONTROL_REGISTRATION);
     objParcel.writeInt32(static_cast<IMS_UINT32>(AosRegRequestType::START));
@@ -144,247 +156,330 @@ TEST_F(JniAosServiceTest, SendData_REQUEST_CONTROL_REGISTRATION)
     objParcel.writeInt32(static_cast<IMS_UINT32>(AosControlCause::DATA));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, ControlRegistration(_, _, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, ControlRegistration(_, _, _));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_AIRPLANE_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyAirplaneSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_AIRPLANE_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyAirplaneSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyAirplaneSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_DATA_ROAMING_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyDataRoamingSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_DATA_ROAMING_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDataRoamingSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyDataRoamingSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_MOBILE_DATA_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyMobileDataSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_MOBILE_DATA_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyMobileDataSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyMobileDataSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyRoamingPreferredVoiceNetwork)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK);
     objParcel.writeInt32(static_cast<IMS_UINT32>(RoamingPreferredVoiceNetwork::CELLULAR));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyRoamingPreferredVoiceNetwork(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyRoamingPreferredVoiceNetwork(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_SERVICE_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyServiceSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_SERVICE_SETTING);
     objParcel.writeInt32(static_cast<IMS_UINT32>(ServiceSetting::OFF));
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyServiceSetting(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyServiceSetting(_, _));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_TTY_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyTtySetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_TTY_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyTtySetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyTtySetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_VIDEO_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyVideoSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_VIDEO_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyVideoSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyVideoSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_VOLTE_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyVolteSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_VOLTE_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyVolteSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyVolteSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_WFC_SETTING)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyWfcSetting)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_WFC_SETTING);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyWfcSetting(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyWfcSetting(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_AOS_START)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyAosStart)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_AOS_START);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyAosStart()).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyAosStart());
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_IPCAN_HANDOVER_FAILURE)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyIpcanHandoverFailure)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_IPCAN_HANDOVER_FAILURE);
     objParcel.writeInt32(0);
     objParcel.writeInt32(1);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyIpcanHandoverFailure(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyIpcanHandoverFailure(_, _));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_ISIM_STATE)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyIsimState)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_ISIM_STATE);
     objParcel.writeInt32(static_cast<IMS_UINT32>(IsimState::LOADED));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyIsimState(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyIsimState(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_LOCATION_INFO)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyLocationInfo)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_LOCATION_INFO);
     objParcel.writeInt32(static_cast<IMS_UINT32>(LocationInfo::FIXED));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyLocationInfo(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyLocationInfo(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_MOBILE_DATA_LIMIT)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyMobileDataLimit)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_MOBILE_DATA_LIMIT);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyMobileDataLimit(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyMobileDataLimit(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_NETWORK_VIDEO_CAPABILITY)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyNetworkVideoCapability)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_NETWORK_VIDEO_CAPABILITY);
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyNetworkVideoCapability(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyNetworkVideoCapability(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_PHONE_NUMBER_STATE)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPhoneNumberState)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_PHONE_NUMBER_STATE);
     objParcel.writeInt32(0);
     objParcel.writeInt32(static_cast<IMS_UINT32>(PhoneNumberState::SIM_LOADED));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyPhoneNumberState(_, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyPhoneNumberState(_, _));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_PLMN_CHANGED)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPlmnChanged)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_PLMN_CHANGED);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyPlmnChanged()).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyPlmnChanged());
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_POWER_OFF)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPowerOff)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_POWER_OFF);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyPowerOff()).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyPowerOff());
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_NOTIFY_PRECISE_CALL_STATE)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyPreciseCallState)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_PRECISE_CALL_STATE);
     objParcel.writeInt32(static_cast<IMS_UINT32>(PreciseCallState::ACTIVE));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyPreciseCallState(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyPreciseCallState(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(JniAosServiceTest, SendData_J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED)
+TEST_F(JniAosServiceTest, ShouldInvokeAosServiceWhenNotifyCarrierSignalPcoValueChanged)
 {
+    // GIVEN
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED);
     objParcel.writeInt32(5);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyCarrierSignalPcoValueChanged(_)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyCarrierSignalPcoValueChanged(_));
 
+    // WHEN
     m_pJniAosService->SendData(objParcel);
+
+    // THEN : GIVEN conditions should be met.
 }

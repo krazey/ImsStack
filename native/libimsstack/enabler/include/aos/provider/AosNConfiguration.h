@@ -73,6 +73,7 @@ public:
     IMS_BOOL IsSmsOverImsSupported() const override;
     IMS_BOOL IsImsOverNrEnabled() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
+    IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
@@ -104,6 +105,8 @@ public:
     IMS_SINT32 GetUssdMethod() const override;
     IMS_SINT32 GetPreferredIpType() const override;
     IMS_SINT32 GetEmergencyPreferredIpType() const override;
+    IMS_SINT32 GetEmcRegRetryMaxCnt() const override;
+    IMS_SINT32 GetEmcRegRetryTimerMillis() const override;
     IMS_SINT32 GetPcscfPort() const override;
     IMS_SINT32 GetSipPreferredTransport() const override;
     IMS_SINT32 GetIpv4MtuSize() const override;
@@ -169,7 +172,6 @@ public:
     ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() override;
-    ImsVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() override;
     ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
     ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
@@ -181,6 +183,7 @@ private:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
     void Init(IN IMS_SINT32 nSlotId = IMS_SLOT_0) override;
 
+protected:
     void InitBundle(IN const ICarrierConfig* piCc);
     void InitConfig(IN const ICarrierConfig* piCc);
     void InitAssetsConfig(IN const ICarrierConfig* piCc);
@@ -208,8 +211,5 @@ private:
     ImsList<IAosNConfigurationListener*> m_objListeners;
 
     AString m_strLogTag;
-
-private:
-    friend class AosNConfigurationTest;
 };
 #endif  // AOS_NCONFIGURATION_H_

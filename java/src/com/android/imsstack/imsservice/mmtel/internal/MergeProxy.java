@@ -433,6 +433,25 @@ public class MergeProxy extends ConferenceProxy {
         });
     }
 
+    private void notifyTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+            int bitsPerSecond) {
+        postAndRun(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (ListenerWrapper lw : mListeners) {
+                        if (lw.mListener != null) {
+                            lw.mListener.onTriggerAnbrQueryReceived(call, mediaType, direction,
+                                    bitsPerSecond);
+                        }
+                    }
+                } catch (Throwable t) {
+                    loge("notifyTriggerAnbrQueryReceived", t);
+                }
+            }
+        });
+    }
+
     private void notifyAudioSessionClosed(MtcCall call) {
         postAndRun(new Runnable() {
             @Override
@@ -791,6 +810,17 @@ public class MergeProxy extends ConferenceProxy {
                 call = mForegroundCall;
             }
             notifyCallQualityChanged(call, callQuality);
+        }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            logi("onTriggerAnbrQueryReceived");
+
+            if (call.equals(getConferenceCall())) {
+                call = mForegroundCall;
+            }
+            notifyTriggerAnbrQueryReceived(call, mediaType, direction, bitsPerSecond);
         }
 
         @Override

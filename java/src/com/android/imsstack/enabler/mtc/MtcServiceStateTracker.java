@@ -16,19 +16,17 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.os.Handler;
-import android.os.Registrant;
-import android.os.RegistrantList;
-
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         implements IServiceStateTracker {
     private final IBaseContext mContext;
-    private RegistrantList mEServiceStateChangedRegistrants = new RegistrantList();
-    private RegistrantList mServiceStateChangedRegistrants = new RegistrantList();
+    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private int mServiceState = IUMtcService.SERVICE_NONE;
     private int mEmergencyServiceState = IUMtcService.SERVICE_NONE;
     private int mEmergencyServiceReason = IUMtcService.ES_IDLE_REASON_NONE;
@@ -54,9 +52,9 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     public void onEmergencyServiceStateChanged(MtcApp app, int state, int reason) {
         updateEmergencyState(state, reason);
 
-        if (mEServiceStateChangedRegistrants.size() > 0) {
-            mEServiceStateChangedRegistrants.notifyResult(
-                    new ImsServiceState(IUMtcService.SERVICE_EMERGENCY, state, reason));
+        for (Listener l : mListeners) {
+            l.onEmergencyServiceStateChanged(
+                    new MtcServiceState(IUMtcService.SERVICE_EMERGENCY, state, reason));
         }
     }
 
@@ -72,8 +70,8 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
 
         updateState(state);
 
-        if (mServiceStateChangedRegistrants.size() > 0) {
-            mServiceStateChangedRegistrants.notifyResult(new ImsServiceState(state, -1, reason));
+        for (Listener l : mListeners) {
+            l.onNormalServiceStateChanged(new MtcServiceState(state, -1, reason));
         }
     }
 
@@ -106,45 +104,37 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         return false;
     }
 
-    // The Message object contains AsyncResult object in "obj" field.
-    // The AsyncResult object contains ImsServiceState object in "result" field.
     @Override
-    public void registerForEmergencyServiceStateChanged(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
+    public void addListener(Listener listener) {
+        mListeners.add(listener);
 
-        mEServiceStateChangedRegistrants.add(r);
-
-        // Notify the service state if a service is already connected
-        notifyServiceStateIfEmergencyServiceRegistered(r);
-    }
-
-    @Override
-    public void unregisterForEmergencyServiceStateChanged(Handler h) {
-        mEServiceStateChangedRegistrants.remove(h);
-    }
-
-    // The Message object contains AsyncResult object in "obj" field.
-    // The AsyncResult object contains ImsServiceState object in "result" field.
-    @Override
-    public void registerForServiceStateChanged(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-
-        mServiceStateChangedRegistrants.add(r);
-
-        // Notify the service state if a service is already connected
-        notifyServiceStateIfServiceRegistered(r);
-    }
-
-    @Override
-    public void unregisterForServiceStateChanged(Handler h) {
-        mServiceStateChangedRegistrants.remove(h);
-    }
-
-    private void notifyServiceStateIfEmergencyServiceRegistered(Registrant r) {
         if (isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)
                 || isEmergencyServiceState(IUMtcService.ES_UNAVAILABLE)) {
             // To guard timing issue: emergency service is already unavailable
-            r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_EMERGENCY,
+            notifyServiceStateIfEmergencyServiceRegistered();
+        }
+
+        if (isServiceRegistered(IUMtcService.SERVICE_UC)) {
+            notifyServiceStateIfServiceRegistered(IUMtcService.SERVICE_UC);
+        } else {
+            if (isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
+                notifyServiceStateIfServiceRegistered(IUMtcService.SERVICE_VOIP);
+            }
+
+            if (isServiceRegistered(IUMtcService.SERVICE_VT)) {
+                notifyServiceStateIfServiceRegistered(IUMtcService.SERVICE_VT);
+            }
+        }
+    }
+
+    @Override
+    public void removeListener(Listener listener) {
+        mListeners.remove(listener);
+    }
+
+    private void notifyServiceStateIfEmergencyServiceRegistered() {
+        for (Listener l : mListeners) {
+            l.onEmergencyServiceStateChanged(new MtcServiceState(IUMtcService.SERVICE_EMERGENCY,
                     mEmergencyServiceState, mEmergencyServiceReason));
         }
     }
@@ -180,17 +170,9 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
         return false;
     }
 
-    private void notifyServiceStateIfServiceRegistered(Registrant r) {
-        if (isServiceRegistered(IUMtcService.SERVICE_UC)) {
-            r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_UC));
-        } else {
-            if (isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
-                r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_VOIP));
-            }
-
-            if (isServiceRegistered(IUMtcService.SERVICE_VT)) {
-                r.notifyResult(new ImsServiceState(IUMtcService.SERVICE_VT));
-            }
+    private void notifyServiceStateIfServiceRegistered(int serviceType) {
+        for (Listener l : mListeners) {
+            l.onNormalServiceStateChanged(new MtcServiceState(serviceType));
         }
     }
 

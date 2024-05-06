@@ -36,7 +36,7 @@ public class LogTest {
     @Test
     @SmallTest
     public void testInit() {
-        int logOptions = SystemUtils.hexStringToInt(Log.DEFAULT_LOG_OPTIONS);
+        int logOptions = ImsUtils.hexStringToInt(Log.DEFAULT_LOG_OPTIONS);
         Log.init(logOptions, true);
 
         assertTrue(Log.isImsDebugEnabled());

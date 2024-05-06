@@ -28,9 +28,6 @@ public:
     SipAuthInfoHeader();
     SipAuthInfoHeader(const SipAuthInfoHeader& objHeader);
 
-    /*destructor*/
-    ~SipAuthInfoHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -46,5 +43,8 @@ public:
     {
         return (m_pAuthInfoList.IsEmpty() == SIP_TRUE) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipAuthInfoHeader();
 };
 #endif  //__SIP_AUTH_INFO_HEADER_H__

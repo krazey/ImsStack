@@ -58,14 +58,14 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_objContactAddress(objContactAddress),
         m_strAor(strAor),
         m_nAorState(IRegInfoContact::STATE_TERMINATED),
+        m_nRetryCountSubTerminated(0),
+        m_nRetryCountRegRequired(0),
         m_piListener(IMS_NULL),
         m_nState(STATE_OFFLINE),
         m_bIsTerminated(IMS_FALSE),
         m_bIsErrChecked(IMS_FALSE),
         m_bIsRadioWaiting(IMS_FALSE),
-        m_bIsTrafficPriorityBlocked(IMS_FALSE),
-        m_nRetryCountSubTerminated(0),
-        m_nRetryCountRegRequired(0)
+        m_bIsTrafficPriorityBlocked(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosSubscription = %" PFLS_u "/%" PFLS_x,
             sizeof(AosSubscription), this, 0);
@@ -197,11 +197,12 @@ PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
 
     IMS_BOOL bUseRegsitrationRetryIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->IsRegRetryIntervalsUsedForSub();
-    if (bUseRegsitrationRetryIntervals == IMS_TRUE)
-    {
-        ImsVector<IMS_SINT32>& objRetryIntervals =
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
 
+    ImsVector<IMS_SINT32>& objRetryIntervals =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
+
+    if (bUseRegsitrationRetryIntervals == IMS_TRUE && objRetryIntervals.GetSize() > 0)
+    {
         StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(objRetryIntervals)));
     }
     else
@@ -235,8 +236,8 @@ IMS_BOOL AosSubscription::IsTerminated() const
 }
 
 PROTECTED
-void AosSubscription::ReportState(
-        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand /*=0*/, IN IMS_BOOL bAwt /*= IMS_FALSE*/)
+void AosSubscription::ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand,
+        IN IMS_BOOL bAwt /* = IMS_FALSE */, IN IMS_SINT32 nRetryAfter /* = 0 */)
 {
     if (nReason == REASON_SUB_TERMINATED)
     {
@@ -253,7 +254,7 @@ void AosSubscription::ReportState(
 
     if (nCommand != CMD_NONE)
     {
-        m_piListener->Subscription_Request(nCommand, 0, bAwt);
+        m_piListener->Subscription_Request(nCommand, nRetryAfter, bAwt);
     }
 }
 
@@ -511,14 +512,15 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BO
     A_IMS_TRACE_I(
             AOSTAG, "ProcessFailureResponse_503 :: TF (%d), RA (%d)", nTimerF, nRetryAfter, 0);
 
-    if (nRetryAfter <= 0 || (nRetryAfter * 1000) > nTimerF)
+    if (nRetryAfter > 0 && (nRetryAfter * 1000) <= nTimerF)
     {
-        A_IMS_TRACE_I(AOSTAG, "request initial registration with available next pcscf", 0, 0, 0);
-        SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_AVAILABLE_NEXT_PCSCF);
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
-    return IMS_FALSE;
+    A_IMS_TRACE_I(AOSTAG, "request initial registration with scscf restoration", 0, 0, 0);
+    SetRequestCommand(bIsRefreshed, CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION,
+            (nRetryAfter < 0) ? 0 : nRetryAfter);
+    return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed)
@@ -582,7 +584,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
                 m_nRetryCountSubTerminated++;
                 A_IMS_TRACE_I(AOSTAG, "Subscription terminated count: %d",
                         m_nRetryCountSubTerminated, 0, 0);
-                if (m_nRetryCountSubTerminated < nSize)
+                if (m_nRetryCountSubTerminated < nRetryInfoSubTerminated)
                 {
                     return IMS_FALSE;
                 }
@@ -619,7 +621,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
                 m_nRetryCountRegRequired++;
                 A_IMS_TRACE_I(
                         AOSTAG, "Registration required count: %d", m_nRetryCountRegRequired, 0, 0);
-                if (m_nRetryCountRegRequired < nSize)
+                if (m_nRetryCountRegRequired < nRetryInfoRegRequired)
                 {
                     return IMS_FALSE;
                 }
@@ -805,20 +807,20 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChec
 }
 
 PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
-        IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand)
+        IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter /* = 0 */)
 {
     if (bIsRefreshed)
     {
-        RequestCommand(REASON_SUB_TERMINATED, nCommand);
+        RequestCommand(REASON_SUB_TERMINATED, nCommand, nRetryAfter);
     }
     else
     {
-        RequestCommand(REASON_SUB_FAILED, nCommand);
+        RequestCommand(REASON_SUB_FAILED, nCommand, nRetryAfter);
     }
 }
 
 PROTECTED VIRTUAL void AosSubscription::RequestCommand(
-        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand)
+        IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter /* = 0 */)
 {
     A_IMS_TRACE_I(AOSTAG, "RequestCommand:: reason(%d), command(%d) ", nReason, nCommand, 0);
     SetState(STATE_OFFLINE);
@@ -830,7 +832,8 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
     ReportState(nReason, nCommand,
             bIsRegRequired &&
                     GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy() !=
-                            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION);
+                            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
+            nRetryAfter);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -917,7 +920,6 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
                 1000;
     }
 
-    IMS_SINT32 nThrotllingTime = 0;
     IMS_UINT32 nTimeIndex = 0;
 
     if (m_nThrottlingCount > nMaxCount)
@@ -932,9 +934,10 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
     ImsVector<IMS_SINT32>& objRetryRandomIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRandomRetryIntervals();
 
-    nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000);
+    IMS_SINT32 nThrotllingTime = objInterval.GetAt(nTimeIndex - 1) * 1000;
 
-    if (objRetryRandomIntervals.GetAt(nTimeIndex - 1) > 0)
+    if (objRetryRandomIntervals.GetSize() == nMaxCount &&
+            objRetryRandomIntervals.GetAt(nTimeIndex - 1) > 0)
     {
         nThrotllingTime +=
                 (IMS_SYS_GetRandom(objRetryRandomIntervals.GetAt(nTimeIndex - 1) + 1) * 1000);
@@ -1192,7 +1195,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Started()
     ClearThrottlingCount();
 
     SetState(STATE_SUBSCRIBED);
-    ReportState(REASON_SUB_ESTABLISHED);
+    ReportState(REASON_SUB_ESTABLISHED, CMD_NONE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_StartFailed(IN IMS_SINT32 nReason)
@@ -1226,7 +1229,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Updated()
 
     ClearThrottlingCount();
     SetState(STATE_SUBSCRIBED);
-    ReportState(REASON_SUB_ESTABLISHED);
+    ReportState(REASON_SUB_ESTABLISHED, CMD_NONE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_UpdateFailed(IN IMS_SINT32 nReason)
@@ -1257,7 +1260,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Removed()
     A_IMS_TRACE_I(AOSTAG, "RegSubscription_Removed", 0, 0, 0);
 
     SetState(STATE_OFFLINE);
-    ReportState(REASON_SUB_REMOVED);
+    ReportState(REASON_SUB_REMOVED, CMD_NONE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_Terminated(IN IMS_SINT32 nReason)

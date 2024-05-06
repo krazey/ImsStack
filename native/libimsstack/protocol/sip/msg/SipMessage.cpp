@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipMsgUtil.h"
 #include "SipDatatypes.h"
-#include "platform/SipString.h"
-#include "platform/SipMemory.h"
-
 #include "SipDebug.h"
-
 #include "msg/SipMessage.h"
 #include "msg/SipMsgBody.h"
+#include "msg/SipMsgUtil.h"
+#include "platform/SipMemory.h"
+#include "platform/SipString.h"
 
 SipMessage::SipMessage() :
         m_eSipMsgType(SipMessage::TYPE_INVALID),

@@ -25,39 +25,27 @@
 using ::testing::_;
 using ::testing::Return;
 
+#define DECLARE_USING(Base)    \
+    using Base::ResetEvent;    \
+    using Base::SetEvent;      \
+    using Base::HasEvent;      \
+    using Base::Start;         \
+    using Base::Terminate;     \
+    using Base::SetThread;     \
+    using Base::SetConnection; \
+    using Base::SetSignaled;   \
+    using Base::RunImp;        \
+    using Base::OnMessage;
+
 class TestAosDnsQuery : public AosDnsQuery
 {
 public:
+    DECLARE_USING(AosDnsQuery)
+
     TestAosDnsQuery(IN IMS_BOOL bIsTest) :
             AosDnsQuery(bIsTest)
     {
     }
-
-    FRIEND_TEST(AosDnsQueryTest, RequestReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, DestroyReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivateReadyReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivateDoneWithParamTrueReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivateDoneWithParamFalseReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivateTerminatedReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithoutListenerReturnFalse);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgReadyReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgRequestReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithDuplicatedMsgRequestReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgDoneAndParamZeroReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgDoneAndParamNotZeroReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgDestroyReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithMsgTerminatedReturnTrue);
-    FRIEND_TEST(AosDnsQueryTest, OnMessageWithInvalidMsgReturnFalse);
-    FRIEND_TEST(AosDnsQueryTest, SucceedSetEventToDnsQueryPrivate);
-    FRIEND_TEST(AosDnsQueryTest, FailSetEventToDnsQueryPrivateWhenDuplicate);
-    FRIEND_TEST(AosDnsQueryTest, SucceedResetEventToDnsQueryPrivate);
-    FRIEND_TEST(AosDnsQueryTest, FailResetEventToDnsQueryPrivateWhenDuplicate);
-    FRIEND_TEST(AosDnsQueryTest, StartDnsQueryPrivateReturnFalseWhenNullThread);
-    FRIEND_TEST(AosDnsQueryTest, TerminateDnsQueryPrivateReturnFalseWhenNullThread);
-    FRIEND_TEST(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQueryFail);
-    FRIEND_TEST(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccess);
-    FRIEND_TEST(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccessWithSignal);
-    FRIEND_TEST(AosDnsQueryTest, RunDnsQueryPrivateThenResetTerminateEvent);
 };
 
 class AosDnsQueryTest : public ::testing::Test

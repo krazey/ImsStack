@@ -100,13 +100,31 @@ protected:
     IMS_BOOL IsTimerRunning() const;
     IMS_BOOL IsTrafficResponseWaiting() const;
 
+    IMS_UINT32 GetAccessNetworkType(IN IMS_UINT32 nRadioType);
+
     // ITimerListener Interface
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-private:
-    IMS_UINT32 GetAccessNetworkType(IN IMS_UINT32 nRadioType);
+    // IAosTrafficListener
+    void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
+            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) override;
 
-    void NotifyConnectionFailed(IN IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
+    void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType) override;
+
+    // IImsRadioTrafficPriorityListener
+    void ImsRadio_OnTrafficPriorityChanged() override;
+
+    // For Unit Test
+    inline ImsMap<IMS_UINT32, ImsList<IAosTransactionListener*>> GetListeners()
+    {
+        return m_objListeners;
+    }
+
+    inline void ClearListeners() { m_objListeners.Clear(); }
+    inline void ClearTraffics() { m_objTraffics.Clear(); }
+
+private:
+    void NotifyConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nType);
     void NotifyTrafficPriorityChanged(IN IMS_UINT32 nType);
@@ -120,15 +138,6 @@ private:
     void StartTimer(IN IMS_UINT32 nDuration);
     void StopTimer();
     void ProcessTimerExpired();
-
-    // IAosTrafficListener
-    void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
-            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) override;
-
-    void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType) override;
-
-    // IImsRadioTrafficPriorityListener
-    void ImsRadio_OnTrafficPriorityChanged() override;
 
 protected:
     IImsRadio* m_piImsRadio;

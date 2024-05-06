@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 #include "SipDebug.h"
+#include "msg/SipMessage.h"
+#include "msg/SipMsgUtil.h"
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
-#include "msg/SipMsgUtil.h"
-#include "msg/SipMessage.h"
-#include <ctype.h>
 
 #define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
 
@@ -445,14 +444,14 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
     return SipHeaderBase::UNKNOWN;
 }
 
-SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR RcvdHdrName)
+SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR cHdrName)
 {
-    SIP_CHAR lowHdrName = tolower(RcvdHdrName);
+    cHdrName = SIP_TOLOWER(cHdrName);
 
     /*Content-Length (l) header to be considered as unknown header to synch with Engine.*/
     /*Other content headers which has compact form (type - c & encoding - e) are known headers in
      * engine*/
-    if (lowHdrName == 'l')
+    if (cHdrName == 'l')
     {
         return SipHeaderBase::UNKNOWN;
     }
@@ -460,7 +459,7 @@ SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR RcvdHdrName)
     const SIP_CHAR* psztemp = gaszSipHdrCompact;
     for (SIP_INT32 i = 0; (*psztemp != '\0'); i++)
     {
-        if (*psztemp == lowHdrName)
+        if (*psztemp == cHdrName)
         {
             return gaszSipHdrCompactEnum[i];
         }

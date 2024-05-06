@@ -35,10 +35,10 @@ public:
     void Transfer() override;
 
 protected:
-    IMS_BOOL IsValid() const override;
     void OnCompleted() override;
 
 private:
+    IMS_BOOL IsValid() const;
     void FindTransferTarget();
     void TerminateTransferTargetCall();
 

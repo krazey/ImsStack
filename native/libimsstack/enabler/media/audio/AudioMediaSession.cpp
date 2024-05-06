@@ -40,7 +40,8 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
-        m_nInactivityTimer(0)
+        m_nInactivityTimer(0),
+        m_bAnbrEnabled(IMS_FALSE)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
 
@@ -367,10 +368,26 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         }
     }
 
+    AnbrMode objAnbr;
+    objAnbr.setDefaultAnbrMode();
+
+    if (m_pRtpConfig->getAnbrMode().getAnbrUplinkCodecMode() != 0)
+    {
+        objAnbr.setAnbrUplinkCodecMode(m_pRtpConfig->getAnbrMode().getAnbrUplinkCodecMode());
+    }
+    if (m_pRtpConfig->getAnbrMode().getAnbrDownlinkCodecMode() != 0)
+    {
+        objAnbr.setAnbrDownlinkCodecMode(m_pRtpConfig->getAnbrMode().getAnbrDownlinkCodecMode());
+    }
+    objAudioConfig.setAnbrMode(objAnbr);
+
     IMS_TRACE_D("UpdateRtpConfig() - DtmfTxPayloadTypeNumber[%d],"
                 "DtmfRxPayloadTypeNumber[%d],DtmfsamplingRateKHz[%d] ",
             objAudioConfig.getTxDtmfPayloadTypeNumber(),
             objAudioConfig.getRxDtmfPayloadTypeNumber(), objAudioConfig.getDtmfsamplingRateKHz());
+    IMS_TRACE_D("UpdateRtpConfig() - Anbr UL CodecMode[%d], Anbr DL CodecMode[%d]",
+            objAudioConfig.getAnbrMode().getAnbrUplinkCodecMode(),
+            objAudioConfig.getAnbrMode().getAnbrDownlinkCodecMode(), 0);
 
     if (m_pRtpConfig != IMS_NULL)
     {
@@ -385,6 +402,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     }
 
     m_pRtpConfig = new AudioConfig(objAudioConfig);
+
     return IMS_TRUE;
 }
 
@@ -484,6 +502,7 @@ IMS_BOOL AudioMediaSession::Modify()
     {
         ImsMediaMsgConfigParam* pParam = new ImsMediaMsgConfigParam(MEDIA_TYPE_AUDIO);
         pParam->m_pConfig = new AudioConfig(REINTERPRET_CAST(AudioConfig*, m_pRtpConfig));
+
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IJniMedia::REQUEST_MODIFY_SESSION, pParam);
 
@@ -612,6 +631,145 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode)
     }
 
     return bResult;
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled)
+{
+    IMS_TRACE_I(
+            "UpdateAnbrEnabledConfig() - state[%d], anbr enabled[%d]", m_nState, anbrEnabled, 0);
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (m_piMediaSessionListener != IMS_NULL)
+    {
+        m_bAnbrEnabled = anbrEnabled;
+
+        ImsMediaMsgAnbrNegotiationParam* pParam = new ImsMediaMsgAnbrNegotiationParam();
+        pParam->m_bAnbrNegotiationType = anbrEnabled;
+
+        bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, pParam);
+    }
+
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::NotifyAnbrReceived(
+        IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate)
+{
+    IMS_TRACE_I("NotifyAnbrReceived() - state[%d], anbr media type[%d], direction[%d]", m_nState,
+            anbrMediaType, anbrDirection);
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (!m_bAnbrEnabled)
+    {
+        IMS_TRACE_D("NotifyAnbrReceived() - Anbr is disabled", 0, 0, 0);
+        return bResult;
+    }
+
+    if (m_piMediaSessionListener != IMS_NULL && m_pRtpConfig != IMS_NULL)
+    {
+        AudioConfig* pAudioConfig = REINTERPRET_CAST(AudioConfig*, m_pRtpConfig);
+        IMS_SINT32 codecMode =
+                ConvertBitrateToCodecMode(anbrBitrate, (IMS_UINT32)pAudioConfig->getCodecType());
+        AnbrMode anbrMode;
+
+        if (anbrDirection == MEDIA_DIRECTION_ANBR::DIRECTION_UPLINK)
+        {
+            anbrMode.setAnbrUplinkCodecMode(1 << codecMode);
+
+            if (m_pRtpConfig->getAnbrMode().getAnbrDownlinkCodecMode() != 0)
+            {
+                anbrMode.setAnbrDownlinkCodecMode(
+                        m_pRtpConfig->getAnbrMode().getAnbrDownlinkCodecMode());
+            }
+        }
+        else if (anbrDirection == MEDIA_DIRECTION_ANBR::DIRECTION_DOWNLINK)
+        {
+            if (m_pRtpConfig->getAnbrMode().getAnbrUplinkCodecMode() != 0)
+            {
+                anbrMode.setAnbrUplinkCodecMode(
+                        m_pRtpConfig->getAnbrMode().getAnbrUplinkCodecMode());
+            }
+
+            anbrMode.setAnbrDownlinkCodecMode(1 << codecMode);
+        }
+        else
+        {
+            IMS_TRACE_D("NotifyAnbrReceived() - Invalid direction[%d]", anbrDirection, 0, 0);
+            return bResult;
+        }
+
+        SetAnbrMode(anbrMode);
+
+        bResult = Modify();
+    }
+
+    return bResult;
+}
+
+PRIVATE
+IMS_SINT32 AudioMediaSession::ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType)
+{
+    IMS_SINT32 convertedCodecMode = -1;
+
+    switch (codecType)
+    {
+        case CodecType_ANBR::CODEC_AMR:
+        case CodecType_ANBR::CODEC_AMR_WB:
+            if (bitrate >= 0 && bitrate <= 12)
+            {
+                convertedCodecMode = 10;
+            }
+            else if (bitrate <= 16)
+            {
+                convertedCodecMode = 12;
+            }
+            else if (bitrate <= 24)
+            {
+                convertedCodecMode = 13;
+            }
+            // TODO: need to add for EVS 24.4kbps
+            break;
+        case CodecType_ANBR::CODEC_EVS:
+            if (bitrate >= 0 && bitrate <= 10)
+            {
+                convertedCodecMode = 9;  // 5.9kbps
+            }
+            else if (bitrate <= 12)
+            {
+                convertedCodecMode = 10;  // 7.2kbps
+            }
+            else if (bitrate <= 16)
+            {
+                convertedCodecMode = 12;  // 9.6kbps
+            }
+            else if (bitrate <= 20)
+            {
+                convertedCodecMode = 13;  // 13.2kbps
+            }
+            else if (bitrate <= 24)
+            {
+                convertedCodecMode = 14;  // 16.4kbps
+            }
+            else if (bitrate <= 28)
+            {
+                convertedCodecMode = 15;  // 24.4kbps
+            }
+            else
+            {
+                convertedCodecMode = 13;  // 13.2kbps
+            }
+            // TODO: need to add for EVS 24.4kbps
+            break;
+        default:
+            IMS_TRACE_D("Enter default - Error", 0, 0, 0);
+            break;
+    }
+    IMS_TRACE_D(
+            "ConvertBitrateToCodecMode() - converted codec mode [%d]", convertedCodecMode, 0, 0);
+    return convertedCodecMode;
 }
 
 PUBLIC

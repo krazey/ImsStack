@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipDefTimerUtil.h"
 #include "ServiceTimer.h"
+#include "SipDefTimerUtil.h"
 
 extern SIP_BOOL Sip_Cbk_StartTimer(IN SIP_UINT32 nDuration, IN SipTimerCallback pfnTimerCallback,
         IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle);

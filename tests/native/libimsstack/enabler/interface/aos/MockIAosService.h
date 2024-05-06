@@ -29,16 +29,15 @@
 class MockIAosService : public IAosService
 {
 public:
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosEmergencyListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
     MOCK_METHOD(
-            IMS_BOOL, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosRegistrationControlListener * piListener),
-            (override));
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosServiceSettingListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServiceSettingListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosServicePhoneListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
+            void, RemoveListener, (IN IAosRegistrationControlListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosServiceSettingListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosServiceSettingListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosServicePhoneListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
     MOCK_METHOD(void, NotifyEmcCallbackModeChanged,
             (IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration), (override));
     MOCK_METHOD(void, UpdateSipDelegateRegistration, (), (override));

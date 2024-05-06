@@ -32,7 +32,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -114,7 +114,7 @@ public class ConfigAgent implements ConfigInterface {
             ImsLog.d(mSlotId, "readTestConfig: " + e.toString());
             mTestConfig = new PersistableBundle();
         } finally {
-            IoUtils.closeQuietly(is);
+            ImsUtils.closeQuietly(is);
         }
 
         return mTestConfig;
@@ -141,7 +141,7 @@ public class ConfigAgent implements ConfigInterface {
             } catch (IOException e) {
                 ImsLog.d(mSlotId, "writeTestConfig: " + e.toString());
             } finally {
-                IoUtils.closeQuietly(os);
+                ImsUtils.closeQuietly(os);
             }
 
             return false;
@@ -309,7 +309,7 @@ public class ConfigAgent implements ConfigInterface {
             ImsLog.e(mSlotId, "loadCarrierConfigFromXml: " + e.toString());
             return new PersistableBundle();
         } finally {
-            IoUtils.closeQuietly(is);
+            ImsUtils.closeQuietly(is);
         }
     }
 

@@ -40,8 +40,8 @@ import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.imsstack.util.SystemUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -654,7 +654,7 @@ public class LocationAgent implements LocationInterface {
         locationInfo[2] = Float.toString(location.getAccuracy());
         locationInfo[3] = mPolicy.getShape();
         locationInfo[4] = Integer.toString(confidence);
-        locationInfo[5] = SystemUtils.getUtcTimeFormat(location.getTime());
+        locationInfo[5] = ImsUtils.getUtcTimeFormat(location.getTime());
         locationInfo[6] = method;
         locationInfo[11] = Double.toString(location.getAltitude());
         locationInfo[12] = Float.toString(location.getVerticalAccuracyMeters());
@@ -766,9 +766,9 @@ public class LocationAgent implements LocationInterface {
             if (ImsLog.isDebuggable()) {
                 ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                         + "; " + cachedTime
-                        + "(" + SystemUtils.getUtcTimeFormat(cachedTime / 1000000) + ")"
+                        + "(" + ImsUtils.getUtcTimeFormat(cachedTime / 1000000) + ")"
                         + " >> " + currentTime
-                        + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
+                        + "(" + ImsUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
             } else {
                 ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                         + "; " + cachedTime + " >> " + currentTime);
@@ -836,9 +836,9 @@ public class LocationAgent implements LocationInterface {
         if (ImsLog.isDebuggable()) {
             ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                     + "; " + locationUpdateTime
-                    + "(" + SystemUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
+                    + "(" + ImsUtils.getUtcTimeFormat(locationUpdateTime / 1000000) + ")"
                     + " >> " + currentTime
-                    + "(" + SystemUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
+                    + "(" + ImsUtils.getUtcTimeFormat(currentTime / 1000000) + ")");
         } else {
             ImsLog.d(mSlotId, "Location :: timeLag=" + timeLag
                     + "; " + locationUpdateTime + " >> " + currentTime);
@@ -1197,7 +1197,7 @@ public class LocationAgent implements LocationInterface {
             sb.append(location.getAccuracy());
             sb.append(", ");
             sb.append("68, ");
-            sb.append(SystemUtils.getUtcTimeFormat(location.getTime()));
+            sb.append(ImsUtils.getUtcTimeFormat(location.getTime()));
             sb.append(", ");
             sb.append("NA, ");
             sb.append(location.getAltitude());

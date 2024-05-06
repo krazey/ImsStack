@@ -16,84 +16,14 @@
 # limitations under the License.
 #
 
-##### App specific parameters #####
-
-PACKAGE_NAME='com.android.imsstack'
-MODULE_NAME='ImsStack'
-MODULE_PATH='vendor/google/services/ImsStack'
-
-TEST_PACKAGE='com.android.imsstack.tests'
-TEST_MODULE_NAME='ImsStackJavaTests'
-TEST_MODULE_PATH='vendor/google/services/ImsStack/tests/java'
-TEST_MODULE_INSTALL_PATH="testcases/$TEST_MODULE_NAME/arm64/$TEST_MODULE_NAME.apk"
-TEST_RUNNER="$TEST_PACKAGE/androidx.test.runner.AndroidJUnitRunner"
-
-##### End app specific parameters #####
-
-if [[ $# != 0 && ! ($# == 1 && ($1 == "html" || $1 == "xml" || $1 == "csv")) ]]; then
-  echo "$0: usage: coverage.sh [REPORT_TYPE]"
-  echo "REPORT_TYPE [html | xml | csv] : the type of the report (default is html)"
-  exit 1
-fi
-
-REPORT_TYPE=${1:-html}
+TEST_SCRIPT_PATH='vendor/google/services/ImsStack/tests/java/coverage-manual'
 
 if [ -z $ANDROID_BUILD_TOP ]; then
   echo "You need to source and lunch before you can use this script"
   exit 1
 fi
 
-REPORTER_JAR=$ANDROID_HOST_OUT/framework/jacoco-cli.jar
-
-OUTPUT_DIR="$ANDROID_BUILD_TOP/out/coverage/$MODULE_NAME"
-
-echo "Running tests and generating coverage report"
-echo "Output dir: $OUTPUT_DIR"
-echo "Report type: $REPORT_TYPE"
-
-# location on the device to store coverage results, need to be accessible by the app
-REMOTE_COVERAGE_OUTPUT_FILE="/storage/self/primary/Download/coverage.ec"
-
-COVERAGE_OUTPUT_FILE="$ANDROID_BUILD_TOP/out/$PACKAGE_NAME.ec"
-OUT_COMMON="$ANDROID_BUILD_TOP/out/target/common"
-COVERAGE_CLASS_FILE="$ANDROID_BUILD_TOP/out/soong/.intermediates/$MODULE_PATH/java/ImsStack/android_common/javac/ImsStack.jar"
-
-source $ANDROID_BUILD_TOP/build/envsetup.sh
-
-set -e # fail early
-
-echo ""
-echo "BUILDING TEST PACKAGE $TEST_PACKAGE"
-echo "============================================"
-(cd "$ANDROID_BUILD_TOP/$TEST_MODULE_PATH" && EMMA_INSTRUMENT=true EMMA_INSTRUMENT_STATIC=true mma -j32)
-echo "============================================"
-
-adb root
-adb wait-for-device
-
-adb shell rm -f "$REMOTE_COVERAGE_OUTPUT_FILE"
-
-adb install -r -g "$OUT/$TEST_MODULE_INSTALL_PATH"
-
-echo ""
-echo "RUNNING TESTS $TEST_RUNNER"
-echo "============================================"
-adb shell am instrument -e coverage true -e coverageFile "$REMOTE_COVERAGE_OUTPUT_FILE" -w "$TEST_RUNNER"
-echo "============================================"
-
-mkdir -p "$OUTPUT_DIR"
-
-adb pull "$REMOTE_COVERAGE_OUTPUT_FILE" "$COVERAGE_OUTPUT_FILE"
-
-java -jar "$REPORTER_JAR" \
-  report "$COVERAGE_OUTPUT_FILE" \
-  --$REPORT_TYPE "$OUTPUT_DIR" \
-  --classfiles "$COVERAGE_CLASS_FILE" \
-  --sourcefiles "$ANDROID_BUILD_TOP/$MODULE_PATH/java/src"
-
-
-# Echo the file as URI to quickly open the result using ctrl-click in terminal
-if [[ REPORT_TYPE == html ]] ; then
-  echo "COVERAGE RESULTS IN:"
-  echo "file://$OUTPUT_DIR/index.html"
-fi
+$ANDROID_BUILD_TOP/$TEST_SCRIPT_PATH/install.sh && \
+# wait 5 seconds for device rebooting
+sleep 5 && \
+$ANDROID_BUILD_TOP/$TEST_SCRIPT_PATH/run.sh

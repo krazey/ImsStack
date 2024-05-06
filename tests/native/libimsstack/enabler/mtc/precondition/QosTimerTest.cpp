@@ -14,18 +14,88 @@
  * limitations under the License.
  */
 
+#include "ImsTypeDef.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
+#include "TestTimerService.h"
+#include "precondition/IQosTimerListener.h"
 #include "precondition/QosTimer.h"
 #include <gtest/gtest.h>
+
+using ::testing::Return;
 
 namespace android
 {
 
-class QosTimerTest : public ::testing::Test
+class QosTimerTest : public ::testing::Test, public IQosTimerListener
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    TestTimerService objTimerService;
+    IMS_BOOL bTimerExpired;
+    IMS_UINT32 nAnyDuration = 10000;
+    QosTimer* pQosTimer;
 
-    virtual void TearDown() override {}
+    void OnTimerExpired(IN QosTimer* /*pTimer*/, IN QosTimerType /*eType*/) override
+    {
+        bTimerExpired = IMS_TRUE;
+    }
+
+protected:
+    virtual void SetUp() override
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
+
+        bTimerExpired = IMS_FALSE;
+        pQosTimer = new QosTimer(this);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pQosTimer;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 };
+
+TEST_F(QosTimerTest, StartQosTimerStopQosTimerAddsRemovesTimer)
+{
+    pQosTimer->StartQosTimer(QosTimerType::GUARD_AVAILABLE, nAnyDuration);
+
+    EXPECT_TRUE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
+
+    pQosTimer->StopQosTimer(QosTimerType::GUARD_AVAILABLE);
+
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
+}
+
+TEST_F(QosTimerTest, TimerTimerExpiredRemovesTimerAndNotifies)
+{
+    pQosTimer->StartQosTimer(QosTimerType::GUARD_AVAILABLE, nAnyDuration);
+
+    EXPECT_TRUE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
+
+    pQosTimer->Timer_TimerExpired(&(objTimerService.GetMockTimer()));
+
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE));
+    EXPECT_FALSE(pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_AFTER_LOST));
+    EXPECT_TRUE(bTimerExpired);
+}
+
+TEST_F(QosTimerTest, DestructorClearsITimer)
+{
+    MockITimer objMockITimer;
+    objTimerService.SetTimer(&objMockITimer);
+
+    QosTimer* pQosTimerForDestructor = new QosTimer(this);
+    pQosTimerForDestructor->StartQosTimer(
+            QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER, nAnyDuration);
+    EXPECT_CALL(objMockITimer, KillTimer);
+
+    delete pQosTimerForDestructor;
+}
 
 }  // namespace android
