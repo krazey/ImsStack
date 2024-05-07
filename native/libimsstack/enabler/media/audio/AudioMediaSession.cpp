@@ -40,7 +40,8 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
-        m_nInactivityTimer(0),
+        m_nNetworkToneTimer(0),
+        m_nRtpInactivityTimer(0),
         m_bAnbrEnabled(IMS_FALSE)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
@@ -423,10 +424,15 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
 {
     IMS_SINT32 nRtpInactivity = 0;
 
-    nRtpInactivity = GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0
-            ? GetInactivityTimer(NETWORK_TONE_INACTIVITY)
-            : (bActiveSession) ? m_pConfig->GetRtpInactivityTimerMillis()
-                               : 0;
+    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
+    {
+        nRtpInactivity = GetInactivityTimer(NETWORK_TONE_INACTIVITY);
+    }
+    else
+    {
+        nRtpInactivity = (bActiveSession) ? m_pConfig->GetRtpInactivityTimerMillis() : 0;
+        m_nRtpInactivityTimer = nRtpInactivity;
+    }
 
     m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{nRtpInactivity});
     m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
@@ -781,9 +787,9 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
 }
 
 PUBLIC
-void AudioMediaSession::SetInactivityTimer(IN IMS_UINT32 nTimer)
+void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 {
-    m_nInactivityTimer = nTimer;
+    m_nNetworkToneTimer = nTimer;
 }
 
 PUBLIC
@@ -792,13 +798,11 @@ IMS_SINT32 AudioMediaSession::GetInactivityTimer(IN InactivitytimerType eType)
     switch (eType)
     {
         case RTP_INACTIVITY:
-            return (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
-                    ? -1
-                    : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front();
+            return m_nRtpInactivityTimer;
         case RTCP_INACTIVITY:
             return m_objMediaQualityThreshold.getRtcpInactivityTimerMillis();
         case NETWORK_TONE_INACTIVITY:
-            return m_nInactivityTimer;
+            return m_nNetworkToneTimer;
         default:
             return -1;
     }

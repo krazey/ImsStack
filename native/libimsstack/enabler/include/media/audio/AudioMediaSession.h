@@ -180,11 +180,11 @@ public:
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
     /**
-     * @brief Set Inactivity timer separately
+     * @brief Set network tone timer
      *
-     * @param nTimer Inactivity timer value
+     * @param nTimer The network tone timer value
      */
-    void SetInactivityTimer(IN IMS_UINT32 nTimer);
+    void SetNetworkToneTimer(IN IMS_UINT32 nTimer);
 
     /**
      * @brief Get Inactivity timer
@@ -226,7 +226,8 @@ protected:
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     ImsList<IMS_UINTP> m_listNegoId;
-    IMS_SINT32 m_nInactivityTimer;
+    IMS_SINT32 m_nNetworkToneTimer;
+    IMS_SINT32 m_nRtpInactivityTimer;
     IMS_BOOL m_bAnbrEnabled;
 };
 
