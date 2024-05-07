@@ -37,6 +37,7 @@ public final class RegistrationInfo {
     private final int mSimApplicationState;
     private final PersistableBundle mConfig;
     private final CapabilityChangeRequest mEnableCapabilityRequest;
+    private final CapabilityChangeRequest mDisableCapabilityRequest;
     private final int mNetworkCapability;
     private final ServiceState mServiceState;
 
@@ -47,16 +48,20 @@ public final class RegistrationInfo {
      * @param config               The configuration for the IMS registration.
      * @param enableCapabilityRequest The request to enable capabilities.
      *                                {@link CapabilityChangeRequest}
+     * @param disableCapabilityRequest The request to disable capabilities.
+     *                                {@link CapabilityChangeRequest}
      * @param networkCapability    The network capability for the IMS registration.
      * @param serviceState         The service state. {@link ServiceState}
      */
     public RegistrationInfo(int slotId, int simApplicationState, PersistableBundle config,
-            CapabilityChangeRequest enableCapabilityRequest, int networkCapability,
+            CapabilityChangeRequest enableCapabilityRequest,
+            CapabilityChangeRequest disableCapabilityRequest, int networkCapability,
             ServiceState serviceState) {
         mSlotId = slotId;
         mSimApplicationState = simApplicationState;
         mConfig = config;
         mEnableCapabilityRequest = enableCapabilityRequest;
+        mDisableCapabilityRequest = disableCapabilityRequest;
         mNetworkCapability = networkCapability;
         mServiceState = serviceState;
     }
@@ -101,12 +106,32 @@ public final class RegistrationInfo {
     }
 
     /**
+     * Returns the request to disable capabilities from the registration information.
+     *
+     * @return The request to disable capabilities, or
+     *         {@code null} if no disable capabilities is available.
+     */
+    @Nullable
+    public CapabilityChangeRequest getDisableCapabilityRequest() {
+        return mDisableCapabilityRequest;
+    }
+
+    /**
      * Indicates whether enable capabilities has been changed.
      *
      * @return {@code true} if enable capabilities has been changed, {@code false} otherwise.
      */
     public boolean isEnableCapabilityRequestChanged() {
         return mEnableCapabilityRequest != null;
+    }
+
+    /**
+     * Indicates whether disable capabilities has been changed.
+     *
+     * @return {@code true} if disable capabilities has been changed, {@code false} otherwise.
+     */
+    public boolean isDisableCapabilityRequestChanged() {
+        return mDisableCapabilityRequest != null;
     }
 
     /**
@@ -154,6 +179,8 @@ public final class RegistrationInfo {
         sb.append(", EnableCapabilityRequest=");
         sb.append((mEnableCapabilityRequest != null)
                 ? mEnableCapabilityRequest.toString() : "null");
+        sb.append((mDisableCapabilityRequest != null)
+                ? mDisableCapabilityRequest.toString() : "null");
         sb.append(", NetworkCapability=");
         sb.append(mNetworkCapability);
         sb.append(", ServiceState=");
@@ -171,6 +198,7 @@ public final class RegistrationInfo {
         private int mSimApplicationState = TelephonyManager.SIM_STATE_LOADED;
         private PersistableBundle mConfig;
         private CapabilityChangeRequest mEnableCapabilityRequest;
+        private CapabilityChangeRequest mDisableCapabilityRequest;
         private int mNetworkCapability = NetworkCapabilities.NET_CAPABILITY_IMS;
         private ServiceState mServiceState;
 
@@ -239,6 +267,13 @@ public final class RegistrationInfo {
         /**
          * Sets the capability request for enabling the specified capability for multiple radio
          * technologies.
+         * <p>
+         * NOTE:
+         * 1. This method ensures that to enable capability request takes precedence over
+         *    the disable capabilities request. If a disable capabilities request already exists
+         *    before this method is called, that request will be removed.
+         * 2. MmTel capabilities are not automatically reset when the ImsStackTest ends.
+         *    If necessary, perform initialization in the tearDown method of the test class.
          *
          * @param capability  The MmTel capability to enable.
          * @param radioTechs  The list of supported radio technologies.
@@ -246,6 +281,10 @@ public final class RegistrationInfo {
          */
         @NonNull
         public Builder setEnableCapabilityRequest(int capability, int... radioTechs) {
+
+            // Remove any existing disable capability request
+            mDisableCapabilityRequest = null;
+
             if (mEnableCapabilityRequest == null) {
                 mEnableCapabilityRequest = new CapabilityChangeRequest();
             }
@@ -253,12 +292,20 @@ public final class RegistrationInfo {
             for (int radioTech : radioTechs) {
                 mEnableCapabilityRequest.addCapabilitiesToEnableForTech(capability, radioTech);
             }
+
             return this;
         }
 
         /**
          * Sets the capability request for disabling the specified capability for multiple radio
          * technologies.
+         * <p>
+         * NOTE:
+         * 1. This method ensures that to disable capability request takes precedence over
+         *    the enable capabilities request. If an enable capabilities request already exists
+         *    before this method is called, that request will be removed.
+         * 2. MmTel capabilities are not automatically reset when the ImsStackTest ends.
+         *    If necessary, perform initialization in the tearDown method of the test class.
          *
          * @param capability  The MmTel capability to disable.
          * @param radioTechs  The list of supported radio technologies.
@@ -266,13 +313,18 @@ public final class RegistrationInfo {
          */
         @NonNull
         public Builder setDisableCapabilityRequest(int capability, int... radioTechs) {
-            if (mEnableCapabilityRequest == null) {
-                mEnableCapabilityRequest = new CapabilityChangeRequest();
+
+            // Remove any existing enable capability request
+            mEnableCapabilityRequest = null;
+
+            if (mDisableCapabilityRequest == null) {
+                mDisableCapabilityRequest = new CapabilityChangeRequest();
             }
 
             for (int radioTech : radioTechs) {
-                mEnableCapabilityRequest.addCapabilitiesToDisableForTech(capability, radioTech);
+                mDisableCapabilityRequest.addCapabilitiesToDisableForTech(capability, radioTech);
             }
+
             return this;
         }
 
@@ -310,7 +362,8 @@ public final class RegistrationInfo {
          */
         public RegistrationInfo build() {
             return new RegistrationInfo(mSlotId, mSimApplicationState, mConfig,
-                    mEnableCapabilityRequest, mNetworkCapability, mServiceState);
+                    mEnableCapabilityRequest, mDisableCapabilityRequest, mNetworkCapability,
+                    mServiceState);
         }
     }
 }

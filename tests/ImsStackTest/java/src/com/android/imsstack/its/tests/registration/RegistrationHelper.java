@@ -79,8 +79,9 @@ public class RegistrationHelper {
         }
 
         if (info.isEnableCapabilityRequestChanged()) {
-            testBase.disableAllMmTelCapabilities();
             performMmTelCapabilityChange(info.getEnableCapabilityRequest());
+        } else if (info.isDisableCapabilityRequestChanged()) {
+            performMmTelCapabilityChange(info.getDisableCapabilityRequest());
         } else {
             testBase.enableAllMmTelCapabilities();
         }
