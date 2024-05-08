@@ -33,6 +33,6 @@ TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
 {
     IMS_UINT32 INACTIVITY_TIME = 12000;
 
-    m_pAudioMediaSession->SetInactivityTimer(INACTIVITY_TIME);
+    m_pAudioMediaSession->SetNetworkToneTimer(INACTIVITY_TIME);
     EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
 }

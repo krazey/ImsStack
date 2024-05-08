@@ -503,9 +503,10 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
     return bRet;
 }
 
-PUBLIC void AudioController::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
+PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
 {
-    IMS_TRACE_I("SetInactivityTimer() - NegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "], timer[%d]",
+    IMS_TRACE_I("SetNetworkToneTimer() - NegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x
+                "], timer[%d]",
             nNegoId, m_nCurrentActiveNegoId, nTimer);
 
     if (nNegoId == IMS_NULL)
@@ -516,7 +517,7 @@ PUBLIC void AudioController::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UIN
     AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
     if (pAudioSession != IMS_NULL)
     {
-        pAudioSession->SetInactivityTimer(nTimer);
+        pAudioSession->SetNetworkToneTimer(nTimer);
     }
 }
 
