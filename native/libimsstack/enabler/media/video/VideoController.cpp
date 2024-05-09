@@ -175,6 +175,17 @@ void VideoController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
+void VideoController::SetMtu(IN IMS_SINT32 nMtu)
+{
+    IMS_TRACE_I("SetMtu() - mtu[%d]", nMtu, 0, 0);
+
+    if (m_pSession != IMS_NULL)
+    {
+        m_pSession->SetMtu(nMtu);
+    }
+}
+
+PUBLIC
 IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);

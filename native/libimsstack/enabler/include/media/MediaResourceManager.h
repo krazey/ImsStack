@@ -75,7 +75,7 @@ public:
     /** Get the current network type connected */
     IMS_SINT32 GetNetworkType();
 
-    /** Get the mtu size */
+    /** Get the MTU size */
     IMS_SINT32 GetMtu();
 
     /** Get the rtp fragment size from mtu */

@@ -242,8 +242,12 @@ PUBLIC void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32
     IMS_TRACE_D("OnNetworkConnectionChanged() - NetworkType[%d]", nRatType, 0, 0);
     m_nNetworkType = nRatType;
 
-    MediaManager::GetInstance(m_nSlotId)->SendMessage(
-            IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+    if (pMediaManager != IMS_NULL)
+    {
+        pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
+    }
 }
 
 PUBLIC void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
@@ -251,5 +255,10 @@ PUBLIC void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
     IMS_TRACE_D("OnMediaMtuChanged() - Mtu[%d]", nMtu, 0, 0);
     m_nMtu = nMtu;
 
-    MediaManager::GetInstance(m_nSlotId)->SendMessage(IJniMedia::CHANGE_MTU, 0, nMtu);
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+    if (pMediaManager != IMS_NULL)
+    {
+        pMediaManager->SendMessage(IJniMedia::CHANGE_MTU, 0, IMS_NULL);
+    }
 }
