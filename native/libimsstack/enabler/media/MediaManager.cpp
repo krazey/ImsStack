@@ -221,6 +221,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
         }
     }
 
+    ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(pParam);
+    delete pTempParam;
+
     return bResult;
 }
 
