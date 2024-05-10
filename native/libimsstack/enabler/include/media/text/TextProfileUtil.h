@@ -17,25 +17,13 @@
 #ifndef TEXT_PROFILE_UTIL_H_
 #define TEXT_PROFILE_UTIL_H_
 
-#include "MediaEnvironment.h"
-#include "MediaResourceManager.h"
-#include "config/TextConfiguration.h"
+class TextConfiguration;
+
 #include "text/TextProfile.h"
 
 class TextProfileUtil
 {
 public:
-    /**
-     * @brief Create a TextProfile with the MediaEnvironment and TextConfiguration
-     *
-     * @param pEnvironment The network connection parameter
-     * @param pConfig The carrier configuration for text
-     * @param nSlotId The UICC slot id
-     * @return TextProfile* The TextProfile created
-     */
-    static TextProfile* CreateProfile(IN MediaEnvironment* pEnvironment,
-            IN TextConfiguration* pConfig, IN IMS_SINT32 nSlotId);
-
     /**
      * @brief Make negotiated bandwidth AS/RS/RR value in SDP attribute with the parameters
      *

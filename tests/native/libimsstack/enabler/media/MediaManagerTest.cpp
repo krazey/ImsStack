@@ -19,10 +19,11 @@
 
 #include "IMediaSession.h"
 #include "MediaManager.h"
+#include "MediaMsgHandler.h"
+#include "MediaResourceManager.h"
 #include "MediaSession.h"
 #include "MockIMediaSession.h"
 #include "MockIMediaManager.h"
-#include "MediaMsgHandler.h"
 #include "MockMediaMsgHandler.h"
 
 using ::testing::Return;

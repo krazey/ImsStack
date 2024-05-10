@@ -23,6 +23,7 @@
 #include "config/MediaConfigUtil.h"
 #include "MediaResourceManager.h"
 #include "MediaManager.h"
+#include "MediaProfileFactory.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.TN");
 
@@ -99,7 +100,9 @@ PUBLIC VIRTUAL void TextNego::CreateProfiles(
     m_pConfig = pConfig;
 
     IMS_TRACE_I("CreateProfiles()", 0, 0, 0);
-    TextProfile* pProfile = TextProfileUtil::CreateProfile(pEnvironment, m_pConfig, GetSlotId());
+    TextProfile* pProfile =
+            static_cast<TextProfile*>(MediaProfileFactory::GetInstance()->CreateProfile(
+                    pEnvironment, m_pConfig, GetSlotId(), MEDIA_TYPE_TEXT));
 
     if (pProfile != IMS_NULL)
     {
