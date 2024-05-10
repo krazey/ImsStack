@@ -93,6 +93,7 @@ public:
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
+    IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
 

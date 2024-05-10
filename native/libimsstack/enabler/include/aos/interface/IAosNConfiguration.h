@@ -433,6 +433,19 @@ public:
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
+     * @brief Flag specifying whether to wait AWT when initial registration proceeds with
+     *        the next pcscf.
+     *
+     * @return IMS_BOOL Returns whether to wait actual wait time(AWT) before attempting initial
+     *         registration with the next pcscf when error responses without retry-after to
+     *         the REGISTER message is received. When true, the UE waits AWT before attempting
+     *         initial registration with next pcscf. When false, the UE doesn't wait.
+     *         This function related to GetRegActualWaitTimePolicy. This is only valid when the
+     *         value of GetRegActualWaitTimePolicy() is CarrierConfig::Assets::AWT_POLICY_RFC_RULE.
+     */
+    virtual IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const = 0;
+
+    /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
      *
      * @return IMS_TRUE if required, else IMS_FALSE

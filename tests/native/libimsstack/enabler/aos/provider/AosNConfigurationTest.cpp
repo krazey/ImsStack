@@ -581,6 +581,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
@@ -780,6 +784,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
+    EXPECT_FALSE(m_pAosNConfiguration->IsAwtUsedWhenInitRegWithNextPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());

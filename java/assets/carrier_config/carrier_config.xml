@@ -338,6 +338,7 @@
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="support_verstat_for_reg_bool" value="false"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
+    <boolean name="use_awt_when_init_reg_with_next_pcscf_bool" value="false"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>

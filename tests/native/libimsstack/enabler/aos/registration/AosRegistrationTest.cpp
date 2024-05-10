@@ -529,6 +529,7 @@ protected:
                 .WillByDefault(ReturnRef(m_objEmptyErrCode));
         ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
                 .WillByDefault(ReturnRef(m_objEmptyMaxCount));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
                 .WillByDefault(
                         Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
@@ -555,6 +556,8 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsIpsecInitializedWithNewPcscf())
+                .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
@@ -2544,6 +2547,23 @@ TEST_F(AosRegistrationTest,
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
+TEST_F(AosRegistrationTest, TriggerOfflineRecoverWithAwtWhenRegRequiredWithAvailableNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    ON_CALL(m_objMockIAosNConfiguration, IsAwtUsedWhenInitRegWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->ProcessRegRequiredWithAvailableNextPcscf(IMS_FALSE, 0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
 TEST_F(AosRegistrationTest,
         ReportFailureWhenRegRequiredWithAvailableNextPcscfIfCreateRegistrationFail)
 {
@@ -2833,6 +2853,19 @@ TEST_F(AosRegistrationTest, StartRetryTimerWhenFlowRecoveryForStartIfSetOfNextPc
     EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
 
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerWhenFlowRecoveryForStartIfInitRegIsTriedWithNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    ON_CALL(m_objMockIAosNConfiguration, IsAwtUsedWhenInitRegWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_503);
 
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }

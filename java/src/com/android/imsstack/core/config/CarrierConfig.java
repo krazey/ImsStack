@@ -747,6 +747,8 @@ public class CarrierConfig {
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
+        public static final String KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL =
+                "use_awt_when_init_reg_with_next_pcscf_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                         "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

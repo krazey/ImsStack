@@ -722,6 +722,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILAB
         "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         "support_verstat_for_reg_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL[] =
+        "use_awt_when_init_reg_with_next_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

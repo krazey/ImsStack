@@ -3249,6 +3249,16 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
             return;
         }
 
+        if ((GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
+                    CarrierConfig::Assets::AWT_POLICY_RFC_RULE) &&
+                GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf())
+        {
+            ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+            IncreaseConsecutiveFailCount();
+            StartTimer(TIMER_OFFLINE_RECOVER, GetActualWaitTime() * 1000);
+            return;
+        }
+
         if (!CreateRegistration())
         {
             ProcessUnpredictableFailure();
@@ -3483,10 +3493,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     m_piContext->GetPcscf()->IncreaseCurrentPcscfTriedCount();
 
-    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
-    IMS_UINT32 nAwt = 0;
-
     if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
     {
         if (IsErrorCodeExisted(
@@ -3500,6 +3507,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
     }
 
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
+    IMS_UINT32 nAwt = 0;
     if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
         ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(nRetryAfter);
@@ -3540,11 +3549,27 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
                     IMS_TRUE, (nRetryAfter > 0) ? nRetryAfter : nAwt);
         }
 
-        if (TryNextPcscf())
+        if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_RFC_RULE &&
+                (GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf()))
         {
-            SetState(STATE_REGISTERING);
-            ReportTryingState();
-            return;
+            if (SetNextPcscf())
+            {
+                IMS_UINT32 nRetryTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
+                StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
+
+                SetState(STATE_REGSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+                return;
+            }
+        }
+        else
+        {
+            if (TryNextPcscf())
+            {
+                SetState(STATE_REGISTERING);
+                ReportTryingState();
+                return;
+            }
         }
     }
 
@@ -3925,7 +3950,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_423()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
 {
-    IncreaseConsecutiveFailCount();
     IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
     if (nRetryAfter == 0)
@@ -3941,6 +3965,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
 
         if (nTimerF > 0)
         {
+            IncreaseConsecutiveFailCount();
+
             if (nRetryAfter > static_cast<IMS_UINT32>(nTimerF))
             {
                 m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
