@@ -576,7 +576,6 @@ IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
             }
         }
 
-        delete param;
         return IMS_TRUE;
     }
 
@@ -595,8 +594,6 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
         VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
         m_nCameraId = param->nValue;
-
-        delete param;
 
         // the operation independent with the media direction
         if (m_nCameraId != CAMERA_ID_NONE)
@@ -649,7 +646,6 @@ IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
         IMS_TRACE_I(
                 "OnChangeCameraZoomCmd() - state[%d], camera zoom[%d]", m_nState, param->nValue, 0);
         m_nCameraZoom = param->nValue;
-        delete param;
         return IMS_TRUE;
     }
 
@@ -679,7 +675,6 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
             this->Modify();
         }
 
-        delete param;
         return IMS_TRUE;
     }
 

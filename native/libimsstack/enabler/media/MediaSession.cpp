@@ -1111,7 +1111,6 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_UINTP nParam)
         IMS_TRACE_I("OnResponse() - eMediaType[%d], eResult[%d]", pParam->m_eMediaType,
                 pParam->m_eResult, 0);
         ReportToClient(pParam->m_eResult, pParam->m_eMediaType);
-        delete pParam;
     }
 
     return IMS_TRUE;
@@ -1149,7 +1148,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     }
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1210,7 +1208,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                                                                 : MEDIA_PROTOCOL_RTCP);
                 }
 
-                delete pTempParam;
                 return IMS_TRUE;
             }
         }
@@ -1249,7 +1246,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     }
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1265,7 +1261,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     m_pClientListener->MediaSession_Notify(REPORT_VIDEO_LOWEST_BITRATE);
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1286,7 +1281,6 @@ IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
     if (pParam != IMS_NULL)
     {
         m_objAudioController.SendDtmf(pParam->m_dtmfCode);
-        delete pParam;
         return IMS_TRUE;
     }
 
@@ -1305,7 +1299,7 @@ IMS_BOOL MediaSession::OnNotifyAnbrReceived(IN IMS_UINTP nParam)
             m_objAudioController.NotifyAnbrReceived(
                     pParam->m_nAnbrMediaType, pParam->m_nAnbrDirection, pParam->m_nAnbrBitrate);
         }
-        delete pParam;
+
         return IMS_TRUE;
     }
 
