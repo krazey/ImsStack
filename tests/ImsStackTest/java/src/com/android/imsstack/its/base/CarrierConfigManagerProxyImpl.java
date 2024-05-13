@@ -16,13 +16,17 @@
 package com.android.imsstack.its.base;
 
 import android.annotation.CallbackExecutor;
+import android.content.Context;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.CarrierConfigChangeListener;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 
@@ -38,9 +42,11 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
     };
     private final SparseArray<PersistableBundle> mConfigs = new SparseArray<>();
     private final ArraySet<CarrierConfigChangeListenerRecord> mListenerRecords = new ArraySet<>();
+    private final Context mContext;
     private final PersistableBundle mDefaultConfig;
 
-    CarrierConfigManagerProxyImpl() {
+    CarrierConfigManagerProxyImpl(Context context) {
+        mContext = context;
         mDefaultConfig = CarrierConfigManager.getDefaultConfig();
         mDefaultConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL, true);
 
@@ -63,7 +69,31 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
 
     @Override
     public @NonNull PersistableBundle getConfigForSubId(int subId) {
-        return mConfigs.get(subId, mDefaultConfig);
+        PersistableBundle config = mConfigs.get(subId);
+        if (config != null) {
+            return config;
+        }
+
+        TelephonyManagerProxyImpl tmp = SystemProxyResolver.getTelephonyManagerProxy();
+        int carrierId = tmp.getSimCarrierId();
+
+        if (carrierId == TelephonyManager.UNKNOWN_CARRIER_ID
+                || carrierId == TestConstants.CARRIER_ID) {
+            return mDefaultConfig;
+        }
+
+        SubscriptionManagerProxyImpl smp = SystemProxyResolver.getSubscriptionManagerProxy();
+        int simSubId = SubscriptionManager.getSubscriptionId(smp.getSlotIndex(subId));
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        tm = tm.createForSubscriptionId(simSubId);
+        int simCarrierId = tm.getSimCarrierId();
+
+        if (carrierId == simCarrierId) {
+            CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
+            return ccm.getConfigForSubId(simSubId);
+        }
+
+        return mDefaultConfig;
     }
 
     @Override
@@ -137,11 +167,13 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
      * @param subId The subscription id.
      * @param config The carrier configuration to be set.
      */
-    public void setConfigForSubId(int subId, @NonNull PersistableBundle config) {
-        for (String generalKey : CONFIG_SUBSET_METADATA_KEYS) {
-            if (!config.containsKey(generalKey)) {
-                PersistableBundle defaultConfig = getDefaultConfig();
-                putConfigValue(config, generalKey, defaultConfig.get(generalKey));
+    public void setConfigForSubId(int subId, @Nullable PersistableBundle config) {
+        if (config != null) {
+            for (String generalKey : CONFIG_SUBSET_METADATA_KEYS) {
+                if (!config.containsKey(generalKey)) {
+                    PersistableBundle defaultConfig = getDefaultConfig();
+                    putConfigValue(config, generalKey, defaultConfig.get(generalKey));
+                }
             }
         }
         mConfigs.put(subId, config);

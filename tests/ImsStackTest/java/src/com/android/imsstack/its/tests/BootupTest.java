@@ -59,6 +59,11 @@ public class BootupTest extends ImsStackTestBase {
 
     @Test
     public void testTriggerImsRegistration() throws Exception {
+        setTestValueInitializer((slotId, simApplicationState) -> {
+            int subId = getSubId(slotId);
+            TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
+            telephony.setSimCarrierId(1); // TMO-US
+        });
         startImsStack(SLOT0, mConfig);
         enableAllMmTelCapabilities();
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);

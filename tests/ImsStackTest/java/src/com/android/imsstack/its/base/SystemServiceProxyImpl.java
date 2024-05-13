@@ -36,7 +36,8 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         mContext = context;
 
         mManagerProxies.put(TelephonyManagerProxy.class, new TelephonyManagerProxyImpl(mContext));
-        mManagerProxies.put(CarrierConfigManagerProxy.class, new CarrierConfigManagerProxyImpl());
+        mManagerProxies.put(CarrierConfigManagerProxy.class,
+                new CarrierConfigManagerProxyImpl(mContext));
         mManagerProxies.put(SubscriptionManagerProxy.class, new SubscriptionManagerProxyImpl());
         mManagerProxies.put(ConnectivityManagerProxy.class, new ConnectivityManagerProxyImpl());
         mManagerProxies.put(IpSecManagerProxy.class, new IpSecManagerProxyImpl(mContext));

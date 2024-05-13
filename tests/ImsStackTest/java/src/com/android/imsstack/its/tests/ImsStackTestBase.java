@@ -79,6 +79,10 @@ import java.util.List;
  * A test base class to provide common functionalities for each test.
  */
 public class ImsStackTestBase {
+    protected interface TestValueInitializer {
+        void init(int slotId, int simApplicationState);
+    }
+
     protected static final String LOG_TAG = "ImsStackTest";
     protected static final int APN_EMERGENCY = NetworkCapabilities.NET_CAPABILITY_EIMS;
     protected static final int APN_IMS = NetworkCapabilities.NET_CAPABILITY_IMS;
@@ -105,6 +109,7 @@ public class ImsStackTestBase {
     protected final WifiAgent mWifiAgent = WifiAgent.getInstance();
     protected final ImsServiceConnector mImsServiceConnector = ImsServiceConnector.getInstance();
     private final SingleLatch mEventLatch = new SingleLatch("ImsStackTestBase");
+    private TestValueInitializer mTestValueInitializer = this::initTestValues;
 
     public ImsStackTestBase() {
         mBroadcastReceiverProxy = SystemProxyResolver.getBroadcastReceiverProxy();
@@ -159,7 +164,7 @@ public class ImsStackTestBase {
      * @param slotId The slot id.
      * @param simApplicationState The USIM application state to be configured.
      */
-    public void initSystemProxies(int slotId, int simApplicationState) {
+    public final void initSystemProxies(int slotId, int simApplicationState) {
         int subId = getSubId(slotId);
         ImsMmTelManagerProxyImpl imsMmTel = getImsMmTelManagerProxy(subId);
         if (imsMmTel != null) {
@@ -180,6 +185,13 @@ public class ImsStackTestBase {
         telephony.setSimApplicationState(simApplicationState);
         // TODO: Need to be removed when ImsService can handle the startImsTraffic.
         telephony.setHalVersion(-2, -2);
+
+        // This ensures each test to initialize their own configuration before ImsStack starts.
+        if (mTestValueInitializer != null) {
+            mTestValueInitializer.init(slotId, simApplicationState);
+        } else {
+            initTestValues(slotId, simApplicationState);
+        }
     }
 
     /**
@@ -447,20 +459,38 @@ public class ImsStackTestBase {
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
     }
 
-    protected TelephonyManagerProxyImpl getTelephonyManagerProxy(int subId) {
+    /**
+     * Sets the {@link TestValueInitializer} to override the default test values.
+     *
+     * @param initializer The {@link TestValueInitializer} instance or null.
+     */
+    public void setTestValueInitializer(TestValueInitializer initializer) {
+        mTestValueInitializer = initializer;
+    }
+
+    protected final TelephonyManagerProxyImpl getTelephonyManagerProxy(int subId) {
         return (TelephonyManagerProxyImpl) mTelephonyManagerProxy.createForSubscriptionId(subId);
     }
 
-    protected SmsManagerProxyImpl getSmsManagerProxy(int subId) {
+    protected final SmsManagerProxyImpl getSmsManagerProxy(int subId) {
         return (SmsManagerProxyImpl) mSmsManagerProxy.createForSubscriptionId(subId);
     }
 
-    protected ImsMmTelManagerProxyImpl getImsMmTelManagerProxy(int subId) {
+    protected final ImsMmTelManagerProxyImpl getImsMmTelManagerProxy(int subId) {
         return (ImsMmTelManagerProxyImpl) mImsManagerProxy.getImsMmTelManagerProxy(subId);
     }
 
-    protected ProvisioningManagerProxyImpl getProvisioningManagerProxy(int subId) {
+    protected final ProvisioningManagerProxyImpl getProvisioningManagerProxy(int subId) {
         return (ProvisioningManagerProxyImpl) mImsManagerProxy.getProvisioningManagerProxy(subId);
+    }
+
+    protected void initTestValues(int slotId, int simApplicationState) {
+        // Subclass can override this method to initialize the additional default test values
+        // before the ImsStack starts.
+        // This method can be used for all the tests which inherit this class.
+        // If the subclass wants to use this for each test,
+        // it can set the value initializer with {@link #setTestValueInitializer()}
+        // in a specific test.
     }
 
     protected static void logd(String s) {
