@@ -27,6 +27,7 @@ import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.media.VideoConfigSpropGenerator;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
@@ -114,6 +115,7 @@ public class ServiceLoader {
         ImsStackRegistry.setImsServiceState(slotId, true);
 
         AosFactory.getInstance().start(slotId);
+        VideoConfigSpropGenerator.init(slotId);
     }
 
     /**
@@ -132,6 +134,7 @@ public class ServiceLoader {
         AgentFactory.getInstance().destroyAgentsForSlot(slotId);
         SystemInterface.getInstance().stop(slotId);
         ImsTestMode.getInstance().cleanUp(slotId);
+        VideoConfigSpropGenerator.cleanup(slotId);
     }
 
     /**
