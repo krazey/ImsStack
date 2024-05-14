@@ -107,7 +107,7 @@ TEST_F(CodecAvcConfigTest, GetConfigDefault)
 TEST_F(CodecAvcConfigTest, GetChannel)
 {
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
 }
@@ -125,7 +125,7 @@ TEST_F(CodecAvcConfigTest, GetVideoResolution)
             .WillByDefault(Return(objVideoResolution));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), nVideoWidth);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), nVideoHeight);
@@ -141,7 +141,7 @@ TEST_F(CodecAvcConfigTest, GetFramerate)
             .WillByDefault(Return(nFramerate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetFramerate(), nFramerate);
 }
@@ -157,7 +157,7 @@ TEST_F(CodecAvcConfigTest, GetVideoBitrate)
             .WillByDefault(Return(objVideoBitrate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetBitrate(), nVideoBitrate);
 }
@@ -172,7 +172,7 @@ TEST_F(CodecAvcConfigTest, GetPacketizationMode)
             .WillByDefault(Return(nPacketizationMode));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), nPacketizationMode);
 }
@@ -180,7 +180,7 @@ TEST_F(CodecAvcConfigTest, GetPacketizationMode)
 TEST_F(CodecAvcConfigTest, GetIncludeSpropParameterSets)
 {
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), DEFAULT_INCLUDE_SPROP);
 }
@@ -188,7 +188,7 @@ TEST_F(CodecAvcConfigTest, GetIncludeSpropParameterSets)
 TEST_F(CodecAvcConfigTest, GetSpropParameterSets)
 {
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
 }
@@ -202,7 +202,7 @@ TEST_F(CodecAvcConfigTest, GetProfileLevelId)
             .WillByDefault(Return(strProfileLevelId));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetProfileLevelId(), strProfileLevelId);
 }
@@ -217,7 +217,7 @@ TEST_F(CodecAvcConfigTest, GetVideoImageAttr)
             .WillByDefault(Return(objImageAttr));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetImageAttr(), objImageAttr.GetAt(0));
 }

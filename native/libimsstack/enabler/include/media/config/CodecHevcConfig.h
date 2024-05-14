@@ -25,10 +25,10 @@ public:
     /**
      * @brief Construct a new codec hevc config
      *
-     * @param nType_ video codec type - hevc (H.265)
-     * @param nPayloadTypeNum_ payload type number
+     * @param nType video codec type - hevc (H.265)
+     * @param nPayloadTypeNum payload type number
      */
-    CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Destroy the codec hevc config
      *
@@ -38,11 +38,10 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Print debug string
      */

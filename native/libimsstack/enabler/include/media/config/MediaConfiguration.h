@@ -144,7 +144,7 @@ protected:
     virtual IMS_UINT32 MakeEachCodecs(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
             IN IMS_UINT32 nCodecIndex, IN ImsVector<IMS_SINT32> objPayloadTypeArray);
     virtual IMS_UINT32 MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
-            IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
+            IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum);
     virtual void ToDebugString() const;
     virtual void ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const;
     virtual void Clear();

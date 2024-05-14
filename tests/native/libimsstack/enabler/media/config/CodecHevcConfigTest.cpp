@@ -109,7 +109,7 @@ TEST_F(CodecHevcConfigTest, GetConfigDefault)
 TEST_F(CodecHevcConfigTest, GetChannel)
 {
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
 }
@@ -127,7 +127,7 @@ TEST_F(CodecHevcConfigTest, GetVideoResolution)
             .WillByDefault(Return(objVideoResolution));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), nVideoWidth);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), nVideoHeight);
@@ -143,7 +143,7 @@ TEST_F(CodecHevcConfigTest, GetFramerate)
             .WillByDefault(Return(nFramerate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetFramerate(), nFramerate);
 }
@@ -159,7 +159,7 @@ TEST_F(CodecHevcConfigTest, GetVideoBitrate)
             .WillByDefault(Return(objVideoBitrate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetBitrate(), nVideoBitrate);
 }
@@ -174,7 +174,7 @@ TEST_F(CodecHevcConfigTest, GetPacketizationMode)
             .WillByDefault(Return(nPacketizationMode));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), nPacketizationMode);
 }
@@ -191,7 +191,7 @@ TEST_F(CodecHevcConfigTest, GetSpropParameterSets)
             .WillByDefault(Return(strSpropParameterSets));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetSpropParameterSets(), strSpropParameterSets);
 }
@@ -204,7 +204,7 @@ TEST_F(CodecHevcConfigTest, GetHevcProfile)
             .WillByDefault(Return(nHevcProfile));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetHevcProfile(), nHevcProfile);
 }
@@ -216,7 +216,7 @@ TEST_F(CodecHevcConfigTest, GetHevcLevel)
             .WillByDefault(Return(nHevcLevel));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetHevcLevel(), nHevcLevel);
 }
@@ -231,7 +231,7 @@ TEST_F(CodecHevcConfigTest, GetImageAttr)
             .WillByDefault(Return(objImageAttr));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetImageAttr(), objImageAttr.GetAt(0));
 }

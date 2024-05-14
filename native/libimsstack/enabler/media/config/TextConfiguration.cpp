@@ -131,12 +131,12 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
     IMS_UINT32 nCodecCnt = 0;
     if (m_nRedPayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, m_nRedPayloadType, 0);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, m_nRedPayloadType);
     }
 
     if (m_nT140PayloadType > 0)
     {
-        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, m_nT140PayloadType, 0);
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, m_nT140PayloadType);
     }
 
     // to avoid static analysis issue (not used variable and variable scope)

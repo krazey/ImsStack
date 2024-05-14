@@ -27,9 +27,9 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecConfig::CodecConfig(IN IMS_SINT32 nCodec_, IN IMS_SINT32 nPayloadTypeNum_) :
-        m_nCodec(nCodec_),
-        m_nPayloadType(nPayloadTypeNum_)
+CodecConfig::CodecConfig(IN IMS_SINT32 nCodec, IN IMS_SINT32 nPayloadTypeNum) :
+        m_nCodec(nCodec),
+        m_nPayloadType(nPayloadTypeNum)
 {
     IMS_TRACE_D("+CodecConfig : m_nCodec[%d], m_nPayloadType[%d]", m_nCodec, m_nPayloadType, 0);
 }
@@ -39,10 +39,9 @@ PUBLIC VIRTUAL CodecConfig::~CodecConfig()
     IMS_TRACE_D("~CodecConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc)
 {
     (void)piCc;
-    (void)nCodecIdx;
     return IMS_TRUE;
 }
 

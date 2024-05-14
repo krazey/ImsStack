@@ -20,8 +20,8 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecConfig(nType_, nPayloadTypeNum_),
+CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecConfig(nType, nPayloadTypeNum),
         m_nChannel(DEFAULT_CHANNEL),
         m_bShowDtx(IMS_FALSE),
         m_bDtx(DEFAULT_DTX),
@@ -39,7 +39,7 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
         m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
         m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
 {
-    IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecEvsConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
@@ -47,13 +47,13 @@ PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
     IMS_TRACE_D("~CodecEvsConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("Create - EvsCodecConfig", 0, 0, 0);
 
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Create - piBuffer is NULL or invalid codecIdx", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 

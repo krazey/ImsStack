@@ -20,12 +20,12 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecT140Config::CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecConfig(nType_, nPayloadTypeNum_),
+CodecT140Config::CodecT140Config(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecConfig(nType, nPayloadTypeNum),
         m_nRedLevel(DEFAULT_RED_LEVEL),
         m_nTextSamplingRate(DEFAULT_TEXT_SAMPLING_RATE)
 {
-    IMS_TRACE_D("+CodecT140Config Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecT140Config Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()
@@ -34,9 +34,9 @@ PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()
 }
 
 PUBLIC
-IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
 {
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         return IMS_FALSE;
     }

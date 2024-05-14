@@ -32,15 +32,15 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 #define DEFAULT_HEVC_FRAME_SIZE "NEED_TO_CHECK"
 
 PUBLIC
-CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecVideoConfig(nType_, nPayloadTypeNum_, DEFAULT_HEVC_RESOLUTION_WIDTH,
+CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecVideoConfig(nType, nPayloadTypeNum, DEFAULT_HEVC_RESOLUTION_WIDTH,
                 DEFAULT_HEVC_RESOLUTION_HEIGHT, DEFAULT_HEVC_FRAMERATE, DEFAULT_HEVC_BITRATE,
                 DEFAULT_HEVC_SPROP_PARAMS_480X640, DEFAULT_HEVC_IMAGE_ATTR,
                 DEFAULT_HEVC_FRAME_SIZE),
         m_nHevcProfile(DEFAULT_HEVC_PROFILE),
         m_nHevcLevel(DEFAULT_HEVC_LEVEL)
 {
-    IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
@@ -48,15 +48,15 @@ PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
     IMS_TRACE_D("~CodecHevcConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
 {
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    CodecVideoConfig::Create(piCc, nCodecIdx);
+    CodecVideoConfig::Create(piCc);
 
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);

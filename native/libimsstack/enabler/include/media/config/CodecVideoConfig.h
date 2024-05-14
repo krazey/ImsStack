@@ -25,8 +25,8 @@ public:
     /**
      * @brief Construct a new common video codec config
      *
-     * @param nType_ video codec type
-     * @param nPayloadTypeNum_ payload type number
+     * @param nType video codec type
+     * @param nPayloadTypeNum payload type number
      * @param nResolutionWidth video resolution width
      * @param nResolutionHeight video resolution height
      * @param nFramerate video frame rate
@@ -35,7 +35,7 @@ public:
      * @param strImageAttr image attribute for the video resolution
      * @param strFrameSize framesize
      */
-    CodecVideoConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_,
+    CodecVideoConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum,
             IN IMS_SINT32 nResolutionWidth, IN IMS_SINT32 nResolutionHeight,
             IN IMS_SINT32 nFramerate, IN IMS_SINT32 nBitrate, IN AString strSpropParameterSets,
             IN AString strImageAttr, IN AString strFrameSize);
@@ -49,11 +49,10 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
 
     /**
      * @brief Print debug string

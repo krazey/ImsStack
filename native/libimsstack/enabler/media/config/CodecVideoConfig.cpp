@@ -20,11 +20,11 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecVideoConfig::CodecVideoConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_,
+CodecVideoConfig::CodecVideoConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum,
         IN IMS_SINT32 nResolutionWidth, IN IMS_SINT32 nResolutionHeight, IN IMS_SINT32 nFramerate,
         IN IMS_SINT32 nBitrate, IN AString strSpropParameterSets, IN AString strImageAttr,
         IN AString strFrameSize) :
-        CodecConfig(nType_, nPayloadTypeNum_),
+        CodecConfig(nType, nPayloadTypeNum),
         m_nChannel(DEFAULT_CHANNEL),
         m_nResolutionWidth(nResolutionWidth),
         m_nResolutionHeight(nResolutionHeight),
@@ -35,7 +35,7 @@ CodecVideoConfig::CodecVideoConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadT
         m_strImageAttr(strImageAttr),
         m_strFrameSize(strFrameSize)
 {
-    IMS_TRACE_D("+CodecVideoConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecVideoConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecVideoConfig::~CodecVideoConfig()
@@ -43,9 +43,9 @@ PUBLIC VIRTUAL CodecVideoConfig::~CodecVideoConfig()
     IMS_TRACE_D("~CodecVideoConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecVideoConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecVideoConfig::Create(IN ICarrierConfig* piCc)
 {
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;

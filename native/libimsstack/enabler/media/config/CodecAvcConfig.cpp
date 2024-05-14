@@ -26,14 +26,14 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 #define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
 
 PUBLIC
-CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecVideoConfig(nType_, nPayloadTypeNum_, DEFAULT_AVC_RESOLUTION_WIDTH,
+CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecVideoConfig(nType, nPayloadTypeNum, DEFAULT_AVC_RESOLUTION_WIDTH,
                 DEFAULT_AVC_RESOLUTION_HEIGHT, DEFAULT_AVC_FRAMERATE, DEFAULT_AVC_BITRATE,
                 DEFAULT_AVC_SPROP_PARAMS, DEFAULT_AVC_IMAGE_ATTR, DEFAULT_AVC_FRAME_SIZE),
         m_bIncludeSpropParameterSets(DEFAULT_INCLUDE_SPROP),
         m_strProfileLevelId(DEFAULT_AVC_PROFILE_ID)
 {
-    IMS_TRACE_D("+CodecAvcConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecAvcConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAvcConfig::~CodecAvcConfig()
@@ -41,15 +41,15 @@ PUBLIC VIRTUAL CodecAvcConfig::~CodecAvcConfig()
     IMS_TRACE_D("~CodecAvcConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
 {
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    CodecVideoConfig::Create(piCc, nCodecIdx);
+    CodecVideoConfig::Create(piCc);
 
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
