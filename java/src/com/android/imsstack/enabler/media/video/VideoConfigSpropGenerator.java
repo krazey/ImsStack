@@ -21,6 +21,7 @@ import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.VideoConfig;
 
+import com.android.imsstack.ServiceLoader;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -102,173 +103,253 @@ public class VideoConfigSpropGenerator {
                     Executors.newSingleThreadExecutor(), callback);
             callback.setMediaManager(imsMediaManager);
         }
+    }
 
-        static class MediaCallback implements ImsMediaManager.OnConnectedCallback {
-            private ImsMediaManager mImsMediaManager;
-            private final int mSlotId;
+    static class MediaCallback implements ImsMediaManager.OnConnectedCallback {
+        private ImsMediaManager mImsMediaManager;
+        private final int mSlotId;
 
-            MediaCallback(int slotId) {
-                mSlotId = slotId;
+        MediaCallback(int slotId) {
+            mSlotId = slotId;
+        }
+
+        public void setMediaManager(ImsMediaManager imsMediaManager) {
+            mImsMediaManager = imsMediaManager;
+        }
+
+        @Override
+        public void onConnected() {
+            ImsLog.i(mSlotId, "Service connected.");
+
+            if (mImsMediaManager == null) {
+                ImsLog.e(mSlotId, "ImsMediaManager is null");
+                return;
             }
 
-            public void setMediaManager(ImsMediaManager imsMediaManager) {
-                mImsMediaManager = imsMediaManager;
+            // 1. Read VideoConfig params from carrierConfig
+            ConfigInterface configInterface = AgentFactory.getInstance()
+                    .getAgent(ConfigInterface.class, mSlotId);
+            if (configInterface == null) {
+                ImsLog.e(mSlotId, "ConfigInterface is null");
+                return;
+            }
+            CarrierConfig carrierConfig = configInterface.getCarrierConfig();
+
+            VideoConfig[] videoConfigs = readVideoConfigs(carrierConfig);
+            if (videoConfigs == null || videoConfigs.length == 0) {
+                ImsLog.e(mSlotId, "No videoConfigs available in carrier config");
+                return;
             }
 
-            @Override
-            public void onConnected() {
-                ImsLog.i(mSlotId, "Service connected.");
+            // 2. Call ImsMedia service to generate SPROP for all VideoConfig
+            mImsMediaManager.generateVideoSprop(videoConfigs,
+                    new ImsMediaManager.ImsMediaManagerCallback() {
+                        @Override
+                        public void onVideoSpropResponse(String[] spropList) {
+                            ImsLog.i(mSlotId, "SPROP Response received: "
+                                    + Arrays.toString(spropList));
 
-                if (mImsMediaManager == null) {
-                    ImsLog.e(mSlotId, "ImsMediaManager is null");
-                    return;
-                }
+                            // 3. Update carrier config with sprop params
+                            ConfigInterface configInterface = AgentFactory.getInstance()
+                                    .getAgent(ConfigInterface.class, mSlotId);
+                            if (configInterface == null) {
+                                ImsLog.e(mSlotId, "ConfigInterface is null");
+                                return;
+                            }
 
-                // 1. Read VideoConfig params from carrierConfig
-                ConfigInterface configInterface = AgentFactory.getInstance()
-                        .getAgent(ConfigInterface.class, mSlotId);
-                if (configInterface == null) {
-                    ImsLog.e(mSlotId, "ConfigInterface is null");
-                    return;
-                }
-                CarrierConfig carrierConfig = configInterface.getCarrierConfig();
+                            CarrierConfig carrierConfig = configInterface.getCarrierConfig();
+                            PersistableBundle configBundle = carrierConfig.getConfig();
+                            for (String sprop : spropList) {
+                                String[] strValues = sprop.split(":");
+                                int payloadType = Integer.parseInt(strValues[0]);
+                                sprop = strValues[1];
+                                addSpropToCarrierConfig(configBundle, payloadType, sprop);
+                            }
+                            ImsLog.i(mSlotId, "Updated CarrierConfig with sprop values");
 
-                VideoConfig[] videoConfigs = readVideoConfigs(carrierConfig);
-                if (videoConfigs == null || videoConfigs.length == 0) {
-                    ImsLog.e(mSlotId, "No videoConfigs available in carrier config");
-                    return;
-                }
+                            // 4. Notify carrier config change
+                            ServiceLoader.notifyCarrierConfigChanged(mSlotId);
 
-                //TODO:
-                // 2. Call ImsMedia service to generate SPROP for all VideoConfig
-                // 3. Update carrier config with sprop params
-                // 4. Notify carrier config change
-
-                mImsMediaManager.release();
-                mImsMediaManager = null;
-            }
-
-            @Override
-            public void onDisconnected() {
-                ImsLog.d(mSlotId, "Service disconnected.");
-            }
-
-            private VideoConfig[] readVideoConfigs(CarrierConfig carrierConfig) {
-                PersistableBundle videoPayloadTypes = carrierConfig.getBundle(
-                        ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
-                if (videoPayloadTypes == null || videoPayloadTypes.isEmpty()) {
-                    ImsLog.e(mSlotId, "makeVideoConfig: Unable to read video payload types from"
-                            + "carrier config.");
-                    return null;
-                }
-
-                ImsLog.i(mSlotId, "makeVideoConfig.videoPayloadTypes: " + videoPayloadTypes);
-
-                ArrayList<VideoConfig> videoConfigs = new ArrayList<VideoConfig>();
-
-                int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
-                        CarrierConfig.Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
-                if (hevcPayloadTypes != null && hevcPayloadTypes.length > 0) {
-                    ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadTypes: "
-                            + Arrays.toString(hevcPayloadTypes));
-
-                    PersistableBundle hevcPayloadDescriptions = carrierConfig.getBundle(
-                            Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
-                    ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadDesc: "
-                            + hevcPayloadDescriptions);
-
-                    for (int payloadTypeIdx = 0;
-                            (payloadTypeIdx < hevcPayloadTypes.length)
-                                 && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES);
-                            payloadTypeIdx++) {
-
-                        int payloadType = hevcPayloadTypes[payloadTypeIdx];
-                        PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
-                                .getPersistableBundle("" + payloadType);
-
-                        // Check if SPROP already exists.
-                        String sprop = hevcPayloadDesc.getString(
-                                Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, null);
-                        if (sprop != null && !sprop.isEmpty()) {
-                            // SPROP already exists in carrier config. No need to generate again.
-                            continue;
+                            mImsMediaManager.release();
+                            mImsMediaManager = null;
                         }
+                    });
+        }
 
-                        int[] resolution = hevcPayloadDesc.getIntArray(
-                                ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
-                        if (resolution == null || resolution.length != 2) {
-                            continue;
-                        }
+        @Override
+        public void onDisconnected() {
+            ImsLog.d(mSlotId, "Service disconnected.");
+        }
 
-                        VideoConfig videoConfig = new VideoConfig.Builder()
-                                .setTxPayloadTypeNumber((byte) payloadType)
-                                .setCodecType(VideoConfig.VIDEO_CODEC_HEVC)
-                                .setCodecProfile(hevcPayloadDesc
-                                        .getInt(Assets.KEY_HEVC_PROFILE_INT))
-                                .setCodecLevel(hevcPayloadDesc.getInt(Assets.KEY_HEVC_LEVEL_INT))
-                                .setResolutionWidth(resolution[0])
-                                .setResolutionHeight(resolution[1])
-                                .setFramerate(hevcPayloadDesc.getInt(
-                                        ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT))
-                                .build();
+        private VideoConfig[] readVideoConfigs(CarrierConfig carrierConfig) {
+            PersistableBundle videoPayloadTypes = carrierConfig.getBundle(
+                    ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+            if (videoPayloadTypes == null || videoPayloadTypes.isEmpty()) {
+                ImsLog.e(mSlotId, "makeVideoConfig: Unable to read video payload types from"
+                        + "carrier config.");
+                return null;
+            }
 
-                        videoConfigs.add(videoConfig);
+            ImsLog.i(mSlotId, "makeVideoConfig.videoPayloadTypes: " + videoPayloadTypes);
+
+            ArrayList<VideoConfig> videoConfigs = new ArrayList<VideoConfig>();
+
+            int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
+                    CarrierConfig.Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+            if (hevcPayloadTypes != null && hevcPayloadTypes.length > 0) {
+                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadTypes: "
+                        + Arrays.toString(hevcPayloadTypes));
+
+                PersistableBundle hevcPayloadDescriptions = carrierConfig.getBundle(
+                        Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+                ImsLog.i(mSlotId, "makeVideoConfig.hevcPayloadDesc: "
+                        + hevcPayloadDescriptions);
+
+                for (int payloadTypeIdx = 0; (payloadTypeIdx < hevcPayloadTypes.length)
+                             && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES); payloadTypeIdx++) {
+
+                    int payloadType = hevcPayloadTypes[payloadTypeIdx];
+                    PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
+                            .getPersistableBundle("" + payloadType);
+
+                    // Check if SPROP already exists.
+                    String sprop = hevcPayloadDesc.getString(
+                            Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, null);
+                    if (sprop != null && !sprop.isEmpty()) {
+                        // SPROP already exists in carrier config. No need to generate again.
+                        continue;
                     }
+
+                    int[] resolution = hevcPayloadDesc.getIntArray(
+                            ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
+                    if (resolution == null || resolution.length != 2) {
+                        continue;
+                    }
+
+                    VideoConfig videoConfig = new VideoConfig.Builder()
+                            .setTxPayloadTypeNumber((byte) payloadType)
+                            .setCodecType(VideoConfig.VIDEO_CODEC_HEVC)
+                            .setCodecProfile(hevcPayloadDesc
+                                    .getInt(Assets.KEY_HEVC_PROFILE_INT))
+                            .setCodecLevel(hevcPayloadDesc.getInt(Assets.KEY_HEVC_LEVEL_INT))
+                            .setResolutionWidth(resolution[0])
+                            .setResolutionHeight(resolution[1])
+                            .setFramerate(hevcPayloadDesc.getInt(
+                                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT))
+                            .build();
+
+                    videoConfigs.add(videoConfig);
                 }
+            }
 
-                int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
-                        ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
-                if (h264PayloadTypes != null && h264PayloadTypes.length > 0) {
-                    PersistableBundle h264PayloadDescriptions = carrierConfig.getBundle(
-                            ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
-                    ImsLog.i(mSlotId, "makeVideoConfig.h264PayloadDesc: "
-                            + h264PayloadDescriptions);
+            int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
+                    ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+            if (h264PayloadTypes != null && h264PayloadTypes.length > 0) {
+                PersistableBundle h264PayloadDescriptions = carrierConfig.getBundle(
+                        ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
+                ImsLog.i(mSlotId, "makeVideoConfig.h264PayloadDesc: "
+                        + h264PayloadDescriptions);
 
-                    for (int payloadTypeIdx = 0;
-                            (payloadTypeIdx < h264PayloadTypes.length)
-                                 && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES);
-                            payloadTypeIdx++) {
-                        int payloadType = h264PayloadTypes[payloadTypeIdx];
-                        PersistableBundle h264PayloadDesc = h264PayloadDescriptions
-                                .getPersistableBundle("" + payloadType);
+                for (int payloadTypeIdx = 0; (payloadTypeIdx < h264PayloadTypes.length)
+                        && (payloadTypeIdx <= MAX_VIDEO_PAYLOAD_TYPES); payloadTypeIdx++) {
 
-                        // Check if SPROP already exists.
-                        String sprop = h264PayloadDesc.getString(
-                                CarrierConfig.ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
-                                null);
-                        if (sprop != null && !sprop.isEmpty()) {
-                            // SPROP already exists in carrier config. No need to generate again.
-                            continue;
-                        }
+                    int payloadType = h264PayloadTypes[payloadTypeIdx];
+                    PersistableBundle h264PayloadDesc = h264PayloadDescriptions
+                            .getPersistableBundle("" + payloadType);
 
-                        int[] resolution = h264PayloadDesc.getIntArray(
-                                ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
-                        if (resolution == null || resolution.length != 2) {
-                            continue;
-                        }
+                    // Check if SPROP already exists.
+                    String sprop = h264PayloadDesc.getString(
+                            CarrierConfig.ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
+                            null);
+                    if (sprop != null && !sprop.isEmpty()) {
+                        // SPROP already exists in carrier config. No need to generate again.
+                        continue;
+                    }
 
+                    int[] resolution = h264PayloadDesc.getIntArray(
+                            ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
+                    if (resolution == null || resolution.length != 2) {
+                        continue;
+                    }
+
+                    String profileLevelStr = h264PayloadDesc.getString(CarrierConfig.ImsVt
+                            .KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING);
+                    if (profileLevelStr != null && !profileLevelStr.isEmpty()) {
                         VideoConfig videoConfig = new VideoConfig.Builder()
                                 .setTxPayloadTypeNumber((byte) payloadType)
                                 .setCodecType(VideoConfig.VIDEO_CODEC_AVC)
-                                .setCodecProfileLevelString(h264PayloadDesc.getString(
-                                        CarrierConfig.ImsVt
-                                                .KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING))
+                                .setCodecProfileLevelString(profileLevelStr)
                                 .setResolutionWidth(resolution[0])
                                 .setResolutionHeight(resolution[1])
                                 .setFramerate(h264PayloadDesc.getInt(
                                         ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT))
                                 .build();
-
                         videoConfigs.add(videoConfig);
+                    } else {
+                        ImsLog.e(mSlotId, "makeVideoConfig: profileLevelStr is empty for"
+                                + "payloadType:" + payloadType);
                     }
                 }
+            }
 
-                if (videoConfigs.isEmpty()) {
-                    ImsLog.e(mSlotId, "makeVideoConfig: videoConfigs is empty");
-                    return null;
+            if (videoConfigs.isEmpty()) {
+                ImsLog.e(mSlotId, "makeVideoConfig: videoConfigs is empty");
+                return null;
+            }
+
+            return videoConfigs.toArray(new VideoConfig[videoConfigs.size()]);
+        }
+
+        private void addSpropToCarrierConfig(
+                PersistableBundle configBundle, int payloadType, String sprop) {
+
+            if (configBundle == null || payloadType == 0 || sprop == null) {
+                ImsLog.e(mSlotId, "addSpropToCarierConfig: Invalid params");
+                return;
+            }
+
+            PersistableBundle videoPayloadTypes = configBundle.getPersistableBundle(
+                    ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+            int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
+                    CarrierConfig.Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+            if (hevcPayloadTypes != null) {
+                for (int hevcPayloadType : hevcPayloadTypes) {
+                    if (hevcPayloadType == payloadType) {
+                        PersistableBundle hevcPayloadDescriptions = configBundle
+                                .getPersistableBundle(Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
+                        if (hevcPayloadDescriptions != null) {
+                            PersistableBundle hevcPayloadDesc = hevcPayloadDescriptions
+                                    .getPersistableBundle("" + payloadType);
+                            if (hevcPayloadDesc != null) {
+                                hevcPayloadDesc.putString(
+                                        Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING, sprop);
+                            }
+                            return;
+                        }
+                    }
                 }
+            }
 
-                return videoConfigs.toArray(new VideoConfig[videoConfigs.size()]);
+            int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
+                    ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+            if (h264PayloadTypes != null) {
+                for (int h264PayloadType : h264PayloadTypes) {
+                    if (h264PayloadType == payloadType) {
+                        PersistableBundle h264PayloadDescriptions = configBundle
+                                .getPersistableBundle(ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
+                        if (h264PayloadDescriptions != null) {
+                            PersistableBundle h264PayloadDesc = h264PayloadDescriptions
+                                    .getPersistableBundle("" + payloadType);
+                            if (h264PayloadDesc != null) {
+                                h264PayloadDesc.putString(CarrierConfig.ImsVt
+                                                .KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
+                                        sprop);
+                            }
+                            return;
+                        }
+                    }
+                }
             }
         }
     }
