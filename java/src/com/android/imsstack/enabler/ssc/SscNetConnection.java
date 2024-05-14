@@ -53,8 +53,8 @@ public class SscNetConnection implements ISscNetConnection {
     @VisibleForTesting
     protected Handler mSscNetConnectionHandler = null;
 
-    private final int mSlotId;
-    private EApnType mApnType = null;
+    protected final int mSlotId;
+    protected EApnType mApnType = null;
     @VisibleForTesting
     protected int mConnectionInactivityTimer = 120 * 1000;
     private final IApn.Listener mApnListener = new ApnListener();

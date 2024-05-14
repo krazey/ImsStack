@@ -18,12 +18,16 @@ package com.android.imsstack.enabler.ssc;
 
 import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -31,6 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -45,6 +50,7 @@ import android.text.TextUtils;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
@@ -77,6 +83,7 @@ public class SscServiceImplTest {
 
     private SscServiceImpl mSscServiceImpl;
 
+    private Context mContext;
     private int mQueryCount; // increase after every startGetTransaction case
     private int mUpdateCount; // increase after every startPutTransaction case
     private Handler mCallbackHandler;
@@ -84,6 +91,7 @@ public class SscServiceImplTest {
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private SharedPreferences mMockSharedPreferences;
     @Mock private SscServiceState mMockSscServiceState;
     @Mock private SscTransactionFactory mMockSscTransactionFactory;
     @Mock private SscTransaction mMockSscTransaction;
@@ -138,13 +146,13 @@ public class SscServiceImplTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        Context context = new ContextFixture().getTestDouble();
-        AppContext.init(context);
+        mContext = new ContextFixture().getTestDouble();
+        AppContext.init(mContext);
 
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
-        mSscServiceImpl.start(context);
+        mSscServiceImpl.start(mContext);
         mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mMockSscTransactionFactory);
 
@@ -154,6 +162,11 @@ public class SscServiceImplTest {
         when(mMockCarrierConfig.getIntArray(
             CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
             .thenReturn(mServerBasedServices);
+
+        when(mContext.getSharedPreferences(anyString(), anyInt()))
+                .thenReturn(mMockSharedPreferences);
+        when(mMockSharedPreferences.getString(eq(KEY_WIFI_TEST), anyString()))
+                .thenReturn(String.valueOf(0));
 
         HandlerThread serviceThreadHandler = mSscServiceImpl.getServiceHandlerThread();
         mLooper = new TestableLooper(serviceThreadHandler.getLooper());
@@ -173,6 +186,18 @@ public class SscServiceImplTest {
         SscConfig.clear(SLOT_0);
 
         AppContext.deinit();
+    }
+
+    @Test
+    public void testInitConnection_wifiTestOn() {
+        when(mMockSharedPreferences.getString(eq(KEY_WIFI_TEST), anyString()))
+                .thenReturn(String.valueOf(1));
+
+        mSscServiceImpl.start(mContext);
+
+        ISscNetConnection netConn = ((SscNetConnectionGov) SscNetConnectionGov.getInstance())
+                .getSscNetConnection(SLOT_0);
+        assertEquals(EApnType.WIFI, ((SscNetConnection) netConn).mApnType);
     }
 
     @Test

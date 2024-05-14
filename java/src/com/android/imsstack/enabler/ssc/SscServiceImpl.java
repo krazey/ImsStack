@@ -28,6 +28,7 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
@@ -160,10 +161,16 @@ public class SscServiceImpl implements IUtInterface {
 
     private void initConnections() {
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
-        netConnGov.init(mSlotId, EApnType.XCAP);
-
         ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
-        httpConnectionGov.open(mSlotId, EApnType.XCAP);
+
+        EApnType apnType = EApnType.XCAP;
+        if (ImsPrivateProperties.Persistent.getInt(
+                ImsPrivateProperties.Persistent.KEY_WIFI_TEST, mSlotId) == 1) {
+            apnType = EApnType.WIFI;
+        }
+
+        netConnGov.init(mSlotId, apnType);
+        httpConnectionGov.open(mSlotId, apnType);
     }
 
     private void clearConnections() {
