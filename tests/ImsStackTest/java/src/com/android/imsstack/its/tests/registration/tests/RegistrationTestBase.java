@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.tests.registration;
+package com.android.imsstack.its.tests.registration.tests;
 
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
@@ -21,6 +21,7 @@ import android.telephony.CarrierConfigManager;
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.tests.ImsStackTestBase;
+import com.android.imsstack.its.tests.registration.RegistrationHelper;
 
 public class RegistrationTestBase extends ImsStackTestBase {
     protected TelephonyManagerProxyImpl mTelephony;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.imsstack.its.tests.registration;
+package com.android.imsstack.its.tests.registration.tests;
 
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
@@ -29,6 +29,8 @@ import android.testing.TestableLooper;
 
 import com.android.imsstack.its.base.ServiceStateBuilder;
 import com.android.imsstack.its.base.SystemProxyResolver;
+import com.android.imsstack.its.tests.registration.RegistrationHelper;
+import com.android.imsstack.its.tests.registration.RegistrationInfo;
 
 import org.junit.After;
 import org.junit.Before;
