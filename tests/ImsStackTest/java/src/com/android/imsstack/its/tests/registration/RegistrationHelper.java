@@ -52,19 +52,57 @@ public class RegistrationHelper {
     }
 
     /**
-     * Performs IMS registration based on the provided {@link ImsStackTestBase} instance and the
+     * Performs IMS registration using the provided {@link ImsStackTestBase} instance and
+     * registration information. If the {@code info} parameter is {@code null}, a default
+     * registration information will be used.
+     *
+     * @param testBase The {@link ImsStackTestBase} instance to perform registration.
+     *                 Must not be {@code null}.
+     * @param info The {@link RegistrationInfo} object containing IMS registration information.
+     *             If {@code null}, a default registration information will be used.
+     * @return {@code true} if registration is successful, {@code false} otherwise.
+     * @throws NullPointerException if {@code testBase} is {@code null}.
+     */
+    public boolean performRegistration(@NonNull ImsStackTestBase testBase,
+            @Nullable RegistrationInfo info) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
+
+        triggerRegistration(testBase, info);
+
+        ImsRegistrationWrapper imsRegistration = getImsServiceConnector().getRegistration();
+        imsRegistration.waitForRegistered();
+
+        return imsRegistration.isRegistered();
+    }
+
+    /**
+     * Triggers IMS registration using the provided {@link ImsStackTestBase} instance.
+     *
+     * @param testBase The {@link ImsStackTestBase} instance to perform registration.
+     *                 Must not be {@code null}.
+     * @throws NullPointerException if {@code testBase} is null.
+     */
+    public void triggerRegistration(@NonNull ImsStackTestBase testBase) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
+
+        triggerRegistration(testBase, null);
+    }
+
+    /**
+     * Triggers IMS registration based on the provided {@link ImsStackTestBase} instance and the
      * {@link RegistrationInfo} object containing IMS registration information.
      * If the {@code info} parameter is null, a default {@link RegistrationInfo} object will be
      * created using {@link RegistrationInfo.Builder}.
+     * This method starts the IMS stack and performs necessary configuration changes
+     * such as enabling IMS capabilities and notifying the network availability.
      *
      * @param testBase The {@link ImsStackTestBase} instance to perform registration.
      *                 Must not be null.
      * @param info The {@link RegistrationInfo} object containing IMS registration information.
      *             If null, a default registration information will be used.
-     * @return {@code true} if registration is successful, {@code false} otherwise.
      * @throws NullPointerException if {@code testBase} is null.
      */
-    public boolean performRegistration(@NonNull ImsStackTestBase testBase,
+    public void triggerRegistration(@NonNull ImsStackTestBase testBase,
             @Nullable RegistrationInfo info) {
         Objects.requireNonNull(testBase, "testBase must not be null.");
 
@@ -86,11 +124,6 @@ public class RegistrationHelper {
 
         mEventLatch.sleep(SingleLatch.SHORT_SLEEP_MS);
         getConnectivityManagerProxy().notifyNetworkAvailable(info.getNetworkCapability());
-
-        ImsRegistrationWrapper imsRegistration = getImsServiceConnector().getRegistration();
-        imsRegistration.waitForRegistered();
-
-        return imsRegistration.isRegistered();
     }
 
     /**
