@@ -42,11 +42,11 @@ PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
     IMS_TRACE_D("~CodecAmrConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("Create - nCodec[%d, %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
 
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piCc is NULL or invalid codecIdx", 0, 0, 0);
         return IMS_FALSE;

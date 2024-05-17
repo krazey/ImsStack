@@ -32,21 +32,15 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 #define DEFAULT_HEVC_FRAME_SIZE "NEED_TO_CHECK"
 
 PUBLIC
-CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecConfig(nType_, nPayloadTypeNum_),
-        m_nChannel(DEFAULT_CHANNEL),
-        m_nResolutionWidth(DEFAULT_HEVC_RESOLUTION_WIDTH),
-        m_nResolutionHeight(DEFAULT_HEVC_RESOLUTION_HEIGHT),
-        m_nFramerate(DEFAULT_HEVC_FRAMERATE),
-        m_nBitrate(DEFAULT_HEVC_BITRATE),
-        m_nPacketizationMode(DEFAULT_PACKETIZATION_MODE),
-        m_strSpropParameterSets(DEFAULT_HEVC_SPROP_PARAMS_480X640),
+CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecVideoConfig(nType, nPayloadTypeNum, DEFAULT_HEVC_RESOLUTION_WIDTH,
+                DEFAULT_HEVC_RESOLUTION_HEIGHT, DEFAULT_HEVC_FRAMERATE, DEFAULT_HEVC_BITRATE,
+                DEFAULT_HEVC_SPROP_PARAMS_480X640, DEFAULT_HEVC_IMAGE_ATTR,
+                DEFAULT_HEVC_FRAME_SIZE),
         m_nHevcProfile(DEFAULT_HEVC_PROFILE),
-        m_nHevcLevel(DEFAULT_HEVC_LEVEL),
-        m_strImageAttr(DEFAULT_HEVC_IMAGE_ATTR),
-        m_strFrameSize(DEFAULT_HEVC_FRAME_SIZE)
+        m_nHevcLevel(DEFAULT_HEVC_LEVEL)
 {
-    IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecHevcConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
@@ -54,13 +48,15 @@ PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()
     IMS_TRACE_D("~CodecHevcConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
 {
-    if (piCc == IMS_NULL || nCodecIdx < 0)
+    if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piBuffer is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    CodecVideoConfig::Create(piCc);
 
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE);
@@ -95,12 +91,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
 
     m_nFramerate = piCcSubBundle->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT, DEFAULT_HEVC_FRAMERATE);
-    ImsVector<IMS_SINT32> objVideoBitrate =
-            piCc->GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY);
-    if (!objVideoBitrate.IsEmpty())
-    {
-        m_nBitrate = objVideoBitrate.GetAt(0);
-    }
 
     m_nPacketizationMode = piCcSubBundle->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
@@ -115,14 +105,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
     m_nHevcLevel =
             piCcSubBundle->GetInt(CarrierConfig::Assets::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL);
 
-    ImsVector<AString> objImageAttr =
-            piCc->GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY);
-    m_strImageAttr = (objImageAttr.IsEmpty()) ? AString::ConstNull() : objImageAttr.GetAt(0);
-
-    ImsVector<AString> objFrameSize =
-            piCc->GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY);
-    m_strFrameSize = (objFrameSize.IsEmpty()) ? AString::ConstNull() : objFrameSize.GetAt(0);
-
     piCcSubBundle->ReleaseBundle();
     piCcBundle->ReleaseBundle();
 
@@ -131,58 +113,9 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
 
 PUBLIC VIRTUAL void CodecHevcConfig::ToDebugString() const
 {
-    CodecConfig::ToDebugString();
+    CodecVideoConfig::ToDebugString();
 
-    IMS_TRACE_D("m_nResolutionWidth(%d), m_nResolutionHeight(%d)", m_nResolutionWidth,
-            m_nResolutionHeight, 0);
-    IMS_TRACE_D("m_nFramerate(%d), m_nBitrate(%d), m_nPacketizationMode(%d)", m_nFramerate,
-            m_nBitrate, m_nPacketizationMode);
-    IMS_TRACE_D("m_strSpropParameterSets (%s)", m_strSpropParameterSets.GetStr(), 0, 0);
     IMS_TRACE_D("m_nHevcProfile (%d), m_nHevcLevel(%d)", m_nHevcProfile, m_nHevcLevel, 0);
-    IMS_TRACE_D("strVideoCodecImageAttr(%s), strVideoCodecFrameSize(%s)", m_strImageAttr.GetStr(),
-            m_strFrameSize.GetStr(), 0);
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetChannel() const
-{
-    return m_nChannel;
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetResolutionWidth() const
-{
-    return m_nResolutionWidth;
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetResolutionHeight() const
-{
-    return m_nResolutionHeight;
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetFramerate() const
-{
-    return m_nFramerate;
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetBitrate() const
-{
-    return m_nBitrate;
-}
-
-PUBLIC
-IMS_SINT32 CodecHevcConfig::GetPacketizationMode() const
-{
-    return m_nPacketizationMode;
-}
-
-PUBLIC
-const AString& CodecHevcConfig::GetSpropParameterSets() const
-{
-    return m_strSpropParameterSets;
 }
 
 PUBLIC
@@ -195,16 +128,4 @@ PUBLIC
 IMS_SINT32 CodecHevcConfig::GetHevcLevel() const
 {
     return m_nHevcLevel;
-}
-
-PUBLIC
-const AString& CodecHevcConfig::GetImageAttr() const
-{
-    return m_strImageAttr;
-}
-
-PUBLIC
-const AString& CodecHevcConfig::GetFrameSize() const
-{
-    return m_strFrameSize;
 }

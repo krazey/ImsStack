@@ -64,7 +64,7 @@ TEST_F(CodecT140ConfigTest, GetConfigTest)
             GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
-    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));
     EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), 5);
     EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 
@@ -81,7 +81,7 @@ TEST_F(CodecT140ConfigTest, GetConfigTestT140)
             GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
-    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));
     EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), DEFAULT_RED_LEVEL_NONE);
     EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 

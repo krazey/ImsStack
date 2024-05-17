@@ -17,18 +17,18 @@
 #ifndef CODEC_HEVC_CONFIG_H_
 #define CODEC_HEVC_CONFIG_H_
 
-#include "config/CodecConfig.h"
+#include "config/CodecVideoConfig.h"
 
-class CodecHevcConfig : public CodecConfig
+class CodecHevcConfig : public CodecVideoConfig
 {
 public:
     /**
      * @brief Construct a new codec hevc config
      *
-     * @param nType_ video codec type - hevc (H.265)
-     * @param nPayloadTypeNum_ payload type number
+     * @param nType video codec type - hevc (H.265)
+     * @param nPayloadTypeNum payload type number
      */
-    CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Destroy the codec hevc config
      *
@@ -38,58 +38,14 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Print debug string
-     *
      */
     virtual void ToDebugString() const override;
-    /**
-     * @brief Get the channel
-     *
-     * @return IMS_SINT32 Return the channel id - default : 0
-     */
-    IMS_SINT32 GetChannel() const;
-    /**
-     * @brief Get the resolution width
-     *
-     * @return IMS_SINT32 Return the resolution configuration - width for hevc
-     */
-    IMS_SINT32 GetResolutionWidth() const;
-    /**
-     * @brief Get the resolution height
-     *
-     * @return IMS_SINT32 Return the resolution configuration - height for hevc
-     */
-    IMS_SINT32 GetResolutionHeight() const;
-    /**
-     * @brief Get the framerate for hevc
-     *
-     * @return IMS_SINT32 Return hevc framerate
-     */
-    IMS_SINT32 GetFramerate() const;
-    /**
-     * @brief Get the bitrate for hevc
-     *
-     * @return IMS_SINT32 Return hevc bitrate
-     */
-    IMS_SINT32 GetBitrate() const;
-    /**
-     * @brief Get the packetization mode
-     *
-     * @return IMS_SINT32 Return the packetization mode
-     */
-    IMS_SINT32 GetPacketizationMode() const;
-    /**
-     * @brief Get the SpropParameterSets
-     *
-     * @return const AString& SpropParameterSets
-     */
-    const AString& GetSpropParameterSets() const;
     /**
      * @brief Get the hevc profile
      *
@@ -102,42 +58,18 @@ public:
      * @return IMS_SINT32 Return hevc level
      */
     IMS_SINT32 GetHevcLevel() const;
-    /**
-     * @brief Get the image attribute
-     *
-     * @return const AString& Return image-attribute
-     */
-    const AString& GetImageAttr() const;
-    /**
-     * @brief Get the frame size
-     *
-     * @return const AString& Return framesize
-     */
-    const AString& GetFrameSize() const;
 
 public:
-    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-    static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_WIDTH = 720;
     static const IMS_SINT32 DEFAULT_HEVC_RESOLUTION_HEIGHT = 1280;
     static const IMS_SINT32 DEFAULT_HEVC_FRAMERATE = 30;
-    static const IMS_SINT32 DEFAULT_HEVC_BITRATE = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_HEVC_BITRATE = 512;
     static const IMS_SINT32 DEFAULT_HEVC_PROFILE = 1;
     static const IMS_SINT32 DEFAULT_HEVC_LEVEL = 93;
 
-private:
-    IMS_SINT32 m_nChannel;
-    IMS_SINT32 m_nResolutionWidth;
-    IMS_SINT32 m_nResolutionHeight;
-    IMS_SINT32 m_nFramerate;
-    IMS_SINT32 m_nBitrate;
-    IMS_SINT32 m_nPacketizationMode;
-    AString m_strSpropParameterSets;
+protected:
     IMS_SINT32 m_nHevcProfile;
     IMS_SINT32 m_nHevcLevel;
-    AString m_strImageAttr;
-    AString m_strFrameSize;
 };
 
 #endif

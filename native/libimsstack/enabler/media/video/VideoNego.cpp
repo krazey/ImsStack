@@ -26,6 +26,7 @@
 #include "config/MediaSessionConfig.h"
 #include "MediaResourceManager.h"
 #include "MediaManager.h"
+#include "MediaProfileFactory.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.VN");
 
@@ -87,7 +88,9 @@ PUBLIC VIRTUAL void VideoNego::CreateProfiles(
     m_pEnvironment = pEnvironment;
     m_pConfig = pConfig;
 
-    VideoProfile* pProfile = VideoProfileUtil::CreateProfile(pEnvironment, m_pConfig, GetSlotId());
+    VideoProfile* pProfile =
+            static_cast<VideoProfile*>(MediaProfileFactory::GetInstance()->CreateProfile(
+                    pEnvironment, m_pConfig, GetSlotId(), MEDIA_TYPE_VIDEO));
 
     if (pProfile != IMS_NULL)
     {
