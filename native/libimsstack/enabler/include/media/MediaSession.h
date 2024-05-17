@@ -107,6 +107,9 @@ protected:
     // IMediaSessionListener
     IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param) override;
+    IMS_BOOL MediaSession_NotifyToClient(IMS_UINT32 eReportType,
+            MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
+            MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
     virtual IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void SetMediaQuality(IN AudioMediaSession* pAudioSession);

@@ -19,6 +19,7 @@
 
 #include <gmock/gmock.h>
 
+#include "MediaDef.h"
 #include "ImsTypeDef.h"
 #include "IMediaSessionListener.h"
 
@@ -64,6 +65,13 @@ public:
 
         return IMS_TRUE;
     }
+
+    IMS_BOOL MediaSession_NotifyToClient(IN IMS_UINT32 eReportType,
+            IN MEDIA_CONTENT_TYPE eMediaType,
+            IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType) override
+    {
+        return IMS_TRUE;
+    }
 };
 
 class MockIMediaSessionListener : public IMediaSessionListener
@@ -74,6 +82,10 @@ public:
 
     MOCK_METHOD(IMS_BOOL, MediaSession_SendMsgToMediaManager,
             (IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam), (override));
+    MOCK_METHOD(IMS_BOOL, MediaSession_NotifyToClient,
+            (IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType,
+                    IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType),
+            (override));
 
     void DelegateToFake()
     {

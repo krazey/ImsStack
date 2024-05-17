@@ -19,6 +19,8 @@
 
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
+
+#include "ITimer.h"
 #include "BaseSession.h"
 #include "IJniMedia.h"
 #include "audio/AudioDef.h"
@@ -27,7 +29,7 @@
 
 using namespace android::telephony::imsmedia;
 
-class AudioMediaSession : public BaseSession
+class AudioMediaSession : public BaseSession, ITimerListener
 {
 public:
     enum
@@ -68,6 +70,11 @@ public:
 
     explicit AudioMediaSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~AudioMediaSession();
+
+    /**
+     * implements ITimerListener interfaces.
+     */
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     /**
      * @brief Set the negotiation id
@@ -219,6 +226,9 @@ public:
 
 private:
     IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 bitrate, IMS_UINT32 codecType);
+    void NetworkToneTimerExpired();
+    IMS_RESULT StartTimer(IN IMS_SINT32 nDuration);
+    void StopTimer();
 
 protected:
     AudioConfiguration* m_pConfig;
@@ -229,6 +239,7 @@ protected:
     IMS_SINT32 m_nNetworkToneTimer;
     IMS_SINT32 m_nRtpInactivityTimer;
     IMS_BOOL m_bAnbrEnabled;
+    ITimer* m_piNetworkToneWaitTimer;
 };
 
 #endif

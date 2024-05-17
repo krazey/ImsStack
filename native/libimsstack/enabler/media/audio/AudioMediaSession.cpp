@@ -15,6 +15,8 @@
  */
 
 #include "ISessionDescriptor.h"
+#include "ServiceTimer.h"
+
 #include "Configuration.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceNetworkPolicy.h"
@@ -31,6 +33,8 @@
 #include <AudioConfig.h>
 using namespace android::telephony::imsmedia;
 
+static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 1000;
+
 __IMS_TRACE_TAG_USER_DECL__("MED.AS");
 
 PUBLIC
@@ -42,7 +46,8 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_nLocalPort(0),
         m_nNetworkToneTimer(0),
         m_nRtpInactivityTimer(0),
-        m_bAnbrEnabled(IMS_FALSE)
+        m_bAnbrEnabled(IMS_FALSE),
+        m_piNetworkToneWaitTimer(IMS_NULL)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
 
@@ -58,6 +63,70 @@ VIRTUAL AudioMediaSession::~AudioMediaSession()
     {
         delete m_pRtpConfig;
     }
+}
+
+PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if ((m_piNetworkToneWaitTimer != IMS_NULL) && (m_piNetworkToneWaitTimer == piTimer))
+    {
+        IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
+
+        NetworkToneTimerExpired();
+    }
+}
+
+PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
+{
+    IMS_TRACE_D("NetworkToneTimerExpired : networktone time[%d]",
+            GetInactivityTimer(NETWORK_TONE_INACTIVITY), 0, 0);
+
+    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
+    {
+        SetNetworkToneTimer(0);
+
+        if (m_piMediaSessionListener != IMS_NULL)
+        {
+            m_piMediaSessionListener->MediaSession_NotifyToClient(
+                    REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
+            m_piMediaSessionListener->MediaSession_NotifyToClient(
+                    REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
+        }
+    }
+}
+
+PRIVATE
+IMS_RESULT AudioMediaSession::StartTimer(IN IMS_SINT32 nDuration)
+{
+    IMS_TRACE_D("StartTimer : duration[%d]", nDuration, 0, 0);
+
+    if (m_piNetworkToneWaitTimer == IMS_NULL)
+    {
+        m_piNetworkToneWaitTimer = TimerService::GetTimerService()->CreateTimer();
+
+        if (m_piNetworkToneWaitTimer == IMS_NULL)
+        {
+            return IMS_FAILURE;
+        }
+
+        m_piNetworkToneWaitTimer->SetTimer(nDuration + IMS_MEDIA_TIMER_MARGIN, this);
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+void AudioMediaSession::StopTimer()
+{
+    if (m_piNetworkToneWaitTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("StopTimer", 0, 0, 0);
+
+    m_piNetworkToneWaitTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piNetworkToneWaitTimer);
+    m_piNetworkToneWaitTimer = IMS_NULL;
 }
 
 PUBLIC
@@ -790,6 +859,15 @@ PUBLIC
 void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 {
     m_nNetworkToneTimer = nTimer;
+
+    if (nTimer > 0)
+    {
+        StartTimer(nTimer);
+    }
+    else
+    {
+        StopTimer();
+    }
 }
 
 PUBLIC

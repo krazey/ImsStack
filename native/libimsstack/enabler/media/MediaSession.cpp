@@ -1018,6 +1018,20 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
     return IMS_FALSE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_NotifyToClient(IMS_UINT32 eReportType,
+        MEDIA_CONTENT_TYPE eMediaType, MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType)
+{
+    IMS_TRACE_D("MediaSession_NotifyToClient() : ReportType[%d], MediaType[%d] ProtocolType[%d]",
+            eReportType, eMediaType, eMediaProtocolType);
+
+    if (m_pClientListener != IMS_NULL)
+    {
+        m_pClientListener->MediaSession_Notify(eReportType, eMediaType, eMediaProtocolType);
+    }
+
+    return IMS_TRUE;
+}
+
 PROTECTED VIRTUAL IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("CreateMediaConfig()", 0, 0, 0);
