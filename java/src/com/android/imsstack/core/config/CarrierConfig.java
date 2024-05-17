@@ -1211,6 +1211,19 @@ public class CarrierConfig {
         private Assets() {}
     }
 
+    /**
+     * Configuration items for the AP IMS hidden key.
+     * The AP IMS hidden key contains internal settings of AP IMS as a nested bundle.
+     **/
+    public static class ApIms {
+        public static final String KEY_PREFIX = "apims.";
+        public static final String KEY_CARRIER_CONFIG_BUNDLE =
+                KEY_PREFIX + "carrier_config_bundle";
+
+        private ApIms() {
+        }
+    }
+
     // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
     private static final List<String> IMS_BUNDLE_KEYS = List.of(
             CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,

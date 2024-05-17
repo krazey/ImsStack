@@ -194,6 +194,9 @@ public class ConfigAgent implements ConfigInterface {
         CarrierConfig.overrideNestedBundles(config, configFromAsset);
         config.putAll(configFromAsset);
 
+        // Loads override configs in the hidden key of CarrierConfigManager
+        overrideHiddenConfigs(subId, config);
+
         ImsLog.d(mSlotId, "updateCarrierConfig: " + config.toString());
 
         java.util.Set<String> keys = config.keySet();
@@ -211,6 +214,24 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         notifyCarrierConfigChanged(subId);
+    }
+
+    @VisibleForTesting
+    protected void overrideHiddenConfigs(int subId, PersistableBundle config) {
+        // Load the settings from the AP IMS hidden key of CarrierConfigManager if it exists
+        if (!config.containsKey(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE)) {
+            return;
+        }
+        PersistableBundle configsInHiddenKey = config.getPersistableBundle(
+                CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
+        config.remove(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
+        if (configsInHiddenKey.isEmpty()) {
+            return;
+        }
+
+        ImsLog.i(mSlotId, "Override internal settings for the hidden key");
+        CarrierConfig.overrideNestedBundles(config, configsInHiddenKey);
+        config.putAll(configsInHiddenKey);
     }
 
     private void overrideTestConfigs(PersistableBundle config) {
@@ -250,7 +271,8 @@ public class ConfigAgent implements ConfigInterface {
                 CarrierConfig.IMS_PREFIX_KEYS, CarrierConfig.IMS_VOICE_PREFIX_KEYS,
                 CarrierConfig.IMS_SMS_PREFIX_KEYS, CarrierConfig.IMS_RTT_PREFIX_KEYS,
                 CarrierConfig.IMS_EMERGENCY_PREFIX_KEYS, CarrierConfig.IMS_VT_PREFIX_KEYS,
-                CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS)
+                CarrierConfig.IMS_WFC_PREFIX_KEYS, CarrierConfig.IMS_SS_PREFIX_KEYS,
+                new String[] {CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE})
                     .flatMap(Stream::of)
                     .toArray(String[]::new);
 
@@ -261,7 +283,8 @@ public class ConfigAgent implements ConfigInterface {
         return ccmp.getConfigForSubId(subId, imsConfigKeys);
     }
 
-    private PersistableBundle loadCarrierConfig(int subId, SimCarrierId id) {
+    @VisibleForTesting
+    protected PersistableBundle loadCarrierConfig(int subId, SimCarrierId id) {
         String fileName = getCarrierConfigFile(subId, id);
 
         if (TextUtils.isEmpty(fileName)) {
