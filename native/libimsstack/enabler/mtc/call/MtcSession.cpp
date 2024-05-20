@@ -60,11 +60,6 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
     IMS_ASSERT(m_pMessageSender != IMS_NULL);
 
-    if (m_eCallType != CallType::UNKNOWN)
-    {
-        SaveCallTypeHistory(m_eCallType);
-    }
-
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
         m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
@@ -280,7 +275,7 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 {
     m_objExtensionSet.HandleRequest(eType, objRequest);
 
-    if (eType == RequestType::START || eType == RequestType::UPDATE)
+    if (eType == RequestType::START || eType == RequestType::ACK || eType == RequestType::UPDATE)
     {
         if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
         {

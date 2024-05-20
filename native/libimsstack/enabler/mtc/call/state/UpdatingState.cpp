@@ -102,7 +102,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     IMtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
     pSession->SetCallType(eCallType);
-    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
@@ -111,6 +110,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
         return CallStateName::ESTABLISHED;
     }
 
+    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
@@ -252,16 +252,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* piSessio
 
     StopTimer();
 
-    if (m_objContext.GetUpdatingInfo().IsModifier())
-    {
-        m_objContext.GetSession()->HandleResponse(ResponseType::ACCEPT_UPDATE,
-                *piSession->GetPreviousResponse(IMessage::SESSION_UPDATE));
-    }
-    else
-    {
-        m_objContext.GetSession()->HandleRequest(
-                RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
-    }
+    m_objContext.GetSession()->HandleRequest(
+            RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
 
     // TODO: Internal error handling
     HandleSdpAnswer();
@@ -696,8 +688,6 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
         // TODO
     }
 
-    m_objContext.GetUpdatingInfo().GetAlertingInfo() =
-            m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
