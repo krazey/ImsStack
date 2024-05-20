@@ -22,6 +22,7 @@
 #include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/MtcCallState.h"
+#include "conferencecall/ConferenceDef.h"
 #include "precondition/QosDef.h"
 #include <functional>
 #include <memory>
@@ -30,7 +31,6 @@ class AString;
 class IMessage;
 class IMtcCallContext;
 class SuppService;
-struct ConfUser;
 struct MediaInfo;
 
 /**
@@ -65,21 +65,22 @@ protected:
 
 private:
     CallStateName ContinueStart();
-    CallStateName ContinueConference(IN const ImsList<ConfUser*>& lstUsers);
+    CallStateName ContinueConference();
     CallStateName ContinueHandleIncoming();
     CallStateName ContinueStartUssi();
 
     IMS_BOOL IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const;
-    void SetResourceListForConference(
-            IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers);
+    void SetResourceListForConference(IN_OUT IMessage& objMessage);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     ImsList<IMtcBlockRule*> GetBlockRulesAfterEpsFallback();
     IMS_BOOL IsCallPull() const;
     IMS_RESULT HandleCallPull();
+    void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
+    ImsList<std::shared_ptr<ConfUser>> m_pConfUsers;
 };
 
 #endif
