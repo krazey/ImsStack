@@ -18,14 +18,15 @@
 #include "ISessionDescriptor.h"
 #include "offeranswer/SdpAvCodec.h"
 
+#include "MediaManager.h"
+#include "MediaProfileFactory.h"
+#include "MediaResourceManager.h"
 #include "audio/AudioNego.h"
 #include "audio/AudioNegoAmr.h"
 #include "audio/AudioNegoEvs.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
-#include "MediaResourceManager.h"
-#include "MediaManager.h"
 
 #define MODESET_MAX_AMR      7
 #define MODESET_MAX_AMRWB    8
@@ -108,7 +109,10 @@ PUBLIC VIRTUAL void AudioNego::CreateProfiles(
     m_pConfig = pConfig;
 
     IMS_TRACE_I("CreateProfiles()", 0, 0, 0);
-    AudioProfile* pProfile = AudioProfileUtil::CreateProfile(pEnvironment, pConfig, GetSlotId());
+
+    AudioProfile* pProfile =
+            static_cast<AudioProfile*>(MediaProfileFactory::GetInstance()->CreateProfile(
+                    pEnvironment, m_pConfig, GetSlotId(), MEDIA_TYPE_AUDIO));
 
     if (pProfile != IMS_NULL)
     {

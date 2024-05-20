@@ -18,12 +18,14 @@
 #define MEDIA_PROFILE_FACTORY_H_
 
 class CodecConfig;
+class CodecAudioConfig;
 class CodecVideoConfig;
 class MediaConfiguration;
 class MediaEnvironment;
 class MediaResourceManager;
 class VideoConfiguration;
 
+#include "audio/AudioProfile.h"
 #include "text/TextProfile.h"
 #include "video/VideoProfile.h"
 
@@ -76,12 +78,22 @@ public:
     static void ReleaseInstance(MediaProfileFactory* pMediaProfileFactory);
 
 private:
+    AudioProfile* CreateAudioProfile();
     VideoProfile* CreateVideoProfile();
     TextProfile* CreateTextProfile();
 
+    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     TextProfile* SetTextProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
 
+    AudioProfile::Payload* CreateAmrPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreateEvsPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreateTelephoneEventPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    AudioProfile::Payload* CreatePcmPayload(
+            IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     VideoProfile::Payload* CreateAvcPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     VideoProfile::Payload* CreateHevcPayload(

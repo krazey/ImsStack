@@ -22,13 +22,19 @@
 #include "MediaProfileFactory.h"
 #include "MediaResourceManager.h"
 
+#include "audio/AudioDef.h"
+#include "audio/AudioProfileUtil.h"
 #include "config/CodecAvcConfig.h"
+#include "config/CodecAmrConfig.h"
+#include "config/CodecEvsConfig.h"
 #include "config/CodecHevcConfig.h"
+#include "config/CodecPcmConfig.h"
 #include "config/CodecT140Config.h"
+#include "config/CodecTelephoneEventConfig.h"
 #include "config/ImsCodec.h"
+#include "config/AudioConfiguration.h"
 #include "config/TextConfiguration.h"
 #include "config/VideoConfiguration.h"
-
 #include "video/VideoProfileUtil.h"
 
 static MediaProfileFactory* g_pMediaProfileFactory = IMS_NULL;
@@ -69,6 +75,10 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
 
     switch (eType)
     {
+        case MEDIA_TYPE_AUDIO:
+            pProfile = CreateAudioProfile();
+            pProfile = SetAudioProfile(pProfile, pConfig);
+            break;
         case MEDIA_TYPE_TEXT:
             pProfile = CreateTextProfile();
             pProfile = SetTextProfile(pProfile, pConfig);
@@ -102,7 +112,30 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
             continue;
         }
 
-        if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_AVC)
+        if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_AMR ||
+                pCodecConfig->GetCodec() == ImsCodec::AUDIO_AMR_WB)
+        {
+            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
+                    CreateAmrPayload(pCodecConfig, pConfig));
+        }
+        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_EVS)
+        {
+            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
+                    CreateEvsPayload(pCodecConfig, pConfig));
+        }
+        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT ||
+                pCodecConfig->GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT_WB)
+        {
+            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
+                    CreateTelephoneEventPayload(pCodecConfig, pConfig));
+        }
+        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMA ||
+                pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMU)
+        {
+            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
+                    CreatePcmPayload(pCodecConfig, pConfig));
+        }
+        else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_AVC)
         {
             static_cast<VideoProfile*>(pProfile)->lstPayload.Append(
                     CreateAvcPayload(pCodecConfig, pConfig));
@@ -180,11 +213,11 @@ void MediaProfileFactory::ReleaseInstance(MediaProfileFactory* pMediaProfileFact
     }
 }
 
-PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
+PRIVATE AudioProfile* MediaProfileFactory::CreateAudioProfile()
 {
-    VideoProfile* pVideoProfile = new VideoProfile();
+    AudioProfile* pAudioProfile = new AudioProfile();
 
-    return pVideoProfile;
+    return pAudioProfile;
 }
 
 PRIVATE TextProfile* MediaProfileFactory::CreateTextProfile()
@@ -192,6 +225,417 @@ PRIVATE TextProfile* MediaProfileFactory::CreateTextProfile()
     TextProfile* pTextProfile = new TextProfile();
 
     return pTextProfile;
+}
+
+PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
+{
+    VideoProfile* pVideoProfile = new VideoProfile();
+
+    return pVideoProfile;
+}
+
+PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
+        IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+{
+    if (pProfile == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    AudioProfile* pAudioProfile = static_cast<AudioProfile*>(pProfile);
+    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+
+    pAudioProfile->strTransportType = "RTP/AVP";
+
+    while (pAudioProfile->lstPayload.GetSize() > 0)
+    {
+        AudioProfile::Payload* pPayload = pAudioProfile->lstPayload.GetAt(0);
+        if (pPayload != IMS_NULL)
+        {
+            delete pPayload;
+        }
+        pAudioProfile->lstPayload.RemoveAt(0);
+    }
+
+    IMS_BOOL bRtcpXr = pAudioConfig->IsRtcpXrEnabled();
+
+    // RTCP-XR
+    if (bRtcpXr == IMS_TRUE)
+    {
+        pAudioProfile->bSupportRtcpXr = IMS_TRUE;
+        if (pAudioConfig->IsRtcpXrVoipEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
+        }
+        if (pAudioConfig->IsRtcpXrStatisticsEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics = IMS_TRUE;
+        }
+        if (pAudioConfig->IsRtcpXrPlrEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle = IMS_TRUE;
+        }
+        if (pAudioConfig->IsRtcpXrPdrEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
+        }
+
+        IMS_TRACE_D("SetAudioProfile() Add RTCP-XR. VoIP[%d], Stat[%d], PLR[%d]",
+                pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics,
+                pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics,
+                pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle);
+        IMS_TRACE_D("SetAudioProfile() Add RTCP-XR. PDR[%d]",
+                pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle, 0, 0);
+    }
+
+    pAudioProfile->objCandidateAttr = pAudioConfig->GetAudioCandidateAttribute();
+    pAudioProfile->nPtime = pAudioConfig->GetPtime();
+    pAudioProfile->nMaxPtime = pAudioConfig->GetMaxPtime();
+
+    AudioProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
+
+    IMS_TRACE_D("SetAudioProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
+            pAudioProfile->nMaxPtime, 0);
+    IMS_TRACE_D("SetAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->nBandwidthAs,
+            pAudioProfile->nBandwidthRr, pAudioProfile->nBandwidthRs);
+
+    return pAudioProfile;
+}
+
+PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreateAmrPayload", 0, 0, 0);
+
+    CodecAmrConfig* pAmrConfig = static_cast<CodecAmrConfig*>(pCodecConfig);
+    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
+    AString strCodecName;
+
+    pAmrFmtp->nModeSetList = pAmrConfig->GetAmrModeSetList();
+    pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultAmrModeSetList();
+    pAmrFmtp->bShowModeSet = pAmrConfig->GetShowAmrModeSet();
+
+    pAmrFmtp->bShowOctetAlign = IMS_FALSE;
+    if (pAmrConfig->GetOctetAlign() != -1)
+    {
+        pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
+        if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->nModeSetList == 0)
+        {
+            pAmrFmtp->bShowOctetAlign = IMS_TRUE;
+        }
+    }
+    else
+    {
+        pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+    }
+
+    if (pAmrConfig->GetModeChangeCapability() != -1)
+    {
+        pAmrFmtp->nModeChangeCapability = pAmrConfig->GetModeChangeCapability();
+        pAmrFmtp->bShowModeChangeCapability = IMS_TRUE;
+    }
+    else
+    {
+        pAmrFmtp->nModeChangeCapability = CodecAmrConfig::DEFAULT_MODECHANGE_CAPABILITY;
+        pAmrFmtp->bShowModeChangeCapability = IMS_FALSE;
+    }
+
+    if (pAmrConfig->GetModeChangePeriod() != -1)
+    {
+        pAmrFmtp->nModeChangePeriod = pAmrConfig->GetModeChangePeriod();
+        pAmrFmtp->bShowModeChangePeriod = IMS_TRUE;
+    }
+    else
+    {
+        pAmrFmtp->nModeChangePeriod = CodecAmrConfig::DEFAULT_MODECHANGE_PERIOD;
+        pAmrFmtp->bShowModeChangePeriod = IMS_FALSE;
+    }
+
+    if (pAmrConfig->GetModeChangeNeighbor() != -1)
+    {
+        pAmrFmtp->nModeChangeNeighbor = pAmrConfig->GetModeChangeNeighbor();
+        pAmrFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+    }
+    else
+    {
+        pAmrFmtp->nModeChangeNeighbor = CodecAmrConfig::DEFAULT_MODECHANGE_NEIGHBOR;
+        pAmrFmtp->bShowModeChangeNeighbor = IMS_FALSE;
+    }
+
+    if (pAudioConfig->GetMaxRed() != -1)
+    {
+        pAmrFmtp->nMaxRed = pAudioConfig->GetMaxRed();
+        pAmrFmtp->bShowMaxRed = IMS_TRUE;
+    }
+    else
+    {
+        pAmrFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
+        pAmrFmtp->bShowMaxRed = IMS_FALSE;
+    }
+    if (pAudioConfig->GetPtime() != -1)
+    {
+        pAmrFmtp->nPtime = pAudioConfig->GetPtime();
+    }
+    else
+    {
+        pAmrFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
+        pAmrFmtp->bShowPtime = IMS_FALSE;
+    }
+    if (pAudioConfig->GetMaxPtime() != -1)
+    {
+        pAmrFmtp->nMaxPtime = pAudioConfig->GetMaxPtime();
+    }
+    else
+    {
+        pAmrFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
+        pAmrFmtp->bShowMaxPtime = IMS_FALSE;
+    }
+    pAmrFmtp->bDtx = pAmrConfig->GetDtx();
+    strCodecName.Sprintf("%s", (pAmrConfig->GetSamplingRate() == 8000) ? "AMR" : "AMR-WB");
+
+    AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
+    pAmrPayload->SetRtpMap(pAmrConfig->GetPayloadType(), strCodecName,
+            pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
+    pAmrPayload->pFmtp = pAmrFmtp;
+
+    IMS_TRACE_D("CreateAmrPayload() codec(%s), SamplingRate(%d)",
+            ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate(), 0);
+
+    return pAmrPayload;
+}
+
+PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreateEvsPayload", 0, 0, 0);
+
+    CodecEvsConfig* pEvsConfig = static_cast<CodecEvsConfig*>(pCodecConfig);
+    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
+
+    AString strCodecName;
+    strCodecName.Sprintf("%s", "EVS");
+
+    // Mode set list
+    pEvsFmtp->nModeSetList = pEvsConfig->GetAmrModeSetList();
+    pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultAmrModeSetList();
+    pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrModeSet();
+    pEvsFmtp->nBrList = pEvsConfig->GetBrList();
+    pEvsFmtp->nBwList = pEvsConfig->GetBwList();
+
+    // Bit-rate
+    if (pEvsFmtp->nBrList == 0)
+    {
+        pEvsFmtp->nBrList = CodecEvsConfig::DEFAULT_BR_LIST;
+        pEvsFmtp->bShowBrList = IMS_FALSE;
+    }
+    else
+    {
+        pEvsFmtp->bShowBrList = IMS_TRUE;
+    }
+
+    // Bandwidth
+    if (pEvsFmtp->nBwList == -1)
+    {
+        pEvsFmtp->nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
+        pEvsFmtp->bShowBrList = IMS_FALSE;
+    }
+    else
+    {
+        pEvsFmtp->bShowBwList = IMS_TRUE;
+    }
+
+    if (pEvsConfig->GetModeChangeCapability() == -1)  // Not Present
+    {
+        pEvsFmtp->nModeChangeCapability = CodecEvsConfig::DEFAULT_MODECHANGE_CAPABILITY;
+    }
+    else
+    {
+        pEvsFmtp->nModeChangeCapability = pEvsConfig->GetModeChangeCapability();
+        pEvsFmtp->bShowModeChangeCapability = IMS_TRUE;
+    }
+
+    if (pEvsConfig->GetModeChangePeriod() == -1)  // Not Present
+    {
+        pEvsFmtp->nModeChangePeriod = CodecEvsConfig::DEFAULT_MODECHANGE_PERIOD;
+    }
+    else
+    {
+        pEvsFmtp->nModeChangePeriod = pEvsConfig->GetModeChangePeriod();
+        pEvsFmtp->bShowModeChangePeriod = IMS_TRUE;
+    }
+
+    if (pEvsConfig->GetModeChangeNeighbor() == -1)  // Not Present
+    {
+        pEvsFmtp->nModeChangeNeighbor = CodecEvsConfig::DEFAULT_MODECHANGE_NEIGHBOR;
+    }
+    else
+    {
+        pEvsFmtp->nModeChangeNeighbor = pEvsConfig->GetModeChangeNeighbor();
+        pEvsFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+    }
+
+    if (pAudioConfig->GetPtime() != -1)
+    {
+        pEvsFmtp->nPtime = pAudioConfig->GetPtime();
+    }
+    else
+    {
+        pEvsFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
+        pEvsFmtp->bShowPtime = IMS_FALSE;
+    }
+    if (pAudioConfig->GetMaxPtime() != -1)
+    {
+        pEvsFmtp->nMaxPtime = pAudioConfig->GetMaxPtime();
+    }
+    else
+    {
+        pEvsFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
+        pEvsFmtp->bShowMaxPtime = IMS_FALSE;
+    }
+
+    if (pAudioConfig->GetMaxRed() != -1)
+    {
+        pEvsFmtp->nMaxRed = pAudioConfig->GetMaxRed();
+        pEvsFmtp->bShowMaxRed = IMS_TRUE;
+    }
+    else
+    {
+        pEvsFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
+        pEvsFmtp->bShowMaxRed = IMS_FALSE;
+    }
+
+    pEvsFmtp->bDtx = pEvsConfig->GetDtx();
+    pEvsFmtp->bShowDtx = pEvsConfig->GetShowDtx();
+
+    if (pEvsConfig->GetHfOnly() == -1)  // Not Present
+    {
+        pEvsFmtp->nHfOnly = CodecEvsConfig::DEFAULT_HF_ONLY;
+    }
+    else
+    {
+        pEvsFmtp->nHfOnly = pEvsConfig->GetHfOnly();
+        pEvsFmtp->bShowHfOnly = IMS_TRUE;
+    }
+
+    if (pEvsConfig->GetEvsModeSwitch() != -1)
+    {
+        pEvsFmtp->nEvsModeSwitch = pEvsConfig->GetEvsModeSwitch();
+        pEvsFmtp->bShowEvsModeSwitch = IMS_TRUE;
+    }
+    else
+    {
+        pEvsFmtp->nEvsModeSwitch = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
+        pEvsFmtp->bShowEvsModeSwitch = IMS_FALSE;
+    }
+
+    if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
+    {
+        pEvsFmtp->nCmr = CodecEvsConfig::DEFAULT_CMR;
+    }
+    else
+    {
+        pEvsFmtp->nCmr = pEvsConfig->GetCmr();
+        pEvsFmtp->bShowCmr = IMS_TRUE;
+    }
+    if (pEvsConfig->GetChAwareRecv() != -1)
+    {
+        pEvsFmtp->nChAwRecv = pEvsConfig->GetChAwareRecv();
+        pEvsFmtp->bShowChannelAwMode = IMS_TRUE;
+
+        if (pEvsConfig->GetChAwareRecv() == 99)
+        {
+            pEvsFmtp->nChAwRecv = -1;
+        }
+    }
+    else
+    {
+        pEvsFmtp->nChAwRecv = -1;
+    }
+
+    IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrModeSet: %d", pEvsConfig->GetShowDtx(),
+            pEvsConfig->GetShowAmrModeSet(), 0);
+
+    // set EVS codec fmtp
+    AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();
+    pEvsPayload->SetRtpMap(
+            pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
+    pEvsPayload->pFmtp = pEvsFmtp;
+
+    return pEvsPayload;
+}
+
+PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateTelephoneEventPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreateTelephoneEventPayload", 0, 0, 0);
+
+    CodecTelephoneEventConfig* pDtmfConfig = static_cast<CodecTelephoneEventConfig*>(pCodecConfig);
+    AString strCodecName;
+    strCodecName.Sprintf("%s", "telephone-event");
+
+    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+    AudioProfile::TelephoneEventFmtp* pTelephoneEventFmtp =
+            new AudioProfile::TelephoneEventFmtp(pDtmfConfig->GetEvents());
+
+    AudioProfile::Payload* pTelephoneEventPayload = new AudioProfile::Payload();
+    pTelephoneEventPayload->SetRtpMap(
+            pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
+    pTelephoneEventPayload->pFmtp = pTelephoneEventFmtp;
+
+    IMS_TRACE_D("CreateTelephoneEventPayload() codec(%s), SamplingRate(%d)",
+            ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetSamplingRate(), 0);
+
+    return pTelephoneEventPayload;
+}
+
+PRIVATE AudioProfile::Payload* MediaProfileFactory::CreatePcmPayload(
+        IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig)
+{
+    if (pCodecConfig == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    IMS_TRACE_I("CreatePcmPayload", 0, 0, 0);
+
+    AudioProfile::Payload* pPcmPayload = new AudioProfile::Payload();
+    AString strCodecName;
+    IMS_UINT32 nPayloadNum = 0;
+
+    if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMU)
+    {
+        strCodecName.Sprintf("%s", "PCMU");
+        nPayloadNum = 0;
+    }
+    else
+    {
+        strCodecName.Sprintf("%s", "PCMA");
+        nPayloadNum = 8;
+    }
+
+    pPcmPayload->SetRtpMap(nPayloadNum, strCodecName, 8000, 0);
+
+    CodecPcmConfig* pPcmConfig = static_cast<CodecPcmConfig*>(pCodecConfig);
+    AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
+
+    return pPcmPayload;
 }
 
 PRIVATE TextProfile* MediaProfileFactory::SetTextProfile(
