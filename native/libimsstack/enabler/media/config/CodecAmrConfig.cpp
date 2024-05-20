@@ -22,17 +22,9 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
 CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
-        CodecConfig(nType, nPayloadTypeNum),
-        m_nChannel(DEFAULT_CHANNEL),
-        m_bShowModeSet(IMS_FALSE),
-        m_nModeSetList(DEFAULT_MODESET_AMR_WB),
-        m_nDefaultModeSetList(DEFAULT_MODESET_AMR_WB),
+        CodecAudioConfig(nType, nPayloadTypeNum),
         m_nOctetAlign(DEFAULT_OCTET_ALIGN),
-        m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB),
-        m_bDtx(DEFAULT_AMR_DTX),
-        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
+        m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB)
 {
     IMS_TRACE_D("+CodecAmrConfig Type[%d]", nType, 0, 0);
 }
@@ -52,19 +44,21 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
+    CodecAudioConfig::Create(piCc);
+
     ICarrierConfig* piCcBundle;
 
     if (m_nCodec == ImsCodec::AUDIO_AMR)
     {
         piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMR;
-        m_nDefaultModeSetList = (1 << DEFAULT_MODESET_AMR);
+        m_nDefaultAmrModeSetList = (1 << DEFAULT_MODESET_AMR);
     }
     else  // (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
         piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
-        m_nDefaultModeSetList = (1 << DEFAULT_MODESET_AMR_WB);
+        m_nDefaultAmrModeSetList = (1 << DEFAULT_MODESET_AMR_WB);
     }
 
     if (piCcBundle == IMS_NULL)
@@ -84,9 +78,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    m_bShowModeSet = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_MODESET_BOOL, IMS_FALSE);
-
     m_nOctetAlign = piCcSubBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
             DEFAULT_OCTET_ALIGN);
@@ -94,7 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     ImsVector<IMS_SINT32> objCodecAttributeModeset = piCcSubBundle->GetIntArray(
             CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY);
 
-    m_nModeSetList = 0;
+    m_nAmrModeSetList = 0;
     IMS_SINT32 nModeSetNum = objCodecAttributeModeset.GetSize();
     IMS_TRACE_D("nModeSetNum: %d", nModeSetNum, 0, 0);
 
@@ -106,7 +97,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             IMS_TRACE_D("Invalid ModeSet value", 0, 0, 0);
             break;
         }
-        m_nModeSetList = (m_nModeSetList | (1 << nModeSet));
+        m_nAmrModeSetList = (m_nAmrModeSetList | (1 << nModeSet));
     }
 
     m_nModeChangeCapability = piCcSubBundle->GetInt(
@@ -130,65 +121,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 
 PUBLIC VIRTUAL void CodecAmrConfig::ToDebugString() const
 {
-    CodecConfig::ToDebugString();
-    IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), m_nOctetAlign(%d)", m_nChannel, m_nModeSetList,
-            m_nOctetAlign);
-    IMS_TRACE_D("default mode-set(0x%04x)", m_nDefaultModeSetList, 0, 0);
-    IMS_TRACE_D("m_nSamplingRate(%d), m_bDtx(%d), m_bShowModeSet(%d)", m_nSamplingRate, m_bDtx,
-            m_bShowModeSet);
-}
-
-PUBLIC
-IMS_SINT32 CodecAmrConfig::GetChannel() const
-{
-    return m_nChannel;
-}
-
-PUBLIC
-IMS_SINT32 CodecAmrConfig::GetModeSet() const
-{
-    IMS_SINT32 nModeSet;
-
-    if (m_nModeSetList == 0)
-    {
-        if (GetCodec() == ImsCodec::AUDIO_AMR)
-        {
-            return DEFAULT_MODESET_AMR;
-        }
-        else if (GetCodec() == ImsCodec::AUDIO_AMR_WB)
-        {
-            return DEFAULT_MODESET_AMR_WB;
-        }
-
-        return (-1);
-    }
-
-    for (nModeSet = DEFAULT_MODESET_AMR_WB; nModeSet >= 0; nModeSet--)
-    {
-        if (m_nModeSetList & (1 << nModeSet))
-        {
-            return nModeSet;
-        }
-    }
-    return 0;
-}
-
-PUBLIC
-IMS_BOOL CodecAmrConfig::GetShowModeSet() const
-{
-    return m_bShowModeSet;
-}
-
-PUBLIC
-IMS_UINT32 CodecAmrConfig::GetModeSetList() const
-{
-    return m_nModeSetList;
-}
-
-PUBLIC
-IMS_UINT32 CodecAmrConfig::GetDefaultModeSetList() const
-{
-    return m_nDefaultModeSetList;
+    CodecAudioConfig::ToDebugString();
+    IMS_TRACE_D("SamplingRate(%d), OctetAlign(%d)", m_nSamplingRate, m_nOctetAlign, 0);
 }
 
 PUBLIC
@@ -201,28 +135,4 @@ PUBLIC
 IMS_SINT32 CodecAmrConfig::GetSamplingRate() const
 {
     return m_nSamplingRate;
-}
-
-PUBLIC
-IMS_BOOL CodecAmrConfig::GetDtx() const
-{
-    return m_bDtx;
-}
-
-PUBLIC
-IMS_SINT32 CodecAmrConfig::GetModeChangeCapability() const
-{
-    return m_nModeChangeCapability;
-}
-
-PUBLIC
-IMS_SINT32 CodecAmrConfig::GetModeChangePeriod() const
-{
-    return m_nModeChangePeriod;
-}
-
-PUBLIC
-IMS_SINT32 CodecAmrConfig::GetModeChangeNeighbor() const
-{
-    return m_nModeChangeNeighbor;
 }

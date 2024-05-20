@@ -35,7 +35,7 @@ static const IMS_SINT32 DEFAULT_BR_LIST = CodecEvsConfig::DEFAULT_BR_LIST;
 static const IMS_SINT32 DEFAULT_BW_LIST = CodecEvsConfig::DEFAULT_BW_LIST;
 static const IMS_SINT32 DEFAULT_CMR = CodecEvsConfig::DEFAULT_CMR;
 static const IMS_SINT32 DEFAULT_CH_AW_RECV = CodecEvsConfig::DEFAULT_CH_AW_RECV;
-static const IMS_SINT32 DEFAULT_AMRWB_IO_MODESET = CodecEvsConfig::DEFAULT_AMRWB_IO_MODESET;
+static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecEvsConfig::DEFAULT_MODESET_AMR_WB;
 static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
         CodecEvsConfig::DEFAULT_MODECHANGE_CAPABILITY;
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecEvsConfig::DEFAULT_MODECHANGE_PERIOD;
@@ -101,8 +101,8 @@ TEST_F(CodecEvsConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetBwList(), DEFAULT_BW_LIST);
     EXPECT_EQ(m_pConfig->GetCmr(), DEFAULT_CMR);
     EXPECT_EQ(m_pConfig->GetChAwareRecv(), DEFAULT_CH_AW_RECV);
-    EXPECT_EQ(m_pConfig->GetShowAmrwbIoModeSet(), IMS_FALSE);
-    EXPECT_EQ(m_pConfig->GetAmrWbIoModeSetList(), DEFAULT_AMRWB_IO_MODESET);
+    EXPECT_EQ(m_pConfig->GetShowAmrModeSet(), IMS_FALSE);
+    EXPECT_EQ(m_pConfig->GetAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
     EXPECT_EQ(m_pConfig->GetModeChangeCapability(), DEFAULT_MODECHANGE_CAPABILITY);
     EXPECT_EQ(m_pConfig->GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     EXPECT_EQ(m_pConfig->GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
@@ -237,20 +237,19 @@ TEST_F(CodecEvsConfigTest, GetChAwareRecv)
     EXPECT_EQ(m_pConfig->GetChAwareRecv(), nEvsChAwareRecv);
 }
 
-TEST_F(CodecEvsConfigTest, GetAmrWbIoModeSetList)
+TEST_F(CodecEvsConfigTest, GetAmrModeSetList)
 {
     IMS_SINT32 nEvsAmrIoMoseSetList = 7;
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    DEFAULT_AMRWB_IO_MODESET))
+            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT, DEFAULT_MODESET_AMR_WB))
             .WillByDefault(Return(nEvsAmrIoMoseSetList));
 
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetAmrWbIoModeSetList(), nEvsAmrIoMoseSetList);
-    EXPECT_EQ(m_pConfig->GetAmrWbIoModeSet(), 2);
+    EXPECT_EQ(m_pConfig->GetAmrModeSetList(), nEvsAmrIoMoseSetList);
+    EXPECT_EQ(m_pConfig->GetAmrModeSet(), 2);
 }
 
 TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
@@ -283,7 +282,7 @@ TEST_F(CodecEvsConfigTest, GetShowEvsAmrWbIoModeSet)
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetShowAmrwbIoModeSet(), bShowEvsAmrWbIoModeSet);
+    EXPECT_EQ(m_pConfig->GetShowAmrModeSet(), bShowEvsAmrWbIoModeSet);
 }
 
 TEST_F(CodecEvsConfigTest, GetModeChangeCapability)

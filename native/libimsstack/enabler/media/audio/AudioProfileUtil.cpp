@@ -194,9 +194,9 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             AString strCodecName;
             AUDIO_CODEC nCurrCodec;
             AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
-            pAmrFmtp->nModeSetList = pAmrConfig->GetModeSetList();
-            pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultModeSetList();
-            pAmrFmtp->bShowModeSet = pAmrConfig->GetShowModeSet();
+            pAmrFmtp->nModeSetList = pAmrConfig->GetAmrModeSetList();
+            pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultAmrModeSetList();
+            pAmrFmtp->bShowModeSet = pAmrConfig->GetShowAmrModeSet();
 
             pAmrFmtp->bShowOctetAlign = IMS_FALSE;
             if (pAmrConfig->GetOctetAlign() != -1)
@@ -293,7 +293,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             pAudioProfile->lstPayload.Append(pAmrPayload);
             IMS_SINT32 nCurrAs;
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetModeSet());
+                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetAmrModeSet());
 
             if (nCurrAs > nAsOptimal)
             {
@@ -301,7 +301,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             }
 
             nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetModeSet(),
+                    pAudioProfile->objIpAddress.IsIPv6Address(), pAmrConfig->GetAmrModeSet(),
                     IMS_TRUE);
 
             if (nCurrAs > nAsMax)
@@ -340,9 +340,9 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
 
             // Mode set list
-            pEvsFmtp->nModeSetList = pEvsConfig->GetAmrWbIoModeSetList();
-            pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultModeSetList();
-            pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrwbIoModeSet();
+            pEvsFmtp->nModeSetList = pEvsConfig->GetAmrModeSetList();
+            pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultAmrModeSetList();
+            pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrModeSet();
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
@@ -476,8 +476,8 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pEvsFmtp->nChAwRecv = -1;
             }
 
-            IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrwbIoModeSet: %d", pEvsConfig->GetShowDtx(),
-                    pEvsConfig->GetShowAmrwbIoModeSet(), 0);
+            IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrModeSet: %d", pEvsConfig->GetShowDtx(),
+                    pEvsConfig->GetShowAmrModeSet(), 0);
 
             // set EVS codec fmtp
             AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();

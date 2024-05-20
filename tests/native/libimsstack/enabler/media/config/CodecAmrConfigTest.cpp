@@ -32,7 +32,7 @@ static const IMS_SINT32 DEFAULT_OCTET_ALIGN = CodecAmrConfig::DEFAULT_OCTET_ALIG
 static const IMS_SINT32 DEFAULT_MODESET_AMR_WB = CodecAmrConfig::DEFAULT_MODESET_AMR_WB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMRWB = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMRWB;
 static const IMS_SINT32 DEFAULT_SAMPLING_RATE_AMR = CodecAmrConfig::DEFAULT_SAMPLING_RATE_AMR;
-static const IMS_BOOL DEFAULT_AMR_DTX = CodecAmrConfig::DEFAULT_AMR_DTX;
+static const IMS_BOOL DEFAULT_DTX = CodecAmrConfig::DEFAULT_DTX;
 static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY =
         CodecAmrConfig::DEFAULT_MODECHANGE_CAPABILITY;
 static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = CodecAmrConfig::DEFAULT_MODECHANGE_PERIOD;
@@ -107,9 +107,9 @@ protected:
 TEST_F(CodecAmrConfigTest, GetConfigDefault)
 {
     EXPECT_EQ(m_pConfig_AmrWb->GetChannel(), DEFAULT_CHANNEL);
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeSetList(), DEFAULT_MODESET_AMR_WB);
-    EXPECT_EQ(m_pConfig_AmrWb->GetDefaultModeSetList(), DEFAULT_MODESET_AMR_WB);
-    EXPECT_EQ(m_pConfig_AmrWb->GetShowModeSet(), IMS_FALSE);
+    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
+    EXPECT_EQ(m_pConfig_AmrWb->GetDefaultAmrModeSetList(), DEFAULT_MODESET_AMR_WB);
+    EXPECT_EQ(m_pConfig_AmrWb->GetShowAmrModeSet(), IMS_FALSE);
     EXPECT_EQ(m_pConfig_AmrWb->GetOctetAlign(), DEFAULT_OCTET_ALIGN);
     EXPECT_EQ(m_pConfig_AmrWb->GetSamplingRate(), DEFAULT_SAMPLING_RATE_AMRWB);
     EXPECT_EQ(m_pConfig_AmrWb->GetDtx(), IMS_TRUE);
@@ -174,7 +174,7 @@ TEST_F(CodecAmrConfigTest, GetConfigShowModeSetList)
     GetReadyToCreateAmrWb();
     EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig_AmrWb->GetShowModeSet(), bMockShowModeSet);
+    EXPECT_EQ(m_pConfig_AmrWb->GetShowAmrModeSet(), bMockShowModeSet);
 }
 
 TEST_F(CodecAmrConfigTest, WB_GetConfigModeSetList)
@@ -191,8 +191,8 @@ TEST_F(CodecAmrConfigTest, WB_GetConfigModeSetList)
     GetReadyToCreateAmrWb();
     EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeSetList(), 7);
-    EXPECT_EQ(m_pConfig_AmrWb->GetModeSet(), 2);
+    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSetList(), 7);
+    EXPECT_EQ(m_pConfig_AmrWb->GetAmrModeSet(), 2);
 }
 
 TEST_F(CodecAmrConfigTest, NB_GetConfigModeSetList)
@@ -209,8 +209,8 @@ TEST_F(CodecAmrConfigTest, NB_GetConfigModeSetList)
     GetReadyToCreateAmrNb();
     EXPECT_TRUE(m_pConfig_AmrNb->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig_AmrNb->GetModeSetList(), 149);
-    EXPECT_EQ(m_pConfig_AmrNb->GetModeSet(), 7);
+    EXPECT_EQ(m_pConfig_AmrNb->GetAmrModeSetList(), 149);
+    EXPECT_EQ(m_pConfig_AmrNb->GetAmrModeSet(), 7);
 }
 
 TEST_F(CodecAmrConfigTest, WB_GetConfigSamplingRate)
@@ -234,7 +234,7 @@ TEST_F(CodecAmrConfigTest, GetDtx)
     GetReadyToCreateAmrWb();
     EXPECT_TRUE(m_pConfig_AmrWb->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig_AmrWb->GetDtx(), DEFAULT_AMR_DTX);
+    EXPECT_EQ(m_pConfig_AmrWb->GetDtx(), DEFAULT_DTX);
 }
 
 TEST_F(CodecAmrConfigTest, GetModeChangeCapability)
