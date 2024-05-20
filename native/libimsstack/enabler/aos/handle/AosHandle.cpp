@@ -786,8 +786,7 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
             nFeature = ImsAosFeature::VIDEO;
             break;
 
-        case BLOCK_SMS_CAPABILITY:  // FALL-THROUGH
-        case BLOCK_SMS_OVER_IP_NETWORK_INDICATION:
+        case BLOCK_SMS_CAPABILITY:
             nFeature = ImsAosFeature::SMSIP;
             break;
 

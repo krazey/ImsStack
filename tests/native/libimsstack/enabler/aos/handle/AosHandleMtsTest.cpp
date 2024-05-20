@@ -208,14 +208,6 @@ TEST_F(AosHandleMtsTest, Init_Test)
             .Times(1)
             .WillOnce(ReturnRef(objTestRats));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsSupported())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverIpEnabled())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -229,50 +221,45 @@ TEST_F(AosHandleMtsTest, Init_Test)
     EXPECT_TRUE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
 }
 
-TEST_F(AosHandleMtsTest, InitializeServiceBlock_Test)
+TEST_F(AosHandleMtsTest, ShouldNotBlockIfSmsCapabilityIsNotBlockedWhenInitializeServiceBlock)
 {
-    // Expectation: Block sms over ims if SmsOverImsSupported or SmsOverIpEnabled is false
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsSupported())
-            .Times(4)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverIpEnabled())
-            .Times(4)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-
+    // WHEN
     InitializeServiceBlock();
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
-    EXPECT_TRUE(IsBlocked());
 
-    InitializeServiceBlock();
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
-    EXPECT_TRUE(IsBlocked());
-
-    InitializeServiceBlock();
-    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
-    EXPECT_TRUE(IsBlocked());
-
-    InitializeServiceBlock();
-    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION));
+    // THEN
     EXPECT_FALSE(IsBlocked());
 }
 
-TEST_F(AosHandleMtsTest, InitializeServiceFeature_Test)
+TEST_F(AosHandleMtsTest, ShouldBlockIfSmsCapabilityIsBlockedWhenInitializeServiceBlock)
 {
-    // Expectation: SMSIP feature is existed only if not blocked
+    // GIVEN
+    AddBlock(AosHandle::BLOCK_SMS_CAPABILITY);
 
+    // WHEN
+    InitializeServiceBlock();
+
+    // THEN
+    EXPECT_TRUE(IsBlocked());
+}
+
+TEST_F(AosHandleMtsTest, FeatureIsAddedIfHandleIsNotBlockedWhenInitializeServiceFeature)
+{
+    // WHEN
     InitializeServiceFeature();
+
+    // THEN
     EXPECT_TRUE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
+}
 
+TEST_F(AosHandleMtsTest, FeatureIsNotAddedIfHandleIsBlockedWhenInitializeServiceFeature)
+{
+    // GIVEN
     SetBlocked(IMS_TRUE);
+
+    // WHEN
     InitializeServiceFeature();
+
+    // THEN
     EXPECT_FALSE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
 }
 
@@ -282,24 +269,27 @@ TEST_F(AosHandleMtsTest, ProcessCapabilitiesChanged_Test)
     ProcessCapabilitiesChanged(objNewCapabilities);
 }
 
-TEST_F(AosHandleMtsTest, IsHandleBlocked_Test)
+TEST_F(AosHandleMtsTest, HandleIsBlockedIfSmsCapabilityIsBlocked)
 {
-    // Expectation: return false if sms_capa or sms_over_ip is blocked or mtc blocked.
-    //              otherwise return true
-
+    // GIVEN
     AddBlock(AosHandle::BLOCK_SMS_CAPABILITY);
-    EXPECT_TRUE(IsHandleBlocked());
 
-    ClearBlocks();
-    AddBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION);
+    // WHEN & THEN
     EXPECT_TRUE(IsHandleBlocked());
+}
 
-    ClearBlocks();
+TEST_F(AosHandleMtsTest, HandleIsBlockedIfMtcHandleIsBlocked)
+{
+    // GIVEN
     SetMtcBlocked(IMS_TRUE);
-    EXPECT_TRUE(IsHandleBlocked());
 
-    ClearBlocks();
-    SetMtcBlocked(IMS_FALSE);
+    // WHEN & THEN
+    EXPECT_TRUE(IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtsTest, HandleIsNotBlockedIfSmsCapabilityAndMtcHandleAreNotBlocked)
+{
+    // WHEN & THEN
     EXPECT_FALSE(IsHandleBlocked());
 }
 
@@ -373,19 +363,4 @@ TEST_F(AosHandleMtsTest, Handle_Notify_Test3)
 
     Handle_Notify(ImsAosService::MTC, IMS_FALSE);
     EXPECT_FALSE(IsBlocked());
-}
-
-TEST_F(AosHandleMtsTest, Handle_Notify_Test4)
-{
-    // Test4: type = Mtc, mts not blocked, mtc blocked.
-    //        Then mts blocked by sms_over_ip_indication and mtc unblocked
-    // Expectation: mts blocked when mtc is blocked and mts keep block even if mtc unblocked.
-
-    Handle_Notify(ImsAosService::MTC, IMS_TRUE);
-    EXPECT_TRUE(IsBlocked());
-
-    AddBlock(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION);
-
-    Handle_Notify(ImsAosService::MTC, IMS_FALSE);
-    EXPECT_TRUE(IsBlocked());
 }

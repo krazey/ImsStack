@@ -141,25 +141,10 @@ void AosHandleMts::EnableAoS()
 
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
-    const IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
+    m_bBlocked = IsHandleBlocked();
 
-    IMS_BOOL bSmsOverImsSupported = piConfig->IsSmsOverImsSupported();
-    IMS_BOOL bSmsOverIpEnabled = piConfig->IsSmsOverIpEnabled();
-
-    A_IMS_TRACE_I(APPPROFILE,
-            "InitializeServiceBlock :: bSmsOverImsSupported(%s), bSmsOverIpEnabled(%s)",
-            _TRACE_B_(bSmsOverImsSupported), _TRACE_B_(bSmsOverIpEnabled), 0);
-
-    if (!bSmsOverImsSupported || !bSmsOverIpEnabled)
-    {
-        AddBlock(BLOCK_SMS_OVER_IP_NETWORK_INDICATION, m_nBlocks);
-        m_bBlocked = IMS_TRUE;
-    }
-    else
-    {
-        RemoveBlock(BLOCK_SMS_OVER_IP_NETWORK_INDICATION, m_nBlocks);
-        m_bBlocked = IMS_FALSE;
-    }
+    A_IMS_TRACE_D(
+            APPPROFILE, "InitializeServiceBlock :: m_bBlocked(%s))", _TRACE_B_(m_bBlocked), 0, 0);
 }
 
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
@@ -205,10 +190,7 @@ PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
 
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
 {
-    IMS_BOOL bBlocked = AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY) ||
-            AosHandle::IsHandleBlocked(BLOCK_SMS_OVER_IP_NETWORK_INDICATION);
-
-    return (bBlocked || m_bMtcBlocked);
+    return (AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY) || m_bMtcBlocked);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsSupportedNetworkTypeForCellular(
