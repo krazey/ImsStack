@@ -50,7 +50,7 @@ public final class ImsRegistrationWrapper {
     private final SingleLatch mDeregisteredLatch = new SingleLatch("ImsDeregistered");
     private boolean mRegistered;
 
-    interface RegistrationListener {
+    public interface RegistrationListener {
         /**
          * Notifies when the IMS Provider is registered to the IMS network
          * with corresponding attributes.
