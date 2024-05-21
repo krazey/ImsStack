@@ -20,6 +20,7 @@
 class CodecConfig;
 class CodecAudioConfig;
 class CodecVideoConfig;
+class AudioConfiguration;
 class MediaConfiguration;
 class MediaEnvironment;
 class MediaResourceManager;
@@ -98,6 +99,8 @@ private:
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     VideoProfile::Payload* CreateHevcPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
+    void SetAudioCodecFmtp(IN CodecAudioConfig* pCodecConfig, IN AudioConfiguration* pAudioConfig,
+            OUT AudioProfile::AudioFmtp* pFmtp);
     void SetVideoCodecFmtp(IN CodecVideoConfig* pCodecConfig, IN VideoConfiguration* pVideoConfig,
             OUT VideoProfile::VideoFmtp* pFmtp);
     void SetVideoCodecPayload(IN CodecVideoConfig* pCodecConfig,

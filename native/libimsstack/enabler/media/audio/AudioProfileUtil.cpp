@@ -69,7 +69,7 @@ const AString AudioProfileUtil::AUDIO_CODEC_BITRATE_STRING[3][9] = {
 PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpRsRr(
         OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
 {
-    if (pAudioProfile == IMS_NULL)
+    if (pAudioProfile == IMS_NULL || pConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -79,6 +79,48 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpRsRr(
 
     IMS_TRACE_I("SetRtcpRsRr(), Set RS[%d], RR[%d]", pAudioProfile->nBandwidthRs,
             pAudioProfile->nBandwidthRr, 0);
+
+    return IMS_TRUE;
+}
+
+PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
+        OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
+{
+    if (pAudioProfile == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    pAudioProfile->bSupportRtcpXr = pConfig->IsRtcpXrEnabled();
+
+    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->bSupportRtcpXr, 0, 0);
+
+    if (pAudioProfile->bSupportRtcpXr == IMS_TRUE)
+    {
+        if (pConfig->IsRtcpXrVoipEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
+        }
+        if (pConfig->IsRtcpXrStatisticsEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics = IMS_TRUE;
+        }
+        if (pConfig->IsRtcpXrPlrEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle = IMS_TRUE;
+        }
+        if (pConfig->IsRtcpXrPdrEnabled() == IMS_TRUE)
+        {
+            pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
+        }
+
+        IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
+                pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics,
+                pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics,
+                pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle);
+        IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
+                pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle, 0, 0);
+    }
 
     return IMS_TRUE;
 }
