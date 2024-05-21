@@ -443,70 +443,51 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessBlockChanged()
 PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
-            objNewCapabilities.GetSize(), 0, 0);
-
-    for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); i++)
+    if (IsEmergencyService())
     {
-        IMS_UINT32 nCapaNetworkType = m_objCapabilities.GetKeyAt(i);
-
-        // Network type is not existed in the new capabilities (=no capabilities)
-        if (objNewCapabilities.GetIndexOfKey(nCapaNetworkType) < 0)
-        {
-            m_objCapabilities.SetValue(
-                    nCapaNetworkType, static_cast<IMS_UINT32>(AosCapability::NONE));
-            continue;
-        }
-
-        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
-
-        A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nCapaNetworkType[%d], nNewCapabilities[%x], m_nNetworkType[%s]",
-                nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
-
-        m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
+        return;
     }
 
-    if (IsSupportedNetworkType(m_nNetworkType))
+    AosHandle::ProcessCapabilitiesChanged(objNewCapabilities);
+
+    if (!IsSupportedNetworkType(m_nNetworkType))
     {
-        // Manage current blocks
-        ProcessBlock(GetVoiceBlockReasonForIpcan(),
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE));
+        return;
+    }
 
-        ProcessBlock(GetVideoBlockReasonForIpcan(),
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
+    // Manage current blocks
+    ProcessBlock(GetVoiceBlockReasonForIpcan(),
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE));
 
-        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER),
-                IMS_FALSE);
+    ProcessBlock(GetVideoBlockReasonForIpcan(),
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
 
-        // Manage holding blocks
-        if (IsEpdgEnabled())
+    ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER),
+            IMS_FALSE);
+
+    // Manage holding blocks
+    if (IsEpdgEnabled())
+    {
+        IMS_UINT32 nMobileNetworkType = GetMobileNetworkType();
+
+        if (IsSupportedNetworkTypeForCellular(nMobileNetworkType))
         {
-            IMS_UINT32 nMobileNetworkType = GetMobileNetworkType();
-
-            if (IsSupportedNetworkTypeForCellular(nMobileNetworkType))
-            {
-                ProcessBlock(BLOCK_VOLTE_CAPABILITY,
-                        !IsCapabilityExistedForNetworkType(
-                                nMobileNetworkType, AosCapability::VOICE));
-                ProcessBlock(BLOCK_VILTE_CAPABILITY,
-                        !IsCapabilityExistedForNetworkType(
-                                nMobileNetworkType, AosCapability::VIDEO));
-            }
+            ProcessBlock(BLOCK_VOLTE_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VOICE));
+            ProcessBlock(BLOCK_VILTE_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VIDEO));
         }
-        else
+    }
+    else
+    {
+        if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
         {
-            if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
-            {
-                ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
-                        !IsCapabilityExistedForNetworkType(
-                                NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+            ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
 
-                ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
-                        !IsCapabilityExistedForNetworkType(
-                                NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
-            }
+            ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
         }
     }
 }

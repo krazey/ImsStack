@@ -165,10 +165,7 @@ public:
         BLOCK_VOPS = 0x40,
         BLOCK_SSAC = 0x80,
         BLOCK_NETWORK = 0x100,
-        BLOCK_3G = 0x200,
-
-        // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x400
+        BLOCK_3G = 0x200
     };
 
 protected:
