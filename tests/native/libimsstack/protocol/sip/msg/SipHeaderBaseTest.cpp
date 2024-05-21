@@ -271,4 +271,87 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));
     pHeader->SipDelete();
 }
+
+TEST_F(SipHeaderBaseTest, DecodeParameter)
+{
+    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    /* Decode content-type with value and parameters */
+    const char* pValue = "multipart/mixed;boundary=b_4043f-000a3b";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
+
+    EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("boundary"));
+    EXPECT_STREQ("b_4043f-000a3b", pHeader->GetParamValue("boundary", 0));
+
+    /* remove parameter and access parameter */
+    pHeader->RemoveParam("boundary");
+    EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(-1, pHeader->GetParamIndex("boundary"));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 0) == nullptr);
+    pHeader->SipDelete();
+
+    /* Decode with only value and empty parameters */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pValue = "multipart/mixed";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
+
+    EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(-1, pHeader->GetParamIndex("boundary"));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 0) == nullptr);
+
+    /* set parameter and access parameter */
+    EXPECT_TRUE(pHeader->SetParam("boundary", "4043f-000a3b"));
+    EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("boundary"));
+    EXPECT_STREQ("4043f-000a3b", pHeader->GetParamValue("boundary", 0));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 1) == nullptr);
+    pHeader->SipDelete();
+
+    /* Decode with only parameters and empty value */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+    pValue = ";boundary=b_4043f-000a3b";
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    pHeader->SipDelete();
+
+    /* Decode accept-contact with value as'*' and multpile parameters */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pValue = "*;param1=value1;param2=value2,value3";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_STREQ("*", pHeader->GetValue());
+    EXPECT_EQ(2, pHeader->GetParamCount());
+
+    EXPECT_TRUE(pHeader->IsParamPresent("param1"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("param1"));
+    EXPECT_STREQ("value1", pHeader->GetParamValue("param1", 0));
+
+    EXPECT_TRUE(pHeader->IsParamPresent("param2"));
+    EXPECT_EQ(1, pHeader->GetParamIndex("param2"));
+    EXPECT_STREQ("value3", pHeader->GetParamValue("param2", 1));
+
+    EXPECT_EQ(-1, pHeader->GetParamIndex("param3"));
+
+    pHeader->RemoveParam("param1");
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    EXPECT_EQ(-1, pHeader->GetParamIndex("param1"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("param2"));
+    EXPECT_STREQ("value2", pHeader->GetParamValue("param2"));
+
+    EXPECT_TRUE(pHeader->SetParam("param3", "value3"));
+    EXPECT_EQ(1, pHeader->GetParamIndex("param3"));
+    EXPECT_STREQ("value3", pHeader->GetParamValue("param3"));
+
+    EXPECT_TRUE(pHeader->SetParam("param4", SIP_NULL));
+    EXPECT_EQ(2, pHeader->GetParamIndex("param4"));
+    ASSERT_TRUE(pHeader->GetParamValue("param4", 0) == nullptr);
+    pHeader->SipDelete();
+}
 }  // namespace android
