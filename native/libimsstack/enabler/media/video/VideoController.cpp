@@ -196,16 +196,18 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
     }
 
     VideoProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
-    IMS_BOOL bEnableRtcp = IMS_TRUE;
-
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+    if (pPeerProfile == IMS_NULL)
     {
-        bEnableRtcp = IMS_FALSE;
+        return IMS_FALSE;
     }
 
-    return m_pSession->UpdateMediaQualityThreshold(
-            MEDIA_DIRECTION_INVOLVED_RECV(m_pSession->GetDirection()), bEnableRtcp);
+    IMS_BOOL bEnableRtcp = (pPeerProfile->nBandwidthRs == 0 && pPeerProfile->nBandwidthRr == 0)
+            ? IMS_FALSE
+            : IMS_TRUE;
+    IMS_BOOL bActiveSession =
+            (m_pSession->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE : IMS_FALSE;
+
+    return m_pSession->UpdateMediaQualityThreshold(bActiveSession, bEnableRtcp);
 }
 
 PUBLIC
