@@ -65,7 +65,7 @@ public:
     static const IMS_SINT32 DEFAULT_AVC_RESOLUTION_HEIGHT = 320;
     static const IMS_SINT32 DEFAULT_AVC_FRAMERATE = 15;
     static const IMS_SINT32 DEFAULT_AVC_BITRATE = 384;
-    static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_TRUE;
 
 protected:
     IMS_BOOL m_bIncludeSpropParameterSets;

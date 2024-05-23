@@ -19,7 +19,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
-#define DEFAULT_AVC_SPROP_PARAMS ""
+#define DEFAULT_AVC_SPROP_PARAMS "Z0LAFukDwKMg,aM4G4g=="
 #define DEFAULT_AVC_PROFILE_ID   "42C00C"
 #define DEFAULT_AVC_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
@@ -92,20 +92,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
     m_strProfileLevelId = piCcSubBundle->GetString(
             CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
             AString::ConstNull());
-
-    m_strSpropParameterSets = piCcSubBundle->GetString(
-            CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
-            AString::ConstNull());
-    if (m_strSpropParameterSets.IsNull() || m_strSpropParameterSets.IsEmpty())
-    {
-        m_bIncludeSpropParameterSets = IMS_FALSE;
-        IMS_TRACE_E(0, "SPROP is NULL", 0, 0, 0);
-    }
-    else
-    {
-        m_bIncludeSpropParameterSets = IMS_TRUE;
-        IMS_TRACE_D("SPROP : %s", m_strSpropParameterSets.GetStr(), 0, 0);
-    }
 
     piCcSubBundle->ReleaseBundle();
     piCcBundle->ReleaseBundle();

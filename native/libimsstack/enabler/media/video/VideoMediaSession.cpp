@@ -209,7 +209,6 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
@@ -231,7 +230,6 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
