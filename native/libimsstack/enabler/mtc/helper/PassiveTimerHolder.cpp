@@ -19,14 +19,15 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IPassiveTimerListener.h"
 #include "helper/PassiveTimerHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 PassiveTimerHolder::PassiveTimerHolder() :
-        m_pService(IMS_NULL),
-        m_objTimers(ImsMap<IPassiveTimerHolder::Type, ITimer*>())
+        m_piService(IMS_NULL),
+        m_objTimerInfoByType(ImsMap<IPassiveTimerHolder::Type, TimerInfo*>())
 {
     IMS_TRACE_I("+PassiveTimerHolder", 0, 0, 0);
 }
@@ -35,16 +36,12 @@ PUBLIC VIRTUAL PassiveTimerHolder::~PassiveTimerHolder()
 {
     IMS_TRACE_I("~PassiveTimerHolder", 0, 0, 0);
 
-    if (m_pService)
+    if (m_piService)
     {
-        m_pService->RemoveAosStateListener(this);
+        m_piService->RemoveAosStateListener(this);
     }
 
-    for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); i++)
-    {
-        ReleaseTimer(m_objTimers.GetValueAt(i));
-    }
-    m_objTimers.Clear();
+    ReleaseAllTimerInfo();
 }
 
 PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eType,
@@ -58,19 +55,19 @@ PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eT
             return;
         }
 
-        ReleaseTimer(m_objTimers.GetValue(eType));
+        ReleaseTimerInfo(eType);
     }
 
     IMS_TRACE_D("AddTimer Type[%d] Duration[%d]", eType, nTimeInMillis, 0);
 
     ITimer* piTimer = TimerService::GetTimerService()->CreateTimer();
-    m_objTimers.Add(eType, piTimer);
+    m_objTimerInfoByType.Add(eType, new TimerInfo(piTimer));
     piTimer->SetTimer(nTimeInMillis, this);
 }
 
 PUBLIC VIRTUAL IMS_BOOL PassiveTimerHolder::IsActive(IN IPassiveTimerHolder::Type eType) const
 {
-    return m_objTimers.GetIndexOfKey(eType) >= 0;
+    return m_objTimerInfoByType.GetIndexOfKey(eType) >= 0;
 }
 
 PUBLIC VIRTUAL void PassiveTimerHolder::OnAosStateChanged(
@@ -81,44 +78,72 @@ PUBLIC VIRTUAL void PassiveTimerHolder::OnAosStateChanged(
     // logic into this api.
     if (eState == MtcAosState::DISCONNECTED)
     {
-        IMS_TRACE_I("OnAosStateChanged : Release Timers size[%d]", m_objTimers.GetSize(), 0, 0);
-        for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); i++)
-        {
-            ReleaseTimer(m_objTimers.GetValueAt(i));
-        }
-        m_objTimers.Clear();
+        ReleaseAllTimerInfo();
     }
 }
 
 PUBLIC VIRTUAL void PassiveTimerHolder::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    IMS_SLONG nIndex = GetIndexOfTimer(piTimer);
+    IMS_SLONG nIndex = GetIndexOfTimerInfo(piTimer);
     if (nIndex == -1)
     {
         return;
     }
 
-    ReleaseTimer(piTimer);
-    IMS_TRACE_I("Timer_TimerExpired : Type[%d]", m_objTimers.GetKeyAt(nIndex), 0, 0);
-    m_objTimers.RemoveAt(nIndex);
+    IPassiveTimerHolder::Type eType = m_objTimerInfoByType.GetKeyAt(nIndex);
+    IMS_TRACE_I("Timer_TimerExpired : Type[%d]", eType, 0, 0);
+
+    TimerInfo* pTimerInfo = m_objTimerInfoByType.GetValue(eType);
+    pTimerInfo->SetTerminating();
+
+    for (IMS_UINT32 i = 0; i < pTimerInfo->objListeners.GetSize(); i++)
+    {
+        pTimerInfo->objListeners.GetAt(i)->OnPassiveTimerExpired(eType);
+    }
+
+    ReleaseTimerInfo(eType);
 }
 
 PUBLIC
 void PassiveTimerHolder::SetNormalService(IN IMtcService* pService)
 {
-    m_pService = pService;
-    if (m_pService)
+    m_piService = pService;
+    if (m_piService)
     {
-        m_pService->AddAosStateListener(this);
+        m_piService->AddAosStateListener(this);
     }
 }
 
-PRIVATE
-IMS_SLONG PassiveTimerHolder::GetIndexOfTimer(IN const ITimer* piTimer)
+PUBLIC
+void PassiveTimerHolder::AddListener(
+        IN IPassiveTimerHolder::Type eType, IPassiveTimerListener* pPassiveTimerListener)
 {
-    for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
+    if (m_objTimerInfoByType.GetIndexOfKey(eType) < 0)
     {
-        if (piTimer == m_objTimers.GetValueAt(i))
+        return;
+    }
+
+    m_objTimerInfoByType.GetValue(eType)->AddListener(pPassiveTimerListener);
+}
+
+PUBLIC
+void PassiveTimerHolder::RemoveListener(
+        IN IPassiveTimerHolder::Type eType, IN IPassiveTimerListener* pPassiveTimerListener)
+{
+    if (m_objTimerInfoByType.GetIndexOfKey(eType) < 0)
+    {
+        return;
+    }
+
+    m_objTimerInfoByType.GetValue(eType)->RemoveListener(pPassiveTimerListener);
+}
+
+PRIVATE
+IMS_SLONG PassiveTimerHolder::GetIndexOfTimerInfo(IN const ITimer* piTimer) const
+{
+    for (IMS_UINT32 i = 0; i < m_objTimerInfoByType.GetSize(); ++i)
+    {
+        if (piTimer == m_objTimerInfoByType.GetValueAt(i)->piTimer)
         {
             return (IMS_SLONG)i;
         }
@@ -128,8 +153,24 @@ IMS_SLONG PassiveTimerHolder::GetIndexOfTimer(IN const ITimer* piTimer)
 }
 
 PRIVATE
-void PassiveTimerHolder::ReleaseTimer(IN ITimer* piTimer)
+void PassiveTimerHolder::ReleaseTimerInfo(IN IPassiveTimerHolder::Type eType)
 {
-    piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piTimer);
+    TimerInfo* pTimerInfo = m_objTimerInfoByType.GetValue(eType);
+    pTimerInfo->piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(pTimerInfo->piTimer);
+    delete pTimerInfo;
+    m_objTimerInfoByType.Remove(eType);
+}
+
+PRIVATE
+void PassiveTimerHolder::ReleaseAllTimerInfo()
+{
+    while (!m_objTimerInfoByType.IsEmpty())
+    {
+        TimerInfo* pTimerInfo = m_objTimerInfoByType.GetValueAt(0);
+        pTimerInfo->piTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(pTimerInfo->piTimer);
+        delete pTimerInfo;
+        m_objTimerInfoByType.RemoveAt(0);
+    }
 }

@@ -19,9 +19,11 @@
 
 #include "ImsTypeDef.h"
 
+class IPassiveTimerListener;
+
 /**
- * This class holds timers with their duration period. When the timer expires, it is removed from
- * the internal list.
+ * This class holds timers with their duration period. When the timer expires,
+ * the listener is notified and the timer is removed from the internal list.
  * All timers in the list are released once a normal registration is disconnedted
  */
 class IPassiveTimerHolder
@@ -54,6 +56,26 @@ public:
      * @return True if the timer is active.
      */
     virtual IMS_BOOL IsActive(IN IPassiveTimerHolder::Type eType) const = 0;
+
+    /**
+     * @brief Adds a listener with a specific type. It does nothing if the timer of given type is
+     * not activated
+     *
+     * @param eType The type the listener interested in.
+     * @param pPassiveTimerListener The listener.
+     */
+    virtual void AddListener(IN IPassiveTimerHolder::Type eType,
+            IN IPassiveTimerListener* pPassiveTimerListener) = 0;
+
+    /**
+     * @brief Removes a listener that has a specific type. It does nothing if the timer of given
+     * type is not activated. Each listener must release itself when it disappears.
+     *
+     * @param eType The type the listener interested in.
+     * @param pPassiveTimerListener The listener.
+     */
+    virtual void RemoveListener(IN IPassiveTimerHolder::Type eType,
+            IN IPassiveTimerListener* pPassiveTimerListener) = 0;
 };
 
 #endif
