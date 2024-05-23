@@ -358,6 +358,14 @@ public:
                     bSupportPacketLossRle == obj.bSupportPacketLossRle &&
                     bSupportPacketDuplicatedRle == obj.bSupportPacketDuplicatedRle);
         }
+
+        bool operator!=(IN const RTCPXRAttributes& obj) const
+        {
+            return (bSupportStatisticMetrics != obj.bSupportStatisticMetrics ||
+                    bSupportVoipMetrics != obj.bSupportVoipMetrics ||
+                    bSupportPacketLossRle != obj.bSupportPacketLossRle ||
+                    bSupportPacketDuplicatedRle != obj.bSupportPacketDuplicatedRle);
+        }
     };
 
 public:
