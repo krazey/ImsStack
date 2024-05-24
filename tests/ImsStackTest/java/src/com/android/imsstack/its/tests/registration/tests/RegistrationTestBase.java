@@ -19,17 +19,28 @@ import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.its.base.TelephonyManagerProxyImpl;
-import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
 import com.android.imsstack.its.tests.ImsStackTestBase;
 import com.android.imsstack.its.tests.registration.RegistrationHelper;
+import com.android.imsstack.its.tests.registration.RegistrationInfo;
+import com.android.imsstack.its.tests.registration.util.TestRegistration;
 
 public class RegistrationTestBase extends ImsStackTestBase {
-    protected TelephonyManagerProxyImpl mTelephony;
-    protected ImsRegistrationWrapper mImsRegistration;
-    protected RegistrationHelper mRegistrationHelper;
-    protected PersistableBundle mConfig = null;
 
-    protected void setRegistrationBaseConfig(int slotId) {
+    protected TelephonyManagerProxyImpl mTelephony;
+    protected TestRegistration mRegistration;
+    protected RegistrationHelper mRegistrationHelper;
+    protected PersistableBundle mConfig;
+    protected RegistrationInfo.Builder mInfoBuilder;
+
+    protected void setTestValueInitializer(int carrierId) {
+        setTestValueInitializer((slotId, simApplicationState) -> {
+            int subId = getSubId(slotId);
+            TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
+            telephony.setSimCarrierId(carrierId);
+        });
+    }
+
+    protected void setRegistrationBaseConfig() {
         mConfig = new PersistableBundle();
         mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, false);
     }
