@@ -38,22 +38,22 @@ public class AosSettingService {
 
     private final Object mLock = new Object();
     @VisibleForTesting
-    protected static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
+    static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
     @VisibleForTesting
-    protected static final int EVENT_REBOOT = 1002;
+    static final int EVENT_REBOOT = 1002;
     @VisibleForTesting
-    protected static final int EVENT_SHUTDOWN = 1003;
+    static final int EVENT_SHUTDOWN = 1003;
 
     @VisibleForTesting
-    protected UserMobileDataStateListener mUserMobileDataStateListener = null;
+    UserMobileDataStateListener mUserMobileDataStateListener = null;
     @VisibleForTesting
-    protected Handler mHandler = null;
+    Handler mHandler = null;
 
     private int mSlotId = 0;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private boolean mMobileDataEnabled = false;
     @VisibleForTesting
-    protected IntentReceiverListener mIntentReceiverListener = null;
+    IntentReceiverListener mIntentReceiverListener = null;
     private Sim.Listener mSimListener;
     private NativeStateListener mNativeStateListener;
 
@@ -224,7 +224,7 @@ public class AosSettingService {
     }
 
     @VisibleForTesting
-    protected final class UserMobileDataStateListener extends TelephonyCallback implements
+    final class UserMobileDataStateListener extends TelephonyCallback implements
             TelephonyCallback.UserMobileDataStateListener {
 
         private final int mSubId;
@@ -246,7 +246,7 @@ public class AosSettingService {
     }
 
     @VisibleForTesting
-    protected class IntentReceiverListener extends BroadcastReceiver {
+    class IntentReceiverListener extends BroadcastReceiver {
         public void register() {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_REBOOT);

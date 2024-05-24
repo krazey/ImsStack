@@ -86,37 +86,36 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private Handler mHandler;
 
     @VisibleForTesting
-    protected final Set<IAosRegistrationListener> mAosRegistrationListeners =
+    final Set<IAosRegistrationListener> mAosRegistrationListeners =
             new CopyOnWriteArraySet<IAosRegistrationListener>();
     @VisibleForTesting
-    protected final Set<IAosInfoListener> mAosInfoListeners =
-            new CopyOnWriteArraySet<IAosInfoListener>();
+    final Set<IAosInfoListener> mAosInfoListeners = new CopyOnWriteArraySet<IAosInfoListener>();
 
     @VisibleForTesting
-    protected final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
+    final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
 
     @VisibleForTesting
-    protected CapabilityPairs mCapabilityPairs;
+    CapabilityPairs mCapabilityPairs;
 
     private long mNativeObject = 0;
     @VisibleForTesting
-    protected JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
+    JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
 
     @VisibleForTesting
-    protected int mRegisteredNetworkType = NetworkType.NONE;
+    int mRegisteredNetworkType = NetworkType.NONE;
 
     private int mRegState = RegistrationState.DEREGISTERED;
 
     @VisibleForTesting
-    protected int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
 
     @VisibleForTesting
-    protected int mFeatureTagBits = 0;
+    int mFeatureTagBits = 0;
     @VisibleForTesting
-    protected final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
+    final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
     @VisibleForTesting
-    protected boolean mIsConnectedOverCrossSim = false;
+    boolean mIsConnectedOverCrossSim = false;
     private NativeStateListener mNativeStateListener;
     private IPhoneStateNotifier mNotifier = null;
 
