@@ -79,10 +79,10 @@ TEST_F(SipPrivacyHeaderTest, AddPrivacy)
 TEST_F(SipPrivacyHeaderTest, EncodeHdr)
 {
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     SipPrivacyHeader* pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
@@ -151,18 +151,18 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Empty value after ; not allowed for privacy*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("user;"), 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("user;", 5));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode ; value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(";"), 1));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(";", 1));
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     pHeader->SipDelete();
@@ -171,7 +171,7 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
 
     /* Decode valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("history"), 7));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("history", 7));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -182,7 +182,7 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode more than one value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("user;header;id"), 14));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("user;header;id", 14));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

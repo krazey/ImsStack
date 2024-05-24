@@ -81,7 +81,7 @@ SIP_BOOL SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
     return SetCharVar(pszComment, m_pszComment);
 }
 
-SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRetryAfterHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -89,11 +89,11 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pCommentStart = SIP_NULL;
-    SIP_CHAR* pCommentEnd = SIP_NULL;
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pCommentStart = SIP_NULL;
+    const SIP_CHAR* pCommentEnd = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     SIP_BOOL bStatus = FindComment(pStartPt, pEndPt, pCommentStart, pCommentEnd);
 

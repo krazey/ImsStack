@@ -38,7 +38,7 @@ public:
     SIP_BOOL EncodeRequestLine(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
-    SIP_BOOL DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     /*Set Methods*/
     SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);

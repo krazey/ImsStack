@@ -173,8 +173,9 @@ public:
         (void)nMsgOptions;
         return EncodeHdr(ppMsgBuffCurrPos, bParams);
     }
-    SIP_BOOL DecodeHeaderParameters(SIP_CHAR* pStart, SIP_CHAR* pEnd, SIP_CHAR cDelimeter);
-    virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHeaderParameters(
+            const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimeter);
+    virtual SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     inline SIP_INT32 GetHdrType() const { return m_eHdrType; }
     inline SIP_VOID SetHdrType(SIP_INT32 eHdrType) { m_eHdrType = eHdrType; }
     inline SIP_UINT32 GetParamCount() const
@@ -216,8 +217,8 @@ public:
 
 protected:
     virtual ~SipHeaderBase();
-    static SIP_BOOL FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
-            SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd);
+    static SIP_BOOL FindComment(const SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
+            const SIP_CHAR*& pszCommentStart, const SIP_CHAR*& pszCommentEnd);
 
 private:
     SIP_VOID InitParameters(SipParameters* pParameters);
@@ -237,7 +238,7 @@ public:
     SIP_CHAR* GetTag();
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
-    virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    virtual SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     inline SIP_BOOL IsValidHeader() const override
     {

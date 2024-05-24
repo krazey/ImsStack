@@ -36,17 +36,17 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetTimeVal(const_cast<char*>("12.56")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetTimeVal(const_cast<SIP_CHAR*>("12.56")));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -58,7 +58,7 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetDelay(const_cast<char*>("1.30")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetDelay(const_cast<SIP_CHAR*>("1.30")));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -75,9 +75,9 @@ TEST_F(SipTimeStampHeaderTest, DecodeHdr)
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("12.56"), 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56", 5));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_EQ(nullptr, pHeader->GetDelay());
@@ -88,7 +88,7 @@ TEST_F(SipTimeStampHeaderTest, DecodeHdr)
             SipTimeStampHeader::GetNewObj(SipHeaderBase::TIMESTAMP, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("12.56 1.30"), 10));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("12.56 1.30", 10));
 
     EXPECT_STREQ("12.56", pHeader->GetTimeVal());
     EXPECT_STREQ("1.30", pHeader->GetDelay());

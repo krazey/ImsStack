@@ -30,7 +30,7 @@ SipPAssertedServiceHeader::SipPAssertedServiceHeader(const SipPAssertedServiceHe
 
 SipPAssertedServiceHeader::~SipPAssertedServiceHeader() {}
 
-SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
     if (nDecLen == SIP_ZERO)
@@ -40,7 +40,7 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SipSkipFwLWS(pStartPt, pEndPt);
 
     // validate the service id value
@@ -63,13 +63,13 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
         delete[] pszTempString;
     }
 
-    SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
+    const SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
 
     // Service id Value Validations   toplebel.subservice id
     // fIND dot and validate topLevel ID and SubService Id
     SIP_UINT16 nTopLevelIDLen = 0;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     if (SipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {

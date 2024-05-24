@@ -38,7 +38,7 @@ TEST_F(SipRequestDispositionHeaderTest, CopyConstructor)
             SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("proxy"), 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("proxy", 5));
 
     SipRequestDispositionHeader* pCopyHeader = reinterpret_cast<SipRequestDispositionHeader*>(
             SipRequestDispositionHeader::GetNewObj(SipHeaderBase::REQUEST_DISPOSITION, pHeader));
@@ -57,10 +57,10 @@ TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty headers, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
 
     /* invalid value, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("InvalidValue"), 12));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("InvalidValue", 12));
     pHeader->SipDelete();
 
     /* Check all possible valid values, success */

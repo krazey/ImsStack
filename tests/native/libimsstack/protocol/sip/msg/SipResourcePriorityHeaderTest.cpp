@@ -50,22 +50,22 @@ TEST_F(SipResourcePriorityHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objValue(256);
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace(const_cast<char*>("Namespace")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace(const_cast<SIP_CHAR*>("Namespace")));
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority(const_cast<char*>("ResourcePriority")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority(const_cast<SIP_CHAR*>("ResourcePriority")));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -82,11 +82,11 @@ TEST_F(SipResourcePriorityHeaderTest, DecodeHdr)
             SipResourcePriorityHeader::GetNewObj(SipHeaderBase::RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("OnlyNameSpace"), 13));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("OnlyNameSpace", 13));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("Namespace.ResourcePriority"), 26));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("Namespace.ResourcePriority", 26));
 
     EXPECT_STREQ("Namespace", pHeader->GetNameSpace());
     EXPECT_STREQ("ResourcePriority", pHeader->GetResourcePriority());

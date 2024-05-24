@@ -35,7 +35,7 @@ public:
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_BOOL SetParams(const SIP_CHAR* pszName, const SIP_CHAR* pszVal, SIP_BOOL bIsFeatureParam);
 

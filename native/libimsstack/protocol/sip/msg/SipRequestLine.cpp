@@ -139,10 +139,10 @@ SipAddrSpec* SipRequestLine::GetReqUri()
     return m_pReqUri;
 }
 
-SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRequestLine::DecodeRequestLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    SIP_CHAR* pTempLoc = SIP_NULL;
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempLoc = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*find first space i.e. end of Method*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)

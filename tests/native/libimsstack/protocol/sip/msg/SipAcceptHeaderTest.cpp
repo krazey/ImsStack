@@ -113,10 +113,10 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader)
 TEST_F(SipAcceptHeaderTest, EncodeAndEncodeHdr)
 {
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
@@ -185,7 +185,7 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode only value and no parameter */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("application/sdp", 15));
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
     pHeader->SipDelete();
@@ -193,7 +193,7 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Decode only value and parameters */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp;q=0.4;level=1"), 29));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("application/sdp;q=0.4;level=1", 29));
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
 
@@ -214,7 +214,7 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Decode invalid media range - MType is '*' and MSubType is not '*' */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("*/sdp"), 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("*/sdp", 5));
     pHeader->SipDelete();
 }
 

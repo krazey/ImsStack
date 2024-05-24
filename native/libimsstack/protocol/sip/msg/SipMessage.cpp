@@ -631,7 +631,7 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
 }
 
 SIP_BOOL SipMessage::DecMultiPartBody(
-        SIP_CHAR* pBuffStart, SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen)
+        const SIP_CHAR* pBuffStart, const SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen)
 {
     (void)nMsgBuffLen;  // unused as of now
 
@@ -676,7 +676,7 @@ SIP_BOOL SipMessage::DecMultiPartBody(
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
+SIP_BOOL SipMessage::DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 {
     if ((pMsgBuff == SIP_NULL) || (nMsgBuffLen == SIP_ZERO))
     {
@@ -685,8 +685,8 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLe
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pStartPt = pMsgBuff;
-    SIP_CHAR* pEndPt = pMsgBuff + nMsgBuffLen;
+    const SIP_CHAR* pStartPt = pMsgBuff;
+    const SIP_CHAR* pEndPt = pMsgBuff + nMsgBuffLen;
 
     // Remove additional CRLF if present at the starting of incoming message.
     while ((pStartPt < pEndPt) && (IS_CR(*pStartPt) && IS_LF(*(pStartPt + SIP_ONE))))
@@ -714,7 +714,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLe
       In case of Request  it should be request line
       In case of Response it should be status line*/
     SIP_BOOL bHdrEnd = SIP_FALSE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
     {
@@ -747,7 +747,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLe
     }
     else
     {  // REQUEST LINE : If sip version present at the last.
-        SIP_CHAR* pSipVersion = pTempPos;
+        const SIP_CHAR* pSipVersion = pTempPos;
 
         while ((*pSipVersion != SPACE) && (pStartPt <= pSipVersion))
         {
@@ -997,7 +997,7 @@ SIP_BOOL SipMessage::DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLe
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
+SIP_BOOL SipMessage::DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 {
     if ((pMsgBuff == SIP_NULL) || (nMsgBuffLen == SIP_ZERO))
     {
@@ -1005,8 +1005,8 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pStartPt = pMsgBuff;
-    SIP_CHAR* pEndPt = pMsgBuff + nMsgBuffLen;
+    const SIP_CHAR* pStartPt = pMsgBuff;
+    const SIP_CHAR* pEndPt = pMsgBuff + nMsgBuffLen;
 
     // Remove additional CRLF if present at the starting of incoming message.
     while ((pStartPt < pEndPt) && (IS_CR(*pStartPt) && IS_LF(*(pStartPt + SIP_ONE))))
@@ -1034,7 +1034,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
       In case of Request  it should be request line
       In case of Response it should be status line*/
     SIP_BOOL bHdrEnd = SIP_FALSE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     if (SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd) == SIP_FALSE)
     {

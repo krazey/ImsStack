@@ -50,10 +50,10 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->SetHeaderName("Name"));
     EXPECT_STREQ("Name", pHeader->GetHeaderName());
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
 
     AStringBuffer objBuffer(512);

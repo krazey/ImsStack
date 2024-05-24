@@ -46,13 +46,13 @@ protected:
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-        char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+        const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n");
+\r\n";
         EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         pRespSipMsg = new SipMessage();
@@ -63,7 +63,7 @@ CSeq: 1 INVITE\r\n\
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
-        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr(const_cast<char*>("2"), 1));
+        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr("2", 1));
 
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespRSeqHdr));
         pRespRSeqHdr->SipDelete();
@@ -107,7 +107,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_IdleState)
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
@@ -145,7 +145,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
@@ -156,7 +156,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
 
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -193,14 +193,14 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -268,13 +268,13 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -303,14 +303,14 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -329,13 +329,13 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);

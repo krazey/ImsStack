@@ -121,11 +121,12 @@ public:
     SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL DecCompleteMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecMultiPartBody(SIP_CHAR* pBuffStart, SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL DecMultiPartBody(
+            const SIP_CHAR* pBuffStart, const SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
 
     inline SipMsgBodyList* GetMsgBodyList()
     {

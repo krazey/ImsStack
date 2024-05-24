@@ -45,7 +45,7 @@ public:
     SIP_BOOL EncodeStatusLine(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
-    SIP_BOOL DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     /*Set Methods*/
     SIP_BOOL SetStatusCode(const SIP_CHAR* pszStatusCode);
