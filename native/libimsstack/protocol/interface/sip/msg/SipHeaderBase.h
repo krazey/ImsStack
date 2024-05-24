@@ -185,9 +185,9 @@ public:
     {
         return (m_pParameters != SIP_NULL) ? m_pParameters->IsParamPresent(pszName) : SIP_FALSE;
     }
-    inline SIP_UINT32 GetParamIndex(const SIP_CHAR* pszName) const
+    inline SIP_INT32 GetParamIndex(const SIP_CHAR* pszName) const
     {
-        return m_pParameters->GetParamIndex(pszName);
+        return (m_pParameters != SIP_NULL) ? m_pParameters->GetParamIndex(pszName) : -1;
     }
     SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
     inline SIP_VOID RemoveParam(const SIP_CHAR* pszName)

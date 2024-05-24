@@ -211,8 +211,7 @@ SIP_CHAR* SipParameterList::GetParamValue(
         return SIP_NULL;
     }
 
-    if ((pNameValue->m_valueList.IsEmpty() == SIP_TRUE) ||
-            (pNameValue->m_valueList.GetSize() < nPos))
+    if (pNameValue->m_valueList.GetSize() <= nPos)
     {
         return SIP_NULL;
     }
