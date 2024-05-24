@@ -86,7 +86,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private Handler mHandler;
 
     @VisibleForTesting
-    protected final Set<IAosRegistrationListener> mAosRegistationListeners =
+    protected final Set<IAosRegistrationListener> mAosRegistrationListeners =
             new CopyOnWriteArraySet<IAosRegistrationListener>();
     @VisibleForTesting
     protected final Set<IAosInfoListener> mAosInfoListeners =
@@ -246,12 +246,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     @Override
     public void addListener(IAosRegistrationListener listener) {
-        mAosRegistationListeners.add(listener);
+        mAosRegistrationListeners.add(listener);
     }
 
     @Override
     public void removeListener(IAosRegistrationListener listener) {
-        mAosRegistationListeners.remove(listener);
+        mAosRegistrationListeners.remove(listener);
     }
 
     @Override
@@ -665,7 +665,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void updateRegisteredNetworkType(int networkType) {
         ImsLog.d(mSlotId, "updateRegisteredNetworkType :: networkType(" + networkType + ")");
         mRegisteredNetworkType = networkType;
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, mFeatureTagBits, mFeatureTags);
         }
     }
@@ -687,7 +687,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistered(int networkType, int featureTagBits, Set<String> featureTags) {
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERED;
         mRegisteredNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, featureTagBits, featureTags);
         }
     }
@@ -695,7 +695,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistering(int networkType, int featureTagBits, Set<String> featureTags) {
         int adjustedNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERING;
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistering(adjustedNetworkType, featureTagBits, featureTags);
         }
     }
@@ -722,37 +722,37 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             }
         }
 
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyDeregistered(networkType, reason, getErrorMessage(reason));
         }
     }
 
     private void onTechnologyChangeFailed(int networkType, int causeCode) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyTechnologyChangeFailed(networkType, causeCode, null);
         }
     }
 
     private void onAssociatedUriChanged(Uri[] uris) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyAssociatedUriChanged(uris);
         }
     }
 
     private void onCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyCapabilitiesUpdateFailed(capabilities, networkType, reason);
         }
     }
 
     private void onCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyCapabilitiesUpdated(pairs);
         }
     }
 
     private void onRegEventStateChanged(int statusCode, Set<Uri> impus) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegEventStateChanged(statusCode, impus);
         }
     }

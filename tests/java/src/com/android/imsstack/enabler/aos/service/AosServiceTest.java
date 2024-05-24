@@ -175,10 +175,10 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void addAndRemoveAosRegistrationListener() {
         mAosService.addListener(mMockAosRegistrationListener);
-        assertEquals(1, mAosService.mAosRegistationListeners.size());
+        assertEquals(1, mAosService.mAosRegistrationListeners.size());
 
         mAosService.removeListener(mMockAosRegistrationListener);
-        assertEquals(0, mAosService.mAosRegistationListeners.size());
+        assertEquals(0, mAosService.mAosRegistrationListeners.size());
     }
 
     @Test
