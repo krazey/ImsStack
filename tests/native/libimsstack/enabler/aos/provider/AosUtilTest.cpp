@@ -34,6 +34,8 @@ using ::testing::Return;
 using ::testing::ReturnNull;
 
 const IMS_SINT32 SLOT_ID = 0;
+const IMS_UINT32 BASE_TIME = 30;
+const IMS_UINT32 MAX_TIME = 1800;
 
 class AosUtilTest : public ::testing::Test
 {
@@ -236,47 +238,144 @@ TEST_F(AosUtilTest, ReturnTrueWhenThereIsParameterInFourFactorsParameterChecked)
             &m_objMockISipMsg, SipHeaderBase::ALLOW, strName, AString("test")));
 }
 
-TEST_F(AosUtilTest, GetLocalPort)
+TEST_F(AosUtilTest, ReturnInitValueWhenGetLocalPort)
 {
     EXPECT_EQ(-1, m_pAosUtil->GetLocalPort(SLOT_ID));
 }
 
-TEST_F(AosUtilTest, CheckFeature)
+TEST_F(AosUtilTest, VerifyAddedFeatureWhenSomeFeaturesAdded)
 {
     IMS_UINT32 nFeatures = 0;
     m_pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
-    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
-
     m_pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
-    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
 
+    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
+    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+}
+
+TEST_F(AosUtilTest, VerifyRemovedFeatureWhenSomeFeaturesRemoved)
+{
+    IMS_UINT32 nFeatures = 0;
+    m_pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
+    m_pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
     m_pAosUtil->RemoveFeature(FEATURE_IPSEC, nFeatures);
+
+    EXPECT_TRUE(m_pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
     EXPECT_FALSE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
+}
+
+TEST_F(AosUtilTest, VerifyFeatureIsClearWhenClearFeatureCalled)
+{
+    IMS_UINT32 nFeatures = 0;
+    m_pAosUtil->AddFeature(FEATURE_SUBSCRIPTION, nFeatures);
+    m_pAosUtil->AddFeature(FEATURE_IPSEC, nFeatures);
 
     m_pAosUtil->ClearFeature(nFeatures);
+
+    EXPECT_FALSE(m_pAosUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, nFeatures));
+    EXPECT_FALSE(m_pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
 }
 
-TEST_F(AosUtilTest, SetRetryTimeDuration)
+TEST_F(AosUtilTest, UpperBoundTimeIsBaseTimeWhenFailCountIsZero)
 {
-    EXPECT_EQ(30, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 0));
-    EXPECT_LE(30, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
-    EXPECT_GE(1800, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
+    const IMS_UINT32 nFailCount = 0;
 
-    EXPECT_LE(30, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
-    EXPECT_LE(60, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 2));
-    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
+    EXPECT_EQ(m_pAosUtil->CalculateUpperBoundTime(BASE_TIME, MAX_TIME, nFailCount), BASE_TIME);
 }
 
-TEST_F(AosUtilTest, SetRetryTimeDurationExecption)
+TEST_F(AosUtilTest, UpperBoundTimeIsBetweenBaseAndMaxWhenFailCountIsOne)
 {
-    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(30, 1800, 30));
-    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(30, 1800, 30));
+    const IMS_UINT32 nFailCount = 1;
 
-    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(1800, 1800, 1));
-    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(1800, 1800, 30));
+    EXPECT_GE(m_pAosUtil->CalculateUpperBoundTime(BASE_TIME, MAX_TIME, nFailCount), BASE_TIME);
+    EXPECT_LE(m_pAosUtil->CalculateUpperBoundTime(BASE_TIME, MAX_TIME, nFailCount), MAX_TIME);
+}
 
-    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 1));
-    EXPECT_GE(1800, m_pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 30));
+TEST_F(AosUtilTest, UpperBoundTimeIsMaxWhenFailCountIsOverMax)
+{
+    const IMS_UINT32 nFailCount = 30;
+
+    // REASONABLE_MAX_FAILURE_COUNT = 24
+    EXPECT_EQ(m_pAosUtil->CalculateUpperBoundTime(BASE_TIME, MAX_TIME, nFailCount), MAX_TIME);
+}
+
+TEST_F(AosUtilTest, UpperBoundTimeIsTheSameValueWhenBaseAndMaxAreTheSame)
+{
+    const IMS_UINT32 nBaseTime = MAX_TIME;
+    const IMS_UINT32 nFailCount = 1;
+
+    EXPECT_EQ(1800, m_pAosUtil->CalculateUpperBoundTime(nBaseTime, MAX_TIME, nFailCount));
+}
+
+TEST_F(AosUtilTest, WaitTimeIsBetweenBaseAndMaxWhenFailureCountIsOne)
+{
+    const IMS_UINT32 nFailCount = 1;
+
+    EXPECT_GE(m_pAosUtil->WaitTimeForFlowRecovery(BASE_TIME, MAX_TIME, nFailCount), BASE_TIME);
+    EXPECT_LE(m_pAosUtil->WaitTimeForFlowRecovery(BASE_TIME, MAX_TIME, nFailCount), MAX_TIME);
+}
+
+TEST_F(AosUtilTest, WaitTimeIsBetweenTwiceBaseAndMaxWhenFailureCountIsTwo)
+{
+    const IMS_UINT32 nFailCount = 2;
+
+    EXPECT_GE(m_pAosUtil->WaitTimeForFlowRecovery(BASE_TIME, MAX_TIME, nFailCount), 2 * BASE_TIME);
+    EXPECT_LE(m_pAosUtil->WaitTimeForFlowRecovery(BASE_TIME, MAX_TIME, nFailCount), MAX_TIME);
+}
+
+TEST_F(AosUtilTest, WaitTimeIsLessAndEqualMaxWhenFailCountIsOverMax)
+{
+    const IMS_UINT32 nFailCount = 30;
+
+    // REASONABLE_MAX_FAILURE_COUNT = 24
+    EXPECT_LE(m_pAosUtil->WaitTimeForFlowRecovery(BASE_TIME, MAX_TIME, nFailCount), MAX_TIME);
+}
+
+TEST_F(AosUtilTest, WaitTimeIsLessAndEqualTheSameValueWhenBaseAndMaxAreTheSame)
+{
+    const IMS_UINT32 nBaseTime = MAX_TIME;
+    IMS_UINT32 nFailCount = 1;
+
+    EXPECT_LE(m_pAosUtil->WaitTimeForFlowRecovery(nBaseTime, MAX_TIME, nFailCount), MAX_TIME);
+
+    nFailCount = 30;
+    EXPECT_LE(m_pAosUtil->WaitTimeForFlowRecovery(nBaseTime, MAX_TIME, nFailCount), MAX_TIME);
+}
+
+TEST_F(AosUtilTest, ReturnTrueWhenCheckingSupportedNetworkType)
+{
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
+}
+
+TEST_F(AosUtilTest, ReturnFalseWhenCheckingUnsupportedNetworkType)
+{
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WCDMA));
+}
+
+TEST_F(AosUtilTest, ReturnTrueWhenCheckingSupportedNetworkTypeForCellular)
+{
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+}
+
+TEST_F(AosUtilTest, ReturnFalseWhenCheckingUnsupportedNetworkTypeForCellular)
+{
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
+}
+
+TEST_F(AosUtilTest, WifiTestIsTrueWhenTurningOnWifiTest)
+{
+    m_pAosUtil->SetWifiTest(IMS_TRUE);
+    EXPECT_TRUE(m_pAosUtil->IsWifiTest());
+}
+
+TEST_F(AosUtilTest, WifiTestIsFalseWhenTurningOffWifiTest)
+{
+    m_pAosUtil->SetWifiTest(IMS_FALSE);
+    EXPECT_FALSE(m_pAosUtil->IsWifiTest());
 }
 
 TEST_F(AosUtilTest, CompareList)
@@ -418,25 +517,4 @@ TEST_F(AosUtilTest, ManageIntList)
     m_pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
     m_pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
     EXPECT_FALSE(m_pAosUtil->IsElementExistInList(compareReasons, reasons));
-}
-
-TEST_F(AosUtilTest, checkNetworkType)
-{
-    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
-    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WCDMA));
-
-    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
-    EXPECT_TRUE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
-    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
-    EXPECT_FALSE(m_pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
-}
-
-TEST_F(AosUtilTest, checkSet)
-{
-    m_pAosUtil->SetWifiTest(IMS_TRUE);
-    EXPECT_TRUE(m_pAosUtil->IsWifiTest());
-    m_pAosUtil->SetWifiTest(IMS_FALSE);
-    EXPECT_FALSE(m_pAosUtil->IsWifiTest());
 }
