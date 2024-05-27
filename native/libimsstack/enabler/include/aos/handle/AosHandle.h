@@ -337,8 +337,5 @@ protected:
 
     AString m_strTag;
     AString m_strTagWithServiceType;
-
-private:
-    friend class AosHandleTest;
 };
 #endif  // AOS_HANDLE_H_
