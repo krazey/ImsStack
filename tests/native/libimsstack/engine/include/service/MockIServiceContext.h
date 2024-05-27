@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_SERVICE_MANAGER_LISTENER_H_
-#define INTERFACE_SERVICE_MANAGER_LISTENER_H_
+#ifndef MOCK_I_SERVICE_CONTEXT_H_
+#define MOCK_I_SERVICE_CONTEXT_H_
 
-#include "ImsTypeDef.h"
+#include <gmock/gmock.h>
 
-class Service;
+#include "IServiceContext.h"
 
-class IServiceManagerListener
+class MockIServiceContext : public IServiceContext
 {
-protected:
-    virtual ~IServiceManagerListener() = default;
-
 public:
-    virtual void ServiceClosed(IN Service* pService) = 0;
+    MockIServiceContext() = default;
+    virtual ~MockIServiceContext() = default;
+
+    MOCK_METHOD(IConfiguration*, GetConfiguration, (), (const, override));
+    MOCK_METHOD(IServiceManager*, GetServiceManager, (), (const, override));
 };
 
 #endif
