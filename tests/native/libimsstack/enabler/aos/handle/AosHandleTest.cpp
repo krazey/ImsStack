@@ -308,31 +308,19 @@ public:
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
+    const AString m_strProfileId = AString("TestProfile");
     const IMS_UINT32 m_nServiceType = -1;
 
 protected:
     virtual void SetUp() override
     {
-        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(0));
-
-        const AString strValue = AString("test");
-        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(strValue));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetApp())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosApplication));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
-
-        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(&m_objMockIAosConnection));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(0));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(m_strProfileId));
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
+        ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .WillByDefault(Return(&m_objMockIAosNetTracker));
+        ON_CALL(m_objMockIAosAppContext, GetConnection())
+                .WillByDefault(Return(&m_objMockIAosConnection));
 
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
