@@ -266,6 +266,17 @@ public:
 
     inline void SetDataConnected(IN IMS_BOOL bConnected) { m_bDataConnected = bConnected; }
 
+    inline void SetWifiWatcher(IN IWifiWatcher* piWifiWatcher) { m_piWifiWatcher = piWifiWatcher; }
+
+    inline void SetCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    {
+        m_objCapabilities = objNewCapabilities;
+    }
+
+    inline void SetRoamingState(IN IMS_UINT32 nState) { m_nRoamingState = nState; }
+
+    inline IMS_BOOL IsCsVoiceAvailable() { return m_bCsVoiceAvailable; }
+
     FRIEND_TEST(AosHandleTest, Constructor);
     FRIEND_TEST(AosHandleTest, NetTracker_StatusChanged_Test9);
     FRIEND_TEST(AosHandleTest, IsEmergencyService_Test);
@@ -381,22 +392,6 @@ protected:
         AosProvider::GetInstance()->SetService(m_piAosService);
         AosProvider::GetInstance()->SetRegStateManager(m_piAosRegStateManager);
     }
-
-    void SetWifiWatcher(IN IWifiWatcher* piWifiWatcher)
-    {
-        m_pAosHandle->m_piWifiWatcher = piWifiWatcher;
-    }
-
-    ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandle->m_objCapabilities; }
-
-    void SetCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
-    {
-        m_pAosHandle->m_objCapabilities = objNewCapabilities;
-    }
-
-    void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
-
-    IMS_BOOL IsCsVoiceAvailable() { return m_pAosHandle->m_bCsVoiceAvailable; }
 
     IMS_BOOL IsEqualCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objSrcCapabilities,
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objDestCapabilities)
@@ -1048,7 +1043,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1104,7 +1099,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -1577,7 +1572,7 @@ TEST_F(AosHandleTest, IsCapabilityExistedForNetworkType_Test)
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
-    SetCapabilities(objCapabilities);
+    m_pAosHandle->SetCapabilities(objCapabilities);
 
     EXPECT_TRUE(m_pAosHandle->IsCapabilityExistedForNetworkType(
             NW_REPORT_RADIO_LTE, AosCapability::VOICE));
@@ -1663,10 +1658,10 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
 
 TEST_F(AosHandleTest, IsRoaming_Test)
 {
-    SetRoamingState(IMS_ROAMING_STATE_OFF);
+    m_pAosHandle->SetRoamingState(IMS_ROAMING_STATE_OFF);
     EXPECT_EQ(m_pAosHandle->IsRoaming(), IMS_ROAMING_STATE_OFF);
 
-    SetRoamingState(IMS_ROAMING_STATE_ON);
+    m_pAosHandle->SetRoamingState(IMS_ROAMING_STATE_ON);
     EXPECT_EQ(m_pAosHandle->IsRoaming(), IMS_ROAMING_STATE_ON);
 }
 
@@ -1762,7 +1757,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test2)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -1801,7 +1796,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test3)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1840,7 +1835,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test4)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1982,7 +1977,7 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -2004,7 +1999,7 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2633,7 +2628,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2705,7 +2700,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2768,7 +2763,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test6)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -2840,7 +2835,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test7)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -4590,19 +4585,19 @@ TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
-    EXPECT_FALSE(IsCsVoiceAvailable());
+    EXPECT_FALSE(m_pAosHandle->IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
-    EXPECT_TRUE(IsCsVoiceAvailable());
+    EXPECT_TRUE(m_pAosHandle->IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
             IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED);
-    EXPECT_FALSE(IsCsVoiceAvailable());
+    EXPECT_FALSE(m_pAosHandle->IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_SMS_ONLY);
-    EXPECT_FALSE(IsCsVoiceAvailable());
+    EXPECT_FALSE(m_pAosHandle->IsCsVoiceAvailable());
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
             (IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED | IMS_LTE_INFO_EXTRA_SMS_ONLY));
-    EXPECT_FALSE(IsCsVoiceAvailable());
+    EXPECT_FALSE(m_pAosHandle->IsCsVoiceAvailable());
 }
 
 TEST_F(AosHandleTest, Event_NotifyEvent_InvalidEvent)
