@@ -576,27 +576,25 @@ public class AosDebug implements IAosDebug {
     void updateSignalStrengthData(CellSignalStrength cs, int network) {
 
         switch (network) {
-            case AccessNetworkType.UTRAN:
+            case AccessNetworkType.UTRAN -> {
                 mDebugData.put(DebugData.KEY_UTRAN_LEVEL, getSignalStrength(
                         DebugData.KEY_UTRAN_LEVEL, cs));
                 mDebugData.put(DebugData.KEY_UTRAN_DBM, getSignalStrength(
                         DebugData.KEY_UTRAN_DBM, cs));
-                break;
-            case AccessNetworkType.EUTRAN:
+            }
+            case AccessNetworkType.EUTRAN -> {
                 mDebugData.put(DebugData.KEY_EUTRAN_RSRP, getSignalStrength(
                         DebugData.KEY_EUTRAN_RSRP, cs));
                 mDebugData.put(DebugData.KEY_EUTRAN_RSRQ, getSignalStrength(
                         DebugData.KEY_EUTRAN_RSRQ, cs));
-                break;
-            case AccessNetworkType.NGRAN:
+            }
+            case AccessNetworkType.NGRAN -> {
                 mDebugData.put(DebugData.KEY_NGRAN_SSRSRP, getSignalStrength(
                         DebugData.KEY_NGRAN_SSRSRP, cs));
                 mDebugData.put(DebugData.KEY_NGRAN_SSRSRQ, getSignalStrength(
                         DebugData.KEY_NGRAN_SSRSRQ, cs));
-                break;
-            default:
-                logd(mSlotId, "Network = " + network + " not handled.");
-                break;
+            }
+            default -> logd(mSlotId, "Network = " + network + " not handled.");
         }
     }
 
@@ -624,25 +622,13 @@ public class AosDebug implements IAosDebug {
 
     @VisibleForTesting
     void updateServiceState(int state) {
-        String text;
-
-        switch (state) {
-            case ServiceState.STATE_IN_SERVICE:
-                text = "In Service";
-                break;
-            case ServiceState.STATE_OUT_OF_SERVICE:
-                text = "Out of Service";
-                break;
-            case ServiceState.STATE_EMERGENCY_ONLY:
-                text = "Emergency call only";
-                break;
-            case ServiceState.STATE_POWER_OFF:
-                text = "Radio off";
-                break;
-            default:
-                text = DebugData.STR_EMPTY;
-                break;
-        }
+        String text = switch (state) {
+            case ServiceState.STATE_IN_SERVICE -> "In Service";
+            case ServiceState.STATE_OUT_OF_SERVICE -> "Out of Service";
+            case ServiceState.STATE_EMERGENCY_ONLY -> "Emergency call only";
+            case ServiceState.STATE_POWER_OFF -> "Radio off";
+            default -> DebugData.STR_EMPTY;
+        };
 
         mDebugData.put(DebugData.KEY_SERVICE_STATE, text);
     }
@@ -822,82 +808,51 @@ public class AosDebug implements IAosDebug {
 
     @VisibleForTesting
     static String getNetworkTypeToString(int type) {
-        switch (type) {
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-                return "GPRS";
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                return "EDGE";
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-                return "UMTS";
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-                return "HSDPA";
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-                return "HSUPA";
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-                return "HSPA";
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-                return "CDMA";
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                return "CDMA - EvDo rev. 0";
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                return "CDMA - EvDo rev. A";
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                return "CDMA - EvDo rev. B";
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-                return "CDMA - 1xRTT";
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return "LTE";
-            case TelephonyManager.NETWORK_TYPE_EHRPD:
-                return "CDMA - eHRPD";
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return "HSPA+";
-            case TelephonyManager.NETWORK_TYPE_GSM:
-                return "GSM";
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return "TD_SCDMA";
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return "IWLAN";
-            case TelephonyManager.NETWORK_TYPE_LTE_CA:
-                return "LTE_CA";
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return "NR";
-            default:
-                return DebugData.STR_EMPTY;
-        }
+        return switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE -> "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS -> "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA -> "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSUPA -> "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA -> "HSPA";
+            case TelephonyManager.NETWORK_TYPE_CDMA -> "CDMA";
+            case TelephonyManager.NETWORK_TYPE_EVDO_0 -> "CDMA - EvDo rev. 0";
+            case TelephonyManager.NETWORK_TYPE_EVDO_A -> "CDMA - EvDo rev. A";
+            case TelephonyManager.NETWORK_TYPE_EVDO_B -> "CDMA - EvDo rev. B";
+            case TelephonyManager.NETWORK_TYPE_1xRTT -> "CDMA - 1xRTT";
+            case TelephonyManager.NETWORK_TYPE_LTE -> "LTE";
+            case TelephonyManager.NETWORK_TYPE_EHRPD -> "CDMA - eHRPD";
+            case TelephonyManager.NETWORK_TYPE_HSPAP -> "HSPA+";
+            case TelephonyManager.NETWORK_TYPE_GSM -> "GSM";
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA -> "TD_SCDMA";
+            case TelephonyManager.NETWORK_TYPE_IWLAN -> "IWLAN";
+            case TelephonyManager.NETWORK_TYPE_LTE_CA -> "LTE_CA";
+            case TelephonyManager.NETWORK_TYPE_NR -> "NR";
+            default -> DebugData.STR_EMPTY;
+        };
     }
 
     @VisibleForTesting
     static String getDataStateToString(int state) {
-        switch (state) {
-            case TelephonyManager.DATA_DISCONNECTED:
-                return "DISCONNECTED";
-            case TelephonyManager.DATA_CONNECTING:
-                return "CONNECTING";
-            case TelephonyManager.DATA_CONNECTED:
-                return "CONNECTED";
-            case TelephonyManager.DATA_SUSPENDED:
-                return "SUSPENDED";
-            case TelephonyManager.DATA_DISCONNECTING:
-                return "DISCONNECTING";
-            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
-                return "HANDOVER IN PROGRESS";
-            default:
-                return DebugData.STR_EMPTY;
-        }
+        return switch (state) {
+            case TelephonyManager.DATA_DISCONNECTED -> "DISCONNECTED";
+            case TelephonyManager.DATA_CONNECTING -> "CONNECTING";
+            case TelephonyManager.DATA_CONNECTED -> "CONNECTED";
+            case TelephonyManager.DATA_SUSPENDED -> "SUSPENDED";
+            case TelephonyManager.DATA_DISCONNECTING -> "DISCONNECTING";
+            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS -> "HANDOVER IN PROGRESS";
+            default -> DebugData.STR_EMPTY;
+        };
     }
 
     @VisibleForTesting
     static String getRoamingTypeToString(int type) {
-        switch (type) {
-            case ServiceState.ROAMING_TYPE_NOT_ROAMING:
-                return "Not Roaming";
-            case ServiceState.ROAMING_TYPE_DOMESTIC:
-                return "Domestic";
-            case ServiceState.ROAMING_TYPE_INTERNATIONAL:
-                return "International";
-            default:
-                return DebugData.STR_EMPTY;
-        }
+        return switch (type) {
+            case ServiceState.ROAMING_TYPE_NOT_ROAMING -> "Not Roaming";
+            case ServiceState.ROAMING_TYPE_DOMESTIC -> "Domestic";
+            case ServiceState.ROAMING_TYPE_INTERNATIONAL -> "International";
+            default -> DebugData.STR_EMPTY;
+        };
     }
 
     @VisibleForTesting
@@ -1251,35 +1206,16 @@ public class AosDebug implements IAosDebug {
                 logi(mSlotId, "handleMessage :: msg= " + msg.what);
 
                 switch (msg.what) {
-                    case DEBUG_AIRPLANE_MODE_CHANGED:
-                        handleAirplaneModeChanged(msg);
-                        break;
-                    case DEBUG_SUBSCRIPTION_CHANGED:
-                        handleSubscriptionChanged();
-                        break;
-                    case DEBUG_SIGNALSTRENGTHS_CHANGED:
-                        handleSignalStrengthsChanged(msg);
-                        break;
-                    case DEBUG_WIFI_CONNECTIVITY_CHANGED:
-                        handleWifiConnectivityChanged(msg);
-                        break;
-                    case DEBUG_SERVICE_STATE_CHANGED:
-                        handleServiceStateChanged(msg);
-                        break;
-                    case DEBUG_PRECISE_DATA_CONNECTION_CHANGED:
-                        handlePreciseDataConnectionChanged(msg);
-                        break;
-                    case DEBUG_NOTIFY_REGISTERED:
-                        handleNotifyRegistered(msg);
-                        break;
-                    case DEBUG_NOTIFY_DEREGISTERED:
-                        handleNotifyDeregistered(msg);
-                        break;
-                    case DEBUG_NOTIFY_CAPABILITIES_UPDATED:
-                        handleNotifyCapabilitiesUpdated(msg);
-                        break;
-                    default:
-                        break;
+                    case DEBUG_AIRPLANE_MODE_CHANGED -> handleAirplaneModeChanged(msg);
+                    case DEBUG_SUBSCRIPTION_CHANGED -> handleSubscriptionChanged();
+                    case DEBUG_SIGNALSTRENGTHS_CHANGED -> handleSignalStrengthsChanged(msg);
+                    case DEBUG_WIFI_CONNECTIVITY_CHANGED -> handleWifiConnectivityChanged(msg);
+                    case DEBUG_SERVICE_STATE_CHANGED -> handleServiceStateChanged(msg);
+                    case DEBUG_PRECISE_DATA_CONNECTION_CHANGED ->
+                            handlePreciseDataConnectionChanged(msg);
+                    case DEBUG_NOTIFY_REGISTERED -> handleNotifyRegistered(msg);
+                    case DEBUG_NOTIFY_DEREGISTERED -> handleNotifyDeregistered(msg);
+                    case DEBUG_NOTIFY_CAPABILITIES_UPDATED -> handleNotifyCapabilitiesUpdated(msg);
                 }
             }
         }

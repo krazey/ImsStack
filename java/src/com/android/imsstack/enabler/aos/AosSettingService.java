@@ -207,17 +207,8 @@ public class AosSettingService {
                 ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
 
                 switch (msg.what) {
-                    case EVENT_MOBILE_DATA_STATE_CHANGED:
-                        handleMobileDataStateChanged(msg);
-                        break;
-
-                    case EVENT_REBOOT: // FALL-THROUGH
-                    case EVENT_SHUTDOWN:
-                        notifyPowerOff();
-                        break;
-
-                    default:
-                        break;
+                    case EVENT_MOBILE_DATA_STATE_CHANGED -> handleMobileDataStateChanged(msg);
+                    case EVENT_REBOOT, EVENT_SHUTDOWN -> notifyPowerOff();
                 }
             }
         }

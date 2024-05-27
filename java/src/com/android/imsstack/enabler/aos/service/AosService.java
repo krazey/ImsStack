@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -436,6 +437,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    @SuppressLint("SwitchIntDef")
     @Override
     public void onIsimStateChanged() {
         ImsLog.d(mSlotId, "AosService: onIsimStateChanged");
@@ -445,20 +447,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             int isimState = sim.getIsimState();
 
             switch (isimState) {
-                case Sim.ISIM_STATE_NOT_PRESENT:
-                    notifyIsimState(IsimState.NOT_PRESENT);
-                    break;
-                case Sim.ISIM_STATE_NOT_READY:
-                    notifyIsimState(IsimState.NOT_READY);
-                    break;
-                case Sim.ISIM_STATE_LOADED:
-                    notifyIsimState(IsimState.LOADED);
-                    break;
-                case Sim.ISIM_STATE_REFRESH_STARTED:
-                    notifyIsimState(IsimState.REFRESH_STARTED);
-                    break;
-                default:
-                    break;
+                case Sim.ISIM_STATE_NOT_PRESENT -> notifyIsimState(IsimState.NOT_PRESENT);
+                case Sim.ISIM_STATE_NOT_READY -> notifyIsimState(IsimState.NOT_READY);
+                case Sim.ISIM_STATE_LOADED -> notifyIsimState(IsimState.LOADED);
+                case Sim.ISIM_STATE_REFRESH_STARTED -> notifyIsimState(IsimState.REFRESH_STARTED);
             }
         }
     }
@@ -627,15 +619,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
         ImsLog.d("PCO values : " + Arrays.toString(values));
         switch (values.length) {
-            case 1:
-                value = values[0];
-                break;
-            case 4:
-                value = values[3];
-                break;
-            default:
-                ImsLog.i("Invalid PCO values length : " + values.length);
-                break;
+            case 1 -> value = values[0];
+            case 4 -> value = values[3];
+            default -> ImsLog.i("Invalid PCO values length : " + values.length);
         }
         ImsLog.d("Returns PCO value : " + value);
         return value;
@@ -903,42 +889,36 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private static int getRegistrationNetworkType(int telephonyNetworkType) {
-        switch (telephonyNetworkType) {
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return NetworkType.IWLAN;
-            case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSPAP: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return NetworkType.UTRAN;
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return NetworkType.LTE;
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return NetworkType.NR;
-            default:
-                return NetworkType.NONE;
-        }
+        return switch (telephonyNetworkType) {
+            case TelephonyManager.NETWORK_TYPE_IWLAN -> NetworkType.IWLAN;
+            case TelephonyManager.NETWORK_TYPE_UMTS,
+                    TelephonyManager.NETWORK_TYPE_HSDPA,
+                    TelephonyManager.NETWORK_TYPE_HSUPA,
+                    TelephonyManager.NETWORK_TYPE_HSPA,
+                    TelephonyManager.NETWORK_TYPE_HSPAP,
+                    TelephonyManager.NETWORK_TYPE_TD_SCDMA -> NetworkType.UTRAN;
+            case TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.LTE;
+            case TelephonyManager.NETWORK_TYPE_NR -> NetworkType.NR;
+            default -> NetworkType.NONE;
+        };
     }
 
     private static String convertReasonToKey(int reason) {
-        switch (reason) {
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403:
-                return CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500:
-                return CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY:
-                return CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403:
-                return CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED:
-                return CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES:
-                return CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
-            default:
-                return null;
-        }
+        return switch (reason) {
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
+            default -> null;
+        };
     }
 
     private String getStringFromBundle(String bundleKey, String key) {
@@ -949,6 +929,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private final class NativeStateListener implements NativeStateInterface.Listener {
+        @SuppressLint("SwitchIntDef")
         @Override
         public void onNativeServiceReady() {
             ImsLog.d(mSlotId, "NativeState: service ready.");
@@ -962,23 +943,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
                 }
 
-                int isimState = sim.getIsimState();
-
-                switch (isimState) {
-                    case Sim.ISIM_STATE_NOT_PRESENT:
-                        notifyIsimState(IsimState.NOT_PRESENT);
-                        break;
-                    case Sim.ISIM_STATE_NOT_READY:
-                        notifyIsimState(IsimState.NOT_READY);
-                        break;
-                    case Sim.ISIM_STATE_LOADED:
-                        notifyIsimState(IsimState.LOADED);
-                        break;
-                    case Sim.ISIM_STATE_REFRESH_STARTED:
-                        notifyIsimState(IsimState.REFRESH_STARTED);
-                        break;
-                    default:
-                        break;
+                switch (sim.getIsimState()) {
+                    case Sim.ISIM_STATE_NOT_PRESENT -> notifyIsimState(IsimState.NOT_PRESENT);
+                    case Sim.ISIM_STATE_NOT_READY -> notifyIsimState(IsimState.NOT_READY);
+                    case Sim.ISIM_STATE_LOADED -> notifyIsimState(IsimState.LOADED);
+                    case Sim.ISIM_STATE_REFRESH_STARTED -> notifyIsimState(
+                            IsimState.REFRESH_STARTED);
                 }
             }
 
@@ -1001,7 +971,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             ImsLog.i("ListenerProxy.onMessage() :: message=" + message);
 
             switch (message) {
-                case IIAosService.N2J_NOTIFY_REGISTERED: {
+                case IIAosService.N2J_NOTIFY_REGISTERED -> {
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
@@ -1012,10 +982,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateRegistered(networkType, featureTagBits, featureTags);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_REGISTERING: {
+                case IIAosService.N2J_NOTIFY_REGISTERING -> {
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
@@ -1026,26 +994,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateRegistering(networkType, featureTagBits, featureTags);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_DEREGISTERED: {
+                case IIAosService.N2J_NOTIFY_DEREGISTERED -> {
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateDeregistered(networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED: {
+                case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateTechnologyChangeFailed(networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED: {
+                case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED -> {
                     int count = parcel.readInt();
                     if (count <= 0) {
                         ImsLog.d("No URIs");
@@ -1059,19 +1021,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateAssociatedUriChanged(uris);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED: {
+                case IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED -> {
                     int capabilities = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateCapabilitiesUpdateFailed(capabilities, networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE: {
+                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE -> {
                     int statusCode = parcel.readInt();
 
                     Set<Uri> impus = new ArraySet<>();
@@ -1081,30 +1039,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     notifyRegEventStateChanged(statusCode, impus);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE: {
+                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE -> {
                     int state = parcel.readInt();
                     notifyAosIsimStateChanged(state);
-                    break;
                 }
-
-                case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY: {
+                case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY -> {
                     int command = parcel.readInt();
                     requestPhoneNumberRetry(command);
-                    break;
                 }
-
-                case IIAosService.N2J_REQUEST_WIFI_SERVICE: {
+                case IIAosService.N2J_REQUEST_WIFI_SERVICE -> {
                     int command = parcel.readInt();
                     requestWifiService(command);
-                    break;
                 }
-
-                default:
-                    ImsLog.d("Not handled");
-                    break;
+                default -> ImsLog.d("Not handled");
             }
         }
     }
