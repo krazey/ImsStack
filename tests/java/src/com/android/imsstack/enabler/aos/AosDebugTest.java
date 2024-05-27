@@ -106,6 +106,7 @@ public class AosDebugTest extends ImsStackTest {
     @Mock ServiceState mMockServiceState;
     @Mock SimInterface mMockSimInterface;
     @Mock TelephonyInterface mMockTelephonyInterface;
+    @Mock ApnSetting mMockApnSetting;
 
     @Before
     public void setup() throws Exception {
@@ -1233,13 +1234,14 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdatePreciseDataConnectionStateWithApnName() {
         // GIVEN
-        mFakeAosDebug.mApnSetting = mock(ApnSetting.class);
-        when(mFakeAosDebug.mApnSetting.getApnName()).thenReturn("TEST_APN_NAME");
+        when(mMockApnSetting.getApnName()).thenReturn("TEST_APN_NAME");
 
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = new PreciseDataConnectionState.Builder().build();
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
@@ -1250,13 +1252,14 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdatePreciseDataConnectionStateWithApnEntryName() {
         // GIVEN
-        mFakeAosDebug.mApnSetting = mock(ApnSetting.class);
-        when(mFakeAosDebug.mApnSetting.getEntryName()).thenReturn("TEST_APN_ENTRY_NAME");
+        when(mMockApnSetting.getEntryName()).thenReturn("TEST_APN_ENTRY_NAME");
 
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = new PreciseDataConnectionState.Builder().build();
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
@@ -1267,15 +1270,15 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdatePreciseDataConnectionStateWithApnTypes() {
         // GIVEN
-        mFakeAosDebug.mApnSetting = mock(ApnSetting.class);
-
         int testApnTypeBitmask = ApnSetting.TYPE_IMS | ApnSetting.TYPE_EMERGENCY;
-        when(mFakeAosDebug.mApnSetting.getApnTypeBitmask()).thenReturn(testApnTypeBitmask);
+        when(mMockApnSetting.getApnTypeBitmask()).thenReturn(testApnTypeBitmask);
 
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = new PreciseDataConnectionState.Builder().build();
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
@@ -1287,8 +1290,6 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdatePreciseDataConnectionStateWithoutApnSetting() {
         // GIVEN
-        mFakeAosDebug.mApnSetting = null;
-
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
@@ -2513,7 +2514,6 @@ public class AosDebugTest extends ImsStackTest {
         static String sTestCurrentTime = "9999-12-25 12:12:12";
         SimCarrierId mSimCarrierId;
         WifiInfo mWifiInfo;
-        ApnSetting mApnSetting;
         LinkProperties mLinkProperties;
         CountDownLatch[] mCountDownLatches;
 
@@ -2680,11 +2680,6 @@ public class AosDebugTest extends ImsStackTest {
         @Override
         protected WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
             return mWifiInfo;
-        }
-
-        @Override
-        protected ApnSetting getApnSettingFromState(PreciseDataConnectionState state) {
-            return mApnSetting;
         }
 
         @Override
