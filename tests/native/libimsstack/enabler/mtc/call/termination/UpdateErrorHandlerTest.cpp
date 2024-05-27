@@ -15,7 +15,8 @@
  */
 
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
@@ -187,7 +188,7 @@ TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerError
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
@@ -203,7 +204,7 @@ TEST_F(UpdateErrorHandlerTest, Handle503ResponseWithRetryAfterReturnsServerError
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(0);
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));

@@ -20,7 +20,8 @@
 #include "ServiceTrace.h"
 #include "TextParser.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ISubscriberConfig.h"
 
 #include "IXmlStreamWriter.h"
@@ -719,7 +720,7 @@ void GeolocationPidfCreator::SetTupleId(IN const AString& strId)
 PUBLIC GLOBAL AString GeolocationPidfCreator::CreateEntityUri(IN IMS_SINT32 nSlotId)
 {
     const ISubscriberConfig* piSubsConfig =
-            Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
+            Engine::GetConfiguration()->GetSubscriberConfig(nSlotId);
 
     if (piSubsConfig == IMS_NULL)
     {

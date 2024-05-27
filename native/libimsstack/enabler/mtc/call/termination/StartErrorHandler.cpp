@@ -16,7 +16,8 @@
 
 #include "AString.h"
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMessage.h"
 #include "ISipConfig.h"
 #include "ISipConfigV.h"
@@ -808,7 +809,7 @@ IMS_BOOL StartErrorHandler::IsRegisterWithNextPcscfAndRedialRequiredFor503(
         IN IMS_SINT32 nRetryAfter) const
 {
     return nRetryAfter <= 0 ||
-            nRetryAfter * 1000 > Configuration::GetInstance()
+            nRetryAfter * 1000 > Engine::GetConfiguration()
                                          ->GetSipConfig(m_objContext.GetSlotId())
                                          ->GetSipConfigV()
                                          ->GetTimerValue(ISipConfigV::TIMER_B);

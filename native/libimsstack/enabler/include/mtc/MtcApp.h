@@ -17,7 +17,8 @@
 #ifndef MTC_APP_H_
 #define MTC_APP_H_
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMtcApp.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
@@ -75,7 +76,7 @@ public:
     inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
     inline const ISubscriberConfig* GetSubscriberConfig() const override
     {
-        return Configuration::GetInstance()->GetSubscriberConfig(GetSlotId());
+        return Engine::GetConfiguration()->GetSubscriberConfig(GetSlotId());
     }
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }

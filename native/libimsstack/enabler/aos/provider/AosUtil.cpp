@@ -18,8 +18,9 @@
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
-#include "Configuration.h"
+#include "Engine.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IRegistration.h"
@@ -258,7 +259,7 @@ IMS_BOOL AosUtil::IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SIN
 PUBLIC
 IMS_SINT32 AosUtil::GetLocalPort(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    const ISipConfig* piConfig = Configuration::GetInstance()->GetSipConfig(nSlotId);
+    const ISipConfig* piConfig = Engine::GetConfiguration()->GetSipConfig(nSlotId);
     IMS_SINT32 nPort = -1;
 
     if (piConfig != IMS_NULL)
@@ -581,7 +582,7 @@ IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
     }
     else
     {
-        piSipConfigV = Configuration::GetInstance()->GetSipConfig(nSlotId)->GetSipConfigV();
+        piSipConfigV = Engine::GetConfiguration()->GetSipConfig(nSlotId)->GetSipConfigV();
     }
 
     if (piSipConfigV != IMS_NULL)

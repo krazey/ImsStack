@@ -27,6 +27,7 @@
 
 #include "CarrierConfig.h"
 
+#include "IConfiguration.h"
 #include "IRegContact.h"
 #include "IRegistration.h"
 #include "IRegParameter.h"
@@ -34,8 +35,8 @@
 #include "ISipHeader.h"
 #include "ISipRtConfigHelper.h"
 #include "ISipTransportHelper.h"
-#include "Configuration.h"
 #include "Credential.h"
+#include "Engine.h"
 #include "RegistrationManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
@@ -3959,7 +3960,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
     else
     {
         IMS_SINT32 nTimerF = SipConfigProxy::GetTimerValueF(m_nSlotId, IMS_NULL,
-                Configuration::GetInstance()->GetSipConfig(m_nSlotId)->GetSipConfigV(), IMS_TRUE);
+                Engine::GetConfiguration()->GetSipConfig(m_nSlotId)->GetSipConfigV(), IMS_TRUE);
 
         A_IMS_TRACE_I(REGID, "ProcessStartFailed_503 :: TF (%d), RA (%d)", nTimerF, nRetryAfter, 0);
 

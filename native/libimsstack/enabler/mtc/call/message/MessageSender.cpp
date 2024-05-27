@@ -15,7 +15,8 @@
  */
 
 #include "CallReasonInfo.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ISession.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
@@ -34,7 +35,7 @@ MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSes
         m_objSession(objSession),
         m_pFormatter(nullptr),
         m_objTimerUpdateHelper(
-                objContext, Configuration::GetInstance()->GetSipConfig(objContext.GetSlotId()))
+                objContext, Engine::GetConfiguration()->GetSipConfig(objContext.GetSlotId()))
 {
     IMS_TRACE_I("+MessageSender", 0, 0, 0);
     CreateFormatter();

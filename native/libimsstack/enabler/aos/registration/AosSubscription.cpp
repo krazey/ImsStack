@@ -21,7 +21,8 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
@@ -505,7 +506,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BO
             AosUtil::GetInstance()->GetRetryAfterValue(m_piRegSubscription->GetPreviousResponse());
 
     IMS_SINT32 nTimerF = SipConfigProxy::GetTimerValueF(m_piContext->GetSlotId(), IMS_NULL,
-            Configuration::GetInstance()->GetSipConfig(m_piContext->GetSlotId())->GetSipConfigV(),
+            Engine::GetConfiguration()->GetSipConfig(m_piContext->GetSlotId())->GetSipConfigV(),
             IMS_TRUE);
 
     A_IMS_TRACE_I(

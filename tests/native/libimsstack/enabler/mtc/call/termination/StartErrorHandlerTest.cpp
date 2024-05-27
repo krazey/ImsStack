@@ -16,7 +16,8 @@
 
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
@@ -745,7 +746,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
     MockIPassiveTimerHolder objPassiveTimer;
     ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
@@ -769,7 +770,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(_)).Times(1);
     MockIPassiveTimerHolder objPassiveTimer;
@@ -792,7 +793,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
             .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
@@ -819,7 +820,7 @@ TEST_F(StartErrorHandlerTest,
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
             GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
             .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
-    Configuration::GetInstance()->RefreshConfigs(objCallContext.GetSlotId());
+    Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
             .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));

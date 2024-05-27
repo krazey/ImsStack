@@ -16,7 +16,8 @@
 
 #include <gtest/gtest.h>
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
@@ -76,7 +77,7 @@ protected:
          * To make Connector::Open() return valid IConnector even though
          * MtsApp is not created during the test.
          */
-        Configuration::GetInstance()->SetAppConfig(
+        Engine::GetConfiguration()->SetAppConfig(
                 ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
         ON_CALL(objConfigService.GetMockCarrierConfig(),

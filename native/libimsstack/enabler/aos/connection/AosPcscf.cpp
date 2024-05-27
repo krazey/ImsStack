@@ -18,9 +18,10 @@
 #include "ServiceTimer.h"
 #include "ServiceNetworkPolicy.h"
 
-#include "Configuration.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "CarrierConfig.h"
+#include "Engine.h"
 #include "ServerAddress.h"
 
 #include "IRegistration.h"
@@ -952,7 +953,7 @@ PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
 PROTECTED
 void AosPcscf::PrintPcscfs()
 {
-    if (Configuration::GetInstance()->IsServerInfoHiddenInLog(m_nSlotId))
+    if (Engine::GetConfiguration()->IsServerInfoHiddenInLog(m_nSlotId))
     {
         return;
     }

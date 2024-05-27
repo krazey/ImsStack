@@ -19,7 +19,8 @@
 #include "JniEnablerConnector.h"
 #include "IUceJniThread.h"
 #include "AoSAppRequestType.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
@@ -68,7 +69,7 @@ UceApp::UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName) :
         IMS_TRACE_E(0, "[ERROR]m_piNetWatcherInfo is null", 0, 0, 0);
     }
     UceConfig::GetInstance()->Init(m_nSlotId);
-    Configuration::GetInstance()->SetAppConfig(
+    Engine::GetConfiguration()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::UCE), m_nSlotId);
 
     JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::UCE, this);

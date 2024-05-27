@@ -15,9 +15,10 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
-#include "Configuration.h"
+#include "Engine.h"
 #include "IAosService.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "ISubscriberConfig.h"
 #include "SipAddress.h"
 #include "ImsIdentity.h"
@@ -567,7 +568,7 @@ PROTECTED
 const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
-    return Configuration::GetInstance()->GetSubscriberConfig(
+    return Engine::GetConfiguration()->GetSubscriberConfig(
             m_nSlotId, (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull());
 }
 

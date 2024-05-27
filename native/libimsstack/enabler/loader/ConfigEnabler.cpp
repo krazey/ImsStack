@@ -21,7 +21,8 @@
 
 #include "offeranswer/SdpProfile.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "ISipRtConfigHelper.h"
 #include "SipFactory.h"
@@ -59,9 +60,9 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
 
         piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
 
-        Configuration* pConfiguration = Configuration::GetInstance();
+        IConfiguration* piConfiguration = Engine::GetConfiguration();
 
-        if (((pConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY) ==
+        if (((piConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY) ==
                     ITraceOption::OPT_HIDE_PRIVACY) ||
                 IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {

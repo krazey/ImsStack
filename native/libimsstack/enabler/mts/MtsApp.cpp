@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsServiceConfig.h"
 #include "MtsApp.h"
 #include "MtsService.h"
@@ -37,7 +38,7 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
-    Configuration::GetInstance()->SetAppConfig(
+    Engine::GetConfiguration()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTS), m_nSlotId);
 }
 
