@@ -60,6 +60,7 @@ import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -698,6 +699,28 @@ public class SystemServiceProxyImplTest {
 
     @Test
     @SmallTest
+    public void testProvisioningManagerProxy_registerFeatureProvisioningChangedCallback()
+            throws ImsException {
+        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
+        ProvisioningManager provisioningManager = mock(ProvisioningManager.class);
+        when(imsManager.getProvisioningManager(anyInt())).thenReturn(provisioningManager);
+
+        ImsManagerProxy imp = mSystemServiceProxy.getSystemService(ImsManagerProxy.class);
+        ProvisioningManagerProxy pmp = imp.getProvisioningManagerProxy(TestAppContext.SUB_ID_1);
+
+        Executor executor = mock(Executor.class);
+        FeatureProvisioningCallback callback = mock(FeatureProvisioningCallback.class);
+
+        pmp.registerFeatureProvisioningChangedCallback(executor, callback);
+        verify(provisioningManager)
+                .registerFeatureProvisioningChangedCallback(eq(executor), eq(callback));
+
+        pmp.unregisterFeatureProvisioningChangedCallback(callback);
+        verify(provisioningManager).unregisterFeatureProvisioningChangedCallback(eq(callback));
+    }
+
+    @Test
+    @SmallTest
     public void testProvisioningManagerProxy_setProvisioningIntValue() {
         ImsManager imsManager = mContext.getSystemService(ImsManager.class);
         ProvisioningManager provisioningManager = mock(ProvisioningManager.class);
@@ -710,5 +733,22 @@ public class SystemServiceProxyImplTest {
         final int value = 1;
         pmp.setProvisioningIntValue(key, value);
         verify(provisioningManager).setProvisioningIntValue(eq(key), eq(value));
+    }
+
+    @Test
+    @SmallTest
+    public void testProvisioningManagerProxy_getProvisioningStatusForCapability() {
+        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
+        ProvisioningManager provisioningManager = mock(ProvisioningManager.class);
+        when(imsManager.getProvisioningManager(anyInt())).thenReturn(provisioningManager);
+
+        ImsManagerProxy imp = mSystemServiceProxy.getSystemService(ImsManagerProxy.class);
+        ProvisioningManagerProxy pmp = imp.getProvisioningManagerProxy(TestAppContext.SUB_ID_1);
+
+        final int voiceCapability = 1 << 0;
+        final int lteTech = 0;
+        pmp.getProvisioningStatusForCapability(voiceCapability, lteTech);
+        verify(provisioningManager)
+                .getProvisioningStatusForCapability(eq(voiceCapability), eq(lteTech));
     }
 }
