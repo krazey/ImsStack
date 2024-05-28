@@ -31,7 +31,7 @@ public interface IAosRegistrationListener {
      */
     void notifyRegistered(int networkType, int featureTagBits, Set<String> featureTags);
     /**
-     * Notify the application that the device is connected to the IMS network.
+     * Notify the application that the device is trying to connect to the IMS network.
      *
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
@@ -119,20 +119,14 @@ public interface IAosRegistrationListener {
         public static final int UTRAN = 4;
 
         public static String toString(int networkType) {
-            switch (networkType) {
-                case LTE:
-                    return "LTE";
-                case IWLAN:
-                    return "IWLAN";
-                case CROSS_SIM:
-                    return "CROSS_SIM";
-                case NR:
-                    return "NR";
-                case UTRAN:
-                    return "UTRAN";
-                default:
-                    return "NONE";
-            }
+            return switch (networkType) {
+                case LTE -> "LTE";
+                case IWLAN -> "IWLAN";
+                case CROSS_SIM -> "CROSS_SIM";
+                case NR -> "NR";
+                case UTRAN -> "UTRAN";
+                default -> "NONE";
+            };
         }
     }
 
@@ -349,50 +343,32 @@ public interface IAosRegistrationListener {
         public static final int CODE_CLEAR_RAT_BLOCKS = 19;
 
         public static String toString(int reasonCode) {
-            switch (reasonCode) {
-                case CODE_UNSPECIFIED:
-                    return "CODE_UNSPECIFIED";
-                case CODE_PLMN_BLOCK:
-                    return "CODE_PLMN_BLOCK";
-                case CODE_PLMN_BLOCK_WITH_TIMEOUT:
-                    return "CODE_PLMN_BLOCK_WITH_TIMEOUT";
-                case CODE_REGISTRATION_ERROR:
-                    return "CODE_REGISTRATION_ERROR";
-                case CODE_REGISTRATION_ERROR_WFC_REG_403:
-                    return "CODE_REGISTRATION_ERROR_WFC_REG_403";
-                case CODE_REGISTRATION_ERROR_WFC_REG_500:
-                    return "CODE_REGISTRATION_ERROR_WFC_REG_500";
-                case CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY:
-                    return "CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY";
-                case CODE_REGISTRATION_ERROR_WFC_SUB_403:
-                    return "CODE_REGISTRATION_ERROR_WFC_SUB_403";
-                case CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED:
-                    return "CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED";
-                case CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES:
-                    return "CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES";
-                case CODE_LOCAL_POWER_OFF:
-                    return "CODE_LOCAL_POWER_OFF";
-                case CODE_LOCAL_LOW_BATTERY:
-                    return "CODE_LOCAL_LOW_BATTERY";
-                case CODE_LOCAL_NETWORK_NO_SERVICE:
-                    return "CODE_LOCAL_NETWORK_NO_SERVICE";
-                case CODE_LOCAL_NETWORK_NO_LTE_COVERAGE:
-                    return "CODE_LOCAL_NETWORK_NO_LTE_COVERAGE";
-                case CODE_LOCAL_NETWORK_ROAMING:
-                    return "CODE_LOCAL_NETWORK_ROAMING";
-                case CODE_LOCAL_NETWORK_IP_CHANGED:
-                    return "CODE_LOCAL_NETWORK_IP_CHANGED";
-                case CODE_LOCAL_SERVICE_UNAVAILABLE:
-                    return "CODE_LOCAL_SERVICE_UNAVAILABLE";
-                case CODE_LOCAL_NOT_REGISTERED:
-                    return "CODE_LOCAL_NOT_REGISTERED";
-                case CODE_RAT_BLOCK:
-                    return "CODE_RAT_BLOCK";
-                case CODE_CLEAR_RAT_BLOCKS:
-                    return "CODE_CLEAR_RAT_BLOCKS";
-                default:
-                    return "Unknown";
-            }
+            return switch (reasonCode) {
+                case CODE_UNSPECIFIED -> "CODE_UNSPECIFIED";
+                case CODE_PLMN_BLOCK -> "CODE_PLMN_BLOCK";
+                case CODE_PLMN_BLOCK_WITH_TIMEOUT -> "CODE_PLMN_BLOCK_WITH_TIMEOUT";
+                case CODE_REGISTRATION_ERROR -> "CODE_REGISTRATION_ERROR";
+                case CODE_REGISTRATION_ERROR_WFC_REG_403 -> "CODE_REGISTRATION_ERROR_WFC_REG_403";
+                case CODE_REGISTRATION_ERROR_WFC_REG_500 -> "CODE_REGISTRATION_ERROR_WFC_REG_500";
+                case CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY ->
+                        "CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY";
+                case CODE_REGISTRATION_ERROR_WFC_SUB_403 -> "CODE_REGISTRATION_ERROR_WFC_SUB_403";
+                case CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED ->
+                        "CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED";
+                case CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
+                        "CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES";
+                case CODE_LOCAL_POWER_OFF -> "CODE_LOCAL_POWER_OFF";
+                case CODE_LOCAL_LOW_BATTERY -> "CODE_LOCAL_LOW_BATTERY";
+                case CODE_LOCAL_NETWORK_NO_SERVICE -> "CODE_LOCAL_NETWORK_NO_SERVICE";
+                case CODE_LOCAL_NETWORK_NO_LTE_COVERAGE -> "CODE_LOCAL_NETWORK_NO_LTE_COVERAGE";
+                case CODE_LOCAL_NETWORK_ROAMING -> "CODE_LOCAL_NETWORK_ROAMING";
+                case CODE_LOCAL_NETWORK_IP_CHANGED -> "CODE_LOCAL_NETWORK_IP_CHANGED";
+                case CODE_LOCAL_SERVICE_UNAVAILABLE -> "CODE_LOCAL_SERVICE_UNAVAILABLE";
+                case CODE_LOCAL_NOT_REGISTERED -> "CODE_LOCAL_NOT_REGISTERED";
+                case CODE_RAT_BLOCK -> "CODE_RAT_BLOCK";
+                case CODE_CLEAR_RAT_BLOCKS -> "CODE_CLEAR_RAT_BLOCKS";
+                default -> "Unknown";
+            };
         }
     }
 

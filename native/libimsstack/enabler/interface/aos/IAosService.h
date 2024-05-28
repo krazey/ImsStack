@@ -118,7 +118,7 @@ public:
             IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
-     * Notify the application that the device is connected to the IMS network.
+     * Notify the application that the device is trying to connect to the IMS network.
      *
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
