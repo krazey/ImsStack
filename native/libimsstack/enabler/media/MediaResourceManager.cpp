@@ -237,16 +237,19 @@ PUBLIC IMS_SINT32 MediaResourceManager::GetRtpFragmentSize()
     return nMtu;
 }
 
-PUBLIC void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType)
+PUBLIC void MediaResourceManager::OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType)
 {
     IMS_TRACE_D("OnNetworkConnectionChanged() - NetworkType[%d]", nRatType, 0, 0);
     m_nNetworkType = nRatType;
+
+    ImsMediaMsgParam* pMediaMsgParam = new ImsMediaMsgParam(MEDIA_TYPE_AUDIOVIDEOTEXT, nRatType);
 
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)
     {
-        pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0, nRatType);
+        pMediaManager->SendMessage(IJniMedia::CHANGE_NETWORK_CONNECTION, 0,
+                reinterpret_cast<IMS_UINTP>(pMediaMsgParam));
     }
 }
 

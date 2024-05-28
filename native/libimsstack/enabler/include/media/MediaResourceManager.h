@@ -82,7 +82,7 @@ public:
     IMS_SINT32 GetRtpFragmentSize();
 
     /* IMediaNetworkConnectionListener Interface Impl */
-    void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType) override;
+    void OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType) override;
     void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
 
 protected:
