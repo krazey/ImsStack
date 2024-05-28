@@ -94,6 +94,39 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
     }
 
     // Setting each payload and bandwidth
+    pProfile = CreateCodecPayloads(pProfile, pConfig);
+
+    if (pProfile != IMS_NULL)
+    {
+        if (eType == MEDIA_TYPE_VIDEO)
+        {
+            SetMaxProfileFrameRate(static_cast<VideoProfile*>(pProfile));
+        }
+
+        // Setting IP address
+        pProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
+        pProfile->nDataPort = pResourceMngr->AcquireRtpPort(pConfig);
+        pProfile->nControlPort = pProfile->nDataPort + 1;
+
+        IMS_TRACE_I("CreateProfile() - IpAddress[%s], rtp port[%d], rtcp port[%d]",
+                pProfile->objIpAddress.ToCharString(), pProfile->nDataPort, pProfile->nControlPort);
+
+        // Setting direction
+        pProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+        pProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
+        pProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
+        pProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
+        pProfile->nRtcpInterval = pConfig->GetRtcpInterval();
+
+        IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d]", pProfile->eDirection,
+                pProfile->nRtcpInterval, 0);
+    }
+
+    return pProfile;
+}
+PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
+        IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+{
     ImsList<CodecConfig*> pCodecs;
     pCodecs = pConfig->GetCodecConfigs();
 
@@ -107,82 +140,81 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
             break;
         }
 
+        IMS_SINT32 nCodec = pCodecConfig->GetCodec();
+
         if (pCodecConfig->GetPayloadType() == -1)
         {
-            IMS_TRACE_D("CreateProfile() invalid payload type, skip config(%d) - %d:%s", i,
-                    pCodecConfig->GetCodec(), ImsCodec::CodecToString(pCodecConfig->GetCodec()));
+            IMS_TRACE_D("CreateProfile() invalid payload type, skip config(%d) - %d:%s", i, nCodec,
+                    ImsCodec::CodecToString(nCodec));
             continue;
         }
 
-        if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_AMR ||
-                pCodecConfig->GetCodec() == ImsCodec::AUDIO_AMR_WB)
+        if (nCodec > ImsCodec::AUDIO_NONE && nCodec < ImsCodec::AUDIO_MAX)
         {
-            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
-                    CreateAmrPayload(pCodecConfig, pConfig));
+            AudioProfile::Payload* pTempPayload = IMS_NULL;
+
+            if (nCodec == ImsCodec::AUDIO_AMR || nCodec == ImsCodec::AUDIO_AMR_WB)
+            {
+                pTempPayload = CreateAmrPayload(pCodecConfig, pConfig);
+            }
+            else if (nCodec == ImsCodec::AUDIO_EVS)
+            {
+                pTempPayload = CreateEvsPayload(pCodecConfig, pConfig);
+            }
+            else if (nCodec == ImsCodec::AUDIO_TELEPHONE_EVENT ||
+                    nCodec == ImsCodec::AUDIO_TELEPHONE_EVENT_WB)
+            {
+                pTempPayload = CreateTelephoneEventPayload(pCodecConfig, pConfig);
+            }
+            else if (nCodec == ImsCodec::AUDIO_PCMA || nCodec == ImsCodec::AUDIO_PCMU)
+            {
+                pTempPayload = CreatePcmPayload(pCodecConfig, pConfig);
+            }
+
+            if (pTempPayload != IMS_NULL)
+            {
+                static_cast<AudioProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+            }
         }
-        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_EVS)
+        else if (nCodec > ImsCodec::VIDEO_NONE && nCodec < ImsCodec::VIDEO_MAX)
         {
-            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
-                    CreateEvsPayload(pCodecConfig, pConfig));
+            VideoProfile::Payload* pTempPayload = IMS_NULL;
+
+            if (nCodec == ImsCodec::VIDEO_AVC)
+            {
+                pTempPayload = CreateAvcPayload(pCodecConfig, pConfig);
+            }
+            else if (nCodec == ImsCodec::VIDEO_HEVC)
+            {
+                pTempPayload = CreateHevcPayload(pCodecConfig, pConfig);
+            }
+
+            if (pTempPayload != IMS_NULL)
+            {
+                static_cast<VideoProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+            }
         }
-        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT ||
-                pCodecConfig->GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT_WB)
+        else if (nCodec > ImsCodec::TEXT_NONE && nCodec < ImsCodec::TEXT_MAX)
         {
-            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
-                    CreateTelephoneEventPayload(pCodecConfig, pConfig));
-        }
-        else if (pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMA ||
-                pCodecConfig->GetCodec() == ImsCodec::AUDIO_PCMU)
-        {
-            static_cast<AudioProfile*>(pProfile)->lstPayload.Append(
-                    CreatePcmPayload(pCodecConfig, pConfig));
-        }
-        else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_AVC)
-        {
-            static_cast<VideoProfile*>(pProfile)->lstPayload.Append(
-                    CreateAvcPayload(pCodecConfig, pConfig));
-        }
-        else if (pCodecConfig->GetCodec() == ImsCodec::VIDEO_HEVC)
-        {
-            static_cast<VideoProfile*>(pProfile)->lstPayload.Append(
-                    CreateHevcPayload(pCodecConfig, pConfig));
-        }
-        else if (pCodecConfig->GetCodec() == ImsCodec::TEXT_T140 ||
-                pCodecConfig->GetCodec() == ImsCodec::TEXT_RED)
-        {
-            static_cast<TextProfile*>(pProfile)->lstPayload.Append(
-                    CreateT140Payload(pCodecConfig, pConfig));
+            TextProfile::Payload* pTempPayload = IMS_NULL;
+
+            if (nCodec == ImsCodec::TEXT_T140 || nCodec == ImsCodec::TEXT_RED)
+            {
+                pTempPayload = CreateT140Payload(pCodecConfig, pConfig);
+            }
+
+            if (pTempPayload != IMS_NULL)
+            {
+                static_cast<TextProfile*>(pProfile)->lstPayload.Append(pTempPayload);
+            }
         }
         else
         {
-            IMS_TRACE_E(0, "CreateProfile() - Invalid Codec(%d)", pCodecConfig->GetCodec(), 0, 0);
+            IMS_TRACE_E(0, "CreateProfile() - Invalid Codec(%d)", nCodec, 0, 0);
             delete pProfile;
             return IMS_NULL;
         }
     }
-
-    if (eType == MEDIA_TYPE_VIDEO)
-    {
-        SetMaxProfileFrameRate(static_cast<VideoProfile*>(pProfile));
-    }
-
-    // Setting IP address
-    pProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
-    pProfile->nDataPort = pResourceMngr->AcquireRtpPort(pConfig);
-    pProfile->nControlPort = pProfile->nDataPort + 1;
-
-    IMS_TRACE_I("CreateProfile() - IpAddress[%s], rtp port[%d], rtcp port[%d]",
-            pProfile->objIpAddress.ToCharString(), pProfile->nDataPort, pProfile->nControlPort);
-
-    // Setting direction
-    pProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
-    pProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
-    pProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-    pProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
-    pProfile->nRtcpInterval = pConfig->GetRtcpInterval();
-
-    IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d]", pProfile->eDirection,
-            pProfile->nRtcpInterval, 0);
 
     return pProfile;
 }
