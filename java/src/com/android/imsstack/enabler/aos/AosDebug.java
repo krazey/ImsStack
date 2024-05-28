@@ -768,7 +768,7 @@ public class AosDebug implements IAosDebug {
         mDebugData.put(DebugData.KEY_DATA_CONNECTION_STATE, getDataStateToString(state.getState()));
         mDebugData.put(DebugData.KEY_NETWORK_TYPE, getNetworkTypeToString(state.getNetworkType()));
 
-        ApnSetting as = getApnSettingFromState(state);
+        ApnSetting as = state.getApnSetting();
         mDebugData.put(DebugData.KEY_APN_NAME,
                 (as != null) ? as.getApnName() : DebugData.STR_EMPTY);
         mDebugData.put(DebugData.KEY_APN_TYPES,
@@ -776,7 +776,7 @@ public class AosDebug implements IAosDebug {
         mDebugData.put(DebugData.KEY_APN_ENTRY_NAME,
                 (as != null) ? as.getEntryName() : DebugData.STR_EMPTY);
 
-        LinkProperties lp = getLinkPropertiesFromState(state);
+        LinkProperties lp = state.getLinkProperties();
         mDebugData.put(DebugData.KEY_IP_ADDRESSES,
                 (lp != null) ? lp.getAddresses().toString() : DebugData.STR_EMPTY);
         mDebugData.put(DebugData.KEY_INTERFACE_NAME,
@@ -893,16 +893,6 @@ public class AosDebug implements IAosDebug {
     @VisibleForTesting
     WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
         return (WifiInfo) capabilities.getTransportInfo();
-    }
-
-    @VisibleForTesting
-    ApnSetting getApnSettingFromState(PreciseDataConnectionState state) {
-        return state.getApnSetting();
-    }
-
-    @VisibleForTesting
-    LinkProperties getLinkPropertiesFromState(PreciseDataConnectionState state) {
-        return state.getLinkProperties();
     }
 
     @VisibleForTesting

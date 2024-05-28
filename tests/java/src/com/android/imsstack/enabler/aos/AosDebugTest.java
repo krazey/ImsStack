@@ -1314,12 +1314,12 @@ public class AosDebugTest extends ImsStackTest {
         lp.setInterfaceName("TEST_INTERFACE_NAME");
         lp.setMtu(1500);
 
-        mFakeAosDebug.mLinkProperties = lp;
-
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = new PreciseDataConnectionState.Builder().build();
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setLinkProperties(lp)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
@@ -1334,8 +1334,6 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdatePreciseDataConnectionStateWithoutLinkProperties() {
         // GIVEN
-        mFakeAosDebug.mLinkProperties = null;
-
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
@@ -2514,7 +2512,6 @@ public class AosDebugTest extends ImsStackTest {
         static String sTestCurrentTime = "9999-12-25 12:12:12";
         SimCarrierId mSimCarrierId;
         WifiInfo mWifiInfo;
-        LinkProperties mLinkProperties;
         CountDownLatch[] mCountDownLatches;
 
         public enum LatchType {
@@ -2680,11 +2677,6 @@ public class AosDebugTest extends ImsStackTest {
         @Override
         protected WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
             return mWifiInfo;
-        }
-
-        @Override
-        protected LinkProperties getLinkPropertiesFromState(PreciseDataConnectionState state) {
-            return mLinkProperties;
         }
 
         @Override
