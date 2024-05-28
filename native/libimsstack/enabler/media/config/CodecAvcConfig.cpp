@@ -19,7 +19,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
-#define DEFAULT_AVC_SPROP_PARAMS "Z0LAFukDwKMg,aM4G4g=="
 #define DEFAULT_AVC_PROFILE_ID   "42C00C"
 #define DEFAULT_AVC_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
@@ -29,7 +28,7 @@ PUBLIC
 CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecVideoConfig(nType, nPayloadTypeNum, DEFAULT_AVC_RESOLUTION_WIDTH,
                 DEFAULT_AVC_RESOLUTION_HEIGHT, DEFAULT_AVC_FRAMERATE, DEFAULT_AVC_BITRATE,
-                DEFAULT_AVC_SPROP_PARAMS, DEFAULT_AVC_IMAGE_ATTR, DEFAULT_AVC_FRAME_SIZE),
+                AString::ConstNull(), DEFAULT_AVC_IMAGE_ATTR, DEFAULT_AVC_FRAME_SIZE),
         m_bIncludeSpropParameterSets(DEFAULT_INCLUDE_SPROP),
         m_strProfileLevelId(DEFAULT_AVC_PROFILE_ID)
 {
@@ -88,6 +87,11 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc)
     m_nPacketizationMode = piCcSubBundle->GetInt(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
             DEFAULT_PACKETIZATION_MODE);
+
+    m_strSpropParameterSets = piCcSubBundle->GetString(
+            CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING, AString::ConstNull());
+
+    m_bIncludeSpropParameterSets = (m_strSpropParameterSets.GetLength() > 0) ? IMS_TRUE : IMS_FALSE;
 
     m_strProfileLevelId = piCcSubBundle->GetString(
             CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,

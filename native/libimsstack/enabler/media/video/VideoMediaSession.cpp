@@ -209,6 +209,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
@@ -230,6 +231,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
@@ -275,8 +277,9 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
             pVideoConfig->getCodecType(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - Framerate[%d], Bitrate[%d]", pVideoConfig->getFramerate(),
             pVideoConfig->getBitrate(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - CodecProfil[%d], CodecLevel[%d]",
-            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - CodecProfile[%d], CodecLevel[%d], Sprop[%s]",
+            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(),
+            pVideoConfig->getCodecSprop().c_str());
     IMS_TRACE_D("UpdateRtpConfig() - IntraFrameInterval[%d], PacketizationMode[%d]",
             pVideoConfig->getIntraFrameInterval(), pVideoConfig->getPacketizationMode(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - CameraId[%d], CameraZoom[%d]", pVideoConfig->getCameraId(),

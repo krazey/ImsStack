@@ -33,7 +33,7 @@ static const IMS_SINT32 DEFAULT_FRAMERATE = CodecAvcConfig::DEFAULT_AVC_FRAMERAT
 static const IMS_SINT32 DEFAULT_BITRATE = CodecAvcConfig::DEFAULT_AVC_BITRATE;
 static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = CodecAvcConfig::DEFAULT_PACKETIZATION_MODE;
 static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SPROP;
-#define DEFAULT_SPROP_PARAMS "Z0LAFukDwKMg,aM4G4g=="
+
 #define DEFAULT_PROFILE_ID "42C00C"
 #define DEFAULT_IMAGE_ATTR \
     "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
@@ -98,7 +98,7 @@ TEST_F(CodecAvcConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_BITRATE);
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
     EXPECT_EQ(m_pConfig->GetIncludeSpropParameterSets(), DEFAULT_INCLUDE_SPROP);
-    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
+    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), AString::ConstNull());
     EXPECT_EQ(m_pConfig->GetProfileLevelId(), DEFAULT_PROFILE_ID);
     EXPECT_EQ(m_pConfig->GetImageAttr(), DEFAULT_IMAGE_ATTR);
     EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);
@@ -187,10 +187,16 @@ TEST_F(CodecAvcConfigTest, GetIncludeSpropParameterSets)
 
 TEST_F(CodecAvcConfigTest, GetSpropParameterSets)
 {
+    AString strSpropParameterSets("Z0LAFtoHgUaagQEBA8UKqA==,aM4NiA==");
+    ON_CALL(*m_pVideoSubBundle,
+            GetString(CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING,
+                    AString::ConstNull()))
+            .WillByDefault(Return(strSpropParameterSets));
+
     GetReadyToCreate();
     EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
+    EXPECT_EQ(m_pConfig->GetSpropParameterSets(), strSpropParameterSets);
 }
 
 TEST_F(CodecAvcConfigTest, GetProfileLevelId)
