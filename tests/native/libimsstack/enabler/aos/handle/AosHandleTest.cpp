@@ -403,14 +403,12 @@ TEST_F(AosHandleTest, Constructor)
             .WillRepeatedly(ReturnRef(strValue));
 
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+    AosProvider::GetInstance()->SetNConfiguration(&objMockIAosNConfiguration);
 
     EXPECT_CALL(objMockIAosNConfiguration, SetListener(_)).Times(1);
 
     TestAosHandle* pTestAosHandle =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, m_nServiceType);
+            new TestAosHandle(&objMockIAosAppContext, m_strAppId, m_strServiceId, m_nServiceType);
 
     ASSERT_TRUE(pTestAosHandle != nullptr);
 
@@ -688,7 +686,7 @@ TEST_F(AosHandleTest, App_StateChanged_Test)
 
 TEST_F(AosHandleTest, SetListener_Test)
 {
-    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    IImsAosListener* piListener = &m_objMockIImsAosListener;
     m_pAosHandle->SetListener(piListener);
     EXPECT_EQ(m_pAosHandle->GetListener(), piListener);
 }
@@ -716,7 +714,7 @@ TEST_F(AosHandleTest, App_Notify_Null_Listener)
 
 TEST_F(AosHandleTest, App_Notify_No_Notify)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_FALSE);
@@ -740,7 +738,7 @@ TEST_F(AosHandleTest, App_Notify_No_Notify)
 
 TEST_F(AosHandleTest, App_Notify_STATE_INVALID)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_TRUE);
@@ -752,7 +750,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_INVALID)
 
 TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_TRUE);
@@ -765,7 +763,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
 
 TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_TRUE);
@@ -778,7 +776,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
 
 TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_TRUE);
@@ -798,7 +796,7 @@ TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
 
 TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTING)
 {
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     m_pAosHandle->SetNotify(IMS_TRUE);
@@ -818,7 +816,7 @@ TEST_F(AosHandleTest, Control_Test)
 TEST_F(AosHandleTest, GetAosInfo_Test)
 {
     MockIImsAosInfo objMockIImsAosInfo;
-    IImsAosInfo* piAosInfo = static_cast<IImsAosInfo*>(&objMockIImsAosInfo);
+    IImsAosInfo* piAosInfo = &objMockIImsAosInfo;
     m_pAosHandle->SetAosInfo(piAosInfo);
     EXPECT_EQ(m_pAosHandle->GetAosInfo(), piAosInfo);
 }
@@ -927,7 +925,7 @@ TEST_F(AosHandleTest, SetMonitor_GetMonitor)
     IImsAosMonitor* piMonitor = m_pAosHandle->GetMonitor();
 
     MockIImsAosMonitor objMockIImsAosMonitor;
-    IImsAosMonitor* piTestMonitor = static_cast<IImsAosMonitor*>(&objMockIImsAosMonitor);
+    IImsAosMonitor* piTestMonitor = &objMockIImsAosMonitor;
     m_pAosHandle->SetMonitor(piTestMonitor);
     EXPECT_EQ(m_pAosHandle->GetMonitor(), piTestMonitor);
 
@@ -959,8 +957,7 @@ TEST_F(AosHandleTest, SetReady_Mtc)
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker();
 
     MockIAosCallTracker objMockIAosCallTracker;
-    AosProvider::GetInstance()->SetCallTracker(
-            static_cast<IAosCallTracker*>(&objMockIAosCallTracker), 0);
+    AosProvider::GetInstance()->SetCallTracker(&objMockIAosCallTracker, 0);
     EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
     EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
 
@@ -1012,7 +1009,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test2)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1068,7 +1065,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -1227,9 +1224,8 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test9)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strValue));
 
-    TestAosHandle* pTestAosHandleEmergencyMtc =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+    TestAosHandle* pTestAosHandleEmergencyMtc = new TestAosHandle(
+            &objMockIAosAppContext, m_strAppId, m_strServiceId, ImsAosService::EMERGENCY_MTC);
 
     ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
 
@@ -1597,20 +1593,17 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
             .WillRepeatedly(ReturnRef(strValue));
 
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+    AosProvider::GetInstance()->SetNConfiguration(&objMockIAosNConfiguration);
 
     EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    TestAosHandle* pTestAosHandleEmergencyMtc =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+    TestAosHandle* pTestAosHandleEmergencyMtc = new TestAosHandle(
+            &objMockIAosAppContext, m_strAppId, m_strServiceId, ImsAosService::EMERGENCY_MTC);
 
-    TestAosHandle* pTestAosHandleEmergencyMts =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, ImsAosService::EMERGENCY_MTS);
+    TestAosHandle* pTestAosHandleEmergencyMts = new TestAosHandle(
+            &objMockIAosAppContext, m_strAppId, m_strServiceId, ImsAosService::EMERGENCY_MTS);
 
     ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
     ASSERT_TRUE(pTestAosHandleEmergencyMts != nullptr);
@@ -1726,7 +1719,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test2)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -1765,7 +1758,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test3)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1804,7 +1797,7 @@ TEST_F(AosHandleTest, BackupAllBlocks_Test4)
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -1946,7 +1939,7 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -1968,7 +1961,7 @@ TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2596,7 +2589,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test4)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2667,7 +2660,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test5)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
@@ -2730,7 +2723,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test6)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -2801,7 +2794,7 @@ TEST_F(AosHandleTest, ProcessBlock_Test7)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pAosHandle->SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    m_pAosHandle->SetWifiWatcher(&m_objMockIWifiWatcher);
     EXPECT_CALL(m_objMockIWifiWatcher, GetState())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
@@ -3294,7 +3287,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test1)
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
+            .WillRepeatedly(Return(&objMockIAosRegistration));
 
     EXPECT_CALL(
             objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
@@ -3316,7 +3309,7 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test2)
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
+            .WillRepeatedly(Return(&objMockIAosRegistration));
 
     EXPECT_CALL(
             objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
@@ -3335,13 +3328,13 @@ TEST_F(AosHandleTest, ProcessUnavailableFeatureChanged_Test3)
     // + Call ImsAos_Connected of the listener
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    m_pAosHandle->SetListener(&m_objMockIImsAosListener);
     ASSERT_NE(m_pAosHandle->GetListener(), nullptr);
 
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
+            .WillRepeatedly(Return(&objMockIAosRegistration));
 
     EXPECT_CALL(
             objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG, 0))
@@ -4064,7 +4057,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test2)
     // Expectation: Call ImsAos_Suspended, return true
 
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
-    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    IImsAosListener* piListener = &m_objMockIImsAosListener;
     m_pAosHandle->SetListener(piListener);
     EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Suspended(_)).Times(1);
 
@@ -4101,12 +4094,10 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test4)
             .WillRepeatedly(ReturnRef(strValue));
 
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+    AosProvider::GetInstance()->SetNConfiguration(&objMockIAosNConfiguration);
 
-    TestAosHandle* pTestAosHandleEmergencyMtc =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+    TestAosHandle* pTestAosHandleEmergencyMtc = new TestAosHandle(
+            &objMockIAosAppContext, m_strAppId, m_strServiceId, ImsAosService::EMERGENCY_MTC);
 
     ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
 
@@ -4178,7 +4169,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
     m_pAosHandle->ClearSuspendedReason();
     m_pAosHandle->SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
-    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    IImsAosListener* piListener = &m_objMockIImsAosListener;
     m_pAosHandle->SetListener(piListener);
     m_pAosHandle->SetReason(AosReason::SUSPEND_NONE);
 
@@ -4210,12 +4201,10 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test6)
             .WillRepeatedly(ReturnRef(strValue));
 
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+    AosProvider::GetInstance()->SetNConfiguration(&objMockIAosNConfiguration);
 
-    TestAosHandle* pTestAosHandleEmergencyMtc =
-            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
-                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+    TestAosHandle* pTestAosHandleEmergencyMtc = new TestAosHandle(
+            &objMockIAosAppContext, m_strAppId, m_strServiceId, ImsAosService::EMERGENCY_MTC);
 
     ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
 
@@ -4303,8 +4292,7 @@ TEST_F(AosHandleTest, ReportRegState_Test2)
     // Test2: RegStateManager is not null, state connected
     // Expectation: call SetRegState with IMS_REG_ON.
 
-    AosProvider::GetInstance()->SetRegStateManager(
-            static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager));
+    AosProvider::GetInstance()->SetRegStateManager(&m_objMockIAosRegStateManager);
     m_pAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
 
     EXPECT_CALL(m_objMockIAosRegStateManager, SetRegState(_, IMS_REG_ON)).Times(1);
@@ -4359,8 +4347,7 @@ TEST_F(AosHandleTest, NConfiguration_NotifyConfigChanged_Test2)
     // Test2: NConfig is not null
     // Expectation: initialize handle
 
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
+    AosProvider::GetInstance()->SetNConfiguration(&m_objMockIAosNConfiguration);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired()).Times(1);
 
