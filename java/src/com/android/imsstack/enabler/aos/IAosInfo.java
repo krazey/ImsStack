@@ -17,6 +17,8 @@ package com.android.imsstack.enabler.aos;
 
 import android.content.Intent;
 
+import com.android.imsstack.core.agents.Sim;
+
 /**
  * This class provides the interworking interface between Java and native layer
  * for AoS(Always On Service) functionalities.
@@ -116,9 +118,16 @@ public interface IAosInfo {
      * Called to notify the change of ISIM state.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param state {@code state} is type of {@link IsimState}.
+     * @param state {@code state} The ISIM state. Valid values are
+     *         {@link Sim#ISIM_STATE_UNKNOWN},
+     *         {@link Sim#ISIM_STATE_NOT_PRESENT},
+     *         {@link Sim#ISIM_STATE_NOT_READY},
+     *         {@link Sim#ISIM_STATE_LOADED},
+     *         {@link Sim#ISIM_STATE_REFRESH_STARTED},
+     *         {@link Sim#ISIM_STATE_REFRESH_COMPLETED},
+     *         {@link Sim#ISIM_STATE_REMOVED}.
      */
-    void notifyIsimState(int state);
+    void notifyIsimState(@Sim.IsimState int state);
 
     /**
      * Called to notify the change of mobile data limit.
@@ -188,18 +197,6 @@ public interface IAosInfo {
         public static final int OFF = 0;
         public static final int ON = 1;
         public static final int PRESENTITY = 2;
-    }
-
-    /**
-     * ISIM State
-     */
-    class IsimState {
-
-        public static final int NOT_PRESENT = 0;
-        public static final int NOT_READY = 1;
-        public static final int LOADED = 2;
-        public static final int REFRESH_STARTED = 3;
-        public static final int REFRESH_COMPLETED = 4;
     }
 
     /**

@@ -52,7 +52,6 @@ import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
 import com.android.imsstack.enabler.aos.IAosInfo.RoamingPreferredVoiceNetwork;
@@ -404,9 +403,10 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void notifyIsimState() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
 
-        mAosService.notifyIsimState(IsimState.LOADED);
+        mAosService.notifyIsimState(Sim.ISIM_STATE_LOADED);
 
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
     }
@@ -577,7 +577,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onIsimStateChanged_notPresent() {
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.NOT_PRESENT);
+                Sim.ISIM_STATE_NOT_PRESENT);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_PRESENT);
 
         mAosService.onIsimStateChanged();
@@ -587,7 +587,8 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onIsimStateChanged_notReady() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.NOT_READY);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_NOT_READY);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_READY);
 
         mAosService.onIsimStateChanged();
@@ -597,7 +598,8 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onIsimStateChanged_loaded() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_LOADED);
 
         mAosService.onIsimStateChanged();
@@ -608,7 +610,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onIsimStateChanged_refreshStarted() {
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.REFRESH_STARTED);
+                Sim.ISIM_STATE_REFRESH_STARTED);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_REFRESH_STARTED);
 
         mAosService.onIsimStateChanged();
@@ -792,7 +794,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.NOT_PRESENT);
+                Sim.ISIM_STATE_NOT_PRESENT);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
@@ -815,7 +817,8 @@ public class AosServiceTest extends ImsStackTest {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
                 IAosRegistration.Cause.IMS_SERVICE);
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.NOT_READY);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_NOT_READY);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
@@ -842,7 +845,8 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.UT);
@@ -872,7 +876,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
                 IAosRegistration.Cause.IMS_SERVICE);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.REFRESH_STARTED);
+                Sim.ISIM_STATE_REFRESH_STARTED);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.UT);

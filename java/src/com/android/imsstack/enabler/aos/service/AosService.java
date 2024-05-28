@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -375,7 +374,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyIsimState(int state) {
+    public void notifyIsimState(@Sim.IsimState int state) {
         sendRequest(IIAosService.J2N_NOTIFY_ISIM_STATE, state);
     }
 
@@ -437,21 +436,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    @SuppressLint("SwitchIntDef")
     @Override
     public void onIsimStateChanged() {
         ImsLog.d(mSlotId, "AosService: onIsimStateChanged");
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
         if (sim != null) {
-            int isimState = sim.getIsimState();
-
-            switch (isimState) {
-                case Sim.ISIM_STATE_NOT_PRESENT -> notifyIsimState(IsimState.NOT_PRESENT);
-                case Sim.ISIM_STATE_NOT_READY -> notifyIsimState(IsimState.NOT_READY);
-                case Sim.ISIM_STATE_LOADED -> notifyIsimState(IsimState.LOADED);
-                case Sim.ISIM_STATE_REFRESH_STARTED -> notifyIsimState(IsimState.REFRESH_STARTED);
-            }
+            notifyIsimState(sim.getIsimState());
+        } else {
+            ImsLog.e(mSlotId, "SimInterface is null for slot: " + mSlotId);
         }
     }
 
@@ -929,7 +922,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private final class NativeStateListener implements NativeStateInterface.Listener {
-        @SuppressLint("SwitchIntDef")
         @Override
         public void onNativeServiceReady() {
             ImsLog.d(mSlotId, "NativeState: service ready.");
@@ -943,13 +935,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
                 }
 
-                switch (sim.getIsimState()) {
-                    case Sim.ISIM_STATE_NOT_PRESENT -> notifyIsimState(IsimState.NOT_PRESENT);
-                    case Sim.ISIM_STATE_NOT_READY -> notifyIsimState(IsimState.NOT_READY);
-                    case Sim.ISIM_STATE_LOADED -> notifyIsimState(IsimState.LOADED);
-                    case Sim.ISIM_STATE_REFRESH_STARTED -> notifyIsimState(
-                            IsimState.REFRESH_STARTED);
-                }
+                notifyIsimState(sim.getIsimState());
+            } else {
+                ImsLog.e(mSlotId, "SimInterface is null for slot: " + mSlotId);
             }
 
             notifyAosStart();

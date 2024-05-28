@@ -84,7 +84,7 @@ public:
     virtual void NotifyAosStart() = 0;
     virtual void NotifyIpcanHandoverFailure(
             IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) = 0;
-    virtual void NotifyIsimState(IN IMS_UINT32 nState) = 0;
+    virtual void NotifyIsimState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyLocationInfo(IN IMS_UINT32 nState) = 0;
     virtual void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) = 0;
     virtual void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) = 0;

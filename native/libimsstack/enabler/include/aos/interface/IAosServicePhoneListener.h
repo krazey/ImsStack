@@ -127,11 +127,13 @@ public:
  */
 enum class IsimState
 {
+    UNKNOWN = -1,
     NOT_PRESENT = 0,
     NOT_READY = 1,
     LOADED = 2,
     REFRESH_STARTED = 3,
-    REFRESH_COMPLETED = 4
+    REFRESH_COMPLETED = 4,
+    REMOVED = 5
 };
 
 /**
