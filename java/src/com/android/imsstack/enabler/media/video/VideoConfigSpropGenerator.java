@@ -259,7 +259,7 @@ public class VideoConfigSpropGenerator {
 
                     // Check if SPROP already exists.
                     String sprop = h264PayloadDesc.getString(
-                            CarrierConfig.ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
+                            CarrierConfig.Assets.KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                             null);
                     if (sprop != null && !sprop.isEmpty()) {
                         // SPROP already exists in carrier config. No need to generate again.
@@ -342,8 +342,8 @@ public class VideoConfigSpropGenerator {
                             PersistableBundle h264PayloadDesc = h264PayloadDescriptions
                                     .getPersistableBundle("" + payloadType);
                             if (h264PayloadDesc != null) {
-                                h264PayloadDesc.putString(CarrierConfig.ImsVt
-                                                .KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING,
+                                h264PayloadDesc.putString(CarrierConfig.Assets
+                                                .KEY_AVC_SPROP_PARAMETER_SETS_STRING,
                                         sprop);
                             }
                             return;

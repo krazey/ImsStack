@@ -628,8 +628,6 @@ public class CarrierConfig {
         public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING =
                 KEY_PREFIX + "h264_video_codec_attribute_profile_level_id_string";
                 // TODO Media - item in Bundle - added to change the internal xml for test
-        public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING =
-                KEY_PREFIX + "h264_video_codec_attribute_sprop_string";
 
         private ImsVt() {}
     }
@@ -1085,6 +1083,8 @@ public class CarrierConfig {
                 "audio_rtcpxr_packet_loss_rle_bool";
         public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
                 "audio_rtcpxr_packet_duplicate_rle_bool";
+        public static final String KEY_AVC_SPROP_PARAMETER_SETS_STRING =
+                "avc_sprop_parameter_sets_string";
         public static final String KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY =
                 "hevc_payload_type_int_array";
         public static final String KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE =

@@ -700,14 +700,6 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateAvcPayload(
 
     IMS_TRACE_I("CreateAvcPayload - pbAvc4SpropParameterSets[%s]", pbAvc4SpropParameterSets, 0, 0);
 
-    if (pbAvc4SpropParameterSets == IMS_NULL || (pbAvc4SpropParameterSets[0] == '\0'))
-    {
-        IMS_TRACE_D("CreateAvcPayload - SpropParameterSets are null, delete pAvcFmtp", 0, 0, 0);
-        delete pAvcFmtp;
-
-        return IMS_NULL;
-    }
-
     if (pAvcConfig->GetProfileLevelId().GetLength() != 0)
     {
         pAvcFmtp->strProfileLevelId = pAvcConfig->GetProfileLevelId();

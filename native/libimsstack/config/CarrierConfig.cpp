@@ -595,8 +595,6 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_AR
         KEY_IMS_VT_PREFIX "video_codec_attribute_resolution_int_array";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING[] =
         KEY_IMS_VT_PREFIX "h264_video_codec_attribute_profile_level_id_string";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_SPROP_STRING[] =
-        KEY_IMS_VT_PREFIX "h264_video_codec_attribute_sprop_string";
 // }
 // Public carrier-config - ends
 const IMS_CHAR CarrierConfig::ImsVt::KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT[] =
@@ -1051,6 +1049,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
         "audio_rtcpxr_packet_loss_rle_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
         "audio_rtcpxr_packet_duplicate_rle_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING[] =
+        "avc_sprop_parameter_sets_string";
 const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =
         "hevc_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[] =
