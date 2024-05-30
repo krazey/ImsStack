@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CfServiceData;
@@ -53,14 +53,14 @@ public class SscXmlParserTest {
     private int mTransactionId = 1;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         SscXmlFormat.init(SLOT_0);
         mSscXmlParser = new SscXmlParser();

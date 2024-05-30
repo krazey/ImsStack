@@ -33,7 +33,7 @@ import android.net.Network;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -75,7 +75,7 @@ public class SscHttpConnectionTest {
     private FakeSscHttpConnection mSscHttpConnection;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private IDcApn mMockDcApn;
     @Mock private Network mMockNetwork;
     @Mock private SscAuthAgent mMockSscAuthAgent;
@@ -99,8 +99,8 @@ public class SscHttpConnectionTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
         DcFactory.setDcAgent(IDcApn.class, mMockDcApn, SLOT_0);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscHttpConnection = new FakeSscHttpConnection(SLOT_0, mApnType);
     }

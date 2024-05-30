@@ -26,7 +26,7 @@ import android.telephony.CarrierConfigManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.config.CarrierConfig;
 
@@ -48,7 +48,7 @@ public class SscHttpConnectionGovTest {
     ISscHttpConnectionGov mSscHttConnectionGov;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscHttpConnection mMockSscHttpConnection;
     @Mock private Map<Integer, ISscHttpConnection> mMockSscHttpConnections;
 
@@ -56,8 +56,8 @@ public class SscHttpConnectionGovTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscHttConnectionGov = SscHttpConnectionGov.getInstance();
         replaceInstance(SscHttpConnectionGov.class, "sSscHttpConnections", null,

@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
@@ -47,15 +47,15 @@ public class SscUrlTest {
     private String mRequestUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml";
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscUtils mMockSscUtils;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         SscXmlFormat.init(SLOT_0);
         mSscUrl = new FakeSscUrl();
