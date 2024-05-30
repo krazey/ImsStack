@@ -87,6 +87,9 @@ private:
     VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     TextProfile* SetTextProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
 
+    MediaBaseProfile* CreateCodecPayloads(
+            IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+
     AudioProfile::Payload* CreateAmrPayload(
             IN CodecConfig* pCodecConfig, IN MediaConfiguration* pConfig);
     AudioProfile::Payload* CreateEvsPayload(
