@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
@@ -48,7 +48,7 @@ public class SscUtilsTest {
     private FakeSscUtils mSscUtils;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SimInterface mMockSimInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
     @Mock private TelephonyInterface mMockTelephonyInterface;
@@ -57,8 +57,8 @@ public class SscUtilsTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscUtils = new FakeSscUtils();
     }

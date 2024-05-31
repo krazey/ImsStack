@@ -49,7 +49,7 @@ import android.text.TextUtils;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
@@ -90,7 +90,7 @@ public class SscServiceImplTest {
     private TestableLooper mLooper;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SharedPreferences mMockSharedPreferences;
     @Mock private SscServiceState mMockSscServiceState;
     @Mock private SscTransactionFactory mMockSscTransactionFactory;
@@ -156,9 +156,9 @@ public class SscServiceImplTest {
         mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mMockSscTransactionFactory);
 
-        // mMockConfigAgent should be set after starting SscServiceImpl
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        // mMockConfigInterface should be set after starting SscServiceImpl
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getIntArray(
             CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
             .thenReturn(mServerBasedServices);

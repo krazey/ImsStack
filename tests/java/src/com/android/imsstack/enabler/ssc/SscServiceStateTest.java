@@ -58,7 +58,6 @@ import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
@@ -104,7 +103,6 @@ public class SscServiceStateTest {
     @Mock private TimerInterface mMockTimerInterface;
     @Mock private AosService mMockAosService;
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
     @Mock private IDcNetWatcher mMockDcNetWatcher;
     @Mock private IUtInterface mMockUtInterface;
     @Mock private WifiInterface mMockWifiInterface;
@@ -115,8 +113,8 @@ public class SscServiceStateTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        SscConfig.setConfigAgent(SLOT0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT0, mMockConfigInterface);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
         when(mMockCarrierConfig.getBoolean(

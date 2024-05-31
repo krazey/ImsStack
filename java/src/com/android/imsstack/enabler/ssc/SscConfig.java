@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
@@ -111,29 +110,28 @@ public final class SscConfig {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CarrierConfigServiceType {}
 
-    private static HashMap<Integer, ConfigAgent> sConfigAgent = new HashMap<>();
+    private static HashMap<Integer, ConfigInterface> sConfigInterfaces = new HashMap<>();
 
     public static void init(int slotId) {
         ImsLog.d("init(" + slotId + ")");
 
-        ConfigAgent ca = (ConfigAgent) AgentFactory.getInstance().getAgent(ConfigInterface.class,
-                slotId);
-        setConfigAgent(slotId, ca);
+        ConfigInterface ci = AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
+        setConfigInterface(slotId, ci);
     }
 
     @VisibleForTesting
-    static void setConfigAgent(int slotId, ConfigAgent configAgent) {
-        if (configAgent == null) {
+    static void setConfigInterface(int slotId, ConfigInterface configInterface) {
+        if (configInterface == null) {
             return;
         }
 
-        sConfigAgent.put(slotId, configAgent);
+        sConfigInterfaces.put(slotId, configInterface);
     }
 
     public static void clear(int slotId) {
         ImsLog.d("clear (" + slotId + ")");
 
-        sConfigAgent.remove(slotId);
+        sConfigInterfaces.remove(slotId);
     }
 
     private static String getString(int slotId, String key) {
@@ -173,12 +171,12 @@ public final class SscConfig {
     }
 
     private static CarrierConfig getCarrierConfig(int slotId) {
-        ConfigAgent ca = sConfigAgent.get(slotId);
-        if (ca == null) {
+        ConfigInterface ci = sConfigInterfaces.get(slotId);
+        if (ci == null) {
             return null;
         }
 
-        return ca.getCarrierConfig();
+        return ci.getCarrierConfig();
     }
 
     // From CarrierConfigManager
