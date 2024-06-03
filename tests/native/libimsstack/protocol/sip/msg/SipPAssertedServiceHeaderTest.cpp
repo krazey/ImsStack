@@ -58,14 +58,14 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
 
     /* Decode in complete value */
-    SIP_CHAR* pValue = const_cast<char*>("urn:urn-8");
+    const SIP_CHAR* pValue = "urn:urn-8";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
 
@@ -73,7 +73,7 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
 
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
-    pValue = const_cast<char*>("urn:urn-7:gpp-serv##ice.");
+    pValue = "urn:urn-7:gpp-serv##ice.";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     pBuff = &(aBuffer[0]);
@@ -86,7 +86,7 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
 
     /* Decode incomplete subservice value */
-    pValue = const_cast<char*>("urn:urn-7:3gpp-service.ims.icsi.mmtel:.");
+    pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel:.";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -97,7 +97,7 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
     /* Decode complete value */
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
-    pValue = const_cast<char*>("urn:urn-7:3gpp-service.ims.icsi.mmtel");
+    pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

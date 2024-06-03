@@ -32,7 +32,7 @@ SipPPreferredServiceHeader::SipPPreferredServiceHeader(
 
 SipPPreferredServiceHeader::~SipPPreferredServiceHeader() {}
 
-SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -40,7 +40,7 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SipSkipFwLWS(pStartPt, pEndPt);
 
     // validate urn:urn-7 mandatory prefix
@@ -62,9 +62,9 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
         delete[] pszTempString;
     }
 
-    SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
     // Find First dot and validate SubService Id
     if (SipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {

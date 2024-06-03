@@ -194,7 +194,7 @@ SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
     return pHdr;
 }
 
-SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipHeaderList::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -228,12 +228,12 @@ SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_TRUE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     while (pStartPt <= pEndPt)
     {
-        SIP_CHAR* pTempPre = SIP_NULL;
-        SIP_CHAR* pTempNext = SIP_NULL;
+        const SIP_CHAR* pTempPre = SIP_NULL;
+        const SIP_CHAR* pTempNext = SIP_NULL;
 
         if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
         {

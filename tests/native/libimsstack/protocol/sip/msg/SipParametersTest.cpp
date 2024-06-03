@@ -41,7 +41,7 @@ TEST_F(SipParametersTest, Add_Get_Param)
 
     EXPECT_EQ(SIP_TRUE, pParameters->AddParam("OnlyName", nullptr));
 
-    const char* const pParamName = "param-name";
+    const SIP_CHAR* const pParamName = "param-name";
     EXPECT_EQ(SIP_TRUE, pParameters->AddParam(pParamName, "param-value1"));
     EXPECT_EQ(SIP_TRUE, pParameters->AddParam(pParamName, "param-value2"));
 
@@ -62,7 +62,7 @@ TEST_F(SipParametersTest, Add_Get_Param)
     /* no value for param, return null */
     EXPECT_EQ(nullptr, pParameters->GetParamValue("OnlyName"));
 
-    char* pValue = pParameters->GetParamValue(pParamName, 1);
+    SIP_CHAR* pValue = pParameters->GetParamValue(pParamName, 1);
     EXPECT_STREQ("param-value2", pValue);
 
     delete[] pValue;
@@ -78,7 +78,7 @@ TEST_F(SipParametersTest, SetParam)
     /* invalid param name - null , fail */
     EXPECT_EQ(SIP_FALSE, pParameters->SetParam(nullptr, nullptr));
 
-    const char* const pParamName = "param-name";
+    const SIP_CHAR* const pParamName = "param-name";
 
     /* New param without value will be added to list, success */
     EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, nullptr));
@@ -101,7 +101,7 @@ TEST_F(SipParametersTest, SetParam)
     EXPECT_EQ(0, pParameters->GetParamIndex(pParamName));
     EXPECT_EQ(1, pNameValue->m_valueList.GetSize());
 
-    char* pValue = pParameters->GetParamValue(pParamName, 0);
+    SIP_CHAR* pValue = pParameters->GetParamValue(pParamName, 0);
     EXPECT_STREQ("param-value1", pValue);
     delete[] pValue;
 
@@ -119,10 +119,10 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pParameters != nullptr);
 
     const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objValue(256);
 
@@ -133,11 +133,11 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     EXPECT_EQ(SIP_TRUE, objParameterList.Encode(&pBuff, ' '));
 
     /* Decode with empty data, fail */
-    char* pData = const_cast<char*>("");
+    const SIP_CHAR* pData = "";
     EXPECT_EQ(SIP_FALSE, objParameterList.Decode(pData, pData, ' '));
 
-    pData = const_cast<char*>("OnlyName;param-name=param-value,param-value1");
-    char* pDataEnd = pData + strlen(pData) - 1;
+    pData = "OnlyName;param-name=param-value,param-value1";
+    const SIP_CHAR* pDataEnd = pData + strlen(pData) - 1;
 
     /* Decode with valid input, success */
     EXPECT_EQ(SIP_TRUE, objParameterList.Decode(pData, pDataEnd, ';'));
@@ -170,7 +170,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     SipParameterList& objNormalParameterList = pParameters->GetParameterList();
 
-    pData = const_cast<char*>("OnlyName;param-name=param%20value,param-value1");
+    pData = "OnlyName;param-name=param%20value,param-value1";
     pDataEnd = pData + strlen(pData) - 1;
 
     SipUri* pSipUri = new SipUri();
@@ -208,7 +208,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     pSipUri->SetComponentType(IParameterComponent::HEADER);
 
-    pData = const_cast<char*>("OnlyName;param-name=param%20value");
+    pData = "OnlyName;param-name=param%20value";
     pDataEnd = pData + strlen(pData) - 1;
 
     EXPECT_EQ(SIP_TRUE, objHeaderParameterList.Decode(pData, pDataEnd, ';', pSipUri));
@@ -246,7 +246,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     SipParameterList& objUriParameterList = pParameters->GetParameterList();
 
-    pData = const_cast<char*>("OnlyName;transport=%24!%26");
+    pData = "OnlyName;transport=%24!%26";
     pDataEnd = pData + strlen(pData) - 1;
 
     pSipUri->SetComponentType(IParameterComponent::URI);

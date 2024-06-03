@@ -29,7 +29,7 @@ public:
 
     /*virtual methods*/
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
 private:
     ~SipPPreferredServiceHeader();

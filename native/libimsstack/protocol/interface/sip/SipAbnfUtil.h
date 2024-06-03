@@ -195,32 +195,32 @@
 
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
 
-SIP_CHAR* SipSkipRwWSP(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+const SIP_CHAR* SipSkipRwWSP(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-SIP_BOOL SipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
-        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter);
+SIP_BOOL SipFindActualPos(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        const SIP_CHAR** ppTempPre, const SIP_CHAR** ppTempNext, const SIP_CHAR cDelimiter);
 
 SIP_VOID SipEnc_UpdateCurrPos(SIP_CHAR** ppMsgBuffer /*in -out param*/);
 
-SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
+SIP_BOOL SipFindLWS(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR** ppTempLoc);
 
-SIP_CHAR* SipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+const SIP_CHAR* SipSkipFwLWS(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-SIP_CHAR* SipSkipRwLWS(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+const SIP_CHAR* SipSkipRwLWS(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-SIP_BOOL SipFindPostDelimiter(
-        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
+SIP_BOOL SipFindPostDelimiter(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        const SIP_CHAR** ppTempLoc, const SIP_CHAR cDelimiter);
 
-SIP_BOOL SipFindPreDelimiter(
-        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
+SIP_BOOL SipFindPreDelimiter(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        const SIP_CHAR** ppTempLoc, const SIP_CHAR cDelimiter);
 
 SIP_CHAR* SipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
+SIP_BOOL SipFindCrlf(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR** ppTempLoc);
 
-SIP_BOOL SipFindTerminatingCRLF(SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint,
-        SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
+SIP_BOOL SipFindTerminatingCRLF(const SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint,
+        const SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
 
-SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt);
+const SIP_CHAR* SkipConsecutiveCRLFs(const SIP_CHAR* pStartPt);
 
 #endif  //__SIP_ABNF_UTIL_H__

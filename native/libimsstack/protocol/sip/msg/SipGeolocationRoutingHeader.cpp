@@ -65,7 +65,7 @@ SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
     return m_pGeoLocationRoutingList->Encode(ppCurrPos);
 }
 
-SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -80,7 +80,7 @@ SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 n
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     return m_pGeoLocationRoutingList->Decode(pStartPt, pEndPt);
 }
 

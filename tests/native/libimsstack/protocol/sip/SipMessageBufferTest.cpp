@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipDatatypes.h"
 #include "SipMessageBuffer.h"
 
 namespace android
@@ -34,7 +35,7 @@ TEST_F(SipMessageBufferTest, SetGetAndUpdate)
     RcPtr<SipMessageBuffer> pMsgBuffer = SipMessageBuffer::GetInstance();
     EXPECT_EQ(SipMessageBuffer::MAX_MSG_SIZE, pMsgBuffer->GetLength());
 
-    unsigned char* pBuffer = pMsgBuffer->GetBuffer();
+    SIP_UCHAR* pBuffer = pMsgBuffer->GetBuffer();
     EXPECT_TRUE(pBuffer != nullptr);
 
     pBuffer = pMsgBuffer->GetBuffer(0);

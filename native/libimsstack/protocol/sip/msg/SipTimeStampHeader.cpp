@@ -102,7 +102,7 @@ SIP_BOOL SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
     return SetCharVar(pszDelay, m_pszDelay);
 }
 
-SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipTimeStampHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -110,8 +110,8 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
     /*Find the LWS i.e. End of Transport*/
     if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {

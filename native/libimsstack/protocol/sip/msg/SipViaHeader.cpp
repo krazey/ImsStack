@@ -213,7 +213,7 @@ SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
     return AddParam("branch", pszBranch);
 }
 
-SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipViaHeader::DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ COLON port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -228,7 +228,7 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
       hex4 = 1*4HEXDIG
       port = 1*DIGIT */
 
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
     /*check for IPV6 address*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
     {
@@ -284,7 +284,7 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -292,9 +292,9 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     /*Search for the Protocol Name End*/
     /*sent-protocol = protocol-name SLASH protocol-version SLASH transport */

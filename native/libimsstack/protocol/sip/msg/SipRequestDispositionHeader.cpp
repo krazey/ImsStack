@@ -36,7 +36,7 @@ SipRequestDispositionHeader::SipRequestDispositionHeader(
 
 SipRequestDispositionHeader::~SipRequestDispositionHeader() {}
 
-SIP_BOOL SipRequestDispositionHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRequestDispositionHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {

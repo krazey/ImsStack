@@ -196,13 +196,13 @@ SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
     return SIP_TRUE;
 }
 
-SIP_INT32 SipGetMsgType(SIP_CHAR* pszStartPoint)
+SIP_INT32 SipGetMsgType(const SIP_CHAR* pszStartPoint)
 {
     return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ? SipMessage::RESP_TYPE
                                                                      : SipMessage::REQ_TYPE;
 }
 
-SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SIP_INT32 SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
     if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
@@ -264,8 +264,8 @@ SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 }
 #endif
 
-SIP_CHAR* SipFindBodyEnd(
-        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
+const SIP_CHAR* SipFindBodyEnd(
+        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
 {
     if (pStartPt == SIP_NULL)
     {
@@ -273,15 +273,15 @@ SIP_CHAR* SipFindBodyEnd(
     }
 
     SIP_UINT16 nBoundaryLen = SipPf_Strlen(pszBoundary);
-    SIP_CHAR* pNextPt = pStartPt + SIP_ONE;
-    SIP_CHAR* pTempEndPt = pStartPt + nBoundaryLen + SIP_TWO;
-    SIP_CHAR* pEndNext = pTempEndPt + SIP_ONE;
+    const SIP_CHAR* pNextPt = pStartPt + SIP_ONE;
+    const SIP_CHAR* pTempEndPt = pStartPt + nBoundaryLen + SIP_TWO;
+    const SIP_CHAR* pEndNext = pTempEndPt + SIP_ONE;
 
     while (pEndNext <= pEndPt)
     {
         if (IS_HYPHEN(*pStartPt) && IS_HYPHEN(*pNextPt))
         {
-            SIP_CHAR* pTempStartPt = pStartPt + SIP_TWO;
+            const SIP_CHAR* pTempStartPt = pStartPt + SIP_TWO;
             if (SipPf_Strncmp(pTempStartPt, pszBoundary, nBoundaryLen) == SIP_ZERO)
             {
                 if (IS_HYPHEN(*pTempEndPt) && IS_HYPHEN(*pEndNext))

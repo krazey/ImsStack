@@ -37,10 +37,10 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     unsigned int nLen = 0;
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* No message body, success */
     EXPECT_EQ(SIP_TRUE, pList->GetEncodedMessageBody(&pBuff, nLen, nullptr));
@@ -48,7 +48,7 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<char*>("This is body1"), 13));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("This is body1"), 13));
     EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
 
     pMessageBody->SipDelete();
@@ -61,7 +61,7 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<char*>("This is body2"), 13));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("This is body2"), 13));
     EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
 
     pMessageBody->SipDelete();
@@ -71,15 +71,15 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE,
-            pList->GetEncodedMessageBody(&pBuff, nLen, const_cast<char*>("unique-boundary-1")));
+            pList->GetEncodedMessageBody(&pBuff, nLen, const_cast<SIP_CHAR*>("unique-boundary-1")));
 
-    char* pMsg = const_cast<char*>("--unique-boundary-1\r\n\
+    const SIP_CHAR* pMsg = "--unique-boundary-1\r\n\
 \r\n\
 This is body1\r\n\
 --unique-boundary-1\r\n\
 \r\n\
 This is body2\r\n\
---unique-boundary-1--\r\n");
+--unique-boundary-1--\r\n";
 
     EXPECT_STREQ(pMsg, &(aBuffer[0]));
     EXPECT_EQ(nLen, strlen(pMsg));
@@ -94,7 +94,7 @@ This is body2\r\n\
     pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<char*>("This is body1"), 13));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("This is body1"), 13));
     EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
 
     pMessageBody->SipDelete();
@@ -104,7 +104,7 @@ This is body2\r\n\
 
     EXPECT_EQ(SIP_TRUE,
             pMessageBody->SetMsgBuffer(
-                    const_cast<char*>("This is \0body2"), 14));  // '\0' introduces
+                    const_cast<SIP_CHAR*>("This is \0body2"), 14));  // '\0' introduces
     EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
 
     pMessageBody->SipDelete();
@@ -116,15 +116,15 @@ This is body2\r\n\
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE,
-            pList->GetEncodedMessageBody(&pBuff, nLen, const_cast<char*>("unique-boundary-1")));
+            pList->GetEncodedMessageBody(&pBuff, nLen, const_cast<SIP_CHAR*>("unique-boundary-1")));
 
-    char* pNullCharMsg = const_cast<char*>("--unique-boundary-1\r\n\
+    const SIP_CHAR* pNullCharMsg = "--unique-boundary-1\r\n\
 \r\n\
 This is body1\r\n\
 --unique-boundary-1\r\n\
 \r\n\
 This is \0body2\r\n\
---unique-boundary-1--\r\n");
+--unique-boundary-1--\r\n";
 
     // pNullCharMsg length = pMsg + 1 (extra '\0' character)
     EXPECT_TRUE(memcmp(pNullCharMsg, &(aBuffer[0]), strlen(pMsg) + 1) == 0);
@@ -139,8 +139,8 @@ TEST_F(SipMsgBodyListTest, DecodeSingleBody)
     SipMsgBodyList* pList = new SipMsgBodyList();
     ASSERT_TRUE(pList != nullptr);
 
-    char* pSingleBody = const_cast<char*>("This is a single body,\r\n\
-and no headers and boundary present\r\n");
+    const SIP_CHAR* pSingleBody = "This is a single body,\r\n\
+and no headers and boundary present\r\n";
     int nLen = strlen(pSingleBody);
 
     EXPECT_EQ(SIP_TRUE, pList->DecodeSingleBody(pSingleBody, pSingleBody + nLen));
@@ -165,7 +165,7 @@ TEST_F(SipMsgBodyListTest, DecodeMIMEBody)
 
     EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(nullptr, nullptr, nullptr));
 
-    char* pMsg = const_cast<char*>("\r\n--unique-boundary\r\n\
+    const SIP_CHAR* pMsg = "\r\n--unique-boundary\r\n\
 Content-Type: application/body1\r\n\
 \r\n\
 Test body 1\r\n\
@@ -173,12 +173,12 @@ Test body 1\r\n\
 Content-Type: application/body2\r\n\
 \r\n\
 Test body 2\r\n\
---unique-boundary--\r\n");
+--unique-boundary--\r\n";
 
     unsigned int nLen = strlen(pMsg);
 
     EXPECT_EQ(SIP_TRUE,
-            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<char*>("unique-boundary")));
+            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<SIP_CHAR*>("unique-boundary")));
 
     EXPECT_EQ(2, pList->GetMsgBodyCount());
 
@@ -201,7 +201,7 @@ Test body 2\r\n\
     pList = new SipMsgBodyList();
     ASSERT_TRUE(pList != nullptr);
 
-    pMsg = const_cast<char*>("--unique-boundary\r\n\
+    pMsg = "--unique-boundary\r\n\
 Content-Type: application/body1\r\n\
 \r\n\
 Test body 1\r\n\
@@ -209,12 +209,12 @@ Test body 1\r\n\
 Content-Type: application/body2\r\n\
 \r\n\
 Test body 2\r\n\
---unique-boundary--\r\n");
+--unique-boundary--\r\n";
 
     nLen = strlen(pMsg);
 
     EXPECT_EQ(SIP_FALSE,
-            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<char*>("mismatch-boundary")));
+            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<SIP_CHAR*>("mismatch-boundary")));
 
     pList->SipDelete();
 
@@ -222,12 +222,12 @@ Test body 2\r\n\
     pList = new SipMsgBodyList();
     ASSERT_TRUE(pList != nullptr);
 
-    pMsg = const_cast<char*>("--unique-boundary");
+    pMsg = "--unique-boundary";
 
     nLen = strlen(pMsg);
 
     EXPECT_EQ(SIP_FALSE,
-            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<char*>("unique-boundary")));
+            pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<SIP_CHAR*>("unique-boundary")));
 
     pList->SipDelete();
 }

@@ -48,7 +48,7 @@ public:
 
     SIP_BOOL EncodeMIMEHdrs(SIP_CHAR** ppCurrPos);
 
-    SIP_BOOL DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     SipHeaderBase* GetNewMIMEHdrObj(SIP_INT32 eHdrType);
 
@@ -86,9 +86,10 @@ public:
 
     SIP_BOOL EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary);
 
-    SIP_BOOL DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary);
+    SIP_BOOL DecodeMIMEBody(
+            const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary);
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 private:
     ~SipMsgBodyList();
@@ -133,9 +134,9 @@ public:
     SIP_BOOL EncodeBody(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
-    SIP_BOOL DecodeSingleMsgBody(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeSingleMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-    SIP_BOOL DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     inline SIP_BOOL IsMimeEncoding() const { return m_bEncodeMime; }
     /*Set Methods*/

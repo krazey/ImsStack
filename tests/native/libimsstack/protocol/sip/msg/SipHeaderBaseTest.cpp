@@ -136,10 +136,10 @@ TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
@@ -199,7 +199,7 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode ALLOW with value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("UPDATE"), 6));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("UPDATE", 6));
     EXPECT_STREQ("UPDATE", pHeader->GetValue());
     pHeader->SipDelete();
 
@@ -210,14 +210,14 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode content-disposition with only value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("render"), 6));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("render", 6));
     EXPECT_STREQ("render", pHeader->GetValue());
     pHeader->SipDelete();
 
     /* Decode content-disposition with value and parameters */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("render;handling=optional"), 24));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("render;handling=optional", 24));
     EXPECT_STREQ("render", pHeader->GetValue());
     EXPECT_EQ(1, pHeader->GetParamCount());
     SipNameValue* pNameVal = pHeader->GetParam(0);
@@ -229,40 +229,37 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     /* Decode with only value and empty parameters */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;"), 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;", 7));
     pHeader->SipDelete();
 
     /* Decode with only parameters and empty value */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(";handling=optional"), 18));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(";handling=optional", 18));
     pHeader->SipDelete();
 
     /* Decode feature-caps with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::FEATURE_CAPS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode reject-contact with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::REJECT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*', success */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("*;param-name=param-value"), 24));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("*;param-name=param-value", 24));
     EXPECT_STREQ("*", pHeader->GetValue());
     EXPECT_EQ(1, pHeader->GetParamCount());
     pNameVal = pHeader->GetParam(0);
@@ -278,8 +275,8 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Decode content-type with value and parameters */
-    const char* pValue = "multipart/mixed;boundary=b_4043f-000a3b";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    const SIP_CHAR* pValue = "multipart/mixed;boundary=b_4043f-000a3b";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
 
     EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
@@ -298,7 +295,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "multipart/mixed";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
 
     EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
@@ -317,7 +314,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     pValue = ";boundary=b_4043f-000a3b";
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*' and multpile parameters */
@@ -325,7 +322,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "*;param1=value1;param2=value2,value3";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(pValue), strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("*", pHeader->GetValue());
     EXPECT_EQ(2, pHeader->GetParamCount());
 

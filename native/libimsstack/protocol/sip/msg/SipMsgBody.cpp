@@ -245,7 +245,7 @@ SIP_BOOL SipMIMEHdrs::EncodeMIMEHdrs(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == 0)
     {
@@ -253,8 +253,8 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempPos = SIP_NULL;
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Get the position previous to ":"*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
@@ -264,7 +264,7 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
+    const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
     pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
@@ -510,7 +510,7 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
                                                       : EncodeMIMEMsgBody(ppCurrPos);
 }
 
-SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SIP_BOOL SipMsgBody::DecodeSingleMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = pEndPt - pStartPt;
     SIP_CHAR* pData = new SIP_CHAR[nSize + SIP_ONE];
@@ -532,7 +532,7 @@ SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, const SIP_CHAR* pEn
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     if (pStartPt == SIP_NULL)
     {
@@ -541,7 +541,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
+    const SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
     /*Case when No Header is present before the start of body*/
     if (IS_CRLF(*pStartPt, *pNext1Pt))
     {
@@ -562,7 +562,7 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     {
         /*find next terminating CRLF*/
         SIP_UINT32 nDecLen = SIP_ZERO;
-        SIP_CHAR* pTempPos = SIP_NULL;
+        const SIP_CHAR* pTempPos = SIP_NULL;
         // Fail condition to be added
         SipFindTerminatingCRLF(pStartPt, pEndPt, &pTempPos, &bHdrEnd);
         nDecLen = pTempPos - pStartPt + SIP_ONE;
@@ -913,7 +913,7 @@ SipMsgBody* SipMsgBodyList::GetBodyByIndex(SIP_UINT32 nIndex)
     return SIP_NULL;
 }
 
-SIP_BOOL SipMsgBodyList::DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipMsgBodyList::DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*single body support*/
 
@@ -943,7 +943,8 @@ SIP_BOOL SipMsgBodyList::DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary)
+SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
+        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary)
 {
     /*Boundary check*/
     if (pszBoundary == SIP_NULL)
@@ -962,7 +963,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SI
     /*Update the start point to the sart of boundary*/
     pStartPt = pStartPt + SIP_TWO;
     SIP_CHAR* pszTempBoundary = SIP_NULL;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     if (SipFindCrlf(pStartPt, pEndPt, &pTempPos) == SIP_TRUE)
     {
@@ -1006,7 +1007,7 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SI
                     "SipMsgBodyList::DecodeMIMEBody:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        SIP_CHAR* pTempEnd = SipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
+        const SIP_CHAR* pTempEnd = SipFindBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
 
         if (pMsgBody->DecodeMIMEMsgBody(pStartPt, pTempEnd) == SIP_FALSE)
         {

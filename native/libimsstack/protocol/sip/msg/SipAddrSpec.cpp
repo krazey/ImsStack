@@ -352,15 +352,15 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /* check for userinfo = ( user / telephone-subscriber ) [ ":" password ] "@" */
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
     /* Decode password part in userinfo */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
     {
-        SIP_CHAR* pPasswordStart = pTempPos + SIP_TWO;
+        const SIP_CHAR* pPasswordStart = pTempPos + SIP_TWO;
         SIP_CHAR* pszPassword = SipCreateString(pPasswordStart, pEndPt);
         if (pszPassword == SIP_NULL)
         {
@@ -386,7 +386,7 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ ":" port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -401,7 +401,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
       hex4 = 1*4HEXDIG
       port = 1*DIGIT */
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     /* IPV6 is enclosed in between '[' and ']', get start and end point of Ipv6 address*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LEFT_SQUARE) == SIP_TRUE)
@@ -478,7 +478,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -490,8 +490,8 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
      * uri-parameters (parameter-name "=" parameter-value pairs) are separated by semi-colons and
      * headers (hname = hvalue pairs) are separated by Ampersand
      */
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     /* Decode user:password part in SIP URI */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
@@ -506,7 +506,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /* Decode headers part in SIP URI */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, QMARK) == SIP_TRUE)
     {
-        SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
+        const SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
 
         m_pUriHdrParamList = new SipParameterList();
         if (m_pUriHdrParamList == SIP_NULL)
@@ -531,7 +531,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /* Decode uri-parameters part in SIP URI */
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_TRUE)
     {
-        SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
+        const SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
 
         m_pUriParamList = new SipParameterList();
         if (m_pUriParamList == SIP_NULL)
@@ -675,7 +675,7 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAddrSpec::DecodeAddrSpec(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Validate the input prm*/
     if ((nDecLen == SIP_ZERO) || (pStartPt == SIP_NULL))
@@ -684,8 +684,8 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
@@ -856,7 +856,7 @@ SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipNameAddr::DecodeNameAddr(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     if (pStartPt == pEndPt)
     {
@@ -864,8 +864,8 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, LEFT_ANGLE) == SIP_FALSE)
     {

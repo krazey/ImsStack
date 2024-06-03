@@ -40,7 +40,7 @@ public:
     SIP_BOOL Encode(
             SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent = SIP_NULL) const;
 
-    SIP_BOOL Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
             IParameterComponent* pParameterComponent = SIP_NULL);
 
 private:
@@ -64,7 +64,7 @@ public:
     SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
             IParameterComponent* pParameterComponent = SIP_NULL) const;
 
-    SIP_BOOL Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR cDelimiter,
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR cDelimiter,
             IParameterComponent* pParameterComponent = SIP_NULL);
 
     SIP_BOOL Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);

@@ -467,7 +467,7 @@ SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
 }
 
 SIP_BOOL SipHeaders::DecodeHdrs(
-        SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody)
+        const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody)
 {
     if (pStartPt == SIP_NULL || nDecLen == SIP_ZERO)
     {
@@ -477,10 +477,10 @@ SIP_BOOL SipHeaders::DecodeHdrs(
 
     /*Skip The LWS form the back*/
     /*Update the End point*/
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     pEndPt = SipSkipRwLWS(pStartPt, pEndPt);
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     /*Get the position previous to ":"*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
@@ -489,7 +489,7 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
+    const SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
     pTempNext = SipSkipFwLWS(pTempNext, pEndPt);
 
     /*skip the WSP form back*/

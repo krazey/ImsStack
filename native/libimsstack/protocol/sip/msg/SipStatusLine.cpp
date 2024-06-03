@@ -130,10 +130,10 @@ SIP_UINT16 SipStatusLine::GetStatusCodeAsInt() const
     return (m_pszStatusCode != SIP_NULL) ? SipPf_Atoi(m_pszStatusCode) : SIP_SC_INVALID;
 }
 
-SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipStatusLine::DecodeStatusLine(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempLoc = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempLoc = SIP_NULL;
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {

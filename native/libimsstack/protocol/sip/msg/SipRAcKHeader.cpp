@@ -77,7 +77,7 @@ SIP_BOOL SipRAcKHeader::SetMethod(const SIP_CHAR* pszMethod)
     return SetCharVar(pszMethod, m_pszMethod);
 }
 
-SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipRAcKHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -85,8 +85,8 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
 
     if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
