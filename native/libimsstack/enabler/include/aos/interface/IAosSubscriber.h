@@ -28,7 +28,8 @@ public:
     virtual ~IAosSubscriber(){};
 
     virtual IMS_BOOL IsReady() const = 0;
-
+    virtual IMS_BOOL IsIsim() const = 0;
+    virtual IMS_BOOL IsUsim() const = 0;
     virtual void SetListener(IN IAosSubscriberListener* piListener) = 0;
 
     virtual const AStringArray& GetConfiguredImpus() const = 0;

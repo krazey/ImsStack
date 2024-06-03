@@ -26,6 +26,8 @@ public:
     virtual ~IAosSubscriberManager(){};
 
     virtual IMS_BOOL IsReady(IN IMS_BOOL bIsFake = IMS_FALSE) const = 0;
+    virtual IMS_BOOL IsIsim() const = 0;
+    virtual IMS_BOOL IsUsim() const = 0;
 
     virtual void AddListener(IN IAosSubscriberManagerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosSubscriberManagerListener* piListener) = 0;

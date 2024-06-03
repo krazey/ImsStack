@@ -55,6 +55,16 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsReady() const
             : IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsIsim() const
+{
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->IsIsim() : IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsUsim() const
+{
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->IsUsim() : IMS_FALSE;
+}
+
 PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
 {
     A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
