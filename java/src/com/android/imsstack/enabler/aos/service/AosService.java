@@ -405,12 +405,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     @Override
     public void notifyCarrierSignalPcoValueChanged(Intent intent) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleCarrierSignalPcoValueChanged(intent);
-            }
-        });
+        mHandler.post(() -> handleCarrierSignalPcoValueChanged(intent));
     }
 
     @Override
@@ -757,12 +752,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 "), featureTagBits (" + featureTagBits + "), featureTags : " +
                 featureTags.toString());
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegistered(networkType, featureTagBits, featureTags);
-            }
-        });
+        mHandler.post(() -> onRegistered(networkType, featureTagBits, featureTags));
     }
 
     private void updateRegistering(int networkType, int featureTagBits,
@@ -771,108 +761,58 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         "), featureTagBits (" + featureTagBits + "), featureTags : " +
         featureTags.toString());
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegistering(networkType, featureTagBits, featureTags);
-            }
-        });
+        mHandler.post(() -> onRegistering(networkType, featureTagBits, featureTags));
     }
 
     private void updateDeregistered(int networkType, int reason) {
         ImsLog.d(mSlotId, "updateDeregistered :: networkType(" + networkType + "), reason("
                 + reason + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onDeregistered(networkType, reason);
-            }
-        });
+        mHandler.post(() -> onDeregistered(networkType, reason));
     }
 
     private void updateTechnologyChangeFailed(int networkType, int reason) {
         ImsLog.d(mSlotId, "updateTechnologyChangeFailed :: networkType(" + networkType +
                 "), reason(" + reason + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onTechnologyChangeFailed(networkType, reason);
-            }
-        });
+        mHandler.post(() -> onTechnologyChangeFailed(networkType, reason));
     }
 
     private void updateAssociatedUriChanged(Uri[] uris) {
         ImsLog.d(mSlotId, "updateAssociatedUriChanged :: URIs : " +
                 java.util.Arrays.toString(uris));
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onAssociatedUriChanged(uris);
-            }
-        });
+        mHandler.post(() -> onAssociatedUriChanged(uris));
     }
 
     private void updateCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
         ImsLog.d(mSlotId, "updateCapabilitiesUpdateFailed :: capabilities(" + capabilities +
                 "), networkType(" + networkType + "), reason(" + reason + ")");
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onCapabilitiesUpdateFailed(capabilities, networkType, reason);
-            }
-        });
+        mHandler.post(() -> onCapabilitiesUpdateFailed(capabilities, networkType, reason));
     }
 
     private void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
         ImsLog.d(mSlotId, "notifyCapabilitiesUpdated :: pairs(" + pairs.toString() + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onCapabilitiesUpdated(pairs);
-            }
-        });
+        mHandler.post(() -> onCapabilitiesUpdated(pairs));
     }
 
     private void notifyAosIsimStateChanged(int state) {
         ImsLog.d(mSlotId, "notifyAosIsimStateChanged :: state(" + state + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onAosIsimStateChanged(state);
-            }
-        });
+        mHandler.post(() -> onAosIsimStateChanged(state));
     }
 
     private void notifyRegEventStateChanged(int statusCode, Set<Uri> impus) {
         ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode + "), IMPU: "
                 + impus.toString());
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegEventStateChanged(statusCode, impus);
-            }
-        });
+        mHandler.post(() -> onRegEventStateChanged(statusCode, impus));
     }
 
     private void requestPhoneNumberRetry(int command) {
         ImsLog.d(mSlotId, "RequestPhoneNumberRetry :: command(" + command + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onPhoneNumberRetryRequest(command);
-            }
-        });
+        mHandler.post(() -> onPhoneNumberRetryRequest(command));
     }
 
     private void requestWifiService(int command) {
         ImsLog.d(mSlotId, "RequestWifiService :: command(" + command + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onWifiServiceRequest(command);
-            }
-        });
+        mHandler.post(() -> onWifiServiceRequest(command));
     }
 
     private String getErrorMessage(int reason) {
