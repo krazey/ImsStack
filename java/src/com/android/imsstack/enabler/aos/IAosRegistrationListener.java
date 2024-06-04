@@ -301,46 +301,50 @@ public interface IAosRegistrationListener {
          */
         public static final int CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9;
         /**
+         * Registration error code for USIM authentication failures.
+         */
+        public static final int CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES = 10;
+        /**
          * Service unavailable; radio power off
          */
-        public static final int CODE_LOCAL_POWER_OFF = 10;
+        public static final int CODE_LOCAL_POWER_OFF = 11;
         /**
          * Service unavailable; low battery
          */
-        public static final int CODE_LOCAL_LOW_BATTERY = 11;
+        public static final int CODE_LOCAL_LOW_BATTERY = 12;
         /**
          * Service unavailable; out of service (data service state)
          */
-        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 12;
+        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 13;
         /**
          * Service unavailable; no LTE coverage
          * (VoLTE is not supported even though IMS is registered)
          */
-        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 13;
+        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 14;
         /**
          * Service unavailable; located in roaming area
          */
-        public static final int CODE_LOCAL_NETWORK_ROAMING = 14;
+        public static final int CODE_LOCAL_NETWORK_ROAMING = 15;
         /**
          * Service unavailable; IP changed
          */
-        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 15;
+        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 16;
         /**
          * Service unavailable; for an unspecified reason
          */
-        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 16;
+        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 17;
         /**
          * Service unavailable; IMS is not registered
          */
-        public static final int CODE_LOCAL_NOT_REGISTERED = 17;
+        public static final int CODE_LOCAL_NOT_REGISTERED = 18;
         /**
          * The current RAT was blocked because registration failed for all P-CSCFs.
          */
-        public static final int CODE_RAT_BLOCK = 18;
+        public static final int CODE_RAT_BLOCK = 19;
         /**
          * Clears blocks for all RATs.
          */
-        public static final int CODE_CLEAR_RAT_BLOCKS = 19;
+        public static final int CODE_CLEAR_RAT_BLOCKS = 20;
 
         public static String toString(int reasonCode) {
             return switch (reasonCode) {
@@ -357,6 +361,8 @@ public interface IAosRegistrationListener {
                         "CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED";
                 case CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
                         "CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES";
+                case CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES ->
+                        "CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES";
                 case CODE_LOCAL_POWER_OFF -> "CODE_LOCAL_POWER_OFF";
                 case CODE_LOCAL_LOW_BATTERY -> "CODE_LOCAL_LOW_BATTERY";
                 case CODE_LOCAL_NETWORK_NO_SERVICE -> "CODE_LOCAL_NETWORK_NO_SERVICE";

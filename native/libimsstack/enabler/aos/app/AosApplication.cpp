@@ -3042,6 +3042,8 @@ PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReas
 {
     A_IMS_TRACE_I(APPID, "Connection_Deactivated :: reason(%d)", nReason, 0, 0);
 
+    m_pCondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
+
     if (IsNotReady())
     {
         return;

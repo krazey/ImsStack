@@ -1108,7 +1108,8 @@ public:
             REG_ERROR_CODE_4XX = 4,
             REG_ERROR_CODE_5XX = 5,
             REG_ERROR_CODE_6XX = 6,
-            REG_ERROR_CODE_ALL_RESP = 9
+            REG_ERROR_CODE_ALL_RESP = 9,
+            REG_ERROR_CODE_USIM_AUTHENTICATION = 10
         };
 
         // registration retry count reset policy

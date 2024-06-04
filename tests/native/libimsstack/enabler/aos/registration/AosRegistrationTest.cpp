@@ -2477,6 +2477,21 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->ProcessAuthenticationFailed();
 }
 
+TEST_F(AosRegistrationTest, ShouldCheckUsimAuthHandlingNeededWhenProcessAuthenticationFailed)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
+
+    EXPECT_CALL(m_objMockIAosSubscriber, IsUsim()).WillOnce(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillOnce(ReturnRef(objErrCode));
+
+    m_pAosRegistration->ProcessAuthenticationFailed();
+}
+
 TEST_F(AosRegistrationTest, TriggerReinitiateWhenRegRequiredWithWaitTimeIfWaitTimeIsZero)
 {
     EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(m_objEmptyImpus));
@@ -4206,11 +4221,68 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNo
 
     ImsSaKey objSaKey;
     IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED,
+            objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersAuthenticationFailedWhenResultIsNokMacInvalid)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosSubscriber, IsUsim()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(
+            ImsAkaParam::RESULT_NOK_MAC_INVALID, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseUpdateResultOfSaToTrueWhenResultIsNokSqnSyncFailed)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED,
+            objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_TRUE(bResultOfSA);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseUpdateResultOfSaToTrueWhenUsimAuthHandlingIsNotNeeded)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosSubscriber, IsUsim()).WillByDefault(Return(IMS_FALSE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
     m_pAosRegistration->Registration_NotifyAkaResponse(
             ImsAkaParam::RESULT_NOK_MAC_INVALID, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
 
     EXPECT_TRUE(bResultOfSA);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort)

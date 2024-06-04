@@ -3156,7 +3156,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
+    if (IsUsimAuthFailureHandlingNeeded())
+    {
+        m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES;
+    }
+    else if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (GetState() == STATE_REGISTERING)
@@ -4645,6 +4649,12 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
     if (!IsAuthChallengeMoreAllowed())
     {
         bResponseToChallenge = IMS_FALSE;
+
+        if (IsUsimAuthFailureHandlingNeeded())
+        {
+            ProcessAuthenticationFailed();
+        }
+
         return;
     }
 
@@ -4692,13 +4702,20 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
     if (nResult != ImsAkaParam::RESULT_OK)
     {
         A_IMS_TRACE_I(REGID, "Aka response is failed , wait next 401 message", 0, 0, 0);
-        bResultOfSA = IMS_TRUE;
 
         if (!ProcessAkaResponseFailed())
         {
             ProcessRegTerminated();
             return;
         }
+
+        if (nResult == ImsAkaParam::RESULT_NOK_MAC_INVALID && IsUsimAuthFailureHandlingNeeded())
+        {
+            ProcessAuthenticationFailed();
+            return;
+        }
+
+        bResultOfSA = IMS_TRUE;
     }
     else
     {
@@ -6215,4 +6232,12 @@ IMS_BOOL AosRegistration::IsNeedToSetLimitedMode()
 
     A_IMS_TRACE_D(REGID, "IsNeedToSetLimitedMode : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
+}
+
+PRIVATE
+IMS_BOOL AosRegistration::IsUsimAuthFailureHandlingNeeded()
+{
+    return m_piContext->GetSubscriber()->IsUsim() &&
+            IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrCode(),
+                    CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
 }

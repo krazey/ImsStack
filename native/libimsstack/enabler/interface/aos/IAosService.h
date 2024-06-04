@@ -291,46 +291,50 @@ enum class AosReasonCode
      */
     REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9,
     /**
+     * Registration error code for USIM authentication failures.
+     */
+    REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES = 10,
+    /**
      * Service unavailable; radio power off
      */
-    LOCAL_POWER_OFF = 10,
+    LOCAL_POWER_OFF = 11,
     /**
      * Service unavailable; low battery
      */
-    LOCAL_LOW_BATTERY = 11,
+    LOCAL_LOW_BATTERY = 12,
     /**
      * Service unavailable; out of service (data service state)
      */
-    LOCAL_NETWORK_NO_SERVICE = 12,
+    LOCAL_NETWORK_NO_SERVICE = 13,
     /**
      * Service unavailable; no LTE coverage
      * (VoLTE is not supported even though IMS is registered)
      */
-    LOCAL_NETWORK_NO_LTE_COVERAGE = 13,
+    LOCAL_NETWORK_NO_LTE_COVERAGE = 14,
     /**
      * Service unavailable; located in roaming area
      */
-    LOCAL_NETWORK_ROAMING = 14,
+    LOCAL_NETWORK_ROAMING = 15,
     /**
      * Service unavailable; IP changed
      */
-    NETWORK_IP_CHANGED = 15,
+    NETWORK_IP_CHANGED = 16,
     /**
      * Service unavailable; for an unspecified reason
      */
-    LOCAL_SERVICE_UNAVAILABLE = 16,
+    LOCAL_SERVICE_UNAVAILABLE = 17,
     /**
      * Service unavailable; IMS is not registered
      */
-    LOCAL_NOT_REGISTERED = 17,
+    LOCAL_NOT_REGISTERED = 18,
     /**
      * The current RAT was blocked because registration failed for all P-CSCFs.
      */
-    RAT_BLOCK = 18,
+    RAT_BLOCK = 19,
     /**
      * Clears blocks for all RATs.
      */
-    CLEAR_RAT_BLOCKS = 19
+    CLEAR_RAT_BLOCKS = 20
 };
 
 /**

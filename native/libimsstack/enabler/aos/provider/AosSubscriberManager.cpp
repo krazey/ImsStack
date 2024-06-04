@@ -86,6 +86,18 @@ IMS_BOOL AosSubscriberManager::IsReady(IN IMS_BOOL bIsFake /*= IMS_FALSE*/) cons
 }
 
 PUBLIC
+IMS_BOOL AosSubscriberManager::IsIsim() const
+{
+    return m_bIsim;
+}
+
+PUBLIC
+IMS_BOOL AosSubscriberManager::IsUsim() const
+{
+    return m_bUsim;
+}
+
+PUBLIC
 void AosSubscriberManager::AddListener(IN IAosSubscriberManagerListener* piListener)
 {
     if (piListener == IMS_NULL)
@@ -308,18 +320,6 @@ void AosSubscriberManager::ClearAll()
 {
     m_objPuids.RemoveAllElements();
     SetProvisioned(IMS_FALSE);
-}
-
-PROTECTED
-IMS_BOOL AosSubscriberManager::IsIsim() const
-{
-    return m_bIsim;
-}
-
-PROTECTED
-IMS_BOOL AosSubscriberManager::IsUsim() const
-{
-    return m_bUsim;
 }
 
 PROTECTED
