@@ -183,7 +183,11 @@ using ::testing::SetArgReferee;
     using Base::UpdateIpsecSupported;                                         \
     using Base::UpdatePreloadedRoute;                                         \
     using Base::UpdateRegIpcanCategory;                                       \
-    using Base::UpdateTransactionStarted;
+    using Base::UpdateTransactionStarted;                                     \
+    using Base::ProcessIpcanChanged;                                          \
+    using Base::SetReregFailureReportOnIpcanChangeRequired;                   \
+    using Base::IsReregFailureReportOnIpcanChangeRequired;                    \
+    using Base::DestroyRegistration;
 
 const IMS_SINT32 SLOT_ID = 0;
 
@@ -5959,4 +5963,60 @@ TEST_F(AosRegistrationTest, ShouldNotifyDeregisteredForFakeTypeWhenRegistrationT
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
 
     // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, SetReregFailureReportOnIpcanChangeRequiredToTrueAfterHandover)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_FALSE);
+
+    // WHEN
+    m_pAosRegistration->ProcessIpcanChanged();
+
+    // THEN
+    EXPECT_TRUE(m_pAosRegistration->IsReregFailureReportOnIpcanChangeRequired());
+}
+
+TEST_F(AosRegistrationTest,
+        ResetReregFailureReportOnIpcanChangeRequiredToFalseIfReregistrationSucceeds)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    m_pAosRegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    // WHEN
+    m_pAosRegistration->Registration_Updated();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsReregFailureReportOnIpcanChangeRequired());
+}
+
+TEST_F(AosRegistrationTest,
+        ResetReregFailureReportOnIpcanChangeRequiredToFalseWhenDestroyRegistration)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    m_pAosRegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    // WHEN
+    m_pAosRegistration->DestroyRegistration();
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsReregFailureReportOnIpcanChangeRequired());
+}
+
+TEST_F(AosRegistrationTest,
+        NotifyTechnologyChangeFailedIfReregistrationFailsWhileTheFlagIsSetToTrue)
+{
+    // GIVEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    m_pAosRegistration->SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosService, NotifyTechnologyChangeFailed(_, _, _));
+
+    // WHEN
+    m_pAosRegistration->Registration_UpdateFailed(IRegistration::REASON_NONE);
+
+    // THEN: The GIVEN condition should be met
 }
