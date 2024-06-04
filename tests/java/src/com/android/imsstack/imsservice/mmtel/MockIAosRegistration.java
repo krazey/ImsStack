@@ -16,10 +16,12 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import static org.junit.Assert.assertEquals;
+
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -32,12 +34,12 @@ class MockIAosRegistration implements IAosRegistration {
     }
 
     @Override
-    public void addListener(IAosRegistrationListener listener) {
+    public void addListener(@NonNull IAosRegistrationListener listener) {
         mAosRegListener = listener;
     }
 
     @Override
-    public void removeListener(IAosRegistrationListener listener) {
+    public void removeListener(@NonNull IAosRegistrationListener listener) {
         mAosRegListener = null;
     }
 
@@ -74,7 +76,7 @@ class MockIAosRegistration implements IAosRegistration {
     }
 
     @Override
-    public void changeCapabilities(CapabilityPairs pairs) {
+    public void changeCapabilities(@NonNull CapabilityPairs pairs) {
     }
 
     public void setCountDownLatch(CountDownLatch cl) {

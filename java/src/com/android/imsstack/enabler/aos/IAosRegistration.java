@@ -18,6 +18,8 @@ package com.android.imsstack.enabler.aos;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 
+import androidx.annotation.NonNull;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -33,49 +35,55 @@ public interface IAosRegistration {
     /**
      * Registers a new Listener to receive registration updates.
      *
-     * @param listener listener to be notified
+     * @param listener The non-null listener to be registered.
+     * @throws NullPointerException if the listener is null.
      */
-    public void addListener(IAosRegistrationListener listener);
+    void addListener(@NonNull IAosRegistrationListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosRegistrationListener)}
      *
-     * @param listener listener previously registered
+     * @param listener The non-null listener to be removed.
+     * @throws NullPointerException if the listener is null.
      */
-    public void removeListener(IAosRegistrationListener listener);
+    void removeListener(@NonNull IAosRegistrationListener listener);
 
     /**
     * Called by the framework to request that the ImsService perform the network registration
     * of all SIP delegates associated with this ImsService.
     */
-    public void updateSipDelegateRegistration();
+    void updateSipDelegateRegistration();
 
     /**
      * Called by the framework to request that the ImsService perform the network deregistration
      * of all SIP delegates associated with this ImsService.
      */
-    public void triggerSipDelegateDeregistration();
+    void triggerSipDelegateDeregistration();
 
     /**
      * Called by the framework to notify the ImsService that a SIP delegate connection has received
-     * a SIP message containing a permanent failure response (such as a 403) or an indication that
-     * a SIP response timer has timed out in response to an outgoing SIP message.
+     * a SIP message containing a permanent failure response (with a SIP status code between
+     * 100 and 699) or an indication that a SIP response timer has timed out in response to
+     * an outgoing SIP message.
+     *
+     * @param sipCode The SIP status code indicating the reason for the failure.
+     *                Must be within the range of 100 to 699 (inclusive).
+     * @param sipReason Optional additional information about the failure reason.
+     * @throws IllegalArgumentException if the sipCode is outside the valid range.
      */
-    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
+    void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
             @Nullable String sipReason);
 
     /**
      * This method is called when capabilities are changed.
-     *
      * If the capabilities changed by calling this method is not updated,
      * the following API is called. {@link IAosRegistrationListener#notifyCapabilitiesUpdateFailed}
      *
-     * @param capabilityPairs Type of {@link CapabilityPairs}, a pair of capabilities and network
-     * Type. {@code capabilityPairs} contains all enabled capabilities for each network type.
-     * See {@link IAosRegistrationListener.Capability} and
-     * {@link IAosRegistrationListener.NetworkType}
+     * @param capabilityPairs A non-null map containing the enabled capabilities for each network
+     *                        type.
+     * @throws NullPointerException if {@code capabilityPairs} is null.
      */
-    public void changeCapabilities(CapabilityPairs capabilityPairs);
+    void changeCapabilities(@NonNull CapabilityPairs capabilityPairs);
 
     /**
      * This method is called when controlling registration.
@@ -93,7 +101,7 @@ public interface IAosRegistration {
      *    {@code IAosRegistrationListener.NetworkType.NONE} if IMS is not registered,
      *    The NetworkType is returns, if IMS is registered.
      */
-    public int getRegisteredNetworkType();
+    int getRegisteredNetworkType();
 
     /**
      * This method provides the IMS registration state
@@ -149,7 +157,7 @@ public interface IAosRegistration {
     /**
      * CapabilityPairs
      */
-    public final class CapabilityPairs {
+    final class CapabilityPairs {
 
         /**
          * The key of {@code Map<Integer, Integer>} is networkType.

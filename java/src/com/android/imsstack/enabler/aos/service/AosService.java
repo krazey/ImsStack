@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
+import android.annotation.IntRange;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -25,6 +26,9 @@ import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -60,6 +64,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -244,12 +249,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void addListener(IAosRegistrationListener listener) {
+    public void addListener(@NonNull IAosRegistrationListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
         mAosRegistrationListeners.add(listener);
     }
 
     @Override
-    public void removeListener(IAosRegistrationListener listener) {
+    public void removeListener(@NonNull IAosRegistrationListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
         mAosRegistrationListeners.remove(listener);
     }
 
@@ -274,21 +281,24 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
+    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
+            @Nullable String sipReason) {
+        if (sipCode < 100 || sipCode > 699) {
+            throw new IllegalArgumentException("Invalid sipCode. Must be between 100 and 699.");
+        }
+
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_REQUEST_FULL_REGISTRATION);
         parcel.writeInt(sipCode);
-        parcel.writeString((sipReason == null) ? "" : sipReason);
+        parcel.writeString((sipReason != null) ? sipReason : "");
 
         sendRequest(parcel);
     }
 
     @Override
-    public void changeCapabilities(CapabilityPairs pairs) {
-        if (pairs == null) {
-            return;
-        }
+    public void changeCapabilities(@NonNull CapabilityPairs pairs) {
+        Objects.requireNonNull(pairs, "listener must not be null");
 
         adjustCapabilities(pairs);
 
