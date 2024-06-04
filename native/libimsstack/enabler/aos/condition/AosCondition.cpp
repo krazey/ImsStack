@@ -413,7 +413,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
             if (IsRefreshStarted())
             {
                 m_bIsRefreshStarted = IMS_FALSE;
-                ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+                ClearRegistrationAndDataFailureBlocks();
             }
             break;
 
@@ -430,7 +430,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
                 if (IsRefreshStarted() && piSubscriber->IsReady())
                 {
                     m_bIsRefreshStarted = IMS_FALSE;
-                    ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+                    ClearRegistrationAndDataFailureBlocks();
                 }
             }
             break;
@@ -721,8 +721,7 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
     {
         RequestCommand(REQUEST_STOP, AosReason::AIRPLANE_MODE);
 
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-        ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+        ClearRegistrationAndDataFailureBlocks();
     }
 }
 
@@ -744,7 +743,8 @@ void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCs
 
     SendConditionEvent(AosServiceAvailable::EVENT_ROAMING, nState, SERVICE_CELLULAR);
 
-    ResetImsDisableReason();
+    ClearRegistrationAndDataFailureBlocks();
+    ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
 }
 
 PROTECTED
@@ -775,7 +775,8 @@ void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT3
 
     if (eState == ServiceSetting::ON)
     {
-        ResetImsDisableReason();
+        ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
+        ClearRegistrationAndDataFailureBlocks();
     }
     else if (eState == ServiceSetting::OFF)
     {
@@ -834,12 +835,12 @@ void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
 }
 
 PROTECTED
-void AosCondition::ResetImsDisableReason()
+void AosCondition::ClearRegistrationAndDataFailureBlocks()
 {
-    A_IMS_TRACE_D(APPPROFILE, "ResetImsDisableReason", 0, 0, 0);
-    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
-    ProcessBlockReason(IMS_FALSE, BLOCK_IMS_DISABLED);
+    A_IMS_TRACE_D(APPPROFILE, "ClearRegistrationAndDataFailureBlocks", 0, 0, 0);
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
 PROTECTED
