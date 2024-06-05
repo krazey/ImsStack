@@ -435,8 +435,17 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
 }
 
 PROTECTED
-IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork)
+IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 {
+    ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
+
+    if (pMediaMsgParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nAccessNetwork = pMediaMsgParam->m_nValue;
+
     m_objAudioController.UpdateAccessNetwork(nAccessNetwork);
 
     if (m_objVideoController.IsSessionOpened() == IMS_TRUE)

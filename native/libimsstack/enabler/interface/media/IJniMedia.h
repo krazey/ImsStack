@@ -282,6 +282,18 @@ public:
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
+class ImsMediaMsgParam : public ImsMediaMsgParamBase
+{
+public:
+    explicit ImsMediaMsgParam(const MEDIA_CONTENT_TYPE eType, const IMS_SINT32 value = -1) :
+            ImsMediaMsgParamBase(eType),
+            m_nValue(value){};
+    virtual ~ImsMediaMsgParam() {}
+
+public:
+    IMS_SINT32 m_nValue;
+};
+
 class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 {
 public:
