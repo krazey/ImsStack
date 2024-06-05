@@ -17,7 +17,7 @@
 package com.android.imsstack.enabler.aos.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -228,10 +228,13 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void changeCapabilities_nullParam() {
-        mAosService.changeCapabilities(null);
+    public void changeCapabilitiesWithNullThrowsNullPointerException() {
 
-        assertNull(mAosService.mCapabilityPairs);
+        Throwable exception = assertThrows(NullPointerException.class, () -> {
+            mAosService.changeCapabilities(null);
+        });
+
+        assertEquals("listener must not be null", exception.getMessage());
     }
 
     @Test
