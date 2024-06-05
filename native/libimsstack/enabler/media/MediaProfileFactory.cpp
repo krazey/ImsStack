@@ -41,7 +41,7 @@ static const IMS_SINT32 NOT_PRESENT = -1;
 
 static MediaProfileFactory* g_pMediaProfileFactory = IMS_NULL;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MPF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PRIVATE
 MediaProfileFactory::MediaProfileFactory() {}

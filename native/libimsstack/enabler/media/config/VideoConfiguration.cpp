@@ -19,7 +19,7 @@
 #include "config/ImsCodec.h"
 #include "config/VideoConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType) :

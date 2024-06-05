@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "BaseNego.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.BN");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC BaseNego::BaseNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),

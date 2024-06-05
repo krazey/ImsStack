@@ -20,7 +20,7 @@
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.PC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::UpdateVideoProfile(
         OUT VideoProfile* pVideoProfile, IN MediaEnvironment* pEnvironment)

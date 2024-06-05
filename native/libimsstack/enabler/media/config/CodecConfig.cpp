@@ -24,7 +24,7 @@
 #include "config/MediaSessionConfig.h"
 #include "config/AudioConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 CodecConfig::CodecConfig(IN IMS_SINT32 nCodec, IN IMS_SINT32 nPayloadTypeNum) :

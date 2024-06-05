@@ -23,7 +23,7 @@
 const AString SEMICOLON = ";";
 const AString COMMA = ",";
 
-__IMS_TRACE_TAG_USER_DECL__("MED.ANA");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC AString AudioNegoAmr::SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* amrFmtp)
 {

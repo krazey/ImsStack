@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "config/CodecAvcConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_AVC_PROFILE_ID   "42C00C"
 #define DEFAULT_AVC_IMAGE_ATTR \

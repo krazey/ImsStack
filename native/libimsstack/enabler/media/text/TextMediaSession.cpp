@@ -33,7 +33,7 @@
 #include <TextConfig.h>
 using namespace android::telephony::imsmedia;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TS");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextMediaSession::TextMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),

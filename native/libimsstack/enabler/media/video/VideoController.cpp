@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "video/VideoProfile.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 VideoController::VideoController() :

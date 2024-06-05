@@ -33,7 +33,7 @@
 #define SIZE_OF_IPV4                   40
 #define SIZE_OF_RTP                    20 + 8  // rtp + header extension (cvo)
 
-__IMS_TRACE_TAG_USER_DECL__("MED.RM");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaResourceManager::MediaResourceManager(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),

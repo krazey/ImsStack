@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "config/CodecPcmConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :

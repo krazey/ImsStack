@@ -18,7 +18,7 @@
 #include "BaseSession.h"
 #include "MediaEnvironment.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.BS");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 BaseSession::BaseSession(IN IMS_SINT32 nSlotId) :

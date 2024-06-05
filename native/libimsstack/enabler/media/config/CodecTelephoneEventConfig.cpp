@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "config/CodecTelephoneEventConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_EVENT "0-15"
 

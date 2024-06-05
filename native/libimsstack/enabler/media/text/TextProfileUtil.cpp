@@ -20,7 +20,7 @@
 #include "config/TextConfiguration.h"
 #include "text/TextProfileUtil.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TU");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration* pConfig,
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,

@@ -33,7 +33,7 @@
 #include <VideoConfig.h>
 using namespace android::telephony::imsmedia;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VS");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),

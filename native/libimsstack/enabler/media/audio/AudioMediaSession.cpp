@@ -35,7 +35,7 @@ using namespace android::telephony::imsmedia;
 
 static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 1000;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.AS");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :

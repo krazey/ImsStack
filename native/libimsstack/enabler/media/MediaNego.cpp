@@ -27,7 +27,7 @@
 #include "config/TextConfiguration.h"
 #include "MediaNego.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MN");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :

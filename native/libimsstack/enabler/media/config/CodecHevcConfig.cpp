@@ -17,7 +17,7 @@
 #include "ServiceTrace.h"
 #include "config/CodecHevcConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_HEVC_SPROP_PARAMS_480X640                   \
     "AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,"                 \

@@ -19,7 +19,7 @@
 
 static MediaSessionConfigFactory* g_pMediaSessionConfigFactory = IMS_NULL;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PRIVATE
 MediaSessionConfigFactory::MediaSessionConfigFactory() {}

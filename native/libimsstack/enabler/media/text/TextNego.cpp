@@ -25,7 +25,7 @@
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TN");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),

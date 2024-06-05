@@ -20,7 +20,7 @@
 const AString SEMICOLON = ";";
 const AString COMMA = ",";
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VNH");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC AString VideoNegoHevc::SetSdpFmtpFromHevcFmtp(IN VideoProfile::HevcFmtp* hevcFmtp)
 {

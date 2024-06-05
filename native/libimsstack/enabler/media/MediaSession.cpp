@@ -31,7 +31,7 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfigUtil.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.SS");
+__IMS_TRACE_TAG_MEDIA__;
 
 using namespace android::telephony::imsmedia;
 

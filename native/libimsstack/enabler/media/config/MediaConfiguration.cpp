@@ -20,7 +20,7 @@
 #include "config/CodecConfigFactory.h"
 #include "config/MediaConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :

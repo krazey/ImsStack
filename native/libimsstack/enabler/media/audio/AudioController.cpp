@@ -19,7 +19,7 @@
 #include "audio/AudioController.h"
 #include "audio/AudioProfile.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.AC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 AudioController::AudioController() :

@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "text/TextProfile.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 TextController::TextController() :

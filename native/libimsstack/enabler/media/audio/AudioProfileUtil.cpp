@@ -30,7 +30,7 @@
 #include "MediaManager.h"
 #include "MediaResourceManager.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.PC");
+__IMS_TRACE_TAG_MEDIA__;
 
 const IMS_SINT32 AudioProfileUtil::AMR_AS[8][9] = {
         {22, 22, 23, 24, 24, 25, 27, 29, 0 }, // nb, ipv4, be

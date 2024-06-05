@@ -28,7 +28,7 @@
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VN");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),

@@ -20,7 +20,7 @@
 const AString SEMICOLON = ";";
 const AString COMMA = ",";
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VNA");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC AString VideoNegoAvc::SetSdpFmtpFromAvcFmtp(IN VideoProfile::AvcFmtp* avcFmtp)
 {
