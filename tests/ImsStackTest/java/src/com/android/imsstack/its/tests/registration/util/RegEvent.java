@@ -73,68 +73,31 @@ public class RegEvent {
      * </p>
      */
     public static class EventRecord {
-        @Nullable
-        private final Object mParam1;
-        @Nullable
-        private final Object mParam2;
-        @Nullable
-        private final Object mParam3;
+
+        private final Object[] mParams;
 
         /**
-         * Constructs a new EventRecord with no parameters.
-         */
-        public EventRecord() {
-            this(null, null, null);
-        }
-
-        /**
-         * Constructs a new EventRecord with the given first parameter.
+         * Constructs a new EventRecord with a variable number of parameters.
          *
-         * @param param1 The first parameter.
+         * @param params The parameters to be stored in the event record.
          */
-        public EventRecord(@Nullable Object param1) {
-            this(param1, null, null);
-        }
-
-        /**
-         * Constructs a new EventRecord with the given first and second parameters.
-         *
-         * @param param1 The first parameter.
-         * @param param2 The second parameter.
-         */
-        public EventRecord(@Nullable Object param1, @Nullable Object param2) {
-            this(param1, param2, null);
-        }
-
-        /**
-         * Constructs a new EventRecord with the given first, second, and third parameters.
-         *
-         * @param param1 The first parameter.
-         * @param param2 The second parameter.
-         * @param param3 The third parameter.
-         */
-        public EventRecord(@Nullable Object param1, @Nullable Object param2,
-                @Nullable Object param3) {
-            mParam1 = param1;
-            mParam2 = param2;
-            mParam3 = param3;
+        public EventRecord(Object... params) {
+            mParams = params;
         }
 
         /**
          * Returns the parameter at the specified index.
          *
-         * @param index The index of the parameter to retrieve (1-based).
+         * @param index The index of the parameter to retrieve (0-based).
          * @return The parameter at the specified index, or null if the index is out of bounds or
          * the parameter is not set.
          */
         @Nullable
         public Object getParam(int index) {
-            return switch (index) {
-                case 1 -> mParam1;
-                case 2 -> mParam2;
-                case 3 -> mParam3;
-                default -> null;
-            };
+            if (index >= 0 && index < mParams.length) {
+                return mParams[index];
+            }
+            return null;
         }
     }
 

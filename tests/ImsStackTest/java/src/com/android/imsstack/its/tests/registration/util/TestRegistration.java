@@ -269,7 +269,7 @@ public class TestRegistration {
                 return;
             }
 
-            Object param = record.getParam(1);
+            Object param = record.getParam(0);
             if (param != null && !nullToTrue(matcher).test((ImsRegistrationAttributes) param)) {
                 failOnUnexpectedParameters();
             }
@@ -283,7 +283,7 @@ public class TestRegistration {
                 return;
             }
 
-            Object param = record.getParam(1);
+            Object param = record.getParam(0);
             if (param != null && !nullToTrue(matcher).test((ImsRegistrationAttributes) param)) {
                 failOnUnexpectedParameters();
             }
@@ -299,13 +299,13 @@ public class TestRegistration {
                 return;
             }
 
+            Object param0 = record.getParam(0);
             Object param1 = record.getParam(1);
             Object param2 = record.getParam(2);
-            Object param3 = record.getParam(3);
 
-            if ((param1 != null && !nullToTrue(infoMatcher).test((ImsReasonInfo) param1))
-                    || (param2 != null && !nullToTrue(actionMatcher).test((Integer) param2))
-                    || (param3 != null && !nullToTrue(techMatcher).test((Integer) param3))) {
+            if ((param0 != null && !nullToTrue(infoMatcher).test((ImsReasonInfo) param0))
+                    || (param1 != null && !nullToTrue(actionMatcher).test((Integer) param1))
+                    || (param2 != null && !nullToTrue(techMatcher).test((Integer) param2))) {
                 failOnUnexpectedParameters();
             }
         }
@@ -320,11 +320,11 @@ public class TestRegistration {
                 return;
             }
 
+            Object param0 = record.getParam(0);
             Object param1 = record.getParam(1);
-            Object param2 = record.getParam(2);
 
-            if ((param1 != null && !nullToTrue(transportMatcher).test((Integer) param1))
-                    || (param2 != null && !nullToTrue(infoMatcher).test((ImsReasonInfo) param2))) {
+            if ((param0 != null && !nullToTrue(transportMatcher).test((Integer) param0))
+                    || (param1 != null && !nullToTrue(infoMatcher).test((ImsReasonInfo) param1))) {
                 failOnUnexpectedParameters();
             }
         }
@@ -338,7 +338,7 @@ public class TestRegistration {
                 return;
             }
 
-            Object param = record.getParam(1);
+            Object param = record.getParam(0);
 
             if (param != null && !nullToTrue(matcher).test((Uri[]) param)) {
                 failOnUnexpectedParameters();
