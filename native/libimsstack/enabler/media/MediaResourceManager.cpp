@@ -219,7 +219,11 @@ PUBLIC IMS_SINT32 MediaResourceManager::GetRtpFragmentSize()
     IMS_SINT32 nMtu = GetMtu();
     if (nMtu == 0)
     {
-        nMtu = m_pNetworkConnectionWatcher->GetMtu();
+        if (m_pNetworkConnectionWatcher != IMS_NULL)
+        {
+            nMtu = m_pNetworkConnectionWatcher->GetMtu();
+        }
+
         if (nMtu == 0)
         {
             nMtu = (GetNetworkType() == MediaNetworkConnectionWatcher::IWLAN) ? MTU_EPDG
