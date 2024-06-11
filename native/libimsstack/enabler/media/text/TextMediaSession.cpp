@@ -127,7 +127,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
     for (IMS_UINT32 nIdxPayload = 0; nIdxPayload < pNegoProfile->lstPayload.GetSize();
             nIdxPayload++)
     {
-        TextProfile::Payload* pPayload = pNegoProfile->lstPayload.GetAt(nIdxPayload);
+        TextProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(nIdxPayload);
 
         if (pPayload == IMS_NULL)
         {

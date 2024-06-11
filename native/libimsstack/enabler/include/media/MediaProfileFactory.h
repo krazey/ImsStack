@@ -49,7 +49,7 @@ public:
      * @brief Create a MediaBaseProfile with the MediaEnvironment and MediaConfiguration
      *
      * @param pEnvironment The network connection parameter
-     * @param pConfig The carrier configuration for text
+     * @param pConfig The carrier configuration for media
      * @param nSlotId The UICC slot id
      * @param eType The media profile type to be created
      * @return MediaBaseProfile* The MediaBaseProfile created
@@ -60,21 +60,46 @@ public:
     /**
      * @brief Delete the profile
      *
-     * @param pProfile The media profile to be delete
+     * @param pProfile The media profile to be deleted
      */
     void DeleteProfile(IN MediaBaseProfile* pProfile);
 
     /**
-     * @brief Distroy the list session config
+     * @brief Create a media(audio/text/video) codec payload
      *
-     * @param nSlotId SIM sloit id - default : 0
+     * @param eType The media codec payload type to be created
+     * @return MediaBaseProfile::BasePayload* The media(audio/text/video) codec payload created will
+     * be returned as its parent class type
+     */
+    MediaBaseProfile::BasePayload* CreatePayload(IN MEDIA_CONTENT_TYPE eType);
+
+    /**
+     * @brief Create a media(audio/text/video) codec payload
+     *
+     * @param payload The media codec payload to be created and copied
+     * @return MediaBaseProfile::BasePayload* The media(audio/text/video) codec payload created will
+     * be returned as its parent class type
+     */
+    MediaBaseProfile::BasePayload* CreatePayload(IN MediaBaseProfile::BasePayload* payload);
+
+    /**
+     * @brief Delete the payload
+     *
+     * @param pPayload The media codec payload to be deleted
+     */
+    void DeletePayload(IN MediaBaseProfile::BasePayload* pPayload);
+
+    /**
+     * @brief Get the instance of MediaProfileFactory
+     *
+     * @return MediaProfileFactory* Return the MediaProfileFactory instance
      */
     static MediaProfileFactory* GetInstance();
 
     /**
-     * @brief Release the instance of the mediasession config
+     * @brief Release the instance of the MediaProfileFactory
      *
-     * @param pMediaProfileFactory mediasession config factory instance
+     * @param pMediaProfileFactory the MediaProfileFactory instance
      */
     static void ReleaseInstance(MediaProfileFactory* pMediaProfileFactory);
 
@@ -82,6 +107,10 @@ private:
     AudioProfile* CreateAudioProfile();
     VideoProfile* CreateVideoProfile();
     TextProfile* CreateTextProfile();
+
+    AudioProfile::Payload* CreateAudioPayload(IN AudioProfile::Payload* payload = IMS_NULL);
+    TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
+    VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);
 
     AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);

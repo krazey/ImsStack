@@ -182,15 +182,15 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
             pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
 
-    pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
+    pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
     if (pPeerProfile->nNegotiatedPayloadIndex < 0)
     {
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(0);
+        pPeerPayload = pPeerProfile->GetPayloadAt(0);
     }
     else
     {
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(pPeerProfile->nNegotiatedPayloadIndex);
+        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->nNegotiatedPayloadIndex);
     }
 
     if (pNegoPayload == IMS_NULL || pPeerPayload == IMS_NULL)
@@ -311,7 +311,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         if (pLocalProfile->nNegotiatedPayloadIndex >= 0)
         {
             AudioProfile::Payload* pLocalPayload =
-                    pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
+                    pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
 
             if (pLocalPayload != IMS_NULL && pLocalPayload->pFmtp != IMS_NULL)
             {
@@ -419,7 +419,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     // Setting the DTMF properties
     for (IMS_UINT32 i = 0; i < pNegoProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pPayload = pNegoProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {

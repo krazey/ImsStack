@@ -405,8 +405,7 @@ TEXT_CODEC TextNego::GetNegotiatedCodec(void)
             return TEXT_CODEC_NONE;
         }
 
-        TextProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(0);
-
+        TextProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(0);
         if (pPayload == IMS_NULL)
         {
             return TEXT_CODEC_NONE;
@@ -926,7 +925,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     // Check and delete "red" type which contains invalid sub payload type
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -949,7 +948,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
             for (IMS_UINT32 j = 0; j < pProfile->lstPayload.GetSize(); j++)
             {
-                TextProfile::Payload* pTempPayload = pProfile->lstPayload.GetAt(j);
+                TextProfile::Payload* pTempPayload = pProfile->GetPayloadAt(j);
 
                 if (pTempPayload == IMS_NULL)
                 {
@@ -989,7 +988,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1030,7 +1029,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
         AString strRtpmap, strFmtp;
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1256,7 +1255,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     // Compare each payload based destination's profile
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pPeerProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1383,7 +1382,7 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* comparedPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
 
         if (comparedPayload == IMS_NULL)
         {

@@ -20,6 +20,7 @@
 #include "MediaEnvironment.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
+#include "MediaProfileUtil.h"
 #include "MediaResourceManager.h"
 
 #include "audio/AudioDef.h"
@@ -124,6 +125,7 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
 
     return pProfile;
 }
+
 PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
         IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
 {
@@ -227,6 +229,46 @@ void MediaProfileFactory::DeleteProfile(IN MediaBaseProfile* pProfile)
 }
 
 PUBLIC
+MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(IN MEDIA_CONTENT_TYPE eType)
+{
+    switch (eType)
+    {
+        case MEDIA_TYPE_AUDIO:
+            return CreateAudioPayload();
+        case MEDIA_TYPE_TEXT:
+            return CreateTextPayload();
+        case MEDIA_TYPE_VIDEO:
+            return CreateVideoPayload();
+        default:
+            return IMS_NULL;
+    }
+}
+
+PUBLIC
+MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(
+        IN MediaBaseProfile::BasePayload* payload)
+{
+    switch (MediaProfileUtil::GetMediaType(payload->objRtpMap.strPayloadType))
+    {
+        case MEDIA_TYPE_AUDIO:
+            return CreateAudioPayload(static_cast<AudioProfile::Payload*>(payload));
+        case MEDIA_TYPE_TEXT:
+            return CreateTextPayload(static_cast<TextProfile::Payload*>(payload));
+        case MEDIA_TYPE_VIDEO:
+            return CreateVideoPayload(static_cast<VideoProfile::Payload*>(payload));
+        default:
+            return IMS_NULL;
+    }
+}
+
+PUBLIC
+void MediaProfileFactory::DeletePayload(IN MediaBaseProfile::BasePayload* pPayload)
+{
+    delete pPayload;
+    pPayload = IMS_NULL;
+}
+
+PUBLIC
 MediaProfileFactory* MediaProfileFactory::GetInstance()
 {
     if (g_pMediaProfileFactory == IMS_NULL)
@@ -247,25 +289,39 @@ void MediaProfileFactory::ReleaseInstance(MediaProfileFactory* pMediaProfileFact
     }
 }
 
+PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAudioPayload(
+        IN AudioProfile::Payload* payload)
+{
+    return (payload != IMS_NULL) ? new AudioProfile::Payload(*payload)
+                                 : new AudioProfile::Payload();
+}
+
+PRIVATE TextProfile::Payload* MediaProfileFactory::CreateTextPayload(
+        IN TextProfile::Payload* payload)
+{
+    return (payload != IMS_NULL) ? new TextProfile::Payload(*payload) : new TextProfile::Payload();
+}
+
+PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateVideoPayload(
+        IN VideoProfile::Payload* payload)
+{
+    return (payload != IMS_NULL) ? new VideoProfile::Payload(*payload)
+                                 : new VideoProfile::Payload();
+}
+
 PRIVATE AudioProfile* MediaProfileFactory::CreateAudioProfile()
 {
-    AudioProfile* pAudioProfile = new AudioProfile();
-
-    return pAudioProfile;
+    return new AudioProfile();
 }
 
 PRIVATE TextProfile* MediaProfileFactory::CreateTextProfile()
 {
-    TextProfile* pTextProfile = new TextProfile();
-
-    return pTextProfile;
+    return new TextProfile();
 }
 
 PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
 {
-    VideoProfile* pVideoProfile = new VideoProfile();
-
-    return pVideoProfile;
+    return new VideoProfile();
 }
 
 PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
@@ -289,7 +345,7 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
 
     while (pAudioProfile->lstPayload.GetSize() > 0)
     {
-        AudioProfile::Payload* pPayload = pAudioProfile->lstPayload.GetAt(0);
+        AudioProfile::Payload* pPayload = pAudioProfile->GetPayloadAt(0);
         if (pPayload != IMS_NULL)
         {
             delete pPayload;
@@ -1063,7 +1119,7 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
 
     for (IMS_UINT32 i = 0; i < pVideoProfile->lstPayload.GetSize(); i++)
     {
-        VideoProfile::Payload* pPayload = pVideoProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pPayload = pVideoProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL || pPayload->pFmtp == IMS_NULL)
         {
