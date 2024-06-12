@@ -33,7 +33,6 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),
-        m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(VideoProfile()),
         m_pConfig(IMS_NULL),
         m_bNegotiatedCvoResult(IMS_FALSE)

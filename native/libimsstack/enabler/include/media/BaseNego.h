@@ -79,6 +79,7 @@ protected:
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
 
 protected:
+    ImsList<OaModel*> m_listOaModel;
     MediaEnvironment* m_pEnvironment;
 };
 

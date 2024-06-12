@@ -197,7 +197,6 @@ private:
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
-    ImsList<OaModel*> m_listOaModel;
     TextProfile m_objBaseProfile;
     TextConfiguration* m_pConfig;
 };

@@ -243,7 +243,6 @@ private:
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
-    ImsList<OaModel*> m_listOaModel;
     VideoProfile m_objBaseProfile;
     VideoConfiguration* m_pConfig;
     IMS_BOOL m_bNegotiatedCvoResult;

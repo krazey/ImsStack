@@ -21,6 +21,7 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC BaseNego::BaseNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
+        m_listOaModel(ImsList<OaModel*>()),
         m_pEnvironment(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);

@@ -240,7 +240,6 @@ private:
     void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
 
-    ImsList<OaModel*> m_lstOaModel;
     AudioProfile m_objBaseProfile;
     AudioConfiguration* m_pConfig;
 };
