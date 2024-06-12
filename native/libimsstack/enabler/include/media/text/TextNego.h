@@ -167,6 +167,7 @@ public:
     virtual IMS_SINT32 GetMediaBandwidth();
 
 protected:
+    TextConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
     TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
     TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;
@@ -198,7 +199,6 @@ private:
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
     TextProfile m_objBaseProfile;
-    TextConfiguration* m_pConfig;
 };
 
 #endif

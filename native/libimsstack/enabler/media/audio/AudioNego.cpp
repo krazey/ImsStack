@@ -41,8 +41,7 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),
-        m_objBaseProfile(AudioProfile()),
-        m_pConfig(IMS_NULL)
+        m_objBaseProfile(AudioProfile())
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -648,6 +647,11 @@ PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetMediaBandwidth(void)
     }
 
     return -1;
+}
+
+PROTECTED AudioConfiguration* AudioNego::ConfigCasting(IN MediaConfiguration* pConfig)
+{
+    return (pConfig != IMS_NULL) ? static_cast<AudioConfiguration*>(pConfig) : IMS_NULL;
 }
 
 PROTECTED AudioProfile* AudioNego::ProfileCasting(IN MediaBaseProfile* pProfile)
@@ -1931,8 +1935,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             }
         }
 
-        AudioProfileUtil::MakeNegotiatedBandwidth(m_pConfig, pLocalProfile, pPeerProfile,
-                bIsOfferReceived, nAsValueOfNegoticatedCodec, pNegotiatedProfile);
+        AudioProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
+                pPeerProfile, bIsOfferReceived, nAsValueOfNegoticatedCodec, pNegotiatedProfile);
 
         // RTCP-XR
         if (pLocalProfile->bSupportRtcpXr == IMS_TRUE &&

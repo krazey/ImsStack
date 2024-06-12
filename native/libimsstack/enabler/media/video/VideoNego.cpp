@@ -34,7 +34,6 @@ __IMS_TRACE_TAG_MEDIA__;
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),
         m_objBaseProfile(VideoProfile()),
-        m_pConfig(IMS_NULL),
         m_bNegotiatedCvoResult(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
@@ -481,6 +480,11 @@ IMS_SINT32 VideoNego::GetMediaBandwidth()
     }
 
     return -1;
+}
+
+PROTECTED VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
+{
+    return (pConfig != IMS_NULL) ? static_cast<VideoConfiguration*>(pConfig) : IMS_NULL;
 }
 
 PROTECTED VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
@@ -2345,8 +2349,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         }
 
         // Setting bandwidth AS/RS/RR
-        VideoProfileUtil::MakeNegotiatedBandwidth(m_pConfig, pLocalProfile, pPeerProfile,
-                bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
+        VideoProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
+                pPeerProfile, bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
 
         // Setting framerate
         pNegotiatedProfile->nFrameRate = nNegotiatedMaxFrameRate;

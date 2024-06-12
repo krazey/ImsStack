@@ -169,6 +169,7 @@ public:
     virtual IMS_SINT32 GetMediaBandwidth();
 
 protected:
+    VideoConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
     VideoProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
     VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;
@@ -244,7 +245,6 @@ private:
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
     VideoProfile m_objBaseProfile;
-    VideoConfiguration* m_pConfig;
     IMS_BOOL m_bNegotiatedCvoResult;
 };
 

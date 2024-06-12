@@ -19,6 +19,7 @@
 
 #include "ImsSlot.h"
 #include "MediaBaseProfile.h"
+#include "config/MediaConfiguration.h"
 #include "MediaEnvironment.h"
 
 class BaseNego : public ImsSlot
@@ -80,6 +81,7 @@ protected:
 
 protected:
     ImsList<OaModel*> m_listOaModel;
+    MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;
 };
 

@@ -176,6 +176,7 @@ public:
     virtual IMS_SINT32 GetMediaBandwidth(void);
 
 protected:
+    AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
     AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
@@ -241,7 +242,6 @@ private:
     void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
 
     AudioProfile m_objBaseProfile;
-    AudioConfiguration* m_pConfig;
 };
 
 #endif

@@ -29,8 +29,7 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),
-        m_objBaseProfile(TextProfile()),
-        m_pConfig(IMS_NULL)
+        m_objBaseProfile(TextProfile())
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -478,6 +477,11 @@ IMS_SINT32 TextNego::GetMediaBandwidth(void)
     }
 
     return -1;
+}
+
+PROTECTED TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
+{
+    return (pConfig != IMS_NULL) ? static_cast<TextConfiguration*>(pConfig) : IMS_NULL;
 }
 
 PROTECTED TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
@@ -1323,8 +1327,8 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
         pNegotiatedProfile->bIsHold =
                 (pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
                                                                                  : IMS_FALSE;
-        TextProfileUtil::MakeNegotiatedBandwidth(
-                m_pConfig, pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
+        TextProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
+                pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
         bRet = IMS_TRUE;
     }
     else
