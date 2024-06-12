@@ -173,21 +173,21 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     private int convertToAosReasonCause(int reason) {
         switch (reason) {
             case REASON_SIM_REMOVED:
-                return IAosRegistration.Cause.RADIO_SIM_REMOVED;
+                return IAosRegistration.Cause.RADIO_SIM_REMOVED.getValue();
             case REASON_SIM_REFRESH:
-                return IAosRegistration.Cause.RADIO_SIM_REFRESH;
+                return IAosRegistration.Cause.RADIO_SIM_REFRESH.getValue();
             case REASON_ALLOWED_NETWORK_TYPES_CHANGED:
-                return IAosRegistration.Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED;
+                return IAosRegistration.Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED.getValue();
             case REASON_NON_IMS_CAPABLE_NETWORK:
-                return IAosRegistration.Cause.NON_IMS_CAPABLE_NETWORK;
+                return IAosRegistration.Cause.NON_IMS_CAPABLE_NETWORK.getValue();
             case REASON_RADIO_POWER_OFF:
-                return IAosRegistration.Cause.RADIO_POWER_OFF;
+                return IAosRegistration.Cause.RADIO_POWER_OFF.getValue();
             case REASON_HANDOVER_FAILED:
-                return IAosRegistration.Cause.HANDOVER_FAILED;
+                return IAosRegistration.Cause.HANDOVER_FAILED.getValue();
             case REASON_VOPS_NOT_SUPPORTED:
-                return IAosRegistration.Cause.VOPS_NOT_SUPPORTED;
+                return IAosRegistration.Cause.VOPS_NOT_SUPPORTED.getValue();
             default:
-                return IAosRegistration.Cause.UNKNOWN;
+                return IAosRegistration.Cause.UNKNOWN.getValue();
         }
     }
 

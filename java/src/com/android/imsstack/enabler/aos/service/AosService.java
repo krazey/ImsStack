@@ -628,7 +628,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void notifyImsServiceChanged() {
         controlRegistration((isImsEnabled()) ? IAosRegistration.RequestType.START :
                 IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
     }
 
     private void adjustCapabilities(CapabilityPairs pairs) {

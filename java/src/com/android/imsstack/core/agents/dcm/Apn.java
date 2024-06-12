@@ -1241,7 +1241,7 @@ public abstract class Apn extends Handler implements IApn {
                                 mAosReg.controlRegistration(
                                         IAosRegistration.RequestType.START_IMS_EST_TIMER,
                                         IAosRegistration.Pcscf.CURRENT,
-                                        IAosRegistration.Cause.DATA_CONNECTING);
+                                        IAosRegistration.Cause.DATA_CONNECTING.getValue());
                             }
                         }
                     }
@@ -1256,7 +1256,7 @@ public abstract class Apn extends Handler implements IApn {
                                     != IAosRegistrationListener.NetworkType.NONE) {
                                 mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
                                         IAosRegistration.Pcscf.CURRENT,
-                                        IAosRegistration.Cause.DATA);
+                                        IAosRegistration.Cause.DATA.getValue());
                             }
                         }
                     }

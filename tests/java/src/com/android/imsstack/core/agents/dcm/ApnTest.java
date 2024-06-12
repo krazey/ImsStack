@@ -810,7 +810,7 @@ public class ApnTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.START_IMS_EST_TIMER,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA_CONNECTING);
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA_CONNECTING.getValue());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApn.mPreciseDcState);
     }
 
@@ -828,7 +828,7 @@ public class ApnTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA);
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA.getValue());
         assertEquals(TelephonyManager.DATA_DISCONNECTING, mApn.mPreciseDcState);
     }
 

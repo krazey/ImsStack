@@ -294,10 +294,10 @@ public class AosServiceTest extends ImsStackTest {
     public void controlRegistration() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
 
         mAosService.controlRegistration(IAosRegistration.RequestType.START,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.IMS_SERVICE.getValue());
 
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
     }
@@ -795,7 +795,7 @@ public class AosServiceTest extends ImsStackTest {
     public void nativeStateListener_onNativeServiceReadyWhenSimNotPresent() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_NOT_PRESENT);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
@@ -819,7 +819,7 @@ public class AosServiceTest extends ImsStackTest {
     public void nativeStateListener_onNativeServiceReadyWhenSimNotReady() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_NOT_READY);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
@@ -845,7 +845,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
@@ -877,7 +877,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_REFRESH_STARTED);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
@@ -904,7 +904,7 @@ public class AosServiceTest extends ImsStackTest {
     public void imsServiceRegistryListener_onImsOnOffChanged() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(false);
 
         ImsServiceRegistry.Listener listener = mAosService.mListener;

@@ -20,9 +20,11 @@ import android.annotation.Nullable;
 
 import androidx.annotation.NonNull;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -130,28 +132,73 @@ public interface IAosRegistration {
     }
 
     /**
-     * Cause
+     * Defines possible causes for a specific event or failure.
      */
-    class Cause {
-        public static final int UNKNOWN = 0;
-        public static final int DATA = 1;
-        public static final int RADIO = 2;
-        public static final int IMS_SERVICE = 3;
-        public static final int IMS_SUBSCRIBER = 4;
-        public static final int DATA_CONNECTING = 5;
+    enum Cause {
+        UNKNOWN(0, "UNKNOWN"),
+        DATA(1, "DATA"),
+        RADIO(2, "RADIO"),
+        IMS_SERVICE(3, "IMS_SERVICE"),
+        IMS_SUBSCRIBER(4, "IMS_SUBSCRIBER"),
+        DATA_CONNECTING(5, "DATA_CONNECTING"),
 
-        /* From modem */
-        public static final int RADIO_SIM_REMOVED = 11;
-        public static final int RADIO_SIM_REFRESH = 12;
-        public static final int RADIO_ALLOWED_NETWORK_TYPES_CHANGED = 13;
+        // From modem
+        RADIO_SIM_REMOVED(11, "RADIO_SIM_REMOVED"),
+        RADIO_SIM_REFRESH(12, "RADIO_SIM_REFRESH"),
+        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13, "RADIO_ALLOWED_NETWORK_TYPES_CHANGED"),
 
-        /* From framework */
-        public static final int RADIO_POWER_OFF = 21;
-        public static final int NON_IMS_CAPABLE_NETWORK = 22;
-        public static final int DATA_STALL = 23;
-        public static final int HANDOVER_FAILED = 24;
-        public static final int VOPS_NOT_SUPPORTED = 25;
-        public static final int WIFI_OFF = 26;
+        // From framework
+        RADIO_POWER_OFF(21, "RADIO_POWER_OFF"),
+        NON_IMS_CAPABLE_NETWORK(22, "NON_IMS_CAPABLE_NETWORK"),
+        DATA_STALL(23, "DATA_STALL"),
+        HANDOVER_FAILED(24, "HANDOVER_FAILED"),
+        VOPS_NOT_SUPPORTED(25, "VOPS_NOT_SUPPORTED"),
+        WIFI_OFF(26, "WIFI_OFF");
+
+        private final int mValue;
+        private final String mLabel;
+
+        /**
+         * Constructs a Cause with the given value and label.
+         *
+         * @param value The integer value of the cause.
+         * @param label The label of the cause.
+         */
+        Cause(int value, String label) {
+            mValue = value;
+            mLabel = label;
+        }
+
+        /**
+         * Returns the integer value of the cause.
+         *
+         * @return The integer value of the cause.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        /**
+         * Returns the label of the cause.
+         *
+         * @return The label of the cause.
+         */
+        public String getLabel() {
+            return mLabel;
+        }
+
+        /**
+         * Returns the Cause enum constant corresponding to the given integer value.
+         *
+         * @param value The integer value to look up.
+         * @return An Optional containing the Cause enum constant with the given value,
+         *         or an empty Optional if no such constant exists.
+         */
+        public static Optional<Cause> fromValue(int value) {
+            return Arrays.stream(values())
+                    .filter(cause -> cause.mValue == value)
+                    .findFirst();
+        }
     }
 
     /**
