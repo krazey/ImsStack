@@ -30,3 +30,16 @@ PUBLIC VIRTUAL BaseNego::~BaseNego()
 {
     IMS_TRACE_I("~BaseNego()", 0, 0, 0);
 }
+
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;
+}
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetPeerProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pPeerProfile : IMS_NULL;
+}
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pNegotiatedProfile : IMS_NULL;
+}

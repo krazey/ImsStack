@@ -18,13 +18,65 @@
 #define BASE_NEGO_H_
 
 #include "ImsSlot.h"
+#include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
 
 class BaseNego : public ImsSlot
 {
 public:
+    /**
+     * @brief The class to store the negotiation attribute of the local and peer
+     *
+     */
+    class OaModel
+    {
+    public:
+        /** The SDP profile for local device side */
+        MediaBaseProfile* pLocalProfile;
+        /** The SDP profile for peer device side */
+        MediaBaseProfile* pPeerProfile;
+        /** The SDP profile to store negotiated profiles */
+        MediaBaseProfile* pNegotiatedProfile;
+        /** The identification of SDP description object from the SDP engine */
+        IMS_SINTP nSessionDescriptorKey;
+        /** checking variable for confirmed session*/
+        IMS_BOOL bConfirmedSession;
+
+    public:
+        OaModel() :
+                pLocalProfile(IMS_NULL),
+                pPeerProfile(IMS_NULL),
+                pNegotiatedProfile(IMS_NULL),
+                nSessionDescriptorKey(0),
+                bConfirmedSession(IMS_FALSE){};
+        ~OaModel()
+        {
+            delete pLocalProfile;
+            delete pPeerProfile;
+            delete pNegotiatedProfile;
+        };
+
+    private:
+        OaModel(IN const OaModel& obj);
+        OaModel& operator=(IN const OaModel& obj);
+
+    public:
+        IMS_BOOL IsAllProfileExist()
+        {
+            return (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
+                           pNegotiatedProfile != IMS_NULL)
+                    ? IMS_TRUE
+                    : IMS_FALSE;
+        };
+    };
+
     explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0);
     virtual ~BaseNego();
+
+protected:
+    virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
+    virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
+    virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
 
 protected:
     MediaEnvironment* m_pEnvironment;

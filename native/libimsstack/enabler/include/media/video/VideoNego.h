@@ -28,60 +28,6 @@
 class VideoNego : public BaseNego
 {
 public:
-    class OaModel
-    {
-    public:
-        VideoProfile* pLocalProfile;
-        VideoProfile* pPeerProfile;
-        VideoProfile* pNegotiatedProfile;
-        IMS_SINTP nSessionDescriptorKey;
-        IMS_BOOL bConfirmedSession;
-
-    public:
-        OaModel() :
-                pLocalProfile(IMS_NULL),
-                pPeerProfile(IMS_NULL),
-                pNegotiatedProfile(IMS_NULL),
-                nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE){};
-        ~OaModel()
-        {
-            if (pLocalProfile != IMS_NULL)
-            {
-                delete pLocalProfile;
-            }
-
-            if (pPeerProfile != IMS_NULL)
-            {
-                delete pPeerProfile;
-            }
-
-            if (pNegotiatedProfile != IMS_NULL)
-            {
-                delete pNegotiatedProfile;
-            }
-        };
-
-    private:
-        OaModel(IN const OaModel& obj);
-        OaModel& operator=(IN const OaModel& obj);
-
-    public:
-        IMS_BOOL IsAllProfileExist()
-        {
-            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
-                    pNegotiatedProfile != IMS_NULL)
-            {
-                return IMS_TRUE;
-            }
-            else
-            {
-                return IMS_FALSE;
-            }
-        };
-    };
-
-public:
     explicit VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
     VideoNego(IN const VideoNego& obj);
     VideoNego& operator=(IN const VideoNego& obj);
@@ -221,6 +167,12 @@ public:
      * @return IMS_SINT32
      */
     virtual IMS_SINT32 GetMediaBandwidth();
+
+protected:
+    VideoProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+    VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
+    VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;
+    VideoProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
 
 private:
     void Copy(IN const VideoNego* pVideoNego);
