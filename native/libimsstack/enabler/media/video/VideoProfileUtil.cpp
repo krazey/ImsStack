@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
 
+#include "MediaProfileUtil.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
@@ -324,23 +325,6 @@ PUBLIC GLOBAL IMS_UINT32 VideoProfileUtil::GetAvcLevelFromProfileLevelId(
     return nLevel;
 }
 
-PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::SetVideoRsRr(
-        OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pConfig)
-{
-    if (pVideoProfile == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    pVideoProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-    pVideoProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
-
-    IMS_TRACE_I(" SetVideoRsRr(), Set RS[%d], RR[%d]", pVideoProfile->nBandwidthRs,
-            pVideoProfile->nBandwidthRr, 0);
-
-    return IMS_TRUE;
-}
-
 PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
         IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT VideoProfile* pNegotiatedProfile)
@@ -415,7 +399,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
                 pPeerProfile->eDirection != MEDIA_DIRECTION_SEND)
         {
             // 3.1 Hold Case
-            SetVideoRsRr(pNegotiatedProfile, pConfig);
+            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
         }
         else
         {

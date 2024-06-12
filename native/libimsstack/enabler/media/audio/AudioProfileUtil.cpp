@@ -28,6 +28,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "MediaManager.h"
+#include "MediaProfileUtil.h"
 #include "MediaResourceManager.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -65,23 +66,6 @@ const AString AudioProfileUtil::AUDIO_CODEC_BITRATE_STRING[3][9] = {
  // EVS
         {"5.90", "7.20", "8.00",  "9.60",  "13.20", "16.40", "24.40", "0",     "0"    }
 };
-
-PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpRsRr(
-        OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
-{
-    if (pAudioProfile == IMS_NULL || pConfig == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    pAudioProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-    pAudioProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
-
-    IMS_TRACE_I("SetRtcpRsRr(), Set RS[%d], RR[%d]", pAudioProfile->nBandwidthRs,
-            pAudioProfile->nBandwidthRr, 0);
-
-    return IMS_TRUE;
-}
 
 PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
         OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig)
@@ -204,7 +188,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::MakeNegotiatedBandwidth(IN AudioConfigu
         if (pPeerProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE)
         {  // Hold Case
             // 3.1 Hold Case
-            SetRtcpRsRr(pNegotiatedProfile, pConfig);
+            MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
         }
         else
         {
@@ -534,7 +518,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 
     pAudioProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
 
-    SetRtcpRsRr(pAudioProfile, pConfig);
+    MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pConfig);
     IMS_TRACE_D("UpdateAudioProfileBandwidth() update AS[%d]", nAsMax, 0, 0);
 
     return IMS_TRUE;

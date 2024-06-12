@@ -20,6 +20,9 @@
 #include "AString.h"
 #include "MediaDef.h"
 
+class MediaBaseProfile;
+class MediaConfiguration;
+
 /**
  * Thi class is an utility class for MediaProfile
  */
@@ -57,6 +60,14 @@ public:
      * @return IMS_TRUE if this payload type is the video, otherwise IMS_FALSE
      */
     static IMS_BOOL IsVideoType(IN const AString payloadType);
+
+    /**
+     * @brief Set RTCP RS/RR from the media configuration
+     *
+     * @param pProfile target profile that RS/RR to be set
+     * @param pConfig media configuration
+     */
+    static void SetRtcpRsRr(OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
 };
 
 #endif

@@ -24,7 +24,6 @@
 class AudioProfileUtil
 {
 public:
-    static IMS_BOOL SetRtcpRsRr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
     static IMS_BOOL SetRtcpXr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
     static IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
             IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,

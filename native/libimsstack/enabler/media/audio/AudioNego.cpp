@@ -20,6 +20,7 @@
 
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
+#include "MediaProfileUtil.h"
 #include "MediaResourceManager.h"
 #include "audio/AudioNego.h"
 #include "audio/AudioNegoAmr.h"
@@ -768,7 +769,7 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_lstOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
@@ -969,7 +970,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel),
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel),
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType));
 
     pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;

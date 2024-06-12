@@ -340,7 +340,7 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
     pAudioProfile->nPtime = pAudioConfig->GetPtime();
     pAudioProfile->nMaxPtime = pAudioConfig->GetMaxPtime();
 
-    AudioProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
+    MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
 
     while (pAudioProfile->lstPayload.GetSize() > 0)
@@ -727,7 +727,7 @@ PRIVATE VideoProfile* MediaProfileFactory::SetVideoProfile(
             : "RTP/AVP";
 
     pVideoProfile->nCvoId = pVideoConfig->GetCvoId();
-    VideoProfileUtil::SetVideoRsRr(pVideoProfile, pVideoConfig);
+    MediaProfileUtil::SetRtcpRsRr(pVideoProfile, pVideoConfig);
 
     if (pVideoConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {

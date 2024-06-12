@@ -27,6 +27,7 @@
 #include "MediaResourceManager.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
+#include "MediaProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -595,7 +596,7 @@ PRIVATE IMS_BOOL VideoNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    VideoProfileUtil::SetVideoRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
@@ -778,7 +779,7 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    VideoProfileUtil::SetVideoRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
