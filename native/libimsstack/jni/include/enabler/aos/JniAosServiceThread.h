@@ -25,8 +25,8 @@ public:
     JniAosServiceThread();
     virtual ~JniAosServiceThread();
 
-    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
     IMS_BOOL NotifyRegistering(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const ImsList<AString>& objFeatureTags) override;

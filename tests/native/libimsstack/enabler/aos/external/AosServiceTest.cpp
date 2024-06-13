@@ -971,7 +971,8 @@ TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;
-    EXPECT_TRUE(m_pAosService->NotifyRegistered(AosNetworkType::LTE, 1, objFeatureTags));
+    EXPECT_TRUE(m_pAosService->NotifyRegistered(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyRegistering)

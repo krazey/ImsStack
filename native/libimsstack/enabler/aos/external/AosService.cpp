@@ -594,15 +594,16 @@ PUBLIC VIRTUAL void AosService::NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32
     }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
+        IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+        IN const ImsList<AString>& objFeatureTags)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyRegistered", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyRegistered(
-                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
     return IMS_TRUE;

@@ -25,11 +25,14 @@ public interface IAosRegistrationListener {
     /**
      * Notify the application that the device is connected to the IMS network.
      *
+     * @param regType Type of the registration. See {@link RegistrationType}.
      * @param networkType The radio access technology. See {@link NetworkType}.
-     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
+     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistered(int networkType, int featureTagBits, Set<String> featureTags);
+    void notifyRegistered(int regType, int networkType, int featureTagBits,
+            Set<String> featureTags);
+
     /**
      * Notify the application that the device is trying to connect to the IMS network.
      *

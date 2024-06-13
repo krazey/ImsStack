@@ -960,7 +960,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         mSscServiceState.mRegiStateListener.mImsRegistrationState = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, 0, null);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -976,7 +976,7 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
 
-        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistered(0, 0, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);

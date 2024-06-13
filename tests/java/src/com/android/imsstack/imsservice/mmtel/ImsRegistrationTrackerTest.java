@@ -180,7 +180,7 @@ public class ImsRegistrationTrackerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
 
         assertEquals(true, mRegTracker.isRegistered());
@@ -211,8 +211,8 @@ public class ImsRegistrationTrackerTest {
         Set<String> tags = new ArraySet<>();
         tags.add("+g.3gpp.smsip");
 
-        mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
-                features, tags);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.IWLAN, features, tags);
 
         assertEquals(true, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
@@ -738,8 +738,8 @@ public class ImsRegistrationTrackerTest {
         Set<String> tags = new ArraySet<>();
         tags.add("+g.3gpp.smsip");
 
-        mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
-                features, tags);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.IWLAN, features, tags);
         assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
                 mRegTracker.getRegisteredNetworkType());
         mRegTracker.refreshCallRegistrationState();

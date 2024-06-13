@@ -1135,9 +1135,10 @@ public class AosDebug implements IAosDebug {
     class RegistrationListener implements IAosRegistrationListener {
 
         @Override
-        public void notifyRegistered(int networkType, int featureTagBits,
+        public void notifyRegistered(int regType, int networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
-            logi(mSlotId, "notifyRegistered - networkType:" + networkType
+            logi(mSlotId, "notifyRegistered - regType:" + regType
+                    + ", networkType:" + networkType
                     + ", featureTagBits:" + featureTagBits + ", featureTags:" + featureTags);
             Message.obtain(mHandler,
                     DEBUG_NOTIFY_REGISTERED, networkType, featureTagBits).sendToTarget();

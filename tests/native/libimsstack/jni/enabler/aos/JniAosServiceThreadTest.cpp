@@ -54,7 +54,7 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistered)
 {
     // GIVEN
     // WHEN
-    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistered(0, 0, m_objFeatureTags);
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistered(0, 0, 0, m_objFeatureTags);
 
     // THEN
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));

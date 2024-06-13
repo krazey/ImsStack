@@ -49,14 +49,21 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyRegistered(int networkType, @NonNull Set<String> featureTags) {
-        logi("notifyRegistered: " + featureTags);
+    public void notifyRegistered(int regType, int networkType, @NonNull Set<String> featureTags) {
+        logi("notifyRegistered: [" + RegistrationType.toString(regType) + "]" + featureTags);
 
-        ImsRegistrationAttributes regAttributes =
+        ImsRegistrationAttributes.Builder attrBuilder =
                 new ImsRegistrationAttributes.Builder(networkType)
-                .setFeatureTags(featureTags)
-                .build();
-        onRegistered(regAttributes);
+                .setFeatureTags(featureTags);
+
+        if (regType == RegistrationType.EMERGENCY) {
+            attrBuilder.setFlagRegistrationTypeEmergency();
+        } else if (regType == RegistrationType.FAKE) {
+            attrBuilder.setFlagRegistrationTypeEmergency();
+            attrBuilder.setFlagVirtualRegistrationForEmergencyCall();
+        }
+
+        onRegistered(attrBuilder.build());
     }
 
     @Override

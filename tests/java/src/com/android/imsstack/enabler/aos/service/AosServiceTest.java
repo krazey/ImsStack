@@ -775,7 +775,7 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.onCrossSimStatusChanged(false);
 
         assertEquals(NetworkType.IWLAN, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener).notifyRegistered(
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
                 NetworkType.IWLAN, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
     }
 
@@ -788,7 +788,7 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.onCrossSimStatusChanged(true);
 
         assertEquals(NetworkType.CROSS_SIM, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener).notifyRegistered(
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
                 NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
     }
 
@@ -922,6 +922,7 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.LTE);
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
@@ -933,8 +934,8 @@ public class AosServiceTest extends ImsStackTest {
 
         assertEquals(NetworkType.LTE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.REGISTERED, mAosService.getRegistrationState());
-        verify(mMockAosRegistrationListener).notifyRegistered(NetworkType.LTE, FeatureTagMask.MMTEL,
-                featureTags);
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL, featureTags);
     }
 
     @Test
