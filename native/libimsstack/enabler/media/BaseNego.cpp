@@ -21,6 +21,8 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC BaseNego::BaseNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
+        m_listOaModel(ImsList<OaModel*>()),
+        m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);
@@ -29,4 +31,17 @@ PUBLIC BaseNego::BaseNego(IMS_SINT32 nSlotId) :
 PUBLIC VIRTUAL BaseNego::~BaseNego()
 {
     IMS_TRACE_I("~BaseNego()", 0, 0, 0);
+}
+
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;
+}
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetPeerProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pPeerProfile : IMS_NULL;
+}
+PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+{
+    return (pOaModel != IMS_NULL) ? pOaModel->pNegotiatedProfile : IMS_NULL;
 }

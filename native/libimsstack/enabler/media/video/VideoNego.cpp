@@ -27,14 +27,13 @@
 #include "MediaResourceManager.h"
 #include "MediaManager.h"
 #include "MediaProfileFactory.h"
+#include "MediaProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         BaseNego(nSlotId),
-        m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(VideoProfile()),
-        m_pConfig(IMS_NULL),
         m_bNegotiatedCvoResult(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
@@ -160,7 +159,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = new VideoProfile();
 
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, objOaModel.pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
+            IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -168,8 +168,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
     // Make a negotiated profile from the local and peer profile
     objOaModel.pNegotiatedProfile = new VideoProfile();
 
-    if (MakeNegotiatedProfile(objOaModel.pLocalProfile, objOaModel.pPeerProfile, IMS_TRUE,
-                objOaModel.pNegotiatedProfile) != IMS_TRUE)
+    if (MakeNegotiatedProfile(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
+                GetNegotiatedProfile(&objOaModel)) != IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -340,7 +340,7 @@ VideoProfile* VideoNego::GetNegotiatedLocalProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pLocalProfile;
+        return GetLocalProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -353,7 +353,7 @@ VideoProfile* VideoNego::GetNegotiatedNegoProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pNegotiatedProfile;
+        return GetNegotiatedProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -366,7 +366,7 @@ VideoProfile* VideoNego::GetNegotiatedPeerProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pPeerProfile;
+        return GetPeerProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -409,7 +409,7 @@ VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
             return VIDEO_RESOLUTION_INVALID;
         }
 
-        VideoProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->GetPayloadAt(0);
+        VideoProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(0);
 
         if (pPayload == IMS_NULL)
         {
@@ -482,6 +482,31 @@ IMS_SINT32 VideoNego::GetMediaBandwidth()
     return -1;
 }
 
+PROTECTED VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
+{
+    return (pConfig != IMS_NULL) ? static_cast<VideoConfiguration*>(pConfig) : IMS_NULL;
+}
+
+PROTECTED VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
+{
+    return (pProfile != IMS_NULL) ? static_cast<VideoProfile*>(pProfile) : IMS_NULL;
+}
+
+PROTECTED VideoProfile* VideoNego::GetLocalProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetLocalProfile(pOaModel));
+}
+
+PROTECTED VideoProfile* VideoNego::GetPeerProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetPeerProfile(pOaModel));
+}
+
+PROTECTED VideoProfile* VideoNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetNegotiatedProfile(pOaModel));
+}
+
 PRIVATE
 void VideoNego::Copy(IN const VideoNego* pVideoNego)
 {
@@ -531,7 +556,7 @@ void VideoNego::Copy(IN const VideoNego* pVideoNego)
 
     OaModel* pNewOaModel = new OaModel();
     OaModel* pOldOaModel = pVideoNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = new VideoProfile(*pOldOaModel->pLocalProfile);
+    pNewOaModel->pLocalProfile = new VideoProfile(GetLocalProfile(pOldOaModel));
     m_listOaModel.Append(pNewOaModel);
 
     IMS_TRACE_I("Copy() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
@@ -574,11 +599,11 @@ PRIVATE IMS_BOOL VideoNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    VideoProfileUtil::SetVideoRsRr(pNewOaModel->pLocalProfile, m_pConfig);
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PRIVATE IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -631,7 +656,7 @@ PRIVATE IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor
     }
 
     // Make the SDP from profile
-    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
+    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
 }
 
 PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
@@ -694,7 +719,7 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
             else
             {
                 IMS_TRACE_D("VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
-                pNewOaModel->pLocalProfile = new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+                pNewOaModel->pLocalProfile = new VideoProfile(GetNegotiatedProfile(pPrevOaModel));
             }
         }
         else
@@ -718,7 +743,7 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
                         IMS_TRACE_D(
                                 "VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
                         pNewOaModel->pLocalProfile =
-                                new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+                                new VideoProfile(GetNegotiatedProfile(pPrevOaModel));
                     }
                 }
             }
@@ -757,11 +782,11 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    VideoProfileUtil::SetVideoRsRr(pNewOaModel->pLocalProfile, m_pConfig);
+    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
@@ -782,7 +807,8 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = new VideoProfile();
 
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
@@ -791,8 +817,8 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
     // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new VideoProfile();
 
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
+                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
     {
         delete pNewOaModel;
         return MEDIA_DIRECTION_INVALID;
@@ -832,7 +858,8 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateAnswer(
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = new VideoProfile();
-    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -841,8 +868,9 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateAnswer(
 
     // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new VideoProfile();
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+
+    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_FALSE,
+                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -2321,8 +2349,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         }
 
         // Setting bandwidth AS/RS/RR
-        VideoProfileUtil::MakeNegotiatedBandwidth(m_pConfig, pLocalProfile, pPeerProfile,
-                bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
+        VideoProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
+                pPeerProfile, bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
 
         // Setting framerate
         pNegotiatedProfile->nFrameRate = nNegotiatedMaxFrameRate;

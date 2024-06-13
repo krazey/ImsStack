@@ -32,59 +32,6 @@
 class TextNego : public BaseNego
 {
 public:
-    /**
-     * @brief The class to store the negotiation attribute of the local and peer
-     *
-     */
-    class OaModel
-    {
-    public:
-        /** The SDP profile for local device side */
-        TextProfile* pLocalProfile;
-        /** The SDP profile for peer device side */
-        TextProfile* pPeerProfile;
-        /** The SDP profile to store negotiated profiles */
-        TextProfile* pNegotiatedProfile;
-        /** The identification of SDP description object from the SDP engine */
-        IMS_SINTP nSessionDescriptorKey;
-        /** checking variable for confirmed session*/
-        IMS_BOOL bConfirmedSession;
-
-    public:
-        OaModel() :
-                pLocalProfile(IMS_NULL),
-                pPeerProfile(IMS_NULL),
-                pNegotiatedProfile(IMS_NULL),
-                nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE){};
-        ~OaModel()
-        {
-            if (pLocalProfile != IMS_NULL)
-                delete pLocalProfile;
-
-            if (pPeerProfile != IMS_NULL)
-                delete pPeerProfile;
-
-            if (pNegotiatedProfile != IMS_NULL)
-                delete pNegotiatedProfile;
-        };
-
-    private:
-        OaModel(IN const OaModel& obj);
-        OaModel& operator=(IN const OaModel& obj);
-
-    public:
-        IMS_BOOL IsAllProfileExist()
-        {
-            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
-                    pNegotiatedProfile != IMS_NULL)
-                return IMS_TRUE;
-            else
-                return IMS_FALSE;
-        };
-    };
-
-public:
     explicit TextNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     TextNego(IN const TextNego& objTextNego);
     TextNego& operator=(IN const TextNego& obj);
@@ -219,6 +166,13 @@ public:
      */
     virtual IMS_SINT32 GetMediaBandwidth();
 
+protected:
+    TextConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
+    TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+    TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
+    TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;
+    TextProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+
 private:
     void copy(IN const TextNego* pTextNego);
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
@@ -244,9 +198,7 @@ private:
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
-    ImsList<OaModel*> m_listOaModel;
     TextProfile m_objBaseProfile;
-    TextConfiguration* m_pConfig;
 };
 
 #endif

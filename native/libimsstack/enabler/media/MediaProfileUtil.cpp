@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
+#include "MediaBaseProfile.h"
 #include "MediaProfileUtil.h"
+#include "config/MediaConfiguration.h"
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC GLOBAL MEDIA_CONTENT_TYPE MediaProfileUtil::GetMediaType(IN const AString payloadType)
 {
@@ -51,4 +56,17 @@ PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsTextType(IN const AString payloadType
 PUBLIC GLOBAL IMS_BOOL MediaProfileUtil::IsVideoType(IN const AString payloadType)
 {
     return (GetMediaType(payloadType) == MEDIA_TYPE_VIDEO) ? IMS_TRUE : IMS_FALSE;
+}
+
+PUBLIC GLOBAL void MediaProfileUtil::SetRtcpRsRr(
+        OUT MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+{
+    if (pProfile != IMS_NULL && pConfig != IMS_NULL)
+    {
+        pProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
+        pProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
+
+        IMS_TRACE_D(
+                "SetRtcpRsRr(), RS[%d], RR[%d]", pProfile->nBandwidthRs, pProfile->nBandwidthRr, 0);
+    }
 }
