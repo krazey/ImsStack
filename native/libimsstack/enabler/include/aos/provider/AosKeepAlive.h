@@ -49,6 +49,12 @@ public:
         TRANSPORT_MAX,
     };
 
+    enum
+    {
+        TIMER_KEEP_ALIVE = 0,
+        TIMER_PONG_WAIT
+    };
+
 protected:
     void SendPing();
 
@@ -70,12 +76,6 @@ protected:
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
-    enum
-    {
-        TIMER_KEEP_ALIVE = 0,
-        TIMER_PONG_WAIT
-    };
-
 protected:
     ISipKeepAliveHelper* m_piKeepAliveHelper;
     IAosKeepAliveListener* m_piListener;
@@ -84,8 +84,9 @@ protected:
     IMS_UINT32 m_nKeepAliveTime;
     IMS_BOOL m_bIsPongChecked;
     IMS_SINT32 m_nSlotId;
-
     AString m_strTag;
+
+    static const IMS_UINT32 PONG_WAIT_TIME_MILLIS = 10000;
 };
 
 class IAosKeepAliveListener

@@ -20,49 +20,20 @@
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
 #include "ImsMap.h"
+#include "MediaBaseProfile.h"
 
-class AudioProfile
+/**
+ * AudioProfile is used to keep the SDP negotiation information for audio like
+ * SDP offer, answer and the negotiated media information.
+ */
+class AudioProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
-    {
-    public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-        IMS_SINT32 nChannel;  // default is 1, if this value is -1 hide channel value at SDP
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                strPayloadType(AString::ConstNull()),
-                nSamplingRate(0),
-                nChannel(1)
-        {
-        }
-
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate),
-                nChannel(obj.nChannel)
-        {
-        }
-
-        RtpMap& operator=(IN const RtpMap& obj)
-        {
-            if (this != &obj)
-            {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-                nChannel = obj.nChannel;
-            }
-            return (*this);
-        }
-    };
-
-public:
-    class AmrFmtp
+    /**
+     * AmrFmtp attributes are used within the SDP to carry AMR parameters that provide
+     * extra configuration details about a specific AMR codec used in the RTP stream.
+     */
+    class AmrFmtp : public BaseFmtp
     {
     public:
         IMS_UINT32 nModeSetList;
@@ -169,10 +140,15 @@ public:
                 bShowPtime(IMS_FALSE),
                 bShowMaxPtime(IMS_FALSE),
                 bShowModeSet(IMS_FALSE){};
+        virtual ~AmrFmtp(){};
     };
 
 public:
-    class EvsFmtp
+    /**
+     * EvsFmtp attributes are used within the SDP to carry EVS parameters that provide
+     * extra configuration details about a specific EVS codec used in the RTP stream.
+     */
+    class EvsFmtp : public BaseFmtp
     {
     public:
         enum
@@ -334,10 +310,17 @@ public:
                 bShowModeSetList(objFmtp.bShowModeSetList)
         {
         }
+
+        virtual ~EvsFmtp(){};
     };
 
 public:
-    class TelephoneEventFmtp
+    /**
+     * TelephoneEventFmtp attributes are used within the SDP to carry TelephoneEvent parameters that
+     * provide extra configuration details about a specific TelephoneEventFmtp codec used in the RTP
+     * stream.
+     */
+    class TelephoneEventFmtp : public BaseFmtp
     {
     public:
         AString strEvents;
@@ -351,6 +334,8 @@ public:
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
                 strEvents(objFmtp.strEvents){};
+
+        virtual ~TelephoneEventFmtp(){};
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
@@ -366,76 +351,61 @@ public:
     };
 
 public:
-    class Payload
+    /**
+     * Payload for audio is the actual audio data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        void* pFmtp;
-
-    public:
         Payload() :
-                pFmtp(IMS_NULL){};
+                BasePayload(1){};
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                BasePayload(obj)
         {
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
             {
-                pFmtp = new AudioProfile::AmrFmtp(
-                        *reinterpret_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
+                pFmtp = new AudioProfile::AmrFmtp(*static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
             }
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
             {
-                pFmtp = new AudioProfile::EvsFmtp(
-                        *reinterpret_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
+                pFmtp = new AudioProfile::EvsFmtp(*static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
             }
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
             {
                 pFmtp = new AudioProfile::TelephoneEventFmtp(
-                        *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
+                        *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
             }
         }
 
-        ~Payload()
+        Payload& operator=(IN const Payload& obj)
         {
-            if (this->pFmtp == IMS_NULL)
+            if (this != &obj)
             {
-                return;
+                BasePayload::operator=(obj);
+
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
+                        objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+                {
+                    pFmtp = new AudioProfile::AmrFmtp(
+                            *static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
+                }
+                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+                {
+                    pFmtp = new AudioProfile::EvsFmtp(
+                            *static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
+                }
+                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+                {
+                    pFmtp = new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
+                }
             }
 
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                    objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
-            {
-                delete reinterpret_cast<AudioProfile::AmrFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
-            {
-                delete reinterpret_cast<AudioProfile::EvsFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
-            {
-                delete reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(this->pFmtp);
-            }
+            return (*this);
         }
 
-    public:
-        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString& strPayloadType,
-                IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
-        {
-            objRtpMap.nPayloadNum = nPayloadNum;
-            objRtpMap.strPayloadType = strPayloadType;
-            objRtpMap.nSamplingRate = nSamplingRate;
-            objRtpMap.nChannel = nChannel;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-            objRtpMap.nChannel = objMap.nChannel;
-        };
+        virtual ~Payload() {}
     };
 
     class CapaNego
@@ -527,6 +497,7 @@ public:
     IMS_BOOL bSupportRtcpXr;
     RTCPXRAttributes objRtcpXrAttr;
     IMS_BOOL bRtcpDisableBeforeSetup;
+    IMS_BOOL bAnbr;
 
 public:
     AudioProfile() :
@@ -548,7 +519,8 @@ public:
             objCapaNego(CapaNego()),
             bSupportRtcpXr(IMS_FALSE),
             objRtcpXrAttr(RTCPXRAttributes()),
-            bRtcpDisableBeforeSetup(IMS_FALSE){};
+            bRtcpDisableBeforeSetup(IMS_FALSE),
+            bAnbr(IMS_FALSE){};
 
     ~AudioProfile()
     {
@@ -581,7 +553,7 @@ public:
                 nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
                 nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
                 bSupportRtcpXr == obj.bSupportRtcpXr && objRtcpXrAttr == obj.objRtcpXrAttr &&
-                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup);
+                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup && bAnbr == obj.bAnbr);
     }
 
     AudioProfile(IN const AudioProfile& obj) { copy(&obj); }
@@ -605,6 +577,7 @@ private:
         bSupportRtcpXr = pProfile->bSupportRtcpXr;
         objRtcpXrAttr = pProfile->objRtcpXrAttr;
         bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
+        bAnbr = pProfile->bAnbr;
 
         while (lstPayload.GetSize() > 0)
         {
@@ -632,6 +605,7 @@ private:
         bIsOfferCase = pProfile->bIsOfferCase;
         objCapaNego = pProfile->objCapaNego;
         nNegotiatedPayloadIndex = -1;
+        bAnbr = pProfile->bAnbr;
     }
 };
 

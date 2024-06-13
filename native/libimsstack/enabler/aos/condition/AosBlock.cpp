@@ -377,6 +377,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_CELLULAR_OUT_OF_SERVICE:
             return "CELLULAR_OUT_OF_SERVICE";
 
+        case BLOCK_CELLULAR_RAT_BLOCK:
+            return "CELLULAR_RAT_BLOCK";
+
         case BLOCK_CELLULAR_ROAMING:
             return "CELLULAR_ROAMING";
 
@@ -403,7 +406,7 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
     }
 }
 
-PRIVATE
+PROTECTED
 void AosBlock::Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable)
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
@@ -413,7 +416,7 @@ void AosBlock::Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable)
     }
 }
 
-PRIVATE GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
+PROTECTED GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
 {
     if (eReason >= BLOCK_CELLULAR_START && eReason <= BLOCK_CELLULAR_END)
     {
@@ -429,7 +432,7 @@ PRIVATE GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
     }
 }
 
-PRIVATE GLOBAL const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
+PROTECTED GLOBAL const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
 {
     switch (eType)
     {

@@ -17,8 +17,11 @@
 #include "IMtcCallController.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
+#include "MockICarrierConfig.h"
 #include "MtcApp.h"
+#include "PlatformContext.h"
 #include "ServiceUtil.h"
+#include "TestConfigService.h"
 #include "call/IMtcCallManager.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "conferencecall/IConferenceManager.h"
@@ -33,6 +36,9 @@
 #include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace android
 {
@@ -51,13 +57,30 @@ public:
 
 class MtcAppTest : public ::testing::Test
 {
-public:
+protected:
     MtcApp* pMtcApp;
 
-protected:
-    virtual void SetUp() override { pMtcApp = new MtcApp(SLOT_ID); }
+    PlatformService* m_pOldConfigService;
+    TestConfigService* m_pConfigService;
+    MockICarrierConfig m_objMockICarrierConfig;
 
-    virtual void TearDown() override { delete pMtcApp; }
+    virtual void SetUp() override
+    {
+        m_pConfigService = new TestConfigService();
+        m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
+        m_pOldConfigService = PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+        pMtcApp = new MtcApp(SLOT_ID);
+    }
+
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pOldConfigService);
+        delete m_pConfigService;
+
+        delete pMtcApp;
+    }
 };
 
 TEST_F(MtcAppTest, Constructor)
@@ -105,6 +128,27 @@ TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
     pMtcApp->Start();
     IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
     ASSERT_EQ(piService, nullptr);
+    pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, StartDoesNotCreateMultiEndPointManagerIfNotSupported)
+{
+    ON_CALL(m_objMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    pMtcApp->Start();
+    EXPECT_EQ(pMtcApp->GetMultiEndpointManager(), nullptr);
+    pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, StartCreatesMultiEndpointManagerIfSupported)
+{
+    ON_CALL(m_objMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pMtcApp->Start();
+    ASSERT_NE(pMtcApp->GetMultiEndpointManager(), nullptr);
     pMtcApp->Stop();
 }
 
@@ -247,6 +291,20 @@ TEST_F(MtcAppTest, IsWifiTestModeReturnsSameValueOfUtilService)
     IMS_BOOL bWifiTestMode = UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
                                      ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1;
     EXPECT_EQ(bWifiTestMode, pMtcApp->IsWifiTestMode());
+}
+
+TEST_F(MtcAppTest, GetAosConnectorReturnsNullIfNotStarted)
+{
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::NORMAL), nullptr);
+}
+
+TEST_F(MtcAppTest, GetAosConnectorReturnsNullIfStarted)
+{
+    // It's always null in the test since the AoS module(IImsAos) is not ready.
+    pMtcApp->Start();
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::NORMAL), nullptr);
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::EMERGENCY), nullptr);
+    pMtcApp->Stop();
 }
 
 }  // namespace android

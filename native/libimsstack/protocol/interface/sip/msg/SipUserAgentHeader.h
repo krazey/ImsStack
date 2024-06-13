@@ -28,8 +28,6 @@ public:
     explicit SipUserAgentHeader(SIP_INT32 eHdrType);
     SipUserAgentHeader(const SipUserAgentHeader& objHeader);
 
-    /*destructor*/
-    virtual ~SipUserAgentHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -44,5 +42,8 @@ public:
     {
         return (m_objProductList.IsEmpty() == SIP_FALSE) ? SIP_TRUE : SIP_FALSE;
     }
+
+private:
+    virtual ~SipUserAgentHeader();
 };
 #endif  //__SIP_USER_AGENT_HEADER_H__

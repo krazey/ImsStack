@@ -217,18 +217,11 @@ public class SscServiceStateTest {
         mSscServiceState = new SscServiceState(SLOT0, mLooper.getLooper());
         mSscServiceState.init();
 
-        verify(mMockDcNetWatcher).registerForAirplaneModeChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_AIRPLANE_MODE_CHANGED, null);
-        verify(mMockDcNetWatcher).registerForDataServiceStateChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED, null);
-        verify(mMockDcNetWatcher).registerForRatChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_RAT_CHANGED, null);
+        verify(mMockDcNetWatcher).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockSimInterface).addListener(mSscServiceState.mSimStateListener);
         verify(mMockConfigInterface).addListener(mSscServiceState.mCarrierConfigListener);
 
         verify(mMockWifiInterface).addListener(mSscServiceState.mWifiListener);
-        verify(mMockDcNetWatcher).registerForRoamingStateChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED, null);
         verify(mMockAosService).addListener(mSscServiceState.mRegiStateListener);
         verify(mMockTelephonyManagerProxy).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
@@ -264,18 +257,11 @@ public class SscServiceStateTest {
         processAllMessages();
 
         verify(mMockUtInterface).onServiceStateChanged();
-        verify(mMockDcNetWatcher).registerForAirplaneModeChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_AIRPLANE_MODE_CHANGED, null);
-        verify(mMockDcNetWatcher).registerForDataServiceStateChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED, null);
-        verify(mMockDcNetWatcher).registerForRatChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_RAT_CHANGED, null);
+        verify(mMockDcNetWatcher).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockSimInterface).addListener(mSscServiceState.mSimStateListener);
         verify(mMockConfigInterface).addListener(mSscServiceState.mCarrierConfigListener);
 
         verify(mMockWifiInterface, never()).addListener(mSscServiceState.mWifiListener);
-        verify(mMockDcNetWatcher, never()).registerForRoamingStateChanged(mSscServiceState.mHandler,
-                SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED, null);
         verify(mMockAosService, never()).addListener(mSscServiceState.mRegiStateListener);
         verify(mMockTelephonyManagerProxy, never()).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
@@ -314,14 +300,11 @@ public class SscServiceStateTest {
         mSscServiceState.deInit();
         processAllMessages();
 
-        verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
-        verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscServiceState.mHandler);
-        verify(mMockDcNetWatcher).unregisterForRatChanged(mSscServiceState.mHandler);
+        verify(mMockDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
         verify(mMockSimInterface).removeListener(mSscServiceState.mSimStateListener);
         verify(mMockConfigInterface).removeListener(mSscServiceState.mCarrierConfigListener);
 
         verify(mMockWifiInterface).removeListener(any(WifiInterface.Listener.class));
-        verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);
         verify(mMockAosService).removeListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManagerProxy)
                 .unregisterTelephonyCallback(any(SscMobileDataStateListener.class));
@@ -361,14 +344,11 @@ public class SscServiceStateTest {
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
-        verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
-        verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscServiceState.mHandler);
-        verify(mMockDcNetWatcher).unregisterForRatChanged(mSscServiceState.mHandler);
+        verify(mMockDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
         verify(mMockSimInterface).removeListener(mSscServiceState.mSimStateListener);
         verify(mMockConfigInterface).removeListener(mSscServiceState.mCarrierConfigListener);
 
         verify(mMockWifiInterface, never()).removeListener(any(WifiInterface.Listener.class));
-        verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);
         verify(mMockAosService, never()).removeListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManagerProxy, never())
                 .unregisterTelephonyCallback(any(SscMobileDataStateListener.class));
@@ -713,7 +693,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         when(mMockDcNetWatcher.isAirplaneMode()).thenReturn(true);
 
-        sendMessage(SscServiceState.EVENT_AIRPLANE_MODE_CHANGED);
+        mSscServiceState.mNetWatcherListener.onAirplaneModeChanged(true);
         processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
@@ -731,7 +711,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         when(mMockDcNetWatcher.isAirplaneMode()).thenReturn(false);
 
-        sendMessage(SscServiceState.EVENT_AIRPLANE_MODE_CHANGED);
+        mSscServiceState.mNetWatcherListener.onAirplaneModeChanged(false);
         processAllMessages();
 
         assertEquals(permanentBlockReasons, mSscServiceState.mUtBlockReason);
@@ -799,7 +779,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = false;
         when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_IN_SERVICE);
 
-        sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
+        mSscServiceState.mNetWatcherListener.onDataServiceStateChanged(STATE_IN_SERVICE);
         processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
@@ -813,7 +793,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = true;
         when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
 
-        sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
+        mSscServiceState.mNetWatcherListener.onDataServiceStateChanged(STATE_OUT_OF_SERVICE);
         processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
@@ -822,7 +802,7 @@ public class SscServiceStateTest {
     }
 
     @Test
-    public void testSscServiceStateHandler_dataRatChangedToValidRat() {
+    public void testSscServiceStateHandler_dataNetworkTypeChangedToValidNetworkType() {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
         when(mMockCarrierConfig.getIntArray(
@@ -830,7 +810,7 @@ public class SscServiceStateTest {
                 .thenReturn(new int[] { AccessNetworkType.NGRAN });
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
 
-        sendMessage(SscServiceState.EVENT_DATA_RAT_CHANGED);
+        mSscServiceState.mNetWatcherListener.onDataNetworkTypeChanged();
         processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
@@ -839,7 +819,7 @@ public class SscServiceStateTest {
     }
 
     @Test
-    public void testSscServiceStateHandler_dataRatChangedToInvalidRat() {
+    public void testSscServiceStateHandler_dataNetworkTypeChangedToInvalidNetworkType() {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = true;
         when(mMockCarrierConfig.getIntArray(
@@ -847,7 +827,7 @@ public class SscServiceStateTest {
                 .thenReturn(new int[] { AccessNetworkType.UTRAN });
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
 
-        sendMessage(SscServiceState.EVENT_DATA_RAT_CHANGED);
+        mSscServiceState.mNetWatcherListener.onDataNetworkTypeChanged();
         processAllMessages();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
@@ -864,7 +844,7 @@ public class SscServiceStateTest {
         mSscServiceState.mUtAvailability = true;
 
         when(mMockDcNetWatcher.isRoaming()).thenReturn(true);
-        sendMessage(SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED);
+        mSscServiceState.mNetWatcherListener.onRoamingStateChanged(true);
         processAllMessages();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -958,8 +938,6 @@ public class SscServiceStateTest {
 
         // Listeners are registered only once during init(). Not in onCarrierConfigChanged()
         verify(mMockWifiInterface, never()).addListener(mSscServiceState.mWifiListener);
-        verify(mMockDcNetWatcher, times(1)).registerForRoamingStateChanged(
-                mSscServiceState.mHandler, SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED, null);
         verify(mMockAosService, times(1)).addListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManagerProxy, times(1)).registerTelephonyCallback(any(Executor.class),
                 any(SscMobileDataStateListener.class));
@@ -967,7 +945,6 @@ public class SscServiceStateTest {
                 any(SscCrossSimDataStateListener.class), any(Handler.class));
 
         verify(mMockWifiInterface).removeListener(any(WifiInterface.Listener.class));
-        verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);
         verify(mMockAosService).removeListener(any(SscRegiStateListener.class));
         verify(mMockTelephonyManagerProxy)
                 .unregisterTelephonyCallback(any(SscMobileDataStateListener.class));

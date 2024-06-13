@@ -38,7 +38,7 @@ TEST(CallReasonInfoTest, InitialValue)
     EXPECT_EQ(objReason.strExtraMessage, AString::ConstNull());
 }
 
-TEST(CallReasonInfoTest, AssignOperator)
+TEST(CallReasonInfoTest, AssignmentOperator)
 {
     CallReasonInfo objAssignedReason(0);
     CallReasonInfo objReason(1, 1, AString("Extra Value"));

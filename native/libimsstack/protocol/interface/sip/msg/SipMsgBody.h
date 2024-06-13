@@ -45,7 +45,7 @@ private:
 public:
     SipMIMEHdrs();
     SipMIMEHdrs(const SipMIMEHdrs& objMimeHdr);
-    virtual ~SipMIMEHdrs();
+
     SIP_BOOL EncodeMIMEHdrs(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
@@ -61,6 +61,9 @@ public:
     SIP_BOOL SetMimeHdrs(SipHeaderBase* pHdr);
 
     SipHeaderBase* GetMimeHdrObj(SIP_INT32 eIndex);
+
+private:
+    virtual ~SipMIMEHdrs();
 };
 
 /*Class for message body list*/
@@ -71,7 +74,7 @@ class SipMsgBodyList : public SipRefBase
 public:
     SipMsgBodyList();
     SipMsgBodyList(const SipMsgBodyList& objMsgBodyList);
-    ~SipMsgBodyList();
+
     SipMsgBody* GetBodyByIndex(SIP_UINT32 nIndex);
 
     SIP_BOOL AddBody(SipMsgBody* pMsgBody);
@@ -86,6 +89,9 @@ public:
     SIP_BOOL DecodeMIMEBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary);
     /*Function for decoding of headers*/
     SIP_BOOL DecodeSingleBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+
+private:
+    ~SipMsgBodyList();
 };
 
 class SipMsgBody : public SipRefBase
@@ -118,8 +124,6 @@ public:
     explicit SipMsgBody(SIP_INT32 eBodyType);
 
     SipMsgBody(const SipMsgBody& objMsgBody);
-    /*Destructor*/
-    ~SipMsgBody();
 
     /*Function for encoding*/
     SIP_BOOL EncodeSingleMsgBody(SIP_CHAR** ppCurrPos);
@@ -166,6 +170,9 @@ public:
 
     inline SIP_CHAR* GetBuffer() const { return m_pBuffer; }
     inline SIP_UINT32 GetBufferLength() const { return m_nBufLen; }
+
+private:
+    ~SipMsgBody();
 };
 
 #endif  //__SIP_MSG_BODY_H__

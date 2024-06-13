@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 #include "SipDatatypes.h"
-#include "platform/SipString.h"
-
 #include "SipDebug.h"
 #include "SipStackError.h"
-
+#include "platform/SipString.h"
 #include "txn/SipTxn.h"
-#include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
+#include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
@@ -165,7 +163,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 
         if (pNewTxnKey != SIP_NULL)
         {
-            delete pNewTxnKey;
+            pNewTxnKey->SipDelete();
         }
         return SIP_FALSE;
     }
@@ -175,7 +173,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 
     if (bStatus == SIP_FALSE)
     {
-        delete pNewTxnKey;
+        pNewTxnKey->SipDelete();
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "NonInvCliFsm_IdleStSendNonInvReqEvt:Adding Txn into DB Fails \n", SIP_ZERO,
                 SIP_ZERO);

@@ -86,7 +86,7 @@ public class MediaInfo implements Parcelable {
         TDir = DIRECTION_INVALID;
         GTTMode = GTTMODE_INVALID;
 
-        logIn("init");
+        logLn("init");
     }
     public MediaInfo(MediaInfo mediaInfo) {
         AQuality = mediaInfo.AQuality;
@@ -96,7 +96,7 @@ public class MediaInfo implements Parcelable {
         TDir = mediaInfo.TDir;
         GTTMode = mediaInfo.GTTMode;
 
-        logIn("init");
+        logLn("init");
     }
 
     public MediaInfo(Parcel source) {
@@ -111,7 +111,7 @@ public class MediaInfo implements Parcelable {
         TDir = _TDir;
         GTTMode = _GTTMode;
 
-        logIn("init");
+        logLn("init");
     }
 
     public void update(MediaInfo mediaInfo) {
@@ -122,10 +122,10 @@ public class MediaInfo implements Parcelable {
         TDir = mediaInfo.TDir;
         GTTMode = mediaInfo.GTTMode;
 
-        logIn("update");
+        logLn("update");
     }
 
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - AQuality : " + AQuality
                 + " VQuality : " + VQuality
                 + " ADir : " + ADir
@@ -143,11 +143,11 @@ public class MediaInfo implements Parcelable {
         TDir = source.readInt();
         GTTMode = source.readInt();
 
-        logIn("read");
+        logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        logIn("write");
+        logLn("write");
 
         dest.writeInt(AQuality);
         dest.writeInt(VQuality);

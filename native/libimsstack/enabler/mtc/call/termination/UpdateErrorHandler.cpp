@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+#include "Configuration.h"
 #include "IMessage.h"
+#include "ISipConfig.h"
+#include "ISipConfigV.h"
+#include "ISipHeader.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
+#include "helper/IMtcAosConnector.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -39,6 +45,11 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
     {
         IMS_TRACE_I("Handle : piMessage is null", 0, 0, 0);
         return CallReasonInfo(CODE_SIP_SERVER_ERROR);
+    }
+
+    if (piMessage->GetStatusCode() == SipStatusCode::SC_503)
+    {
+        Handle503Response(*piMessage);
     }
 
     return GetCallReasonInfoForResponse(*piMessage);
@@ -154,4 +165,36 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMes
     }
 
     return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+}
+
+PRIVATE
+void UpdateErrorHandler::Handle503Response(IN const IMessage& objMessage) const
+{
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+
+    RegisterWithNextPcscfIfRequired(nRetryAfter);
+}
+
+PRIVATE
+void UpdateErrorHandler::RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const
+{
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
+    {
+        if (nRetryAfter < 0)
+        {
+            pAosConnector->RegisterWithNextPcscf(0);
+            return;
+        }
+
+        if (nRetryAfter * 1000 > Configuration::GetInstance()
+                                         ->GetSipConfig(m_objContext.GetSlotId())
+                                         ->GetSipConfigV()
+                                         ->GetTimerValue(ISipConfigV::TIMER_F))
+        {
+            pAosConnector->RegisterWithNextPcscf(nRetryAfter);
+            return;
+        }
+    }
 }

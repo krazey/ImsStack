@@ -24,7 +24,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
@@ -32,7 +31,6 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -66,11 +64,14 @@ public class SscNetConnectionTest {
     @Mock private IDcNetWatcher mMockDcNetWatcher;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private Handler mMockSscConnectionHandler;
     @Mock private Handler mMockSscTransactionHandler;
     @Mock private SscServiceState mMockSscServiceState;
 
-    @Captor ArgumentCaptor<Integer> mMessageCaptor;
-    @Captor ArgumentCaptor<ApnStateListener> mApnStateListenerCaptor;
+    @Captor ArgumentCaptor<Integer> mEventCaptor;
+    @Captor ArgumentCaptor<Message> mMessageCaptor;
+    @Captor ArgumentCaptor<IApn.Listener> mApnListenerCaptor;
+    @Captor ArgumentCaptor<IDcNetWatcher.Listener> mNetWatcherListenerCaptor;
 
     @Before
     public void setup() {
@@ -103,10 +104,7 @@ public class SscNetConnectionTest {
     @Test
     public void init_registerEvents() {
         // mSscNetConnection.init(EApnType.XCAP) is called in setup() function
-        verify(mMockDcNetWatcher).registerForDataStateChanged(mSscNetConnectionHandler,
-                SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, null);
-        verify(mMockDcNetWatcher).registerForPdnConnectionFailed(mSscNetConnectionHandler,
-                SscNetConnection.EVENT_PDN_CONNECTION_FAILED, null);
+        verify(mMockDcNetWatcher).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockApn).addListener(any());
 
         assertEquals(INACTIVITY_TIME_SEC * 1000, mSscNetConnection.mConnectionInactivityTimer);
@@ -118,8 +116,7 @@ public class SscNetConnectionTest {
 
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         verify(mMockApn).removeListener(any());
-        verify(mMockDcNetWatcher).unregisterForDataStateChanged(mSscNetConnectionHandler);
-        verify(mMockDcNetWatcher).unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
+        verify(mMockDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -299,15 +296,47 @@ public class SscNetConnectionTest {
 
     @Test
     public void onIpcanCategoryChanged() {
-        verify(mMockApn).addListener(mApnStateListenerCaptor.capture());
-        ApnStateListener apnStateListener = mApnStateListenerCaptor.getValue();
-        assertNotNull(apnStateListener);
+        verify(mMockApn).addListener(mApnListenerCaptor.capture());
+        IApn.Listener apnListener = mApnListenerCaptor.getValue();
+        assertNotNull(apnListener);
 
-        apnStateListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
+        apnListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
 
-        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
-        int msg = mMessageCaptor.getValue();
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
+        int msg = mEventCaptor.getValue();
         assertEquals(SscNetConnection.EVENT_PDN_IPCAN_CHANGED, msg);
+    }
+
+    @Test
+    public void onDataConnectionStateChanged() {
+        mSscNetConnection.mSscNetConnectionHandler = mMockSscConnectionHandler;
+        verify(mMockDcNetWatcher).addListener(mNetWatcherListenerCaptor.capture());
+        IDcNetWatcher.Listener listener = mNetWatcherListenerCaptor.getValue();
+        assertNotNull(listener);
+
+        listener.onDataConnectionStateChanged(EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
+
+        verify(mMockSscConnectionHandler).sendMessage(mMessageCaptor.capture());
+        Message msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, msg.what);
+        mSscNetConnection.mSscNetConnectionHandler = mSscNetConnectionHandler;
+    }
+
+
+    @Test
+    public void onPdnConnectionFailed() {
+        int smCause = 33;
+        mSscNetConnection.mSscNetConnectionHandler = mMockSscConnectionHandler;
+        verify(mMockDcNetWatcher).addListener(mNetWatcherListenerCaptor.capture());
+        IDcNetWatcher.Listener listener = mNetWatcherListenerCaptor.getValue();
+        assertNotNull(listener);
+
+        listener.onPdnConnectionFailed(EApnType.XCAP, smCause);
+
+        verify(mMockSscConnectionHandler).sendMessage(mMessageCaptor.capture());
+        Message msg = mMessageCaptor.getValue();
+        assertEquals(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, msg.what);
+        mSscNetConnection.mSscNetConnectionHandler = mSscNetConnectionHandler;
     }
 
     @Test
@@ -320,18 +349,16 @@ public class SscNetConnectionTest {
                 eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class)))
                 .thenReturn(TIMER_ID);
 
-        IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
-                EDataState.DATA_STATE_CONNECTED, -1);
-        AsyncResult ar = new AsyncResult(null, notiObj, null);
-        triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
+        triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, EApnType.XCAP.getType(),
+                EDataState.DATA_STATE_CONNECTED.getState());
 
         verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
         verify(mMockTimerInterface).startTimer(
                 eq(INACTIVITY_TIME_SEC * 1000L), any(TimerInterface.Listener.class));
         assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
-        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
-        int msg = mMessageCaptor.getValue();
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
+        int msg = mEventCaptor.getValue();
         assertEquals(SscNetConnection.EVENT_PDN_CONNECTED, msg);
     }
 
@@ -345,17 +372,15 @@ public class SscNetConnectionTest {
                 eq(SscNetConnection.DISCONNECTION_DELAY), any(TimerInterface.Listener.class)))
                 .thenReturn(TIMER_ID);
 
-        IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
-                EDataState.DATA_STATE_DISCONNECTED, -1);
-        AsyncResult ar = new AsyncResult(null, notiObj, null);
-        triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
+        triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, EApnType.XCAP.getType(),
+                EDataState.DATA_STATE_DISCONNECTED.getState());
 
         verify(mMockTimerInterface).startTimer(
                 eq(SscNetConnection.DISCONNECTION_DELAY), any(TimerInterface.Listener.class));
         assertEquals(Long.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
-        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
-        int msg = mMessageCaptor.getValue();
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
+        int msg = mEventCaptor.getValue();
         assertEquals(SscNetConnection.EVENT_PDN_DISCONNECTED, msg);
     }
 
@@ -367,14 +392,12 @@ public class SscNetConnectionTest {
                 timerIdForRequestTimeout);
         SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mMockSscServiceState);
 
-        IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
-                EDataState.DATA_STATE_CONNECT_FAILED, smCause);
-        AsyncResult ar = new AsyncResult(null, notiObj, null);
-        triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, ar);
+        triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, EApnType.XCAP.getType(),
+                smCause);
 
         verify(mMockSscServiceState).setPdnConnectionFailed(smCause);
-        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
-        int msg = mMessageCaptor.getValue();
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
+        int msg = mEventCaptor.getValue();
         assertEquals(SscNetConnection.EVENT_PDN_CONNECTION_FAILED, msg);
 
         verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
@@ -389,10 +412,10 @@ public class SscNetConnectionTest {
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
-        triggerEventHandler(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, null);
+        triggerEventHandler(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, 0, 0);
 
-        verify(mMockSscTransactionHandler).sendEmptyMessage(mMessageCaptor.capture());
-        int msg = mMessageCaptor.getValue();
+        verify(mMockSscTransactionHandler).sendEmptyMessage(mEventCaptor.capture());
+        int msg = mEventCaptor.getValue();
         assertEquals(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, msg);
 
         verify(mMockTimerInterface).stopTimer(timerIdForRequestTimeout);
@@ -407,7 +430,7 @@ public class SscNetConnectionTest {
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
-        triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED, null);
+        triggerEventHandler(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED, 0, 0);
 
         verify(mMockTimerInterface).stopTimer(timerIdForConnectionExpired);
         verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
@@ -428,9 +451,9 @@ public class SscNetConnectionTest {
         mSscNetConnection.refreshConnectionTimer();
     }
 
-    private void triggerEventHandler(int event, AsyncResult ar) {
+    private void triggerEventHandler(int event, int arg1, int arg2) {
         mSscNetConnectionHandler.handleMessage(
-                Message.obtain(mSscNetConnectionHandler, event, ar));
+                Message.obtain(mSscNetConnectionHandler, event, arg1, arg2));
     }
 
     private class FakeSscNetConnection extends SscNetConnection {

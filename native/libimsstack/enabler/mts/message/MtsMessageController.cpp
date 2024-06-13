@@ -573,7 +573,7 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     Add(piMtsMessage);
 
     m_pRetryContent = pContent;
-    m_objRetryFunction = [=]()
+    m_objRetryFunction = [=, this]()
     {
         NotifyMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
     };

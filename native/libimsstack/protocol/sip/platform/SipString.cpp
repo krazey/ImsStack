@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform/SipString.h"
-#include "platform/SipMemory.h"
 #include "ServiceSystemTime.h"
+#include "platform/SipMemory.h"
+#include "platform/SipString.h"
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
 void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...)

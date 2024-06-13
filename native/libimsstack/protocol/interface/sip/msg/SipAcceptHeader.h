@@ -32,8 +32,6 @@ public:
     /*Copy constructor*/
     SipAcceptHeader(const SipAcceptHeader& objHeader);
 
-    /*destructor*/
-    ~SipAcceptHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -53,5 +51,8 @@ public:
     inline const SIP_CHAR* GetMType() const { return m_pszMType; }
 
     inline const SIP_CHAR* GetMSubType() const { return m_pszMSubType; }
+
+private:
+    ~SipAcceptHeader();
 };
 #endif  //__SIP_ACCEPT_HEADER_H__

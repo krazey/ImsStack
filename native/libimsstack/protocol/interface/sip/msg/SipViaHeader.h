@@ -43,8 +43,6 @@ public:
     /*constructor*/
     SipViaHeader();
     SipViaHeader(const SipViaHeader& objHeader);
-    /*destructor*/
-    ~SipViaHeader();
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
@@ -79,6 +77,9 @@ public:
 
     SIP_BOOL SetBranchParam(const SIP_CHAR* pszBranch);
     SIP_BOOL IsValidHeader() const override;
+
+private:
+    ~SipViaHeader();
 };
 
 #endif  //__SIP_VIA_HEADER_H__

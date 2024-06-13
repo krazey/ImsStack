@@ -19,9 +19,10 @@
 
 #include "../../interface/aos/MockIAosService.h"
 
-#include "app/MockAosAppContext.h"
+#include "interface/MockIAosAppContext.h"
 
 #include "ImsServiceConfig.h"
+#include "app/AosAppContext.h"
 #include "app/AosApplication.h"
 #include "app/AosEApplication.h"
 #include "handle/AosHandle.h"
@@ -58,218 +59,234 @@ const IMS_SINT32 SLOT_ID = 0;
 class AosBuilderTest : public ::testing::Test
 {
 public:
-    AosBuilder* pAosBuilder;
+    AosBuilder* m_pAosBuilder;
 
-    AosStaticProfile* pAosStaticProfile;
-    MockAosAppContext* pMockAosAppContext;
+    AosStaticProfile* m_pAosStaticProfile;
+    MockIAosAppContext m_objMockIAosAppContext;
 
-    const AString strProfile = "aos_normal";
+    const AString m_strProfile = "aos_normal";
 
 protected:
     virtual void SetUp() override
     {
-        pAosStaticProfile = new AosStaticProfile();
-        pMockAosAppContext = new MockAosAppContext(pAosStaticProfile);
-        EXPECT_CALL(*pMockAosAppContext, GetStaticProfile())
-                .WillRepeatedly(Return(pAosStaticProfile));
-        EXPECT_CALL(*pMockAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
-        EXPECT_CALL(*pMockAosAppContext, GetProfileId()).WillRepeatedly(ReturnRef(strProfile));
+        m_pAosStaticProfile = new AosStaticProfile();
+        ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
+                .WillByDefault(Return(m_pAosStaticProfile));
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(m_strProfile));
 
-        pAosBuilder = new AosBuilder();
-        ASSERT_TRUE(pAosBuilder != nullptr);
+        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
+
+        m_pAosBuilder = new AosBuilder();
+        ASSERT_TRUE(m_pAosBuilder != nullptr);
     }
 
     virtual void TearDown() override
     {
-        if (pMockAosAppContext)
+        if (m_pAosStaticProfile)
         {
-            delete pMockAosAppContext;
+            delete m_pAosStaticProfile;
         }
 
-        if (pAosStaticProfile)
+        if (m_pAosBuilder)
         {
-            delete pAosStaticProfile;
-        }
-
-        if (pAosBuilder)
-        {
-            delete pAosBuilder;
+            delete m_pAosBuilder;
         }
     }
 };
 
-TEST_F(AosBuilderTest, BuildAppContext)
+TEST_F(AosBuilderTest, SucceedBuildingAppContext)
 {
     AosAppContext* pAosAppContext =
-            static_cast<AosAppContext*>(pAosBuilder->BuildAppContext(pAosStaticProfile));
+            static_cast<AosAppContext*>(m_pAosBuilder->BuildAppContext(m_pAosStaticProfile));
     ASSERT_TRUE(pAosAppContext != nullptr);
     delete pAosAppContext;
 }
 
-TEST_F(AosBuilderTest, BuildApplication)
+TEST_F(AosBuilderTest, SucceedBuildingAosApplication)
 {
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
-    AosApplication* pAosApplication = static_cast<AosApplication*>(
-            pAosBuilder->BuildApp(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    AosApplication* pAosApplication =
+            static_cast<AosApplication*>(m_pAosBuilder->BuildApp(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosApplication != nullptr);
     delete pAosApplication;
-
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
-    AosEApplication* pAosEApplication = static_cast<AosEApplication*>(
-            pAosBuilder->BuildApp(static_cast<IAosAppContext*>(pMockAosAppContext)));
-    ASSERT_TRUE(pAosEApplication != nullptr);
-    delete pAosEApplication;
-
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 }
 
-TEST_F(AosBuilderTest, BuildHandle)
+TEST_F(AosBuilderTest, SucceedBuildingAosEApplication)
 {
-    AosHandleMtc* pAosHandleMtc = static_cast<AosHandleMtc*>(pAosBuilder->BuildHandle(
-            static_cast<IAosAppContext*>(pMockAosAppContext), "ims.app.mtc", "ims.service.mtc"));
+    m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    AosEApplication* pAosEApplication =
+            static_cast<AosEApplication*>(m_pAosBuilder->BuildApp(&m_objMockIAosAppContext));
+    ASSERT_TRUE(pAosEApplication != nullptr);
+    delete pAosEApplication;
+}
+
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForMtc)
+{
+    AosHandleMtc* pAosHandleMtc = static_cast<AosHandleMtc*>(
+            m_pAosBuilder->BuildHandle(&m_objMockIAosAppContext, "ims.app.mtc", "ims.service.mtc"));
     ASSERT_TRUE(pAosHandleMtc != nullptr);
     delete pAosHandleMtc;
+}
 
-    AosHandleMts* pAosHandleMts = static_cast<AosHandleMts*>(pAosBuilder->BuildHandle(
-            static_cast<IAosAppContext*>(pMockAosAppContext), "ims.app.mts", "ims.service.mts"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForMts)
+{
+    AosHandleMts* pAosHandleMts = static_cast<AosHandleMts*>(
+            m_pAosBuilder->BuildHandle(&m_objMockIAosAppContext, "ims.app.mts", "ims.service.mts"));
     ASSERT_TRUE(pAosHandleMts != nullptr);
     delete pAosHandleMts;
+}
 
-    AosHandleEmergencyMtc* pAosHandleEmergencyMtc = static_cast<AosHandleEmergencyMtc*>(
-            pAosBuilder->BuildHandle(static_cast<IAosAppContext*>(pMockAosAppContext),
-                    "ims.app.mtc", "ims.service.mtc.emergency"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForEmergencyMtc)
+{
+    AosHandleEmergencyMtc* pAosHandleEmergencyMtc =
+            static_cast<AosHandleEmergencyMtc*>(m_pAosBuilder->BuildHandle(
+                    &m_objMockIAosAppContext, "ims.app.mtc", "ims.service.mtc.emergency"));
     ASSERT_TRUE(pAosHandleEmergencyMtc != nullptr);
     delete pAosHandleEmergencyMtc;
+}
 
-    AosHandleEmergencyMts* pAosHandleEmergencyMts = static_cast<AosHandleEmergencyMts*>(
-            pAosBuilder->BuildHandle(static_cast<IAosAppContext*>(pMockAosAppContext),
-                    "ims.app.mts", "ims.service.mts.emergency"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForEmergencyMts)
+{
+    AosHandleEmergencyMts* pAosHandleEmergencyMts =
+            static_cast<AosHandleEmergencyMts*>(m_pAosBuilder->BuildHandle(
+                    &m_objMockIAosAppContext, "ims.app.mts", "ims.service.mts.emergency"));
     ASSERT_TRUE(pAosHandleEmergencyMts != nullptr);
     delete pAosHandleEmergencyMts;
+}
 
-    AosHandleUce* pAosHandleUce = static_cast<AosHandleUce*>(pAosBuilder->BuildHandle(
-            static_cast<IAosAppContext*>(pMockAosAppContext), "ims.app.uce", "ims.service.uce"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForUce)
+{
+    AosHandleUce* pAosHandleUce = static_cast<AosHandleUce*>(
+            m_pAosBuilder->BuildHandle(&m_objMockIAosAppContext, "ims.app.uce", "ims.service.uce"));
     ASSERT_TRUE(pAosHandleUce != nullptr);
     delete pAosHandleUce;
+}
 
-    AosHandleSipController* pAosHandleSipController = static_cast<AosHandleSipController*>(
-            pAosBuilder->BuildHandle(static_cast<IAosAppContext*>(pMockAosAppContext),
-                    "ims.app.sip_delegate", "ims.service.sip_delegate"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandleForSipDelegate)
+{
+    AosHandleSipController* pAosHandleSipController =
+            static_cast<AosHandleSipController*>(m_pAosBuilder->BuildHandle(
+                    &m_objMockIAosAppContext, "ims.app.sip_delegate", "ims.service.sip_delegate"));
     ASSERT_TRUE(pAosHandleSipController != nullptr);
     delete pAosHandleSipController;
+}
 
-    AosHandle* pAosHandle = static_cast<AosHandle*>(pAosBuilder->BuildHandle(
-            static_cast<IAosAppContext*>(pMockAosAppContext), "ims.app.test", "ims.service.test"));
+TEST_F(AosBuilderTest, SucceedBuildingAosHandle)
+{
+    AosHandle* pAosHandle = static_cast<AosHandle*>(m_pAosBuilder->BuildHandle(
+            &m_objMockIAosAppContext, "ims.app.test", "ims.service.test"));
     ASSERT_TRUE(pAosHandle != nullptr);
     delete pAosHandle;
 }
 
-TEST_F(AosBuilderTest, BuildRegistration)
+TEST_F(AosBuilderTest, SucceedBuildingAosRegistration)
 {
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
     AosRegistration* pAosRegistration = static_cast<AosRegistration*>(
-            pAosBuilder->BuildRegistration(static_cast<IAosAppContext*>(pMockAosAppContext)));
+            m_pAosBuilder->BuildRegistration(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosRegistration != nullptr);
     delete pAosRegistration;
-
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
-    AosERegistration* pAosERegistration = static_cast<AosERegistration*>(
-            pAosBuilder->BuildRegistration(static_cast<IAosAppContext*>(pMockAosAppContext)));
-    ASSERT_TRUE(pAosERegistration != nullptr);
-    delete pAosERegistration;
-
-    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 }
 
-TEST_F(AosBuilderTest, BuildSubscriber)
+TEST_F(AosBuilderTest, SucceedBuildingAosERegistration)
 {
-    AosSubscriber* pAosSubscriber = static_cast<AosSubscriber*>(
-            pAosBuilder->BuildSubscriber(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    AosERegistration* pAosERegistration = static_cast<AosERegistration*>(
+            m_pAosBuilder->BuildRegistration(&m_objMockIAosAppContext));
+    ASSERT_TRUE(pAosERegistration != nullptr);
+    delete pAosERegistration;
+}
+
+TEST_F(AosBuilderTest, SucceedBuildingAosSubscriber)
+{
+    AosSubscriber* pAosSubscriber =
+            static_cast<AosSubscriber*>(m_pAosBuilder->BuildSubscriber(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosSubscriber != nullptr);
     delete pAosSubscriber;
 }
 
-TEST_F(AosBuilderTest, BuildPcscf)
+TEST_F(AosBuilderTest, SucceedBuildingAosPcscf)
 {
-    AosPcscf* pAosPcscf = static_cast<AosPcscf*>(
-            pAosBuilder->BuildPcscf(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    AosPcscf* pAosPcscf =
+            static_cast<AosPcscf*>(m_pAosBuilder->BuildPcscf(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosPcscf != nullptr);
     delete pAosPcscf;
 }
 
-TEST_F(AosBuilderTest, BuildBlock)
+TEST_F(AosBuilderTest, SucceedBuildingAosBlock)
 {
-    AosBlock* pAosBlock = static_cast<AosBlock*>(
-            pAosBuilder->BuildBlock(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    AosBlock* pAosBlock =
+            static_cast<AosBlock*>(m_pAosBuilder->BuildBlock(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosBlock != nullptr);
     delete pAosBlock;
 }
 
-TEST_F(AosBuilderTest, BuildConnection)
+TEST_F(AosBuilderTest, SucceedBuildingAosConnection)
 {
-    AosConnection* pAosConnection = static_cast<AosConnection*>(
-            pAosBuilder->BuildConnection(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    AosConnection* pAosConnection =
+            static_cast<AosConnection*>(m_pAosBuilder->BuildConnection(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosConnection != nullptr);
     delete pAosConnection;
 }
 
-TEST_F(AosBuilderTest, BuildNetTracker)
+TEST_F(AosBuilderTest, SucceedBuildingAosNetTracker)
 {
-    AosNetTracker* pAosNetTracker = static_cast<AosNetTracker*>(
-            pAosBuilder->BuildNetTracker(static_cast<IAosAppContext*>(pMockAosAppContext)));
+    AosNetTracker* pAosNetTracker =
+            static_cast<AosNetTracker*>(m_pAosBuilder->BuildNetTracker(&m_objMockIAosAppContext));
     ASSERT_TRUE(pAosNetTracker != nullptr);
     delete pAosNetTracker;
 }
 
-TEST_F(AosBuilderTest, BuildCallTracker)
+TEST_F(AosBuilderTest, SucceedBuildingAosCallTracker)
 {
     IAosService* pOriginAosService = AosProvider::GetInstance()->GetService(SLOT_ID);
     MockIAosService objMockAosService;
     AosProvider::GetInstance()->SetService(static_cast<IAosService*>(&objMockAosService), SLOT_ID);
 
     AosCallTracker* pAosCallTracker =
-            static_cast<AosCallTracker*>(pAosBuilder->BuildCallTracker(SLOT_ID));
+            static_cast<AosCallTracker*>(m_pAosBuilder->BuildCallTracker(SLOT_ID));
     ASSERT_TRUE(pAosCallTracker != nullptr);
     delete pAosCallTracker;
 
     AosProvider::GetInstance()->SetService(pOriginAosService, SLOT_ID);
 }
 
-TEST_F(AosBuilderTest, BuildRegStateManager)
+TEST_F(AosBuilderTest, SucceedBuildingAosRegStateManager)
 {
     AosRegStateManager* pAosRegStateManager =
-            static_cast<AosRegStateManager*>(pAosBuilder->BuildRegStateManager());
+            static_cast<AosRegStateManager*>(m_pAosBuilder->BuildRegStateManager());
     ASSERT_TRUE(pAosRegStateManager != nullptr);
     delete pAosRegStateManager;
 }
 
-TEST_F(AosBuilderTest, BuildService)
+TEST_F(AosBuilderTest, SucceedBuildingAosService)
 {
-    AosService* pAosService = static_cast<AosService*>(pAosBuilder->BuildService(SLOT_ID));
+    AosService* pAosService = static_cast<AosService*>(m_pAosBuilder->BuildService(SLOT_ID));
     ASSERT_TRUE(pAosService != nullptr);
     delete pAosService;
 }
 
-TEST_F(AosBuilderTest, BuildSubscriberManager)
+TEST_F(AosBuilderTest, SucceedBuildingAosSubscriberManager)
 {
     AosSubscriberManager* pAosSubscriberManager =
-            static_cast<AosSubscriberManager*>(pAosBuilder->BuildSubscriberManager(SLOT_ID));
+            static_cast<AosSubscriberManager*>(m_pAosBuilder->BuildSubscriberManager(SLOT_ID));
     ASSERT_TRUE(pAosSubscriberManager != nullptr);
     delete pAosSubscriberManager;
 }
 
-TEST_F(AosBuilderTest, BuildRetryRepository)
+TEST_F(AosBuilderTest, SucceedBuildingAosRetryRepository)
 {
     AosRetryRepository* pAosRetryRepository =
-            static_cast<AosRetryRepository*>(pAosBuilder->BuildRetryRepository(SLOT_ID));
+            static_cast<AosRetryRepository*>(m_pAosBuilder->BuildRetryRepository(SLOT_ID));
     ASSERT_TRUE(pAosRetryRepository != nullptr);
     delete pAosRetryRepository;
 }
 
-TEST_F(AosBuilderTest, BuildNConfiguration)
+TEST_F(AosBuilderTest, SucceedBuildingAosNConfiguration)
 {
     AosNConfiguration* pAosNConfiguration =
-            static_cast<AosNConfiguration*>(pAosBuilder->BuildNConfiguration());
+            static_cast<AosNConfiguration*>(m_pAosBuilder->BuildNConfiguration());
     ASSERT_TRUE(pAosNConfiguration != nullptr);
     delete pAosNConfiguration;
 }

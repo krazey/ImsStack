@@ -22,8 +22,19 @@
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
-    <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
+    <int name="ims.request_uri_type_int" value="1"/>
+    <int-array name="imsvoice.srvcc_type_int_array" num="4">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+    </int-array>
+    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
+    <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="1800"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
+    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
+    <int name="imswfc.country_code_int" value="1"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

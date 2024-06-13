@@ -869,7 +869,7 @@ public class SystemCallAgentTest {
     public void testIsImsVoiceCallSupported() {
         mSystemCallAgent.isImsVoiceCallSupported();
 
-        verify(mDcNetWatcher).isVops();
+        verify(mDcNetWatcher).isVopsSupported();
 
         replaceDcNetWatcher(null);
         boolean result = mSystemCallAgent.isImsVoiceCallSupported();

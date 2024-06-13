@@ -51,6 +51,8 @@ private:
     CallReasonInfo GetCallReasonInfoFor4xxResponse(IN const IMessage& objMessage) const;
     static CallReasonInfo GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage);
     static CallReasonInfo GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage);
+    void Handle503Response(IN const IMessage& objMessage) const;
+    void RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const;
 
     IMtcCallContext& m_objContext;
 };

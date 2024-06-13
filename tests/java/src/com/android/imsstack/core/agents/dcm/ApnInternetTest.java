@@ -100,7 +100,7 @@ public class ApnInternetTest {
         mApnInternet.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher, times(1)).notifyResult(
+        verify(mMockIDcNetWatcher, times(1)).notifyDataConnectionState(
                 EApnType.INTERNET, EDataState.DATA_STATE_CONNECTED);
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
                 EApnType.INTERNET.getType(), EDataState.DATA_STATE_CONNECTED.getState());
@@ -118,7 +118,7 @@ public class ApnInternetTest {
         mApnInternet.sendEmptyMessage(Apn.EVENT_NETWORK_LOST);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher, times(1)).notifyResult(
+        verify(mMockIDcNetWatcher, times(1)).notifyDataConnectionState(
                 EApnType.INTERNET, EDataState.DATA_STATE_DISCONNECTED);
         verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
                 EApnType.INTERNET.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());

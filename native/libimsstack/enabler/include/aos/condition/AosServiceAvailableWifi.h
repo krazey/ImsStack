@@ -43,20 +43,20 @@ public:
         STATE_BAD_NETWORK_DETECTED
     };
 
-private:
+protected:
     void RegisterListener() final;
     void DeregisterListener() final;
 
     // IWifiWatcherListener
-    void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher) final;
+    void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher) override;
 
     // INetworkPingListener
-    void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult) final;
+    void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult) override;
 
-    void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) final;
-    void HandleAirplaneModeChanged(IN IMS_UINT32 nState) final;
-    void HandleWiFiConnectionChanged() final;
-    void HandleLocationInfoChanged() final;
+    void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) override;
+    void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override;
+    void HandleWifiConnectionChanged() override;
+    void HandleLocationInfoChanged() override;
 
     IMS_BOOL CheckServiceAvailable() final;
 
@@ -66,20 +66,16 @@ private:
     IMS_SINT32 RequestNetPing();
     static const IMS_CHAR* PingResultToString(IN IMS_SINT32 nResult);
 
-private:
+protected:
     AString m_strCountry;
     IMS_UINT32 m_nBadNetworkState;
-    IMS_BOOL m_bWiFiState;
+    IMS_BOOL m_bWifiState;
     INetworkPing* m_piNetPing;
 
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;
 
-private:
     // Use only for Unit test
     ILocationProperties* m_piTestLocation;
-
-    friend class AosServiceAvailableWifiTest;
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_WIFI_H_

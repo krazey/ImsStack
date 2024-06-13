@@ -102,7 +102,6 @@ protected:
     void ProcessUpdateFailed_TxnTimeout() final;
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
-    void ProcessStopRetryTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
@@ -126,11 +125,9 @@ protected:
 
     void ClearCbm();
 
-    IMS_UINT32 GetRetryTime();
-
     /// IAosEmergencyListener
-    void CallbackModeChanged(
-            IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration);
+    void CallbackModeChanged(IN EmcCallbackModeType eType, IN EmcCallbackMode eState,
+            IN IMS_ULONG nDuration) override;
 
     void HandleECallState(IN IMS_UINT32 nState);
     void HandleESmsState(IN IMS_UINT32 nState);
@@ -148,6 +145,7 @@ protected:
     void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
+    void StartRegRetryTimer();
 
     IMS_UINT32 GetPreferredRegScheme();
 

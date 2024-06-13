@@ -91,7 +91,7 @@ public class UsersInfo implements Parcelable {
         readFromParcel(source);
     }
 
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - User : size[" + Users.size() + "]");
 
         for (int index = 0; index < Users.size(); index++) {
@@ -136,7 +136,7 @@ public class UsersInfo implements Parcelable {
         user.anonymize = userIn.anonymize;
 
         Users.add(user);
-        logIn("addUser");
+        logLn("addUser");
     }
 
     /**
@@ -156,7 +156,7 @@ public class UsersInfo implements Parcelable {
         user.anonymize = anonymizeIn;
 
         Users.add(user);
-        logIn("addUser");
+        logLn("addUser");
     }
 
     public void readFromParcel(Parcel source) {
@@ -193,7 +193,7 @@ public class UsersInfo implements Parcelable {
 
             Users.add(user);
         }
-        logIn("read");
+        logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -217,7 +217,7 @@ public class UsersInfo implements Parcelable {
             }
         }
 
-        logIn("write");
+        logLn("write");
     }
 
     public int describeContents() {

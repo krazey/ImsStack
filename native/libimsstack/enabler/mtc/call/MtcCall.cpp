@@ -62,7 +62,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objStateMachine(
                 MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objPendingOperationHolder(),
-        m_objTimer(MtcTimerWrapper()),
+        m_pTimer(objContext.CreateTimer()),
         m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this, *IMediaManager::GetInstance(GetSlotId()))),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
@@ -76,7 +76,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
-    m_objTimer.SetListener(this);
+    m_pTimer->SetListener(this);
     m_objPreconditionManager.SetListener(this);
     m_objMediaManager.SetMediaReportEventListener(this);
     m_objService.AddAosStateListener(this);

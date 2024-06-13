@@ -56,6 +56,7 @@ class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class LastComeFirstServedHelper;
+class MtcTimerWrapper;
 class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
@@ -96,6 +97,7 @@ public:
     IEctManager& GetEctManager() override;
     IMtcEmergencyServiceManager& GetEmergencyServiceManager() override;
     OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
+    std::unique_ptr<MtcTimerWrapper> CreateTimer() override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override { return m_objPassiveTimerHolder; }
     inline IMultiEndpointManager* GetMultiEndpointManager() override

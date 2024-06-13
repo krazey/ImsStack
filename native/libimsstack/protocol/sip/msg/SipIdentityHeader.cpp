@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipIdentityHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
+#include "msg/SipIdentityHeader.h"
 #include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SipIdentityHeader::SipIdentityHeader() :
         SipHeaderBase(SipHeaderBase::IDENTITY),

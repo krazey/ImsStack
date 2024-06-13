@@ -29,9 +29,6 @@ public:
     explicit SipAuthBase(SIP_INT32 eHdrType);
     SipAuthBase(const SipAuthBase& objHeader);
 
-    /*destructor*/
-    ~SipAuthBase();
-
     /*virtual methods*/
     /*Function for encoding of headers*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -49,5 +46,8 @@ public:
     SIP_BOOL IsValidHeader() const override;
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipAuthBase();
 };
 #endif  //__SIP_AUTH_BASE_H__

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipDebug.h"
+#include "SipStackError.h"
+#include "platform/SipString.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
-#include "SipStackError.h"
-#include "SipDebug.h"
-#include "platform/SipString.h"
 
 SipTxnKey::SipTxnKey() :
         m_nRSeqNum(SIP_ZERO),

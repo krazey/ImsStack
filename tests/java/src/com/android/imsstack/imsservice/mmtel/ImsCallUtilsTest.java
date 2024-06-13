@@ -44,7 +44,6 @@ import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.ImsConstants;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -433,12 +432,6 @@ public class ImsCallUtilsTest {
         result = ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(
                 ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT);
         assertEquals(result, CallReasonInfo.CODE_UNSPECIFIED);
-    }
-
-    @Test
-    public void testIsGoogleNativeCompliant() {
-        boolean ret = ImsCallUtils.isGoogleNativeCompliant(mContext);
-        assertEquals(ret, ImsConstants.USE_GOOGLE_NATIVE_APPS);
     }
 
     @Test

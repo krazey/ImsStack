@@ -57,7 +57,7 @@ protected:
     virtual void HandleRoamingChanged(IN IMS_UINT32 nState);
     virtual void HandleAirplaneModeChanged(IN IMS_UINT32 nState);
     virtual void HandleVopsChanged(IN IMS_UINT32 nState);
-    virtual void HandleWiFiConnectionChanged();
+    virtual void HandleWifiConnectionChanged();
     virtual void HandleLocationInfoChanged();
     virtual IMS_BOOL CheckServiceAvailable();
 
@@ -94,16 +94,10 @@ protected:
 
     IMS_BOOL m_bAirplaneMode;
     IMS_BOOL m_bRoamingState;
-
-private:
     IMS_BOOL m_bAvailableLastNotified;
 
     ImsList<IMS_UINT32> m_objBlockReasonsLastNotified;
     ImsList<IAosServiceAvailableListener*> m_objListeners;
-
-private:
-    friend class AosServiceAvailableTest;
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_H_

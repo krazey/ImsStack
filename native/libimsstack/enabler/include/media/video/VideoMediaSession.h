@@ -55,7 +55,7 @@ public:
     void SetConfig(IN VideoConfiguration* pConfig);
 
     /**
-     * @brief Set VideoConfig for libimsmedia from src/dest/negotiated profile
+     * @brief Set VideoConfig for libpixelimsmedia from src/dest/negotiated profile
      * @param pLocalProfile : local profile of the SDP negotiation
      * @param pPeerProfile : peer profile of the SDP negotiation
      * @param pNegoProfile : negotiated profile of the SDP negotiation

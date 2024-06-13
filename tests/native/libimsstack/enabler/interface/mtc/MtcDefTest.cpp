@@ -44,7 +44,7 @@ TEST(MtcDefTest, MediaInfoConstructorWithParams)
     EXPECT_EQ(objMediaInfo.eGttMode, ANY_GTT_MODE);
 }
 
-TEST(MtcDefTest, MediaInfoAssignOperator)
+TEST(MtcDefTest, MediaInfoAssignmentOperator)
 {
     MediaInfo objMediaInfo;
     MediaInfo objRightHandSide(ANY_A_DIR, ANY_V_DIR, 3, 1, 2, 1);
@@ -92,7 +92,7 @@ TEST(MtcDefTest, SuppServiceCopyConstructor)
     EXPECT_EQ(objSuppService.bValue, objSuppServiceToCopy.bValue);
 }
 
-TEST(MtcDefTest, SuppServiceAssignOperator)
+TEST(MtcDefTest, SuppServiceAssignmentOperator)
 {
     SuppService objSuppService;
     SuppService objRightHandSide;

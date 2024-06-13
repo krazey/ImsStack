@@ -32,12 +32,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
 
@@ -45,12 +45,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class TimerAgentTest {
     private static final int MAX_TIMER_ID = 3;
     private static final long NATIVE_TIMER_ID = 100L;
@@ -73,14 +73,14 @@ public class TimerAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mMainLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
         mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
-        mTestAppContext.setUp();
+        mTestAppContext.setUpWithLooper(mMainLooper.getLooper());
 
         mAlarmManager = mTestAppContext.getSystemService(AlarmManager.class);
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLock);
-        mMainLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mTimerAgent = new TimerAgent();
         mTimerAgent.init(mTestAppContext.getContext());
@@ -102,11 +102,6 @@ public class TimerAgentTest {
                     .unregisterReceiver(any(BroadcastReceiver.class));
         }
 
-        if (mMainLooper != null) {
-            mMainLooper.destroy();
-            mMainLooper = null;
-        }
-
         if (mTimerLooper != null) {
             mTimerLooper.destroy();
             mTimerLooper = null;
@@ -121,6 +116,7 @@ public class TimerAgentTest {
         mContextFixture = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mMainLooper = null;
     }
 
     @Test

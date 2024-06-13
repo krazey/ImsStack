@@ -36,12 +36,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.BroadcastReceiverProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
@@ -50,12 +50,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class BatteryStateAgentTest {
     private static final int LOW_BATTERY_WARNING_LEVEL = 20;
     private static final int LOW_BATTERY_LEVEL = 10;
@@ -78,9 +78,10 @@ public class BatteryStateAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mTestableLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
         mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
-        mTestAppContext.setUp();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
         mBroadcastReceiverProxy = mTestAppContext.getBroadcastReceiverProxy();
         when(mTestAppContext.getContext().getResources()
                 .getInteger(eq(com.android.internal.R.integer.config_lowBatteryWarningLevel)))
@@ -90,7 +91,6 @@ public class BatteryStateAgentTest {
         when(mTimerInterface.startTimer(anyLong(), any(TimerInterface.Listener.class)))
                 .thenReturn(TIMER_ID);
 
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
         mBatteryStateAgent = new BatteryStateAgent();
     }
 
@@ -99,11 +99,6 @@ public class BatteryStateAgentTest {
         if (mBatteryStateAgent != null) {
             mBatteryStateAgent.cleanup();
             mBatteryStateAgent = null;
-        }
-
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
         }
 
         AgentFactory.getInstance().setAgent(TimerInterface.class, null);
@@ -115,6 +110,7 @@ public class BatteryStateAgentTest {
         mContextFixture = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test

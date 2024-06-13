@@ -821,7 +821,7 @@ public class SystemCallAgent implements SystemCallInterface {
     @Override
     public boolean isImsVoiceCallSupported() {
         IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.isVops() : false;
+        return (netWatcher != null) ? netWatcher.isVopsSupported() : false;
     }
 
     /**

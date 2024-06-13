@@ -172,6 +172,7 @@ public:
         IMAGEATTR,  // RFC 6236, Negotiation of Generic Image Attributes in the SDP
         CRYPTO,     // RFC 4568, SDP Security Descriptions for Media Streams
         A_3GE2AE,   // TS 24.229, 3GPP End-To-Access-Edge security-indicator
+        ANBR,       // TS 26.114, Access Network Bitrate Recommendation
         ATTRIBUTE_OTHER,
         ATTRIBUTE_ALL,  // Special attribute type for RemoveAll operation
         ATTRIBUTE_MAX

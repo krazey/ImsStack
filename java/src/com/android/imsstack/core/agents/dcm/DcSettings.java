@@ -59,37 +59,11 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public boolean isVopsRequired() {
+    public boolean isVopsIgnored() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        return (config == null) ? false : !config.getBoolean(
-                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
-    }
-
-    @Override
-    public boolean isImsPdnRequestWithoutMmtel() {
-        CarrierConfig config = getCarrierConfig(mSlotId);
-
-        return (config == null) ? false : config.getBoolean(
-                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
-    }
-
-    @Override
-    public int[] getImsPdnEnabledInNoVopsSupport() {
-        CarrierConfig config = getCarrierConfig(mSlotId);
-
-        if (config != null) {
-            int[] noVopsRequired = config.getIntArray(
-                    CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
-            if (noVopsRequired != null) {
-                return noVopsRequired;
-            } else {
-                ImsLog.w(mSlotId, "noVopsRequired is null");
-            }
-        } else {
-            ImsLog.w(mSlotId, "config is null");
-        }
-        return new int[]{};
+        return config == null || config.getBoolean(
+                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, true);
     }
 
     @Override

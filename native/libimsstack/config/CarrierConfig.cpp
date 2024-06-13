@@ -683,6 +683,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPL
         "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
         "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL[] =
+        "emc_reg_on_random_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
@@ -737,6 +739,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOIC
 const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[] =
         "contact_user_info_policy_for_non_reg_message_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT[] = "emc_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT[] = "emc_reg_retry_max_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT[] =
+        "emc_reg_retry_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         "geolocation_pidf_forming_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[] =
@@ -775,8 +780,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[] =
         "usat_reg_event_download_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT[] = "volte_hys_time_sec_int";
 
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =
-        "emergency_pcscf_retry_wait_time_sec_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         "permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[] =

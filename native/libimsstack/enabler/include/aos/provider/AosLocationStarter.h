@@ -66,10 +66,11 @@ protected:
     IMS_BOOL StartDelayTimer(IN IMS_UINT32 nDuration);
     IMS_BOOL StopDelayTimer();
 
-protected:
+public:
     static const IMS_UINT32 DEFAULT_SHORT_UPDATE_INTERVAL = 300;  // 5min
     static const IMS_UINT32 DEFAULT_STOP_DELAY = 30;              // 30s
 
+protected:
     IMS_SINT32 m_nSlotId;
     IMS_BOOL m_bInitialized;
     IMS_BOOL m_bWfcSetting;

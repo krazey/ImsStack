@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "MockIOsFactory.h"
+#include "PlatformContext.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockIReference.h"
@@ -29,9 +31,37 @@ using ::testing::Return;
 namespace android
 {
 
+class TestImsTimerForRiHolder : public ImsTimer
+{
+public:
+    inline TestImsTimerForRiHolder() {}
+    inline ~TestImsTimerForRiHolder() {}
+
+public:
+    IMS_BOOL Equals(IN const ITimer* piTimer) const override
+    {
+        ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
+        return pTimer->GetTimerId() == reinterpret_cast<IMS_UINTP>(this);
+    }
+
+    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
+    {
+        return reinterpret_cast<IMS_UINTP>(this);
+    }
+
+    void KillTimer() override {}
+
+    IMS_UINTP GetTimerId() const override { return reinterpret_cast<IMS_UINTP>(this); }
+
+    void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
+};
+
 class ReferenceInterfaceHolderTest : public ::testing::Test
 {
 public:
+    MockIOsFactory objMockIOsFactory;
+    IOsFactory* piOldOsFactory;
+    TestImsTimerForRiHolder* pTestImsTimerForRiHolder;
     ReferenceInterfaceHolder* pHolder;
     MockIInterfaceHolderListener objListener;
     MockIReference objMockIReference;
@@ -81,6 +111,35 @@ TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseStartsTimer)
 
     pHolder->ReleaseIReference(&objMockIReference, IMS_FALSE);
     EXPECT_TRUE(pHolder->IsTimerExist(&objMockIReference));
+}
+
+TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTimerExpiredStopsTimer)
+{
+    piOldOsFactory = PlatformContext::GetInstance()->SetOsFactory(&objMockIOsFactory);
+
+    // will be deleted in the TimerService::DestroyTimer.
+    pTestImsTimerForRiHolder = new TestImsTimerForRiHolder();
+    EXPECT_CALL(objMockIOsFactory, CreateTimer())
+            .Times(1)
+            .WillOnce(Return(pTestImsTimerForRiHolder));
+
+    ON_CALL(objMockIReference, GetState).WillByDefault(Return(IReference::STATE_REFERRING));
+
+    EXPECT_EQ(pHolder->GetReferenceCount(), 0);
+
+    pHolder->GetIReference(&objMockISession, "sip:referToUri", "referMethod");
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockIReference));
+    EXPECT_EQ(pHolder->GetReferenceCount(), 1);
+
+    pHolder->ReleaseIReference(&objMockIReference, IMS_FALSE);
+    EXPECT_TRUE(pHolder->IsTimerExist(&objMockIReference));
+
+    pHolder->Timer_TimerExpired(pTestImsTimerForRiHolder);
+
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockIReference));
+    EXPECT_EQ(pHolder->GetReferenceCount(), 0);
+
+    PlatformContext::GetInstance()->SetOsFactory(piOldOsFactory);
 }
 
 TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)

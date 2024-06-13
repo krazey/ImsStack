@@ -20,14 +20,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import android.os.AsyncResult;
 import android.os.Looper;
-import android.os.Message;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -36,7 +33,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 
@@ -62,10 +59,9 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
     @Mock private EcbmListener mMockEcbmListener;
     @Mock private ISystem mMockISystem;
     @Mock private MtcCall mMockMtcCall;
-    @Captor private ArgumentCaptor<MtcECallStateTracker.ECallStateHandler> mECallStateHandlerCaptor;
+    @Captor private ArgumentCaptor<IServiceStateTracker.Listener> mListenerCaptor;
     @Captor private ArgumentCaptor<MtcECallStateTracker.MtcECallStateListener>
             mMtcECallStateListenerCaptor;
-
     private MtcECallStateTracker mTestMtcECallStateTracker;
 
     @Before
@@ -104,8 +100,7 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         mTestMtcECallStateTracker.setECallListener();
         mTestMtcECallStateTracker.dispose();
 
-        verify(mMockIServiceStateTracker, times(1))
-                .unregisterForEmergencyServiceStateChanged(any());
+        verify(mMockIServiceStateTracker, times(1)).removeListener(any());
         verify(mMockICallStateTracker, times(1)).removeListener(any());
     }
 
@@ -159,33 +154,24 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         assertFalse(mTestMtcECallStateTracker.isECallStarted());
         mTestMtcECallStateTracker.setState(IUMtcService.ES_IDLE);
         mTestMtcECallStateTracker.addEcbmListener(mMockEcbmListener);
-        MtcECallStateTracker.ECallStateHandler ecallStateHandler = getECallStateHandler();
-        Message msg = Message.obtain();
-        msg.what = 101;
-        msg.obj = null;
-        ecallStateHandler.handleMessage(msg);
+        IServiceStateTracker.Listener listener = getServiceStateListener();
+        listener.onEmergencyServiceStateChanged(null);
+        processAllMessages();
 
         assertTrue(mTestMtcECallStateTracker.getState() == IUMtcService.ES_IDLE);
         assertFalse(mTestMtcECallStateTracker.isECallStarted());
 
-        msg.what = 101;
-        msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(
+        listener.onEmergencyServiceStateChanged(new MtcServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_OPENED,
-                IUMtcService.ES_IDLE_REASON_NONE),
-                null);
-        ecallStateHandler.handleMessage(msg);
+                IUMtcService.ES_IDLE_REASON_NONE));
+        processAllMessages();
 
         assertTrue(mTestMtcECallStateTracker.isECallStarted());
 
         mTestMtcECallStateTracker.setEcbmEntered(false);
-        msg.what = 101;
-        msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(
+        listener.onEmergencyServiceStateChanged(new MtcServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_IDLE,
-                IUMtcService.ES_IDLE_REASON_WITH_ECM),
-                null);
-        ecallStateHandler.handleMessage(msg);
+                IUMtcService.ES_IDLE_REASON_WITH_ECM));
         processAllMessages();
 
         assertTrue(mTestMtcECallStateTracker.isECallStarted());
@@ -194,12 +180,9 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
                 ImsEventDef.IMS_EVENT_ECM_STATE, ImsEventDef.IMS_ECM_STATE_ON, 0);
 
         mTestMtcECallStateTracker.setState(IUMtcService.ES_OPENED);
-        msg.obj = (Object) new AsyncResult(null,
-                (Object) new ImsServiceState(
+        listener.onEmergencyServiceStateChanged(new MtcServiceState(
                 IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_IDLE,
-                ImsEventDef.IMS_ECM_STATE_OFF),
-                null);
-        ecallStateHandler.handleMessage(msg);
+                ImsEventDef.IMS_ECM_STATE_OFF));
         processAllMessages();
 
         assertFalse(mTestMtcECallStateTracker.isECallStarted());
@@ -306,10 +289,9 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         assertFalse(testMtcECallStateTracker.isProceedingExitEmergency());
     }
 
-    private MtcECallStateTracker.ECallStateHandler getECallStateHandler() {
-        verify(mMockIServiceStateTracker).registerForEmergencyServiceStateChanged(
-                mECallStateHandlerCaptor.capture(), eq(101), eq(null));
-        return mECallStateHandlerCaptor.getValue();
+    private IServiceStateTracker.Listener getServiceStateListener() {
+        verify(mMockIServiceStateTracker).addListener(mListenerCaptor.capture());
+        return mListenerCaptor.getValue();
     }
 
     private MtcECallStateTracker.MtcECallStateListener getECallListener() {

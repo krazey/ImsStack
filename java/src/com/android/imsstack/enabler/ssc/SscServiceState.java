@@ -69,7 +69,7 @@ public class SscServiceState {
     @VisibleForTesting
     protected static final int EVENT_DATA_SERVICE_STATE_CHANGED = 2001;
     @VisibleForTesting
-    protected static final int EVENT_DATA_RAT_CHANGED = 2002;
+    protected static final int EVENT_DATA_NETWORK_TYPE_CHANGED = 2002;
     @VisibleForTesting
     protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
     @VisibleForTesting
@@ -84,6 +84,8 @@ public class SscServiceState {
     @VisibleForTesting
     final SscCarrierConfigListener mCarrierConfigListener;
     final SscTimerListener mTimerListener;
+    @VisibleForTesting
+    final IDcNetWatcher.Listener mNetWatcherListener;
     @VisibleForTesting
     SscWifiListener mWifiListener;
     @VisibleForTesting
@@ -110,6 +112,7 @@ public class SscServiceState {
         mSimStateListener = new SscSimStateListener();
         mCarrierConfigListener = new SscCarrierConfigListener();
         mTimerListener = new SscTimerListener();
+        mNetWatcherListener = new NetWatcherListener();
     }
 
     protected void init() {
@@ -117,10 +120,7 @@ public class SscServiceState {
 
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
-            dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
-            dnw.registerForDataServiceStateChanged(mHandler, EVENT_DATA_SERVICE_STATE_CHANGED,
-                    null);
-            dnw.registerForRatChanged(mHandler, EVENT_DATA_RAT_CHANGED, null);
+            dnw.addListener(mNetWatcherListener);
         }
 
         SimInterface sim = getSimInterface();
@@ -136,7 +136,6 @@ public class SscServiceState {
 
         // register listeners related to carrier configuration
         registerWifiConnectionStateChangedEvent();
-        registerMobileDataRoamingStateEvent();
         registerImsRegistrationStateListener();
         registerMobileDataStateListener(mSubId);
         registerCrossSimDataStateListener();
@@ -152,9 +151,7 @@ public class SscServiceState {
 
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
-            dnw.unregisterForAirplaneModeChanged(mHandler);
-            dnw.unregisterForDataServiceStateChanged(mHandler);
-            dnw.unregisterForRatChanged(mHandler);
+            dnw.removeListener(mNetWatcherListener);
         }
 
         SimInterface sim = getSimInterface();
@@ -169,7 +166,6 @@ public class SscServiceState {
 
         // unregister listeners related to carrier configuration
         unregisterWifiConnectionStateChangedEvent();
-        unregisterMobileDataRoamingStateEvent();
         unregisterImsRegistrationStateListener();
         unregisterMobileDataStateListener(mSubId);
         unregisterCrossSimDataStateListener();
@@ -518,24 +514,6 @@ public class SscServiceState {
         }
     }
 
-    private void registerMobileDataRoamingStateEvent() {
-        if (SscConfig.isUtSupportedWhenRoaming(mSlotId)) {
-            return;
-        }
-
-        IDcNetWatcher dnw = getDcNetWatcher();
-        if (dnw != null) {
-            dnw.registerForRoamingStateChanged(mHandler, EVENT_DATA_ROAMING_STATE_CHANGED, null);
-        }
-    }
-
-    private void unregisterMobileDataRoamingStateEvent() {
-        IDcNetWatcher dnw = getDcNetWatcher();
-        if (dnw != null) {
-            dnw.unregisterForRoamingStateChanged(mHandler);
-        }
-    }
-
     private void registerImsRegistrationStateListener() {
         if (!SscConfig.isImsRegistrationRequired(mSlotId)) {
             return;
@@ -677,7 +655,7 @@ public class SscServiceState {
                     handleAirplaneModeChanged();
                     break;
                 case EVENT_DATA_SERVICE_STATE_CHANGED: // FALL-THROUGH
-                case EVENT_DATA_RAT_CHANGED: // FALL-THROUGH
+                case EVENT_DATA_NETWORK_TYPE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_ROAMING_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_CROSS_SIM_DATA_STATE_CHANGED:
                     handleUtFeatureCapabilityChanged();
@@ -747,13 +725,11 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "slotId : " + slotId + ", subId : " + subId);
 
             unregisterWifiConnectionStateChangedEvent();
-            unregisterMobileDataRoamingStateEvent();
             unregisterImsRegistrationStateListener();
             unregisterMobileDataStateListener(mSubId);
             unregisterCrossSimDataStateListener();
 
             registerWifiConnectionStateChangedEvent();
-            registerMobileDataRoamingStateEvent();
             registerImsRegistrationStateListener();
             registerMobileDataStateListener(mSubId);
             registerCrossSimDataStateListener();
@@ -912,6 +888,31 @@ public class SscServiceState {
 
         public boolean getCrossSimDataState() {
             return mCrossSimDataAvailable;
+        }
+    }
+
+    private final class NetWatcherListener implements IDcNetWatcher.Listener {
+        @Override
+        public void onDataServiceStateChanged(int state) {
+            mHandler.sendEmptyMessage(EVENT_DATA_SERVICE_STATE_CHANGED);
+        }
+
+        @Override
+        public void onDataNetworkTypeChanged() {
+            mHandler.sendEmptyMessage(EVENT_DATA_NETWORK_TYPE_CHANGED);
+        }
+
+        @Override
+        public void onRoamingStateChanged(boolean roaming) {
+            if (SscConfig.isUtSupportedWhenRoaming(mSlotId)) {
+                return;
+            }
+            mHandler.sendEmptyMessage(EVENT_DATA_ROAMING_STATE_CHANGED);
+        }
+
+        @Override
+        public void onAirplaneModeChanged(boolean airplaneMode) {
+            mHandler.sendEmptyMessage(EVENT_AIRPLANE_MODE_CHANGED);
         }
     }
 

@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -25,7 +24,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.util.ImsLog;
@@ -68,6 +67,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
     private boolean mEcbmEntered = false;
 
     private MtcECallStateListener mCallListener = null;
+    private MtcServiceStateListener mServiceStateListener = null;
     private int mECallState = ECALLSTATE_IDLE;
     private boolean mEcbmExitedByNewCall = false;
     private boolean mProceedingExitEmergency = false;
@@ -80,8 +80,8 @@ public class MtcECallStateTracker implements IECallStateTracker {
         mHandler = new ECallStateHandler(mContext.getContext().getMainLooper());
 
         IServiceStateTracker sst = mContext.getServiceStateTracker();
-        sst.registerForEmergencyServiceStateChanged(
-                mHandler, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, null);
+        mServiceStateListener = new MtcServiceStateListener();
+        sst.addListener(mServiceStateListener);
 
         initEcbmSupportType();
     }
@@ -89,8 +89,11 @@ public class MtcECallStateTracker implements IECallStateTracker {
     public void dispose() {
         log("dispose");
 
-        IServiceStateTracker sst = mContext.getServiceStateTracker();
-        sst.unregisterForEmergencyServiceStateChanged(mHandler);
+        if (mServiceStateListener != null) {
+            IServiceStateTracker sst = mContext.getServiceStateTracker();
+            sst.removeListener(mServiceStateListener);
+            mServiceStateListener = null;
+        }
 
         if (mCallListener != null) {
             mCallStateTracker.removeListener(mCallListener);
@@ -436,9 +439,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
             switch (msg.what) {
             case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
-
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
                 if (ss != null) {
                     onEmergencyServiceStateChanged(ss.mExtraState, ss.mReason);
                 }
@@ -597,6 +598,16 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 }
 
                 setECallState(ECALLSTATE_IDLE);
+            }
+        }
+    }
+
+    protected class MtcServiceStateListener implements IServiceStateTracker.Listener {
+        @Override
+        public void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
+            if (mHandler != null) {
+                Message.obtain(mHandler, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, serviceState)
+                        .sendToTarget();
             }
         }
     }

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIPTIMERUTIL_H__
-#define __ISIPTIMERUTIL_H__
+#ifndef __INTERFACE_SIP_TIMER_UTIL_H__
+#define __INTERFACE_SIP_TIMER_UTIL_H__
 
 #include "SipDatatypes.h"
 
@@ -33,4 +33,4 @@ public:
 
     virtual SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId) = 0;
 };
-#endif  //__ISIPTIMERUTIL_H__
+#endif  //__INTERFACE_SIP_TIMER_UTIL_H__

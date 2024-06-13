@@ -15,10 +15,10 @@
  */
 #include "SipDatatypes.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipAddrSpec.h"
-#include "msg/SipRequestLine.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipRequestLine.h"
+#include "platform/SipString.h"
 
 SipRequestLine::SipRequestLine() :
         m_pszMethod(SIP_NULL),

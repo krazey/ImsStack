@@ -29,6 +29,7 @@
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
+#include "helper/MockUdpKeepAliveSender.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
@@ -38,9 +39,10 @@
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipMethod.h"
 #include "sipcore/SipStatusCode.h"
+#include "ussi/MockUssiController.h"
 #include "ussi/UssiConstants.h"
-#include "ussi/UssiController.h"
 #include "ussi/UssiData.h"
+#include "ussi/UssiDef.h"
 #include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
@@ -67,9 +69,10 @@ public:
     MockIMtcUiNotifier objUiNotifier;
     MockIMessageUtils objMessageUtils;
     MockMtcTimerWrapper objTimerWrapper;
-    UssiController* pUssiController;
+    MockUssiController* pUssiController;
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
+    MockUdpKeepAliveSender* pUdpKeepAliveSender;
 
 protected:
     virtual void SetUp() override
@@ -103,6 +106,10 @@ protected:
 
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
+        pUdpKeepAliveSender = new MockUdpKeepAliveSender(objCallContext);
+        ON_CALL(objCallContext, GetUdpKeepAliveSender)
+                .WillByDefault(ReturnRef(*pUdpKeepAliveSender));
+
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
         pUssiController = IMS_NULL;
@@ -119,7 +126,7 @@ protected:
     void SetUpForUssi()
     {
         // TODO: use MockUssiController
-        pUssiController = new UssiController(objCallContext, new UssiDataParser());
+        pUssiController = new MockUssiController(objCallContext, new UssiDataParser());
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objISession, GetNextRequest()).WillByDefault(Return(&objIMessage));
 
@@ -135,6 +142,22 @@ protected:
                 .WillByDefault(Return(IMS_SUCCESS));
     }
 };
+
+TEST_F(AlertingStateTest, OnEnterInvokesKeepAliveSenderStart)
+{
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    EXPECT_CALL(*pUdpKeepAliveSender, Start);
+
+    pAlertingState->OnEnter();
+}
+
+TEST_F(AlertingStateTest, OnExitInvokesKeepAliveSenderStop)
+{
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    EXPECT_CALL(*pUdpKeepAliveSender, Stop);
+
+    pAlertingState->OnExit();
+}
 
 TEST_F(AlertingStateTest, HandleUserAlertSendsProvisonalResponseAndStartAlertingTimer)
 {
@@ -210,7 +233,7 @@ TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Reject(objReason));
 }
 
-TEST_F(AlertingStateTest, RejectIncomingCallIfAlertingTimerExpired)
+TEST_F(AlertingStateTest, OnTimerExpiredRejectIncomingCallIfAlertingTimerExpired)
 {
     const CallReasonInfo objReason(CODE_TIMEOUT_NO_ANSWER);
     EXPECT_CALL(objMtcSession, Reject(objReason));
@@ -218,6 +241,16 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAlertingTimerExpired)
 
     EXPECT_EQ(CallStateName::TERMINATING,
             pAlertingState->OnTimerExpired(MtcCallState::TIMER_MT_ALERTING));
+}
+
+TEST_F(AlertingStateTest, OnTimerExpiredInvokesSendEarlyUpdateIfGlareConditionTimerExpired)
+{
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(_));
+
+    EXPECT_EQ(CallStateName::ALERTING,
+            pAlertingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION));
 }
 
 TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionIsRelease)
@@ -416,24 +449,38 @@ TEST_F(AlertingStateTest, SessionRprDeliveryFailedRejectsIncomingCall)
 
 TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
 {
-    // TODO: Mocking UssiController may be needed.
     SetUpForUssi();
 
     EXPECT_CALL(objTimerWrapper, StopAll);
+    EXPECT_CALL(*pUssiController, FormAcceptUssi).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMtcSession, Reject(_)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
 }
 
-TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
+TEST_F(AlertingStateTest, AcceptUssiRejectsIncomingUssiIfAcceptUssiFails)
 {
-    // TODO: Mocking UssiController may be needed.
     SetUpForUssi();
 
+    EXPECT_CALL(*pUssiController, FormAcceptUssi).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_FAILURE));
     const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
+}
+
+TEST_F(AlertingStateTest, AcceptUssiRejectsIncomingUssiIfFormAcceptUssiFails)
+{
+    SetUpForUssi();
+    EXPECT_CALL(*pUssiController, FormAcceptUssi).Times(1).WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objMtcSession, Accept).Times(0);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
+    EXPECT_CALL(objMtcSession, Reject(objReason)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason)).Times(1);
 
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
 }
@@ -444,10 +491,19 @@ TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
     SetUpForUssi();
+    SipMethod objMethod = SipMethod::ACK;
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
+    UssiResult objResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
+    EXPECT_CALL(*pUssiController, ParseUssiBodyAndCheckResult(_, _))
+            .Times(1)
+            .WillOnce(Return(objResult));
+    EXPECT_CALL(objCallContext, CreateClientConnection(_))
+            .Times(1)
+            .WillOnce(Return(reinterpret_cast<ISipClientConnection*>(0x0)));
     EXPECT_CALL(objUiNotifier, SendStarted).Times(1);
 
-    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->UssiStarted(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)

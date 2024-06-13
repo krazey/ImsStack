@@ -34,7 +34,7 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -487,7 +487,7 @@ public class SimAgent implements SimInterface {
         if (tmp != null) {
             String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_USIM);
 
-            mUst = SimUtils.hexStringToBytes(serviceTable);
+            mUst = ImsUtils.hexStringToBytes(serviceTable);
 
             ImsLog.i(getSlotId(), "[SIM] SimRecords: ust=" + serviceTable);
         }
@@ -583,7 +583,7 @@ public class SimAgent implements SimInterface {
 
         if (tmp != null) {
             String serviceTable = tmp.getSimServiceTable(Sim.APP_TYPE_ISIM);
-            mIsimIst = SimUtils.hexStringToBytes(serviceTable);
+            mIsimIst = ImsUtils.hexStringToBytes(serviceTable);
             mIsimDomain = tmp.getIsimDomain();
 
             try {

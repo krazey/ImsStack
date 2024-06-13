@@ -28,9 +28,6 @@ public:
     SipAllowEventsHeader();
     SipAllowEventsHeader(const SipAllowEventsHeader& objHeader);
 
-    /*destructor*/
-    ~SipAllowEventsHeader();
-
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -40,5 +37,8 @@ public:
 
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+
+private:
+    ~SipAllowEventsHeader();
 };
 #endif  //__SIP_ALLOW_EVENTS_HEADER_H__

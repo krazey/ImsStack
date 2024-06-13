@@ -92,12 +92,6 @@ PROTECTED
 IMtcCall* EctController::GetTransferee() const
 {
     IMtcCall* piTransferee = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
-    if (m_nTransfereeKey != piTransferee->GetKey())
-    {
-        IMS_TRACE_E(0, "NullCall.", 0, 0, 0);
-        // TODO: What to do?
-    }
-
     return piTransferee;
 }
 

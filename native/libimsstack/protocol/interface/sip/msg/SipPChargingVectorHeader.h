@@ -28,8 +28,6 @@ public:
     SipPChargingVectorHeader();
     SipPChargingVectorHeader(const SipPChargingVectorHeader& objHeader);
 
-    /*destructor*/
-    ~SipPChargingVectorHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
@@ -43,5 +41,8 @@ public:
     {
         return (m_pChargingVectorList == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+private:
+    ~SipPChargingVectorHeader();
 };
 #endif  //__SIP_P_CHARGING_VECTOR_HEADER_H__

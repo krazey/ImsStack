@@ -213,6 +213,30 @@ public:
      */
     IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType, IN IMS_UINTP nNegoId);
 
+    /**
+     * @brief Update the sdp negotiation result on whether to support anbr feature
+     *
+     * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @param anbrEnabled Anbr negotiation result, if it is true, anbr feature can be supported on
+     * both devices.
+     * @return IMS_BOOL Return IMS_TRUE, when the update is done successfully, IMS_FALSE when it is
+     * failed
+     */
+    IMS_BOOL UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL anbrEnabled);
+
+    /**
+     * @brief Notify the received ANBR information such as mediaType, bitrate and direction received
+     * from the network
+     *
+     * @param anbrMediaType mediaType such as audio and video
+     * @param anbrDirection media stream direction to change the bitrate
+     * @param anbrBitrate bitrate the network wants to change
+     * @return IMS_BOOL Return IMS_TRUE if the parameter is passed successfully, IMS_FALSE if it is
+     * failed
+     */
+    IMS_BOOL NotifyAnbrReceived(
+            IN IMS_UINT32 anbrMediaType, IN IMS_UINT32 anbrDirection, IN IMS_UINT32 anbrBitrate);
+
 private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
     void ClearSession();

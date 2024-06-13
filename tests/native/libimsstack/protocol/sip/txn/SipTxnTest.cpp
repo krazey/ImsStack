@@ -15,15 +15,15 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "SipVector.h"
+#include "include/MockSipTransaction.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
-#include "transport/SipTransportInfo.h"
-#include "SipStackCallback.h"
-#include "txn/SipTimeoutData.h"
-#include "SipVector.h"
-#include "include/MockSipTransaction.h"
 
 SipVector<MockSipTransaction*> objTxnList;
 static int* pnTimerId = SIP_NULL;
@@ -241,7 +241,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
 TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
@@ -318,7 +318,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -401,7 +401,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -458,7 +458,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -510,9 +510,9 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
-    delete pInSipMsg;
+    pInSipMsg->SipDelete();
     pTxn->SipDelete();
-    delete pRespSipMsg;
+    pRespSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, SetUserData)
@@ -586,8 +586,8 @@ TEST_F(SipTxnTest, InvalidTxn)
 
     SipTxn_RemoveFromTxnPool(SIP_NULL);
     pTxn->SipDelete();
-    delete pTxnKey;
-    delete pInSipMsg;
+    pTxnKey->SipDelete();
+    pInSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, AbortTxn)
@@ -630,7 +630,7 @@ TEST_F(SipTxnTest, AbortTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 }  // namespace android

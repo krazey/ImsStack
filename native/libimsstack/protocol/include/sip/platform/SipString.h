@@ -16,11 +16,12 @@
 #ifndef __SIP_STRING_H__
 #define __SIP_STRING_H__
 
-#include "SipDatatypes.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "SipDatatypes.h"
 
 #define SIP_TIME_MAX_SIZE 100
 #define SIP_NUM_SEC_HOURS 100000000
@@ -60,4 +61,4 @@ SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSource, SIP_CHAR cChar);
 
 SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName);
 
-#endif /*__SIP_STRING_H__ */
+#endif  //__SIP_STRING_H__

@@ -27,7 +27,7 @@ LOCAL IMS_BOOL ANY_OFFLINE_BOOL = IMS_TRUE;
 LOCAL IMS_BOOL ANY_USSI_BOOL = IMS_TRUE;
 LOCAL IMS_BOOL ANY_CONFERENCE_BOOL = IMS_TRUE;
 
-TEST(CallInfoTest, CallInfoAssignOperator)
+TEST(CallInfoTest, CallInfoAssignmentOperator)
 {
     CallInfo objCallInfo;
     CallInfo objRightHandSide;

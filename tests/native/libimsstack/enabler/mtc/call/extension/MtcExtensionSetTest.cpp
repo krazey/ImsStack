@@ -92,7 +92,7 @@ TEST(MtcExtensionSetTest, CopyConstructor)
             objCopiedExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
 }
 
-TEST(MtcExtensionSetTest, AssignOperator)
+TEST(MtcExtensionSetTest, AssignmentOperator)
 {
     MockIMtcCallContext objContext;
     MtcExtensionSet objAssignedExtensionSet = CreateExtensionSetSupportsTdialogOnly(objContext);

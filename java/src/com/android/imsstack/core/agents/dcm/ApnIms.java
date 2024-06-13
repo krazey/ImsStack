@@ -19,7 +19,6 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 import android.os.Message;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.base.DeviceConfig;
@@ -31,25 +30,15 @@ import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
-import com.android.imsstack.core.agents.dcmif.IApn;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.util.ImsLog;
 
 /**
  * this is data connection class for ims
  */
 public class ApnIms extends Apn {
-    protected static final int HOME_NETWORK = 0x01;
-    protected static final int ROAMING_NETWORK = 0x02;
-
-    protected IAosInfo mAosInfo;
-    protected boolean mImsPdnRequestWithoutMmtel = false;
-    protected int mNoVopsRequired = 0;
-    private boolean mIsCellularDefaultNetwork = false;
-    private boolean mIsConnectedOverCrossSim = false;
-    private DefaultNetworkCallback mDefaultNetworkCallback = null;
+    protected boolean mIsCellularDefaultNetwork = false;
+    protected boolean mIsConnectedOverCrossSim = false;
+    protected DefaultNetworkCallback mDefaultNetworkCallback = null;
 
     // Public methods --------------------------------------------
     public ApnIms(Context context, int slotId) {
@@ -85,7 +74,6 @@ public class ApnIms extends Apn {
             }
 
             setApnReqState(EApnReqState.APN_REQUEST_DONE);
-            mIsMmtelRequired = isMmtelCapabilityRequired();
             requestNetwork();
 
             setDataState(TelephonyManager.DATA_CONNECTING);
@@ -131,7 +119,6 @@ public class ApnIms extends Apn {
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
         mType = EApnType.IMS;
-        mAosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
 
         registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
         registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
@@ -140,36 +127,9 @@ public class ApnIms extends Apn {
         registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
         registerHandler(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
                 new HandleDefaultNetworkStatusChanged());
-        registerHandler(EVENT_ROAMING_STATE_CHANGED, new HandleRoamingStateChanged());
-        registerHandler(EVENT_VOPS_SUPPORT_CHANGED, new HandleVopsSupportChanged());
 
         registerConfigListener();
         registerDefaultNetworkCallback();
-
-        updateCarrierConfig();
-        if (mDcNetWatcher != null) {
-            mDcNetWatcher.registerForRoamingStateChanged(this, EVENT_ROAMING_STATE_CHANGED, null);
-            mDcNetWatcher.registerForImsVopsChanged(this, EVENT_VOPS_SUPPORT_CHANGED, null);
-        }
-    }
-
-    /**
-     * Notifies the application that data handover information is changed.
-     */
-    @Override
-    protected void notifyHandoverInfoChanged(int handoverState, int networkType, int failCause) {
-        super.notifyHandoverInfoChanged(handoverState, networkType, failCause);
-
-        if (handoverState == IApn.HANDOVER_FAILURE) {
-            ImsLog.d(mSlotId, "notifyIpcanHandoverFailure :: networkType=" + networkType
-                    + ", failCause=" + failCause);
-
-            if (mAosInfo != null) {
-                int targetNetwork = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
-                        ? IApn.IPCAN_CATEGORY_MOBILE : IApn.IPCAN_CATEGORY_WLAN;
-                mAosInfo.notifyIpcanHandoverFailure(targetNetwork, failCause);
-            }
-        }
     }
 
     /**
@@ -185,12 +145,11 @@ public class ApnIms extends Apn {
         }
         unregisterDefaultNetworkCallback();
         registerDefaultNetworkCallback();
-        updateCarrierConfig();
     }
 
     /**
      * If the access network status is changed, update CrossSim connection status and notify it.
-     * @param networkType The type of access network that is carry this data connection
+     * @param networkType The type of access network that carries this data connection
      */
     @Override
     protected void updateCrossSimStatus(@NetworkType int networkType) {
@@ -201,7 +160,9 @@ public class ApnIms extends Apn {
                 + " to " + isCrossSimUsed);
         if (mIsConnectedOverCrossSim != isCrossSimUsed) {
             mIsConnectedOverCrossSim = isCrossSimUsed;
-            mAosInfo.notifyCrossSimStatus(mIsConnectedOverCrossSim);
+            for (Listener l : mListeners) {
+                l.onCrossSimStatusChanged(mIsConnectedOverCrossSim);
+            }
         }
     }
 
@@ -247,43 +208,8 @@ public class ApnIms extends Apn {
         mDefaultNetworkCallback = null;
     }
 
-    protected void evaluateImsNetworkCapability() {
-        if (mDcNetWatcher == null
-                || mDcNetWatcher.getNetworkType() == TelephonyManager.NETWORK_TYPE_UNKNOWN
-                || mDcNetWatcher.isVops()) {
-            return;
-        }
-
-        if (mAPNState != EApnReqState.APN_REQUEST_DONE
-                || mIpcanCategory == IPCAN_CATEGORY_WLAN) {
-            return;
-        }
-
-        if (mIsMmtelRequired != isMmtelCapabilityRequired()) {
-            if (mAosReg != null) {
-                mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                        IAosRegistration.Pcscf.CURRENT,
-                        IAosRegistration.Cause.PDN_CAPABILITY_CHANGED);
-            }
-        }
-    }
-
-    protected boolean isMmtelCapabilityRequired() {
-        if (mImsPdnRequestWithoutMmtel) {
-            return false;
-        }
-
-        if (mDcNetWatcher != null) {
-            return mDcNetWatcher.isRoaming() ? ((mNoVopsRequired & ROAMING_NETWORK) == 0)
-                    : ((mNoVopsRequired & HOME_NETWORK) == 0);
-        }
-
-        return true;
-    }
-
     protected boolean handleIpcanCategory(int networkType) {
         boolean ret = super.handleIpcanCategory(networkType);
-        evaluateImsNetworkCapability();
 
         if (ret) {
             ImsTrafficInterface imsTraffic =
@@ -294,31 +220,6 @@ public class ApnIms extends Apn {
         }
 
         return ret;
-    }
-
-    protected boolean updateCarrierConfig() {
-        if (mDcSettings == null) {
-            ImsLog.d(mSlotId, "mDcSettings is null");
-            return false;
-        }
-
-        mImsPdnRequestWithoutMmtel = mDcSettings.isImsPdnRequestWithoutMmtel();
-
-        int[] noVopsRequired = mDcSettings.getImsPdnEnabledInNoVopsSupport();
-        mNoVopsRequired = 0;
-        if (noVopsRequired != null) {
-            for (int i = 0; i < noVopsRequired.length; i++) {
-                if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_HOME) {
-                    mNoVopsRequired |= HOME_NETWORK;
-                } else if (noVopsRequired[i] == CarrierConfigManager.Ims.NETWORK_TYPE_ROAMING) {
-                    mNoVopsRequired |= ROAMING_NETWORK;
-                }
-            }
-        }
-
-        evaluateImsNetworkCapability();
-
-        return true;
     }
 
     private class HandleNetworkAvailable implements MsgProcInterface {
@@ -431,36 +332,6 @@ public class ApnIms extends Apn {
                 mIsCellularDefaultNetwork = isCellularAvailable;
                 updateCrossSimStatus(mNetworkType);
             }
-        }
-    }
-
-    /**
-     * This handle EVENT_ROAMING_STATE_CHANGED event
-     */
-    private class HandleRoamingStateChanged implements MsgProcInterface {
-        @Override
-        public void procMsg(Message msg) {
-            ImsLog.d(mSlotId, "");
-            if (msg == null || msg.obj == null) {
-                return;
-            }
-
-            evaluateImsNetworkCapability();
-        }
-    }
-
-    /**
-     * This handle EVENT_VOPS_SUPPORT_CHANGED event
-     */
-    private class HandleVopsSupportChanged implements MsgProcInterface {
-        @Override
-        public void procMsg(Message msg) {
-            ImsLog.d(mSlotId, "");
-            if (msg == null || msg.obj == null) {
-                return;
-            }
-
-            evaluateImsNetworkCapability();
         }
     }
 }

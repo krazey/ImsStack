@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipPChargingFunctionAddressesHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipPChargingFunctionAddressesHeader.h"
+#include "platform/SipString.h"
 
 SipPChargingFunctionAddressesHeader::SipPChargingFunctionAddressesHeader() :
         SipHeaderBase(SipHeaderBase::P_CHRG_FUN_ADDR),

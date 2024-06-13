@@ -29,8 +29,6 @@ public:
     SipResourcePriorityHeader();
     SipResourcePriorityHeader(const SipResourcePriorityHeader& objHeader);
 
-    /*destructor*/
-    ~SipResourcePriorityHeader();
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     /*virtual methods*/
@@ -56,5 +54,8 @@ public:
         return ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL)) ? SIP_FALSE
                                                                               : SIP_TRUE;
     }
+
+private:
+    ~SipResourcePriorityHeader();
 };
 #endif  //__SIP_RESOURCE_PRIORITY_HEADER_H__

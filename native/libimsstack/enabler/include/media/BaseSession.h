@@ -86,6 +86,13 @@ public:
      */
     virtual void SetState(IMS_SINT32 state);
 
+    /**
+     * @brief Set the AnbrMode parameter
+     *
+     * @param anbrMode The codec mode of the current activated code in EvsParams and AmrParams
+     */
+    virtual void SetAnbrMode(AnbrMode AnbrMode);
+
 protected:
     IMS_SINT32 m_nSlodId;
     IMediaSessionListener* m_piMediaSessionListener;

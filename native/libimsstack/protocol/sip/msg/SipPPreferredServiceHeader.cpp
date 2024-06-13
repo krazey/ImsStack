@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipPPreferredServiceHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipPPreferredServiceHeader.h"
+#include "platform/SipString.h"
 
 SipPPreferredServiceHeader::SipPPreferredServiceHeader() :
         SipHeaderBase(SipHeaderBase::P_PREFERRED_SERVICE)

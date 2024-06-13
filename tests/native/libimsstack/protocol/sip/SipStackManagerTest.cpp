@@ -15,15 +15,15 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackManager.h"
 #include "ISipNetworkUtil.h"
-#include "ISipTxnListener.h"
 #include "ISipTimerUtil.h"
-#include "transport/SipTransportHandler.h"
+#include "ISipTxnListener.h"
 #include "SipStackCallback.h"
+#include "SipStackError.h"
+#include "SipStackManager.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
-#include "SipStackError.h"
+#include "transport/SipTransportHandler.h"
 
 SipTxn* pTxn = SIP_NULL;
 

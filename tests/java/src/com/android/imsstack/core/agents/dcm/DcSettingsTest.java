@@ -75,44 +75,17 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testIsVopsRequired() throws Exception {
+    public void testIsVopsIgnored() throws Exception {
         when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
                 .thenReturn(false)
                 .thenReturn(true);
 
         // configured to not ignore VoPS
-        assertTrue(mDcSettingsUT.isVopsRequired());
+        assertFalse(mDcSettingsUT.isVopsIgnored());
 
         // configured to ignore VoPS
-        assertFalse(mDcSettingsUT.isVopsRequired());
-    }
-
-    @Test
-    public void testIsImsPdnRequestWithoutMmtel() throws Exception {
-        when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
-                .thenReturn(true)
-                .thenReturn(false);
-
-        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-    }
-
-    @Test
-    public void testGetImsPdnEnabledInNoVopsSupport() throws Exception {
-        int[] emptyList = {};
-        int[] availableList = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME};
-        when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY)))
-                .thenReturn(emptyList)
-                .thenReturn(availableList);
-
-        int[] noNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noNetwork.length, emptyList.length);
-
-        int[] oneNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(oneNetwork.length, availableList.length);
+        assertTrue(mDcSettingsUT.isVopsIgnored());
     }
 
     @Test
@@ -201,10 +174,7 @@ public class DcSettingsTest {
         mDcSettingsUT.init(mMockContext);
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
-        assertFalse(mDcSettingsUT.isVopsRequired());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        int[] noVopsRequired = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noVopsRequired.length, 0);
+        assertTrue(mDcSettingsUT.isVopsIgnored());
         int[] availableRats = mDcSettingsUT.getImsSupportedRats();
         assertEquals(availableRats.length, 0);
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());

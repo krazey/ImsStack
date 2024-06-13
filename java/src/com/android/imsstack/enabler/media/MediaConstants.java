@@ -38,6 +38,7 @@ public class MediaConstants {
     public static final int REQUEST_QOS                   = (IMSMEDIA_REQUEST + 10);
 
     public static final int REQUEST_SET_QNS_MEDIA_THRESHOLD = (IMSMEDIA_REQUEST + 11);
+    public static final int REQUEST_UPDATE_ANBR_ENABLED_CONFIG = (IMSMEDIA_REQUEST + 12);
 
     // Requests for video
     public static final int IMSMEDIA_VIDEO_REQUEST        = (IMSMEDIA_REQUEST + 50);
@@ -66,6 +67,8 @@ public class MediaConstants {
     public static final int NOTIFY_CALL_QUALITY_CHANGE    = (IMSMEDIA_RESPONSE + 16);
     public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 17);
     public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 18);
+    public static final int TRIGGER_ANBR_QUERY            = (IMSMEDIA_RESPONSE + 20);
+    public static final int NOTIFY_ANBR_RECEIVED          = (IMSMEDIA_RESPONSE + 21);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);

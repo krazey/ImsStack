@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipDebug.h"
+#include "SipStackError.h"
+#include "platform/SipMemory.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
-#include "SipDebug.h"
-#include "SipStackError.h"
-#include "platform/SipString.h"
-#include "platform/SipMemory.h"
 
 /*****************************************************************************
   Macro
@@ -180,7 +180,7 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
         SIP_DEBUG_STACKBUG(
                 ESIPTRACE_MODTRANSP, "OnRecvTransp: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
 
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         return SIP_FALSE;
     }
 
@@ -343,7 +343,7 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
                 SIP_ZERO, SIP_ZERO);
     }
 
-    delete pInviteTxnKey;
+    pInviteTxnKey->SipDelete();
 
     return (bTxnExist == SIP_TRUE) ? SIP_TRUE : SIP_FALSE;
 }
@@ -461,7 +461,7 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
-        delete pTxnKey;
+        pTxnKey->SipDelete();
         return SIP_FALSE;
     }
 

@@ -165,7 +165,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = -1;
         mExtraMessage = "";
 
-        logIn();
+        logLn();
     }
 
     public CallReasonInfo(CallReasonInfo callReasonInfo) {
@@ -175,7 +175,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = callReasonInfo.mExtraCode;
         mExtraMessage = callReasonInfo.mExtraMessage;
 
-        logIn();
+        logLn();
     }
 
     public CallReasonInfo(Parcel source) {
@@ -190,13 +190,13 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = extraCode;
         mExtraMessage = extraMessage;
 
-        logIn();
+        logLn();
     }
 
     /**
      * Helper for leaving the logs.
     */
-    public void logIn() {
+    public void logLn() {
         ImsLog.i("mCode : " + mCode
                 + " mExtraCode : " + mExtraCode
                 + " mExtraMessage : " + mExtraMessage
@@ -213,7 +213,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = source.readInt();
         mExtraMessage = source.readString();
 
-        logIn();
+        logLn();
     }
 
     @Override

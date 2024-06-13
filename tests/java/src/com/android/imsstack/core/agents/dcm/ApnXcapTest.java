@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
@@ -172,7 +171,7 @@ public class ApnXcapTest {
         mTestableLooper.processAllMessages();
 
         assertEquals(TelephonyManager.DATA_CONNECTED, mApnXcap.getDataState());
-        verify(mMockIDcNetWatcher).notifyResult(
+        verify(mMockIDcNetWatcher).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_CONNECTED);
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
@@ -197,7 +196,7 @@ public class ApnXcapTest {
 
         assertFalse(mApnXcap.hasMessages(Apn.EVENT_WAITING_IPV6_ADDRESS));
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnXcap.getDataState());
-        verify(mMockIDcNetWatcher, times(2)).notifyResult(
+        verify(mMockIDcNetWatcher, times(2)).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
         verify(mMockISystem, times(2)).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
@@ -234,7 +233,7 @@ public class ApnXcapTest {
         mApnXcap.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIDcNetWatcher).notifyResult(
+        verify(mMockIDcNetWatcher).notifyDataConnectionState(
                 EApnType.XCAP, EDataState.DATA_STATE_IP_CHANGED);
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
@@ -269,41 +268,6 @@ public class ApnXcapTest {
 
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.XCAP.getType(), EDataState.DATA_STATE_CONNECTED.getState());
-    }
-
-    @Test
-    public void testAirplaneModeChanged() throws Exception {
-        replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
-        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_AIRPLANE_MODE_CHANGED;
-        AsyncResult ar = new AsyncResult(null, true, null);
-        msg.obj = ar;
-        mApnXcap.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-
-        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
-    }
-
-    @Test
-    public void testAirplaneModeChanged_invalidCase() throws Exception {
-        replaceInstance(Apn.class, "mNetworkCallback", mApnXcap, mMockNetworkCallback);
-        mApnXcap.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-
-        Message msg1 = Message.obtain();
-        msg1.what = Apn.EVENT_AIRPLANE_MODE_CHANGED;
-        msg1.obj = null;
-        mApnXcap.sendMessage(msg1);
-
-        Message msg2 = Message.obtain();
-        msg2.what = Apn.EVENT_AIRPLANE_MODE_CHANGED;
-        AsyncResult ar = new AsyncResult(null, null, null);
-        msg2.obj = ar;
-        mApnXcap.sendMessage(msg2);
-        mTestableLooper.processAllMessages();
-
-        verify(mConnectivityManager, never()).unregisterNetworkCallback(mMockNetworkCallback);
     }
 
     @Test

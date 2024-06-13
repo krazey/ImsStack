@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.annotation.NonNull;
 import android.location.Location;
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -41,7 +40,6 @@ import android.text.TextUtils;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
-import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -64,7 +62,7 @@ import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
@@ -73,7 +71,7 @@ import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFactory;
 import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
@@ -127,7 +125,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private ConferenceProxy mConferenceProxy = null;
     private MoPendingCall mMoPendingCall = null;
     private TtyModeListenerProxy mTtyModeListener = null;
-    private CallApnStateListener mApnStateListener = null;
+    private ApnListener mApnListener = null;
+    private MtcServiceStateListener mServiceStateListener = null;
     private final ImsVideoCallSession mVideoCallSession;
     private final ImsVideoCallProviderBase mVideoCallProvider;
     // WFC w/ geolocation {
@@ -212,7 +211,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             tmt.addListener(mTtyModeListener);
         }
 
-        setApnStateListener();
+        setApnListener();
         updateCallExtraForRatType(mCallProfile, true);
     }
 
@@ -229,7 +228,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         clearPendingCall();
         clearLocationBasedCall();
         clearUsatBasedCall();
-        clearApnStateListener();
+        clearApnListener();
 
         logi("close");
 
@@ -1187,6 +1186,26 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         mCall.sendRtpHeaderExtensions(rtpHeaderExtensions);
+    }
+
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     * @hide
+     */
+    @Override
+    public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        if (mCall == null) {
+            loge("callSessionNotifyAnbr :: session is null");
+            return;
+        }
+
+        mCall.notifyAnbr(mediaType, direction, bitsPerSecond);
     }
 
     // @Override
@@ -2606,12 +2625,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         public void dispose() {
-            IServiceStateTracker sst = mCallContext.getServiceStateTracker();
-
-            if (mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-                sst.unregisterForEmergencyServiceStateChanged(this);
-            } else {
-                sst.unregisterForServiceStateChanged(this);
+            if (mServiceStateListener != null) {
+                IServiceStateTracker sst = mCallContext.getServiceStateTracker();
+                sst.removeListener(mServiceStateListener);
+                mServiceStateListener = null;
             }
 
             stopImsRegWaitingTimer();
@@ -2630,13 +2647,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         public void start(String callee) {
             mCallee = callee;
 
-            IServiceStateTracker sst = mCallContext.getServiceStateTracker();
-
-            if (mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-                sst.registerForEmergencyServiceStateChanged(
-                        this, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, null);
-            } else {
-                sst.registerForServiceStateChanged(this, EVENT_SERVICE_STATE_CHANGED, null);
+            if (mServiceStateListener == null) {
+                IServiceStateTracker sst = mCallContext.getServiceStateTracker();
+                mServiceStateListener = new MtcServiceStateListener();
+                sst.addListener(mServiceStateListener);
             }
 
             if (mImsRegWaitingTimerRequired) {
@@ -2653,8 +2667,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             switch (msg.what) {
             case EVENT_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
 
                 logi("MoPendingCall :: " + ss);
 
@@ -2671,8 +2684,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
 
                 logi("MoPendingCall :: " + ss);
 
@@ -2700,7 +2712,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
-        private int startCall(ImsServiceState ss) {
+        private int startCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
             }
@@ -2728,7 +2740,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return RESULT_NOK;
         }
 
-        private int startEmergencyCall(ImsServiceState ss) {
+        private int startEmergencyCall(MtcServiceState ss) {
             if (ss == null) {
                 return RESULT_NOK;
             }
@@ -2802,7 +2814,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
         }
 
-        private void notifyPendingECallStartFailed(ImsServiceState ss) {
+        private void notifyPendingECallStartFailed(MtcServiceState ss) {
             // Check whether call is already terminated or not, and
             // notify call start failed using the existing terminated reason if it's terminated
             if (notifyCallStartFailedIfAlreadyTerminated()) {
@@ -3133,7 +3145,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
                     return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_USSD;
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                        && SimUtils.containsWildValue(dialString)) {
+                        && ImsUtils.hasWildValueForDialString(dialString)) {
                     return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO;
                 }
             } else {
@@ -3142,7 +3154,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
                     return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_USSD;
                 } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                        && SimUtils.containsWildValue(dialString)) {
+                        && ImsUtils.hasWildValueForDialString(dialString)) {
                     return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
                 }
             }
@@ -3151,14 +3163,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // for all the call control types except for the exceptional case.
             if ((newCcType == Usat.CALL_CONTROL_TYPE_SS
                     || newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL)
-                            && SimUtils.containsWildValue(dialString)) {
+                            && ImsUtils.hasWildValueForDialString(dialString)) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
             }
         } else if (oldCcType == Usat.CALL_CONTROL_TYPE_USSD) {
             if (newCcType == Usat.CALL_CONTROL_TYPE_SS) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_SS;
             } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
-                    && SimUtils.containsWildValue(dialString)) {
+                    && ImsUtils.hasWildValueForDialString(dialString)) {
                 return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
             }
         }
@@ -3215,7 +3227,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private class CallApnStateListener extends ApnStateListener {
+    private class ApnListener implements IApn.Listener {
         @Override
         public void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
             log("onIpcanCategoryChanged :: apnType="
@@ -3231,6 +3243,20 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
+    private class MtcServiceStateListener implements IServiceStateTracker.Listener {
+        @Override
+        public void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
+            Message.obtain(mMoPendingCall, MoPendingCall.EVENT_EMERGENCY_SERVICE_STATE_CHANGED,
+                    serviceState).sendToTarget();
+        }
+
+        @Override
+        public void onNormalServiceStateChanged(MtcServiceState serviceState) {
+            Message.obtain(mMoPendingCall, MoPendingCall.EVENT_SERVICE_STATE_CHANGED,
+                    serviceState).sendToTarget();
+        }
+    }
+
     private int getApnType(ImsCallProfile profile) {
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             //To-Do:- Need to find the way Emergency call Over VoWiFi
@@ -3243,8 +3269,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private void clearApnStateListener() {
-        if (mApnStateListener == null) {
+    private void clearApnListener() {
+        if (mApnListener == null) {
             return;
         }
 
@@ -3252,13 +3278,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
-            apn.removeListener(mApnStateListener);
+            apn.removeListener(mApnListener);
         }
 
-        mApnStateListener = null;
+        mApnListener = null;
     }
 
-    private void setApnStateListener() {
+    private void setApnListener() {
         if (!ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId())) {
             return;
         }
@@ -3267,13 +3293,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         IApn apn = (dcApn != null) ? dcApn.getApnControl(getApnType(mCallProfile)) : null;
 
         if (apn != null) {
-            mApnStateListener = new CallApnStateListener();
-            apn.addListener(mApnStateListener);
+            mApnListener = new ApnListener();
+            apn.addListener(mApnListener);
         }
     }
 
     private boolean updateCallExtraForRatType(ImsCallProfile profile, boolean isInitialSet) {
-        if (mApnStateListener == null) {
+        if (mApnListener == null) {
             // If Wi-Fi calling is not supported, do not update this call extra.
             return false;
         }
@@ -4520,6 +4546,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onCallRtpHeaderExtensionsReceived");
             mCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            logi("onTriggerAnbrQueryReceived");
+            mCallback.invokeSendAnbrQuery(mediaType, direction, bitsPerSecond);
         }
 
         private void clearTransferRequestedSessionEctDetails() {

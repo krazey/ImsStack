@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipParameters.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipParameters.h"
+#include "platform/SipString.h"
 
 SipParameterList::SipParameterList() :
         m_objPrmList(SipVector<SipNameValue*>())
@@ -48,7 +48,7 @@ SipParameterList::~SipParameterList()
 {
     while (m_objPrmList.IsEmpty() != SIP_TRUE)
     {
-        delete m_objPrmList.Top();
+        m_objPrmList.Top()->SipDelete();
         m_objPrmList.Pop();
     }
 }
@@ -131,7 +131,7 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
         return SIP_FALSE;
     }
 
-    delete m_objPrmList.GetAt(nIndex);
+    m_objPrmList.GetAt(nIndex)->SipDelete();
     m_objPrmList.RemoveAt(nIndex);
 
     return SIP_TRUE;
@@ -348,7 +348,7 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "Decode: Name Val Decode fail", SIP_ZERO, SIP_ZERO);
-            delete pNameValue;
+            pNameValue->SipDelete();
             return SIP_FALSE;
         }
 
@@ -356,7 +356,7 @@ SIP_BOOL SipParameterList::Decode(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "Decode: Append in list Failed", SIP_ZERO, SIP_ZERO);
-            delete pNameValue;
+            pNameValue->SipDelete();
             return SIP_FALSE;
         }
 

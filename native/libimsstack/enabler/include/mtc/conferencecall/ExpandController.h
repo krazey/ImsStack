@@ -27,7 +27,7 @@ struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
 
-class ExpandController final : public ConferenceController
+class ExpandController : public ConferenceController
 {
 public:
     explicit ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,

@@ -39,7 +39,7 @@ public final class Log {
     private static int sLogOptions = -1;
 
     static {
-        if (!"user".equals(android.os.Build.TYPE)) {
+        if (!ImsUtils.IS_USER) {
             sDebug = 1;
         }
     }

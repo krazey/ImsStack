@@ -19,45 +19,20 @@
 
 #include "ImsTypeDef.h"
 #include "IpAddress.h"
+#include "MediaBaseProfile.h"
 
-class TextProfile
+/**
+ * TextProfile is used to keep the SDP negotiation information for text like
+ * SDP offer, answer and the negotiated media information.
+ */
+class TextProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
-    {
-    public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                nSamplingRate(0)
-        {
-        }
-
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate)
-        {
-        }
-
-        RtpMap& operator=(IN const RtpMap& obj)
-        {
-            if (this != &obj)
-            {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-            }
-            return (*this);
-        }
-    };
-
-public:
-    class RedFmtp
+    /**
+     * RedFmtp attributes are used within the SDP to carry RED parameters that provide
+     * extra configuration details about a specific RED codec used in the RTP stream.
+     */
+    class RedFmtp : public BaseFmtp
     {
     public:
         IMS_SINT32 nRedLevel;
@@ -76,6 +51,8 @@ public:
                 nRedLevel(obj.nRedLevel),
                 nRedPayload(obj.nRedPayload){};
 
+        virtual ~RedFmtp(){};
+
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
             if (this != &obj)
@@ -88,66 +65,39 @@ public:
     };
 
 public:
-    class Payload
+    /**
+     * Payload for text is the actual text data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        void* pFmtp;
-
-    public:
         Payload() :
-                pFmtp(IMS_NULL){};
+                BasePayload(){};
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                BasePayload(obj)
         {
-            if (objRtpMap.strPayloadType.Equals("red"))
+            if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
             {
-                pFmtp = new TextProfile::RedFmtp(
-                        *reinterpret_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                pFmtp = new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
             }
         }
 
-        virtual ~Payload()
-        {
-            if (objRtpMap.strPayloadType.Equals("red"))
-            {
-                if (pFmtp != IMS_NULL)
-                {
-                    delete reinterpret_cast<TextProfile::RedFmtp*>(pFmtp);
-                }
-            }
-        }
+        virtual ~Payload() {}
 
         Payload& operator=(IN const Payload& obj)
         {
             if (this != &obj)
             {
-                objRtpMap = obj.objRtpMap;
+                BasePayload::operator=(obj);
 
-                if (objRtpMap.strPayloadType.Equals("red"))
+                if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
                 {
                     pFmtp = new TextProfile::RedFmtp(
-                            *reinterpret_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                            *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
                 }
             }
 
             return (*this);
-        }
-
-        void SetRtpMap(IN const IMS_UINT32 payloadNum, IN const AString& payloadType,
-                IN const IMS_UINT32 samplingRate)
-        {
-            objRtpMap.nPayloadNum = payloadNum;
-            objRtpMap.strPayloadType = payloadType;
-            objRtpMap.nSamplingRate = samplingRate;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
         }
     };
 

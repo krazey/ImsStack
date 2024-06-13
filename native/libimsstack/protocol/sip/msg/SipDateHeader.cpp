@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipDateHeader.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
+#include "msg/SipDateHeader.h"
 #include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 #define MAX_WEEK_LEN  3
 #define MAX_MONTH_LEN 3
