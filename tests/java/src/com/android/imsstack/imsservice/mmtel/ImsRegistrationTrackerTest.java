@@ -307,12 +307,15 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testnotifyTechnologyChangeFailed() {
         assertNotNull(mRegTracker.getRegistration());
-        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.NONE,
+        mAosRegListener.notifyTechnologyChangeFailed(
+                IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.NONE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         assertNotNull(mRegTracker.getRegistration());
-        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyTechnologyChangeFailed(
+                IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 DataFailCause.IWLAN_IKEV2_AUTH_FAILURE, null);
-
     }
 
     @Test

@@ -53,11 +53,12 @@ public interface IRegistrationNotifier {
      * Notify the framework that the handover from the current radio technology
      * to the other technology has failed.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the current network type (before handover)
      * @param reason the handover failure reason.
      * @param message the handover failure message.
      */
-    void notifyTechnologyChangeFailed(int networkType, int reason, String message);
+    void notifyTechnologyChangeFailed(int regType, int networkType, int reason, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter

@@ -1040,7 +1040,7 @@ public class SscServiceStateTest {
         when(mMockAosService.getRegistrationState()).thenReturn(RegistrationState.REGISTERED);
 
         createAndInitSscServiceState();
-        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyTechnologyChangeFailed(0, 0, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);

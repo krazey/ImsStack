@@ -66,6 +66,7 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniIms;
@@ -1031,6 +1032,7 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED);
+        parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.LTE);
         parcel.writeInt(reason);
         parcel.setDataPosition(0);
@@ -1038,7 +1040,7 @@ public class AosServiceTest extends ImsStackTest {
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
-        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(
+        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(RegistrationType.NORMAL,
                 NetworkType.LTE, reason, null);
     }
 

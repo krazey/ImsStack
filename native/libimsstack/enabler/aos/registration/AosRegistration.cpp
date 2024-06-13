@@ -550,6 +550,26 @@ PUBLIC VIRTUAL AosRegistrationType AosRegistration::GetRegType()
     return m_eRegType;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosRegistration::GetImsRegType()
+{
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        return IMS_REG_TYPE_NORMAL;
+    }
+
+    if (m_eRegType == AosRegistrationType::EMERGENCY)
+    {
+        return (IsFakeRegistration() ? IMS_REG_TYPE_FAKE : IMS_REG_TYPE_EMERGENCY);
+    }
+
+    if (m_eRegType == AosRegistrationType::FAKE)
+    {
+        return IMS_REG_TYPE_FAKE;
+    }
+
+    return IMS_REG_TYPE_INVALID;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosRegistration::IsRegistered()
 {
     return (IsRefreshing() || m_nState == STATE_REGISTERED);

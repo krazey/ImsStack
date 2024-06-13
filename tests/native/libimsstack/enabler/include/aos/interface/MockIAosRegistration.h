@@ -47,6 +47,7 @@ public:
             OUT AString& strValue), (override));
     MOCK_METHOD(IMS_UINT32, GetState, (), (override));
     MOCK_METHOD(AosRegistrationType, GetRegType, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetImsRegType, (), (override));
     MOCK_METHOD(IMS_BOOL, IsRegistered, (), (override));
     MOCK_METHOD(IMS_BOOL, IsRefreshing, (), (override));
     MOCK_METHOD(IMS_BOOL, IsRetryTimer, (), (override));

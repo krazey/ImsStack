@@ -83,7 +83,8 @@ public:
     MOCK_METHOD(IMS_BOOL, NotifyDeregistered,
             (IN AosNetworkType eNetworkType, IN AosReasonCode eReason), (override));
     MOCK_METHOD(IMS_BOOL, NotifyTechnologyChangeFailed,
-            (IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode), (override));
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode),
+            (override));
     MOCK_METHOD(
             IMS_BOOL, NotifyAssociatedUriChanged, (IN const ImsList<AString>& objUris), (override));
     MOCK_METHOD(IMS_BOOL, NotifyCapabilitiesUpdateFailed,

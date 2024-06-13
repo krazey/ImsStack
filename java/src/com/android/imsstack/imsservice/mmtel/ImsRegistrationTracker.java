@@ -713,10 +713,11 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int reason, String message) {
+        public void notifyTechnologyChangeFailed(int regType, int networkType, int reason,
+                String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
 
-            mRegImpl.notifyTechnologyChangeFailed(radioTech, reason, message);
+            mRegImpl.notifyTechnologyChangeFailed(regType, radioTech, reason, message);
         }
 
         @Override

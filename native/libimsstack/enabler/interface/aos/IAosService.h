@@ -144,13 +144,15 @@ public:
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The technology that has failed to be changed to.
      * @param nCauseCode Handover failure cause.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
      * @see class android.telephony.DataFailCause
      */
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
-            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -383,7 +385,7 @@ enum class AosPhoneNumberRetryCommand
 {
     INITIAL = 0,
     REFRESH = 1,
-    CLEAR = 2,
+    CLEAR = 2
 };
 
 #endif  // INTERFACE_AOS_SERVICE_H_

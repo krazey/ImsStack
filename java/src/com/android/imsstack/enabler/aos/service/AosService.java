@@ -710,9 +710,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void onTechnologyChangeFailed(int networkType, int causeCode) {
+    private void onTechnologyChangeFailed(int regType, int networkType, int causeCode) {
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
-            l.notifyTechnologyChangeFailed(networkType, causeCode, null);
+            l.notifyTechnologyChangeFailed(regType, networkType, causeCode, null);
         }
     }
 
@@ -780,10 +780,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         mHandler.post(() -> onDeregistered(networkType, reason));
     }
 
-    private void updateTechnologyChangeFailed(int networkType, int reason) {
-        ImsLog.d(mSlotId, "updateTechnologyChangeFailed :: networkType(" + networkType +
-                "), reason(" + reason + ")");
-        mHandler.post(() -> onTechnologyChangeFailed(networkType, reason));
+    private void updateTechnologyChangeFailed(int regType, int networkType, int reason) {
+        ImsLog.d(mSlotId, "updateTechnologyChangeFailed :: regType(" + regType + "), networkType("
+                + networkType + "), reason(" + reason + ")");
+
+        mHandler.post(() -> onTechnologyChangeFailed(regType, networkType, reason));
     }
 
     private void updateAssociatedUriChanged(Uri[] uris) {
@@ -940,10 +941,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     updateDeregistered(networkType, reason);
                 }
                 case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
+                    int regType = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
-                    updateTechnologyChangeFailed(networkType, reason);
+                    updateTechnologyChangeFailed(regType, networkType, reason);
                 }
                 case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED -> {
                     int count = parcel.readInt();

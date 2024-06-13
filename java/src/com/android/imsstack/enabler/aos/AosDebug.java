@@ -1158,7 +1158,8 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
+        public void notifyTechnologyChangeFailed(int regType, int networkType, int causeCode,
+                String message) {
             // Do nothing.
         }
 
