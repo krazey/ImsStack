@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "ISessionDescriptor.h"
+#include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
-#include "text/TextNego.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaConfigUtil.h"
-#include "MediaResourceManager.h"
-#include "MediaManager.h"
+
+#include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
+#include "config/MediaConfigUtil.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
+#include "text/TextNego.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -37,7 +37,7 @@ PUBLIC
 TextNego::TextNego(IN const TextNego& objTextNego) :
         BaseNego(objTextNego.GetSlotId())
 {
-    copy(&objTextNego);
+    Copy(&objTextNego);
 }
 
 PUBLIC
@@ -45,7 +45,7 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
 {
     if (this != &obj)
     {
-        copy(&obj);
+        Copy(&obj);
     }
     return (*this);
 }
@@ -53,35 +53,6 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
 PUBLIC VIRTUAL TextNego::~TextNego()
 {
     IMS_TRACE_I("~TextNego()", 0, 0, 0);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-        if (pResourceMngr != IMS_NULL)
-        {
-            if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-            {
-                pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-            }
-        }
-    }
-
-    IMS_TRACE_I("~TextNego() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
-
-    while (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pOaModel = m_listOaModel.GetAt(0);
-
-        if (pOaModel != IMS_NULL)
-        {
-            delete pOaModel;
-        }
-
-        m_listOaModel.RemoveAt(0);
-    }
 }
 
 PUBLIC VIRTUAL void TextNego::CreateProfiles(
@@ -246,45 +217,6 @@ PUBLIC VIRTUAL void TextNego::FinalizeSdp(
     {
         IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
-}
-
-PUBLIC IMS_BOOL TextNego::SetPort(IN IMS_UINT32 nPort)
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (m_pBaseProfile == IMS_NULL || pMediaManager == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    // Release Current Port
-    if (m_pBaseProfile->nDataPort != 0)
-    {
-        pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-    }
-
-    IMS_TRACE_I("SetPort() - changed Data Port[%d]->[%d]", m_pBaseProfile->nDataPort, nPort, 0);
-
-    if (nPort != 0)
-    {
-        m_pBaseProfile->nDataPort = pResourceMngr->AcquireRtpPort(nPort, nPort);
-        m_pBaseProfile->nControlPort = m_pBaseProfile->nDataPort + 1;
-    }
-    else
-    {
-        m_pBaseProfile->nDataPort = 0;
-        m_pBaseProfile->nControlPort = 0;
-        IMS_TRACE_I("SetPort() - data port is 0", 0, 0, 0);
-    }
-
-    return IMS_TRUE;
 }
 
 PUBLIC
@@ -501,43 +433,24 @@ PROTECTED TextProfile* TextNego::GetNegotiatedProfile(IN OaModel* pOaModel)
 }
 
 PRIVATE
-void TextNego::copy(IN const TextNego* pTextNego)
+void TextNego::Copy(IN const TextNego* pTextNego)
 {
     if (m_pBaseProfile == IMS_NULL || pTextNego == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_I("copy() - list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
+    IMS_TRACE_I(
+            "Copy() - referenced OaModel list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To release previous used port
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-        }
-    }
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
     delete m_pBaseProfile;
     m_pBaseProfile = new TextProfile(ProfileCasting(pTextNego->m_pBaseProfile));
 
-    if (pResourceMngr != IMS_NULL)
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
-        // To add port (it would be duplicated)
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->AcquireRtpPort(m_pBaseProfile->nDataPort, m_pBaseProfile->nDataPort);
-        }
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
     }
 
     m_pEnvironment = pTextNego->m_pEnvironment;
@@ -551,9 +464,9 @@ void TextNego::copy(IN const TextNego* pTextNego)
     OaModel* pOldOaModel = pTextNego->m_listOaModel.GetAt(0);
     pNewOaModel->pLocalProfile = new TextProfile(GetLocalProfile(pOldOaModel));
     m_listOaModel.Append(pNewOaModel);
-    this->m_pConfig = pTextNego->m_pConfig;
 
-    IMS_TRACE_I("copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
+    m_pConfig = pTextNego->m_pConfig;
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
 }
 
 PRIVATE IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,

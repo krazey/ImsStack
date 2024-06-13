@@ -94,10 +94,21 @@ public:
         return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->nDataPort : 0;
     };
 
+    /**
+     * @brief Set the local port number of the media profile
+     *
+     * @param nPort The port number
+     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
+     * invalid port number which is already reserved
+     */
+    IMS_BOOL SetPort(IN IMS_UINT32 nPort);
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
+
+    void DestroyListOaModel();
 
 protected:
     MediaBaseProfile* m_pBaseProfile;

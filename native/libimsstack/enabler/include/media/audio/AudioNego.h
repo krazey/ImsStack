@@ -94,15 +94,6 @@ public:
     virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
     /**
-     * @brief Set the local port number of the AudioProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
      * @brief Get the negotiated remote ip address
      *
      * @return const IpAddress& The ip address
@@ -169,7 +160,7 @@ protected:
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
 
 private:
-    void copy(IN const AudioNego* pAudioNego);
+    void Copy(IN const AudioNego* pAudioNego);
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDir);
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "ISessionDescriptor.h"
+#include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpRtcpFeedback.h"
+
+#include "MediaNegoUtil.h"
+#include "MediaProfileFactory.h"
+#include "MediaProfileUtil.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
 #include "video/VideoNego.h"
 #include "video/VideoNegoAvc.h"
 #include "video/VideoNegoHevc.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
-#include "MediaResourceManager.h"
-#include "MediaManager.h"
-#include "MediaProfileFactory.h"
-#include "MediaProfileUtil.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -58,18 +58,6 @@ VideoNego& VideoNego::operator=(IN const VideoNego& obj)
 PUBLIC VideoNego::~VideoNego()
 {
     IMS_TRACE_I("~VideoNego()", 0, 0, 0);
-    VideoNego::DestroyProfiles();
-
-    while (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pOaModel = m_listOaModel.GetAt(0);
-
-        if (pOaModel != IMS_NULL)
-        {
-            delete pOaModel;
-        }
-        m_listOaModel.RemoveAt(0);
-    }
 }
 
 PUBLIC VIRTUAL void VideoNego::CreateProfiles(
@@ -92,30 +80,6 @@ PUBLIC VIRTUAL void VideoNego::CreateProfiles(
 
     delete m_pBaseProfile;
     m_pBaseProfile = pProfile;
-}
-
-PUBLIC
-void VideoNego::DestroyProfiles()
-{
-    if (m_pBaseProfile != IMS_NULL)
-    {
-        m_pBaseProfile->DeletePayloads();
-
-        MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-        if (pMediaManager != IMS_NULL)
-        {
-            MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-            if (pResourceMngr != IMS_NULL)
-            {
-                if (m_pBaseProfile->nDataPort != 0)
-                {
-                    pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-                }
-            }
-        }
-    }
 }
 
 PUBLIC VIRTUAL IMS_BOOL VideoNego::FormSdp(IN NEGO_STATE eNegoState,
@@ -260,50 +224,6 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSdp(
     {
         IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
-}
-
-PUBLIC
-IMS_BOOL VideoNego::SetPort(IN IMS_UINT32 nPort)
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (m_pBaseProfile == IMS_NULL || pMediaManager == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    // Release Current Port
-    if (m_pBaseProfile->nDataPort != 0)
-    {
-        pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-    }
-
-    IMS_TRACE_I(
-            "SetPort() - Video Changed Data Port[%d]->[%d]", m_pBaseProfile->nDataPort, nPort, 0);
-
-    if (nPort != 0)
-    {
-        // Acquire New Port
-        m_pBaseProfile->nDataPort = pResourceMngr->AcquireRtpPort(nPort, nPort);
-        m_pBaseProfile->nControlPort = m_pBaseProfile->nDataPort + 1;
-    }
-    else  // port 0 case
-    {
-        // Set to Port 0
-        m_pBaseProfile->nDataPort = 0;
-        m_pBaseProfile->nControlPort = 0;
-
-        IMS_TRACE_I("SetPort() - Video Data Port is 0!!!", 0, 0, 0);
-    }
-
-    return IMS_TRUE;
 }
 
 PUBLIC
@@ -516,34 +436,14 @@ void VideoNego::Copy(IN const VideoNego* pVideoNego)
 
     IMS_TRACE_I("Copy() - listOaModel size[%d]", pVideoNego->m_listOaModel.GetSize(), 0, 0);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To release previous used port
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-        }
-    }
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
     delete m_pBaseProfile;
     m_pBaseProfile = new VideoProfile(ProfileCasting(pVideoNego->m_pBaseProfile));
 
-    if (pResourceMngr != IMS_NULL)
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
-        // To add port (it would be duplicated)
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->AcquireRtpPort(m_pBaseProfile->nDataPort, m_pBaseProfile->nDataPort);
-        }
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
     }
 
     m_bNegotiatedCvoResult = pVideoNego->m_bNegotiatedCvoResult;

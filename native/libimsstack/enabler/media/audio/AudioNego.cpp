@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "ISessionDescriptor.h"
+#include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
 
-#include "MediaManager.h"
+#include "MediaNegoUtil.h"
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
-#include "MediaResourceManager.h"
 #include "audio/AudioNego.h"
 #include "audio/AudioNegoAmr.h"
 #include "audio/AudioNegoEvs.h"
@@ -49,7 +48,7 @@ PUBLIC
 AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
         BaseNego(objAudioNego.GetSlotId())
 {
-    copy(&objAudioNego);
+    Copy(&objAudioNego);
 }
 
 PUBLIC
@@ -57,41 +56,14 @@ AudioNego& AudioNego::operator=(IN const AudioNego& obj)
 {
     if (this != &obj)
     {
-        copy(&obj);
+        Copy(&obj);
     }
     return (*this);
 }
 
 PUBLIC VIRTUAL AudioNego::~AudioNego()
 {
-    IMS_TRACE_I("~AudioNego() - lstOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-        if (pResourceMngr != IMS_NULL)
-        {
-            if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-            {
-                pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-            }
-        }
-    }
-
-    while (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pOaModel = m_listOaModel.GetAt(0);
-
-        if (pOaModel != IMS_NULL)
-        {
-            delete pOaModel;
-        }
-
-        m_listOaModel.RemoveAt(0);
-    }
+    IMS_TRACE_I("~AudioNego()", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL void AudioNego::CreateProfiles(
@@ -257,47 +229,6 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSdp(
     {
         IMS_TRACE_D("FinalizeSdp() - not found comfirmed Session OaModel", 0, 0, 0);
     }
-}
-
-PUBLIC VIRTUAL IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-    if (m_pBaseProfile == IMS_NULL || pMediaManager == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-    if (pResourceMngr == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    // Release Current Port
-    if (m_pBaseProfile->nDataPort != 0)
-    {
-        pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-    }
-
-    IMS_TRACE_I(
-            "SetPort() - VoLTE Changed Data Port[%d]->[%d]", m_pBaseProfile->nDataPort, nPort, 0);
-
-    if (nPort != 0)
-    {
-        // Acquire New Port
-        m_pBaseProfile->nDataPort = pResourceMngr->AcquireRtpPort(nPort, nPort);
-        m_pBaseProfile->nControlPort = m_pBaseProfile->nDataPort + 1;
-    }
-    else  // port 0 case
-    {
-        // Set to Port 0
-        m_pBaseProfile->nDataPort = 0;
-        m_pBaseProfile->nControlPort = 0;
-
-        IMS_TRACE_I("SetPort() - VoLTE Data Port is 0!!!", 0, 0, 0);
-    }
-
-    return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL const IpAddress& AudioNego::GetNegotiatedRemoteAddress()
@@ -671,7 +602,7 @@ PROTECTED AudioProfile* AudioNego::GetNegotiatedProfile(IN OaModel* pOaModel)
 }
 
 PRIVATE
-void AudioNego::copy(IN const AudioNego* pAudioNego)
+void AudioNego::Copy(IN const AudioNego* pAudioNego)
 {
     if (m_pBaseProfile == IMS_NULL || pAudioNego == IMS_NULL)
     {
@@ -679,36 +610,16 @@ void AudioNego::copy(IN const AudioNego* pAudioNego)
     }
 
     IMS_TRACE_I(
-            "copy() - referenced OaModel list size[%d]", pAudioNego->m_listOaModel.GetSize(), 0, 0);
+            "Copy() - referenced OaModel list size[%d]", pAudioNego->m_listOaModel.GetSize(), 0, 0);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To release previous used port
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->ReleaseRtpPort(m_pBaseProfile->nDataPort);
-        }
-    }
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
     delete m_pBaseProfile;
     m_pBaseProfile = new AudioProfile(ProfileCasting(pAudioNego->m_pBaseProfile));
 
-    if (pResourceMngr != IMS_NULL)
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
-        // To add port (it would be duplicated)
-        if (m_pBaseProfile->nDataPort != 0)
-        {
-            pResourceMngr->AcquireRtpPort(m_pBaseProfile->nDataPort, m_pBaseProfile->nDataPort);
-        }
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
     }
 
     m_pEnvironment = pAudioNego->m_pEnvironment;
@@ -720,8 +631,8 @@ void AudioNego::copy(IN const AudioNego* pAudioNego)
         m_listOaModel.Append(pNewOaModel);
     }
 
-    this->m_pConfig = pAudioNego->m_pConfig;
-    IMS_TRACE_I("copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
+    m_pConfig = pAudioNego->m_pConfig;
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
 }
 
 PRIVATE
