@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-#ifndef TIMER_BLOCK_RULE_H_
-#define TIMER_BLOCK_RULE_H_
+#ifndef RETRY_AFTER_BLOCK_RULE_H_
+#define RETRY_AFTER_BLOCK_RULE_H_
 
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
+#include "helper/IPassiveTimerListener.h"
 
-class IPassiveTimerHolder;
+class IMtcCallContext;
 
-class TimerBlockRule final : public IMtcBlockRule
+class RetryAfterBlockRule final : public IMtcBlockRule, public IPassiveTimerListener
 {
 public:
-    explicit TimerBlockRule(
-            IN IPassiveTimerHolder& objPassiveTimerHolder, IN IMS_BOOL bEmergencyCall);
-    virtual ~TimerBlockRule();
-    TimerBlockRule(IN const TimerBlockRule&) = delete;
-    TimerBlockRule& operator=(IN const TimerBlockRule&) = delete;
+    explicit RetryAfterBlockRule(IN IMtcCallContext& objContext);
+    virtual ~RetryAfterBlockRule();
+    RetryAfterBlockRule(IN const RetryAfterBlockRule&) = delete;
+    RetryAfterBlockRule& operator=(IN const RetryAfterBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
+    void OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType) override;
+
 private:
-    IPassiveTimerHolder& m_objPassiveTimerHolder;
-    IMS_BOOL m_bEmergencyCall;
+    IMS_BOOL IsEpsOnlyAttach() const;
+
+    IMtcCallContext& m_objContext;
+    IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
 };
 
 #endif
