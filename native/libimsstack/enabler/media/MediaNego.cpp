@@ -79,13 +79,13 @@ void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
     m_pVideoNego = new VideoNego(GetSlotId());
     m_pTextNego = new TextNego(GetSlotId());
 
-    m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
+    m_pAudioNego->CreateProfiles(m_pMediaEnvironment, MEDIA_TYPE_AUDIO,
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 
-    m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
+    m_pVideoNego->CreateProfiles(m_pMediaEnvironment, MEDIA_TYPE_VIDEO,
             MediaConfigUtil::GetVideoConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 
-    m_pTextNego->CreateProfiles(m_pMediaEnvironment,
+    m_pTextNego->CreateProfiles(m_pMediaEnvironment, MEDIA_TYPE_TEXT,
             MediaConfigUtil::GetTextConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
 }
 

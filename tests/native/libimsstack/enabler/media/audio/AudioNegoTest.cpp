@@ -93,7 +93,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pAudioNego = new FakeAudioNego(DEFAULT_SLOT_ID);
-        m_pAudioNego->CreateProfiles(m_pEnvironment, m_pConfig);
+        m_pAudioNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_AUDIO, m_pConfig);
     }
 
     void CreateEnvironment()

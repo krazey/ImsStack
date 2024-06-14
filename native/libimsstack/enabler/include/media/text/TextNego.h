@@ -38,14 +38,6 @@ public:
     virtual ~TextNego();
 
     /**
-     * @brief Create a base local/peer/negotiate profile with given configuration
-     *
-     * @param pEnvironment The MediaEnvironment
-     * @param pConfig The configuration to create the TextProfile
-     */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN TextConfiguration* pConfig);
-
-    /**
      * @brief Form the SDP with the current profile based on the state
      *
      * @param eNegoState The negotiation state which decide how to use the profile from the OA model
@@ -85,37 +77,6 @@ public:
     virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
-     */
-    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
-    /**
-     * @brief Set the local port number of the TextProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
-     * @brief Get the local ip address
-     *
-     * @return const IpAddress& The local ip address
-     */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_UINT32 The local port number
-     */
-    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
 
     /**
      * @brief Get the negotiated remote ip address
@@ -174,7 +135,7 @@ protected:
     TextProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
 
 private:
-    void copy(IN const TextNego* pTextNego);
+    void Copy(IN const TextNego* pTextNego);
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -197,8 +158,6 @@ private:
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
-
-    TextProfile m_objBaseProfile;
 };
 
 #endif

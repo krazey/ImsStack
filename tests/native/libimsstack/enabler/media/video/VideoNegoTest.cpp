@@ -87,7 +87,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pVideoNego = new FakeVideoNego(DEFAULT_SLOT_ID);
-        m_pVideoNego->CreateProfiles(m_pEnvironment, m_pConfig);
+        m_pVideoNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_VIDEO, m_pConfig);
     }
 
     void CreateEnvironment()

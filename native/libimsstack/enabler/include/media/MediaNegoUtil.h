@@ -17,6 +17,8 @@
 #ifndef MEDIA_NEGO_UTIL_H_
 #define MEDIA_NEGO_UTIL_H_
 
+#include "ImsMap.h"
+
 #include "MediaDef.h"
 
 class MediaNego;
@@ -41,6 +43,8 @@ public:
     static IMS_BOOL GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
             IN const AString& strIpAddr, IN IMS_SINT32 nPort, OUT IMS_UINTP& nNegoId,
             OUT MEDIA_CONTENT_TYPE& eMediaType);
+    static void ReleaseRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port);
+    static IMS_UINT32 AcquireRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port);
 };
 
 #endif

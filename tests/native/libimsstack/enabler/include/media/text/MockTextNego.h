@@ -27,8 +27,6 @@ class MockTextNego : public TextNego
 public:
     explicit MockTextNego(IMS_SINT32 nSlotId) :
             TextNego(nSlotId){};
-    MOCK_METHOD(void, CreateProfiles,
-            (IN MediaEnvironment * pEnvironment, IN TextConfiguration* pConfig), (override));
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
@@ -41,9 +39,6 @@ public:
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
             (override));
-    MOCK_METHOD(void, FinalizeSdp,
-            (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));
-    MOCK_METHOD(IMS_BOOL, SetPort, (IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
     MOCK_METHOD(const IpAddress&, GetNegotiatedRemoteAddress, (), (override));

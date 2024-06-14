@@ -18,9 +18,11 @@
 #define BASE_NEGO_H_
 
 #include "ImsSlot.h"
+#include "ISession.h"
+
 #include "MediaBaseProfile.h"
-#include "config/MediaConfiguration.h"
 #include "MediaEnvironment.h"
+#include "config/MediaConfiguration.h"
 
 class BaseNego : public ImsSlot
 {
@@ -74,12 +76,62 @@ public:
     explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0);
     virtual ~BaseNego();
 
+    /**
+     * @brief Get the local ip address
+     *
+     * @return const IpAddress& The local ip address
+     */
+    virtual const IpAddress& GetLocalAddress()
+    {
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->objIpAddress : IpAddress::NONE;
+    }
+
+    /**
+     * @brief Get the local port number
+     *
+     * @return IMS_UINT32 The local port number
+     */
+    virtual IMS_UINT32 GetLocalPort()
+    {
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->nDataPort : 0;
+    };
+
+    /**
+     * @brief Set the local port number of the media profile
+     *
+     * @param nPort The port number
+     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
+     * invalid port number which is already reserved
+     */
+    IMS_BOOL SetPort(IN IMS_UINT32 nPort);
+
+    /**
+     * @brief Create a base local/peer/negotiate profile with given configuration
+     *
+     * @param pEnvironment The MediaEnvironment
+     * @param pType The media type to form, audio/video/text defined in MEDIA_CONTENT_TYPE
+     * @param pConfig The configuration to create media profile
+     */
+    void CreateProfiles(IN MediaEnvironment* pEnvironment, IN MEDIA_CONTENT_TYPE pType,
+            IN MediaConfiguration* pConfig);
+
+    /**
+     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
+     *
+     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
+     * @param eNegoState The current negotiation state to decide to remove the OA model item
+     */
+    void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
 
+    void DestroyListOaModel();
+
 protected:
+    MediaBaseProfile* m_pBaseProfile;
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;

@@ -33,13 +33,6 @@ public:
     VideoNego& operator=(IN const VideoNego& obj);
     virtual ~VideoNego();
 
-    /**
-     * @brief Create a base local/peer/negotiate profile with given configuration
-     *
-     * @param pEnvironment The MediaEnvironment
-     * @param pConfig The configuration to create audio profile
-     */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig);
     void DestroyProfiles();
     /**
      * @brief Form the SDP with the current profile based on the state
@@ -81,37 +74,6 @@ public:
     virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
-     */
-    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
-    /**
-     * @brief Set the local port number of the VideoProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
-     * @brief Get the local ip address
-     *
-     * @return const IpAddress& The local ip address
-     */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_UINT32 The local port number
-     */
-    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
 
     /**
      * @brief Get the negotiated remote ip address
@@ -244,7 +206,6 @@ private:
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
-    VideoProfile m_objBaseProfile;
     IMS_BOOL m_bNegotiatedCvoResult;
 };
 

@@ -38,14 +38,6 @@ public:
     virtual ~AudioNego();
 
     /**
-     * @brief Create a base local/peer/negotiate profile with given configuration
-     *
-     * @param pEnvironment The MediaEnvironment
-     * @param pConfig The configuration to create audio profile
-     */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig);
-
-    /**
      * @brief Form the SDP with the current profile based on the state
      *
      * @param eNegoState The negotiation state which decide how to use the profile from the OA model
@@ -84,37 +76,6 @@ public:
     virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
-     */
-    virtual void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
-    /**
-     * @brief Set the local port number of the AudioProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
-     * @brief Get the local ip address
-     *
-     * @return const IpAddress& The local ip address
-     */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_UINT32 The local port number
-     */
-    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
 
     /**
      * @brief Get the negotiated remote ip address
@@ -183,7 +144,7 @@ protected:
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
 
 private:
-    void copy(IN const AudioNego* pAudioNego);
+    void Copy(IN const AudioNego* pAudioNego);
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDir);
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -240,8 +201,6 @@ private:
             OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
     void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-
-    AudioProfile m_objBaseProfile;
 };
 
 #endif
