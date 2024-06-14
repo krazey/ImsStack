@@ -134,15 +134,22 @@ public interface IAosRegistrationListener {
      * Capability
      */
     class Capability {
-
+        /** MmTelFeature capability
+        * {@link android.telephony.ims.feature.MmTelFeature.MmTelCapabilities}.
+        */
         public static final int NONE = 0;
         public static final int VOICE = 1;
         public static final int VIDEO = 1 << 1;
         public static final int UT = 1 << 2;
         public static final int SMS = 1 << 3;
         public static final int CALL_COMPOSER = 1 << 4;
+        /** RcsFeature capability
+        * {@link android.telephony.ims.feature.RcsFeature.RcsImsCapabilities}.
+        */
         public static final int OPTIONS_UCE = 1 << 5;
         public static final int PRESENCE_UCE = 1 << 6;
+        // Internal capability
+        public static final int TEXT = 1 << 11;
 
         public static String toString(int capabilities) {
             StringBuilder sb = new StringBuilder("[");
@@ -154,6 +161,7 @@ public interface IAosRegistrationListener {
             appendToken(sb, capabilities, CALL_COMPOSER, "call_composer");
             appendToken(sb, capabilities, OPTIONS_UCE, "options_uce");
             appendToken(sb, capabilities, PRESENCE_UCE, "presence_uce");
+            appendToken(sb, capabilities, TEXT, "text");
             sb.append("]");
 
             return sb.toString();

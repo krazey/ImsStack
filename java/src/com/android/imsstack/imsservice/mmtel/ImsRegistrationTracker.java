@@ -86,11 +86,15 @@ public class ImsRegistrationTracker {
         @Override
         public void onImsConfigurationChanged(int item) {
             if ((item == ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE)
-                    || (item == ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE)) {
-                logi("onImsConfigurationChanged:: changed item" + item);
-                CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
-                if (capabilityPairs != null) {
-                    mRegTracker.changeCapabilities(capabilityPairs);
+                    || (item == ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE)
+                    || (item == ProvisioningManager.KEY_RTT_ENABLED)) {
+                if ((item == ProvisioningManager.KEY_RTT_ENABLED)
+                        || isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
+                    logi("onImsConfigurationChanged:: changed item" + item);
+                    CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+                    if (capabilityPairs != null) {
+                        mRegTracker.changeCapabilities(capabilityPairs);
+                    }
                 }
             }
         }
@@ -106,20 +110,17 @@ public class ImsRegistrationTracker {
 
         mRegImpl.setRegistrationTracker(this);
 
-        if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
-            addNetWatcherListener();
-            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-            if (isr != null) {
-                ImsConfigImpl configImpl = isr.getConfig();
-                if (configImpl != null) {
-                    mConfigListener = new ConfigListener();
-                    configImpl.addListener(mConfigListener);
-                }
+        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        if (isr != null) {
+            ImsConfigImpl configImpl = isr.getConfig();
+            if (configImpl != null) {
+                mConfigListener = new ConfigListener();
+                configImpl.addListener(mConfigListener);
             }
         }
 
+        addNetWatcherListener();
         if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-            addNetWatcherListener();
             registerDataRoamingSettingObserver();
         }
     }
@@ -330,8 +331,13 @@ public class ImsRegistrationTracker {
             }
 
             capabilityPairs.addCapability(networkType, capability);
-            logi("changeCapabilities::finalCaps networkType"
-                    + networkType + " Capability " + capability);
+
+            if ((capability == IAosRegistrationListener.Capability.VOICE)
+                    && isRttSupported()) {
+                ImsLog.d("Add text Capability");
+                capabilityPairs.addCapability(networkType,
+                        IAosRegistrationListener.Capability.TEXT);
+            }
 
             if (((networkType == IAosRegistrationListener.NetworkType.LTE)
                     && (capability == IAosRegistrationListener.Capability.VIDEO))
@@ -342,6 +348,7 @@ public class ImsRegistrationTracker {
                         IAosRegistrationListener.Capability.VIDEO);
             }
         }
+        logi("Final Capabilities" + capabilityPairs);
         return capabilityPairs;
     }
 
@@ -374,16 +381,37 @@ public class ImsRegistrationTracker {
         return null;
     }
 
+    private boolean isRttSupported() {
+        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        if (isr != null) {
+            ImsConfigImpl configImpl = isr.getConfig();
+            if ((configImpl != null)
+                    && (configImpl.getConfigInt(ProvisioningManager.KEY_RTT_ENABLED)
+                            == ProvisioningManager.PROVISIONING_VALUE_ENABLED)) {
+                if (isRoaming()) {
+                    ConfigInterface config = getConfigInterface(mContext.getSlotId());
+                    CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+                    return cc != null && cc.getBoolean(
+                            CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isCellularPreferredMode() {
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-        ImsConfigImpl configImpl = isr.getConfig();
-
-        if ((configImpl.getConfigInt(
-                ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE)
-                == ProvisioningManager.PROVISIONING_VALUE_DISABLED)
-                || (configImpl.getConfigInt(ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE)
-                == ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED)) {
-            return true;
+        if (isr != null) {
+            ImsConfigImpl configImpl = isr.getConfig();
+            if ((configImpl != null) && ((configImpl.getConfigInt(
+                    ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE)
+                    == ProvisioningManager.PROVISIONING_VALUE_DISABLED)
+                    || (configImpl.getConfigInt(
+                            ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE)
+                    == ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED))) {
+                return true;
+            }
         }
         return false;
     }
@@ -735,22 +763,20 @@ public class ImsRegistrationTracker {
                 return;
             }
 
-            if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
-                addNetWatcherListener();
-                ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
-                if (isr != null) {
-                    ImsConfigImpl configImpl = isr.getConfig();
-                    if (configImpl != null) {
-                        if (mConfigListener == null) {
-                            mConfigListener = new ConfigListener();
-                        }
-                        configImpl.addListener(mConfigListener);
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+            if (isr != null) {
+                ImsConfigImpl configImpl = isr.getConfig();
+                if (configImpl != null) {
+                    if (mConfigListener == null) {
+                        mConfigListener = new ConfigListener();
                     }
+                    configImpl.addListener(mConfigListener);
                 }
             }
 
+            addNetWatcherListener();
+
             if (!isIgnoreDataEnabledChangedForVideoCalls()) {
-                addNetWatcherListener();
                 registerDataRoamingSettingObserver();
             }
 

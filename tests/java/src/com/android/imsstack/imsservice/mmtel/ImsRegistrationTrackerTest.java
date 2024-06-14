@@ -865,6 +865,128 @@ public class ImsRegistrationTrackerTest {
         }
     }
 
+    @Test
+    public void testRttCapability() {
+        ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
+        ImsServiceManager serviceManager =
+                new ImsServiceManager(mTestAppContext.getContext(), mExecutor);
+        ImsServiceManager.setDefault(serviceManager);
+
+        try {
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(SLOT0);
+            ImsConfigImpl configImpl = isr.getConfig();
+            // Rtt Disabled
+            configImpl.setConfig(
+                    ProvisioningManager.KEY_RTT_ENABLED,
+                    ProvisioningManager.PROVISIONING_VALUE_DISABLED);
+
+            when(mSp.getInt(eq("RTT_ENABLED"), anyInt()))
+                    .thenReturn(ProvisioningManager.PROVISIONING_VALUE_DISABLED);
+
+            // Enabled Capabilities from framework
+            List<CapabilityPair> enableCapabilities = new ArrayList<>();
+            enableCapabilities.add(new CapabilityPair(
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                    ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+            mRegTracker.changeCapabilities(enableCapabilities, null);
+
+            CapabilityPairs capabilityPairs = new CapabilityPairs();
+            capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                    IAosRegistrationListener.Capability.VOICE);
+            // Capability : LTE -> Voice when rtt disabled
+            assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+            // Rtt Enabled
+            configImpl.setConfig(
+                    ProvisioningManager.KEY_RTT_ENABLED,
+                    ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+
+            when(mSp.getInt(eq("RTT_ENABLED"), anyInt()))
+                    .thenReturn(ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+
+            capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                    IAosRegistrationListener.Capability.TEXT);
+            // Capability : LTE -> Voice & LTE & Text when rtt enabled
+            assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+            // Enabled Capabilities from framework
+            enableCapabilities = new ArrayList<>();
+            enableCapabilities.add(new CapabilityPair(
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                    ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+
+            List<CapabilityPair> disableCapabilities = new ArrayList<>();
+            disableCapabilities.add(new CapabilityPair(
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                    ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+
+            mRegTracker.changeCapabilities(enableCapabilities, disableCapabilities);
+
+            capabilityPairs = new CapabilityPairs();
+            capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                    IAosRegistrationListener.Capability.UT);
+            // Capability : LTE -> UT since no voice, no text even if rtt enabled
+            assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        } finally {
+            serviceManager.dispose();
+            ImsServiceManager.setDefault(oldServiceManager);
+        }
+    }
+
+    @Test
+    public void testRttCapabilityInRoaming() {
+        ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
+        ImsServiceManager serviceManager =
+                new ImsServiceManager(mTestAppContext.getContext(), mExecutor);
+        ImsServiceManager.setDefault(serviceManager);
+
+        try {
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(SLOT0);
+            ImsConfigImpl configImpl = isr.getConfig();
+
+            // Rtt Enabled
+            configImpl.setConfig(
+                    ProvisioningManager.KEY_RTT_ENABLED,
+                    ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+
+            when(mSp.getInt(eq("RTT_ENABLED"), anyInt()))
+                    .thenReturn(ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+
+            // In Roaming
+            when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
+
+            // In Roaming rtt not enabled
+            when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
+                .KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL))).thenReturn(false);
+
+            // Enabled Capabilities from framework
+            List<CapabilityPair> enableCapabilities = new ArrayList<>();
+            enableCapabilities.add(new CapabilityPair(
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                    ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+            mRegTracker.changeCapabilities(enableCapabilities, null);
+
+            // Capability : LTE -> Voice no text as rtt enabled but not in roaming
+            CapabilityPairs capabilityPairs = new CapabilityPairs();
+            capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                    IAosRegistrationListener.Capability.VOICE);
+            assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+            // In Roaming rtt enabled
+            when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
+                .KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL))).thenReturn(true);
+
+            capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
+                    IAosRegistrationListener.Capability.TEXT);
+            // Capability : LTE -> Voice & LTE -> Text
+            assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+        } finally {
+            serviceManager.dispose();
+            ImsServiceManager.setDefault(oldServiceManager);
+        }
+    }
+
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {
         FakeImsRegistrationTracker(IBaseContext context, ImsRegistrationImpl regImpl) {
             super(context, regImpl);
