@@ -157,7 +157,6 @@ private:
     IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 };
 
 #endif

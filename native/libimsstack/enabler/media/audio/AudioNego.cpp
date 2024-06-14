@@ -3455,31 +3455,6 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
     return IMS_TRUE;
 }
 
-PRIVATE
-AudioNego::OaModel* AudioNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
-{
-    IMS_UINT32 nOaModelCount = m_listOaModel.GetSize();
-    IMS_UINT32 nTempOaModelCount = nOaModelCount;
-    while (nTempOaModelCount > 0)
-    {
-        OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
-        if (pLatestOaModel != IMS_NULL)
-        {
-            if ((pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE) ||
-                    (pLatestOaModel->bConfirmedSession == IMS_TRUE && bCheckConfirmed == IMS_TRUE))
-            {
-                return pLatestOaModel;
-            }
-
-            IMS_TRACE_I("GetNegotiatedOaModel() - [%d/%d]th is not perfect. Try next",
-                    nTempOaModelCount, nOaModelCount, 0);
-        }
-        nTempOaModelCount--;
-    }
-
-    return IMS_NULL;
-}
-
 PRIVATE void AudioNego::SetSdpSessionIpAddress(
         OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile)
 {

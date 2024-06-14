@@ -147,6 +147,32 @@ PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedProfile(IN OaModel* p
     return (pOaModel != IMS_NULL) ? pOaModel->pNegotiatedProfile : IMS_NULL;
 }
 
+PROTECTED
+BaseNego::OaModel* BaseNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
+{
+    IMS_UINT32 nTempOaModelCount = m_listOaModel.GetSize();
+    IMS_TRACE_I("GetNegotiatedOaModel()", 0, 0, 0);
+    while (nTempOaModelCount > 0)
+    {
+        OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
+
+        if (pLatestOaModel != IMS_NULL)
+        {
+            if ((pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE) ||
+                    (pLatestOaModel->bConfirmedSession == IMS_TRUE && bCheckConfirmed == IMS_TRUE))
+            {
+                return pLatestOaModel;
+            }
+
+            IMS_TRACE_I("GetNegotiatedOaModel() - [%d/%d]th is not perfect. Try next",
+                    nTempOaModelCount, m_listOaModel.GetSize(), 0);
+        }
+        nTempOaModelCount--;
+    }
+
+    return IMS_NULL;
+}
+
 PUBLIC IMS_BOOL BaseNego::SetPort(IN IMS_UINT32 nPort)
 {
     if (m_pBaseProfile == IMS_NULL)

@@ -3656,32 +3656,6 @@ PRIVATE IMS_BOOL VideoNego::CheckAvpfFromProfile(IN VideoProfile* pProfile)
     return IMS_FALSE;
 }
 
-PRIVATE VideoNego::OaModel* VideoNego::GetNegotiatedOaModel()
-{
-    IMS_UINT32 nOaModelCount = m_listOaModel.GetSize();
-    IMS_UINT32 nTempOaModelCount = nOaModelCount;
-
-    while (nTempOaModelCount > 0)
-    {
-        OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
-
-        if (pLatestOaModel != IMS_NULL)
-        {
-            if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)
-            {
-                return pLatestOaModel;
-            }
-
-            IMS_TRACE_I("GetNegotiatedOaModel() - [%d/%d]th is not perfect. Try next",
-                    nTempOaModelCount, nOaModelCount, 0);
-        }
-
-        nTempOaModelCount--;
-    }
-
-    return IMS_NULL;
-}
-
 PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromResolutionId(
         IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight)
 {

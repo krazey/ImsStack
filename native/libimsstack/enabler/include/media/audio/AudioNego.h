@@ -195,7 +195,6 @@ private:
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
     void SetSdpSessionIpAddress(
             OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
