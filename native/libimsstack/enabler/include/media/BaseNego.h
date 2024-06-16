@@ -123,6 +123,35 @@ public:
      */
     void FinalizeSdp(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
 
+    /**
+     * @brief Get the negotiated remote ip address
+     *
+     * @return const IpAddress& The ip address
+     */
+    virtual const IpAddress& GetNegotiatedRemoteAddress();
+
+    /**
+     * @brief Get the negotiated remote port number
+     *
+     * @return IMS_UINT32 The port number
+     */
+    virtual IMS_SINT32 GetRemotePort();
+
+    /**
+     * @brief Get the negotiated local profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedLocalProfile();
+
+    /**
+     * @brief Get the negotiated negotiated profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedNegoProfile();
+
+    /**
+     * @brief Get the negotiated peer profile object
+     */
+    virtual MediaBaseProfile* GetNegotiatedPeerProfile();
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);
