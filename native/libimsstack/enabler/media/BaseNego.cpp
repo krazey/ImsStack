@@ -194,6 +194,69 @@ PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedPeerProfile()
     return IMS_NULL;
 }
 
+PUBLIC
+MEDIA_DIRECTION BaseNego::GetNegotiatedDirection()
+{
+    if (m_listOaModel.GetSize() > 0)
+    {
+        OaModel* pLatestOaModel = IMS_NULL;
+        pLatestOaModel = GetNegotiatedOaModel();
+
+        if (pLatestOaModel == IMS_NULL)
+        {
+            return MEDIA_DIRECTION_INVALID;
+        }
+
+        if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)
+        {
+            return pLatestOaModel->pNegotiatedProfile->eDirection;
+        }
+    }
+    return MEDIA_DIRECTION_INVALID;
+}
+
+PUBLIC IMS_SINT32 BaseNego::GetNegotiatedRtpPort()
+{
+    const IMS_SINT32 PORT_NONE = -1;
+
+    if (m_listOaModel.GetSize() > 0)
+    {
+        OaModel* pLatestOaModel = IMS_NULL;
+        pLatestOaModel = GetNegotiatedOaModel();
+
+        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+        {
+            return PORT_NONE;
+        }
+
+        IMS_TRACE_I("GetNegotiatedRtpPort() - Previous negotiated port[%d] found",
+                pLatestOaModel->pNegotiatedProfile->nDataPort, 0, 0);
+
+        return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->nDataPort;
+    }
+
+    return PORT_NONE;
+}
+
+PUBLIC IMS_SINT32 BaseNego::GetNegotiatedBandwidth()
+{
+    if (m_listOaModel.GetSize() > 0)
+    {
+        OaModel* pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
+
+        if (pLatestOaModel == IMS_NULL || GetLocalProfile(pLatestOaModel) == IMS_NULL)
+        {
+            return -1;
+        }
+
+        return (GetNegotiatedProfile(pLatestOaModel) != IMS_NULL)
+                ? (IMS_SINT32)GetNegotiatedProfile(pLatestOaModel)->nBandwidthAs
+                : (IMS_SINT32)GetLocalProfile(pLatestOaModel)->nBandwidthAs;
+    }
+
+    return -1;
+}
+
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
 {
     return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;

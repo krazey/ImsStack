@@ -152,6 +152,21 @@ public:
      */
     virtual MediaBaseProfile* GetNegotiatedPeerProfile();
 
+    /**
+     * @brief Get the negotiated media direction
+     */
+    virtual MEDIA_DIRECTION GetNegotiatedDirection();
+
+    /**
+     * @brief Get the negotiated rtp port number
+     */
+    virtual IMS_SINT32 GetNegotiatedRtpPort();
+
+    /**
+     * @brief Get the negotiated bandwidth
+     */
+    virtual IMS_SINT32 GetNegotiatedBandwidth();
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);

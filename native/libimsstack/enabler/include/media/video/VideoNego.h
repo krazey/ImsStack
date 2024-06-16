@@ -76,30 +76,11 @@ public:
             OUT IMS_SINT32& eDir);
 
     /**
-     * @brief Get the negotiated audio direction
-     */
-    virtual MEDIA_DIRECTION GetNegotiatedDirection();
-
-    /**
      * @brief Get the Negotiated video resolution
      *
      * @return VIDEO_RESOLUTION
      */
     virtual VIDEO_RESOLUTION GetNegotiatedResolution();
-
-    /**
-     * @brief Get the Negotiated rtp port number
-     *
-     * @return IMS_SINT32
-     */
-    virtual IMS_SINT32 GetNegotiatedRtpPort();
-
-    /**
-     * @brief Get the negotiated bandwidth
-     *
-     * @return IMS_SINT32
-     */
-    virtual IMS_SINT32 GetMediaBandwidth();
 
     /**
      * @brief static cast from MediaConfiguration to VideoConfiguration
