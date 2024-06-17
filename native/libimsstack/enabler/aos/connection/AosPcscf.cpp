@@ -25,7 +25,6 @@
 #include "ServerAddress.h"
 
 #include "IRegistration.h"
-#include "RegistrationManager.h"
 
 #include "connection/AosPcscf.h"
 #include "provider/AosProvider.h"

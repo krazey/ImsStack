@@ -38,10 +38,9 @@
 
 class IRegContact;
 class IRegistration;
+class IRegistrationManager;
 class IRegParameter;
 class IRegSubscription;
-
-class RegistrationManager;
 
 class IAosAppContext;
 class IAosHandle;
@@ -477,7 +476,7 @@ protected:
     IMS_SINT32 m_nSlotId;
 
     /// engine member
-    RegistrationManager* m_pRegManager;
+    IRegistrationManager* m_piRegManager;
     IRegistration* m_piRegistration;
     IRegContact* m_piRegContact;
     IRegParameter* m_piRegParameter;

@@ -23,7 +23,6 @@
 #include "SipAddress.h"
 #include "ImsIdentity.h"
 #include "IRegistration.h"
-#include "RegistrationManager.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "provider/AosUtil.h"
