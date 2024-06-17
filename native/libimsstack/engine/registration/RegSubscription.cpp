@@ -20,6 +20,7 @@
 #include "ImsIdentity.h"
 
 #include "Connector.h"
+#include "IRegInfoManager.h"
 #include "IRegSubscriptionListener.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
@@ -28,8 +29,8 @@
 #include "PAccessNetworkInfoHeader.h"
 #include "RegContact.h"
 #include "RegInfo.h"
-#include "RegInfoManager.h"
 #include "RegSubscription.h"
+#include "RegistrationContext.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipParameter.h"
@@ -102,7 +103,7 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
 
 PUBLIC VIRTUAL RegSubscription::~RegSubscription()
 {
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    RegistrationContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -183,7 +184,7 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
         m_piOngoingScc = IMS_NULL;
     }
 
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    RegistrationContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -217,7 +218,7 @@ PUBLIC VIRTUAL IMS_SINT32 RegSubscription::EnableFeatures(IN IMS_SINT32 nFeature
 
 PUBLIC VIRTUAL const IRegInfo* RegSubscription::GetRegInfo() const
 {
-    return RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    return RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_objRegKey);
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegSubscription::SetContactParameter(
@@ -578,9 +579,10 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::InitInstance()
 
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
 
-    RegInfoManager::GetInstance()->CreateRegInfo(m_objRegKey);
+    IRegInfoManager* piRegInfoManager = RegistrationContext::GetInstance()->GetRegInfoManager();
+    piRegInfoManager->CreateRegInfo(m_objRegKey);
 
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    RegInfo* pRegInfo = piRegInfoManager->GetRegInfo(m_objRegKey);
 
     if (pRegInfo != IMS_NULL)
     {
@@ -949,7 +951,8 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
                 IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
             }
 
-            RegInfoManager::GetInstance()->Update(m_objRegKey, strRegInfo);
+            RegistrationContext::GetInstance()->GetRegInfoManager()->Update(
+                    m_objRegKey, strRegInfo);
 
             nBodyParts = 1;
         }
