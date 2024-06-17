@@ -30,6 +30,7 @@
 #include "IConfiguration.h"
 #include "IRegContact.h"
 #include "IRegistration.h"
+#include "IRegistrationManager.h"
 #include "IRegParameter.h"
 #include "IRegSubscription.h"
 #include "ISipHeader.h"
@@ -37,7 +38,6 @@
 #include "ISipTransportHelper.h"
 #include "Credential.h"
 #include "Engine.h"
-#include "RegistrationManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipFactory.h"
@@ -84,7 +84,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piContext(piAppContext),
         m_piListener(IMS_NULL),
         m_nSlotId(piAppContext->GetSlotId()),
-        m_pRegManager(IMS_NULL),
+        m_piRegManager(IMS_NULL),
         m_piRegistration(IMS_NULL),
         m_piRegContact(IMS_NULL),
         m_piRegParameter(IMS_NULL),
@@ -136,7 +136,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
 {
     // Init Object
     m_pUtil = AosUtil::GetInstance();
-    m_pRegManager = RegistrationManager::GetInstance();
+    m_piRegManager = Engine::GetRegistrationManager();
 
     // registration type
     m_eRegType = piAppContext->GetStaticProfile()->GetRegistrationType();
@@ -1306,7 +1306,7 @@ void AosRegistration::PrepareRegistration()
     A_IMS_TRACE_I(REGID, "PrepareRegistration", 0, 0, 0);
 
     if (m_piRegistration != IMS_NULL &&
-            m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
+            m_piRegManager->GetRegistration(m_nSlotId, m_nFlowId) != IMS_NULL)
     {
         A_IMS_TRACE_I(REGID, "PrepareRegistration :: destroy registration for creating", 0, 0, 0);
 
@@ -1317,7 +1317,7 @@ void AosRegistration::PrepareRegistration()
             m_piRegistration->DestroyContact(objContactList.GetAt(nAt));
         }
 
-        m_pRegManager->DestroyRegistration(m_piRegistration);
+        m_piRegManager->DestroyRegistration(m_piRegistration);
         m_piRegistration = IMS_NULL;
 
         DestroySubscription();
@@ -1421,7 +1421,7 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
 
     m_piRegistration->DestroyContact(m_piRegContact);
     m_piRegistration->SetListener(IMS_NULL);
-    m_pRegManager->DestroyRegistration(m_piRegistration);
+    m_piRegManager->DestroyRegistration(m_piRegistration);
 
     m_piRegistration = IMS_NULL;
     m_piRegContact = IMS_NULL;
@@ -1433,13 +1433,13 @@ PROTECTED VIRTUAL IRegistration* AosRegistration::GetRegistration()
     A_IMS_TRACE_D(REGID, "GetRegistration :: m_nFlowId (%d), strAoR (%s)", m_nFlowId,
             m_strPuid.GetStr(), 0);
 
-    if (!m_pRegManager->CreateRegistration(m_nFlowId, m_strPuid, IsFakeRegistration()))
+    if (!m_piRegManager->CreateRegistration(m_nSlotId, m_nFlowId, m_strPuid, IsFakeRegistration()))
     {
         A_IMS_TRACE_I(REGID, "create reg is failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    return m_pRegManager->GetRegistration(m_nSlotId, m_nFlowId);
+    return m_piRegManager->GetRegistration(m_nSlotId, m_nFlowId);
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
@@ -2123,9 +2123,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         else
         {
             A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
-            const IRegistration* piRegistration =
-                    RegistrationManager::GetInstance()->GetRegistration(
-                            m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+            const IRegistration* piRegistration = m_piRegManager->GetRegistration(
+                    m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
             objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
                                                    : piRegistration->GetAssociatedUris();
         }
