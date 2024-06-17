@@ -117,7 +117,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
-            if (!IsEpsOnlyAttach())
+            if (m_objContext.GetService().IsEpsCombinedAttach())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
@@ -131,7 +131,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::
                 MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
-            if (!IsEpsOnlyAttach())
+            if (m_objContext.GetService().IsEpsCombinedAttach())
             {
                 nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
@@ -342,7 +342,7 @@ CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessag
             break;
 
         case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB:
-            if (!IsEpsOnlyAttach())
+            if (m_objContext.GetService().IsEpsCombinedAttach())
             {
                 return CallReasonInfo(
                         CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -350,7 +350,7 @@ CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessag
             break;
 
         case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
-            if (!IsEpsOnlyAttach())
+            if (m_objContext.GetService().IsEpsCombinedAttach())
             {
                 ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
                 return CallReasonInfo(
@@ -365,7 +365,7 @@ CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle404Response() const
 {
-    if (m_objContext.GetCallInfo().bUssi && !IsEpsOnlyAttach())
+    if (m_objContext.GetCallInfo().bUssi && m_objContext.GetService().IsEpsCombinedAttach())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -480,7 +480,7 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR);
     }
 
-    if (!IsEpsOnlyAttach())
+    if (m_objContext.GetService().IsEpsCombinedAttach())
     {
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
@@ -513,7 +513,7 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
                 case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
                     break;
                 case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
-                    if (!IsEpsOnlyAttach())
+                    if (m_objContext.GetService().IsEpsCombinedAttach())
                     {
                         break;
                     }
@@ -578,7 +578,7 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
     }
 
-    if (IsEpsOnlyAttach())
+    if (!m_objContext.GetService().IsEpsCombinedAttach())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
@@ -631,7 +631,7 @@ IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& ob
         return IMS_FALSE;
     }
 
-    if (IsEpsOnlyAttach())
+    if (!m_objContext.GetService().IsEpsCombinedAttach())
     {
         return IMS_FALSE;
     }
@@ -778,13 +778,6 @@ IMS_BOOL StartErrorHandler::IsRoaming() const
 {
     return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
             IMS_ROAMING_STATE_ON;
-}
-
-PRIVATE
-IMS_BOOL StartErrorHandler::IsEpsOnlyAttach() const
-{
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
-            IMS_LTE_INFO_EPS_ONLY_ATTACHED;
 }
 
 PRIVATE

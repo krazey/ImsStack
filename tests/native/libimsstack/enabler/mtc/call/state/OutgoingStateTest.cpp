@@ -18,9 +18,7 @@
 #include "CarrierConfig.h"
 #include "Ims3gpp.h"
 #include "ImsAosReason.h"
-#include "ImsEventDef.h"
 #include "MockIMtcCallController.h"
-#include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
@@ -93,7 +91,6 @@ public:
     MtcSupplementaryService* pSupplementaryService;
     MediaInfo objMediaInfo;
     ImsList<IMtcSession*> objSessions;
-    MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallManager objCallManager;
 
 protected:
@@ -142,10 +139,6 @@ protected:
         ON_CALL(objCallContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
-        ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
-        ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
-                .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
-
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(12345));
 
@@ -187,6 +180,7 @@ protected:
         ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(nStatusCode))
                 .WillByDefault(Return(bCsfb));
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
+        ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(bCsfb));
         if (bWiFi)
         {
             ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
