@@ -335,6 +335,9 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     {
         if (m_pAudioNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
                     pDescriptorForAudio, (MEDIA_DIRECTION)nAudioDirection,
+                    MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO) == IMS_FALSE
+                            ? IMS_TRUE
+                            : IMS_FALSE,
                     bEnforceReofferMode) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "FormSdp() - Forming a m line of audio is failed", 0, 0, 0);

@@ -19,6 +19,7 @@
 
 #include "ImsSlot.h"
 #include "ISession.h"
+#include "media/IMedia.h"
 
 #include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
@@ -75,6 +76,23 @@ public:
 
     explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0);
     virtual ~BaseNego();
+
+    /**
+     * @brief Form the SDP with the current profile based on the state
+     *
+     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
+     * list
+     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
+     * @param pDescriptor The SDP descriptor instance to form the media level SDP
+     * @param eDir The media direction of the SDP
+     * @param bDisable if it is IMS_TRUE, set the port number to zero
+     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
+     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
+     * it is failed to form
+     */
+    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Get the local ip address
@@ -178,6 +196,14 @@ protected:
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     void DestroyListOaModel();
+
+    virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable) = 0;
+    virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable) = 0;
+    virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode) = 0;
 
 protected:
     MediaBaseProfile* m_pBaseProfile;

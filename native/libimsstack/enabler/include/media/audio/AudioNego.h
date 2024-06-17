@@ -17,9 +17,7 @@
 #ifndef AUDIO_NEGO_H_
 #define AUDIO_NEGO_H_
 
-#include "media/IMedia.h"
 #include "BaseNego.h"
-#include "ISession.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfileUtil.h"
@@ -36,22 +34,6 @@ public:
     AudioNego(IN const AudioNego& objAudioNego);
     AudioNego& operator=(IN const AudioNego& obj);
     virtual ~AudioNego();
-
-    /**
-     * @brief Form the SDP with the current profile based on the state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to form the session level SDP
-     * @param pDescriptor The SDP descriptor instance to form the media level SDP
-     * @param eDir The media direction of the SDP
-     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
-     * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
-     * it is failed to form
-     */
-    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-            IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Check if audio codec from SDP is supported
@@ -111,16 +93,17 @@ protected:
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+            IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable) override;
+    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
+            IN IMS_BOOL bDisable) override;
+    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
+            IN IMS_BOOL bEnforceReofferMode) override;
 
 private:
     void Copy(IN const AudioNego* pAudioNego);
-    IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
-            IN MEDIA_DIRECTION eDir);
-    IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir);
-    IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-            IN IMS_BOOL bEnforceReofferMode);
     MEDIA_DIRECTION NegotiateOffer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     MEDIA_DIRECTION NegotiateAnswer(

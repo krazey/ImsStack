@@ -71,6 +71,28 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(IN MediaEnvironment* pEnvironment,
             pEnvironment, m_pConfig, GetSlotId(), pType);
 }
 
+PUBLIC VIRTUAL IMS_BOOL BaseNego::FormSdp(IN NEGO_STATE eNegoState,
+        IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
+        IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
+{
+    IMS_TRACE_I("FormSdp() - State[%d], OaModel size[%d]", eNegoState, m_listOaModel.GetSize(), 0);
+    IMS_TRACE_D("FormSdp() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+            bEnforceReofferMode);
+
+    switch (eNegoState)
+    {
+        case STATE_IDLE:
+            return FormOffer(pSessionDescriptor, pDescriptor, eDir, bDisable);
+        case STATE_OFFER_RECEIVED:
+            return FormAnswer(pSessionDescriptor, pDescriptor, eDir, bDisable);
+        case STATE_NEGOTIATED:
+            return FormReoffer(
+                    pSessionDescriptor, pDescriptor, eDir, bDisable, bEnforceReofferMode);
+        default:
+            return IMS_FALSE;
+    }
+}
+
 PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {

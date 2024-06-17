@@ -30,7 +30,7 @@ public:
     MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-                    IN IMS_BOOL bEnforceReofferMode),
+                    IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
             (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
