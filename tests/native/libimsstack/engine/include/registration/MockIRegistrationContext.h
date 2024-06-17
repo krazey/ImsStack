@@ -13,27 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ENGINE_H_
-#define ENGINE_H_
+#ifndef MOCK_I_REGISTRATION_CONTEXT_H_
+#define MOCK_I_REGISTRATION_CONTEXT_H_
 
-class IConfiguration;
-class IRegistrationManager;
+#include <gmock/gmock.h>
 
-/**
- * @brief This class provides an interface to manage and control the state of Engine.
- */
-class Engine
+#include "IRegistrationContext.h"
+
+class MockIRegistrationContext : public IRegistrationContext
 {
 public:
-    /**
-     * @brief Returns the Configuration interface.
-     */
-    static IConfiguration* GetConfiguration();
+    MockIRegistrationContext() = default;
+    virtual ~MockIRegistrationContext() = default;
 
-    /**
-     * @brief Returns the RegistrationManager interface.
-     */
-    static IRegistrationManager* GetRegistrationManager();
+    MOCK_METHOD(IRegistrationManager*, GetRegistrationManager, (), (override));
+    MOCK_METHOD(IRegInfoManager*, GetRegInfoManager, (), (override));
 };
 
 #endif

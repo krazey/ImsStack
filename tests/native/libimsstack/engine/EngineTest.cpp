@@ -16,8 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "Engine.h"
+#include "RegistrationContext.h"
 #include "ServiceContext.h"
 
+#include "MockIRegistrationContext.h"
 #include "MockIServiceContext.h"
 
 using ::testing::Return;
@@ -41,6 +43,19 @@ TEST_F(EngineTest, GetConfiguration)
     EXPECT_EQ(Engine::GetConfiguration(), nullptr);
 
     ServiceContext::GetInstance()->SetServiceContext(IMS_NULL);
+}
+
+TEST_F(EngineTest, GetRegistrationManager)
+{
+    MockIRegistrationContext objRegistrationContext;
+    RegistrationContext::GetInstance()->SetRegistrationContext(&objRegistrationContext);
+    EXPECT_CALL(objRegistrationContext, GetRegistrationManager())
+            .Times(1)
+            .WillOnce(Return(nullptr));
+
+    EXPECT_EQ(Engine::GetRegistrationManager(), nullptr);
+
+    RegistrationContext::GetInstance()->SetRegistrationContext(IMS_NULL);
 }
 
 }  // namespace android

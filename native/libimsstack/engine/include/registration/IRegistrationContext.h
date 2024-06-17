@@ -13,27 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ENGINE_H_
-#define ENGINE_H_
+#ifndef INTERFACE_REGISTRATION_CONTEXT_H_
+#define INTERFACE_REGISTRATION_CONTEXT_H_
 
-class IConfiguration;
+#include "ImsTypeDef.h"
+
+class IRegInfoManager;
 class IRegistrationManager;
 
 /**
- * @brief This class provides an interface to manage and control the state of Engine.
+ * A context interface for providing the singleton instances for registration layer.
  */
-class Engine
+class IRegistrationContext
 {
+protected:
+    virtual ~IRegistrationContext() = default;
+
 public:
     /**
-     * @brief Returns the Configuration interface.
+     * @brief Returns the IRegistrationManager instance.
+     *        Creates a new instance if it does not exist.
      */
-    static IConfiguration* GetConfiguration();
+    virtual IRegistrationManager* GetRegistrationManager() = 0;
 
     /**
-     * @brief Returns the RegistrationManager interface.
+     * @brief Returns the IRegInfoManager instance.
+     *        Creates a new instance if it does not exist.
      */
-    static IRegistrationManager* GetRegistrationManager();
+    virtual IRegInfoManager* GetRegInfoManager() = 0;
 };
 
 #endif

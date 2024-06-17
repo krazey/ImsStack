@@ -19,36 +19,30 @@
 #include "AString.h"
 #include "ImsMap.h"
 
+#include "IRegInfoManager.h"
 #include "IRegInfoParserListener.h"
-#include "RegKey.h"
 
 class IDocument;
 class IMutex;
-class RegInfo;
 class RegInfoParser;
 
-class RegInfoManager : public IRegInfoParserListener
+class RegInfoManager : public IRegInfoManager, public IRegInfoParserListener
 {
-private:
+public:
     RegInfoManager();
     virtual ~RegInfoManager();
 
 public:
-    RegInfoManager(IN const RegInfoManager& other) = delete;
-    RegInfoManager& operator=(IN const RegInfoManager& other) = delete;
+    RegInfoManager(IN const RegInfoManager&) = delete;
+    RegInfoManager& operator=(IN const RegInfoManager&) = delete;
 
 public:
-    IMS_BOOL CreateRegInfo(IN const RegKey& objRegKey);
-    void DestroyRegInfo(IN const RegKey& objRegKey);
-    RegInfo* GetRegInfo(IN const RegKey& objRegKey);
-    const RegInfo* GetRegInfo(IN const RegKey& objRegKey) const;
-    IMS_BOOL Initialize();
-    IMS_BOOL Update(IN const RegKey& objRegKey, IN const AString& strRegInfo);
-
-    // Debugging ...
-    void DisplayRegInfo();
-
-    static RegInfoManager* GetInstance();
+    IMS_BOOL CreateRegInfo(IN const RegKey& objRegKey) override;
+    void DestroyRegInfo(IN const RegKey& objRegKey) override;
+    RegInfo* GetRegInfo(IN const RegKey& objRegKey) override;
+    const RegInfo* GetRegInfo(IN const RegKey& objRegKey) const override;
+    IMS_BOOL Update(IN const RegKey& objRegKey, IN const AString& strRegInfo) override;
+    void DisplayRegInfo() const override;
 
 private:
     // IRegInfoParserListener interface

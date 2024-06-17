@@ -15,9 +15,15 @@
  */
 
 #include "Engine.h"
+#include "RegistrationContext.h"
 #include "ServiceContext.h"
 
 PUBLIC GLOBAL IConfiguration* Engine::GetConfiguration()
 {
     return ServiceContext::GetInstance()->GetConfiguration();
+}
+
+PUBLIC GLOBAL IRegistrationManager* Engine::GetRegistrationManager()
+{
+    return RegistrationContext::GetInstance()->GetRegistrationManager();
 }
