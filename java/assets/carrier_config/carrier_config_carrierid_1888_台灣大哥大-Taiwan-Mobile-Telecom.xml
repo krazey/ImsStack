@@ -47,13 +47,19 @@
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
         <pbundle name="97">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="98">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
@@ -61,13 +67,19 @@
     </pbundle>
     <pbundle name="imsvoice.amrnb_payload_description_bundle">
         <pbundle name="99">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
         </pbundle>
         <pbundle name="100">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="0">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
@@ -81,6 +93,7 @@
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
+    <boolean name="audio_show_codec_attribute_modeset_bool" value="true"/>
     <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
     <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
