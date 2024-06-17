@@ -112,7 +112,8 @@ private:
     TextProfile::Payload* CreateTextPayload(IN TextProfile::Payload* payload = IMS_NULL);
     VideoProfile::Payload* CreateVideoPayload(IN VideoProfile::Payload* payload = IMS_NULL);
 
-    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
+    AudioProfile* SetAudioProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig,
+            IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId);
     VideoProfile* SetVideoProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
     TextProfile* SetTextProfile(IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig);
 

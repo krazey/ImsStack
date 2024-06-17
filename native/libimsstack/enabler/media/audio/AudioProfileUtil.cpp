@@ -30,6 +30,8 @@
 #include "MediaManager.h"
 #include "MediaProfileUtil.h"
 #include "MediaResourceManager.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -704,4 +706,21 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     }
 
     return NO_MODESET;
+}
+
+PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
+        OUT AudioProfile* pProfile, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
+{
+    if (pProfile != IMS_NULL)
+    {
+        MediaSessionConfig* pMediaSessionConfig =
+                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                        nSlotId, pEnvironment->eServiceType);
+
+        if (pMediaSessionConfig != IMS_NULL)
+        {
+            pProfile->bAnbr = pMediaSessionConfig->IsAnbrSupported();
+            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->bAnbr, 0, 0);
+        }
+    }
 }

@@ -420,15 +420,6 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->eDirection = eDir;
     }
 
-    MediaSessionConfig* pMediaSessionConfig =
-            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                    GetSlotId(), m_pEnvironment->eServiceType);
-
-    if (pMediaSessionConfig != IMS_NULL && pMediaSessionConfig->IsAnbrSupported())
-    {
-        GetLocalProfile(pNewOaModel)->bAnbr = IMS_TRUE;
-    }
-
     // Modify a RS/RR by conditions (for RTCP enable/disable)
     MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(pNewOaModel), m_pConfig);
     m_listOaModel.Append(pNewOaModel);

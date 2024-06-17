@@ -80,7 +80,7 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
     {
         case MEDIA_TYPE_AUDIO:
             pProfile = CreateAudioProfile();
-            pProfile = SetAudioProfile(pProfile, pConfig);
+            pProfile = SetAudioProfile(pProfile, pConfig, pEnvironment, nSlotId);
             break;
         case MEDIA_TYPE_TEXT:
             pProfile = CreateTextProfile();
@@ -324,8 +324,8 @@ PRIVATE VideoProfile* MediaProfileFactory::CreateVideoProfile()
     return new VideoProfile();
 }
 
-PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
-        IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
+PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(IN MediaBaseProfile* pProfile,
+        IN MediaConfiguration* pConfig, IN MediaEnvironment* pEnvironment, IN IMS_SINT32 nSlotId)
 {
     if (pProfile == IMS_NULL || pConfig == IMS_NULL)
     {
@@ -342,6 +342,7 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(
 
     MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
+    AudioProfileUtil::SetAnbr(pAudioProfile, pEnvironment, nSlotId);
 
     while (pAudioProfile->lstPayload.GetSize() > 0)
     {
