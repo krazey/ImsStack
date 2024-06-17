@@ -102,6 +102,11 @@ public:
      */
     AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
 
+    /**
+     * @brief static cast from MediaBaseProfile::BasePayload to AudioProfile::Payload
+     */
+    AudioProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
+
 protected:
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;

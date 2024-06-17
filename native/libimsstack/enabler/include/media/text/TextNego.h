@@ -93,6 +93,11 @@ public:
      */
     TextProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
 
+    /**
+     * @brief static cast from MediaBaseProfile::BasePayload to TextProfile::Payload
+     */
+    TextProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
+
 protected:
     TextProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     TextProfile* GetPeerProfile(IN OaModel* pOaModel) override;

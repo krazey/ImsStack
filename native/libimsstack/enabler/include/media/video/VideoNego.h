@@ -92,6 +92,11 @@ public:
      */
     VideoProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
 
+    /**
+     * @brief static cast from MediaBaseProfile::BasePayload to VideoProfile::Payload
+     */
+    VideoProfile::Payload* PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload);
+
 protected:
     VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;

@@ -148,30 +148,7 @@ PUBLIC VIRTUAL void AudioNego::NegotiateSdp(IN NEGO_STATE eNegoState,
 
 PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 {
-    OaModel* pLatestOaModel = GetNegotiatedOaModel();
-    if (pLatestOaModel == IMS_NULL)
-    {
-        return AUDIO_CODEC_BITRATE_MAX;
-    }
-
-    AudioProfile* pNegotiatedProfile = GetNegotiatedProfile(pLatestOaModel);
-
-    if (pNegotiatedProfile == IMS_NULL || pNegotiatedProfile->lstPayload.GetSize() == 0)
-    {
-        return AUDIO_CODEC_BITRATE_MAX;
-    }
-
-    AudioProfile::Payload* pNegotiatedPayload = NULL;
-
-    if (pNegotiatedProfile->nNegotiatedPayloadIndex < 0)
-    {
-        pNegotiatedPayload = pNegotiatedProfile->GetPayloadAt(0);
-    }
-    else
-    {
-        pNegotiatedPayload =
-                pNegotiatedProfile->GetPayloadAt(pNegotiatedProfile->nNegotiatedPayloadIndex);
-    }
+    MediaBaseProfile::BasePayload* pNegotiatedPayload = GetNegotiatedPayload();
 
     if (pNegotiatedPayload == NULL)
     {
@@ -185,28 +162,31 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 
         if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
-            nLargestModeSet =
-                    AudioProfileUtil::GetLargestModesetInFmtp("AMR-WB", pNegotiatedPayload) +
+            nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp(
+                                      "AMR-WB", PayloadCasting(pNegotiatedPayload)) +
                     AUDIO_CODEC_BITRATE_AMR_WB_660;
             return (AUDIO_CODEC_BITRATE)nLargestModeSet;
         }
         else  // AMR case
         {
-            nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp("AMR", pNegotiatedPayload) +
+            nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp(
+                                      "AMR", PayloadCasting(pNegotiatedPayload)) +
                     AUDIO_CODEC_BITRATE_AMR_475;
             return (AUDIO_CODEC_BITRATE)nLargestModeSet;
         }
     }
     else if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->pFmtp;
+        AudioProfile::EvsFmtp* pEvsFmtp =
+                (AudioProfile::EvsFmtp*)PayloadCasting(pNegotiatedPayload)->pFmtp;
         if (pEvsFmtp == IMS_NULL)
         {
             return AUDIO_CODEC_BITRATE_INVALID;
         }
 
         IMS_SINT32 nLargestModeSet = -1;
-        nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegotiatedPayload);
+        nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp(
+                "EVS", PayloadCasting(pNegotiatedPayload));
         // primary mode
         if (pEvsFmtp->nEvsModeSwitch != 1)
         {
@@ -245,86 +225,57 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 
 PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
 {
-    if (m_listOaModel.GetSize() > 0)
+    MediaBaseProfile::BasePayload* pPayload = GetNegotiatedPayload();
+
+    if (pPayload == IMS_NULL)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
-        pLatestOaModel = GetNegotiatedOaModel();
-        if (pLatestOaModel == IMS_NULL)
-        {
-            return AUDIO_CODEC_NONE;
-        }
-        if (pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
-        {
-            return AUDIO_CODEC_NONE;
-        }
-        // if (pLatestOaModel->pNegotiatedProfile->nDataPort == 0) return AUDIO_CODEC_NONE;
-        if (pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0)
-        {
-            return AUDIO_CODEC_NONE;
-        }
+        return AUDIO_CODEC_NONE;
+    }
 
-        AudioProfile::Payload* pPayload;
+    IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
+            pPayload->objRtpMap.strPayloadType.GetStr(), 0, 0);
 
-        if (pLatestOaModel->pNegotiatedProfile->nNegotiatedPayloadIndex < 0)
-        {
-            pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(0);
-        }
-        else
-        {
-            pPayload = GetNegotiatedProfile(pLatestOaModel)
-                               ->GetPayloadAt(
-                                       pLatestOaModel->pNegotiatedProfile->nNegotiatedPayloadIndex);
-        }
+    if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
+    {
+        return AUDIO_CODEC_AMRWB;
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+    {
+        return AUDIO_CODEC_AMR;
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+    {
+        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->pFmtp;
 
-        if (pPayload == IMS_NULL)
+        if (pEvsFmtp == IMS_NULL)
         {
-            return AUDIO_CODEC_NONE;
-        }
-
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
-        {
-            return AUDIO_CODEC_AMRWB;
-        }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
-        {
-            return AUDIO_CODEC_AMR;
-        }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
-        {
-            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->pFmtp;
-
-            if (pEvsFmtp == IMS_NULL)
-            {
-                return AUDIO_CODEC_EVS;
-            }
-            // EVS AMR WB IO Mode case
-            if (pEvsFmtp->nEvsModeSwitch == 1)
-            {
-                return AUDIO_CODEC_EVS_WB;
-            }
-            // Primary SWB case
-            if ((pEvsFmtp->nBwList & 0x04) != 0)
-            {
-                return AUDIO_CODEC_EVS_SWB;
-            }
-            else if ((pEvsFmtp->nBwList & 0x02) != 0)
-            {  // Primary WB case
-                return AUDIO_CODEC_EVS_WB;
-            }
-            else if ((pEvsFmtp->nBwList & 0x01) != 0)
-            {  // Primary NB case
-                return AUDIO_CODEC_EVS_NB;
-            }
             return AUDIO_CODEC_EVS;
         }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU"))
+        if (pEvsFmtp->nEvsModeSwitch == 1)
         {
-            return AUDIO_CODEC_G711_PCMU;
+            return AUDIO_CODEC_EVS_WB;
         }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
+        if ((pEvsFmtp->nBwList & 0x04) != 0)
         {
-            return AUDIO_CODEC_G711_PCMA;
+            return AUDIO_CODEC_EVS_SWB;
         }
+        else if ((pEvsFmtp->nBwList & 0x02) != 0)
+        {
+            return AUDIO_CODEC_EVS_WB;
+        }
+        else if ((pEvsFmtp->nBwList & 0x01) != 0)
+        {
+            return AUDIO_CODEC_EVS_NB;
+        }
+        return AUDIO_CODEC_EVS;
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU"))
+    {
+        return AUDIO_CODEC_G711_PCMU;
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
+    {
+        return AUDIO_CODEC_G711_PCMA;
     }
 
     return AUDIO_CODEC_NONE;
@@ -373,6 +324,11 @@ PUBLIC AudioConfiguration* AudioNego::ConfigCasting(IN MediaConfiguration* pConf
 PUBLIC AudioProfile* AudioNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<AudioProfile*>(pProfile) : IMS_NULL;
+}
+
+PUBLIC AudioProfile::Payload* AudioNego::PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload)
+{
+    return (pPayload != IMS_NULL) ? static_cast<AudioProfile::Payload*>(pPayload) : IMS_NULL;
 }
 
 PROTECTED AudioProfile* AudioNego::GetLocalProfile(IN OaModel* pOaModel)

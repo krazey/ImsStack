@@ -167,6 +167,11 @@ public:
      */
     virtual IMS_SINT32 GetNegotiatedBandwidth();
 
+    /**
+     * @brief Get the negotiated payload
+     */
+    virtual MediaBaseProfile::BasePayload* GetNegotiatedPayload();
+
 protected:
     virtual MediaBaseProfile* GetLocalProfile(IN OaModel* pOaModel);
     virtual MediaBaseProfile* GetPeerProfile(IN OaModel* pOaModel);

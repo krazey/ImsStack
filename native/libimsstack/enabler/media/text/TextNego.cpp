@@ -137,51 +137,26 @@ PUBLIC VIRTUAL void TextNego::NegotiateSdp(IN NEGO_STATE eNegoState,
 PUBLIC
 TEXT_CODEC TextNego::GetNegotiatedCodec(void)
 {
-    if (m_listOaModel.GetSize() > 0)
+    MediaBaseProfile::BasePayload* pPayload = GetNegotiatedPayload();
+
+    if (pPayload == IMS_NULL)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
-        pLatestOaModel = GetNegotiatedOaModel();
-
-        if (pLatestOaModel == IMS_NULL)
-        {
-            return TEXT_CODEC_NONE;
-        }
-
-        if (pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
-        {
-            return TEXT_CODEC_NONE;
-        }
-
-        if (GetNegotiatedProfile(pLatestOaModel)->nDataPort == 0)
-        {
-            return TEXT_CODEC_NONE;
-        }
-
-        if (GetNegotiatedProfile(pLatestOaModel)->lstPayload.GetSize() == 0)
-        {
-            return TEXT_CODEC_NONE;
-        }
-
-        TextProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(0);
-        if (pPayload == IMS_NULL)
-        {
-            return TEXT_CODEC_NONE;
-        }
-
-        IMS_TRACE_I("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
-                pPayload->objRtpMap.strPayloadType.GetStr(), 0, 0);
-
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
-        {
-            return TEXT_CODEC_T140;
-        }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
-        {
-            return TEXT_CODEC_T140_RED;
-        }
+        return TEXT_CODEC_NONE;
     }
 
-    return TEXT_CODEC_NOT_USED;
+    IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
+            pPayload->objRtpMap.strPayloadType.GetStr(), 0, 0);
+
+    if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
+    {
+        return TEXT_CODEC_T140;
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+    {
+        return TEXT_CODEC_T140_RED;
+    }
+
+    return TEXT_CODEC_NONE;
 }
 
 PUBLIC TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
@@ -192,6 +167,11 @@ PUBLIC TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig
 PUBLIC TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<TextProfile*>(pProfile) : IMS_NULL;
+}
+
+PUBLIC TextProfile::Payload* TextNego::PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload)
+{
+    return (pPayload != IMS_NULL) ? static_cast<TextProfile::Payload*>(pPayload) : IMS_NULL;
 }
 
 PROTECTED TextProfile* TextNego::GetLocalProfile(IN OaModel* pOaModel)

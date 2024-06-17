@@ -144,40 +144,27 @@ PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
 PUBLIC
 VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
 {
-    if (m_listOaModel.GetSize() > 0)
+    MediaBaseProfile::BasePayload* pPayload = GetNegotiatedPayload();
+
+    if (pPayload == IMS_NULL)
     {
-        OaModel* pLatestOaModel = IMS_NULL;
-        pLatestOaModel = GetNegotiatedOaModel();
+        return VIDEO_RESOLUTION_INVALID;
+    }
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE ||
-                pLatestOaModel->pNegotiatedProfile->nDataPort == 0 ||
-                pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0)
+    if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+    {
+        VideoProfile::AvcFmtp* pFmtp = (VideoProfile::AvcFmtp*)pPayload->pFmtp;
+        if (pFmtp != IMS_NULL)
         {
-            return VIDEO_RESOLUTION_INVALID;
+            return pFmtp->eResolution;
         }
-
-        VideoProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(0);
-
-        if (pPayload == IMS_NULL)
+    }
+    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+    {
+        VideoProfile::HevcFmtp* pFmtp = (VideoProfile::HevcFmtp*)pPayload->pFmtp;
+        if (pFmtp != IMS_NULL)
         {
-            return VIDEO_RESOLUTION_INVALID;
-        }
-
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
-        {
-            VideoProfile::AvcFmtp* pFmtp = (VideoProfile::AvcFmtp*)pPayload->pFmtp;
-            if (pFmtp != IMS_NULL)
-            {
-                return pFmtp->eResolution;
-            }
-        }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
-        {
-            VideoProfile::HevcFmtp* pFmtp = (VideoProfile::HevcFmtp*)pPayload->pFmtp;
-            if (pFmtp != IMS_NULL)
-            {
-                return pFmtp->eResolution;
-            }
+            return pFmtp->eResolution;
         }
     }
 
@@ -192,6 +179,11 @@ PUBLIC VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConf
 PUBLIC VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<VideoProfile*>(pProfile) : IMS_NULL;
+}
+
+PUBLIC VideoProfile::Payload* VideoNego::PayloadCasting(IN MediaBaseProfile::BasePayload* pPayload)
+{
+    return (pPayload != IMS_NULL) ? static_cast<VideoProfile::Payload*>(pPayload) : IMS_NULL;
 }
 
 PROTECTED VideoProfile* VideoNego::GetLocalProfile(IN OaModel* pOaModel)

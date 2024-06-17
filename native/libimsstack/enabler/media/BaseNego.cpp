@@ -257,6 +257,32 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedBandwidth()
     return -1;
 }
 
+PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
+{
+    if (m_listOaModel.GetSize() > 0)
+    {
+        OaModel* pLatestOaModel = GetNegotiatedOaModel();
+
+        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
+        {
+            return IMS_NULL;
+        }
+
+        MediaBaseProfile* pProfile = GetNegotiatedProfile(pLatestOaModel);
+
+        if (pProfile->nDataPort == 0 || pProfile->lstPayload.GetSize() == 0)
+        {
+            return IMS_NULL;
+        }
+
+        return (pProfile->nNegotiatedPayloadIndex > 0)
+                ? pProfile->GetPayloadAt(pProfile->nNegotiatedPayloadIndex)
+                : pProfile->GetPayloadAt(0);
+    }
+
+    return IMS_NULL;
+}
+
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
 {
     return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;
