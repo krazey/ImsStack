@@ -93,7 +93,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pAudioNego = new FakeAudioNego(DEFAULT_SLOT_ID);
-        m_pAudioNego->CreateProfiles(m_pEnvironment, m_pConfig);
+        m_pAudioNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_AUDIO, m_pConfig);
     }
 
     void CreateEnvironment()
@@ -190,13 +190,13 @@ protected:
         delete m_pICoreService;
         delete m_pMockICarrierConfig;
         delete m_pAudioBundle;
-        delete m_pEvsBundle;
-        delete m_pAmrWbBundle;
-        delete m_pAmrNbBundle;
-        delete m_pEvsSubBundle;
-        delete m_pAmrWbSubBundle;
-        delete m_pAmrNbSubBundle;
         delete m_pConfig;
+        delete m_pEvsBundle;
+        delete m_pEvsSubBundle;
+        delete m_pAmrWbBundle;
+        delete m_pAmrWbSubBundle;
+        delete m_pAmrNbBundle;
+        delete m_pAmrNbSubBundle;
 
         m_objEvsPayloadType.Clear();
         m_objAmrWbPayloadType.Clear();

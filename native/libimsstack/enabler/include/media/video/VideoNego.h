@@ -17,84 +17,22 @@
 #ifndef VIDEO_NEGO_H_
 #define VIDEO_NEGO_H_
 
-#include "ImsSlot.h"
 #include "media/IMedia.h"
+#include "BaseNego.h"
 #include "ISession.h"
 #include "MediaDef.h"
 #include "video/VideoDef.h"
-#include "MediaEnvironment.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileUtil.h"
 
-class VideoNego : ImsSlot
+class VideoNego : public BaseNego
 {
-public:
-    class OaModel
-    {
-    public:
-        VideoProfile* pLocalProfile;
-        VideoProfile* pPeerProfile;
-        VideoProfile* pNegotiatedProfile;
-        IMS_SINTP nSessionDescriptorKey;
-        IMS_BOOL bConfirmedSession;
-
-    public:
-        OaModel() :
-                pLocalProfile(IMS_NULL),
-                pPeerProfile(IMS_NULL),
-                pNegotiatedProfile(IMS_NULL),
-                nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE){};
-        ~OaModel()
-        {
-            if (pLocalProfile != IMS_NULL)
-            {
-                delete pLocalProfile;
-            }
-
-            if (pPeerProfile != IMS_NULL)
-            {
-                delete pPeerProfile;
-            }
-
-            if (pNegotiatedProfile != IMS_NULL)
-            {
-                delete pNegotiatedProfile;
-            }
-        };
-
-    private:
-        OaModel(IN const OaModel& obj);
-        OaModel& operator=(IN const OaModel& obj);
-
-    public:
-        IMS_BOOL IsAllProfileExist()
-        {
-            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
-                    pNegotiatedProfile != IMS_NULL)
-            {
-                return IMS_TRUE;
-            }
-            else
-            {
-                return IMS_FALSE;
-            }
-        };
-    };
-
 public:
     explicit VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
     VideoNego(IN const VideoNego& obj);
     VideoNego& operator=(IN const VideoNego& obj);
     virtual ~VideoNego();
 
-    /**
-     * @brief Create a base local/peer/negotiate profile with given configuration
-     *
-     * @param pEnvironment The MediaEnvironment
-     * @param pConfig The configuration to create audio profile
-     */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig);
     void DestroyProfiles();
     /**
      * @brief Form the SDP with the current profile based on the state
@@ -109,7 +47,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
-    virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode);
 
@@ -133,40 +71,9 @@ public:
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
      * @param eDir The media direction of the SDP
      */
-    virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
+    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
-     */
-    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
-    /**
-     * @brief Set the local port number of the VideoProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
-     * @brief Get the local ip address
-     *
-     * @return const IpAddress& The local ip address
-     */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_UINT32 The local port number
-     */
-    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
 
     /**
      * @brief Get the negotiated remote ip address
@@ -222,6 +129,13 @@ public:
      * @return IMS_SINT32
      */
     virtual IMS_SINT32 GetMediaBandwidth();
+
+protected:
+    VideoConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
+    VideoProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+    VideoProfile* GetLocalProfile(IN OaModel* pOaModel) override;
+    VideoProfile* GetPeerProfile(IN OaModel* pOaModel) override;
+    VideoProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
 
 private:
     void Copy(IN const VideoNego* pVideoNego);
@@ -292,11 +206,6 @@ private:
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
-    ImsList<OaModel*> m_listOaModel;
-    VideoProfile m_objBaseProfile;
-    MediaEnvironment* m_pEnvironment;
-    VideoConfiguration* m_pConfig;
-    MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bNegotiatedCvoResult;
 };
 

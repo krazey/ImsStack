@@ -41,11 +41,12 @@
 #include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/RadioBlockRule.h"
+#include "call/block/RetryAfterBlockRule.h"
 #include "call/block/SsacBlockRule.h"
-#include "call/block/TimerBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
+#include "conferencecall/ConferenceDef.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessage.h"
@@ -68,7 +69,8 @@ PUBLIC
 IdleState::IdleState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::IDLE, objContext),
         m_pBlockChecker(nullptr),
-        m_objOperationAfterBlockCheck(nullptr)
+        m_objOperationAfterBlockCheck(nullptr),
+        m_pConfUsers(ImsList<std::shared_ptr<ConfUser>>())
 {
 }
 
@@ -128,9 +130,11 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
+    CopyConfUserListForAsynchronousHandling(lstUsers);
+
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueConference(lstUsers);
+        return ContinueConference();
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -154,9 +158,11 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     m_objContext.GetMediaManager().SetMediaInfo(MediaInfo(DIRECTION_SEND_RECEIVE, nVideoDirection,
             DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID));
 
+    CopyConfUserListForAsynchronousHandling(lstUsers);
+
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueConference(lstUsers);
+        return ContinueConference();
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -401,16 +407,16 @@ CallStateName IdleState::ContinueStart()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueConference(IN const ImsList<ConfUser*>& lstUsers)
+CallStateName IdleState::ContinueConference()
 {
-    IMS_TRACE_D("ContinueConference UserSize[%d]", lstUsers.GetSize(), 0, 0);
+    IMS_TRACE_D("ContinueConference UserSize[%d]", m_pConfUsers.GetSize(), 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
-    SetResourceListForConference(*GetISession()->GetNextRequest(), lstUsers);
+    SetResourceListForConference(*GetISession()->GetNextRequest());
 
     InitMediaSession();
 
@@ -500,18 +506,23 @@ IMS_BOOL IdleState::IsEpsFallbackRequired(IN const CallReasonInfo& objReason) co
 }
 
 PRIVATE
-void IdleState::SetResourceListForConference(
-        IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers)
+void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
 {
-    if (lstUsers.GetSize() == 0)
+    if (m_pConfUsers.GetSize() == 0)
     {
         return;
     }
     objMessage.AddHeader(SipHeaderName::CONTENT_TYPE, "multipart/mixed");
 
+    ImsList<ConfUser*> objUsers;
+    for (IMS_UINT32 i = 0; i < m_pConfUsers.GetSize(); i++)
+    {
+        objUsers.Append(m_pConfUsers.GetAt(i).get());
+    }
+
     // TODO: LGU needs to set false the 5th param.
     m_objContext.GetMessageUtils().SetResourceList(
-            &objMessage, m_objContext, AString::ConstNull(), lstUsers, IMS_TRUE, IMS_TRUE);
+            &objMessage, m_objContext, AString::ConstNull(), objUsers, IMS_TRUE, IMS_TRUE);
 }
 
 PRIVATE
@@ -542,8 +553,7 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
-    lstRules.Append(new TimerBlockRule(
-            m_objContext.GetPassiveTimerHolder(), m_objContext.GetCallInfo().bEmergency));
+    lstRules.Append(new RetryAfterBlockRule(m_objContext));
 
     return lstRules;
 }
@@ -589,4 +599,13 @@ IMS_RESULT IdleState::HandleCallPull()
     m_objContext.GetMediaManager().SetMediaInfo(*objDialogInfo.pMediaInfo);
 
     return IMS_SUCCESS;
+}
+
+PRIVATE
+void IdleState::CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers)
+{
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        m_pConfUsers.Append(std::make_shared<ConfUser>(*objUsers.GetAt(i)));
+    }
 }

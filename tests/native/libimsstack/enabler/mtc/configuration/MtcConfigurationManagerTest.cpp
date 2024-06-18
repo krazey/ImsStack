@@ -1031,7 +1031,7 @@ TEST_F(MtcConfigurationManagerTest,
 }
 
 TEST_F(MtcConfigurationManagerTest,
-        IsRegistrationDisconnectReasonToTerminateOngoingCallReturnsValueInCarrierConfig)
+        IsRegistrationDisconnectReasonToIgnoreReturnsValueInCarrierConfig)
 {
     ImsVector<IMS_SINT32> objArray;
     objArray.Push(ImsAosReason::POWER_OFF);
@@ -1039,50 +1039,18 @@ TEST_F(MtcConfigurationManagerTest,
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY))
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY))
             .WillByDefault(Return(objArray));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
 
-    EXPECT_FALSE(
-            pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(ImsAosReason::NONE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::POWER_OFF));
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::DATA_DISCONNECTED));
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::NO_RAT_COVERAGE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::OUT_OF_SERVICE));
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::REG_TERMINATED));
-}
-
-TEST_F(MtcConfigurationManagerTest,
-        IsRegistrationDisconnectReasonToTerminateOngoingCallReturnsTrueBy999)
-{
-    ImsVector<IMS_SINT32> objArray;
-    objArray.Push(999);
-
-    MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
-    ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY))
-            .WillByDefault(Return(objArray));
-
-    pManager->UpdateFullConfig(piMockCarrierConfig);
-
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::POWER_OFF));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::DATA_DISCONNECTED));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::NO_RAT_COVERAGE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::OUT_OF_SERVICE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::REG_TERMINATED));
+    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NONE));
+    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::POWER_OFF));
+    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::DATA_DISCONNECTED));
+    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NO_RAT_COVERAGE));
+    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::OUT_OF_SERVICE));
+    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::REG_TERMINATED));
 }
 
 TEST_F(MtcConfigurationManagerTest, GetWifiEmergency18xTimerReturnsValueInCarrierConfig)

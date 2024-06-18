@@ -16,134 +16,13 @@
 
 #include "IService.h"
 #include "ServiceTrace.h"
-#include "text/TextDef.h"
+
+#include "config/TextConfiguration.h"
 #include "text/TextProfileUtil.h"
-#include "config/CodecT140Config.h"
-#include "MediaManager.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TU");
+__IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC GLOBAL TextProfile* TextProfileUtil::CreateProfile(
-        IN MediaEnvironment* pEnvironment, IN TextConfiguration* pConfig, IN IMS_SINT32 nSlotId)
-{
-    if (pEnvironment == IMS_NULL || pConfig == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    IMS_TRACE_I("CreateProfile()", 0, 0, 0);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(nSlotId);
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    TextProfile* pTextProfile = new TextProfile();
-
-    // Setting IP address
-    pTextProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
-
-    if (pTextProfile->nDataPort == 0)
-    {
-        pTextProfile->nDataPort = pResourceMngr->AcquireRtpPort(pConfig);
-        pTextProfile->nControlPort = pTextProfile->nDataPort + 1;
-    }
-
-    IMS_TRACE_I("CreateProfile() - IpAddress[%s], port[%d]",
-            pTextProfile->objIpAddress.ToCharString(), pTextProfile->nDataPort, 0);
-
-    // Setting profile type
-    pTextProfile->strTransportType = "RTP/AVP";  // Text uses a default.
-
-    while (pTextProfile->lstPayload.GetSize() > 0)
-    {
-        TextProfile::Payload* pPayload = pTextProfile->lstPayload.GetAt(0);
-
-        if (pPayload != IMS_NULL)
-        {
-            delete pPayload;
-        }
-
-        pTextProfile->lstPayload.RemoveAt(0);
-    }
-
-    // Setting each payload and bandwidth
-    ImsList<CodecConfig*> pCodecs;
-    pCodecs = pConfig->GetCodecConfigs();
-
-    for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)
-    {
-        CodecConfig* pCodecConfig = pCodecs.GetAt(i);
-
-        if (pCodecConfig == IMS_NULL)
-        {
-            IMS_TRACE_D("pCodecConfig is NULL", 0, 0, 0);
-            break;
-        }
-
-        if (pCodecConfig->GetCodec() == ImsCodec::TEXT_T140 ||
-                pCodecConfig->GetCodec() == ImsCodec::TEXT_RED)
-        {
-            CodecT140Config* pT140Config = reinterpret_cast<CodecT140Config*>(pCodecConfig);
-            AString strCodecName;
-
-            TextProfile::Payload* pT140Payload = new TextProfile::Payload();
-
-            if (pCodecConfig->GetCodec() == ImsCodec::TEXT_RED)
-            {
-                strCodecName.Sprintf("%s", "red");
-                TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp(
-                        pT140Config->GetRedLevel(), pConfig->GetT140PayloadType());
-                IMS_TRACE_I("CreateProfile() add fmtp(%d) - nRedLevel(%d), nRedPayload(%d)", i,
-                        pRedFmtp->nRedLevel, pRedFmtp->nRedPayload);
-                pT140Payload->pFmtp = pRedFmtp;
-            }
-            else
-            {
-                strCodecName.Sprintf("%s", "t140");
-            }
-
-            pT140Payload->SetRtpMap(
-                    pT140Config->GetPayloadType(), strCodecName, pT140Config->GetSamplingRate());
-
-            pTextProfile->lstPayload.Append(pT140Payload);
-
-            IMS_TRACE_I("CreateProfile() add payload(%d) - %s, %d", i, strCodecName.GetStr(),
-                    pT140Config->GetSamplingRate());
-        }
-        else
-        {
-            IMS_TRACE_E(0, "CreateProfile() - Invalid Codec(%d)", pCodecConfig->GetCodec(), 0, 0);
-            delete pTextProfile;
-            return IMS_NULL;
-        }
-    }
-
-    // Setting direction
-    pTextProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
-    pTextProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
-    pTextProfile->nBandwidthRr = pConfig->GetRrBandwidthBps();
-    pTextProfile->nBandwidthRs = pConfig->GetRsBandwidthBps();
-    pTextProfile->nRtcpInterval = pConfig->GetRtcpInterval();
-    pTextProfile->bKeepRedLevel = pConfig->IsTextCodecEmptyRedundantEnabled();
-
-    IMS_TRACE_I("CreateProfile() - direction[%d], rtcp Interval[%d], keepRedLevel[%d]",
-            pTextProfile->eDirection, pTextProfile->nRtcpInterval, pTextProfile->bKeepRedLevel);
-    IMS_TRACE_I("CreateProfile() - AS[%d], RR[%d], RS[%d]", pTextProfile->nBandwidthAs,
-            pTextProfile->nBandwidthRr, pTextProfile->nBandwidthRs);
-    return pTextProfile;
-}
-
-void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration* pConfig,
+PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration* pConfig,
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         IN IMS_SINT32 nASValueOfNegoticatedCodec, OUT TextProfile* pNegotiatedProfile)
 {

@@ -35,10 +35,10 @@ public class AosFactory {
     public final Map<Integer, AosService> mAosServices =
             new HashMap<Integer, AosService>(DeviceConfig.getSupportedSimCount());
     @VisibleForTesting
-    protected final Map<Integer, AosSettingService> mAosSettingServices =
+    final Map<Integer, AosSettingService> mAosSettingServices =
             new HashMap<Integer, AosSettingService>(DeviceConfig.getSupportedSimCount());
     @VisibleForTesting
-    protected final Map<Integer, AosDebug> mAosDebugs =
+    final Map<Integer, AosDebug> mAosDebugs =
             new HashMap<Integer, AosDebug>(DeviceConfig.getSupportedSimCount());
 
     public static AosFactory getInstance() {

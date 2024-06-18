@@ -29,7 +29,6 @@ public:
             bExtraRegErrRetryCntSharedForRegAndSub(IMS_FALSE),
             nExtraRegErrFinalType(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED),
             nExtraRegErrMaxCnt(0),
-            nExtraRegErrMinCnt(0),
             nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached(0),
             nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached(0),
             nExtraRegErrPolicy(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED),
@@ -47,7 +46,6 @@ public:
     IMS_BOOL bExtraRegErrRetryCntSharedForRegAndSub;
     IMS_SINT32 nExtraRegErrFinalType;
     IMS_SINT32 nExtraRegErrMaxCnt;
-    IMS_SINT32 nExtraRegErrMinCnt;
     IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached;
     IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached;
     IMS_SINT32 nExtraRegErrPolicy;

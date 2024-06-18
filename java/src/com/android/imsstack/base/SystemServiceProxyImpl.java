@@ -51,7 +51,10 @@ import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ImsMmTelManager.WiFiCallingMode;
 import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback;
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
@@ -64,6 +67,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -483,8 +487,42 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         }
 
         @Override
+        public void registerFeatureProvisioningChangedCallback(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull FeatureProvisioningCallback callback) {
+            Objects.requireNonNull(executor, "executor must not be null");
+            Objects.requireNonNull(callback, "callback must not be null");
+
+            try {
+                mProvisioningManager.registerFeatureProvisioningChangedCallback(
+                        executor, callback);
+            } catch (ImsException e) {
+                Log.d(Log.TAG, "registerFeatureProvisioningChangedCallback: " + e);
+            }
+        }
+
+        @Override
+        public void unregisterFeatureProvisioningChangedCallback(
+                @NonNull FeatureProvisioningCallback callback) {
+            Objects.requireNonNull(callback, "callback must not be null");
+
+            try {
+                mProvisioningManager.unregisterFeatureProvisioningChangedCallback(callback);
+            } catch (IllegalArgumentException e) {
+                Log.d(Log.TAG, "unregisterFeatureProvisioningChangedCallback: " + e);
+            }
+        }
+
+        @Override
         public @ImsConfigImplBase.SetConfigResult int setProvisioningIntValue(int key, int value) {
             return mProvisioningManager.setProvisioningIntValue(key, value);
+        }
+
+        @Override
+        public boolean getProvisioningStatusForCapability(
+                @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @ImsRegistrationImplBase.ImsRegistrationTech int tech) {
+            return mProvisioningManager.getProvisioningStatusForCapability(capability, tech);
         }
     }
 }

@@ -88,6 +88,7 @@ private:
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nId);
     void NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice, IN IMS_SINT32 nTimeSecForVoice,
             IN IMS_SINT32 nFactorForVideo, IN IMS_SINT32 nTimeSecForVideo);
+    void NotifySimultaneousCallingSupportChanged(IN IMS_BOOL bSupported);
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 
 private:

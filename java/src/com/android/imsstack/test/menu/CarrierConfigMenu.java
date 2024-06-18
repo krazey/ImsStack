@@ -21,7 +21,6 @@ import android.os.PersistableBundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.ImsRtt;
 import android.telephony.CarrierConfigManager.ImsVoice;
@@ -44,7 +43,6 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -61,8 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("deprecation")
-public class CarrierConfigMenu extends PreferenceActivity {
+public class CarrierConfigMenu extends AppCompatActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
 
@@ -196,7 +193,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
                     Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
                     Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
-                    Assets.KEY_EXTRA_REG_ERR_MIN_CNT_INT,
                     Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
                     Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
                     Assets.KEY_EXTRA_REG_ERR_POLICY_INT,
@@ -219,7 +215,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
             Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
                     Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)),
+                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT)),
             Map.entry(Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
                     Assets.KEY_WFC_ERR_REG_403_STRING,
                     Assets.KEY_WFC_ERR_REG_500_STRING,
@@ -303,11 +299,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
         ImsLog.d(mSlotId, "CarrierConfigMenu: onResume");
 
         initTestConfig();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     @VisibleForTesting
@@ -1165,11 +1156,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private static void readConfigKeys(String fileName, Collection<String> configKeys) {
-        InputStream is = null;
-
-        try {
-            is = AppContext.getInstance().getAssets().open(fileName);
-
+        try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(is, "utf-8");
@@ -1184,8 +1171,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
             }
         } catch (IOException | XmlPullParserException e) {
             ImsLog.e("readConfigKeys: " + e.toString());
-        } finally {
-            ImsUtils.closeQuietly(is);
         }
     }
 

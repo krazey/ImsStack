@@ -17,6 +17,11 @@
 #ifndef MEDIA_BASE_PROFILE_H_
 #define MEDIA_BASE_PROFILE_H_
 
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
+#include "IpAddress.h"
+#include "MediaDef.h"
+
 /**
  * The class is a base class of the Media (Audio/Video/Text) Profile.
  * Media Profile is used to keep the SDP negotiation information like
@@ -80,6 +85,18 @@ public:
                 nChannel = obj.nChannel;
             }
             return (*this);
+        }
+
+        bool operator==(IN const RtpMap& obj) const
+        {
+            return (nPayloadNum == obj.nPayloadNum && strPayloadType == obj.strPayloadType &&
+                    nSamplingRate == obj.nSamplingRate && nChannel == obj.nChannel);
+        }
+
+        bool operator!=(IN const RtpMap& obj) const
+        {
+            return (nPayloadNum != obj.nPayloadNum || strPayloadType != obj.strPayloadType ||
+                    nSamplingRate != obj.nSamplingRate || nChannel != obj.nChannel);
         }
     };
 
@@ -146,6 +163,150 @@ public:
             }
         }
     };
+
+public:
+    class CapaNego
+    {
+    public:
+        ImsMap<IMS_SINT32, AString> mapTransportCapa;
+        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
+        ImsList<AString> lstPotentialConfig;
+        AString strNegotiatedAcfg;
+        IMS_BOOL bIsAttCapaInPcfg;
+
+    public:
+        CapaNego() :
+                mapTransportCapa(ImsMap<IMS_SINT32, AString>()),
+                mapAttributeCapa(ImsMap<IMS_SINT32, AString>()),
+                lstPotentialConfig(ImsList<AString>()),
+                strNegotiatedAcfg(AString::ConstNull()),
+                bIsAttCapaInPcfg(IMS_FALSE){};
+    };
+
+public:
+    IpAddress objIpAddress;
+    IMS_UINT32 nDataPort;
+    IMS_UINT32 nControlPort;
+    AString strTransportType;
+    IMS_UINT32 nRtcpInterval;
+    IMS_SINT32 nBandwidthAs;
+    IMS_SINT32 nBandwidthRs;
+    IMS_SINT32 nBandwidthRr;
+    MEDIA_DIRECTION eDirection;
+    CapaNego objCapaNego;
+    IMS_SINT32 nNegotiatedPayloadIndex;
+    ImsList<BasePayload*> lstPayload;
+
+    MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
+            IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
+            IN const AString transportType = "RTP/AVP", IN const IMS_UINT32 rtcpInterval = 0,
+            IN const IMS_SINT32 bandwidthAs = 0, IN const IMS_SINT32 bandwidthRs = 0,
+            IN const IMS_SINT32 bandwidthRr = 0,
+            IN const MEDIA_DIRECTION direction = MEDIA_DIRECTION_INVALID) :
+            objIpAddress(ipAddress),
+            nDataPort(dataPort),
+            nControlPort(controlPort),
+            strTransportType(transportType),
+            nRtcpInterval(rtcpInterval),
+            nBandwidthAs(bandwidthAs),
+            nBandwidthRs(bandwidthRs),
+            nBandwidthRr(bandwidthRr),
+            eDirection(direction),
+            objCapaNego(CapaNego()),
+            nNegotiatedPayloadIndex(-1),
+            lstPayload(ImsList<BasePayload*>())
+    {
+    }
+
+    virtual ~MediaBaseProfile() { DeletePayloads(); }
+
+    MediaBaseProfile(MediaBaseProfile* profile)
+    {
+        if (profile == nullptr)
+        {
+            return;
+        }
+        objIpAddress = profile->objIpAddress;
+        nDataPort = profile->nDataPort;
+        nControlPort = profile->nControlPort;
+        strTransportType = profile->strTransportType;
+        nRtcpInterval = profile->nRtcpInterval;
+        nBandwidthAs = profile->nBandwidthAs;
+        nBandwidthRs = profile->nBandwidthRs;
+        nBandwidthRr = profile->nBandwidthRr;
+        eDirection = profile->eDirection;
+        objCapaNego = profile->objCapaNego;
+        nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
+
+        DeletePayloads();
+        CopyPayloads(profile->lstPayload);
+    }
+
+    MediaBaseProfile(const MediaBaseProfile& obj)
+    {
+        objIpAddress = obj.objIpAddress;
+        nDataPort = obj.nDataPort;
+        nControlPort = obj.nControlPort;
+        strTransportType = obj.strTransportType;
+        nRtcpInterval = obj.nRtcpInterval;
+        nBandwidthAs = obj.nBandwidthAs;
+        nBandwidthRs = obj.nBandwidthRs;
+        nBandwidthRr = obj.nBandwidthRr;
+        eDirection = obj.eDirection;
+        objCapaNego = obj.objCapaNego;
+        nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+
+        DeletePayloads();
+        CopyPayloads(obj.lstPayload);
+    }
+
+    MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
+    {
+        if (this != &obj)
+        {
+            objIpAddress = obj.objIpAddress;
+            nDataPort = obj.nDataPort;
+            nControlPort = obj.nControlPort;
+            strTransportType = obj.strTransportType;
+            nRtcpInterval = obj.nRtcpInterval;
+            nBandwidthAs = obj.nBandwidthAs;
+            nBandwidthRs = obj.nBandwidthRs;
+            nBandwidthRr = obj.nBandwidthRr;
+            eDirection = obj.eDirection;
+            objCapaNego = obj.objCapaNego;
+            nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+
+            DeletePayloads();
+            CopyPayloads(obj.lstPayload);
+        }
+        return (*this);
+    }
+
+    bool operator==(IN const MediaBaseProfile& obj) const
+    {
+        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
+                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
+                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
+                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
+                eDirection == obj.eDirection);
+    }
+
+    bool operator!=(IN const MediaBaseProfile& obj) const
+    {
+        return (objIpAddress != obj.objIpAddress || nDataPort != obj.nDataPort ||
+                nControlPort != obj.nControlPort || strTransportType != obj.strTransportType ||
+                nRtcpInterval != obj.nRtcpInterval || nBandwidthAs != obj.nBandwidthAs ||
+                nBandwidthRs != obj.nBandwidthRs || nBandwidthRr != obj.nBandwidthRr ||
+                eDirection != obj.eDirection);
+    }
+
+    virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
+    {
+        return (lstPayload.GetSize() > nIndex) ? lstPayload.GetAt(nIndex) : IMS_NULL;
+    }
+
+    void DeletePayloads();
+    void CopyPayloads(IN ImsList<BasePayload*> payloadList);
 };
 
 #endif

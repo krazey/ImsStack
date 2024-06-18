@@ -20,7 +20,7 @@
 #include "IJniMediaSessionThread.h"
 #include "IJniEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MH");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaMsgHandler::MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey) :

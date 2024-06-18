@@ -505,12 +505,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::
-                               KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
@@ -523,8 +523,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL,
-                    IMS_FALSE))
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL, IMS_FALSE))
@@ -538,7 +538,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL, IMS_FALSE))
@@ -581,6 +581,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
@@ -606,12 +610,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT, -1))
             .WillOnce(Return(1));
-    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
-    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT, -1))
             .WillOnce(Return(2));
     EXPECT_CALL(
-            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, -1))
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT, -1))
             .WillOnce(Return(3000));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT, -1))
@@ -654,13 +658,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_NONE));
-    EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT, -1))
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
-    EXPECT_CALL(
-            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT, -1))
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT, -1))
             .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
@@ -781,6 +784,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
+    EXPECT_FALSE(m_pAosNConfiguration->IsAwtUsedWhenInitRegWithNextPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
@@ -905,9 +909,6 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             .WillOnce(Return(0));
 
     EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT, -1))
-            .WillOnce(Return(0));
-
-    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT, -1))
             .WillOnce(Return(0));
 
     EXPECT_CALL(objExtraRegErr,
@@ -1071,7 +1072,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     Return(static_cast<ICarrierConfig*>(&objSubErrCodeForTerminatedBundle)));
 
     EXPECT_CALL(objSubErrCodeForTerminatedBundle,
-            GetInt(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT,
+            GetInt(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT,
                     -1))
             .WillOnce(Return(0));
 
@@ -1131,7 +1132,6 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsExtraRegErrRetryCntSharedForRegAndSubRequired());
     EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrFinalType());
     EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrMaxCount());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetExtraRegErrMinCount());
     EXPECT_EQ(1, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached());
     EXPECT_EQ(2, m_pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
     EXPECT_EQ(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED,

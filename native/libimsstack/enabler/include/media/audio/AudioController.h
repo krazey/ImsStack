@@ -198,12 +198,12 @@ public:
     IMS_BOOL UpdateMediaDirection(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bRestore = IMS_FALSE);
 
     /**
-     * @brief Set Inactivity timer
+     * @brief Set network tone timer
      *
      * @param nNegoId The identification to get the audio profile from negotiated parameter
-     * @param nTimer Inactivity timer value
+     * @param nTimer The network tone timer value
      */
-    void SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
+    void SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
 
     /**
      * @brief Get Inactivity timer

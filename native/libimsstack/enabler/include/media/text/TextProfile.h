@@ -17,8 +17,6 @@
 #ifndef TEXT_PROFILE_H_
 #define TEXT_PROFILE_H_
 
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
 #include "MediaBaseProfile.h"
 
 /**
@@ -102,110 +100,64 @@ public:
     };
 
 public:
-    IpAddress objIpAddress;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
-    ImsList<Payload*> lstPayload;
-    MEDIA_DIRECTION eDirection;
-    IMS_BOOL bISOfferCase;
     IMS_BOOL bIsHold;
     IMS_BOOL bKeepRedLevel;
 
 public:
     TextProfile() :
-            nDataPort(0),
-            nControlPort(0),
-            strTransportType("RTP/AVP"),
-            nRtcpInterval(0),
-            nBandwidthAs(0),
-            nBandwidthRs(0),
-            nBandwidthRr(0),
-            eDirection(MEDIA_DIRECTION_INVALID),
-            bISOfferCase(IMS_FALSE),
+            MediaBaseProfile(
+                    IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
             bIsHold(IMS_FALSE),
             bKeepRedLevel(IMS_TRUE){};
 
-    TextProfile(IN const TextProfile& obj) { copy(&obj); }
+    virtual ~TextProfile() {}
 
-    virtual ~TextProfile()
+    TextProfile(IN TextProfile* profile) :
+            MediaBaseProfile(profile)
     {
-        while (lstPayload.GetSize() > 0)
+        if (profile == nullptr)
         {
-            TextProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
+            return;
         }
+
+        bIsHold = profile->bIsHold;
+        bKeepRedLevel = profile->bKeepRedLevel;
+    }
+
+    TextProfile(IN const TextProfile& obj) :
+            MediaBaseProfile(obj)
+    {
+        bIsHold = obj.bIsHold;
+        bKeepRedLevel = obj.bKeepRedLevel;
     }
 
     TextProfile& operator=(IN const TextProfile& obj)
     {
         if (this != &obj)
         {
-            copy(&obj);
+            MediaBaseProfile::operator=(obj);
+            bIsHold = obj.bIsHold;
+            bKeepRedLevel = obj.bKeepRedLevel;
         }
         return (*this);
     }
 
     bool operator==(IN const TextProfile& obj) const
     {
-        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
-                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
-                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
-                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
-                eDirection == obj.eDirection && bISOfferCase == obj.bISOfferCase &&
-                bIsHold == obj.bIsHold && bKeepRedLevel == obj.bKeepRedLevel);
+        return (MediaBaseProfile::operator==(obj) && bIsHold == obj.bIsHold &&
+                bKeepRedLevel == obj.bKeepRedLevel);
     }
 
-private:
-    void copy(const TextProfile* pProfile)
+    bool operator!=(IN const TextProfile& obj) const
     {
-        if (pProfile == IMS_NULL)
-        {
-            return;
-        }
+        return (MediaBaseProfile::operator!=(obj) || bIsHold != obj.bIsHold ||
+                bKeepRedLevel != obj.bKeepRedLevel);
+    }
 
-        objIpAddress = pProfile->objIpAddress;
-        nDataPort = pProfile->nDataPort;
-        nControlPort = pProfile->nControlPort;
-        strTransportType = pProfile->strTransportType;
-        nRtcpInterval = pProfile->nRtcpInterval;
-        nBandwidthAs = pProfile->nBandwidthAs;
-        nBandwidthRs = pProfile->nBandwidthRs;
-        nBandwidthRr = pProfile->nBandwidthRr;
-
-        while (lstPayload.GetSize() > 0)
-        {
-            TextProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
-        }
-
-        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
-        {
-            TextProfile::Payload* pNewPayload =
-                    new TextProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
-
-        eDirection = pProfile->eDirection;
-        bISOfferCase = pProfile->bISOfferCase;
-        bIsHold = pProfile->bIsHold;
-        bKeepRedLevel = pProfile->bKeepRedLevel;
+    Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
+    {
+        BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
+        return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 };
 

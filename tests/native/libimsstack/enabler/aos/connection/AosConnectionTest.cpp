@@ -34,56 +34,40 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define DECLARE_USING(Base)                           \
+    using Base::Notify;                               \
+    using Base::SetActivationRequested;               \
+    using Base::SetState;                             \
+    using Base::UpdateIpcanForImsTraffic;             \
+    using Base::NetworkConnection_OnConnected;        \
+    using Base::NetworkConnection_OnDisconnected;     \
+    using Base::NetworkConnection_OnConnectionFailed; \
+    using Base::NetworkConnection_OnIpChanged;        \
+    using Base::NetworkConnection_OnIpcanChanged;     \
+    using Base::NetworkConnection_OnPcscfChanged;
+
 const IMS_SINT32 SLOT_ID = 0;
 
 class TestAosConnection : public AosConnection
 {
 public:
-    TestAosConnection(IN IAosAppContext* piAppContext) :
+    DECLARE_USING(AosConnection)
+
+    explicit inline TestAosConnection(IN IAosAppContext* piAppContext) :
             AosConnection(piAppContext)
     {
     }
 
-    FRIEND_TEST(AosConnectionTest, Constructor_NotSetListenerForNullConnection);
-    FRIEND_TEST(AosConnectionTest, Activate_NotifyStateChangeImmediatelyIfActiveState);
-    FRIEND_TEST(AosConnectionTest, Activate_ReturnIfAlreadyActivationRequested);
-    FRIEND_TEST(AosConnectionTest, Activate_NotifyStateChangeImmediatelyIfGetResultDone);
-    FRIEND_TEST(AosConnectionTest, Activate_ActivatingIsNotYetComplete);
-    FRIEND_TEST(AosConnectionTest, Deactivate_NotInvokeDeactivateIfActivationNotRequested);
-    FRIEND_TEST(AosConnectionTest, Deactivate_InvokeDeactivate);
-    FRIEND_TEST(AosConnectionTest, GetConnectionType);
-    FRIEND_TEST(AosConnectionTest, SetListener_NotAddSameListenerAgain);
-    FRIEND_TEST(AosConnectionTest, RemoveListener_IgnoreIfNotInList);
-    FRIEND_TEST(AosConnectionTest, GetMtu_ReturnZeroIfNotActiveState);
-    FRIEND_TEST(AosConnectionTest, GetMtuThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, GetLocalAddressThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, GetPcscfAddressThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, GetHostByNameThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, GetIfaceNameThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, CheckEpdgEnabledThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, CheckIpv6PreferredThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, CheckIpcanCategoryThroughNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, CheckPcoValue_ReturnTrueIfConfiguredAsLimitedServiceValue);
-    FRIEND_TEST(AosConnectionTest, CheckPcoValue_ReturnFalseIfNotSupportLimitedAdminSmsMode);
-    FRIEND_TEST(AosConnectionTest, CheckPcoValue_ReturnFalseIfConfiguredAsNotLimitedServiceValue);
-    FRIEND_TEST(AosConnectionTest, StateToString_ReturnStringOfCurrentState);
-    FRIEND_TEST(AosConnectionTest, NotUpdateIpcanForNonImsConnectionType);
-    FRIEND_TEST(AosConnectionTest, HandleOnConnected_NotifyStateChanged);
-    FRIEND_TEST(AosConnectionTest, HandleOnDisconnected_NotifyStateChanged);
-    FRIEND_TEST(AosConnectionTest, HandleOnConnectionFailed_NotifyConnectionFailed);
-    FRIEND_TEST(AosConnectionTest, HandleOnIpChanged_NotNotifyIpChangedIfNotConnected);
-    FRIEND_TEST(AosConnectionTest, HandleOnIpChanged_NotifyIpChanged);
-    FRIEND_TEST(AosConnectionTest, HandleOnIpcanChanged_NotifyIpcanChanged);
-    FRIEND_TEST(AosConnectionTest, HandleOnPcscfChanged_NotifyPcscfChanged);
-    FRIEND_TEST(AosConnectionTest, NotHandleNetworkConnectionCallbackForOtherNetworkConnection);
-    FRIEND_TEST(AosConnectionTest, NotifyExceptionHandlingForNullListener_Ignore);
-    FRIEND_TEST(AosConnectionTest, NotifyExceptionHandlingForUnknownType_Ignore);
+    inline void SetConnectionType(IN IMS_SINT32 nType) { m_nCnxType = nType; }
+    inline INetworkConnection* GetNetworkConnection() { return m_piConnection; }
+    inline ImsList<IAosConnectionListener*> GetListeners() { return m_objListeners; }
 };
 
 class AosConnectionTest : public ::testing::Test
 {
 public:
-    inline AosConnectionTest()
+    inline AosConnectionTest() :
+            m_pAosConnection(IMS_NULL)
     {
         m_pAosStaticProfile = new AosStaticProfile();
 
@@ -110,7 +94,7 @@ public:
     }
 
 public:
-    TestAosConnection* m_pTestAosConnection;
+    TestAosConnection* m_pAosConnection;
     TestNetworkService m_objNetworkService;
 
     AosStaticProfile* m_pAosStaticProfile;
@@ -130,25 +114,29 @@ protected:
         ON_CALL(m_objMockIAosAppContext, GetStaticProfile())
                 .WillByDefault(Return(m_pAosStaticProfile));
 
-        m_pTestAosConnection = new TestAosConnection(&m_objMockIAosAppContext);
-        m_pTestAosConnection->SetListener(&m_objMockIAosConnectionListener);
+        m_pAosConnection = new TestAosConnection(&m_objMockIAosAppContext);
+        ASSERT_TRUE(m_pAosConnection != nullptr);
+
+        m_pAosConnection->SetListener(&m_objMockIAosConnectionListener);
     }
 
     virtual void TearDown() override
     {
-        if (m_pTestAosConnection)
+        if (m_pAosConnection)
         {
-            delete m_pTestAosConnection;
+            delete m_pAosConnection;
+            m_pAosConnection = IMS_NULL;
         }
     }
 };
-TEST_F(AosConnectionTest, Constructor_NotSetListenerForNullConnection)
+
+TEST_F(AosConnectionTest, ConnectionIsNullIfFailToCreateConnectionWhenConstructAosConnection)
 {
     // set listener as IMS_NULL when destrcut AosConnection
     EXPECT_CALL(m_objMockINetworkConnection, SetListener(IMS_NULL));
-    if (m_pTestAosConnection)
+    if (m_pAosConnection)
     {
-        delete m_pTestAosConnection;
+        delete m_pAosConnection;
     }
 
     // set to return IMS_NULL when NetworkService create connection
@@ -157,38 +145,38 @@ TEST_F(AosConnectionTest, Constructor_NotSetListenerForNullConnection)
     // not set listenr because NetworkService return IMS_NULL for CreateConnection
     EXPECT_CALL(m_objMockINetworkConnection, SetListener(_)).Times(0);
 
-    m_pTestAosConnection = new TestAosConnection(&m_objMockIAosAppContext);
+    m_pAosConnection = new TestAosConnection(&m_objMockIAosAppContext);
 
-    EXPECT_EQ(m_pTestAosConnection->m_piConnection, nullptr);
+    EXPECT_EQ(m_pAosConnection->GetNetworkConnection(), nullptr);
 
     m_objNetworkService.SetConnection(&m_objMockINetworkConnection);
 }
 
-TEST_F(AosConnectionTest, Activate_NotifyStateChangeImmediatelyIfActiveState)
+TEST_F(AosConnectionTest, NotifyStateChangeImmediatelyIfAlreadyInActiveStateWhenActivate)
 {
-    m_pTestAosConnection->SetState(AosConnection::STATE_ACTIVE);
+    m_pAosConnection->SetState(AosConnection::STATE_ACTIVE);
 
     // notify state change without invoking Activate
     EXPECT_CALL(m_objMockIAosConnectionListener,
             AosConnection_StateChanged(AosConnection::STATE_ACTIVE));
     EXPECT_CALL(m_objMockINetworkConnection, Activate(_)).Times(0);
 
-    EXPECT_TRUE(m_pTestAosConnection->Activate());
+    m_pAosConnection->Activate();
 
-    EXPECT_FALSE(m_pTestAosConnection->IsActivationRequested());
+    EXPECT_FALSE(m_pAosConnection->IsActivationRequested());
 }
 
-TEST_F(AosConnectionTest, Activate_ReturnIfAlreadyActivationRequested)
+TEST_F(AosConnectionTest, DoNotInvokeActivateAgainIfAlreadyRequestedWhenActivate)
 {
-    m_pTestAosConnection->SetActivationRequested(IMS_TRUE);
+    m_pAosConnection->SetActivationRequested(IMS_TRUE);
 
     // return without invoking Activate
     EXPECT_CALL(m_objMockINetworkConnection, Activate(_)).Times(0);
 
-    EXPECT_TRUE(m_pTestAosConnection->Activate());
+    m_pAosConnection->Activate();
 }
 
-TEST_F(AosConnectionTest, Activate_NotifyStateChangeImmediatelyIfGetResultDone)
+TEST_F(AosConnectionTest, NotifyStateChangeImmediatelyIfResultIsDoneWhenActivate)
 {
     ON_CALL(m_objMockINetworkConnection, Activate(_))
             .WillByDefault(Return(INetworkConnection::RESULT_DONE));
@@ -197,13 +185,13 @@ TEST_F(AosConnectionTest, Activate_NotifyStateChangeImmediatelyIfGetResultDone)
     EXPECT_CALL(m_objMockIAosConnectionListener,
             AosConnection_StateChanged(AosConnection::STATE_ACTIVE));
 
-    EXPECT_TRUE(m_pTestAosConnection->Activate());
+    m_pAosConnection->Activate();
 
-    EXPECT_TRUE(m_pTestAosConnection->IsActivationRequested());
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_ACTIVE);
+    EXPECT_TRUE(m_pAosConnection->IsActivationRequested());
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_ACTIVE);
 }
 
-TEST_F(AosConnectionTest, Activate_ActivatingIsNotYetComplete)
+TEST_F(AosConnectionTest, SetAsActivatingStateIfNotYetDoneWhenActivate)
 {
     ON_CALL(m_objMockINetworkConnection, Activate(_))
             .WillByDefault(Return(INetworkConnection::RESULT_DOING));
@@ -211,252 +199,285 @@ TEST_F(AosConnectionTest, Activate_ActivatingIsNotYetComplete)
     // not notify state change because it is not yet complete
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_)).Times(0);
 
-    EXPECT_TRUE(m_pTestAosConnection->Activate());
+    m_pAosConnection->Activate();
 
-    EXPECT_TRUE(m_pTestAosConnection->IsActivationRequested());
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_ACTIVATING);
+    EXPECT_TRUE(m_pAosConnection->IsActivationRequested());
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_ACTIVATING);
 }
 
-TEST_F(AosConnectionTest, Deactivate_NotInvokeDeactivateIfActivationNotRequested)
+TEST_F(AosConnectionTest, NotInvokeDeactivateIfActivationWasNotRequestedWhenDeactivate)
 {
-    m_pTestAosConnection->SetActivationRequested(IMS_FALSE);
+    m_pAosConnection->SetActivationRequested(IMS_FALSE);
 
     EXPECT_CALL(m_objMockINetworkConnection, Deactivate(_)).Times(0);
 
-    m_pTestAosConnection->Deactivate();
+    m_pAosConnection->Deactivate();
 
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_IDLE);
 }
 
-TEST_F(AosConnectionTest, Deactivate_InvokeDeactivate)
+TEST_F(AosConnectionTest, InvokeDeactivateIfActivationWasRequestedWhenDeactivate)
 {
-    m_pTestAosConnection->SetActivationRequested(IMS_TRUE);
+    m_pAosConnection->SetActivationRequested(IMS_TRUE);
 
     EXPECT_CALL(m_objMockINetworkConnection, Deactivate(IMS_TRUE));
 
-    m_pTestAosConnection->Deactivate();
+    m_pAosConnection->Deactivate();
 
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_IDLE);
 }
 
-TEST_F(AosConnectionTest, GetConnectionType)
+TEST_F(AosConnectionTest, GetConnectionTypeReturnsCurrentConnectionType)
 {
-    EXPECT_EQ(m_pTestAosConnection->GetConnectionType(), NetworkPolicy::APN_IMS);
+    m_pAosConnection->SetConnectionType(NetworkPolicy::APN_IMS);
+    EXPECT_EQ(m_pAosConnection->GetConnectionType(), NetworkPolicy::APN_IMS);
 
-    m_pTestAosConnection->m_nCnxType = NetworkPolicy::APN_EMERGENCY;
-    EXPECT_EQ(m_pTestAosConnection->GetConnectionType(), NetworkPolicy::APN_EMERGENCY);
+    m_pAosConnection->SetConnectionType(NetworkPolicy::APN_EMERGENCY);
+    EXPECT_EQ(m_pAosConnection->GetConnectionType(), NetworkPolicy::APN_EMERGENCY);
 }
 
-TEST_F(AosConnectionTest, SetListener_NotAddSameListenerAgain)
+TEST_F(AosConnectionTest, NotAddNullOrSameListenerAgainWhenSetListener)
 {
-    IMS_UINT32 nListenerSize = m_pTestAosConnection->m_objListeners.GetSize();
+    IMS_UINT32 nListenerSize = m_pAosConnection->GetListeners().GetSize();
+
+    // not add NULL listener
+    m_pAosConnection->SetListener(IMS_NULL);
 
     // not add same listener again
-    m_pTestAosConnection->SetListener(&m_objMockIAosConnectionListener);
+    m_pAosConnection->SetListener(&m_objMockIAosConnectionListener);
 
-    EXPECT_EQ(m_pTestAosConnection->m_objListeners.GetSize(), nListenerSize);
+    EXPECT_EQ(m_pAosConnection->GetListeners().GetSize(), nListenerSize);
 }
 
-TEST_F(AosConnectionTest, RemoveListener_IgnoreIfNotInList)
+TEST_F(AosConnectionTest, IgnoreIfListenerIsNullOrNotInListWhenRemoveListener)
 {
-    IMS_UINT32 nListenerSize = m_pTestAosConnection->m_objListeners.GetSize();
+    IMS_UINT32 nListenerSize = m_pAosConnection->GetListeners().GetSize();
 
     // remove listener
-    m_pTestAosConnection->RemoveListener(&m_objMockIAosConnectionListener);
-    EXPECT_EQ(m_pTestAosConnection->m_objListeners.GetSize(), nListenerSize - 1);
+    m_pAosConnection->RemoveListener(&m_objMockIAosConnectionListener);
+    EXPECT_EQ(m_pAosConnection->GetListeners().GetSize(), nListenerSize - 1);
+
+    // ignore remove request for NULL listener
+    m_pAosConnection->RemoveListener(IMS_NULL);
+    EXPECT_EQ(m_pAosConnection->GetListeners().GetSize(), nListenerSize - 1);
 
     // ignore remove request for listener not in the list
-    m_pTestAosConnection->RemoveListener(&m_objMockIAosConnectionListener);
-    EXPECT_EQ(m_pTestAosConnection->m_objListeners.GetSize(), nListenerSize - 1);
+    m_pAosConnection->RemoveListener(&m_objMockIAosConnectionListener);
+    EXPECT_EQ(m_pAosConnection->GetListeners().GetSize(), nListenerSize - 1);
 }
 
-TEST_F(AosConnectionTest, GetMtu_ReturnZeroIfNotActiveState)
+TEST_F(AosConnectionTest, ReturnZeroIfNotActiveStateWhenGetMtu)
 {
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    m_pAosConnection->SetState(AosConnection::STATE_IDLE);
+
     EXPECT_CALL(m_objMockINetworkConnection, GetMtu()).Times(0);
 
-    EXPECT_EQ(m_pTestAosConnection->GetMtu(), 0);
+    IMS_SINT32 nResult = m_pAosConnection->GetMtu();
+
+    EXPECT_EQ(nResult, 0);
 }
 
-TEST_F(AosConnectionTest, GetMtuThroughNetworkConnection)
+TEST_F(AosConnectionTest, AcquireThroughNetworkConnectionWhenGetMtu)
 {
-    m_pTestAosConnection->SetState(AosConnection::STATE_ACTIVE);
-    EXPECT_CALL(m_objMockINetworkConnection, GetMtu()).Times(1).WillOnce(Return(3000));
+    m_pAosConnection->SetState(AosConnection::STATE_ACTIVE);
 
-    EXPECT_EQ(m_pTestAosConnection->GetMtu(), 3000);
+    IMS_SINT32 nExpectedMtu = 3000;
+    EXPECT_CALL(m_objMockINetworkConnection, GetMtu()).WillOnce(Return(nExpectedMtu));
+
+    IMS_SINT32 nResult = m_pAosConnection->GetMtu();
+
+    EXPECT_EQ(nResult, nExpectedMtu);
 }
 
-TEST_F(AosConnectionTest, GetLocalAddressThroughNetworkConnection)
+TEST_F(AosConnectionTest, AcquireThroughNetworkConnectionWhenGetLocalAddress)
 {
+    const IpAddress objExpectedAddress = IpAddress(AString("1.1.1.1"));
+
     EXPECT_CALL(m_objMockINetworkConnection, GetLocalAddress(_))
-            .Times(1)
-            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
+            .WillOnce(ReturnRef(objExpectedAddress));
 
-    EXPECT_EQ(m_pTestAosConnection->GetLocalAddress(), IpAddress::LOOPBACK);
+    const IpAddress& objResult = m_pAosConnection->GetLocalAddress();
+
+    EXPECT_TRUE(objExpectedAddress.Equals(objResult));
 }
 
-TEST_F(AosConnectionTest, GetPcscfAddressThroughNetworkConnection)
+TEST_F(AosConnectionTest, AcquireThroughNetworkConnectionWhenGetPcscfAddress)
 {
     EXPECT_CALL(m_objMockINetworkConnection, GetPcscfAddress(_))
-            .Times(1)
             .WillOnce(ReturnRef(AStringArray::ConstNull()));
 
-    m_pTestAosConnection->GetPcscfAddress();
+    m_pAosConnection->GetPcscfAddress();
 }
 
-TEST_F(AosConnectionTest, GetHostByNameThroughNetworkConnection)
+TEST_F(AosConnectionTest, AcquireThroughNetworkConnectionWhenGetHostByName)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).WillOnce(Return(1));
 
     const AString strHostName = AString("hostName");
     ImsList<IpAddress> objIpas;
-    EXPECT_EQ(m_pTestAosConnection->GetHostByName(strHostName, objIpas), 1);
+    m_pAosConnection->GetHostByName(strHostName, objIpas);
 }
 
-TEST_F(AosConnectionTest, GetIfaceNameThroughNetworkConnection)
+TEST_F(AosConnectionTest, AcquireThroughNetworkConnectionWhenGetIfaceName)
 {
     const AString strIfaceName = AString("ifaceName");
-    EXPECT_CALL(m_objMockINetworkConnection, GetIfaceName())
-            .Times(1)
-            .WillOnce(ReturnRef(strIfaceName));
+    EXPECT_CALL(m_objMockINetworkConnection, GetIfaceName()).WillOnce(ReturnRef(strIfaceName));
 
-    EXPECT_EQ(m_pTestAosConnection->GetIfaceName(), strIfaceName);
+    EXPECT_EQ(m_pAosConnection->GetIfaceName(), strIfaceName);
 }
 
-TEST_F(AosConnectionTest, CheckEpdgEnabledThroughNetworkConnection)
+TEST_F(AosConnectionTest, IsEpdgEnabledChecksThroughNetworkConnection)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled()).Times(1).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled()).WillOnce(Return(IMS_TRUE));
 
-    EXPECT_EQ(m_pTestAosConnection->IsEpdgEnabled(), IMS_TRUE);
+    IMS_BOOL bResult = m_pAosConnection->IsEpdgEnabled();
+
+    EXPECT_EQ(bResult, IMS_TRUE);
 }
 
-TEST_F(AosConnectionTest, CheckIpv6PreferredThroughNetworkConnection)
+TEST_F(AosConnectionTest, IsIpv6PreferredChecksThroughNetworkConnection)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, IsIpv6Preferred()).Times(1).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockINetworkConnection, IsIpv6Preferred()).WillOnce(Return(IMS_TRUE));
 
-    EXPECT_EQ(m_pTestAosConnection->IsIpv6Preferred(), IMS_TRUE);
+    IMS_BOOL bResult = m_pAosConnection->IsIpv6Preferred();
+
+    EXPECT_EQ(bResult, IMS_TRUE);
 }
 
-TEST_F(AosConnectionTest, CheckIpcanCategoryThroughNetworkConnection)
+TEST_F(AosConnectionTest, ReturnWlanCategoryIfEpdgIsEnabledWhenGetIpcanCategory)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled())
-            .Times(2)
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled()).WillOnce(Return(IMS_TRUE));
 
-    EXPECT_EQ(m_pTestAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_WLAN);
-    EXPECT_EQ(m_pTestAosConnection->GetIpcanCategory(), IIpcan::CATEGORY_MOBILE);
+    IMS_SINT32 nResult = m_pAosConnection->GetIpcanCategory();
+
+    EXPECT_EQ(nResult, IIpcan::CATEGORY_WLAN);
 }
 
-TEST_F(AosConnectionTest, CheckPcoValue_ReturnTrueIfConfiguredAsLimitedServiceValue)
+TEST_F(AosConnectionTest, ReturnMobileCategoryIfEpdgIsNotEnabledWhenGetIpcanCategory)
 {
-    m_pTestAosConnection->SetCarrierSignalPcoValue(TestAosConnection::PCO_LIMITED_SERVICE_VALUE);
+    EXPECT_CALL(m_objMockINetworkConnection, IsePDGEnabled()).WillOnce(Return(IMS_FALSE));
+
+    IMS_SINT32 nResult = m_pAosConnection->GetIpcanCategory();
+
+    EXPECT_EQ(nResult, IIpcan::CATEGORY_MOBILE);
+}
+
+TEST_F(AosConnectionTest, IsLimitedServicePcoValueReturnsTrueIfLimitedAdminSmsModeIsSupported)
+{
+    m_pAosConnection->SetCarrierSignalPcoValue(AosConnection::PCO_LIMITED_SERVICE_VALUE);
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_TRUE(m_pTestAosConnection->IsLimitedServicePcoValue());
+    IMS_BOOL bResult = m_pAosConnection->IsLimitedServicePcoValue();
+
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosConnectionTest, CheckPcoValue_ReturnFalseIfNotSupportLimitedAdminSmsMode)
+TEST_F(AosConnectionTest, IsLimitedServicePcoValueReturnsFalseIfLimitedAdminSmsModeIsNotSupported)
 {
-    m_pTestAosConnection->SetCarrierSignalPcoValue(TestAosConnection::PCO_LIMITED_SERVICE_VALUE);
+    m_pAosConnection->SetCarrierSignalPcoValue(AosConnection::PCO_LIMITED_SERVICE_VALUE);
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_FALSE(m_pTestAosConnection->IsLimitedServicePcoValue());
+    IMS_BOOL bResult = m_pAosConnection->IsLimitedServicePcoValue();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectionTest, CheckPcoValue_ReturnFalseIfConfiguredAsNotLimitedServiceValue)
+TEST_F(AosConnectionTest, IsLimitedServicePcoValueReturnsFalseIfInvalidPcoValue)
 {
-    m_pTestAosConnection->SetCarrierSignalPcoValue(TestAosConnection::PCO_INVALID_VALUE);
+    m_pAosConnection->SetCarrierSignalPcoValue(AosConnection::PCO_INVALID_VALUE);
     ON_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_FALSE(m_pTestAosConnection->IsLimitedServicePcoValue());
+    IMS_BOOL bResult = m_pAosConnection->IsLimitedServicePcoValue();
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosConnectionTest, StateToString_ReturnStringOfCurrentState)
+TEST_F(AosConnectionTest, ReturnStringOfCurrentStateWhenStateToString)
 {
     IMS_SINT32 nInvalidState = -1;
 
-    EXPECT_STREQ(m_pTestAosConnection->StateToString(IAosConnection::STATE_IDLE), "STATE_IDLE");
-    EXPECT_STREQ(m_pTestAosConnection->StateToString(IAosConnection::STATE_ACTIVE), "STATE_ACTIVE");
-    EXPECT_STREQ(m_pTestAosConnection->StateToString(IAosConnection::STATE_ACTIVATING),
-            "STATE_ACTIVATING");
-    EXPECT_STREQ(m_pTestAosConnection->StateToString(nInvalidState), "__INVALID__");
+    EXPECT_STREQ(m_pAosConnection->StateToString(IAosConnection::STATE_IDLE), "STATE_IDLE");
+    EXPECT_STREQ(m_pAosConnection->StateToString(IAosConnection::STATE_ACTIVE), "STATE_ACTIVE");
+    EXPECT_STREQ(
+            m_pAosConnection->StateToString(IAosConnection::STATE_ACTIVATING), "STATE_ACTIVATING");
+    EXPECT_STREQ(m_pAosConnection->StateToString(nInvalidState), "__INVALID__");
 }
 
-TEST_F(AosConnectionTest, NotUpdateIpcanForNonImsConnectionType)
+TEST_F(AosConnectionTest, DoNotUpdateForNonImsConnectionTypeWhenUpdateIpcanForImsTraffic)
 {
-    m_pTestAosConnection->m_nCnxType = NetworkPolicy::APN_EMERGENCY;
+    m_pAosConnection->SetConnectionType(NetworkPolicy::APN_EMERGENCY);
 
     EXPECT_CALL(m_objMockIAosTransaction, SetWlan(_)).Times(0);
 
-    m_pTestAosConnection->UpdateIpcanForImsTraffic();
+    m_pAosConnection->UpdateIpcanForImsTraffic();
 }
 
-TEST_F(AosConnectionTest, HandleOnConnected_NotifyStateChanged)
+TEST_F(AosConnectionTest, NotifyStateChangedWhenOnConnected)
 {
     EXPECT_CALL(m_objMockIAosTransaction, SetWlan(_));
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_));
 
-    m_pTestAosConnection->NetworkConnection_OnConnected(&m_objMockINetworkConnection);
+    m_pAosConnection->NetworkConnection_OnConnected(&m_objMockINetworkConnection);
 
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_ACTIVE);
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_ACTIVE);
 }
 
-TEST_F(AosConnectionTest, HandleOnDisconnected_NotifyStateChanged)
+TEST_F(AosConnectionTest, NotifyStateChangedOnDisconnected)
 {
-    m_pTestAosConnection->SetState(AosConnection::STATE_ACTIVE);
+    m_pAosConnection->SetState(AosConnection::STATE_ACTIVE);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_));
 
-    m_pTestAosConnection->NetworkConnection_OnDisconnected(&m_objMockINetworkConnection, 0);
+    m_pAosConnection->NetworkConnection_OnDisconnected(&m_objMockINetworkConnection, 0);
 
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_IDLE);
 }
 
-TEST_F(AosConnectionTest, HandleOnConnectionFailed_NotifyConnectionFailed)
+TEST_F(AosConnectionTest, NotifyConnectionFailedWhenOnConnectionFailed)
 {
-    m_pTestAosConnection->SetState(AosConnection::STATE_ACTIVATING);
+    m_pAosConnection->SetState(AosConnection::STATE_ACTIVATING);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_ConnectionFailed());
 
-    m_pTestAosConnection->NetworkConnection_OnConnectionFailed(&m_objMockINetworkConnection, 0);
+    m_pAosConnection->NetworkConnection_OnConnectionFailed(&m_objMockINetworkConnection, 0);
 
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    EXPECT_EQ(m_pAosConnection->GetState(), AosConnection::STATE_IDLE);
 }
 
-TEST_F(AosConnectionTest, HandleOnIpChanged_NotNotifyIpChangedIfNotConnected)
+TEST_F(AosConnectionTest, NotNotifyIpChangedIfNotConnectedWhenOnIpChanged)
 {
-    EXPECT_EQ(m_pTestAosConnection->GetState(), AosConnection::STATE_IDLE);
+    m_pAosConnection->SetState(AosConnection::STATE_IDLE);
+
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_IpChanged()).Times(0);
 
-    m_pTestAosConnection->NetworkConnection_OnIpChanged(&m_objMockINetworkConnection);
+    m_pAosConnection->NetworkConnection_OnIpChanged(&m_objMockINetworkConnection);
 }
 
-TEST_F(AosConnectionTest, HandleOnIpChanged_NotifyIpChanged)
+TEST_F(AosConnectionTest, NotifyIpChangedWhenOnIpChanged)
 {
-    m_pTestAosConnection->SetState(AosConnection::STATE_ACTIVE);
+    m_pAosConnection->SetState(AosConnection::STATE_ACTIVE);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_IpChanged());
 
-    m_pTestAosConnection->NetworkConnection_OnIpChanged(&m_objMockINetworkConnection);
+    m_pAosConnection->NetworkConnection_OnIpChanged(&m_objMockINetworkConnection);
 }
 
-TEST_F(AosConnectionTest, HandleOnIpcanChanged_NotifyIpcanChanged)
+TEST_F(AosConnectionTest, NotifyIpcanChangedWhenOnIpcanChanged)
 {
     EXPECT_CALL(m_objMockIAosTransaction, SetWlan(_));
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_IpcanCatChanged());
 
-    m_pTestAosConnection->NetworkConnection_OnIpcanChanged(&m_objMockINetworkConnection);
+    m_pAosConnection->NetworkConnection_OnIpcanChanged(&m_objMockINetworkConnection);
 }
 
-TEST_F(AosConnectionTest, HandleOnPcscfChanged_NotifyPcscfChanged)
+TEST_F(AosConnectionTest, NotifyPcscfChangedWhenOnPcscfChanged)
 {
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_PcscfChanged());
 
-    m_pTestAosConnection->NetworkConnection_OnPcscfChanged(&m_objMockINetworkConnection);
+    m_pAosConnection->NetworkConnection_OnPcscfChanged(&m_objMockINetworkConnection);
 }
 
 TEST_F(AosConnectionTest, NotHandleNetworkConnectionCallbackForOtherNetworkConnection)
@@ -464,33 +485,23 @@ TEST_F(AosConnectionTest, NotHandleNetworkConnectionCallbackForOtherNetworkConne
     MockINetworkConnection m_objMockOtherNetworkConnection;
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_)).Times(0);
-    m_pTestAosConnection->NetworkConnection_OnConnected(&m_objMockOtherNetworkConnection);
-    m_pTestAosConnection->NetworkConnection_OnDisconnected(&m_objMockOtherNetworkConnection, 0);
+    m_pAosConnection->NetworkConnection_OnConnected(&m_objMockOtherNetworkConnection);
+    m_pAosConnection->NetworkConnection_OnDisconnected(&m_objMockOtherNetworkConnection, 0);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_ConnectionFailed()).Times(0);
-    m_pTestAosConnection->NetworkConnection_OnConnectionFailed(&m_objMockOtherNetworkConnection, 0);
+    m_pAosConnection->NetworkConnection_OnConnectionFailed(&m_objMockOtherNetworkConnection, 0);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_IpChanged()).Times(0);
-    m_pTestAosConnection->NetworkConnection_OnIpChanged(&m_objMockOtherNetworkConnection);
+    m_pAosConnection->NetworkConnection_OnIpChanged(&m_objMockOtherNetworkConnection);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_IpcanCatChanged()).Times(0);
-    m_pTestAosConnection->NetworkConnection_OnIpcanChanged(&m_objMockOtherNetworkConnection);
+    m_pAosConnection->NetworkConnection_OnIpcanChanged(&m_objMockOtherNetworkConnection);
 
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_PcscfChanged()).Times(0);
-    m_pTestAosConnection->NetworkConnection_OnPcscfChanged(&m_objMockOtherNetworkConnection);
+    m_pAosConnection->NetworkConnection_OnPcscfChanged(&m_objMockOtherNetworkConnection);
 }
 
-TEST_F(AosConnectionTest, NotifyExceptionHandlingForNullListener_Ignore)
-{
-    m_pTestAosConnection->SetListener(IMS_NULL);
-    EXPECT_EQ(m_pTestAosConnection->m_objListeners.GetSize(), 2);
-
-    EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_)).Times(1);
-
-    m_pTestAosConnection->Notify();
-}
-
-TEST_F(AosConnectionTest, NotifyExceptionHandlingForUnknownType_Ignore)
+TEST_F(AosConnectionTest, IgnoreUnknownTypeWhenNotify)
 {
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_StateChanged(_)).Times(0);
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_ConnectionFailed()).Times(0);
@@ -499,5 +510,5 @@ TEST_F(AosConnectionTest, NotifyExceptionHandlingForUnknownType_Ignore)
     EXPECT_CALL(m_objMockIAosConnectionListener, AosConnection_PcscfChanged()).Times(0);
 
     IMS_UINT32 nUnknownType = 100;
-    m_pTestAosConnection->Notify(nUnknownType);
+    m_pAosConnection->Notify(nUnknownType);
 }

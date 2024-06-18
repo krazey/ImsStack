@@ -523,12 +523,12 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
     }
 
     if (m_objContext.GetConfigurationProxy().Is(
-                Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, eAosReason))
+                Feature::REGISTRATION_DISCONNECT_REASON_TO_IGNORE, eAosReason))
     {
-        const CallReasonInfo objReason(GetCallReasonByAosReason(eAosReason));
-        return Terminate(objReason);
+        return GetStateName();
     }
-    return GetStateName();
+    const CallReasonInfo objReason(GetCallReasonByAosReason(eAosReason));
+    return Terminate(objReason);
 }
 
 PROTECTED

@@ -45,7 +45,7 @@ protected:                  \
     }
 
 #define STATE_ENTRY(STATE) \
-    { STATE, (GetStateMsgMap)(&ThisClass::Get##STATE##MsgMap) },
+    { STATE, static_cast<GetStateMsgMap>(&ThisClass::Get##STATE##MsgMap) },
 
 #define EMPTY_STATE_MAP(THIS_CLASS)                           \
     PROTECTED const StateMap* THIS_CLASS::GetStateMap() const \

@@ -34,6 +34,7 @@ public:
             m_nTopPriorityTraffic(IImsTraffic::TRAFFIC_PRIORITY_NONE),
             m_nTraffics(IImsTraffic::TRAFFIC_PRIORITY_NONE),
             m_bEnabled(IMS_FALSE),
+            m_bSimultaneousCallingSupported(IMS_FALSE),
             m_bWlan(IMS_FALSE),
             m_objTimer(ImsMap<IMS_UINT32, IImsTrafficTimer*>())
     {
@@ -127,11 +128,21 @@ public:
 
     inline IMS_BOOL IsStarted(IN IMS_UINT32 nType) const { return (m_nTraffics & nType); }
 
+    inline IMS_BOOL IsSimultaneousCallingSupported() const
+    {
+        return m_bSimultaneousCallingSupported;
+    }
+
     inline IMS_BOOL IsWlan() const { return m_bWlan; }
 
     inline void SetWlan(IN IMS_BOOL bEnabled) { m_bWlan = bEnabled; }
 
     inline void SetTopPriorityTraffic(IN IMS_UINT32 nType) { m_nTopPriorityTraffic = nType; }
+
+    inline void SetSimultaneousCallingSupported(IN IMS_BOOL bSupported)
+    {
+        m_bSimultaneousCallingSupported = bSupported;
+    }
 
     inline void Start(IN IMS_UINT32 nType) { m_nTraffics |= nType; }
 
@@ -143,6 +154,7 @@ public:
     IMS_UINT32 m_nTraffics;
 
     IMS_BOOL m_bEnabled;
+    IMS_BOOL m_bSimultaneousCallingSupported;
     IMS_BOOL m_bWlan;
 
     ImsMap<IMS_UINT32, IImsTrafficTimer*> m_objTimer;
@@ -166,6 +178,7 @@ public:
     IMS_BOOL IsAllowed(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTrafficType) override;
     void Start(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTrafficType) override;
     void Stop(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTrafficType) override;
+    void SetSimultaneousCallingSupported(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSupported) override;
     void SetWlan(IN IMS_SINT32 nSlotId, IN IMS_BOOL bEnabled) override;
     void AddListener(IN IImsTrafficListener* piListener) override;
     void RemoveListener(IN IImsTrafficListener* piListener) override;
@@ -183,6 +196,7 @@ private:
     IMS_BOOL IsEmergencyInOtherSlot(IN IMS_SINT32 nSlotId) const;
     IMS_BOOL IsEnabled(IN IMS_SINT32 nSlotId) const;
     IMS_BOOL IsIdle() const;
+    IMS_BOOL IsSimultaneousCallingSupported(IN IMS_SINT32 nSlotId) const;
     IMS_BOOL IsWlan(IN IMS_SINT32 nSlotId) const;
     IMS_BOOL IsWlanInOtherSlot(IN IMS_SINT32 nSlotId) const;
     void PostMessage();

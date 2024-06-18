@@ -97,7 +97,7 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUserAgentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -105,10 +105,10 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempPos = SIP_NULL;
-    SIP_CHAR* pCommentStart = SIP_NULL;
-    SIP_CHAR* pCommentEnd = SIP_NULL;
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pCommentStart = SIP_NULL;
+    const SIP_CHAR* pCommentEnd = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     /*"UserAgent" HCOLON UserAgent-val *(LWS UserAgent-val) */
     while (pStartPt < pEndPt)
     {

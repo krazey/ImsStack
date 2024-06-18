@@ -47,10 +47,10 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
@@ -59,8 +59,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     EXPECT_EQ(SIP_FALSE, pSipAddrSpec->DecodeAddrSpec(nullptr, 0));
 
-    EXPECT_EQ(SIP_TRUE,
-            pSipAddrSpec->DecodeAddrSpec(const_cast<char*>("http://absoluteuri.addrspec"), 27));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("http://absoluteuri.addrspec", 27));
 
     EXPECT_EQ(SipUri::SCHEME_ABS, pSipAddrSpec->GetUriScheme());
     EXPECT_STREQ("http://absoluteuri.addrspec", pSipAddrSpec->GetAbsUri());
@@ -75,7 +74,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    char* pUri = const_cast<char*>("sip:192.168.2.2:9090;user=phone");
+    const SIP_CHAR* pUri = "sip:192.168.2.2:9090;user=phone";
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
 
     EXPECT_EQ(SipUri::SCHEME_SIP, pSipAddrSpec->GetUriScheme());
@@ -99,8 +98,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    EXPECT_EQ(
-            SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(const_cast<char*>("sips:192.168.2.8:9091"), 21));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sips:192.168.2.8:9091", 21));
 
     EXPECT_EQ(SipUri::SCHEME_SIPS, pSipAddrSpec->GetUriScheme());
 
@@ -122,7 +120,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
-    pUri = const_cast<char*>("sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15");
+    pUri = "sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15";
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
 
     pBuff = &(aBuffer[0]);
@@ -138,7 +136,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
 
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
-    pUri = const_cast<char*>("sip:AAuser:$=+,%3AB@host;method=REGISTER?to=proxy");
+    pUri = "sip:AAuser:$=+,%3AB@host;method=REGISTER?to=proxy";
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
 
     pSipUri = pSipAddrSpec->GetSipUri();

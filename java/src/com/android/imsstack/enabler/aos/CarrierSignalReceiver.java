@@ -47,7 +47,7 @@ public class CarrierSignalReceiver extends BroadcastReceiver {
     }
 
     @VisibleForTesting
-    protected int getSlotId(int subId) {
+    int getSlotId(int subId) {
         return MSimUtils.getSlotId(subId);
     }
 }

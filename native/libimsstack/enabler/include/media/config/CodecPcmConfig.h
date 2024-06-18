@@ -25,10 +25,10 @@ public:
     /**
      * @brief Construct a new codec pcm config
      *
-     * @param nType_ codec type
-     * @param nPayloadTypeNum_ payload type number
+     * @param nType codec type
+     * @param nPayloadTypeNum payload type number
      */
-    CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    CodecPcmConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Destroy the codec pcm config
      *
@@ -38,11 +38,10 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration object
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Print debug string
      *

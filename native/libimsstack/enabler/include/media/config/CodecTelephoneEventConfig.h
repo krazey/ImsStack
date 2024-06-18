@@ -26,10 +26,10 @@ public:
     /**
      * @brief Construct a new codec telephone event config
      *
-     * @param nType_ codec type
-     * @param nPayloadTypeNum_ payload type number
+     * @param nType codec type
+     * @param nPayloadTypeNum payload type number
      */
-    CodecTelephoneEventConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    CodecTelephoneEventConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Destroy the codec telephone cvent config
      *
@@ -39,11 +39,10 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Print debug string
      *

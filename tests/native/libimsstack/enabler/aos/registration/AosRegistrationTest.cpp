@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosCounter.h"
 #include "AString.h"
 #include "GeolocationHelper.h"
 #include "ImsMap.h"
@@ -81,6 +82,7 @@ using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::DoAll;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 using ::testing::SetArgReferee;
 
@@ -116,17 +118,15 @@ using ::testing::SetArgReferee;
     using Base::NetTracker_StatusChanged;                                     \
     using Base::OnMessage;                                                    \
     using Base::ProcessAuthenticationFailed;                                  \
-    using Base::ProcessDefaultFlowRecovery_Start;                             \
     using Base::ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy;         \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy;  \
-    using Base::ProcessDefaultFlowRecovery_Update;                            \
     using Base::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy; \
     using Base::ProcessForbiddenFailed;                                       \
     using Base::ProcessIpVersionChange;                                       \
-    using Base::ProcessOfflineRecoverTimerExpired;                            \
     using Base::ProcessPendingPlmnBlockOnUpdateFailure;                       \
     using Base::ProcessPendingTransaction;                                    \
     using Base::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure;             \
+    using Base::ProcessRegEventChange;                                        \
     using Base::ProcessRegRequiredWithAvailableNextPcscf;                     \
     using Base::ProcessRegRequiredWithNextPcscf;                              \
     using Base::ProcessRegRequiredWithWaitTime;                               \
@@ -134,12 +134,10 @@ using ::testing::SetArgReferee;
     using Base::ProcessReinitiate;                                            \
     using Base::ProcessReregister;                                            \
     using Base::ProcessRetryInRegStopped;                                     \
-    using Base::ProcessStandardPcscfSelection;                                \
     using Base::ProcessStartFailed_305;                                       \
     using Base::ProcessStartFailed_Others;                                    \
     using Base::ProcessStartFailed_StatusCode;                                \
     using Base::ProcessStartFailed_TxnTimeout;                                \
-    using Base::ProcessStopRetryTimerExpired;                                 \
     using Base::ProcessSubReinitiate;                                         \
     using Base::ProcessSubscriberFailed;                                      \
     using Base::ProcessUpdateFailed_Others;                                   \
@@ -200,7 +198,12 @@ public:
             m_pSubscriptionInstance(IMS_NULL),
             m_pIpsecHelperInstance(IMS_NULL)
     {
+        m_pCounter = new AosCounter();
     }
+    inline ~TestAosRegistration() override { delete m_pCounter; }
+
+    inline TestAosRegistration(IN const TestAosRegistration&) = delete;
+    inline TestAosRegistration& operator=(IN const TestAosRegistration&) = delete;
 
     inline IRegistration* GetRegistration() override { return m_piRegistrationInstance; }
     inline AosSubscription* GetSubscription(IN IRegSubscription*) override
@@ -229,13 +232,13 @@ public:
     inline void SetTransactionStarted(IN IMS_BOOL bStarted) { m_bIsTransactionStarted = bStarted; }
     inline void SetRegType(IN AosRegistrationType objRegType) { m_eRegType = objRegType; }
     inline IpAddress GetIpAddress() { return m_objIpa; }
-    inline void SetPcscfString(AString strPcscf) { m_strPcscf = strPcscf; }
-    inline void SetPuid(AString strPuid) { m_strPuid = strPuid; }
+    inline void SetPcscfString(IN AString strPcscf) { m_strPcscf = strPcscf; }
+    inline void SetPuid(IN AString strPuid) { m_strPuid = strPuid; }
     inline AString GetPcscfString() { return m_strPcscf; }
     inline IMS_UINT32 GetPcscfPort() { return m_nPcscfPort; }
     inline IMS_UINT32 GetRetryBaseTime() { return m_nRetryBaseTime; }
     inline IMS_UINT32 GetRetryMaxTime() { return m_nRetryMaxTime; }
-    inline void SetConsecutiveFailureCount(IMS_UINT32 nCount) { m_nConsecutiveFailure = nCount; }
+    inline void SetConsecutiveFailureCount(IN IMS_UINT32 nCount) { m_nConsecutiveFailure = nCount; }
     inline IMS_UINT32 GetConsecutiveFailureCount() { return m_nConsecutiveFailure; }
     inline IMS_UINT32 GetConsecutiveFailureCountForPdn()
     {
@@ -285,13 +288,55 @@ public:
     inline IMS_UINT32 GetIpsecBlockReason() { return m_nIpsecBlockReason; }
     inline void SetImsRegState(IMS_UINT32 nState) { m_nImsRegState = nState; }
     inline void SetImsReasonCode(AosReasonCode eCode) { m_eImsReasonCode = eCode; }
-
     inline IMS_UINT32 GetDefaultWaitTimeForConnectionFailure()
     {
         return AosRegistration::CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME;
     }
 
+    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+    IMS_BOOL CheckRadioReadyAndSetTxnPending() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        return AosRegistration::CheckRadioReadyAndSetTxnPending();
+    }
+    void ProcessIpsecFallback(IN IMS_BOOL bIsIpsecRetry) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessIpsecFallback(bIsIpsecRetry);
+    }
+    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessDefaultFlowRecovery_Start(nStatusCode);
+    }
+    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessDefaultFlowRecovery_Update(nStatusCode);
+    }
+    void ProcessStandardPcscfSelection(IN IMS_UINT32 nRetryAfter) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessStandardPcscfSelection(nRetryAfter);
+    }
+    void ProcessRequiredWfcErrMessage_403() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_403();
+    }
+    void ProcessRequiredWfcErrMessage_500() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_500();
+    }
+    void ProcessRequiredWfcErrMessage_Others() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosRegistration::ProcessRequiredWfcErrMessage_Others();
+    }
+
 private:
+    AosCounter* m_pCounter;
     IRegistration* m_piRegistrationInstance;
     AosSubscription* m_pSubscriptionInstance;
     AosIpsecHelper* m_pIpsecHelperInstance;
@@ -415,6 +460,7 @@ public:
     ImsList<IMS_SINT32> m_objPcscfPorts;
     ImsVector<IMS_SINT32> m_objEmptyMaxCount;
     ImsVector<IMS_SINT32> m_objEmptyErrCode;
+    ImsVector<IMS_SINT32> m_objEmptyRegErrWaitTime;
     ImsVector<IMS_SINT32> m_objEmptyRegRetryInterval;
     AosFeatureTagList m_objEmptyFeatureTagList;
 
@@ -455,6 +501,8 @@ protected:
                 .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
         ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
                 .WillByDefault(ReturnRef(m_objEmptyErrCode));
+        ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrWaitTime())
+                .WillByDefault(ReturnRef(m_objEmptyRegErrWaitTime));
         ON_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
                 .WillByDefault(ReturnRef(m_objEmptyErrCode));
         ON_CALL(m_objMockIAosNConfiguration, GetImsSignallingDscp()).WillByDefault(Return(46));
@@ -481,6 +529,7 @@ protected:
                 .WillByDefault(ReturnRef(m_objEmptyErrCode));
         ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
                 .WillByDefault(ReturnRef(m_objEmptyMaxCount));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
                 .WillByDefault(
                         Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
@@ -498,6 +547,8 @@ protected:
                 .WillByDefault(Return(340));
         ON_CALL(m_objMockIAosNConfiguration, GetSipPreferredTransport())
                 .WillByDefault(Return(CarrierConfig::Ims::PREFERRED_TRANSPORT_UDP));
+        ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+                .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
         ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
@@ -505,7 +556,11 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled()).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsIpsecInitializedWithNewPcscf())
+                .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsUserInfoInContactSupported())
+                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
                 .WillByDefault(Return(IMS_FALSE));
         ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable()).WillByDefault(Return(IMS_FALSE));
 
@@ -606,6 +661,8 @@ protected:
     {
         if (m_pAosRegistration)
         {
+            m_pAosRegistration->ClearTimers();
+
             delete m_pAosRegistration;
             m_pAosRegistration = IMS_NULL;
         }
@@ -852,40 +909,28 @@ TEST_F(AosRegistrationTest, ClearRetryCountCommandClearsConsecutiveFailureCount)
     EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
 }
 
-TEST_F(AosRegistrationTest, IpsecCommandForEnableWhileSupportIpsecTriggersDefaultFlowRecovery)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenRequestToSetIpsecEnable)
 {
-    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
-    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
-    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillOnce(Return(IMS_FALSE));
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_ENABLE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, IpsecCommandForDisableUpdatesIpsecSupportedStatus)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenRequestToSetIpsecDisable)
 {
-    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
-
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_DISABLE);
 
-    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, UninterestedIpsecCommandDoesNothing)
+TEST_F(AosRegistrationTest, DoNothingWhenRequestToSetIpsecWithInitReason)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined()).Times(0);
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).Times(0);
-
     m_pAosRegistration->RequestCmd(
             IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_INIT);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 0);
 }
 
 TEST_F(AosRegistrationTest, RefreshRegInfoCommandTriggersRecalculateCallerCapabilities)
@@ -1241,8 +1286,6 @@ TEST_F(AosRegistrationTest, FailsSetTrafficListenerIfTransactionIsNull)
     EXPECT_CALL(m_objMockIAosTransaction, SetListener(_, _)).Times(0);
 
     m_pAosRegistration->SetTrafficListener(IMS_TRUE);
-
-    AosProvider::GetInstance()->SetTransaction(&m_objMockIAosTransaction, SLOT_ID);
 }
 
 TEST_F(AosRegistrationTest, IpsecIsNotSupportedWhenSetAsFakeRegistration)
@@ -1608,164 +1651,167 @@ TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsDifferentWithConnectionWhe
     m_pAosRegistration->SetDynamicIpQos();
 }
 
-TEST_F(AosRegistrationTest, UpdateTransactionStarted)
+TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForEmergencyType)
 {
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->UpdateTransactionStarted();
-    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 
+    m_pAosRegistration->UpdateTransactionStarted();
+
+    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
+}
+
+TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForNormalType)
+{
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
     m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pAosRegistration->SetBlocked(IMS_FALSE);
+
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .WillOnce(Return(IMS_TRUE));
-    m_pAosRegistration->SetHeldByCall(IMS_TRUE);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
-    m_pAosRegistration->SetBlocked(IMS_FALSE);
-    m_pAosRegistration->SetRadioWaiting(IMS_FALSE);
+
     m_pAosRegistration->UpdateTransactionStarted();
+
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 }
 
-TEST_F(AosRegistrationTest, SendRegisterEx)
+TEST_F(AosRegistrationTest, ReturnFalseIfRegistrationIsNullWhenSendRegisterEx)
 {
-    // m_piRegistration is not null
-    EXPECT_CALL(m_objMockIRegistration, Register(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FAILURE))
-            .WillOnce(Return(IMS_SUCCESS));
-
-    // fail to Register
-    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE));
-
-    // succeed to Register
-    EXPECT_TRUE(m_pAosRegistration->SendRegisterEx(0, IMS_FALSE));
-
-    // m_piRegistration is null
     m_pAosRegistration->Destroy();
-    EXPECT_FALSE(m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_TRUE);
+
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosRegistrationTest, GetActualWaitTime)
+TEST_F(AosRegistrationTest, ReturnFalseIfRegisterFailWhenSendRegisterEx)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueIfRegisterSucceedWhenSendRegisterEx)
+{
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    IMS_BOOL bResult = m_pAosRegistration->SendRegisterEx(1800, IMS_FALSE);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, UseConfiguredPolicyWhenGetActualWaitTime)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
     m_pAosRegistration->SetConsecutiveFailureCount(2);
 
-    // size of RegRetryIntervals and RegRandomRetryIntervals is different
     ImsVector<IMS_SINT32> objInterval;
     objInterval.Add(1000);
     objInterval.Add(2000);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
-    ImsVector<IMS_SINT32> objRandomInterval;
+            .WillOnce(ReturnRef(objInterval));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRandomRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRandomInterval));
-    m_pAosRegistration->GetActualWaitTime();
+            .WillOnce(ReturnRef(objInterval));
 
-    // size of RegRetryIntervals and RegRandomRetryIntervals is same
-    objRandomInterval.Add(1000);
-    objRandomInterval.Add(2000);
     m_pAosRegistration->GetActualWaitTime();
 }
 
-TEST_F(AosRegistrationTest, TryNextPcscf)
+TEST_F(AosRegistrationTest, NotUseConfiguredPolicyWhenGetActualWaitTime)
 {
-    // succeed to SetNextPcscf - bHonorRetryAfter is true
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals()).Times(0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRandomRetryIntervals()).Times(0);
+
+    m_pAosRegistration->GetActualWaitTime();
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfRetryAfterIsNotZeroWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
-            .Times(AnyNumber())
             .WillRepeatedly(Return(AString("60")));
 
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_TRUE));
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_TRUE);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
+}
 
-    // succeed to SetNextPcscf - bHonorRetryAfter is false - succeed to SendRegister
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(1);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
+TEST_F(AosRegistrationTest, StopRegistrationIfSendRegisterFailWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
+
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSendRegisterSucceedWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
 
-    // succeed to SetNextPcscf - bHonorRetryAfter is false - fail to SendRegister
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, Register(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FAILURE));
-    EXPECT_FALSE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForStartIfFailToSetNextPcscfWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
 
-    // fail to SetNextPcscf - bFlowRecoveryOnAllFail is true
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(4));
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
 
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillOnce(Return(IMS_FALSE));
-    EXPECT_TRUE(m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE));
+    m_pAosRegistration->TryNextPcscf(IMS_TRUE, IMS_FALSE);
+}
 
-    // fail to SetNextPcscf - bFlowRecoveryOnAllFail is false
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    EXPECT_FALSE(m_pAosRegistration->TryNextPcscf(IMS_FALSE, IMS_FALSE));
+TEST_F(AosRegistrationTest, StopRegistrationIfFailToSetNextPcscfWhenTryNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosRegistration->TryNextPcscf(IMS_FALSE, IMS_FALSE);
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
-TEST_F(AosRegistrationTest, SetNextPcscf_SamePcscf)
+TEST_F(AosRegistrationTest, ReturnTrueIfRetryOnSamePcscfIsRequiredWhenSetNextPcscf)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(2));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillByDefault(Return(0));
 
-    ImsList<IMS_SINT32> objPcscfPorts;
-    objPcscfPorts.Append(5060);
-    objPcscfPorts.Append(5060);
-    objPcscfPorts.Append(5060);
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfsPorts())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfPorts));
+    IMS_BOOL bResult = m_pAosRegistration->SetNextPcscf();
 
-    m_pAosRegistration->SetPcscf();
-
-    ASSERT_TRUE(m_pAosRegistration->GetPcscfString().Equals(m_objPcscfs.GetElementAt(0)));
-    ASSERT_EQ(m_pAosRegistration->GetPcscfPort(), objPcscfPorts.GetAt(0));
-
-    AString strCurrentPcscf = m_pAosRegistration->GetPcscfString();
-    IMS_UINT32 nCurrentPort = m_pAosRegistration->GetPcscfPort();
-
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    m_pAosRegistration->SetNextPcscf();
-
-    EXPECT_TRUE(strCurrentPcscf.Equals(m_pAosRegistration->GetPcscfString()));
-    EXPECT_EQ(nCurrentPort, m_pAosRegistration->GetPcscfPort());
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequired)
+TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequiredDecidedUsingRegRetryCountPerPcscf)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(3)
-            .WillOnce(Return(0))
-            .WillOnce(Return(2))
-            .WillOnce(Return(2));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillOnce(Return(3));
+    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(0));
 
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(2)
-            .WillOnce(Return(3))
-            .WillOnce(Return(0));
+    IMS_BOOL bResult = m_pAosRegistration->IsRetryOnSamePcscfRequired();
 
-    EXPECT_FALSE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
-    EXPECT_FALSE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
-    EXPECT_TRUE(m_pAosRegistration->IsRetryOnSamePcscfRequired());
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, IsRetryOnSamePcscfRequiredDecidedUsingRegRetryCountOnSinglePcscf)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf()).WillOnce(Return(3));
+    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillOnce(Return(1));
+    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(0));
+
+    IMS_BOOL bResult = m_pAosRegistration->IsRetryOnSamePcscfRequired();
+
+    EXPECT_TRUE(bResult);
 }
 
 TEST_F(AosRegistrationTest, RegReinitiateMessageTriggersReinitiate)
@@ -2237,7 +2283,6 @@ TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileRetryTimerExistNotTries
     m_pAosRegistration->ProcessRetryInRegStopped(IMS_FALSE);
 
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
 }
 
 TEST_F(AosRegistrationTest, ProcessRetryInRegStoppedWhileTransactionIsNotStartedNotTriesRegister)
@@ -2301,6 +2346,19 @@ TEST_F(AosRegistrationTest, StopReregisterProcessWhileTransactionIsNotStarted)
 TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsNotReady)
 {
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessReregister();
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest, StopReregisterProcessWhileRadioIsWaiting)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
 
     EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(IAosTransaction::TYPE_REG))
             .WillOnce(Return(IMS_FALSE));
@@ -2419,6 +2477,21 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->ProcessAuthenticationFailed();
 }
 
+TEST_F(AosRegistrationTest, ShouldCheckUsimAuthHandlingNeededWhenProcessAuthenticationFailed)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
+
+    EXPECT_CALL(m_objMockIAosSubscriber, IsUsim()).WillOnce(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillOnce(ReturnRef(objErrCode));
+
+    m_pAosRegistration->ProcessAuthenticationFailed();
+}
+
 TEST_F(AosRegistrationTest, TriggerReinitiateWhenRegRequiredWithWaitTimeIfWaitTimeIsZero)
 {
     EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(m_objEmptyImpus));
@@ -2489,6 +2562,23 @@ TEST_F(AosRegistrationTest,
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
+TEST_F(AosRegistrationTest, TriggerOfflineRecoverWithAwtWhenRegRequiredWithAvailableNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    ON_CALL(m_objMockIAosNConfiguration, IsAwtUsedWhenInitRegWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->ProcessRegRequiredWithAvailableNextPcscf(IMS_FALSE, 0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
 TEST_F(AosRegistrationTest,
         ReportFailureWhenRegRequiredWithAvailableNextPcscfIfCreateRegistrationFail)
 {
@@ -2543,180 +2633,297 @@ TEST_F(AosRegistrationTest, NotCreateSubscriptionWhenReinitiateIfNotRegistered)
     m_pAosRegistration->ProcessSubReinitiate();
 }
 
-TEST_F(AosRegistrationTest, ProcessForbiddenFailed)
+TEST_F(AosRegistrationTest, ReturnFalseWhenForbiddenFailIfCodeIsNotPermanentErrorCode)
 {
     ImsVector<IMS_SINT32> objErrCode;
-    objErrCode.Clear();
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrCode));
-    ImsVector<IMS_SINT32> objCount;
-    objCount.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objCount));
+            .WillOnce(ReturnRef(objErrCode));
 
-    // Error code is exist in RegPermanentErrCode
-    EXPECT_FALSE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
 
-    // m_nForbiddenCount is greater than or equal to nMaxCount
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenForbiddenFailIfForbiddenCountIsGreaterThanMaxCount)
+{
+    ImsVector<IMS_SINT32> objErrCode;
     objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
+
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_TYPE_CRITICAL));
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_CRITICAL));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN))
-            .Times(AnyNumber());
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
 
-    // m_nForbiddenCount is less than nMaxCount - Not Registered
-    objCount.Add(5);
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
-
-    // m_nForbiddenCount is less than nMaxCount - Registered
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_TRUE(m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403));
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
 }
 
-TEST_F(AosRegistrationTest, ProcessSubscriberFailed)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForStartWhenForbiddenFailWhileRegistering)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
-    ImsVector<IMS_SINT32> objReregErrCode;
-    objReregErrCode.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objReregErrCode));
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    objExtraRegErrCode.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objExtraRegErrCode));
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
+    objCount.Add(5);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
 
-    // STATE_REGISTERED - GetExtraReregErrCode does not have ErrCode
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(0);
-    EXPECT_FALSE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
+    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
 
-    // STATE_REFRESHING - m_nConsecutiveFailure is 1
-    objReregErrCode.Add(403);
-    m_pAosRegistration->SetConsecutiveFailureCount(1);
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryForUpdateWhenForbiddenFailWhileRefreshing)
+{
     m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(0);
-    EXPECT_TRUE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
-    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 0);
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+    ImsVector<IMS_SINT32> objCount;
+    objCount.Add(5);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
+            .WillByDefault(ReturnRef(objCount));
 
-    // STATE_OFFLINE - GetExtraRegErrCode does not have ErrCode
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(0);
-    EXPECT_FALSE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillOnce(Return(IMS_FALSE));
 
-    // there are PUIDs more than 1 - succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->ProcessForbiddenFailed(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, DoNothingWhenSubscriberFailedIfExtraRegErrorPolicyIsNotSubscriberFailed)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DoNothingWhenSubscriberFailedIfStatusCodeIsNotInExtraReregErrorCode)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
+
+    ImsVector<IMS_SINT32> objReregErrCode;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
+            .WillOnce(ReturnRef(objReregErrCode));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, TriggerReinitiationWhenSubscriberFailedIfConsecutiveFailureIsOne)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REFRESHING);
+    m_pAosRegistration->SetConsecutiveFailureCount(1);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
+
+    ImsVector<IMS_SINT32> objReregErrCode;
+    objReregErrCode.Add(403);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
+            .WillOnce(ReturnRef(objReregErrCode));
+    EXPECT_CALL(m_objMockThread, PostMessageI(IsSameMsg(AosRegistration::MSG_REG_REINITIATE)));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DoNothingWhenSubscriberFailedIfStatusCodeIsNotInExtraRegErrorCode)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
+
+    ImsVector<IMS_SINT32> objExtraRegErrCode;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillOnce(ReturnRef(objExtraRegErrCode));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerWhenSubscriberFailedIfSetOfNextPcscfSucceed)
+{
     m_pAosRegistration->SetPuid(m_objAvailableImpus.GetElementAt(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
+    ImsVector<IMS_SINT32> objReregErrCode;
+    objReregErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objReregErrCode));
+
     EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
             .WillOnce(ReturnRef(m_objAvailableImpus));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    ImsVector<IMS_SINT32> objRegErrWaitTime;
-    objRegErrWaitTime.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrWaitTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrWaitTime));
-    EXPECT_TRUE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
 
-    // there is not PUID more than 1
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus()).WillOnce(ReturnRef(m_objEmptyImpus));
-    EXPECT_TRUE(m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_TRUE(bResult);
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_Start)
+TEST_F(AosRegistrationTest, TriggerImsiBasedSubscriberUsingNextPuidWhenSubscriberFailed)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
+    m_pAosRegistration->SetPuid(m_objAvailableImpus.GetElementAt(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED));
+    ImsVector<IMS_SINT32> objReregErrCode;
+    objReregErrCode.Add(403);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objReregErrCode));
+
+    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillOnce(ReturnRef(m_objAvailableImpus));
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIRegistration, SetAor(_, _));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessSubscriberFailed(SipStatusCode::SC_403);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosRegistration->IsIpsecSupported());
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryForStartIfIpsecSupportingStatusIsNotChangedWhenIpsecFallback)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+
+    m_pAosRegistration->ProcessIpsecFallback(IMS_TRUE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerStartWithEveryPcscfPolicyWhenFlowRecoveryForStart)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objErrorCode;
-    objErrorCode.Clear();
-    objErrorCode.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithRetryAfterTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrorCode));
+    objErrorCode.Add(SipStatusCode::SC_300);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithRetryAfterTime())
+            .WillByDefault(ReturnRef(objErrorCode));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("60")));
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EVERY_PCSCF
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0)).Times(1);
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+}
 
-    // ActualWaitTimePolicy is AWT_POLICY_SPECIFIED_INTERVAL
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
+TEST_F(AosRegistrationTest, TriggerStartWithSpecifiedIntervalPolicyWhenFlowRecoveryForStart)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
+
     EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfTried()).Times(1);
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfTried());
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerWhenFlowRecoveryForStartIfSetOfNextPcscfSucceed)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EACH_PCSCF - succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
+}
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EACH_PCSCF - fail to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(4));
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+TEST_F(AosRegistrationTest, StartRetryTimerWhenFlowRecoveryForStartIfInitRegIsTriedWithNextPcscf)
+{
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    ON_CALL(m_objMockIAosNConfiguration, IsAwtUsedWhenInitRegWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_503);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, TryingNextPcscfSucceedWhenFlowRecoveryForStart)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenFlowRecoveryForStartIfSetOfNextPcscfFail)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EACH_PCSCF));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
-
-    // ActualWaitTimePolicy is AWT_POLICY_RFC_RULE
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_TRUE, _)).Times(1);
-
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_600);
 }
 
-// ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy
+TEST_F(AosRegistrationTest, ReportFailureWithAwtWhenFlowRecoveryForStartIfTryingNextPcscfFail)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Start(SipStatusCode::SC_300);
+}
+
 TEST_F(AosRegistrationTest, StartRetryTimerIfRetryAfterIsNotZeroWhenStartWithEveryPcscfPolicy)
 {
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
@@ -2777,213 +2984,369 @@ TEST_F(AosRegistrationTest, ReportFailureIfSetOfPcscfFailWhenStartWithEveryPcscf
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(retryAfter);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy)
+TEST_F(AosRegistrationTest, StartRetryTimerIfCanIncreaseCountWhenStartWithNonZeroInterval)
 {
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count can be increased
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
-            .Times(2);
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
 
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfCanIncreaseCountWhenStartWithZeroInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+
     EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count reaches max count
-    // succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+TEST_F(AosRegistrationTest, StartRetryTimerIfSucceedToSetNextPcscfWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
 
-    // retry counter is shared between REGISTER and SUBSCRIBE - retry count reaches max count
-    // fail to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(4));
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
 
-    // retry counter is not shared between REGISTER and SUBSCRIBE - Retry count can be increased
-    // succeed to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
 
-    // retry counter is not shared between REGISTER and SUBSCRIBE - Retry count can be increased
-    // fail to SetNextPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount()).WillOnce(Return(4));
+TEST_F(AosRegistrationTest, ResetPcscfTriedIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosPcscf, IsAllPcscfTried()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTime()).WillByDefault(Return(10));
+
+    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTried());
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+}
+
+TEST_F(AosRegistrationTest,
+        ReportFailureDueToNoPcscfIfRetryCounterIsNotSharedWhenStartWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(10);
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(0);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_Update)
+TEST_F(AosRegistrationTest, TriggerOfflineRecoverWhenFlowRecoveryForUpdate)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objErrorCode;
-    objErrorCode.Clear();
     objErrorCode.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeWithRetryAfterTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrorCode));
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
+    ON_CALL(m_objMockIAosNConfiguration, GetReregErrCodeWithRetryAfterTime())
+            .WillByDefault(ReturnRef(objErrorCode));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(Return(AString("60")));
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EVERY_PCSCF - nRetryAfter is less than 0
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .Times(AnyNumber())
-            .WillOnce(ReturnRef(m_objEmptyImpus))
-            .WillRepeatedly(ReturnRef(m_objAvailableImpus));
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
 
-    // fail to CreateRegistration
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegistration, GetPreviousResponse()).WillByDefault(ReturnNull());
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objEmptyImpus));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
 
-    // succeed to CreateRegistration
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF));
+    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegistration, GetPreviousResponse()).WillByDefault(ReturnNull());
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
+}
 
-    // ActualWaitTimePolicy is AWT_POLICY_FAILURE_TO_EVERY_PCSCF - nRetryAfter is greater than 0
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
+TEST_F(AosRegistrationTest, TriggerStartWithSpecifiedIntervalPolicyWhenFlowRecoveryForUpdate)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
 
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(AString("60")));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_600);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_OFFLINE_RECOVER);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillOnce(Return(IMS_TRUE));
 
-    // ActualWaitTimePolicy is AWT_POLICY_SPECIFIED_INTERVAL
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_300);
-
-    // ActualWaitTimePolicy is AWT_POLICY_RFC_RULE
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
     m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_300);
 }
 
-TEST_F(AosRegistrationTest, ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy)
+TEST_F(AosRegistrationTest, TriggerStartWithAvailableNextPcscfWhenFlowRecoveryForUpdate)
 {
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_Update(SipStatusCode::SC_300);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerRegWithAvailableNextPcscfForReregErrorCodeWhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objErrorCode;
-    objErrorCode.Clear();
     objErrorCode.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrorCode));
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objInterval));
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraReregErrCode())
+            .WillByDefault(ReturnRef(objErrorCode));
 
-    // retry counter is shared between REGISTER and SUBSCRIBE
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _));
 
-    // GetExtraReregErrCode have nStatusCode
+    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
+            SipStatusCode::SC_600, 0);
+}
+
+TEST_F(AosRegistrationTest,
+        StartRetryTimerIfRetryCountCanBeIncreasedWhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_TRUE));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
             SipStatusCode::SC_600, 0);
 
-    // GetExtraReregErrCode dose not have nStatusCode - retry count can be increased
-    EXPECT_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerRegWithAvailableNextPcscfIfRetryCountReachedMaxWhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosRetryRepository, IncreaseRetryCount(_)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
-            SipStatusCode::SC_300, 0);
+            SipStatusCode::SC_600, 0);
+}
 
-    // GetExtraReregErrCode dose not have nStatusCode - retry count reaches max count
-    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
-            SipStatusCode::SC_300, 0);
+TEST_F(AosRegistrationTest, TriggerReinitiateIfStatusCodeIs481WhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
 
-    // retry counter is not shared between REGISTER and SUBSCRIBE
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    // nStatusCode is SC_481
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
     m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
             SipStatusCode::SC_481, 0);
+}
 
-    // m_nConsecutiveFailure is 1 and Reg is not Expired During Awt
+TEST_F(AosRegistrationTest, StartRetryTimerIfRegIsNotExpiredWhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(0));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
+            SipStatusCode::SC_600, 0);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerOfflineRecoverIfNotFailedConsecutivelyWhenUpdateWithSpecifiedInterval)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIRegContact, GetExpires()).WillByDefault(Return(1000));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
+            SipStatusCode::SC_600, 1000);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, ReconnectPdnIfFailToSetNextPcscfWhenUpdateWithSpecifiedInterval)
+{
+    m_pAosRegistration->SetConsecutiveFailureCount(2);
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
-    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
-            SipStatusCode::SC_300, 0);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
-    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 1);
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
 
-    // m_nConsecutiveFailure is 1 and Reg is Expired During Awt
-    EXPECT_CALL(m_objMockIRegContact, GetExpires()).Times(AnyNumber()).WillRepeatedly(Return(100));
-    m_pAosRegistration->SetConsecutiveFailureCount(0);
     m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
-            SipStatusCode::SC_300, 100);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 1);
+            SipStatusCode::SC_600, 0);
+}
 
-    // m_nConsecutiveFailure is 2
-    m_pAosRegistration->ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
-            SipStatusCode::SC_300, 0);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-    EXPECT_EQ(m_pAosRegistration->GetConsecutiveFailureCount(), 2);
+TEST_F(AosRegistrationTest, DoNothingIfPolicyIsDefaultWhenStartFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest,
+        NotifyDeregisteredWithNotSupportedCountryWhenWfcErrMessageRequiredFor403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(AString("NotSupportedCountry")));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+}
+
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg403WhenWfcErrMessageRequiredFor403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(m_strLocationProperties));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+}
+
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor403)
+{
+    m_pAosRegistration->SetImsReasonCode(
+            AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
+            .WillByDefault(Return(AString("NotSupportedCountry")));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+}
+
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg500WhenWfcErrMessageRequiredFor500)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
+}
+
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor500)
+{
+    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_REG_500);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
+}
+
+TEST_F(AosRegistrationTest, NotifyDeregisteredWithOtherFailuresWhenWfcErrMessageRequiredForOthers)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES));
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
+}
+
+TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredForOthers)
+{
+    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES);
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
+}
+
+TEST_F(AosRegistrationTest,
+        DoNotNotifyDeregisteredIfWfcErrorMessageNotSupportedWhenWfcErrMessageRequiredForOthers)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
 }
 
 TEST_F(AosRegistrationTest,
@@ -3001,6 +3364,7 @@ TEST_F(AosRegistrationTest,
             .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC));
 
     m_pAosRegistration->ProcessStartFailed_TxnTimeout();
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
@@ -3086,697 +3450,586 @@ TEST_F(AosRegistrationTest, ReportFailureWhenStartFailedWithTxnTimeoutAndFailToT
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 }
 
-TEST_F(AosRegistrationTest, ProcessIpVersionChange)
+TEST_F(AosRegistrationTest, ReturnFalseIfNoChangedIpVersionInLocalAddressWhenIpVersionChange)
 {
-    AString strIpv4Addr = "192.168.0.1";
-    AString strIpv6Addr = "fc01:cafe::1";
-    m_pAosRegistration->SetPcscfString(strIpv4Addr);
-
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
     IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
-    IpAddress objLocalIpv6Addr(AString("fc01:abab:cdcd:efe0::1"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
-    EXPECT_FALSE(m_pAosRegistration->ProcessIpVersionChange());
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv4Addr));
 
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv6Addr));
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
 
-    AStringArray objPcscfs;
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
-    EXPECT_FALSE(m_pAosRegistration->ProcessIpVersionChange());
-
-    objPcscfs.AddElement(strIpv6Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
-
-    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(2);
-    EXPECT_CALL(m_objMockIAosPcscf, SetFirstPcscfIndex()).Times(2);
-    EXPECT_TRUE(m_pAosRegistration->ProcessIpVersionChange());
-
-    m_pAosRegistration->SetPcscfString(strIpv6Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
-    objPcscfs.RemoveAllElements();
-    objPcscfs.AddElement(strIpv4Addr);
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfs));
-    EXPECT_TRUE(m_pAosRegistration->ProcessIpVersionChange());
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode)
+TEST_F(AosRegistrationTest, ReturnFalseIfNoChangedIpVersionInPcscfAddressWhenIpVersionChange)
 {
-    // ProcessStandardPcscfSelection
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objEmptyPcscfs;
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objEmptyPcscfs));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ReturnTrueIfSucceedToHandleChangeIpVersion)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objPcscfs;
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
+
+    IMS_BOOL bResult = m_pAosRegistration->ProcessIpVersionChange();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, NotifyRegEventStateWhenRegEventChange)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, ImsList<AString>()));
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfAosServiceIsNullWhenRegEventChange)
+{
+    AosProvider::GetInstance()->SetService(IMS_NULL, SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfConfiguredPolicyIsNotDownloadEventWhenRegEventChange)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, TriggerPcscfSelectionWhenStartFailedWithStatusCodeForPcscfDiscovery)
+{
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Clear();
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_300);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
 
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_300);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
 
-    // ProcessForbiddenFailed return true and ProcessSubscriberFailed return false
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessStandardPcscfSelection"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerForbiddenFailHandlingWhenStartFailedWithPermanentStatusCode)
+{
     ImsVector<IMS_SINT32> objErrCode;
-    objErrCode.Clear();
     objErrCode.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrCode));
-    ImsVector<IMS_SINT32> objCount;
-    objCount.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objCount));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
 
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_403);
+}
 
-    // ProcessIpsecFallback
-    ImsVector<IMS_SINT32> objErrWithoutIpsec;
-    objErrWithoutIpsec.Clear();
-    objErrWithoutIpsec.Add(SipStatusCode::SC_406);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_406);
-
-    // PDN reactivation is required
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED))
-            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED))
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
-
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    objExtraRegErrCode.Clear();
-    objExtraRegErrCode.Add(SipStatusCode::SC_408);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objExtraRegErrCode));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(
-            m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).Times(AnyNumber()).WillOnce(Return(1));
+TEST_F(AosRegistrationTest, TriggerPlmnBlockHandlingWhenStartFailedWithPcoLimitedMode)
+{
+    m_pAosRegistration->SetMode(IAosRegistration::MODE_LIMITED);
+    ON_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
-    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_408);
+                    IAosRegistration::REASON_FAILURE_PCO_LIMITED_SERVICE));
 
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
-            .Times(AnyNumber());
-
-    // ProcessStartFailed_503 - nRetryAfter is 0
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetrySip503CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_503);
-
-    // ProcessStartFailed_420 - bIsExtensionUnsupported is false
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-
-    // ProcessStartFailed_421 - bIsExtensionRequired  is false
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_421);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-
-    // ProcessStartFailed_423 - nMinTime is less than 0
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
-
-    // Other 4xx, 5xx, 6xx response
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillOnce(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
-    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_580);
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_300);
 }
 
-// ProcessStartFailed_305
 TEST_F(AosRegistrationTest, TriggerStandardPcscfSelectionIfPolicyIs3gppWhenStartFailedWith305)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
 
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_305);
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
-
-    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessStandardPcscfSelection"), 1);
 }
 
 TEST_F(AosRegistrationTest, TriggerStandardPcscfSelectionWhenStartFailedWith305ForFirstPcscf)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount());
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_305);
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
-
-    EXPECT_TRUE(bResult);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessStandardPcscfSelection"), 1);
 }
 
-TEST_F(AosRegistrationTest, ReportFailureIfSetFirstPcscfFailWhenStartFailedWith305)
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetFirstPcscfWhenStartFailedWith305)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
-
-    EXPECT_TRUE(bResult);
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_305);
 }
 
 TEST_F(AosRegistrationTest, ReportFailureIfSendRegisterFailWhenStartFailedWith305)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
 
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_FAILURE));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
-
-    EXPECT_TRUE(bResult);
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_305);
 }
 
-TEST_F(AosRegistrationTest, SetFirstPcscfAndRetryIfPolicyIs3gppUsingTopPcscfWhenStartFailedWith305)
+TEST_F(AosRegistrationTest, SendRegisterIfSucceedToSetFirstPcscfWhenStartFailedWith305)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
             .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
 
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
-
-    EXPECT_TRUE(bResult);
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_305);
 }
 
-TEST_F(AosRegistrationTest, ReturnFalseIfPolicyIsNot3gppWhenStartFailedWith305)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenStartFailedWithRetryRequiredWithoutIpsec)
 {
-    ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip305CodePolicy())
-            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ImsVector<IMS_SINT32> objErrWithoutIpsec;
+    objErrWithoutIpsec.Add(SipStatusCode::SC_406);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+            .WillByDefault(ReturnRef(objErrWithoutIpsec));
 
-    IMS_BOOL bResult = m_pAosRegistration->ProcessStartFailed_305();
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_406);
 
-    EXPECT_FALSE(bResult);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
 }
 
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Success)
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryIfIpVersionChangeFailedWhenStartFailedWithIpVersionFallback)
 {
-    // BEGIN uninteresting preparation
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
+            .WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv4Addr));
 
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
 
-    AString strHeader = AString("regtest");
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(strHeader));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
 
-    EXPECT_CALL(m_objMockIAosService, NotifyRegistering(_, _, _)).Times(AnyNumber());
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfHasNextPcscfWhenStartFailedWithIpVersionFallback)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objPcscfs;
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
 
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
-    // END uninteresting preparation
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
-
-    AStringArray objPcscfsIpv6;
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::1"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
-
-    AStringArray objPcscfsIpv4;
-    objPcscfsIpv4.AddElement(AString("192.168.0.1"));
-    objPcscfsIpv4.AddElement(AString("192.168.0.2"));
-    objPcscfsIpv4.AddElement(AString("192.168.0.3"));
-
-    IpAddress objLocalIpa = IpAddress(AString("192.168.0.100"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpa));
-
-    EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV4))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objPcscfsIpv4));
-    EXPECT_CALL(m_objMockIAosPcscf, UpdatePcscfs(_, _)).Times(AnyNumber());
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+TEST_F(AosRegistrationTest,
+        TriggerOfflineRecoverIfIpVersionChangeSucceedWhenStartFailedWithIpVersionFallback)
+{
+    m_pAosRegistration->SetPcscfString("192.168.0.1");
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
+            .WillByDefault(Return(IMS_TRUE));
+    IpAddress objLocalIpv6Addr(AString("fc01:cafe::100"));
+    ON_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objLocalIpv6Addr));
+    AStringArray objPcscfs;
+    objPcscfs.AddElement("fc01:cafe::1");
+    ON_CALL(m_objMockIAosConnection, GetPcscfAddress(IpAddress::IPV6))
+            .WillByDefault(ReturnRef(objPcscfs));
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
-            .Times(100);
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
 
-    for (IMS_SINT32 i = SipStatusCode::SC_500; i < SipStatusCode::SC_600; i++)
-    {
-        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objPcscfsIpv6));
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_504);
 
-        m_pAosRegistration->SetPcscf();
-
-        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
-                .Times(AnyNumber())
-                .WillRepeatedly(ReturnRef(objPcscfsIpv4));
-
-        m_pAosRegistration->ProcessStartFailed_StatusCode(i);
-        EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
-    }
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failure)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNoRetryAfterWhenStartFailedWith503)
 {
-    // BEGIN uninteresting preparation
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetrySip503CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    // END uninteresting preparation
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetrySip503CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::RETRY_AFTER_SEC, _, _))
+            .WillByDefault(ReturnNull());
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_503);
 
-    AString strIpv4Addr = "192.168.0.1";
-    m_pAosRegistration->SetPcscfString(strIpv4Addr);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
 
-    IpAddress objLocalIpv4Addr(AString("192.186.0.100"));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objLocalIpv4Addr));
+TEST_F(AosRegistrationTest, TriggerPdnReactivationWhenStartFailedWithFinalResponse)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
 
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
-                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT));
-    m_pAosRegistration->ProcessStartFailed_StatusCode(500);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_408);
 }
 
-TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNextPcscf)
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackIfIncludeUnsupportedHeaderWhenStartFailedWith420)
 {
-    // BEGIN uninteresting preparation
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString(AosString::STR_SEC_AGREE));
+    ON_CALL(m_objMockISipMessage, GetHeaders(ISipHeader::UNSUPPORTED, _))
+            .WillByDefault(Return(objHeaders));
 
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
 
-    AString strHeader = AString("regtest");
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(strHeader));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
+}
 
-    EXPECT_CALL(m_objMockIAosService, NotifyRegistering(_, _, _)).Times(AnyNumber());
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNotIncludeUnsupportedHeaderWhenStartFailedWith420)
+{
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_420);
 
-    ImsVector<IMS_SINT32> objTestVector;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
-    // END uninteresting preparation
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objTestVector));
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackIfIncludeRequireHeaderWhenStartFailedWith421)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    ImsList<AString> objHeaders;
+    objHeaders.Append(AString(AosString::STR_SEC_AGREE));
+    ON_CALL(m_objMockISipMessage, GetHeaders(ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(objHeaders));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_421);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountOnSinglePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
+}
 
-    EXPECT_CALL(m_objMockIAosPcscf, HasNextPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNotIncludeRequireHeaderWhenStartFailedWith421)
+{
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_421);
 
-    EXPECT_CALL(m_objMockIAosPcscf, IncreaseCurrentPcscfTriedCount()).Times(AnyNumber());
-    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
 
-    AStringArray objPcscfsIpv6;
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::1"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
-    objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
+TEST_F(AosRegistrationTest, SendRegisterIfIncludeMinExpiresWhenStartFailedWith423)
+{
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
+            .WillByDefault(Return(AString("180")));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
 
-    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
-            .WillOnce(DoAll(SetArgReferee<0>(objPcscfsIpv6.GetElementAt(1)),
-                    SetArgReferee<1>(m_objPcscfPorts.GetAt(1)), Return(IMS_TRUE)));
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegRetryWithIpVerFallback())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillRepeatedly(Return(IMS_SUCCESS));
-
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
-
-    m_pAosRegistration->ProcessStartFailed_StatusCode(500);
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
-TEST_F(AosRegistrationTest, ProcessStartFailed_Others)
+TEST_F(AosRegistrationTest, ReportFailureIfSendRegisterFailWhenStartFailedWith423)
 {
-    ImsVector<IMS_SINT32> objExtraRegErrCode;
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillRepeatedly(ReturnRef(objExtraRegErrCode));
-    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
+            .WillByDefault(Return(AString("180")));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
 
-    // ProcessAwtRecovery
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_NONE);
-    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGSTOP);
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
-    // REASON_CLIENT_SOCKET_ERROR - PDN reactivation is not required
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
-
-    // REASON_CLIENT_SOCKET_ERROR - PDN reactivation is required
-    objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_TRANSPORT);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(
-            m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .Times(AnyNumber())
-            .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).Times(AnyNumber()).WillOnce(Return(1));
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_CLIENT_SOCKET_ERROR);
-
-    // REG_ERROR_CODE_OTHER is exist in ExtraRegErrCode
-    objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_OTHER);
-    m_pAosRegistration->ProcessStartFailed_Others(IRegistration::REASON_NONE);
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
 }
 
-TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNotIncludeMinExpiresWhenStartFailedWith423)
 {
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_423);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenStartFailedWithOtherResponse)
+{
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_580);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerPendingPlmnBlockIfCallExistWhenUpdateFailedInRoaming)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRANSACTION));
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
+TEST_F(AosRegistrationTest, TriggerPlmnBlockWhenUpdateFailedInRoaming)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsCall(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
 
-    // SipStatusCode is in GetRegErrCodeWithoutIpsec
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfPolicyIs3gppWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetNextPcscfWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSetFirstPcscfWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToCreateRegistrationWhenUpdateFailedWith305)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
+    ON_CALL(m_objMockIAosPcscf, IsFirstPcscf()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, TriggerIpsecFallbackWhenUpdateFailedWithRetryRequiredWithoutIpsec)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
     ImsVector<IMS_SINT32> objErrWithoutIpsec;
-    objErrWithoutIpsec.Add(SipStatusCode::SC_406);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_406);
-    objErrWithoutIpsec.Clear();
+    objErrWithoutIpsec.Add(SipStatusCode::SC_305);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+            .WillByDefault(ReturnRef(objErrWithoutIpsec));
 
-    // SipStatusCode is in GetReregErrCodeForImsPdnReactivation
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessIpsecFallback"), 1);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureWhenUpdateFailedWithPdnReactivationRequiredStatusCode)
+{
     ImsVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
     objReregErrCodeForImsPdnReactivation.Add(SipStatusCode::SC_407);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForImsPdnReactivation())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objReregErrCodeForImsPdnReactivation));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_407);
-    objReregErrCodeForImsPdnReactivation.Clear();
+    ON_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForImsPdnReactivation())
+            .WillByDefault(ReturnRef(objReregErrCodeForImsPdnReactivation));
 
-    // ProcessForbiddenFailed return true and ProcessSubscriberFailed return false
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_407);
+}
+
+TEST_F(AosRegistrationTest, TriggerForbiddenFailHandlingWhenUpdateFailedWithPermanentStatusCode)
+{
     ImsVector<IMS_SINT32> objErrCode;
     objErrCode.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrCode));
-    ImsVector<IMS_SINT32> objCount;
-    objCount.Clear();
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objCount));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
-    objErrCode.Clear();
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
 
-    // REG_ERROR_CODE_ALL_RESP is in GetReregRetryErrCodeForInitRegWithSamePcscf
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_FORBIDDEN));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfConfiguredToRetryWithSamePcscfWhenUpdateFailed)
+{
     ImsVector<IMS_SINT32> ReregRetryErrCodeForInitRegWithSamePcscf;
     ReregRetryErrCodeForInitRegWithSamePcscf.Add(CarrierConfig::Assets::REG_ERROR_CODE_ALL_RESP);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(ReregRetryErrCodeForInitRegWithSamePcscf));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
-    ReregRetryErrCodeForInitRegWithSamePcscf.Clear();
+    ON_CALL(m_objMockIAosNConfiguration, GetReregRetryErrCodeForInitRegWithSamePcscf())
+            .WillByDefault(ReturnRef(ReregRetryErrCodeForInitRegWithSamePcscf));
 
-    // ExtraRegErrPolicy is ERROR_POLICY_PDN_REACTIVATED - m_bEps5GsOnly is false
-    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
 
-    // ExtraRegErrPolicy is ERROR_POLICY_PDN_REACTIVATED - m_bEps5GsOnly is true
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfPdnReactivationIsRequiredWhenUpdateFailed)
+{
     m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
-            .WillOnce(Return(1));
-    EXPECT_CALL(
-            m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
-            .WillOnce(Return(1));
-    EXPECT_CALL(m_objMockIAosPcscf, GetPcscfCount()).Times(AnyNumber()).WillOnce(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfPdnReactivationIsNotRequiredWhenUpdateFailed)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_302);
 
-    // ExtraRegErrPolicy is AWT_POLICY_RFC_RULE  - SipStatusCode::SC_403
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED));
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerReinitiateIfNoSpecifiedAwtPolicyWhenUpdateFailedWith403)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_403);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
 
-    // ExtraRegErrPolicy is AWT_POLICY_RFC_RULE  - SipStatusCode::SC_600
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(3));
-    EXPECT_CALL(m_objMockIAosPcscf, GetCurrentPcscfTriedCount())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(4));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_600);
+TEST_F(AosRegistrationTest, SendRegisterIfIncludeMinExpiresWhenUpdateFailedWith423)
+{
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
+            .WillByDefault(Return(AString("180")));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
 
-    // ProcessUpdateFailed_423
-    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
-            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
-    EXPECT_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(AString("60")));
     m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_423);
+
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHING);
 }
 
-TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCode_ProcessUpdateFailed_305)
+TEST_F(AosRegistrationTest, ReportFailureIfSendRegisterFailWhenUpdateFailedWith423)
 {
-    m_pAosRegistration->SetImsCall(IMS_FALSE);
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    ON_CALL(m_objMockISipMessage, GetHeader(ISipHeader::MIN_EXPIRES, _, _))
+            .WillByDefault(Return(AString("180")));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
 
-    // SIP_305_CODE_POLICY_3GPP
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
 
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - first PCSCF
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF));
-    EXPECT_CALL(m_objMockIAosPcscf, IsFirstPcscf())
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - fail to SetFirstPcscf
-    EXPECT_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - succeed to SetFirstPcscf
-    // fail to CreateRegistration
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .Times(AnyNumber())
-            .WillOnce(ReturnRef(m_objEmptyImpus))
-            .WillRepeatedly(ReturnRef(m_objAvailableImpus));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_3GPP_USING_TOP_PCSCF - not first PCSCF - succeed to SetFirstPcscf
-    // succeed to CreateRegistration
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
-
-    // SIP_305_CODE_POLICY_DEFAULT
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregRetrySip305CodePolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
-    ImsVector<IMS_SINT32> objErrWithoutIpsec;
-    objErrWithoutIpsec.Clear();
-    objErrWithoutIpsec.Add(SipStatusCode::SC_305);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_305);
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_423);
 }
 
-TEST_F(AosRegistrationTest, ProcessUpdateFailed_StatusCodeWhenReceived500)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfNotIncludeMinExpiresWhenUpdateFailedWith423)
 {
-    m_pAosRegistration->SetImsCall(IMS_FALSE);
-    // return IMS_FALSE in ProcessUnpredictableFailureHeldByCall()
-    ON_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
-            .WillByDefault(Return(IMS_TRUE));
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_423);
 
-    // return IMS_FALSE in ProcessPlmnBlockOnUpdateFailure()
-    ON_CALL(m_objMockIAosNConfiguration, IsExtraReregErrInRoamingAsFailureHandled())
-            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
+}
 
-    // for executing the ProcessDefaultFlowRecovery_Update
-    ON_CALL(m_objMockIAosNConfiguration, IsRegErrCodeWithRetryAfterTimeOnlyDefined())
-            .WillByDefault(Return(IMS_FALSE));
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenUpdateFailedWithOtherResponse)
+{
+    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_600);
 
-    m_pAosRegistration->ProcessUpdateFailed_StatusCode(SipStatusCode::SC_500);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Update"), 1);
 }
 
 TEST_F(AosRegistrationTest,
@@ -3873,7 +4126,7 @@ TEST_F(AosRegistrationTest, TryNextPcscfWhenStandardPcscfSelection)
     ON_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
 
-    m_pAosRegistration->ProcessStandardPcscfSelection();
+    m_pAosRegistration->ProcessStandardPcscfSelection(0);
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
@@ -3886,7 +4139,7 @@ TEST_F(AosRegistrationTest, ReportFailureIfTryNextPcscfFailWhenStandardPcscfSele
             Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
                     IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
 
-    m_pAosRegistration->ProcessStandardPcscfSelection();
+    m_pAosRegistration->ProcessStandardPcscfSelection(0);
 }
 
 TEST_F(AosRegistrationTest, ReportFailureIfTryNextPcscfFailWhenStandardPcscfSelectionWithRetryAfter)
@@ -3968,11 +4221,68 @@ TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenResultIsNo
 
     ImsSaKey objSaKey;
     IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED,
+            objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersAuthenticationFailedWhenResultIsNokMacInvalid)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosSubscriber, IsUsim()).WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(
+            ImsAkaParam::RESULT_NOK_MAC_INVALID, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_FALSE(bResultOfSA);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseUpdateResultOfSaToTrueWhenResultIsNokSqnSyncFailed)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
+    m_pAosRegistration->Registration_NotifyAkaResponse(ImsAkaParam::RESULT_NOK_SQN_SYNC_FAILED,
+            objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
+
+    EXPECT_TRUE(bResultOfSA);
+}
+
+TEST_F(AosRegistrationTest, NotifyAkaResponseUpdateResultOfSaToTrueWhenUsimAuthHandlingIsNotNeeded)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_IPSEC);
+    m_pAosRegistration->CreateIpsecHelper();
+
+    ON_CALL(m_objMockAosIpsecHelper, Create(IMS_FALSE)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosSubscriber, IsUsim()).WillByDefault(Return(IMS_FALSE));
+
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    ImsSaKey objSaKey;
+    IMS_BOOL bResultOfSA = IMS_FALSE;
     m_pAosRegistration->Registration_NotifyAkaResponse(
             ImsAkaParam::RESULT_NOK_MAC_INVALID, objSaKey.GetIk(), objSaKey.GetCk(), bResultOfSA);
 
     EXPECT_TRUE(bResultOfSA);
-    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
 TEST_F(AosRegistrationTest, NotifyAkaResponseTriggersRegTerminatedWhenButFailToSetPcscfPort)
@@ -4124,6 +4434,23 @@ TEST_F(AosRegistrationTest, RefreshTimerExpiredStopsRefreshWhenTransactionIsStop
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
 }
 
+TEST_F(AosRegistrationTest,
+        RefreshTimerExpiredStopsRefreshWhenTransactionIsStoppedAndRadioIsWaiting)
+{
+    IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegOutOfServicePolicy())
+            .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
+    EXPECT_CALL(m_objMockIAosTransaction, IsTransactionAllowed(_)).WillOnce(Return(IMS_FALSE));
+
+    m_pAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+
+    EXPECT_FALSE(bDoImplicitRefresh);
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+}
+
 TEST_F(AosRegistrationTest, RefreshTimerExpiredTriggersRegTerminatedWhenFailToCreateIpsec)
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
@@ -4252,309 +4579,95 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout)
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
 }
 
-TEST_F(AosRegistrationTest, RegistrationStartFailedWithOtherReason)
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfErrorCodeOtherConfiguredWhenStartFailedWithOthers)
 {
-    // ProcessStartFailed_Others
     ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Add(CarrierConfig::Assets::REG_ERROR_CODE_OTHER);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
-            .WillOnce(ReturnRef(objExtraRegErrCode));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
+            .WillByDefault(ReturnRef(objExtraRegErrCode));
 
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_NONE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
 }
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403)
+TEST_F(AosRegistrationTest, TriggerPdnReactivationIfRequiredWhenStartFailedWithSocketError)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached())
+            .WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+}
+
+TEST_F(AosRegistrationTest,
+        TriggerFlowRecoveryIfPdnReactivationNotRequiredWhenStartFailedWithSocketError)
+{
+    m_pAosRegistration->SetEps5GsOnly(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, StartRetryTimerIfAwtRecoveryRequiredWhenStartFailedWithOthers)
+{
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_NONE);
+
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWith403)
 {
     ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
     ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_403"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWith500)
+{
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
-            .WillByDefault(Return(m_strLocationProperties));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403));
-
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_NotSupportErrMessage)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg403_DuplicateReason)
-{
-    m_pAosRegistration->SetImsReasonCode(
-            AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY);
-    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
+    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
     ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_500"), 1);
+}
+
+TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWithOthers)
+{
+    ON_CALL(m_objMockISipMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_600));
     ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_403))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_NOT_SUPPORTED_COUNTRY))
-            .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _)).Times(0);
-
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500));
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_NotSupportErrMessage)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrReg500_DuplicateReason)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_500));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_500);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_REG_500))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // Set duplicate reason
-    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_REG_500);
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_600));
-
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .WillByDefault(ReturnRef(objRegErrCodeForPcscfDiscovery));
 
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES))
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES));
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
 
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_NotSupportErrMessage)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_600));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_WfcErrOtherFailures_DuplicateReason)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_600));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_600);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsWfcErrorMessageSupported(CarrierConfig::Assets::WFC_ERROR_OTHER_FAILURES))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // Set duplicate reason
-    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES);
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_UnconditionalDownload)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
-
-    ImsList<AString> objImpus;
-    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, objImpus));
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
-}
-
-TEST_F(AosRegistrationTest, Registration_StartFailed_RegEventChange_NotDownload)
-{
-    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(SipStatusCode::SC_403));
-
-    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    objRegErrCodeForPcscfDiscovery.Add(SipStatusCode::SC_403);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
-
-    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD));
-
-    ImsList<AString> objImpus;
-    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, objImpus))
-            .Times(0);
-    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_Others"), 1);
 }
 
 TEST_F(AosRegistrationTest, RegistrationUpdatedWhenRegistrationIsNullDoesNothing)
@@ -5213,38 +5326,122 @@ TEST_F(AosRegistrationTest,
     GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
 }
 
-TEST_F(AosRegistrationTest, StopTimer)
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfGeoLocationInfoIsNotRequired)
 {
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_OFFLINE_RECOVER);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
 
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_STOP_RETRY);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
 
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_REFRESH);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_EXPIRED);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_MODE);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_TRANSACTION);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
-    m_pAosRegistration->StopTimer(AosRegistration::TIMER_INTERNAL_ERROR);
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosRegistrationTest, ClearTimer)
+TEST_F(AosRegistrationTest, RemovePreviousBodyWhenAddLocationHeaderBodyWithResubmit)
+{
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockISipMessage, RemoveBodyParts());
+
+    m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_RESUBMIT);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithoutPosition)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithPosition)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest,
+        AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithPositionAndCountry)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(
+                    Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfFailToCreatePidfWithoutCivic)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_CIVIC));
+    ON_CALL(m_objMockILocationInfo, GetLocationProperties(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, AddLocationHeaderBodyReturnsFalseIfPidfFormingPolicyIsInvalid)
+{
+    GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
+    IMS_SINT32 nInvalidPidfFormingPolicy = 0;
+    ON_CALL(m_objMockIAosNConfiguration,
+            IsGeolocationPidfSupported(
+                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetGeolocationPidfFormingPolicy())
+            .WillByDefault(Return(nInvalidPidfFormingPolicy));
+
+    IMS_BOOL bResult = m_pAosRegistration->AddLocationHeaderBody(
+            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL);
+
+    EXPECT_FALSE(bResult);
+    GeolocationHelper::GetInstance()->DestroyPidfCreator(SLOT_ID);
+}
+
+TEST_F(AosRegistrationTest, InvokingClearTimersStopsAllTimersExceptOfflineRecoverTimer)
 {
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
@@ -5263,203 +5460,365 @@ TEST_F(AosRegistrationTest, ClearTimer)
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ClearRetryTimers();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, TimerExpired)
+TEST_F(AosRegistrationTest, InvokingClearRetryTimersStopsOfflineRecoverTimerAndStopRetryTimer)
 {
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
+    m_pAosRegistration->ClearRetryTimers();
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfExpiredTimerIsNullWhenTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
     m_pAosRegistration->Timer_TimerExpired(IMS_NULL);
 
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_REFRESH));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_EXPIRED));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_MODE));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_TRANSACTION));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
-
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
-    EXPECT_CALL(m_objMockIRegistration, RestoreActiveBindings()).Times(1);
-    m_pAosRegistration->Timer_TimerExpired(
-            m_pAosRegistration->GetTimer(AosRegistration::TIMER_INTERNAL_ERROR));
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+    EXPECT_TRUE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
 }
 
-TEST_F(AosRegistrationTest, ProcessOfflineRecoverTimerExpired)
+TEST_F(AosRegistrationTest,
+        DoNothingExceptStopTimerIfStateIsNotOfflineWhenOfflineRecoverTimerExpired)
 {
-    // Not STATE_OFFLINE
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 
-    // Not AppReady
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, DoNothingExceptStopTimerIfAppIsNotReadyWhenOfflineRecoverTimerExpired)
+{
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
     m_pAosRegistration->SetAppReady(IMS_FALSE);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 
-    // State is STATE_OFFLINE and AppReady
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest,
+        AddTrafficPendingIfTransactionIsNotStartedWhenOfflineRecoverTimerExpired)
+{
     m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
     m_pAosRegistration->SetAppReady(IMS_TRUE);
-
-    // Transaction is started - fail to CreateRegistration
-    EXPECT_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
-            .Times(AnyNumber())
-            .WillOnce(ReturnRef(m_objEmptyImpus))
-            .WillRepeatedly(ReturnRef(m_objAvailableImpus));
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-
-    // Transaction is started - succeed to CreateRegistration
-    EXPECT_CALL(m_objMockIAosRegistrationListener,
-            Registration_StateChanged(
-                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
-
-    // Transaction is not started
-    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
     m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
-
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
-    m_pAosRegistration->ProcessOfflineRecoverTimerExpired();
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
 }
 
-TEST_F(AosRegistrationTest, ProcessStopRetryTimerExpired)
+TEST_F(AosRegistrationTest,
+        TryRegistrationIfSucceedToCreateRegistrationWhenOfflineRecoverTimerExpired)
 {
-    // Transaction is started - succeed to SendRegister
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objAvailableImpus));
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 
-    // Transaction is not started
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->SetImsCall(IMS_TRUE);
-    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
 
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
 
-    // Retry is not held
-    m_pAosRegistration->Destroy();
-    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
-    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+TEST_F(AosRegistrationTest, ReportFailureIfFailToCreateRegistrationWhenOfflineRecoverTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pAosRegistration->SetAppReady(IMS_TRUE);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_OFFLINE_RECOVER, 5000);
+    ON_CALL(m_objMockIAosSubscriber, GetConfiguredImpus())
+            .WillByDefault(ReturnRef(m_objEmptyImpus));
 
-    // Transaction is started - fail to SendRegister
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
-    m_pAosRegistration->SetImsCall(IMS_FALSE);
-    m_pAosRegistration->SetTransactionStarted(IMS_TRUE);
     EXPECT_CALL(m_objMockIAosRegistrationListener,
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_OFFLINE_RECOVER));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_OFFLINE_RECOVER));
+}
+
+TEST_F(AosRegistrationTest, DoNothingExceptStopTimerIfRetryWasNotHeldWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
-    m_pAosRegistration->ProcessStopRetryTimerExpired();
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
     EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
 }
 
-TEST_F(AosRegistrationTest, CreateAndDestroySubscription)
+TEST_F(AosRegistrationTest, AddTrafficPendingIfTransactionIsNotStartedWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_TRAFFIC));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("CheckRadioReadyAndSetTxnPending"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, TryRegistrationIfSucceedToSendRegisterWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, ReportFailureIfFailToSendRegisterWhenStopRetryTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGSTOP);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_STOP_RETRY, 5000);
+    ON_CALL(m_objMockIRegistration, Register(_)).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_INTERNAL));
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_STOP_RETRY));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_STOP_RETRY));
+}
+
+TEST_F(AosRegistrationTest, StopRefreshTimerWhenRefreshTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_REFRESH, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_REFRESH));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_REFRESH));
+}
+
+TEST_F(AosRegistrationTest, StopExpiredTimerWhenExpiredTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_EXPIRED, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_EXPIRED));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_EXPIRED));
+}
+
+TEST_F(AosRegistrationTest, StopModeTimerWhenModeTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_MODE, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_MODE));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_MODE));
+}
+
+TEST_F(AosRegistrationTest, StopTransactionTimerWhenTransactionTimerExpired)
+{
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_TRANSACTION, 5000);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_TRANSACTION));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_TRANSACTION));
+}
+
+TEST_F(AosRegistrationTest, RestoreActiveBindingsIfRegisteredWhenInternalTimerExpired)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->StartTimer(AosRegistration::TIMER_INTERNAL_ERROR, 5000);
+
+    EXPECT_CALL(m_objMockIRegistration, RestoreActiveBindings()).Times(1);
+
+    m_pAosRegistration->Timer_TimerExpired(
+            m_pAosRegistration->GetTimer(AosRegistration::TIMER_INTERNAL_ERROR));
+
+    EXPECT_FALSE(m_pAosRegistration->IsTimerRunning(AosRegistration::TIMER_INTERNAL_ERROR));
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfRegistrationIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(IMS_NULL, &m_objMockAosSubscription,
+            &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsFalseIfFailToCreate)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    ON_CALL(m_objMockIRegistration, CreateSubscription(_)).WillByDefault(Return(nullptr));
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, CreateSubscriptionReturnsTrueIfSucceedToCreate)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    ON_CALL(m_objMockIRegistration, CreateSubscription(_))
+            .WillByDefault(Return(&m_objMockIRegSubscription));
+
+    IMS_BOOL bResult = m_pAosRegistration->CreateSubscription();
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, DestroySubscriptionReturnsTrueIfSucceedToDestroy)
 {
     m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
 
-    // StartSubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->StartSubscription(IMS_TRUE));
+    IMS_BOOL bResult = m_pAosRegistration->DestroySubscription();
 
-    // StopSubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->StopSubscription());
-
-    // DestroySubscription - m_pSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->DestroySubscription());
-
-    // StartSubscription - m_pSubscription is null
-    EXPECT_FALSE(m_pAosRegistration->StartSubscription(IMS_TRUE));
-
-    // StopSubscription - m_pSubscription is null
-    EXPECT_FALSE(m_pAosRegistration->StopSubscription());
-
-    // CreateSubscription - piRegSubscription is null
-    EXPECT_CALL(m_objMockIRegistration, CreateSubscription(_))
-            .Times(AnyNumber())
-            .WillOnce(Return(nullptr))
-            .WillRepeatedly(Return(&m_objMockIRegSubscription));
-    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
-
-    // CreateSubscription - m_piRegistration and piRegSubscription is not null
-    EXPECT_TRUE(m_pAosRegistration->CreateSubscription());
-
-    // CreateSubscription - m_piRegistration is null
-    m_pAosRegistration->Destroy();
-    EXPECT_FALSE(m_pAosRegistration->CreateSubscription());
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosRegistrationTest, AddLocationHeaderBody)
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsFalseIfFeatureIsNotOn)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
 
-    // IsGeolocationInfoRequired return false
-    EXPECT_FALSE(m_pAosRegistration->AddLocationHeaderBody(
-            &m_objMockISipMessage, IMessageMediator::MESSAGE_NORMAL));
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
 
-    // IsGeolocationInfoRequired return true
-    EXPECT_CALL(m_objMockIAosNConfiguration,
-            IsGeolocationPidfSupported(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(m_objMockISipMessage, RemoveBodyParts()).Times(1);
-    EXPECT_FALSE(m_pAosRegistration->AddLocationHeaderBody(
-            &m_objMockISipMessage, IMessageMediator::MESSAGE_RESUBMIT));
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StartSubscriptionReturnsTrueIfSucceedToStart)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+
+    IMS_BOOL bResult = m_pAosRegistration->StartSubscription(IMS_TRUE);
+
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsFalseIfFeatureIsNotOn)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_NONE);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsFalseIfSubscriptionIsNull)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, IMS_NULL, &m_objMockIRegContact,
+            &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosRegistrationTest, StopSubscriptionReturnsTrueIfSucceedToStop)
+{
+    m_pAosRegistration->SetFeature(AosRegistration::FEATURE_SUBSCRIPTION);
+
+    IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
+
+    EXPECT_TRUE(bResult);
 }

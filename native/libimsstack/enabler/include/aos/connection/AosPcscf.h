@@ -209,6 +209,11 @@ public:
 
     void SetListener(IN IAosPcscfListener* piListener) override;
 
+    enum
+    {
+        TIMER_DNS_QUERY_RETRY = 0
+    };
+
 protected:
     void AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort);
 
@@ -253,11 +258,6 @@ protected:
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
-    enum
-    {
-        TIMER_DNS_QUERY_RETRY = 0
-    };
-
 private:
     static const IMS_SINT32 DNS_QEUERY_RETRY_WAITING_TIME_MILLS = 4000;
     IMS_SINT32 GetPcscfPort();
@@ -276,9 +276,9 @@ protected:
     IMS_UINT32 m_nChangedType;
 
     IMS_BOOL m_bIsConfigured;
+    IMS_BOOL m_bIsDnsQueryRetry;
+    IMS_BOOL m_bOtherIpTypeRequired;
     IMS_UINT32 m_nCurrentPcscfIndex;
-    IMS_UINT32 m_bIsDnsQueryRetry;
-    IMS_UINT32 m_bOtherIpTypeRequired;
     IMS_UINT32 m_nDiscoveryMethodIndex;
 
     AStringArray m_objCurrAddresses;

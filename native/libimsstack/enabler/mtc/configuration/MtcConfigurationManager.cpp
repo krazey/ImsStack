@@ -695,17 +695,10 @@ IMS_BOOL MtcConfigurationManager::IsBlockWifiEmergencyCallIfNotProvisioned() con
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoingCall(
+IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToIgnore(
         IN IMS_SINT32 nReason) const
 {
-    if (ContainsValue(m_objCarrierConfig.objRegistrationDisconnectReasonToTerminateOngoingCalls,
-                TERMINATE_BY_ANY_AOS_REASON))
-    {
-        return IMS_TRUE;
-    }
-
-    return ContainsValue(
-            m_objCarrierConfig.objRegistrationDisconnectReasonToTerminateOngoingCalls, nReason);
+    return ContainsValue(m_objCarrierConfig.objRegistrationDisconnectReasonToIgnore, nReason);
 }
 
 PUBLIC

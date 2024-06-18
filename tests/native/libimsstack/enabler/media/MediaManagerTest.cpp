@@ -19,10 +19,11 @@
 
 #include "IMediaSession.h"
 #include "MediaManager.h"
+#include "MediaMsgHandler.h"
+#include "MediaResourceManager.h"
 #include "MediaSession.h"
 #include "MockIMediaSession.h"
 #include "MockIMediaManager.h"
-#include "MediaMsgHandler.h"
 #include "MockMediaMsgHandler.h"
 
 using ::testing::Return;
@@ -305,7 +306,7 @@ TEST_F(MediaManagerTest, testDestroySession)
 TEST_F(MediaManagerTest, testGetResourceManager)
 {
     EXPECT_NE(m_pMediaManager->GetResourceManager(), nullptr);
-    EXPECT_EQ(m_pMediaManager->GetResourceManager()->GetMtu(), 1500);
+    EXPECT_EQ(m_pMediaManager->GetResourceManager()->GetMtu(), 0);
 }
 
 TEST_F(MediaManagerTest, testSendMessage_CommonResponse)

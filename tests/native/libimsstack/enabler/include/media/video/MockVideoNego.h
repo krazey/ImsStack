@@ -27,9 +27,7 @@ class MockVideoNego : public VideoNego
 public:
     explicit MockVideoNego(IMS_SINT32 nSlotId) :
             VideoNego(nSlotId){};
-    MOCK_METHOD(void, CreateProfiles,
-            (IN MediaEnvironment * pEnvironment, IN VideoConfiguration* pConfig), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
                     IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),
@@ -37,13 +35,10 @@ public:
     MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
             (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
             (override));
-    MOCK_METHOD(void, NegotiateSDP,
+    MOCK_METHOD(void, NegotiateSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
             (override));
-    MOCK_METHOD(void, FinalizeSDP,
-            (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));
-    MOCK_METHOD(IMS_BOOL, SetPort, (IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
     MOCK_METHOD(const IpAddress&, GetNegotiatedRemoteAddress, (), (override));

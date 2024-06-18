@@ -20,7 +20,7 @@
 #include "config/AudioConfiguration.h"
 #include "config/MediaSessionConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
 

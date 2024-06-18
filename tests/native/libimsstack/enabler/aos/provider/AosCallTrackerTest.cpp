@@ -203,44 +203,148 @@ TEST_F(AosCallTrackerTest, ReturnsTrueWhenActiveCallStateSmallerThenCsCallState)
     EXPECT_TRUE(bResult3);
 }
 
-TEST_F(AosCallTrackerTest, IsNormalCallActive)
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsTrueWhenNormalCallStateIsNew)
 {
-    // Expect return False
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
-    EXPECT_FALSE(m_pAosCallTracker->IsNormalCallActive());
+    // GIVEN
+    CallState eCallState = CallState::NEW;
 
-    // Expect return True
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, CallState::RINGBACK);
-    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
 
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, CallState::RINGING);
-    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, CallState::ALERTING);
-    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK);
+    // THEN
     EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
 }
 
-TEST_F(AosCallTrackerTest, IsEmergencyCallActive)
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsTrueWhenNormalCallStateIsRingback)
 {
-    // Expect return False
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
+    // GIVEN
+    CallState eCallState = CallState::RINGBACK;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsTrueWhenNormalCallStateIsRinging)
+{
+    // GIVEN
+    CallState eCallState = CallState::RINGING;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsTrueWhenNormalCallStateIsAlerting)
+{
+    // GIVEN
+    CallState eCallState = CallState::ALERTING;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsTrueWhenNormalCallStateIsOffhook)
+{
+    // GIVEN
+    CallState eCallState = CallState::OFFHOOK;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsNormalCallActiveReturnsFalseWhenNormalCallStateIsIdle)
+{
+    // GIVEN
+    CallState eCallState = CallState::IDLE;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_NORMAL, eCallState);
+
+    // THEN
+    EXPECT_FALSE(m_pAosCallTracker->IsNormalCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsTrueWhenEmergencyCallStateIsNew)
+{
+    // GIVEN
+    CallState eCallState = CallState::NEW;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsTrueWhenEmergencyCallStateIsRingback)
+{
+    // GIVEN
+    CallState eCallState = CallState::RINGBACK;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsTrueWhenEmergencyCallStateIsRinging)
+{
+    // GIVEN
+    CallState eCallState = CallState::RINGING;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsTrueWhenEmergencyCallStateIsAlerting)
+{
+    // GIVEN
+    CallState eCallState = CallState::ALERTING;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsTrueWhenEmergencyCallStateIsOffhook)
+{
+    // GIVEN
+    CallState eCallState = CallState::OFFHOOK;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
+    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
+}
+
+TEST_F(AosCallTrackerTest, IsEmergencyCallActiveReturnsFalseWhenEmergencyCallStateIsIdle)
+{
+    // GIVEN
+    CallState eCallState = CallState::IDLE;
+
+    // WHEN
+    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, eCallState);
+
+    // THEN
     EXPECT_FALSE(m_pAosCallTracker->IsEmergencyCallActive());
-
-    // Expect return True
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::RINGBACK);
-    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::RINGING);
-    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::ALERTING);
-    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
-
-    m_pAosCallTracker->SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::OFFHOOK);
-    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
 }
 
 TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnTrue)

@@ -51,4 +51,7 @@ public interface TestConstants {
     // Operator alpha string (short/long)
     String OPERATOR_ALPHA_SHORT = "Test";
     String OPERATOR_ALPHA_LONG = "Test-Carrier";
+
+    // Test SIM
+    int CARRIER_ID = 1911;
 }

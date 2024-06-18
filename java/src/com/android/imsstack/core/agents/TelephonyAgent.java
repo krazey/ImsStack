@@ -25,6 +25,7 @@ import android.telephony.TelephonyManager.SimState;
 import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
@@ -57,20 +58,31 @@ public class TelephonyAgent implements TelephonyInterface {
 
     @Override
     public @CallState int getCsCallState() {
-        return TelephonyManager.CALL_STATE_IDLE;
-        /** TODO(b/281756154): need to integrate with the IMS calls.
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getCallStateForSubscription() : TelephonyManager.CALL_STATE_IDLE;
-        */
+        PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                PhoneStateInterface.class, mSlotId);
+        return (phoneState != null)
+                ? phoneState.getCsCallState()
+                : TelephonyManager.CALL_STATE_IDLE;
     }
 
     @Override
     public @CallState int getCsCallStateInOtherSlot() {
+        int simCount = DeviceConfig.getActiveSimCount();
+
+        for (int i = 0; i < simCount; ++i) {
+            if (mSlotId != i) {
+                PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                        PhoneStateInterface.class, i);
+                int state = phoneState != null
+                        ? phoneState.getCsCallState()
+                        : TelephonyManager.CALL_STATE_IDLE;
+                if (state != TelephonyManager.CALL_STATE_IDLE) {
+                    return state;
+                }
+            }
+        }
+
         return TelephonyManager.CALL_STATE_IDLE;
-        /** TODO(b/281756154): need to integrate with the IMS calls.
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getCallStateForSubscription() : TelephonyManager.CALL_STATE_IDLE;
-        */
     }
 
     @Override

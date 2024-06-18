@@ -21,7 +21,6 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
@@ -40,8 +39,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 
-@SuppressWarnings("deprecation")
-public class TestConfigMenu extends PreferenceActivity {
+public class TestConfigMenu extends AppCompatActivity {
     // Main tree
     protected static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
     protected static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
@@ -108,11 +106,6 @@ public class TestConfigMenu extends PreferenceActivity {
         addPreferencesFromResource(R.xml.test_config_menu);
 
         initPreferences();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     private void initPreferences() {

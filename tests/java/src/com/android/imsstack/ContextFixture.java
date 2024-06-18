@@ -787,7 +787,7 @@ public class ContextFixture implements TestFixture<Context> {
             Log.d(TAG, "NameNotFoundException: " + ex);
         }
 
-        doReturn(mBundle).when(mCarrierConfigManager).getConfigForSubId(anyInt());
+        doReturn(mBundle).when(mCarrierConfigManager).getConfigForSubId(anyInt(), any());
         //doReturn(mBundle).when(mCarrierConfigManager).getConfig(anyInt());
         doReturn(mBundle).when(mCarrierConfigManager).getConfig();
 

@@ -19,15 +19,27 @@
 
 #include "ServiceNetworkPolicy.h"
 #include "provider/AosStaticProfile.h"
+#include "PlatformContext.h"
+#include "TestUtilService.h"
+
+using ::testing::Eq;
+using ::testing::Return;
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class AosStaticProfileTest : public ::testing::Test
 {
 public:
     AosStaticProfile* m_pProfile;
 
+    TestUtilService m_objUtilService;
+
 protected:
     virtual void SetUp() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
+
         m_pProfile = new AosStaticProfile();
         ASSERT_TRUE(m_pProfile != nullptr);
     }
@@ -38,6 +50,8 @@ protected:
         {
             delete m_pProfile;
         }
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
     }
 };
 
@@ -222,6 +236,32 @@ TEST_F(AosStaticProfileTest, SucceedsSetRegistrationFlowIdWhenRcs)
     // THEN
     EXPECT_EQ(static_cast<IMS_UINT32>(AosRegistrationFlowId::RCS),
             m_pProfile->GetRegistrationFlowId());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetConnectionTypeWhenNormalAndWifiTest)
+{
+    // GIVEN
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+            GetPersistentInt(Eq(ImsPrivateProperties::Persistent::KEY_WIFI_TEST), Eq(SLOT_ID)))
+            .WillByDefault(Return(1));
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
+
+    // THEN
+    EXPECT_EQ(NetworkPolicy::APN_WIFI, m_pProfile->GetConnectionType());
+}
+
+TEST_F(AosStaticProfileTest, SucceedsSetConnectionTypeWhenEmergencyAndWifiTest)
+{
+    // GIVEN
+    ON_CALL(m_objUtilService.GetMockPrivateProperty(),
+            GetPersistentInt(Eq(ImsPrivateProperties::Persistent::KEY_WIFI_TEST), Eq(SLOT_ID)))
+            .WillByDefault(Return(1));
+    // WHEN
+    m_pProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+    // THEN
+    EXPECT_EQ(NetworkPolicy::APN_WIFI, m_pProfile->GetConnectionType());
 }
 
 TEST_F(AosStaticProfileTest, SucceedsAddService)

@@ -50,7 +50,7 @@ TEST_F(AosStaticConfigTest, FailsGetProfileWithInvalidService)
     AString strInvalidService = AString("ims.service.invalid");
 
     // WHEN
-    AosStaticProfile* pProfile = m_pConfig->GetProfile(strInvalidApp, strInvalidService);
+    const AosStaticProfile* pProfile = m_pConfig->GetProfile(strInvalidApp, strInvalidService);
 
     EXPECT_EQ(nullptr, pProfile);
 }
@@ -64,7 +64,7 @@ TEST_F(AosStaticConfigTest, SucceedsGetProfileWithValidService)
     AString strValidService = AString("ims.service.mts");
 
     // WHEN
-    AosStaticProfile* pProfile = m_pConfig->GetProfile(strValidApp, strValidService);
+    const AosStaticProfile* pProfile = m_pConfig->GetProfile(strValidApp, strValidService);
 
     // THEN
     EXPECT_NE(nullptr, pProfile);

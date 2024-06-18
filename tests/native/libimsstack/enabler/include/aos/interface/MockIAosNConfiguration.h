@@ -81,6 +81,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsCallEndOnRegHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithFeatureTagUnavailableSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAwtUsedWhenInitRegWithNextPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsPlmnBlockWithTimeoutOnVoiceCallUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWfcErrorMessageSupported, (IN IMS_SINT32 nError), (const, override));
 
@@ -122,7 +123,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrFinalType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetExtraRegErrMinCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));

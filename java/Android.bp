@@ -43,6 +43,7 @@ android_library {
     ],
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.appcompat_appcompat",
         "PixelImsMediaFramework",
         "imsstack-prebuilt",
     ],

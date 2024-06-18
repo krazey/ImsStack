@@ -91,8 +91,5 @@ protected:
 
     static const IMS_UINT32 IPSEC_PORT_INTERVAL = 1000;
     static const IMS_UINT32 IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS = 30000;
-
-private:
-    friend class AosIpsecHelperTest;
 };
 #endif  // AOS_IPSEC_HELPER_H_

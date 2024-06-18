@@ -49,9 +49,6 @@ public:
     IMS_BOOL RequestPhoneNumberRetry(IN IMS_UINT32 nCommand) override;
 
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
-
-private:
-    friend class JniAosServiceThreadTest;
 };
 
 #endif  // JNI_AOS_SERVICE_THREAD_H_

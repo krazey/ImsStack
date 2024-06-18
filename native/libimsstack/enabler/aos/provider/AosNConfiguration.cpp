@@ -75,7 +75,7 @@ PUBLIC VIRTUAL void AosNConfiguration::SetListener(IN IAosNConfigurationListener
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosNConfigurationListener* piCurrListener = m_objListeners.GetAt(i);
+        const IAosNConfigurationListener* piCurrListener = m_objListeners.GetAt(i);
 
         if (piCurrListener == piListener)
         {
@@ -378,6 +378,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() c
     return m_objAsset.bSupportVerstatForReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAwtUsedWhenInitRegWithNextPcscf() const
+{
+    return m_objAsset.bUseAwtWhenInitRegWithNextPcscf;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
 {
     return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
@@ -594,11 +599,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMaxCount() const
     return m_objExtraRegErr.nExtraRegErrMaxCnt;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMinCount() const
-{
-    return m_objExtraRegErr.nExtraRegErrMinCnt;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
 {
     return m_objAsset.nRegPcscfUpdatePolicy;
@@ -802,7 +802,7 @@ PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS
 
     A_IMS_TRACE_I(LOGTAG, "CarrierConfig_NotifyConfigChanged :: updated", 0, 0, 0);
 
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
 
     if (piCc == IMS_NULL)
     {
@@ -865,8 +865,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT);
         m_objExtraRegErr.nExtraRegErrMaxCnt =
                 piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT);
-        m_objExtraRegErr.nExtraRegErrMinCnt =
-                piCcBundle->GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT);
         m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached = piCcBundle->GetInt(
                 CarrierConfig::Assets::
                         KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT);
@@ -886,10 +884,9 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         A_IMS_TRACE_D(LOGTAG, "KEY_EXTRA_REG_ERR_BUNDLE :: FinalType(%d), Policy(%d), MaxCnt(%d)",
                 m_objExtraRegErr.nExtraRegErrFinalType, m_objExtraRegErr.nExtraRegErrPolicy,
                 m_objExtraRegErr.nExtraRegErrMaxCnt);
-        A_IMS_TRACE_D(LOGTAG, "MinCnt(%d), RetryCntShared(%d), ReRegRoaming(%d)",
-                m_objExtraRegErr.nExtraRegErrMinCnt,
+        A_IMS_TRACE_D(LOGTAG, "RetryCntShared(%d), ReregRoaming(%d)",
                 m_objExtraRegErr.bExtraRegErrRetryCntSharedForRegAndSub,
-                m_objExtraRegErr.bExtraReregFailureWithErrCodeInRoaming);
+                m_objExtraRegErr.bExtraReregFailureWithErrCodeInRoaming, 0);
         A_IMS_TRACE_D(LOGTAG, "Pcscfs Repeated Cnt: EPS 5GS only(%d), LTE Combined(%d)",
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached,
                 m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, 0);
@@ -903,7 +900,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         for (int i = 0; i < nSize; i++)
         {
             IMS_SINT32 nValue = m_objExtraRegErr.objExtraReregErrCode.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "ReRegErrCode(%d), ", nValue, 0, 0);
+            A_IMS_TRACE_D(LOGTAG, "ReregErrCode(%d), ", nValue, 0, 0);
         }
         nSize = m_objExtraRegErr.objExtraRegErrWaitTimeSec.GetSize();
         for (int i = 0; i < nSize; i++)
@@ -1048,7 +1045,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT);
+                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT);
         m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY);
         piCcBundle->ReleaseBundle();
@@ -1223,17 +1220,17 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
+            CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
-    m_objAsset.bInitializeIpsecWithNewPcscf = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
+    m_objAsset.bInitializeIpsecWithNewPcscf =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(
@@ -1241,7 +1238,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bRegContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL);
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
     m_objAsset.bRequiredCdmalessFeatureTag =
@@ -1264,6 +1261,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
+    m_objAsset.bUseAwtWhenInitRegWithNextPcscf =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =
@@ -1278,11 +1277,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nContactUserInfoPolicyForNonRegMessage = piCc->GetInt(
             CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
-    m_objAsset.nEmcRegRetryMaxCnt =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT);
+    m_objAsset.nEmcRegRetryMaxCnt = piCc->GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT);
     m_objAsset.nEmcRegRetryTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
     m_objAsset.nImsEstablishmentTimeSec =
@@ -1314,11 +1312,11 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nRegRetryTimerFPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT);
     m_objAsset.nRegTimerForEmcCallMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT);
     m_objAsset.nReregRetry305Policy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT);
     m_objAsset.nRoamingPreferredEmcReg =
-            piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT);
+            piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
     m_objAsset.nUsatRegEventDownloadPolicy =

@@ -42,7 +42,7 @@ class TestAosDnsQuery : public AosDnsQuery
 public:
     DECLARE_USING(AosDnsQuery)
 
-    TestAosDnsQuery(IN IMS_BOOL bIsTest) :
+    inline explicit TestAosDnsQuery(IN IMS_BOOL bIsTest) :
             AosDnsQuery(bIsTest)
     {
     }

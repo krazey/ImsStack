@@ -142,8 +142,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsIgnorePrackDeliveryFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportVideoCallOnlyInVopsOffStatus, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsBlockWifiEmergencyCallIfNotProvisioned, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRegistrationDisconnectReasonToTerminateOngoingCall,
-            (IN IMS_SINT32 nReason), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegistrationDisconnectReasonToIgnore, (IN IMS_SINT32 nReason),
+            (const, override));
     MOCK_METHOD(IMS_SINT32, GetWifiEmergency18xTimer, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportCanidInfo, (), (const, override));
     MOCK_METHOD(

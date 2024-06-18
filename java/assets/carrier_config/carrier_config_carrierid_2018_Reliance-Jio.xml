@@ -147,7 +147,7 @@
         <item value="1236"/>
     </int-array>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
-    <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="2000"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
     <boolean name="video_drop_p_frame_bool" value="true"/>

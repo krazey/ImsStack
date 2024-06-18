@@ -93,6 +93,7 @@ public:
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
+    IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const override;
     IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
     IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const override;
 
@@ -134,7 +135,6 @@ public:
     IMS_SINT32 GetExtraRegErrFinalType() const override;
     IMS_SINT32 GetExtraRegErrPolicy() const override;
     IMS_SINT32 GetExtraRegErrMaxCount() const override;
-    IMS_SINT32 GetExtraRegErrMinCount() const override;
     IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const override;
     IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const override;
     IMS_SINT32 GetGeolocationPidfFormingPolicy() const override;

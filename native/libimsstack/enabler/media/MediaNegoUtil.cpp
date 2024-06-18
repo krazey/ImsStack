@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include "MediaManager.h"
 #include "MediaNego.h"
 #include "MediaNegoUtil.h"
+#include "MediaResourceManager.h"
 
 PUBLIC
 MediaNegoUtil::MediaNegoUtil() {}
@@ -81,4 +83,42 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMedi
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC void MediaNegoUtil::ReleaseRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port)
+{
+    if (port != 0)
+    {
+        MediaManager* pMediaManager = MediaManager::GetInstance(slotId);
+
+        if (pMediaManager != IMS_NULL)
+        {
+            MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+
+            if (pResourceMngr != IMS_NULL)
+            {
+                pResourceMngr->ReleaseRtpPort(port);
+            }
+        }
+    }
+}
+
+PUBLIC IMS_UINT32 MediaNegoUtil::AcquireRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port)
+{
+    if (port != 0)
+    {
+        MediaManager* pMediaManager = MediaManager::GetInstance(slotId);
+
+        if (pMediaManager != IMS_NULL)
+        {
+            MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+
+            if (pResourceMngr != IMS_NULL)
+            {
+                return pResourceMngr->AcquireRtpPort(port, port);
+            }
+        }
+    }
+
+    return 0;
 }

@@ -20,9 +20,9 @@
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 
-#include "Configuration.h"
-
+#include "Engine.h"
 #include "EngineLoader.h"
+#include "IConfiguration.h"
 
 #include "EnablerFactory.h"
 #include "EnablerThread.h"
@@ -133,8 +133,7 @@ void EnablerThread::ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags)
     if (IsControlSet(nCtrlFlags, CONTROL_CREATE))
     {
         ConfigService::GetConfigService()->LoadCarrierConfig(GetSlotId());
-        // InitConfig?
-        Configuration::GetInstance()->RefreshConfigs(GetSlotId());
+        Engine::GetConfiguration()->RefreshConfigs(GetSlotId());
         EngineLoader::Initialize(GetSlotId());
         InitializeGlobals();
 

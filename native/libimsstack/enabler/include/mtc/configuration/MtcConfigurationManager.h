@@ -149,8 +149,7 @@ public:
     IMS_BOOL IsIgnorePrackDeliveryFailure() const override;
     IMS_BOOL IsSupportVideoCallOnlyInVopsOffStatus() const override;
     IMS_BOOL IsBlockWifiEmergencyCallIfNotProvisioned() const override;
-    IMS_BOOL IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            IN IMS_SINT32 nReason) const override;
+    IMS_BOOL IsRegistrationDisconnectReasonToIgnore(IN IMS_SINT32 nReason) const override;
     IMS_SINT32 GetWifiEmergency18xTimer() const override;
     IMS_BOOL IsSupportCanidInfo() const override;
     IMS_BOOL IsUseCarrierSpecificContactHeaderForOptionsResponse() const override;
@@ -183,8 +182,6 @@ private:
     static IMS_BOOL ContainsValue(IN const ImsVector<AString>& lstList, IN const AString& strValue);
 
     CarrierConfigItems m_objCarrierConfig;
-
-    LOCAL const IMS_UINT32 TERMINATE_BY_ANY_AOS_REASON = 999;
 };
 
 #endif

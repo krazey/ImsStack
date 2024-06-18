@@ -23,7 +23,7 @@
 #include "config/VideoConfiguration.h"
 #include "config/TextConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE serviceType) :

@@ -17,6 +17,7 @@
 #define ANSI_STRING_ARRAY_H_
 
 #include "AString.h"
+#include "TextParser.h"
 
 class AStringArray
 {
@@ -58,6 +59,7 @@ public:
     {
         m_objElements.SetAt(strElem, nIndex);
     }
+    AString ToString(IN IMS_CHAR cDelimiter = TextParser::CHAR_COMMA) const;
 
     static const AStringArray& ConstNull();
 

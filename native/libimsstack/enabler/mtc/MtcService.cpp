@@ -16,10 +16,11 @@
 
 #include "AString.h"
 #include "CarrierConfig.h"
-#include "Configuration.h"
 #include "Connector.h"
+#include "Engine.h"
 #include "ICapabilities.h"
 #include "ICarrierConfig.h"
+#include "IConfiguration.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IImsAos.h"
@@ -242,12 +243,12 @@ PUBLIC VIRTUAL void MtcService::CoreService_SessionInvitationReceived(
 PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
         IN ICoreService* piService, IN ICapabilities* piCapabilities)
 {
-    const IAppConfig* piAppConfig = Configuration::GetInstance()->GetAppConfig(
+    const IAppConfig* piAppConfig = Engine::GetConfiguration()->GetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTC), m_objContext.GetSlotId());
     const ICoreServiceConfig* piCoreServiceConfig =
             piAppConfig ? piAppConfig->GetCoreServiceConfig(m_strServiceName) : IMS_NULL;
     const IMediaConfig* piMediaConfig =
-            Configuration::GetInstance()->GetMediaConfig(m_objContext.GetSlotId());
+            Engine::GetConfiguration()->GetMediaConfig(m_objContext.GetSlotId());
     IMS_UINT32 nFeatures = m_pAosConnector ? m_pAosConnector->GetFeatures() : 0;
 
     MtcCapabilityQueryHandler(m_objContext, piCoreServiceConfig, piMediaConfig)

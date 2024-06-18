@@ -37,10 +37,10 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objValue(256);
 
@@ -79,9 +79,7 @@ TEST_F(SipIdentityHeaderTest, EncodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("alg", "ES256");
+    pHeader->AddParam("alg", "ES256");
 
     /* Signed identity digest, info and parameters present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
@@ -100,14 +98,13 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty headers, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
 
     /* Only signed digest, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("eyJhbGci.VyaSI6WyJ-zJ6F1VOg"), 27));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("eyJhbGci.VyaSI6WyJ-zJ6F1VOg", 27));
 
     /* info not present, fail */
-    EXPECT_EQ(SIP_FALSE,
-            pHeader->DecodeHdr(const_cast<char*>("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;NoInfo=abcd"), 39));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;NoInfo=abcd", 39));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipIdentityHeader*>(
@@ -115,8 +112,7 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* signed digest, info present with value not enclosed in LA/RA Quotes, fail */
-    EXPECT_EQ(SIP_FALSE,
-            pHeader->DecodeHdr(const_cast<char*>("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=abcd"), 37));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=abcd", 37));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipIdentityHeader*>(
@@ -124,8 +120,7 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* signed digest, info present and no parameters, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=<abcd>"), 39));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=<abcd>", 39));
     EXPECT_STREQ("eyJhbGci.VyaSI6WyJ-zJ6F1VOg", pHeader->GetSignedIdentityDigest());
     EXPECT_STREQ("abcd", pHeader->GetInfo());
     pHeader->SipDelete();
@@ -136,17 +131,11 @@ TEST_F(SipIdentityHeaderTest, DecodeHdr)
 
     /* signed digest, info present and parameters present, success */
     EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(
-                    const_cast<char*>(
-                            "eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=<1234>;alg=ES256;ppt=shaken"),
-                    60));
+            pHeader->DecodeHdr("eyJhbGci.VyaSI6WyJ-zJ6F1VOg;info=<1234>;alg=ES256;ppt=shaken", 60));
     EXPECT_STREQ("eyJhbGci.VyaSI6WyJ-zJ6F1VOg", pHeader->GetSignedIdentityDigest());
     EXPECT_STREQ("1234", pHeader->GetInfo());
 
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& pSipParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(2, pSipParameterList.GetCount());
+    EXPECT_EQ(2, pHeader->GetParamCount());
 
     SipIdentityHeader* pCopyHeader = reinterpret_cast<SipIdentityHeader*>(
             SipIdentityHeader::GetNewObj(SipHeaderBase::IDENTITY, pHeader));

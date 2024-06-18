@@ -17,12 +17,10 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosCounter.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
-#include "interface/IAosCallTracker.h"
-#include "interface/IAosServiceAvailableListener.h"
-#include "condition/AosBlock.h"
 #include "condition/AosCondition.h"
 #include "condition/AosServiceAvailable.h"
 #include "provider/AosProvider.h"
@@ -33,21 +31,31 @@
 #include "interface/MockIAosServiceAvailableListener.h"
 
 using ::testing::_;
+using ::testing::NiceMock;
 
 const IMS_SINT32 SLOT_ID = 0;
+const AString NAME = AString("AosServiceAvailable");
+
+#define DECLARE_USING(Base) using Base::RequestCommand;
 
 class TestAosServiceAvailable : public AosServiceAvailable
 {
+private:
+    AosCounter* m_pCounter;
+
 public:
+    DECLARE_USING(AosServiceAvailable)
+
     inline explicit TestAosServiceAvailable(const AString& strName) :
             AosServiceAvailable(strName)
     {
+        m_pCounter = new AosCounter();
     }
 
-    inline void RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason)
-    {
-        AosServiceAvailable::RequestCommand(nCommand, nReason);
-    }
+    inline ~TestAosServiceAvailable() override { delete m_pCounter; }
+
+    inline TestAosServiceAvailable(IN const TestAosServiceAvailable&) = delete;
+    inline TestAosServiceAvailable& operator=(IN const TestAosServiceAvailable&) = delete;
 
     inline void SetAppContext(IN IAosAppContext* piContext) { m_piAppContext = piContext; }
 
@@ -66,6 +74,57 @@ public:
     {
         m_bAvailableLastNotified = bAvailable;
     }
+
+    IMS_UINT32 GetInvokedCount(IN const AString strName) { return m_pCounter->GetCount(strName); }
+
+    // Functions where calls are being counted
+    void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleCallStateChanged(nState, nStateEx);
+    }
+
+    void HandleNetworkStateChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleNetworkStateChanged();
+    }
+
+    void HandleBlockChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleBlockChanged(nState, nStateEx);
+    }
+
+    void HandleRoamingChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleRoamingChanged(nState);
+    }
+
+    void HandleAirplaneModeChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleAirplaneModeChanged(nState);
+    }
+
+    void HandleVopsChanged(IN IMS_UINT32 nState) override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleVopsChanged(nState);
+    }
+
+    void HandleWifiConnectionChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleWifiConnectionChanged();
+    }
+
+    void HandleLocationInfoChanged() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosServiceAvailable::HandleLocationInfoChanged();
+    }
 };
 
 class AosServiceAvailableTest : public ::testing::Test
@@ -74,7 +133,10 @@ public:
     TestAosServiceAvailable* m_pAosServiceAvailable;
 
     IAosCallTracker* m_pOriginIAosCallTracker;
-    MockIAosCallTracker m_objMockIAosCallTracker;
+
+    NiceMock<MockIAosCallTracker> m_objMockIAosCallTracker;
+    NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosBlock> m_objMockIAosBlock;
 
     MockIAosServiceAvailableListener m_objListener1;
     MockIAosServiceAvailableListener m_objListener2;
@@ -85,12 +147,14 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_pAosServiceAvailable = new TestAosServiceAvailable(AString("AosServiceAvailable"));
+        m_pAosServiceAvailable = new TestAosServiceAvailable(AString(NAME));
         ASSERT_TRUE(m_pAosServiceAvailable != nullptr);
 
         // save origin pointer
         m_pOriginIAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
         AosProvider::GetInstance()->SetCallTracker(&m_objMockIAosCallTracker, SLOT_ID);
+
+        m_pAosServiceAvailable->SetBlock(&m_objMockIAosBlock);
     }
 
     virtual void TearDown() override
@@ -103,163 +167,149 @@ protected:
     }
 };
 
-TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull)
+TEST_F(AosServiceAvailableTest, ShouldUpdateMemberVariableWhenCachedContextIsNull)
 {
+    // GIVEN
     m_pAosServiceAvailable->SetAppContext(IMS_NULL);
 
-    MockIAosAppContext objMockIAosAppContext;
-    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(1);
-    EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(1);
-    EXPECT_CALL(objMockIAosAppContext, GetRegistration()).Times(1);
-    EXPECT_CALL(objMockIAosAppContext, GetConnection()).Times(1);
+    EXPECT_CALL(m_objMockIAosAppContext, GetSlotId());
+    EXPECT_CALL(m_objMockIAosAppContext, GetBlock());
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration());
+    EXPECT_CALL(m_objMockIAosAppContext, GetConnection());
 
-    m_pAosServiceAvailable->Init(&objMockIAosAppContext);
+    // WHEN
+    m_pAosServiceAvailable->Init(&m_objMockIAosAppContext);
+
+    // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosServiceAvailableTest, Init_MemberContextIsNotNull)
+TEST_F(AosServiceAvailableTest, ShouldNotUpdateMemberVariableWhenCachedContextIsNotNull)
 {
-    MockIAosAppContext objMockIAosAppContext;
-    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(0);
-    EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(0);
-    EXPECT_CALL(objMockIAosAppContext, GetRegistration()).Times(0);
-    EXPECT_CALL(objMockIAosAppContext, GetConnection()).Times(0);
+    // GIVEN
+    m_pAosServiceAvailable->SetAppContext(&m_objMockIAosAppContext);
 
-    m_pAosServiceAvailable->SetAppContext(&objMockIAosAppContext);
+    EXPECT_CALL(m_objMockIAosAppContext, GetSlotId()).Times(0);
+    EXPECT_CALL(m_objMockIAosAppContext, GetBlock()).Times(0);
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration()).Times(0);
+    EXPECT_CALL(m_objMockIAosAppContext, GetConnection()).Times(0);
 
-    m_pAosServiceAvailable->Init(&objMockIAosAppContext);
+    // WHEN
+    m_pAosServiceAvailable->Init(&m_objMockIAosAppContext);
+
+    // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosServiceAvailableTest, SetListener_ParamIsNull)
+TEST_F(AosServiceAvailableTest, FailsSetListenerWhenListenerIsNull)
 {
-    m_pAosServiceAvailable->CleanUp();
+    // GIVEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
+
+    // WHEN
     m_pAosServiceAvailable->SetListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist)
+TEST_F(AosServiceAvailableTest, FailsSetListenerWhenSameListener)
 {
-    m_pAosServiceAvailable->CleanUp();
-
+    // GIVEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
+    // WHEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 
-    m_pAosServiceAvailable->SetListener(&m_objListener1);
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
 }
 
-TEST_F(AosServiceAvailableTest, SetListener_Success)
+TEST_F(AosServiceAvailableTest, SucceedsSetListener)
 {
-    m_pAosServiceAvailable->CleanUp();
+    // GIVEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 
+    // WHEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
-
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
-
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
-
     m_pAosServiceAvailable->SetListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
-
     m_pAosServiceAvailable->SetListener(&m_objListener5);
+
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 5);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull)
+TEST_F(AosServiceAvailableTest, FailsRemoveListenerWhenListenerIsNull)
 {
-    m_pAosServiceAvailable->CleanUp();
-
+    // GIVEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
-
     m_pAosServiceAvailable->SetListener(&m_objListener2);
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
+    // WHEN
     m_pAosServiceAvailable->RemoveListener(IMS_NULL);
+
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_NotExist)
+TEST_F(AosServiceAvailableTest, FailsRemoveListenerWhenNotMatchedListener)
 {
-    m_pAosServiceAvailable->CleanUp();
-
+    // GIVEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
-
     m_pAosServiceAvailable->SetListener(&m_objListener2);
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 
+    // WHEN
     m_pAosServiceAvailable->RemoveListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
-
     m_pAosServiceAvailable->RemoveListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
-
     m_pAosServiceAvailable->RemoveListener(&m_objListener5);
+
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_Success)
+TEST_F(AosServiceAvailableTest, SucceedsRemoveListener)
 {
-    m_pAosServiceAvailable->CleanUp();
-
+    // GIVEN
     m_pAosServiceAvailable->SetListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
-
     m_pAosServiceAvailable->SetListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
-
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
-
     m_pAosServiceAvailable->SetListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
-
     m_pAosServiceAvailable->SetListener(&m_objListener5);
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 5);
 
-    m_pAosServiceAvailable->RemoveListener(&m_objListener1);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 4);
-
-    m_pAosServiceAvailable->RemoveListener(&m_objListener4);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
-
-    m_pAosServiceAvailable->RemoveListener(&m_objListener2);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 2);
-
+    // WHEN
     m_pAosServiceAvailable->RemoveListener(&m_objListener5);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 1);
-
+    m_pAosServiceAvailable->RemoveListener(&m_objListener4);
     m_pAosServiceAvailable->RemoveListener(&m_objListener3);
+    m_pAosServiceAvailable->RemoveListener(&m_objListener2);
+    m_pAosServiceAvailable->RemoveListener(&m_objListener1);
+
+    // THEN
     EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore)
+TEST_F(AosServiceAvailableTest, ShouldNotNotifyToListenersWhenAvailableStateIsSame)
 {
-    MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
-
-    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(0);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, GetBlockReasons(_, _));
+    EXPECT_CALL(m_objMockIAosBlock, PrintBlockReasons()).Times(0);
 
     m_pAosServiceAvailable->SetAvailableLastNotified(IMS_TRUE);
-    m_pAosServiceAvailable->RefreshServiceAvailablility();
+
+    // WHEN
+    m_pAosServiceAvailable->RefreshServiceAvailability();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
+TEST_F(AosServiceAvailableTest, ShouldNotifyToListenersWhenRefreshServiceAvailability)
 {
-    MockIAosBlock objMockIAosBlock;
-    m_pAosServiceAvailable->SetBlock(&objMockIAosBlock);
-
-    EXPECT_NE(m_pAosServiceAvailable->GetBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(1);
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, GetBlockReasons(_, _));
+    EXPECT_CALL(m_objMockIAosBlock, PrintBlockReasons());
 
     ImsList<IAosServiceAvailableListener*> objListeners;
     objListeners.Append(&m_objListener1);
@@ -267,61 +317,81 @@ TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
     objListeners.Append(&m_objListener3);
     m_pAosServiceAvailable->SetListeners(objListeners);
 
-    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed()).Times(1);
-    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed()).Times(1);
-    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed()).Times(1);
+    EXPECT_CALL(m_objListener1, ServiceAvailable_Changed());
+    EXPECT_CALL(m_objListener2, ServiceAvailable_Changed());
+    EXPECT_CALL(m_objListener3, ServiceAvailable_Changed());
 
     m_pAosServiceAvailable->SetAvailableLastNotified(IMS_FALSE);
-    m_pAosServiceAvailable->RefreshServiceAvailablility();
+
+    // WHEN
+    m_pAosServiceAvailable->RefreshServiceAvailability();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosServiceAvailableTest, HandleEvent_Valid)
+TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
 {
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1),
-            AosServiceAvailable::EVENT_AIRPLANE);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 0, 1),
-            AosServiceAvailable::EVENT_AIRPLANE);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1),
-            AosServiceAvailable::EVENT_ROAMING);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 0, 1),
-            AosServiceAvailable::EVENT_ROAMING);
+    // GIVEN
+    // WHEN
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_NETWORK, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_BLOCK, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1);
+    m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1);
 
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1),
-            AosServiceAvailable::EVENT_VOPS);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_LOCATION, 1, 1),
-            AosServiceAvailable::EVENT_LOCATION);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_CALL, 1, 1),
-            AosServiceAvailable::EVENT_CALL);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_NETWORK, 1, 1),
-            AosServiceAvailable::EVENT_NETWORK);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_WIFI_STATE, 1, 1),
-            AosServiceAvailable::EVENT_WIFI_STATE);
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleCallStateChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleNetworkStateChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 1);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 1);
 }
 
-TEST_F(AosServiceAvailableTest, HandleEvent_Invalid)
+TEST_F(AosServiceAvailableTest, FailsInvokeFunctionWhenHandleEventWithInvalid)
 {
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(-1, 1, 1), -1);
-    EXPECT_EQ(m_pAosServiceAvailable->HandleEvent(100, 1, 1), -1);
+    // GIVEN
+    IMS_SINT32 nInvalidEvent = AosServiceAvailable::EVENT_MAX;
+
+    // WHEN
+    m_pAosServiceAvailable->HandleEvent(nInvalidEvent, 1, 1);
+
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleCallStateChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleNetworkStateChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleBlockChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleAirplaneModeChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleVopsChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 0);
+    EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 0);
 }
 
-TEST_F(AosServiceAvailableTest, RequestCommand)
+TEST_F(AosServiceAvailableTest, SucceedsNotifyToListenersWhenRequestCommand)
 {
-    m_pAosServiceAvailable->CleanUp();
+    // GIVEN
+    IMS_UINT32 nAnyCommand = AosCondition::REQUEST_STOP;
+    IMS_UINT32 nAnyReason = AosReason::NOT_SPECIFIED;
 
-    EXPECT_CALL(m_objListener1, ServiceAvailable_RequestCommand(_, _)).Times(4);
-
-    EXPECT_CALL(m_objListener2, ServiceAvailable_RequestCommand(_, _)).Times(4);
-
-    EXPECT_CALL(m_objListener3, ServiceAvailable_RequestCommand(_, _)).Times(4);
+    EXPECT_CALL(m_objListener1, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener2, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener3, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener4, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
+    EXPECT_CALL(m_objListener5, ServiceAvailable_RequestCommand(nAnyCommand, nAnyReason)).Times(1);
 
     m_pAosServiceAvailable->SetListener(&m_objListener1);
     m_pAosServiceAvailable->SetListener(&m_objListener2);
     m_pAosServiceAvailable->SetListener(&m_objListener3);
-    EXPECT_EQ(m_pAosServiceAvailable->GetListeners().GetSize(), 3);
+    m_pAosServiceAvailable->SetListener(&m_objListener4);
+    m_pAosServiceAvailable->SetListener(&m_objListener5);
 
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_STOP, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_DESTROY, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(AosCondition::REQUEST_RECOVER, AosReason::NOT_SPECIFIED);
-    m_pAosServiceAvailable->RequestCommand(
-            AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
+    // WHEN
+    m_pAosServiceAvailable->RequestCommand(nAnyCommand, nAnyReason);
+
+    // THEN : GIVEN conditions should be met.
 }

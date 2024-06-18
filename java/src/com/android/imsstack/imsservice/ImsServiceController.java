@@ -25,6 +25,7 @@ import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.imsservice.uce.RcsFeatureImpl;
+import com.android.imsstack.internal.imsservice.ProvisioningStatusTracker;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MessageExecutor;
@@ -102,6 +103,8 @@ public class ImsServiceController {
         } else {
             isrReconfigurationRequired = true;
         }
+
+        ProvisioningStatusTracker.getInstance(slotId).start();
 
         if (!sImsServiceController.mStarted) {
             sImsServiceController.mStarted = true;

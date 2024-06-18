@@ -71,7 +71,7 @@ SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipInfoBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -79,8 +79,8 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTemp = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTemp = SIP_NULL;
 
     if (SipFindPostDelimiter(pStartPt, pEndPt, &pTemp, LEFT_ANGLE) == SIP_FALSE)
     {

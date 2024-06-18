@@ -31,7 +31,7 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfigUtil.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.SS");
+__IMS_TRACE_TAG_MEDIA__;
 
 using namespace android::telephony::imsmedia;
 
@@ -184,30 +184,30 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
     return bRet;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
         IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
         IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
         IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
+    IMS_TRACE_I("FormSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "], eMediaType[%d]", nNegoId,
             pSession, eMediaType);
-    IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
+    IMS_TRACE_I("FormSdp() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
             nVideoDirection, nTextDirection);
-    IMS_TRACE_D("FormSDP() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
+    IMS_TRACE_D("FormSdp() - eMediaType [%d], EnforceReofferMode[%d]", eMediaType,
             bEnforceReofferMode, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->FormSDP(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
+    if (pMediaNego->FormSdp(pSession, eMediaType, nAudioDirection, nVideoDirection, nTextDirection,
                 bEnforceReofferMode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "FormSDP() - FormSDP Failed", 0, 0, 0);
+        IMS_TRACE_E(0, "FormSdp() - FormSdp Failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -257,25 +257,25 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetSupportedMediaTypesFromSdp(
     return pMediaNego->GetSupportedMediaTypesFromSdp(pSession);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
+PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
         OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
         OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason)
 {
     IMS_TRACE_I(
-            "NegotiateSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "NegotiateSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     MediaNego* pMediaNego = FindMediaNego(nNegoId);
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "NegotiateSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pMediaNego->NegotiateSDP(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
+    if (pMediaNego->NegotiateSdp(pSession, *nAudioDirection, *nVideoDirection, *nTextDirection,
                 errorReason) == IMS_TRUE)
     {
-        IMS_TRACE_I("NegotiateSDP() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
+        IMS_TRACE_I("NegotiateSdp() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
 
         // set Access Network
@@ -369,10 +369,10 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession)
+PUBLIC VIRTUAL void MediaSession::FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession)
 {
     IMS_TRACE_I(
-            "FinalizeSDP() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
+            "FinalizeSdp() - nNegoId[%" PFLS_x "], pSession[%" PFLS_x "]", nNegoId, pSession, 0);
 
     if (pSession == IMS_NULL)
     {
@@ -384,11 +384,11 @@ PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession*
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FinalizeSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FinalizeSdp() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return;
     }
 
-    pMediaNego->FinalizeSDP(pSession);
+    pMediaNego->FinalizeSdp(pSession);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
@@ -435,8 +435,17 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
 }
 
 PROTECTED
-IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork)
+IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINTP pParam)
 {
+    ImsMediaMsgParam* pMediaMsgParam = reinterpret_cast<ImsMediaMsgParam*>(pParam);
+
+    if (pMediaMsgParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nAccessNetwork = pMediaMsgParam->m_nValue;
+
     m_objAudioController.UpdateAccessNetwork(nAccessNetwork);
 
     if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
@@ -449,6 +458,36 @@ IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork)
     m_objTextController.UpdateSession();
 
     return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL MediaSession::OnMediaMtuChanged()
+{
+    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    {
+        m_objVideoController.SetMtu(GetMtu());
+        m_objVideoController.UpdateSession();
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_SINT32 MediaSession::GetMtu()
+{
+    IMS_SINT32 nMtu = -1;
+
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+    if (pMediaManager != IMS_NULL)
+    {
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+        if (pResourceMngr != IMS_NULL)
+        {
+            nMtu = pResourceMngr->GetRtpFragmentSize();
+        }
+    }
+
+    return nMtu;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
@@ -743,7 +782,7 @@ PUBLIC VIRTUAL void MediaSession::SetNetworkToneRtpTimer(
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
     {
-        m_objAudioController.SetInactivityTimer(nNegoId, nRtpTimer);
+        m_objAudioController.SetNetworkToneTimer(nNegoId, nRtpTimer);
     }
 }
 
@@ -988,6 +1027,20 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
     return IMS_FALSE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_NotifyToClient(IMS_UINT32 eReportType,
+        MEDIA_CONTENT_TYPE eMediaType, MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType)
+{
+    IMS_TRACE_D("MediaSession_NotifyToClient() : ReportType[%d], MediaType[%d] ProtocolType[%d]",
+            eReportType, eMediaType, eMediaProtocolType);
+
+    if (m_pClientListener != IMS_NULL)
+    {
+        m_pClientListener->MediaSession_Notify(eReportType, eMediaType, eMediaProtocolType);
+    }
+
+    return IMS_TRUE;
+}
+
 PROTECTED VIRTUAL IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("CreateMediaConfig()", 0, 0, 0);
@@ -1059,7 +1112,7 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             bRet = OnChangeNetworkConnection(pParam);
             break;
         case IJniMedia::CHANGE_MTU:
-            /** TODO: add implementation */
+            bRet = OnMediaMtuChanged();
             break;
         case IJniMedia::NOTIFY_ANBR_RECEIVED:
             bRet = OnNotifyAnbrReceived(pParam);
@@ -1081,7 +1134,6 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_UINTP nParam)
         IMS_TRACE_I("OnResponse() - eMediaType[%d], eResult[%d]", pParam->m_eMediaType,
                 pParam->m_eResult, 0);
         ReportToClient(pParam->m_eResult, pParam->m_eMediaType);
-        delete pParam;
     }
 
     return IMS_TRUE;
@@ -1113,13 +1165,12 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     if (m_objAudioController.GetInactivityTimer(NETWORK_TONE_INACTIVITY, IMS_NULL) >
                             0)
                     {
-                        m_objAudioController.SetInactivityTimer(IMS_NULL, 0);
+                        m_objAudioController.SetNetworkToneTimer(IMS_NULL, 0);
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
                     }
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1151,7 +1202,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     if (nLocalNetworkToneTimer > 0 && pParam->m_nRtpInactivityTimerMillis > 0 &&
                             pParam->m_nRtpInactivityTimerMillis >= nLocalNetworkToneTimer)
                     {
-                        m_objAudioController.SetInactivityTimer(IMS_NULL, 0);
+                        m_objAudioController.SetNetworkToneTimer(IMS_NULL, 0);
                         m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
                                 pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
                         m_pClientListener->MediaSession_Notify(
@@ -1180,7 +1231,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                                                                 : MEDIA_PROTOCOL_RTCP);
                 }
 
-                delete pTempParam;
                 return IMS_TRUE;
             }
         }
@@ -1219,7 +1269,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     }
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1235,7 +1284,6 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     m_pClientListener->MediaSession_Notify(REPORT_VIDEO_LOWEST_BITRATE);
                 }
 
-                delete pParam;
                 return IMS_TRUE;
             }
         }
@@ -1256,7 +1304,6 @@ IMS_BOOL MediaSession::OnSendDtmf(IN IMS_UINTP nParam)
     if (pParam != IMS_NULL)
     {
         m_objAudioController.SendDtmf(pParam->m_dtmfCode);
-        delete pParam;
         return IMS_TRUE;
     }
 
@@ -1275,7 +1322,7 @@ IMS_BOOL MediaSession::OnNotifyAnbrReceived(IN IMS_UINTP nParam)
             m_objAudioController.NotifyAnbrReceived(
                     pParam->m_nAnbrMediaType, pParam->m_nAnbrDirection, pParam->m_nAnbrBitrate);
         }
-        delete pParam;
+
         return IMS_TRUE;
     }
 

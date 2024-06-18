@@ -42,12 +42,14 @@
 
     <!-- Aos -->
     <boolean name="call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
-    <boolean name="initialize_ipsec_setting_with_new_pcscf_bool" value="true"/>
+    <boolean name="ecall_based_on_p_associated_uri_of_normal_reg_bool" value="true"/>
+    <boolean name="init_ipsec_setting_with_new_pcscf_bool" value="true"/>
+    <int name="reg_actual_wait_time_policy_int" value="1"/>
     <int name="reg_out_of_service_policy_int" value="1"/>
     <int name="reg_retry_cnt_on_single_pcscf_int" value="1"/>
     <int name="reg_retry_cnt_with_ipsec_on_auth_failure_int" value="0"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int name="roaming_preferred_emc_reg_int" value="2"/>
+    <int name="roaming_preferred_ereg_int" value="2"/>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>
@@ -59,15 +61,15 @@
     </int-array>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle name="sub_err_code_for_terminated_bundle">
-        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="1"/>
+        <int name="sub_err_code_for_terminated_with_retry_max_cnt_int" value="1"/>
         <int-array name="sub_err_code_for_terminated_int_array" num="1">
             <item value="489"/>
         </int-array>
     </pbundle>
 
     <!-- Mtc -->
-    <int-array name="registration_disconnect_reason_to_terminate_ongoing_call_int_array" num="1">
-        <item value="999"/> <!-- All cases -->
+    <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
+        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
     <!-- Media -->
@@ -150,6 +152,7 @@
         <item value="49154"/>
         <item value="65535"/>
     </int-array>
+    <int name="video_cvo_value_int" value="-1"/>
     <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
         <item value="1, UDP, 1119400811, 10.3.210.77, 49152, typ, host"/>
     </string-array>

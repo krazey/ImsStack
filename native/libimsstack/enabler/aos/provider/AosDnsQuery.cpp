@@ -184,7 +184,6 @@ PUBLIC
 VIRTUAL void AosDnsQueryPrivate::RunImp()
 {
     IMS_BOOL bLoop = IMS_TRUE;
-    IMS_SINT32 nWaitResult = 0;
 
     if (m_pQueryer != IMS_NULL)
     {
@@ -195,17 +194,10 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
     {
         m_objMutex4Signal.Lock();
 
-        if (m_bSignaled)
+        if (!m_bSignaled && m_pQueryer->IsTestMode() == IMS_FALSE)
         {
-            IMS_TRACE_D("AosDnsQueryPrivate :: signal is already triggered", 0, 0, 0);
-            nWaitResult = 1;
-        }
-        else
-        {
-            nWaitResult = (m_pQueryer->IsTestMode())
-                    ? 1
-                    : pthread_cond_wait(&m_stSignal,
-                              reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
+            pthread_cond_wait(&m_stSignal,
+                    reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
         }
 
         m_bSignaled = IMS_FALSE;
@@ -216,8 +208,7 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
         IMS_UINT32 nEventCache = m_nEvent;
         m_objMutex4Event.Unlock();
 
-        IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
-                nWaitResult, m_nEvent, 0);
+        IMS_TRACE_D("AosDnsQueryPrivate :: event (%d) before processing", m_nEvent, 0, 0);
 
         if ((nEventCache & AosDnsQuery::DNS_QUERY_EXEC) != 0)
         {

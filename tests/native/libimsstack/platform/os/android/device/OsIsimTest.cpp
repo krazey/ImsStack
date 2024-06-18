@@ -80,7 +80,8 @@ protected:
 
         AString strOut("NOT_READY");
         EXPECT_CALL(m_objMockSystem, GetIsimState(_)).Times(1).WillRepeatedly(Return(strOut));
-        EXPECT_EQ(m_pOsIsim->Init(), IMS_SUCCESS);
+
+        m_pOsIsim->Init();
     }
 
     virtual void TearDown() override
@@ -118,24 +119,7 @@ TEST_F(OsIsimTest, Init)
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    m_pOsIsim->SetState(IIsim::STATE_INIT);
-    EXPECT_EQ(m_pOsIsim->Init(), IMS_FAILURE);
-    m_pOsIsim->SetState(IIsim::STATE_IDLE);
-    EXPECT_EQ(m_pOsIsim->Init(), IMS_SUCCESS);
-    EXPECT_EQ(m_pOsIsim->Init(), IMS_SUCCESS);
-    EXPECT_EQ(m_pOsIsim->Start(), IMS_FAILURE);
-
-    EXPECT_CALL(m_objMockSystem, ReadIsimFileAttributes(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FAILURE));
-
-    m_pOsIsim->SetState(IIsim::STATE_INIT);
-
-    EXPECT_EQ(m_pOsIsim->Start(IIsim::EF_IMPI), IMS_FAILURE);
-    EXPECT_EQ(m_pOsIsim->Start(IIsim::EF_IMPU), IMS_FAILURE);
-    EXPECT_EQ(m_pOsIsim->Start(IIsim::EF_DOMAIN), IMS_FAILURE);
-    EXPECT_EQ(m_pOsIsim->Start(IIsim::EF_IST), IMS_FAILURE);
-    EXPECT_EQ(m_pOsIsim->Start(IIsim::EF_PCSCF), IMS_FAILURE);
+    m_pOsIsim->Init();
 }
 
 TEST_F(OsIsimTest, DigestAka)
@@ -157,13 +141,6 @@ TEST_F(OsIsimTest, GetAuthResponse)
     objChallenge.Append(&pbyNonce[16], 16);
 
     EXPECT_CALL(m_objMockSystem, RequestIsimAuthentication(_, _, _))
-            .Times(0)
-            .WillOnce(Return(IMS_SUCCESS));
-    EXPECT_EQ(m_pDigestAka->GetAuthResponse(objChallenge), IMS_FAILURE);
-
-    m_pOsIsim->SetState(IIsim::STATE_READY);
-
-    EXPECT_CALL(m_objMockSystem, RequestIsimAuthentication(_, _, _))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_EQ(m_pDigestAka->GetAuthResponse(objChallenge), IMS_SUCCESS);
@@ -172,244 +149,6 @@ TEST_F(OsIsimTest, GetAuthResponse)
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
     EXPECT_EQ(m_pDigestAka->GetAuthResponse(objChallenge), IMS_FAILURE);
-}
-
-TEST_F(OsIsimTest, DispatchServiceMessage_IsimFileAttr)
-{
-    EXPECT_CALL(m_objMockSystem, ReadIsimFileAttributes(_, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_SUCCESS));
-
-    m_pOsIsim->SetState(IIsim::STATE_INIT);
-    IMS_SINT32 nEFs = (IIsim::EF_IMPI | IIsim::EF_DOMAIN | IIsim::EF_IMPU);
-
-    EXPECT_EQ(m_pOsIsim->Start(nEFs), IMS_SUCCESS);
-    EXPECT_EQ(m_pOsIsim->Start(nEFs), IMS_SUCCESS);
-
-    IMS_UINTP wParam;
-    IMS_UINTP lParam;
-
-    EXPECT_CALL(m_objMockThread, PostMessageI(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Invoke(
-                    [&](Unused, IMS_UINTP nWparam, IN IMS_UINTP nLparam)
-                    {
-                        wParam = nWparam;
-                        lParam = nLparam;
-                        return IMS_TRUE;
-                    }));
-
-    android::Parcel in;
-
-    // EF_ID_IMPU Reading is done but in refreshing but record is 0
-    in.writeInt32(OsIsim::EF_ID_IMPU);
-    in.writeInt32(0);  // 0 Record
-    in.setDataPosition(0);
-    m_pOsIsim->SetState(IIsim::STATE_REFRESHED);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnError(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // EF_ID_IMPU Reading is done but in refreshing state 2 records
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_IMPU);
-    in.writeInt32(2);  // 2 Record
-    in.setDataPosition(0);
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(1);
-    m_pOsIsim->SetState(IIsim::STATE_REFRESHING);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE, 0, reinterpret_cast<IMS_UINTP>(&in));
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(0);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // EF_ID_IMPU Reading is done in refreshed state
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_IMPU);
-    in.writeInt32(2);  // 2 Record
-    in.setDataPosition(0);
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(1);
-    m_pOsIsim->SetState(IIsim::STATE_REFRESHED);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(0);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // EF_ID_IMPI Reading is done in refreshed state
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_IMPI);
-    in.writeInt32(2);  // 2 Record
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(0);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // EF_DOMAIN Reading is done 2 records
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_DOMAIN);
-    in.writeInt32(2);  // 2 Record
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-}
-
-TEST_F(OsIsimTest, DispatchServiceMessage_IsimReadRecord)
-{
-    IMS_UINTP wParam;
-    IMS_UINTP lParam;
-
-    EXPECT_CALL(m_objMockThread, PostMessageI(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Invoke(
-                    [&](Unused, IMS_UINTP nWparam, IN IMS_UINTP nLparam)
-                    {
-                        wParam = nWparam;
-                        lParam = nLparam;
-                        return IMS_TRUE;
-                    }));
-
-    EXPECT_CALL(m_objMockSystem, ReadIsimRecord(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_SUCCESS));
-
-    m_pOsIsim->SetState(IIsim::STATE_INIT);
-    EXPECT_EQ(m_pOsIsim->Start(), IMS_SUCCESS);
-    m_pOsIsim->SetState(IIsim::STATE_READY);
-    // Test Get Impi and notify ISIM record read and dispatch
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_IMPI, IMS_TRUE, 1);
-    EXPECT_EQ(m_pIsim->GetImpi(), IMS_SUCCESS);
-
-    android::Parcel in;
-    in.writeInt32(OsIsim::EF_ID_IMPI);
-    in.writeInt32(1);
-    in.writeString16(String16("11111@ims.mnc861.mcc405.3gppnetwork.org"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnImpi(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // Test Get DomainName and notify ISIM record read and dispatch
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_DOMAIN, IMS_TRUE, 1);
-    EXPECT_EQ(m_pIsim->GetHomeDomainName(), IMS_SUCCESS);
-
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_DOMAIN);
-    in.writeInt32(1);
-    in.writeString16(String16("ims.mnc861.mcc405.3gppnetwork.org"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnHomeDomainName(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // Test Get Impu and notify ISIM record read and dispatch
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_IMPU, IMS_TRUE, 1);
-    EXPECT_EQ(m_pIsim->GetImpu(), IMS_SUCCESS);
-
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_IMPU);
-    in.writeInt32(1);
-    in.writeString16(String16("sip:11111@ims.mnc861.mcc405.3gppnetwork.org"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnImpu(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // Test Get PCSCF and notify ISIM record read and dispatch
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_PCSCF, IMS_TRUE, 1);
-    EXPECT_EQ(m_pIsim->GetField(IIsim::FIELD_PCSCF_ADDRESS), IMS_SUCCESS);
-
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_PCSCF);
-    in.writeInt32(1);
-    in.writeString16(String16("10.221.67.98"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnField(_, _)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    // Test Get IST and notify ISIM record read and dispatch
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_IST, IMS_TRUE, 1);
-    EXPECT_EQ(m_pIsim->GetField(IIsim::FIELD_IST), IMS_SUCCESS);
-
-    in.setDataPosition(0);
-    in.writeInt32(OsIsim::EF_ID_IST);
-    in.writeInt32(1);
-    in.writeString16(String16("80000000000000"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnField(_, _)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
-
-    m_pIsim->ClearRecords();
-}
-
-TEST_F(OsIsimTest, DispatchServiceMessage_IsimReadRecordFailed)
-{
-    IMS_UINTP wParam;
-    IMS_UINTP lParam;
-
-    EXPECT_CALL(m_objMockThread, PostMessageI(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Invoke(
-                    [&](Unused, IMS_UINTP nWparam, IN IMS_UINTP nLparam)
-                    {
-                        wParam = nWparam;
-                        lParam = nLparam;
-                        return IMS_TRUE;
-                    }));
-
-    EXPECT_CALL(m_objMockSystem, ReadIsimRecord(_, _, _)).Times(1).WillOnce(Return(IMS_SUCCESS));
-
-    m_pOsIsim->SetState(IIsim::STATE_INIT);
-    EXPECT_EQ(m_pOsIsim->Start(), IMS_SUCCESS);
-    m_pOsIsim->SetState(IIsim::STATE_READY);
-
-    // Test Get PCSCF with Isim record reading failed check notify error
-    m_pOsIsim->SetRecordAttributes(OsIsim::EF_ID_PCSCF, IMS_TRUE, 2);
-    EXPECT_EQ(m_pIsim->GetField(IIsim::FIELD_PCSCF_ADDRESS), IMS_SUCCESS);
-
-    EXPECT_CALL(m_objMockSystem, ReadIsimRecord(_, _, _)).Times(1).WillOnce(Return(IMS_FAILURE));
-
-    android::Parcel in;
-    in.writeInt32(OsIsim::EF_ID_PCSCF);
-    in.writeInt32(1);
-    in.writeString16(String16("10.221.43.97"));
-    in.setDataPosition(0);
-
-    m_piSystemListener->System_NotifyEvent(
-            OsIsim::NOTIFICATION_ISIM_READ_RECORD, 0, reinterpret_cast<IMS_UINTP>(&in));
-
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnError(_)).Times(1);
-    m_pIsim->DispatchServiceMessage(wParam, lParam);
 }
 
 TEST_F(OsIsimTest, DispatchServiceMessage_IsimAuth)
@@ -639,7 +378,7 @@ TEST_F(OsIsimTest, DispatchServiceMessage_IsimStateChange)
 
     EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(1);
     m_pIsim->DispatchServiceMessage(wParam, lParam);
-    EXPECT_EQ(m_pOsIsim->IsReady(), IMS_FALSE);
+    EXPECT_EQ(m_pOsIsim->IsLoadCompleted(), IMS_FALSE);
 
     in.setDataPosition(0);
     in.writeString16(String16("NOT_PRESENT"));
@@ -648,22 +387,8 @@ TEST_F(OsIsimTest, DispatchServiceMessage_IsimStateChange)
     m_piSystemListener->System_NotifyEvent(
             OsIsim::NOTIFICATION_ISIM_STATE_CHANGED, 0, reinterpret_cast<IMS_UINTP>(&in));
 
-    EXPECT_CALL(m_objMockIsimListener, Isim_OnError(_)).Times(1);
+    EXPECT_CALL(m_objMockIsimListener, Isim_OnStateChanged(_)).Times(1);
     m_pIsim->DispatchServiceMessage(wParam, lParam);
-}
-
-TEST_F(OsIsimTest, GetRecord)
-{
-    EXPECT_CALL(m_objMockSystem, ReadIsimRecord(_, _, _))
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FAILURE));
-
-    EXPECT_EQ(m_pOsIsim->GetRecord(OsIsim::EF_ID_IST), IMS_FAILURE);
-
-    m_pOsIsim->SetState(IIsim::STATE_READY);
-    EXPECT_EQ(m_pOsIsim->IsReady(), IMS_TRUE);
-    EXPECT_EQ(m_pOsIsim->GetRecord(OsIsim::EF_ID_PCSCF), IIsim::RESULT_NO_RECORDS);
-    EXPECT_EQ(m_pOsIsim->GetRecord(OsIsim::EF_ID_IMPU), IIsim::RESULT_NO_RECORDS);
 }
 
 }  // namespace android

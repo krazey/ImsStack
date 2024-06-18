@@ -19,6 +19,8 @@ package com.android.imsstack.enabler.ssc;
 import android.net.Network;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -87,9 +89,14 @@ public class SscHttpConnection implements ISscHttpConnection {
         int responseCode = HTTP_REQUEST_FAILED_UNSPECIFIED;
         try {
             Network nw = null;
-            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
-            if (dcApn != null) {
-                nw = dcApn.getNetworkByCapability(mApnType.getType());
+            if (mApnType.getType() == EApnType.WIFI.getType()) {
+                WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+                nw = ((wifi != null) ? wifi.getNetwork() : null);
+            } else {
+                IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+                if (dcApn != null) {
+                    nw = dcApn.getNetworkByCapability(mApnType.getType());
+                }
             }
 
             if (nw == null) {

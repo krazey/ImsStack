@@ -137,6 +137,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetConnectionType()
 
 PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piListener)
 {
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
         IAosConnectionListener* pTmpListener = m_objListeners.GetAt(i);
@@ -155,6 +160,11 @@ PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piList
 
 PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
 {
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
         IAosConnectionListener* pTmpListener = m_objListeners.GetAt(i);
@@ -263,9 +273,6 @@ void AosConnection::Notify(IN IMS_UINT32 nType /* = TYPE_STATE_CHANGED */)
     for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); ++nAt)
     {
         IAosConnectionListener* piListener = m_objListeners.GetAt(nAt);
-
-        if (piListener == IMS_NULL)
-            continue;
 
         switch (nType)
         {

@@ -189,15 +189,15 @@ TEST_F(AudioControllerTest, testInactivityTimer)
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId2, m_pConfig), IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
 
-    m_pController->SetInactivityTimer(negoId1, inactivityTime1);
-    m_pController->SetInactivityTimer(negoId2, inactivityTime2);
+    m_pController->SetNetworkToneTimer(negoId1, inactivityTime1);
+    m_pController->SetNetworkToneTimer(negoId2, inactivityTime2);
 
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime2);
 
     m_pController->UpdateSession(negoId2, ACCESS_NETWORK, m_pAudioNego);
 
-    m_pController->SetInactivityTimer(IMS_NULL, inactivityTime3);
+    m_pController->SetNetworkToneTimer(IMS_NULL, inactivityTime3);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime3);
 }

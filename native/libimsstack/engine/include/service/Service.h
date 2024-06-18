@@ -36,7 +36,7 @@ class CallerCapability;
 class Capabilities;
 class IRegBinding;
 class IRegInfo;
-class IServiceManagerListener;
+class IServiceCloseListener;
 class ISipClientConnection;
 class ISipDialog;
 class ISipMessage;
@@ -158,9 +158,9 @@ public:
     }
     IMS_BOOL SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
             IN const AString& strPhrase = AString::ConstNull());
-    inline void SetServiceManagerListener(IN IServiceManagerListener* piListener)
+    inline void SetServiceCloseListener(IN IServiceCloseListener* piListener)
     {
-        m_piServiceManagerListener = piListener;
+        m_piServiceCloseListener = piListener;
     }
     inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
     void RegisterMethod(IN Method* pMethod);
@@ -410,8 +410,8 @@ private:
     AString m_strServiceId;
     // IMS registry; Storage for application & service specific configurations
     AppConfig* m_pAppConfig;
-    // Reference of ServiceManager listener
-    IServiceManagerListener* m_piServiceManagerListener;
+    // Listener for monitoring the service close.
+    IServiceCloseListener* m_piServiceCloseListener;
 
     // Registration state
     IMS_BOOL m_bImsConnected;

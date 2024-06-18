@@ -27,8 +27,10 @@
 #include "device/OsImsRadio.h"
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Invoke;
 using ::testing::Return;
+using ::testing::SaveArg;
 using ::testing::Unused;
 
 namespace android
@@ -40,6 +42,7 @@ public:
     int EVENT_CONNECTION_FAILED = 1;
     int EVENT_CONNECTION_SETUP_PREPARED = 2;
     int EVENT_SSAC_STATE_CHANGED = 3;
+    int EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED = 4;
 
     MockIImsRadioConnectionListener objImsRadioConnectionListener;
     MockIImsRadioConnectionListener objImsRadioConnectionListener2;
@@ -281,6 +284,28 @@ TEST_F(OsImsRadioTest, ImsRadioConnectionListener)
 
     EXPECT_CALL(m_objMockSystem, StopImsTraffic(_, _)).Times(1);
     m_pOsImsRadio->StopImsTraffic(&objImsRadioConnectionListener);
+}
+
+TEST_F(OsImsRadioTest, SetScSupportToImsTrafficWithTheValueGivenByScSupportChangedEvent)
+{
+    // GIVEN
+    IMS_UINTP wParam, lParam;
+    ON_CALL(m_objMockThread, PostMessageI(_, _, _))
+            .WillByDefault(DoAll(SaveArg<1>(&wParam), SaveArg<2>(&lParam), Return(IMS_TRUE)));
+
+    EXPECT_CALL(
+            m_objRadioService.GetMockImsTraffic(), SetSimultaneousCallingSupported(_, IMS_TRUE));
+
+    // WHEN
+    android::Parcel in;
+    in.writeInt32(1);
+    in.setDataPosition(0);
+
+    m_piSystemListener->System_NotifyEvent(
+            EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED, 0, reinterpret_cast<IMS_UINTP>(&in));
+    m_pImsRadio->DispatchServiceMessage(wParam, lParam);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 }  // namespace android

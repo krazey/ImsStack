@@ -42,6 +42,8 @@ public:
 
 public:
     IMS_BOOL IsReady(IN IMS_BOOL bIsFake = IMS_FALSE) const override;
+    IMS_BOOL IsIsim() const override;
+    IMS_BOOL IsUsim() const override;
 
     // IAosSubscriberManager
     void AddListener(IN IAosSubscriberManagerListener* piListener) override;
@@ -83,8 +85,6 @@ protected:
 
     void ClearAll();
 
-    IMS_BOOL IsIsim() const;
-    IMS_BOOL IsUsim() const;
     IMS_BOOL IsProvisioned(IN IMS_BOOL bIsFake = IMS_FALSE) const;
     IMS_BOOL IsRefreshStarted() const;
     IMS_BOOL IsIsimRecoveryAllowed() const;

@@ -17,12 +17,11 @@
 #ifndef AUDIO_NEGO_H_
 #define AUDIO_NEGO_H_
 
-#include "ImsSlot.h"
 #include "media/IMedia.h"
+#include "BaseNego.h"
 #include "ISession.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
-#include "audio/AudioProfile.h"
 #include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
 
@@ -30,80 +29,13 @@
  * @brief The class to negotiate and form the SDP attribute belong to the m=audio line
  *
  */
-class AudioNego : public ImsSlot
+class AudioNego : public BaseNego
 {
-public:
-    /**
-     * @brief The class to store the negotiation attribute of the local and peer
-     *
-     */
-    class OaModel
-    {
-    public:
-        AudioProfile* pLocalProfile;
-        AudioProfile* pPeerProfile;
-        AudioProfile* pNegotiatedProfile;
-        IMS_SINTP nSessionDescriptorKey;
-        IMS_BOOL bConfirmedSession;
-
-    public:
-        OaModel() :
-                pLocalProfile(IMS_NULL),
-                pPeerProfile(IMS_NULL),
-                pNegotiatedProfile(IMS_NULL),
-                nSessionDescriptorKey(0),
-                bConfirmedSession(IMS_FALSE){};
-
-        ~OaModel()
-        {
-            if (pLocalProfile != IMS_NULL)
-            {
-                delete pLocalProfile;
-            }
-
-            if (pPeerProfile != IMS_NULL)
-            {
-                delete pPeerProfile;
-            }
-
-            if (pNegotiatedProfile != IMS_NULL)
-            {
-                delete pNegotiatedProfile;
-            }
-        };
-
-    private:
-        OaModel(IN const OaModel& obj);
-        OaModel& operator=(IN const OaModel& obj);
-
-    public:
-        IMS_BOOL IsAllProfileExist()
-        {
-            if (pLocalProfile != IMS_NULL && pPeerProfile != IMS_NULL &&
-                    pNegotiatedProfile != IMS_NULL)
-            {
-                return IMS_TRUE;
-            }
-            else
-            {
-                return IMS_FALSE;
-            }
-        };
-    };
-
 public:
     explicit AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     AudioNego(IN const AudioNego& objAudioNego);
     AudioNego& operator=(IN const AudioNego& obj);
     virtual ~AudioNego();
-
-    /**
-     * @brief Create a base local/peer/negotiate profile with given configuration
-     *
-     * @param pEnvironment The MediaEnvironment
-     * @param pConfig The configuration to create audio profile
-     */
-    virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig);
 
     /**
      * @brief Form the SDP with the current profile based on the state
@@ -117,7 +49,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when there is no error during forming SDP, IMS_FALSE when
      * it is failed to form
      */
-    virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
+    virtual IMS_BOOL FormSdp(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
             IN IMS_BOOL bEnforceReofferMode);
 
@@ -141,40 +73,9 @@ public:
      * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
      * @param eDir The media direction of the SDP
      */
-    virtual void NegotiateSDP(IN const NEGO_STATE eNegoState,
+    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT IMS_SINT32& eDir);
-
-    /**
-     * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
-     *
-     * @param pSessionDescriptor The SDP descriptor instance to access session level SDP
-     * @param eNegoState The current negotiation state to decide to remove the OA model item
-     */
-    virtual void FinalizeSDP(IN ISessionDescriptor* pSessionDescriptor, NEGO_STATE eNegoState);
-
-    /**
-     * @brief Set the local port number of the AudioProfile
-     *
-     * @param nPort The port number
-     * @return IMS_BOOL IMS_TRUE when the port number is unique and valid, IMS_FALSE when it is
-     * invalid port number which is already reserved
-     */
-    virtual IMS_BOOL SetPort(IN IMS_UINT32 nPort);
-
-    /**
-     * @brief Get the local ip address
-     *
-     * @return const IpAddress& The local ip address
-     */
-    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddr; };
-
-    /**
-     * @brief Get the local port number
-     *
-     * @return IMS_UINT32 The local port number
-     */
-    virtual IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
 
     /**
      * @brief Get the negotiated remote ip address
@@ -235,8 +136,15 @@ public:
      */
     virtual IMS_SINT32 GetMediaBandwidth(void);
 
+protected:
+    AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
+    AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+    AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
+    AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
+    AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;
+
 private:
-    void copy(IN const AudioNego* pAudioNego);
+    void Copy(IN const AudioNego* pAudioNego);
     IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
             IN MEDIA_DIRECTION eDir);
     IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -289,10 +197,10 @@ private:
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
-    ImsList<OaModel*> m_lstOaModel;
-    AudioProfile m_objBaseProfile;
-    MediaEnvironment* m_pEnvironment;
-    AudioConfiguration* m_pConfig;
+    void SetSdpSessionIpAddress(
+            OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
+    void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+    void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
 };
 
 #endif

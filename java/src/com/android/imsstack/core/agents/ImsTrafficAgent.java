@@ -78,6 +78,10 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     @Override
     public boolean isAllowed(int trafficType, int slotId) {
         synchronized (mTraffics) {
+            if (isSimultaneousCallingSupported(slotId)) {
+                return true;
+            }
+
             if (isEmergency(slotId)) {
                 ImsLog.d(slotId, "emergency is ongoing");
                 return true;
@@ -115,6 +119,18 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
             if (traffic != null) {
                 traffic.setPriorityType(priorityType);
                 invokePriorityListener();
+            }
+        }
+    }
+
+    @Override
+    public void setSimultaneousCallingSupported(boolean supported, int slotId) {
+        ImsLog.d(slotId, "setSimultaneousCallingSupported=" + supported);
+
+        synchronized (mTraffics) {
+            Traffic traffic = mTraffics.get(slotId);
+            if (traffic != null) {
+                traffic.setSimultaneousCallingSupported(supported);
             }
         }
     }
@@ -210,6 +226,11 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
         return true;
     }
 
+    private boolean isSimultaneousCallingSupported(int slotId) {
+        Traffic traffic = mTraffics.get(slotId);
+        return (traffic != null) ? traffic.isSimultaneousCallingSupported() : false;
+    }
+
     private boolean isWlan(int slotId) {
         Traffic traffic = mTraffics.get(slotId);
         return (traffic != null) ? traffic.isWlan() : false;
@@ -258,6 +279,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     private final class Traffic {
         private int mPriorityType = TRAFFIC_PRIORITY_NONE;
         private boolean mWlan = false;
+        private boolean mIsSimultaneousCallingSupported = false;
 
         Traffic() {
         }
@@ -271,12 +293,20 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
                     || mPriorityType == TRAFFIC_PRIORITY_EMERGENCY_SMS);
         }
 
+        public boolean isSimultaneousCallingSupported() {
+            return mIsSimultaneousCallingSupported;
+        }
+
         public boolean isWlan() {
             return mWlan;
         }
 
         public void setPriorityType(int type) {
             mPriorityType = type;
+        }
+
+        public void setSimultaneousCallingSupported(boolean supported) {
+            mIsSimultaneousCallingSupported = supported;
         }
 
         public void setWlan(boolean enabled) {

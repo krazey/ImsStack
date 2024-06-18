@@ -53,7 +53,6 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -450,24 +449,16 @@ public class CarrierConfigMenuTest {
 
     private void setUpConfig() {
         mTestConfig = new PersistableBundle();
-        InputStream is = null;
-        XmlPullParserFactory factory;
-        XmlPullParser parser;
         PersistableBundle defaultConfig;
 
-        try {
-            is = TestApplication.getAppContext().getAssets().open(
-                    CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE);
-            factory = XmlPullParserFactory.newInstance();
-            parser = factory.newPullParser();
+        try (InputStream is = TestApplication.getAppContext().getAssets().open(
+                CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE)) {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            XmlPullParser parser = factory.newPullParser();
             parser.setInput(is, "utf-8");
             defaultConfig = readConfigFromXml(parser);
         } catch (IOException | XmlPullParserException e) {
             defaultConfig = new PersistableBundle();
-        } finally {
-            ImsUtils.closeQuietly(is);
-            factory = null;
-            parser = null;
         }
 
         mCarrierConfig = new CarrierConfig();

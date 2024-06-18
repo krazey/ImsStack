@@ -27,6 +27,7 @@
 
 #include "CarrierConfig.h"
 
+#include "IConfiguration.h"
 #include "IRegContact.h"
 #include "IRegistration.h"
 #include "IRegParameter.h"
@@ -34,8 +35,8 @@
 #include "ISipHeader.h"
 #include "ISipRtConfigHelper.h"
 #include "ISipTransportHelper.h"
-#include "Configuration.h"
 #include "Credential.h"
+#include "Engine.h"
 #include "RegistrationManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
@@ -442,7 +443,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_PATH:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -454,7 +455,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_LAST_PATH:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
                 if (piMessage != IMS_NULL)
                 {
                     strList = piMessage->GetHeaders(ISipHeader::PATH);
@@ -469,7 +470,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_SUPPORTED:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -481,7 +482,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         case PROPERTY_SERVICE_ROUTE:
             if (m_piRegistration != IMS_NULL)
             {
-                ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
+                const ISipMessage* piMessage = m_piRegistration->GetPreviousResponse();
 
                 if (piMessage != IMS_NULL)
                 {
@@ -2100,7 +2101,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateFinalAddFeatureTag()
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
 {
-    IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
+    const IAosSubscriber* pSubscriber = m_piContext->GetSubscriber();
 
     AStringArray objImpu;
 
@@ -2122,8 +2123,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         else
         {
             A_IMS_TRACE_D(REGID, "SetAor :: GetAssociatedUris from normal registration", 0, 0, 0);
-            IRegistration* piRegistration = RegistrationManager::GetInstance()->GetRegistration(
-                    m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
+            const IRegistration* piRegistration =
+                    RegistrationManager::GetInstance()->GetRegistration(
+                            m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
             objImpu = (piRegistration == IMS_NULL) ? pSubscriber->GetFakeImpus()
                                                    : piRegistration->GetAssociatedUris();
         }
@@ -3021,7 +3023,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReregister()
     if (!CheckRadioReadyAndSetTxnPending())
     {
         A_IMS_TRACE_I(REGID, "ProcessReregister :: txn is pending due to radio", 0, 0, 0);
-        SetState(STATE_REFRESHSTOP);
+        if (IsRadioWaiting())
+        {
+            m_nState = STATE_REFRESHSTOP;
+        }
+        else
+        {
+            SetState(STATE_REFRESHSTOP);
+        }
         return;
     }
 
@@ -3147,7 +3156,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
+    if (IsUsimAuthFailureHandlingNeeded())
+    {
+        m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES;
+    }
+    else if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (GetState() == STATE_REGISTERING)
@@ -3238,6 +3251,16 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
                     REGID, "ProcessRegRequiredWithAvailableNextPcscf :: RA(%d)", nRetryAfter, 0, 0);
             ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
             StartTimer(TIMER_OFFLINE_RECOVER, nRetryAfter * 1000);
+            return;
+        }
+
+        if ((GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
+                    CarrierConfig::Assets::AWT_POLICY_RFC_RULE) &&
+                GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf())
+        {
+            ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+            IncreaseConsecutiveFailCount();
+            StartTimer(TIMER_OFFLINE_RECOVER, GetActualWaitTime() * 1000);
             return;
         }
 
@@ -3475,10 +3498,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 
     m_piContext->GetPcscf()->IncreaseCurrentPcscfTriedCount();
 
-    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
-    IMS_UINT32 nAwt = 0;
-
     if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
     {
         if (IsErrorCodeExisted(
@@ -3492,6 +3512,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
         nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
     }
 
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
+    IMS_UINT32 nAwt = 0;
     if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
         ProcessDefaultFlowRecovery_StartWithEveryPcscfPolicy(nRetryAfter);
@@ -3532,11 +3554,27 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
                     IMS_TRUE, (nRetryAfter > 0) ? nRetryAfter : nAwt);
         }
 
-        if (TryNextPcscf())
+        if (nAwtPolicy == CarrierConfig::Assets::AWT_POLICY_RFC_RULE &&
+                (GET_N_CONFIG(m_nSlotId)->IsAwtUsedWhenInitRegWithNextPcscf()))
         {
-            SetState(STATE_REGISTERING);
-            ReportTryingState();
-            return;
+            if (SetNextPcscf())
+            {
+                IMS_UINT32 nRetryTime = (nRetryAfter > 0) ? nRetryAfter : nAwt;
+                StartTimer(TIMER_STOP_RETRY, nRetryTime * 1000);
+
+                SetState(STATE_REGSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+                return;
+            }
+        }
+        else
+        {
+            if (TryNextPcscf())
+            {
+                SetState(STATE_REGISTERING);
+                ReportTryingState();
+                return;
+            }
         }
     }
 
@@ -3917,7 +3955,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_423()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
 {
-    IncreaseConsecutiveFailCount();
     IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
     if (nRetryAfter == 0)
@@ -3927,12 +3964,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
     else
     {
         IMS_SINT32 nTimerF = SipConfigProxy::GetTimerValueF(m_nSlotId, IMS_NULL,
-                Configuration::GetInstance()->GetSipConfig(m_nSlotId)->GetSipConfigV(), IMS_TRUE);
+                Engine::GetConfiguration()->GetSipConfig(m_nSlotId)->GetSipConfigV(), IMS_TRUE);
 
         A_IMS_TRACE_I(REGID, "ProcessStartFailed_503 :: TF (%d), RA (%d)", nTimerF, nRetryAfter, 0);
 
         if (nTimerF > 0)
         {
+            IncreaseConsecutiveFailCount();
+
             if (nRetryAfter > static_cast<IMS_UINT32>(nTimerF))
             {
                 m_piContext->GetPcscf()->SetCurrentPcscfInvalid(IMS_TRUE, nRetryAfter);
@@ -4610,6 +4649,12 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
     if (!IsAuthChallengeMoreAllowed())
     {
         bResponseToChallenge = IMS_FALSE;
+
+        if (IsUsimAuthFailureHandlingNeeded())
+        {
+            ProcessAuthenticationFailed();
+        }
+
         return;
     }
 
@@ -4657,13 +4702,20 @@ PROTECTED VIRTUAL void AosRegistration::Registration_NotifyAkaResponse(IN IMS_SI
     if (nResult != ImsAkaParam::RESULT_OK)
     {
         A_IMS_TRACE_I(REGID, "Aka response is failed , wait next 401 message", 0, 0, 0);
-        bResultOfSA = IMS_TRUE;
 
         if (!ProcessAkaResponseFailed())
         {
             ProcessRegTerminated();
             return;
         }
+
+        if (nResult == ImsAkaParam::RESULT_NOK_MAC_INVALID && IsUsimAuthFailureHandlingNeeded())
+        {
+            ProcessAuthenticationFailed();
+            return;
+        }
+
+        bResultOfSA = IMS_TRUE;
     }
     else
     {
@@ -4749,7 +4801,14 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
     if (!IsTransactionStarted())
     {
         m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
-        SetState(STATE_REFRESHSTOP);
+        if (IsRadioWaiting())
+        {
+            m_nState = STATE_REFRESHSTOP;
+        }
+        else
+        {
+            SetState(STATE_REFRESHSTOP);
+        }
         return;
     }
 
@@ -5784,7 +5843,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
         piSipMsg->RemoveBodyParts();
     }
 
-    GeolocationPidfCreator* pPidfCreator =
+    const GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(m_nSlotId);
 
     if (pPidfCreator == IMS_NULL)
@@ -5933,7 +5992,7 @@ void AosRegistration::SetContactAddressConfiguration(IN IMS_BOOL bAdd)
             return;
         }
 
-        ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
+        const ISipMessage* piMessage = m_piRegistration->GetPreviousRequest();
 
         if (piMessage == IMS_NULL)
         {
@@ -6173,4 +6232,12 @@ IMS_BOOL AosRegistration::IsNeedToSetLimitedMode()
 
     A_IMS_TRACE_D(REGID, "IsNeedToSetLimitedMode : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
+}
+
+PRIVATE
+IMS_BOOL AosRegistration::IsUsimAuthFailureHandlingNeeded()
+{
+    return m_piContext->GetSubscriber()->IsUsim() &&
+            IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrCode(),
+                    CarrierConfig::Assets::REG_ERROR_CODE_USIM_AUTHENTICATION);
 }

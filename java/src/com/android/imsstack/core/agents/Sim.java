@@ -268,4 +268,18 @@ public interface Sim {
                 return "INVALID";
         }
     }
+
+    /** Returns a string representation by the given ISIM file id. */
+    static String isimFileIdToString(@Sim.IsimFileId int fileId) {
+        switch (fileId) {
+            case Sim.ISIM_FILE_ID_IMPI:
+                return "IMPI";
+            case Sim.ISIM_FILE_ID_DOMAIN:
+                return "DOMAIN";
+            case Sim.ISIM_FILE_ID_IMPU:
+                return "IMPU";
+            default:
+                return "UNKNOWN";
+        }
+    }
 }

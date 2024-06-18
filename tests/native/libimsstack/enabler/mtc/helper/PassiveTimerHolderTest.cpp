@@ -20,8 +20,11 @@
 #include "TestTimerService.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/IPassiveTimerHolder.h"
+#include "helper/MockIPassiveTimerListener.h"
 #include "helper/PassiveTimerHolder.h"
 #include <gtest/gtest.h>
+
+using ::testing::Invoke;
 
 #define ANY_TIMER_TYPE     IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER
 #define ANY_TIMER_DURATION 10000
@@ -33,6 +36,7 @@ public:
             objService(),
             objTimerService(),
             objTimer(objTimerService.GetMockTimer()),
+            objListener(),
             pPassiveTimerHolder(new PassiveTimerHolder())
     {
         PlatformContext::GetInstance()->SetService(
@@ -49,6 +53,7 @@ protected:
     MockIMtcService objService;
     TestTimerService objTimerService;
     MockITimer& objTimer;
+    MockIPassiveTimerListener objListener;
 
     PassiveTimerHolder* pPassiveTimerHolder;
 };
@@ -91,7 +96,18 @@ TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseAfterAosDisconnected)
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
-TEST_F(PassiveTimerHolderTest, SerNormalServiceAddsAosStateListener)
+TEST_F(PassiveTimerHolderTest, NotNotifyingListenerAfterAosDisconnected)
+{
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(0);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(PassiveTimerHolderTest, SetNormalServiceAddsAosStateListener)
 {
     EXPECT_CALL(objService, AddAosStateListener(pPassiveTimerHolder));
     pPassiveTimerHolder->SetNormalService(&objService);
@@ -120,4 +136,90 @@ TEST_F(PassiveTimerHolderTest, InvalidTimerExpiredInvokesNothing)
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 
     delete pDiffTimer;
+}
+
+TEST_F(PassiveTimerHolderTest, AddListenerAndTimerExpiringInvokesNotifyingListener)
+{
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(1);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(PassiveTimerHolderTest,
+        AddListenerAndRemoveListenerAndTimerExpiringNotInvokesNotifyingListener)
+{
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    MockIPassiveTimerListener objListener2;
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
+    pPassiveTimerHolder->RemoveListener(
+            IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, &objListener);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(1);
+    EXPECT_CALL(objListener2, OnPassiveTimerExpired).Times(1);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
+    pPassiveTimerHolder->RemoveListener(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(0);
+    EXPECT_CALL(objListener2, OnPassiveTimerExpired).Times(1);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(PassiveTimerHolderTest, AddListenerAndRemoveListenerDoesNothingWithNoTimer)
+{
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(0);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    pPassiveTimerHolder->RemoveListener(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired).Times(0);
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(PassiveTimerHolderTest,
+        AddListenerAndTimerExpiringAndRemoveListenerRightAfterThatIgnoresRemoveListener)
+{
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, ANY_TIMER_DURATION, IMS_FALSE);
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+    MockIPassiveTimerListener objListener2;
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener2);
+
+    MockITimer objTimer2;
+    objTimerService.SetTimer(&objTimer2);
+    pPassiveTimerHolder->AddTimer(
+            IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, ANY_TIMER_DURATION, IMS_FALSE);
+    MockIPassiveTimerListener objListener3;
+    pPassiveTimerHolder->AddListener(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, &objListener3);
+
+    EXPECT_CALL(objListener, OnPassiveTimerExpired)
+            .Times(1)
+            .WillRepeatedly(Invoke(
+                    [&]()
+                    {
+                        pPassiveTimerHolder->RemoveListener(
+                                IPassiveTimerHolder::Type::PRE_ALERTING_GUARD, &objListener);
+                        pPassiveTimerHolder->RemoveListener(
+                                IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, &objListener3);
+                    }));
+    EXPECT_CALL(objListener2, OnPassiveTimerExpired).Times(1);
+
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
+
+    EXPECT_CALL(objListener3, OnPassiveTimerExpired).Times(0);
+
+    pPassiveTimerHolder->Timer_TimerExpired(&objTimer2);
 }

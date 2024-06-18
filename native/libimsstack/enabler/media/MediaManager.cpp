@@ -27,7 +27,7 @@
 #include "JniEnablerConnector.h"
 #include "IJniEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MM");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define CALL_KEY_BROADCAST 0
 
@@ -220,6 +220,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaManager::SendMessage(
             bResult = IMS_FALSE;
         }
     }
+
+    ImsMediaMsgParamBase* pTempParam = reinterpret_cast<ImsMediaMsgParamBase*>(pParam);
+    delete pTempParam;
 
     return bResult;
 }

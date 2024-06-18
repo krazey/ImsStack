@@ -27,6 +27,12 @@
     <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
     <boolean name="hide_mac_address_in_pani_header_bool" value="true"/>
     <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
+    <int name="location_policy_update_type_int" value="2"/>
+    <boolean name="location_allow_mock_location_update_bool" value="true"/>
+    <int name="location_acquisition_policy_int" value="86672"/>
+    <int name="location_address_resolution_time_millis_int" value="3000"/>
+    <int name="location_validity_period_min_int" value="30"/>
+    <int name="location_tolerable_distance_int" value="150"/>
 
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
@@ -49,9 +55,12 @@
 
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="no_init_reg_on_pcscf_change_bool" value="true"/>
+    <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="true"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
     <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
+    <int name="ims_establishment_time_sec_int" value="300"/>
     <int name="reg_actual_wait_time_policy_int" value="1"/>
     <int name="reg_retry_default_policy_int" value="1"/>
     <int-array name="permanent_pdn_failure_int_array" num="2">
@@ -255,8 +264,8 @@
     <boolean name="ignore_prack_delivery_failure_bool" value="false"/>
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
-    <int-array name="registration_disconnect_reason_to_terminate_ongoing_call_int_array" num="1">
-        <item value="999"/> <!-- All cases -->
+    <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
+        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int name="wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="support_canid_info_bool" value="false"/>

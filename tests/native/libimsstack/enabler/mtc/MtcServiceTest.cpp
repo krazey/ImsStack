@@ -15,7 +15,8 @@
  */
 
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
@@ -156,7 +157,7 @@ protected:
 
         // to make Connector::Open() return valid IConnector even though MtcApp is not created
         // during the test.
-        Configuration::GetInstance()->SetAppConfig(
+        Engine::GetConfiguration()->SetAppConfig(
                 ImsServiceConfig::GetAppName(ImsAppId::MTC), SLOT_ID);
 
         pNormalMtcService = CreateNormalService();

@@ -16,7 +16,8 @@
 
 #include "SipControllerManager.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
 #include "RcsMessageService.h"
@@ -41,7 +42,7 @@ PUBLIC SipControllerManager::SipControllerManager(
     m_strAppID = ImsServiceConfig::GetAppName(ImsAppId::SIP_DELEGATE);
     m_strServiceID = ImsServiceConfig::GetServiceName(ImsServiceId::SIP_DELEGATE);
 
-    Configuration::GetInstance()->SetAppConfig(
+    Engine::GetConfiguration()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::SIP_DELEGATE), m_nSlotId);
     JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::SIP_DELEGATE, this);
 

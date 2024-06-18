@@ -293,6 +293,7 @@ public class ServiceStateBuilder {
             p.writeString(mOperatorAlphaShort); // mOperatorAlphaShortRaw
             p.writeBoolean(false); // mIsDataRoamingFromRegistration
             p.writeBoolean(mIsIwlanPreferred);
+            p.setDataPosition(0);
             return ServiceState.CREATOR.createFromParcel(p);
         } finally {
             if (p != null) {

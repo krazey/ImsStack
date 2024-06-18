@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "Service.h"
+#include "ServiceContext.h"
 #include "ServiceManager.h"
 #include "ServiceResolver.h"
 
@@ -25,7 +26,8 @@ __IMS_TRACE_TAG_IMS__;
 PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
         IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId)
 {
-    Service* pService = ServiceManager::GetInstance()->GetService(nSlotId, strAppId, strServiceId);
+    Service* pService = ServiceContext::GetInstance()->GetServiceManager()->GetService(
+            nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
     {
@@ -40,7 +42,8 @@ PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
 
 PUBLIC GLOBAL ImsList<IRegBinding*> ServiceResolver::GetRegBindings(IN IMS_SINT32 nSlotId)
 {
-    ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices(nSlotId);
+    ImsList<Service*> objServices =
+            ServiceContext::GetInstance()->GetServiceManager()->GetServices(nSlotId);
     ImsList<IRegBinding*> objRegBindings;
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
@@ -61,7 +64,8 @@ PUBLIC GLOBAL ImsList<IRegBinding*> ServiceResolver::GetRegBindings(IN IMS_SINT3
 PUBLIC GLOBAL void ServiceResolver::SetRegBinding(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
         IN const AString& strServiceId, IN IRegBinding* piRegBinding)
 {
-    Service* pService = ServiceManager::GetInstance()->GetService(nSlotId, strAppId, strServiceId);
+    Service* pService = ServiceContext::GetInstance()->GetServiceManager()->GetService(
+            nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
     {

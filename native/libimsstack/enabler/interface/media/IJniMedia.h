@@ -282,12 +282,25 @@ public:
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
+class ImsMediaMsgParam : public ImsMediaMsgParamBase
+{
+public:
+    explicit ImsMediaMsgParam(const MEDIA_CONTENT_TYPE eType, const IMS_SINT32 value = -1) :
+            ImsMediaMsgParamBase(eType),
+            m_nValue(value){};
+    virtual ~ImsMediaMsgParam() {}
+
+public:
+    IMS_SINT32 m_nValue;
+};
+
 class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 {
 public:
     explicit ImsMediaMsgSetMediaQualityParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_objMediaQualityThreshold(MediaQualityThreshold()){};
+    virtual ~ImsMediaMsgSetMediaQualityParam() {}
 
 public:
     MediaQualityThreshold m_objMediaQualityThreshold;
@@ -299,20 +312,7 @@ public:
     explicit ImsMediaMsgConfigParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_pConfig(IMS_NULL){};
-    virtual ~ImsMediaMsgConfigParam()
-    {
-        if (m_pConfig != IMS_NULL)
-        {
-            if (m_eMediaType == MEDIA_TYPE_AUDIO)
-            {
-                delete reinterpret_cast<AudioConfig*>(m_pConfig);
-            }
-            else if (m_eMediaType == MEDIA_TYPE_VIDEO)
-            {
-                delete reinterpret_cast<VideoConfig*>(m_pConfig);
-            }
-        }
-    }
+    virtual ~ImsMediaMsgConfigParam() { delete m_pConfig; }
 
 public:
     RtpConfig* m_pConfig;
@@ -339,6 +339,7 @@ public:
             ImsMediaMsgParamBase(MEDIA_TYPE_AUDIO),
             m_dtmfCode(-1),
             m_nDuration(0){};
+    virtual ~ImsMediaMsgDtmfParam() {}
 
 public:
     IMS_CHAR m_dtmfCode;
@@ -363,20 +364,7 @@ public:
     explicit ImsMediaResponseConfigParam(RtpConfig* config = IMS_NULL) :
             ImsMediaResponseParamBase(),
             m_pConfig(config){};
-    virtual ~ImsMediaResponseConfigParam()
-    {
-        if (m_pConfig != IMS_NULL)
-        {
-            if (m_eMediaType == MEDIA_TYPE_AUDIO)
-            {
-                delete reinterpret_cast<AudioConfig*>(m_pConfig);
-            }
-            else if (m_eMediaType == MEDIA_TYPE_VIDEO)
-            {
-                delete reinterpret_cast<VideoConfig*>(m_pConfig);
-            }
-        }
-    }
+    virtual ~ImsMediaResponseConfigParam() { delete m_pConfig; }
 
 public:
     RtpConfig* m_pConfig;
@@ -394,6 +382,7 @@ public:
             m_bResult(IMS_FALSE)
     {
     }
+    virtual ~ImsMediaMsgQosParam() {}
 
     bool operator==(const ImsMediaMsgQosParam& param)
     {
@@ -414,6 +403,7 @@ public:
     ImsMediaNotifyInactivityParam() :
             ImsMediaMsgParamBase(),
             m_eMediaProtocolType(RTP){};
+    virtual ~ImsMediaNotifyInactivityParam() {}
 
 public:
     ProtocolType m_eMediaProtocolType;
@@ -426,6 +416,7 @@ public:
             ImsMediaMsgParamBase(),
             m_nRtpInactivityTimerMillis(-1),
             m_nRtcpInactivityTimerMillis(-1){};
+    virtual ~ImsMediaNotifyQualityStatusParam() {}
 
 public:
     IMS_SINT32 m_nRtpInactivityTimerMillis;
@@ -437,6 +428,7 @@ class ImsMediaNotifyPacketParam : public ImsMediaResponseParamBase
 public:
     ImsMediaNotifyPacketParam() :
             m_nResponse(-1){};
+    virtual ~ImsMediaNotifyPacketParam() {}
 
 public:
     IMS_SINT32 m_nResponse;
@@ -448,6 +440,7 @@ public:
     explicit ImsMediaMsgAnbrNegotiationParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
             ImsMediaResponseParamBase(type),
             m_bAnbrNegotiationType(IMS_FALSE){};
+    virtual ~ImsMediaMsgAnbrNegotiationParam() {}
 
 public:
     IMS_BOOL m_bAnbrNegotiationType;
@@ -461,6 +454,7 @@ public:
             m_nAnbrMediaType(-1),
             m_nAnbrDirection(-1),
             m_nAnbrBitrate(-1){};
+    virtual ~ImsMediaMsgAnbrReceivedParam() {}
 
 public:
     IMS_SINT32 m_nAnbrMediaType;
@@ -474,6 +468,7 @@ public:
     explicit ImsMediaVideoParam(IMS_SINT32 value = -1) :
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nValue(value){};
+    virtual ~ImsMediaVideoParam() {}
 
 public:
     IMS_SINT32 nValue;
@@ -486,6 +481,7 @@ public:
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nWidth(value1),
             nHeight(value2){};
+    virtual ~ImsMediaVideoResolutionParam() {}
 
 public:
     IMS_SINT32 nWidth;

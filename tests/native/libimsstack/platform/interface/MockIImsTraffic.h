@@ -33,6 +33,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAllowed, (IN IMS_SINT32, IN IMS_UINT32), (override));
     MOCK_METHOD(void, Start, (IN IMS_SINT32, IN IMS_UINT32), (override));
     MOCK_METHOD(void, Stop, (IN IMS_SINT32, IN IMS_UINT32), (override));
+    MOCK_METHOD(void, SetSimultaneousCallingSupported, (IN IMS_SINT32, IN IMS_BOOL), (override));
     MOCK_METHOD(void, SetWlan, (IN IMS_SINT32, IN IMS_BOOL), (override));
     MOCK_METHOD(void, AddListener, (IN IImsTrafficListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN IImsTrafficListener*), (override));

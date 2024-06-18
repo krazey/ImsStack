@@ -46,12 +46,6 @@ void AosStaticProfile::SetProfileType(IN Type eType)
         m_strRegistrationId = AString("aos_normal_reg");
         m_eRegistrationType = AosRegistrationType::NORMAL;
         m_nRegistrationFlowId = static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL);
-
-        // For test purpose
-        if (IsWifiTest())
-        {
-            m_nConnectionType = NetworkPolicy::APN_WIFI;
-        }
     }
     else if (eType == Type::EMERGENCY)
     {
@@ -73,6 +67,12 @@ void AosStaticProfile::SetProfileType(IN Type eType)
     {
         m_strId = AString("aos_default");
         m_nConnectionType = NetworkPolicy::APN_NONE;
+    }
+
+    // For test purpose
+    if (IsWifiTest())
+    {
+        m_nConnectionType = NetworkPolicy::APN_WIFI;
     }
 }
 

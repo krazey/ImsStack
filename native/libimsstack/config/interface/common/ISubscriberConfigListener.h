@@ -16,6 +16,8 @@
 #ifndef INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
 #define INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
 
+#include "ImsTypeDef.h"
+
 /**
  * @brief A listener type for receiving notifications about changes to the IMS subscriber
  *        configuration.

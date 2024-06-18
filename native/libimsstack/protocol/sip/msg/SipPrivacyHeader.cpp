@@ -107,7 +107,7 @@ SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
     return SIP_FALSE;
 }
 
-SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPrivacyHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*"Privacy" HCOLON priv-value *(";" priv-value)*/
     if (nDecLen == SIP_ZERO)
@@ -117,10 +117,10 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     while (pStartPt < pEndPt)
     {
-        SIP_CHAR* pTempPos = SIP_NULL;
+        const SIP_CHAR* pTempPos = SIP_NULL;
 
         if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
         {

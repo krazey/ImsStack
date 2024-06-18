@@ -213,9 +213,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
                     nAdditionalInfo);
         case Feature::VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE:
             return m_pManager->IsVilteToVolteRetryFailureResponseCode(nAdditionalInfo);
-        case Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL:
-            return m_pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-                    nAdditionalInfo);
+        case Feature::REGISTRATION_DISCONNECT_REASON_TO_IGNORE:
+            return m_pManager->IsRegistrationDisconnectReasonToIgnore(nAdditionalInfo);
         case Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF:
             return m_pManager->IsMessageTypeSupportGeolocationPidf(
                     static_cast<MessageTypeForGeolocationPidf>(nAdditionalInfo));

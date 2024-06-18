@@ -97,7 +97,18 @@ public:
         TIMER_VOICE_RAT_GUARD
     };
 
-private:
+    enum
+    {
+        REASON_NONE = 0,
+        REASON_NET_STATE_CHANGED,
+        REASON_ROAMING_SATAE_CHANGED
+    };
+
+    static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
+    static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
+
+protected:
+    void Init() override;
     void InitConfig();
     void InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats);
     void InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRats);
@@ -156,16 +167,6 @@ private:
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
 protected:
-    void Init() override;
-
-private:
-    enum
-    {
-        REASON_NONE = 0,
-        REASON_NET_STATE_CHANGED,
-        REASON_ROAMING_SATAE_CHANGED
-    };
-
     // access_policy (ex 0x20000004)
     IMS_UINT32 m_nCnxPolicy;
     IMS_UINT32 m_nCnxPolicyInRoaming;
@@ -214,12 +215,6 @@ private:
     ImsList<IAosNetTrackerListener*> m_objListeners;
 
     AString m_strTag;
-
-    static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
-    static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
-
-private:
-    friend class AosNetTrackerTest;
 };
 
 #endif  // AOS_NET_TRACKER_H_

@@ -473,7 +473,7 @@ PUBLIC VIRTUAL void AosService::NotifyIpcanHandoverFailure(
     }
 }
 
-PUBLIC VIRTUAL void AosService::NotifyIsimState(IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyIsimState(IN IMS_SINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyIsimState :: nState(%d)", nState, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)

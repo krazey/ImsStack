@@ -58,7 +58,7 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_bTimer100WaitExpired(IMS_FALSE),
-        m_bWaitingRedialEmergency(IMS_FALSE)
+        m_bWaitingRedial(IMS_FALSE)
 {
 }
 
@@ -204,9 +204,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
-        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
+        StopTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+        StopTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
+
+        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF ||
+                objReason.nExtraCode == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
         {
-            m_bWaitingRedialEmergency = IMS_TRUE;
+            m_bWaitingRedial = IMS_TRUE;
             return GetStateName();
         }
 
@@ -617,11 +621,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
 PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
 {
     IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
-    if (m_bWaitingRedialEmergency)
+    if (m_bWaitingRedial)
     {
-        m_bWaitingRedialEmergency = IMS_FALSE;
+        m_bWaitingRedial = IMS_FALSE;
         return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
-                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF));
+                CallReasonInfo(CODE_INTERNAL_REDIAL,
+                        m_objContext.GetCallInfo().bEmergency
+                                ? EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF
+                                : EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
     }
 
     if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()))

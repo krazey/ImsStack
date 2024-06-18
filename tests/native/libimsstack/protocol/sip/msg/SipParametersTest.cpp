@@ -40,19 +40,20 @@ TEST_F(SipParametersTest, Add_Get_Param)
     EXPECT_EQ(SIP_FALSE, pParameters->AddParam(nullptr, nullptr));
 
     EXPECT_EQ(SIP_TRUE, pParameters->AddParam("OnlyName", nullptr));
-    EXPECT_EQ(SIP_TRUE, pParameters->AddParam("param-name", "param-value1"));
-    EXPECT_EQ(SIP_TRUE, pParameters->AddParam("param-name", "param-value2"));
+
+    const SIP_CHAR* const pParamName = "param-name";
+    EXPECT_EQ(SIP_TRUE, pParameters->AddParam(pParamName, "param-value1"));
+    EXPECT_EQ(SIP_TRUE, pParameters->AddParam(pParamName, "param-value2"));
 
     EXPECT_EQ(2, pParameters->GetParamCount());
 
-    EXPECT_EQ(SIP_FALSE, pParameters->IsParamExists(nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, pParameters->IsParamPresent(nullptr));
 
-    unsigned int nPosition = ~(0);
-    EXPECT_EQ(SIP_FALSE, pParameters->IsParamExists("NameNotExists", &nPosition));
-    EXPECT_EQ(~(0), nPosition);
+    EXPECT_EQ(SIP_FALSE, pParameters->IsParamPresent("NameNotExists"));
+    EXPECT_EQ(-1, pParameters->GetParamIndex("NameNotExists"));
 
-    EXPECT_EQ(SIP_TRUE, pParameters->IsParamExists("param-name", &nPosition));
-    EXPECT_EQ(1, nPosition);
+    EXPECT_EQ(SIP_TRUE, pParameters->IsParamPresent(pParamName));
+    EXPECT_EQ(1, pParameters->GetParamIndex(pParamName));
 
     EXPECT_EQ(nullptr, pParameters->GetParamValue(nullptr));
 
@@ -61,7 +62,7 @@ TEST_F(SipParametersTest, Add_Get_Param)
     /* no value for param, return null */
     EXPECT_EQ(nullptr, pParameters->GetParamValue("OnlyName"));
 
-    char* pValue = pParameters->GetParamValue("param-name", 1);
+    SIP_CHAR* pValue = pParameters->GetParamValue(pParamName, 1);
     EXPECT_STREQ("param-value2", pValue);
 
     delete[] pValue;
@@ -69,42 +70,43 @@ TEST_F(SipParametersTest, Add_Get_Param)
     delete pParameters;
 }
 
-TEST_F(SipParametersTest, SetParamValue)
+TEST_F(SipParametersTest, SetParam)
 {
     SipParameters* pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
     /* invalid param name - null , fail */
-    EXPECT_EQ(SIP_FALSE, pParameters->SetParamValue(nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE, pParameters->SetParam(nullptr, nullptr));
+
+    const SIP_CHAR* const pParamName = "param-name";
 
     /* New param without value will be added to list, success */
-    EXPECT_EQ(SIP_TRUE, pParameters->SetParamValue("param-name", nullptr));
+    EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, nullptr));
 
     /* Existing param to add value to list as list is empty, success */
-    EXPECT_EQ(SIP_TRUE, pParameters->SetParamValue("param-name", "param-value"));
+    EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, "param-value"));
 
     /* Existing param to set value to list at invalid position, fail */
-    EXPECT_EQ(SIP_FALSE, pParameters->SetParamValue("param-name", "param-value1", 3));
+    EXPECT_EQ(SIP_FALSE, pParameters->SetParam(pParamName, "param-value1", 3));
 
     /* Existing param to set value to list at valid position, success */
-    EXPECT_EQ(SIP_TRUE, pParameters->SetParamValue("param-name", "param-value1", 0));
+    EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, "param-value1", 0));
 
-    unsigned int nPosition = ~(0);
-    EXPECT_EQ(nullptr, pParameters->GetParamNode(nullptr, &nPosition));
-    EXPECT_EQ(nullptr, pParameters->GetParamNode("NameNotExists", &nPosition));
+    EXPECT_EQ(-1, pParameters->GetParamIndex(nullptr));
+    EXPECT_EQ(-1, pParameters->GetParamIndex("NameNotExists"));
 
-    SipNameValue* pNameValue = pParameters->GetParamNode("param-name", &nPosition);
+    SipNameValue* pNameValue = pParameters->GetParam(0);
     ASSERT_TRUE(pNameValue != nullptr);
 
-    EXPECT_EQ(0, nPosition);
+    EXPECT_EQ(0, pParameters->GetParamIndex(pParamName));
     EXPECT_EQ(1, pNameValue->m_valueList.GetSize());
 
-    char* pValue = pParameters->GetParamValue("param-name", 0);
+    SIP_CHAR* pValue = pParameters->GetParamValue(pParamName, 0);
     EXPECT_STREQ("param-value1", pValue);
     delete[] pValue;
 
     /* Existing param to add null value to list - removes value at position, success */
-    EXPECT_EQ(SIP_TRUE, pParameters->SetParamValue("param-name", nullptr, 0));
+    EXPECT_EQ(SIP_TRUE, pParameters->SetParam(pParamName, nullptr, 0));
 
     EXPECT_EQ(0, pNameValue->m_valueList.GetSize());
 
@@ -117,10 +119,10 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pParameters != nullptr);
 
     const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objValue(256);
 
@@ -131,11 +133,11 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     EXPECT_EQ(SIP_TRUE, objParameterList.Encode(&pBuff, ' '));
 
     /* Decode with empty data, fail */
-    char* pData = const_cast<char*>("");
+    const SIP_CHAR* pData = "";
     EXPECT_EQ(SIP_FALSE, objParameterList.Decode(pData, pData, ' '));
 
-    pData = const_cast<char*>("OnlyName;param-name=param-value,param-value1");
-    char* pDataEnd = pData + strlen(pData) - 1;
+    pData = "OnlyName;param-name=param-value,param-value1";
+    const SIP_CHAR* pDataEnd = pData + strlen(pData) - 1;
 
     /* Decode with valid input, success */
     EXPECT_EQ(SIP_TRUE, objParameterList.Decode(pData, pDataEnd, ';'));
@@ -168,7 +170,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     SipParameterList& objNormalParameterList = pParameters->GetParameterList();
 
-    pData = const_cast<char*>("OnlyName;param-name=param%20value,param-value1");
+    pData = "OnlyName;param-name=param%20value,param-value1";
     pDataEnd = pData + strlen(pData) - 1;
 
     SipUri* pSipUri = new SipUri();
@@ -206,7 +208,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     pSipUri->SetComponentType(IParameterComponent::HEADER);
 
-    pData = const_cast<char*>("OnlyName;param-name=param%20value");
+    pData = "OnlyName;param-name=param%20value";
     pDataEnd = pData + strlen(pData) - 1;
 
     EXPECT_EQ(SIP_TRUE, objHeaderParameterList.Decode(pData, pDataEnd, ';', pSipUri));
@@ -244,7 +246,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
 
     SipParameterList& objUriParameterList = pParameters->GetParameterList();
 
-    pData = const_cast<char*>("OnlyName;transport=%24!%26");
+    pData = "OnlyName;transport=%24!%26";
     pDataEnd = pData + strlen(pData) - 1;
 
     pSipUri->SetComponentType(IParameterComponent::URI);

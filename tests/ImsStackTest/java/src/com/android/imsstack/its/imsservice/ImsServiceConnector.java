@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.its.imsservice;
 
+import static org.junit.Assert.fail;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,9 +26,11 @@ import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsServiceController;
+import android.telephony.ims.feature.ImsFeature;
 
 import androidx.annotation.NonNull;
 
+import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.ims.internal.IImsUt;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.imsservice.ImsService;
@@ -35,23 +39,40 @@ import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
 import com.android.imsstack.its.imsservice.mmtel.sms.ImsSmsWrapper;
 import com.android.imsstack.its.imsservice.mmtel.ut.ImsUtWrapper;
 import com.android.imsstack.its.imsservice.reg.ImsRegistrationWrapper;
+import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * IMS service connector
  */
 public final class ImsServiceConnector {
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack.its";
+    private static final List<Integer> IMS_FEATURES = Collections.unmodifiableList(
+            Arrays.asList(
+                    ImsFeature.FEATURE_EMERGENCY_MMTEL,
+                    ImsFeature.FEATURE_MMTEL,
+                    ImsFeature.FEATURE_RCS
+                )
+            );
 
     private static ImsServiceConnector sImsServiceConnector = null;
     private static TestImsService sImsService;
 
+    private final SingleLatch mImsServiceConnectedLatch = new SingleLatch("ImsService");
     private IImsServiceController mImsServiceBinder;
     private ImsServiceConnection mServiceConnection;
+    private IImsMmTelFeature mMmTelFeature;
     private ImsMmTelFeatureWrapper mMmTelFeatureWrapper;
     private ImsRegistrationWrapper mRegistrationWrapper;
     private ImsSmsWrapper mSmsWrapper;
     private ImsUtWrapper mUtWrapper;
+    private final ConcurrentHashMap<Integer, ImsFeatureStatusProxy>
+            mFeatureStatusCallbacks = new ConcurrentHashMap<>();
 
     /**
      * Gets static instance.
@@ -61,6 +82,22 @@ public final class ImsServiceConnector {
             sImsServiceConnector = new ImsServiceConnector();
         }
         return sImsServiceConnector;
+    }
+
+    /**
+     * Checks whether the service connection is in progress or not.
+     *
+     * @return {@code true} if the service connection is in progress, {@code false} otherwise.
+     */
+    public boolean isConnectionInProgress() {
+        return mServiceConnection != null;
+    }
+
+    /**
+     * Waits for the ImsService's connection ready.
+     */
+    public void waitForServiceConnected() {
+        mImsServiceConnectedLatch.await();
     }
 
     /**
@@ -76,6 +113,21 @@ public final class ImsServiceConnector {
     public void stop() {
         destroyWrappers();
 
+        if (mImsServiceBinder != null) {
+            IMS_FEATURES.forEach(feature -> {
+                try {
+                    ImsFeatureStatusProxy proxy = mFeatureStatusCallbacks.get(feature);
+                    if (proxy != null) {
+                        mImsServiceBinder.removeFeatureStatusCallback(
+                                TestConstants.SLOT0, feature, proxy);
+                    }
+                } catch (RemoteException e) {
+                    loge(e.toString());
+                }
+            });
+        }
+        mFeatureStatusCallbacks.clear();
+
         try {
             if (mImsServiceBinder != null) {
                 mImsServiceBinder.disableIms(TestConstants.SLOT0, TestConstants.SUB_ID_1);
@@ -88,6 +140,32 @@ public final class ImsServiceConnector {
         }
 
         unbindImsService();
+    }
+
+    /**
+     * Creates MMTEL wrappers.
+     */
+    public void createMmTelWrappers() {
+        assertFeatureReady(ImsFeature.FEATURE_MMTEL);
+
+        if (mMmTelFeatureWrapper != null) {
+            mMmTelFeatureWrapper.destroy();
+        }
+        mMmTelFeatureWrapper = new ImsMmTelFeatureWrapper(mMmTelFeature);
+
+        if (mSmsWrapper != null) {
+            mSmsWrapper.destroy();
+        }
+        mSmsWrapper = new ImsSmsWrapper(mMmTelFeature);
+
+        if (mUtWrapper != null) {
+            mUtWrapper.destroy();
+            mUtWrapper = null;
+        }
+        IImsUt imsUt = mMmTelFeatureWrapper.getUtInterface();
+        if (imsUt != null) {
+            mUtWrapper = new ImsUtWrapper(imsUt);
+        }
     }
 
     /**
@@ -131,27 +209,8 @@ public final class ImsServiceConnector {
             AppContext.getInstance().unbindService(mServiceConnection);
             mServiceConnection = null;
         }
-    }
 
-    private void createMmTelWrappers(@NonNull IImsMmTelFeature mmtelFeature) {
-        if (mMmTelFeatureWrapper != null) {
-            mMmTelFeatureWrapper.destroy();
-        }
-        mMmTelFeatureWrapper = new ImsMmTelFeatureWrapper(mmtelFeature);
-
-        if (mSmsWrapper != null) {
-            mSmsWrapper.destroy();
-        }
-        mSmsWrapper = new ImsSmsWrapper(mmtelFeature);
-
-        if (mUtWrapper != null) {
-            mUtWrapper.destroy();
-            mUtWrapper = null;
-        }
-        IImsUt imsUt = mMmTelFeatureWrapper.getUtInterface();
-        if (imsUt != null) {
-            mUtWrapper = new ImsUtWrapper(imsUt);
-        }
+        mImsServiceConnectedLatch.init();
     }
 
     private void createRegistrationWrapper(@NonNull IImsRegistration registration) {
@@ -188,6 +247,7 @@ public final class ImsServiceConnector {
 
         try {
             mImsServiceBinder.enableIms(TestConstants.SLOT0, TestConstants.SUB_ID_1);
+            mImsServiceBinder.notifyImsServiceReadyForFeatureCreation();
 
             IImsRegistration registration = mImsServiceBinder.getRegistration(
                     TestConstants.SLOT0, TestConstants.SUB_ID_1);
@@ -195,14 +255,32 @@ public final class ImsServiceConnector {
                 createRegistrationWrapper(registration);
             }
 
-            IImsMmTelFeature mmtelFeature = mImsServiceBinder.createMmTelFeature(
+            mMmTelFeature = mImsServiceBinder.createMmTelFeature(
                     TestConstants.SLOT0, TestConstants.SUB_ID_1);
-            if (mmtelFeature != null) {
-                createMmTelWrappers(mmtelFeature);
-            }
+            setFeatureStatusCallbacks();
         } catch (RemoteException e) {
             loge("notifyOnServiceConnected:" + e.toString());
         }
+    }
+
+    private void setFeatureStatusCallbacks() {
+        IMS_FEATURES.forEach(feature -> {
+            try {
+                ImsFeatureStatusProxy proxy = new ImsFeatureStatusProxy();
+                mFeatureStatusCallbacks.put(feature, proxy);
+                mImsServiceBinder.addFeatureStatusCallback(TestConstants.SLOT0, feature, proxy);
+            } catch (RemoteException e) {
+                loge("setFeatureStatusCallbacks " + e.toString());
+            }
+        });
+    }
+
+    private void assertFeatureReady(int featureType) {
+        ImsFeatureStatusProxy proxy = mFeatureStatusCallbacks.get(featureType);
+        if (proxy == null) {
+            fail("Failed due to no IImsFeatureStatusCallback for feature[" + featureType + "]");
+        }
+        proxy.waitForReady();
     }
 
     private static void logi(String s) {
@@ -217,6 +295,7 @@ public final class ImsServiceConnector {
         public void onServiceConnected(ComponentName className, IBinder service) {
             logi("onServiceConnected = " + className + " / " + service);
             notifyOnServiceConnected(service);
+            mImsServiceConnectedLatch.countDown();
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -225,8 +304,24 @@ public final class ImsServiceConnector {
         }
     };
 
-    private static class TestImsService extends ImsService {
-        TestImsService() {
+    private static class ImsFeatureStatusProxy extends IImsFeatureStatusCallback.Stub {
+        private final SingleLatch mFeatureCallbackLatch =
+                new SingleLatch("WaitFeatureReadyLatch");
+
+        public void waitForReady() {
+            mFeatureCallbackLatch.await(SingleLatch.SHORT_TIMEOUT_MS);
+        }
+
+        @Override
+        public void notifyImsFeatureStatus(int featureStatus) {
+            if (featureStatus == ImsFeature.STATE_READY) {
+                mFeatureCallbackLatch.countDown();
+            }
+        }
+    }
+
+    public static class TestImsService extends ImsService {
+        public TestImsService() {
             sImsService = this;
         }
     }

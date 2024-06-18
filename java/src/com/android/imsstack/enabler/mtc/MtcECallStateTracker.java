@@ -406,12 +406,13 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private static boolean getBoolean(int slotId, String key) {
-        return getCarrierConfig(slotId).getBoolean(key);
+        CarrierConfig cc = getCarrierConfig(slotId);
+        return cc != null ? cc.getBoolean(key) : false;
     }
 
     private static CarrierConfig getCarrierConfig(int slotId) {
-        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId)
-                .getCarrierConfig();
+        ConfigInterface config = AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
+        return config != null ? config.getCarrierConfig() : null;
     }
 
     private static void log(String s) {

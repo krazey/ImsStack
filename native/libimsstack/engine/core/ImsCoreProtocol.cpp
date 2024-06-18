@@ -20,8 +20,9 @@
 #include "private/ConfigurationManager.h"
 
 #include "CoreServiceImpl.h"
+#include "IServiceManager.h"
 #include "ImsCoreProtocol.h"
-#include "ServiceManager.h"
+#include "ServiceContext.h"
 #include "SipDebug.h"
 #include "SipError.h"
 
@@ -106,8 +107,8 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     }
 
     // Check if the service is already created
-    ServiceManager* pServiceMngr = ServiceManager::GetInstance();
-    Service* pService = pServiceMngr->GetService(nSlotId, strAppId, strServiceId);
+    IServiceManager* piServiceMngr = ServiceContext::GetInstance()->GetServiceManager();
+    Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
     {
@@ -161,7 +162,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         return IMS_NULL;
     }
 
-    if (!pServiceMngr->AttachService(pCoreService))
+    if (!piServiceMngr->AttachService(pCoreService))
     {
         piCoreService->Close();
 
@@ -169,7 +170,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         return IMS_NULL;
     }
 
-    pCoreService->SetServiceManagerListener(pServiceMngr);
+    pCoreService->SetServiceCloseListener(piServiceMngr);
 
     return piCoreService;
 }

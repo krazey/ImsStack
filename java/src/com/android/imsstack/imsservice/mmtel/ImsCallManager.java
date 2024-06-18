@@ -17,6 +17,7 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.PowerManager;
+import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.ims.ImsCallProfile;
@@ -24,6 +25,8 @@ import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.SrvccCall;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
@@ -184,6 +187,8 @@ public class ImsCallManager {
                 mCallContext, mCT, call, callId, profile, true);
 
         onCallCreate(callSession);
+        // MO call created.
+        updateImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
 
         // CALL_CONNECTION_ID
         int ccId = ImsCallConnectionIds.getNewId(mCallContext.getSlotId());
@@ -210,6 +215,8 @@ public class ImsCallManager {
 
             if (newSession != null) {
                 onCallCreate(newSession);
+                // MT call is taken.
+                updateImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
 
                 // CALL_CONNECTION_ID
                 int ccId = ImsCallConnectionIds.getNewId(mCallContext.getSlotId());
@@ -412,6 +419,14 @@ public class ImsCallManager {
         return ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId());
     }
 
+    private void updateImsCallState(int state) {
+        PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                PhoneStateInterface.class, mCallContext.getSlotId());
+        if (phoneState != null) {
+            phoneState.setImsCallState(state);
+        }
+    }
+
     private void checkAndExitEcbm() {
         // It requires to exit an ECBM if emergency call is initiated
         IECallStateTracker ecst = mCallContext.getECallStateTracker();
@@ -521,6 +536,7 @@ public class ImsCallManager {
             // If all the sessions are destroyed,
             // then remove all the ConferenceInfo if present.
             if (mSessions.isEmpty()) {
+                updateImsCallState(TelephonyManager.CALL_STATE_IDLE);
                 ConferenceInfoHelper.destroyAllConferenceInfos();
 
                 ImsGarbageCalls gc = ImsGarbageCalls.getInstance();

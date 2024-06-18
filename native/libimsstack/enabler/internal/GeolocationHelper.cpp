@@ -18,7 +18,8 @@
 #include "ServiceSystemTime.h"
 #include "SystemConfig.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "GeolocationHelper.h"
 
@@ -167,7 +168,7 @@ PUBLIC GLOBAL AString GeolocationHelper::CreateContentId(
     else
     {
         const ISubscriberConfig* piSubsConfig =
-                Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
+                Engine::GetConfiguration()->GetSubscriberConfig(nSlotId);
 
         strContentId.Sprintf("%05x%05x@%s", nMicroSeconds, nRandom,
                 (piSubsConfig == IMS_NULL) ? "unavailable.com"

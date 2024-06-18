@@ -28,7 +28,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -63,7 +63,7 @@ public class SscNetConnectionTest {
     @Mock private IDcApn mMockDcApn;
     @Mock private IDcNetWatcher mMockDcNetWatcher;
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private Handler mMockSscConnectionHandler;
     @Mock private Handler mMockSscTransactionHandler;
     @Mock private SscServiceState mMockSscServiceState;
@@ -77,11 +77,11 @@ public class SscNetConnectionTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT))
                 .thenReturn(INACTIVITY_TIME_SEC);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         when(mMockDcApn.getApnControl(APN_TYPE.getType())).thenReturn(mMockApn);
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);

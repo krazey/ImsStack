@@ -27,11 +27,10 @@ import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.core.carrier.CarrierInfo;
-import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Queue;
 import java.util.Set;
@@ -43,13 +42,9 @@ import java.util.concurrent.Executors;
 public class ConfigProxy {
 
     private static final String SHARED_PREFERENCE_IMSCONFIG = "imsconfig";
-    private static final String KEY_CARRIER_ID = "carrier_id";
-    private static final String KEY_SUB_ID = "sub_id";
-
     private final IContext mContext;
     private final ImsConfigImplBase mConfig;
     private PersistableBundle mImsCarrierConfigs;
-    private final String mPreferenceName;
     private final Set<ConfigurationListener> mConfigurationListeners
             = new CopyOnWriteArraySet<ConfigurationListener>();
     private Queue<Integer> mData = null;
@@ -58,46 +53,15 @@ public class ConfigProxy {
     public ConfigProxy(IContext context, ImsConfigImplBase config) {
         mContext = context;
         mConfig = config;
-
-        mPreferenceName = SHARED_PREFERENCE_IMSCONFIG + mContext.getSlotId();
-    }
-
-    public boolean isOperatorOrSimChanged() {
-        SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
-
-        if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
-            return true;
-        }
-
-        int carrierId = id.getCarrierId();
-
-        SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
-
-        if (preferences == null) {
-            ImsLog.w("Shared Preference obj is null.");
-            return false;
-        }
-
-        int oldCarrierId = preferences.getInt(KEY_CARRIER_ID, -1);
-        int oldSubId = preferences.getInt(KEY_SUB_ID, -1);
-        SimInterface sim = AgentFactory.getInstance().getAgent(
-                SimInterface.class, mContext.getSlotId());
-        int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
-
-        if ((subId != oldSubId) || (carrierId != oldCarrierId)) {
-            return true;
-        }
-        return false;
     }
 
     public final void init() {
         mRequestExecutor = Executors.newSingleThreadExecutor();
         mData = new ConcurrentLinkedQueue<>();
 
-        if (isOperatorOrSimChanged() == true) {
+        if (!hasSharedPreference()) {
             SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                    mPreferenceName, Context.MODE_PRIVATE);
+                    getPreferenceName(), Context.MODE_PRIVATE);
 
             if (preferences == null) {
                 ImsLog.w("Shared Preference obj is null.");
@@ -108,12 +72,6 @@ public class ConfigProxy {
 
             editor.clear();
             editor.commit();
-
-            SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
-            int carrierId = id.getCarrierId();
-
-            editor.putInt(KEY_CARRIER_ID, carrierId);
-            editor.apply();
 
             loadDefaultProvisionValues();
             loadOperatorSpecificDefaults();
@@ -148,7 +106,7 @@ public class ConfigProxy {
         }
 
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -171,7 +129,7 @@ public class ConfigProxy {
         }
 
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -210,7 +168,7 @@ public class ConfigProxy {
         }
 
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -248,7 +206,7 @@ public class ConfigProxy {
         }
 
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -290,7 +248,7 @@ public class ConfigProxy {
 
     public final void loadDefaultProvisionValues() {
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -351,7 +309,8 @@ public class ConfigProxy {
         editor.apply();
     }
 
-    private void notifyConfigItemsChanged() {
+    @VisibleForTesting
+    void notifyConfigItemsChanged() {
         while (!mData.isEmpty()) {
             int item = mData.peek();
             for (ConfigurationListener l : mConfigurationListeners) {
@@ -364,7 +323,7 @@ public class ConfigProxy {
 
     private void loadOperatorSpecificDefaults() {
         SharedPreferences preferences = mContext.getContext().getSharedPreferences(
-                mPreferenceName, Context.MODE_PRIVATE);
+                getPreferenceName(), Context.MODE_PRIVATE);
 
         if (preferences == null) {
             ImsLog.w("Shared Preference obj is null.");
@@ -377,46 +336,41 @@ public class ConfigProxy {
             return;
         }
 
-        SimCarrierId id = CarrierInfo.getCarrierIdFromSim(mContext.getSlotId());
-
-        if (id.getCarrierId() == SimCarrierId.UNKNOWN_ID) {
-            return;
-        }
-
         SparseArray<ProvisioningItem> provisioningItems = ConfigUtils.getProvisioningItems();
 
-        int carrierId = id.getCarrierId();
+        ProvisioningItem item = provisioningItems.get(
+                ProvisioningManager.KEY_SIP_INVITE_CANCELLATION_TIMER_MS);
+        editor.putInt(item.getName(), 6);
 
-        if (carrierId == 1839) {//VZW
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_SIP_INVITE_CANCELLATION_TIMER_MS);
-            editor.putInt(item.getName(), 6);
+        item = provisioningItems.get(ProvisioningManager.KEY_TRANSITION_TO_LTE_DELAY_MS);
+        editor.putInt(item.getName(), 5);
 
-            item = provisioningItems.get(ProvisioningManager.KEY_TRANSITION_TO_LTE_DELAY_MS);
-            editor.putInt(item.getName(), 5);
+        item = provisioningItems.get(ProvisioningManager.KEY_ENABLE_SILENT_REDIAL);
+        editor.putInt(item.getName(), 1);
 
-            item = provisioningItems.get(ProvisioningManager.KEY_ENABLE_SILENT_REDIAL);
-            editor.putInt(item.getName(), 1);
+        item = provisioningItems.get(ProvisioningManager.KEY_REGISTRATION_DOMAIN_NAME);
+        editor.putString(item.getName(), "vzims.com");
 
-            item = provisioningItems.get(ProvisioningManager.KEY_REGISTRATION_DOMAIN_NAME);
-            editor.putString(item.getName(), "vzims.com");
+        /* Set default to ENABLED for EAB */
+        item = provisioningItems.get(ProvisioningManager.KEY_EAB_PROVISIONING_STATUS);
+        editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
 
-            /* Set default to ENABLED for EAB */
-            item = provisioningItems.get(ProvisioningManager.KEY_EAB_PROVISIONING_STATUS);
-            editor.putInt(item.getName(), ProvisioningManager.PROVISIONING_VALUE_ENABLED);
-        } else if (carrierId == 1890) {//KT
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS);
-            editor.putString(item.getName(), "volte.imskt.com");
-        }
-
-        if ((carrierId == 1890) || (carrierId == 1892)) {// KT or LGU+
-            ProvisioningItem item = provisioningItems.get(
-                    ProvisioningManager.KEY_SIP_KEEP_ALIVE_ENABLED);
-            editor.putInt(item.getName(),
-                    ProvisioningManager.PROVISIONING_VALUE_DISABLED);
-        }
         editor.apply();
+    }
+
+    private boolean hasSharedPreference() {
+        SharedPreferences preferences = mContext.getContext().getSharedPreferences(
+                getPreferenceName(), Context.MODE_PRIVATE);
+
+        return (preferences != null) ? !preferences.getAll().isEmpty() : false;
+    }
+
+    private String getPreferenceName() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(
+                SimInterface.class, mContext.getSlotId());
+        int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
+
+        return SHARED_PREFERENCE_IMSCONFIG + "_sub" + subId;
     }
 
     private static void log(String s) {

@@ -34,7 +34,7 @@ public:
             objCallMaintainingOnRegistrationSuspendeds(ImsVector<IMS_SINT32>()),
             objInformationLevelOfGeolocationPidfs(ImsVector<IMS_SINT32>()),
             objMessageTypesSupportGeolocationPidf(ImsVector<IMS_SINT32>()),
-            objRegistrationDisconnectReasonToTerminateOngoingCalls(ImsVector<IMS_SINT32>()),
+            objRegistrationDisconnectReasonToIgnore(ImsVector<IMS_SINT32>()),
             objRejectCodeForCsfbs(ImsVector<IMS_SINT32>()),
             objRequiringEmergencyCallWhenVideoEmergencyCallFaileds(ImsVector<IMS_SINT32>()),
             objShortCallCodes(ImsVector<IMS_SINT32>()),
@@ -162,7 +162,7 @@ public:
         objCallMaintainingOnRegistrationSuspendeds.Clear();
         objInformationLevelOfGeolocationPidfs.Clear();
         objMessageTypesSupportGeolocationPidf.Clear();
-        objRegistrationDisconnectReasonToTerminateOngoingCalls.Clear();
+        objRegistrationDisconnectReasonToIgnore.Clear();
         objRejectCodeForCsfbs.Clear();
         objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Clear();
         objShortCallCodes.Clear();
@@ -186,7 +186,7 @@ public:
     ImsVector<IMS_SINT32> objCallMaintainingOnRegistrationSuspendeds;  // name?
     ImsVector<IMS_SINT32> objInformationLevelOfGeolocationPidfs;
     ImsVector<IMS_SINT32> objMessageTypesSupportGeolocationPidf;
-    ImsVector<IMS_SINT32> objRegistrationDisconnectReasonToTerminateOngoingCalls;
+    ImsVector<IMS_SINT32> objRegistrationDisconnectReasonToIgnore;
     ImsVector<IMS_SINT32> objRejectCodeForCsfbs;
     ImsVector<IMS_SINT32> objRequiringEmergencyCallWhenVideoEmergencyCallFaileds;  // name?
     ImsVector<IMS_SINT32> objShortCallCodes;

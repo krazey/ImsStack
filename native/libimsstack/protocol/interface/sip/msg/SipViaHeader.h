@@ -37,7 +37,7 @@ private:
 
     SIP_INT32 m_eHostType;
 
-    SIP_BOOL DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 public:
     /*constructor*/
@@ -49,7 +49,7 @@ public:
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
     SIP_BOOL SetProtocolName(const SIP_CHAR* pszProtocolNm);

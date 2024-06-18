@@ -39,7 +39,10 @@ import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager.CarrierConfigChangeListener;
 import android.telephony.SubscriptionManager.PhoneNumberSource;
 import android.telephony.ims.ImsMmTelManager.WiFiCallingMode;
+import android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback;
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -578,6 +581,31 @@ public interface SystemServiceProxy {
      */
     interface ProvisioningManagerProxy {
         /**
+         * Register a new {@link FeatureProvisioningCallback}, which is used to listen for
+         * IMS feature provisioning updates.
+         *
+         * @param executor The executor that the callback methods will be called on.
+         * @param callback The callback instance being registered.
+         * @throws NullPointerException if the executor or the callback is null.
+         */
+        void registerFeatureProvisioningChangedCallback(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull FeatureProvisioningCallback callback);
+
+        /**
+         * Unregisters a previously registered {@link FeatureProvisioningCallback}
+         * instance. When the subscription associated with this
+         * callback is removed (SIM removed, ESIM swap, etc...), this callback will
+         * automatically be removed. If this method is called for an inactive
+         * subscription, it will result in a no-op.
+         *
+         * @param callback The existing {@link FeatureProvisioningCallback} to be removed.
+         * @throws NullPointerException if the callback is null.
+         */
+        void unregisterFeatureProvisioningChangedCallback(
+                @NonNull FeatureProvisioningCallback callback);
+
+        /**
          * Sets the integer value associated with the provided key.
          *
          * This operation is blocking and should not be performed on the UI thread.
@@ -587,5 +615,16 @@ public interface SystemServiceProxy {
          * @return The result of setting the configuration value.
          */
         @ImsConfigImplBase.SetConfigResult int setProvisioningIntValue(int key, int value);
+
+        /**
+         * Get the provisioning status for the IMS MmTel capability specified.
+         *
+         * @param capability The MMTEL capability that provisioning is requested for.
+         * @param tech The IMS registration technology associated with the MMTEL capability that
+         *             provisioning status is requested for.
+         */
+        boolean getProvisioningStatusForCapability(
+                @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @ImsRegistrationImplBase.ImsRegistrationTech int tech);
     }
 }

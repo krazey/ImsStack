@@ -681,25 +681,24 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_T
         "call_end_and_pdn_reactivation_by_reg_terminated_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[] =
         "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
-        "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL[] =
-        "emc_reg_on_random_pcscf_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
+        "ecall_based_on_p_associated_uri_of_normal_reg_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL[] = "ereg_on_random_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         "ignore_vops_for_volte_enable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
         "ims_dereg_on_3g_network_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[] =
-        "initialize_ipsec_setting_with_new_pcscf_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[] =
+        "init_ipsec_setting_with_new_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[] =
         "no_init_reg_on_pcscf_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL[] =
         "plmn_block_with_timeout_on_voice_call_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL[] =
         "reg_contact_validation_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL[] =
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL[] =
         "reg_retry_with_ip_ver_fallback_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
         "remove_old_sa_on_establishing_sa_bool";
@@ -723,6 +722,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILAB
         "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         "support_verstat_for_reg_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL[] =
+        "use_awt_when_init_reg_with_next_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
@@ -738,10 +739,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOIC
 
 const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT[] =
         "contact_user_info_policy_for_non_reg_message_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT[] = "emc_preferred_iptype_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_RETRY_MAX_CNT_INT[] = "emc_reg_retry_max_cnt_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT[] =
-        "emc_reg_retry_timer_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EPDN_PREFERRED_IPTYPE_INT[] = "epdn_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EREG_RETRY_MAX_CNT_INT[] = "ereg_retry_max_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT[] =
+        "ereg_retry_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         "geolocation_pidf_forming_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[] =
@@ -768,12 +769,12 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT[] =
         "reg_retry_default_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT[] =
         "reg_retry_timer_f_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT[] =
-        "reg_timer_for_emc_call_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_TIMER_FOR_ECALL_MILLIS_INT[] =
+        "reg_timer_for_ecall_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT[] =
         "rereg_retry_305_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT[] =
-        "roaming_preferred_emc_reg_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EREG_INT[] =
+        "roaming_preferred_ereg_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         "sip_message_threshold_for_transport_change_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[] =
@@ -805,7 +806,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATIO
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY[] =
         "supported_roaming_rats_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
-        "vowifi_sub_error_code_for_init_reg_int_array";
+        "vowifi_sub_err_code_for_init_reg_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE[] = "extra_reg_err_bundle";
 const IMS_CHAR
@@ -816,7 +817,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[] =
         "extra_reg_err_final_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT[] = "extra_reg_err_max_cnt_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT[] = "extra_reg_err_min_cnt_int";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[] =
                 "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
@@ -872,8 +872,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] 
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE[] =
         "sub_err_code_for_terminated_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT[] =
-        "sub_err_code_for_terminated_with_retry_max_count_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT[] =
+        "sub_err_code_for_terminated_with_retry_max_cnt_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[] =
         "sub_err_code_for_terminated_int_array";
 // }
@@ -959,9 +959,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_ST
         "support_video_call_only_in_vops_off_status_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[] =
         "block_wifi_emergency_call_if_not_provisioned_bool";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY[] =
-                "registration_disconnect_reason_to_terminate_ongoing_call_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY[] =
+        "registration_disconnect_reason_to_ignore_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
         "wifi_emergency_18x_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL[] = "support_canid_info_bool";
@@ -1050,6 +1049,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL[] =
         "audio_rtcpxr_packet_loss_rle_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL[] =
         "audio_rtcpxr_packet_duplicate_rle_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AVC_SPROP_PARAMETER_SETS_STRING[] =
+        "avc_sprop_parameter_sets_string";
 const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =
         "hevc_payload_type_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE[] =

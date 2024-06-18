@@ -18,7 +18,8 @@
 
 #include "Feature.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IRegCapabilityChangeListener.h"
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
@@ -692,8 +693,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         return IMS_TRUE;
     }
 
-    const IAppConfig* piAppConfig =
-            Configuration::GetInstance()->GetAppConfig(strAppId, GetSlotId());
+    const IAppConfig* piAppConfig = Engine::GetConfiguration()->GetAppConfig(strAppId, GetSlotId());
     const ICoreServiceConfig* piServiceConfig =
             (piAppConfig != IMS_NULL) ? piAppConfig->GetCoreServiceConfig(strServiceId) : IMS_NULL;
 

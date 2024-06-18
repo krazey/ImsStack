@@ -33,18 +33,18 @@ IMS_UINT32 gRandPcscfPort = AosIpsec::PCSCF_PORT_LOWER;
 
 PUBLIC
 AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId) :
-        m_piListener(piListener),
         m_piNetIpsec(IMS_NULL),
         m_piPolicy(IMS_NULL),
-        m_pUeInfo(new UeIpsecInfo()),
         m_pPcscfInfo(new PcscfIpsecInfo()),
+        m_bSaEstablished(IMS_FALSE),
+        m_bIgnorePolicyExpired(IMS_FALSE),
+        m_piListener(piListener),
+        m_pUeInfo(new UeIpsecInfo()),
         m_nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP),
         m_nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
         m_nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO),
         m_nMode(IpSecType::MODE_TRANSPORT),
         m_bAddPolicy(IMS_FALSE),
-        m_bSaEstablished(IMS_FALSE),
-        m_bIgnorePolicyExpired(IMS_FALSE),
         m_nSlotId(nSlotId)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosIpsec = %" PFLS_u "/%" PFLS_x, sizeof(AosIpsec), this, 0);
