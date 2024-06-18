@@ -135,71 +135,6 @@ PUBLIC VIRTUAL void TextNego::NegotiateSdp(IN NEGO_STATE eNegoState,
 }
 
 PUBLIC
-const IpAddress& TextNego::GetNegotiatedRemoteAddress()
-{
-    TextProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->objIpAddress;
-    }
-
-    return IpAddress::NONE;
-}
-
-PUBLIC
-IMS_SINT32 TextNego::GetRemotePort()
-{
-    TextProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->nDataPort;
-    }
-
-    return MEDIA_PORT_INVALID;
-}
-
-PUBLIC
-TextProfile* TextNego::GetNegotiatedLocalProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetLocalProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
-TextProfile* TextNego::GetNegotiatedNegoProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetNegotiatedProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
-TextProfile* TextNego::GetNegotiatedPeerProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetPeerProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
 MEDIA_DIRECTION TextNego::GetNegotiatedDirection(void)
 {
     if (m_listOaModel.GetSize() > 0)
@@ -322,12 +257,12 @@ IMS_SINT32 TextNego::GetMediaBandwidth(void)
     return -1;
 }
 
-PROTECTED TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
+PUBLIC TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
 {
     return (pConfig != IMS_NULL) ? static_cast<TextConfiguration*>(pConfig) : IMS_NULL;
 }
 
-PROTECTED TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
+PUBLIC TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<TextProfile*>(pProfile) : IMS_NULL;
 }

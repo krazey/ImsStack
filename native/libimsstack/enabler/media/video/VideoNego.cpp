@@ -142,71 +142,6 @@ PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
 }
 
 PUBLIC
-const IpAddress& VideoNego::GetNegotiatedRemoteAddress()
-{
-    VideoProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->objIpAddress;
-    }
-
-    return IpAddress::NONE;
-}
-
-PUBLIC
-IMS_SINT32 VideoNego::GetRemotePort()
-{
-    VideoProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->nDataPort;
-    }
-
-    return MEDIA_PORT_INVALID;
-}
-
-PUBLIC
-VideoProfile* VideoNego::GetNegotiatedLocalProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetLocalProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
-VideoProfile* VideoNego::GetNegotiatedNegoProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetNegotiatedProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
-VideoProfile* VideoNego::GetNegotiatedPeerProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetPeerProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC
 MEDIA_DIRECTION VideoNego::GetNegotiatedDirection()
 {
     if (m_listOaModel.GetSize() > 0)
@@ -316,12 +251,12 @@ IMS_SINT32 VideoNego::GetMediaBandwidth()
     return -1;
 }
 
-PROTECTED VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
+PUBLIC VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)
 {
     return (pConfig != IMS_NULL) ? static_cast<VideoConfiguration*>(pConfig) : IMS_NULL;
 }
 
-PROTECTED VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
+PUBLIC VideoProfile* VideoNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<VideoProfile*>(pProfile) : IMS_NULL;
 }

@@ -107,10 +107,10 @@ IMS_BOOL AudioController::UpdateSession(
 
     m_nCurrentActiveNegoId = nNegoId;
 
-    IMS_BOOL bAnbrResult =
-            UpdateAnbrEnabledConfig(nNegoId, pNego->GetNegotiatedNegoProfile()->bAnbr);
+    IMS_BOOL bAnbrResult = UpdateAnbrEnabledConfig(
+            nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->bAnbr);
     IMS_TRACE_D("UpdateSession() - res: %d, anbr enable: %d", bAnbrResult,
-            pNego->GetNegotiatedNegoProfile()->bAnbr, 0);
+            pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->bAnbr, 0);
 
     if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {
@@ -348,8 +348,10 @@ IMS_BOOL AudioController::UpdateRtpConfig(
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateRtpConfig(nAccessNetwork, pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        return pAudioSession->UpdateRtpConfig(nAccessNetwork,
+                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
     }
 
     IMS_TRACE_E(0, "UpdateRtpConfig() - invalid param", 0, 0, 0);
@@ -440,7 +442,7 @@ IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioN
 
     if (pAudioSession != IMS_NULL && pNego != IMS_NULL)
     {
-        AudioProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
+        AudioProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
         IMS_BOOL bEnableRtcp = IMS_TRUE;
 
         if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&

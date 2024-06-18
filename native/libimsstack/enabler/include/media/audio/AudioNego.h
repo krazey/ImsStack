@@ -78,35 +78,6 @@ public:
             OUT IMS_SINT32& eDir);
 
     /**
-     * @brief Get the negotiated remote ip address
-     *
-     * @return const IpAddress& The ip address
-     */
-    virtual const IpAddress& GetNegotiatedRemoteAddress();
-
-    /**
-     * @brief Get the negotiated remote port number
-     *
-     * @return IMS_UINT32 The port number
-     */
-    virtual IMS_SINT32 GetRemotePort();
-
-    /**
-     * @brief Get the negotiated local profile object
-     */
-    virtual AudioProfile* GetNegotiatedLocalProfile();
-
-    /**
-     * @brief Get the negotiated negotiated profile object
-     */
-    virtual AudioProfile* GetNegotiatedNegoProfile();
-
-    /**
-     * @brief Get the negotiated peer profile object
-     */
-    virtual AudioProfile* GetNegotiatedPeerProfile();
-
-    /**
      * @brief Get the negotiated audio direction
      */
     virtual MEDIA_DIRECTION GetNegotiatedDirection(void);
@@ -136,9 +107,17 @@ public:
      */
     virtual IMS_SINT32 GetMediaBandwidth(void);
 
-protected:
+    /**
+     * @brief static cast from MediaConfiguration to AudioConfiguration
+     */
     AudioConfiguration* ConfigCasting(IN MediaConfiguration* pConfig);
+
+    /**
+     * @brief static cast from MediaBaseProfile to AudioProfile
+     */
     AudioProfile* ProfileCasting(IN MediaBaseProfile* pProfile);
+
+protected:
     AudioProfile* GetLocalProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetPeerProfile(IN OaModel* pOaModel) override;
     AudioProfile* GetNegotiatedProfile(IN OaModel* pOaModel) override;

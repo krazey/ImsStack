@@ -146,66 +146,6 @@ PUBLIC VIRTUAL void AudioNego::NegotiateSdp(IN NEGO_STATE eNegoState,
     }
 }
 
-PUBLIC VIRTUAL const IpAddress& AudioNego::GetNegotiatedRemoteAddress()
-{
-    AudioProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->objIpAddress;
-    }
-
-    return IpAddress::NONE;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetRemotePort()
-{
-    AudioProfile* pProfile = GetNegotiatedPeerProfile();
-
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->nDataPort;
-    }
-
-    return MEDIA_PORT_INVALID;
-}
-
-PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedLocalProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetLocalProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedNegoProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetNegotiatedProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
-PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedPeerProfile()
-{
-    OaModel* pOaModel = GetNegotiatedOaModel();
-
-    if (pOaModel != IMS_NULL)
-    {
-        return GetPeerProfile(pOaModel);
-    }
-
-    return IMS_NULL;
-}
-
 PUBLIC VIRTUAL MEDIA_DIRECTION AudioNego::GetNegotiatedDirection(void)
 {
     if (m_listOaModel.GetSize() > 0)
@@ -491,12 +431,12 @@ PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetMediaBandwidth(void)
     return -1;
 }
 
-PROTECTED AudioConfiguration* AudioNego::ConfigCasting(IN MediaConfiguration* pConfig)
+PUBLIC AudioConfiguration* AudioNego::ConfigCasting(IN MediaConfiguration* pConfig)
 {
     return (pConfig != IMS_NULL) ? static_cast<AudioConfiguration*>(pConfig) : IMS_NULL;
 }
 
-PROTECTED AudioProfile* AudioNego::ProfileCasting(IN MediaBaseProfile* pProfile)
+PUBLIC AudioProfile* AudioNego::ProfileCasting(IN MediaBaseProfile* pProfile)
 {
     return (pProfile != IMS_NULL) ? static_cast<AudioProfile*>(pProfile) : IMS_NULL;
 }

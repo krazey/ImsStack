@@ -134,6 +134,66 @@ PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
     }
 }
 
+PUBLIC const IpAddress& BaseNego::GetNegotiatedRemoteAddress()
+{
+    MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->objIpAddress;
+    }
+
+    return IpAddress::NONE;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
+{
+    MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
+
+    if (pProfile != IMS_NULL)
+    {
+        return pProfile->nDataPort;
+    }
+
+    return MEDIA_PORT_INVALID;
+}
+
+PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
+{
+    OaModel* pOaModel = GetNegotiatedOaModel();
+
+    if (pOaModel != IMS_NULL)
+    {
+        return GetLocalProfile(pOaModel);
+    }
+
+    return IMS_NULL;
+}
+
+PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedNegoProfile()
+{
+    OaModel* pOaModel = GetNegotiatedOaModel();
+
+    if (pOaModel != IMS_NULL)
+    {
+        return GetNegotiatedProfile(pOaModel);
+    }
+
+    return IMS_NULL;
+}
+
+PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedPeerProfile()
+{
+    OaModel* pOaModel = GetNegotiatedOaModel();
+
+    if (pOaModel != IMS_NULL)
+    {
+        return GetPeerProfile(pOaModel);
+    }
+
+    return IMS_NULL;
+}
+
 PROTECTED VIRTUAL MediaBaseProfile* BaseNego::GetLocalProfile(IN OaModel* pOaModel)
 {
     return (pOaModel != IMS_NULL) ? pOaModel->pLocalProfile : IMS_NULL;

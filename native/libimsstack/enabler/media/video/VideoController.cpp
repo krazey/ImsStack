@@ -156,8 +156,10 @@ IMS_BOOL VideoController::UpdateRtpConfig(IN VideoNego* pNego)
 
     if (pNego != NULL && m_pSession != IMS_NULL)
     {
-        return m_pSession->UpdateRtpConfig(pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        return m_pSession->UpdateRtpConfig(
+                pNego->ProfileCasting(pNego->GetNegotiatedLocalProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile()),
+                pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile()));
     }
 
     return IMS_FALSE;
@@ -195,7 +197,7 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
         return IMS_FALSE;
     }
 
-    VideoProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
+    VideoProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
     if (pPeerProfile == IMS_NULL)
     {
         return IMS_FALSE;
