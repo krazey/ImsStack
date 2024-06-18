@@ -22,10 +22,12 @@
 #include "ISipHeader.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
 #include "helper/IMtcAosConnector.h"
+#include "helper/IPassiveTimerHolder.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -48,12 +50,7 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
         return CallReasonInfo(CODE_SIP_SERVER_ERROR);
     }
 
-    if (piMessage->GetStatusCode() == SipStatusCode::SC_503)
-    {
-        Handle503Response(*piMessage);
-    }
-
-    return GetCallReasonInfoForResponse(*piMessage);
+    return HandleResponse(*piMessage);
 }
 
 PUBLIC
@@ -78,32 +75,32 @@ IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoForResponse(IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::HandleResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
     IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
 
     if (SipStatusCode::SC_300 <= nStatusCode && nStatusCode < SipStatusCode::SC_400)
     {
-        return GetCallReasonInfoFor3xxResponse(objMessage);
+        return Handle3xxResponse(objMessage);
     }
     else if (SipStatusCode::SC_400 <= nStatusCode && nStatusCode < SipStatusCode::SC_500)
     {
-        return GetCallReasonInfoFor4xxResponse(objMessage);
+        return Handle4xxResponse(objMessage);
     }
     else if (SipStatusCode::SC_500 <= nStatusCode && nStatusCode < SipStatusCode::SC_600)
     {
-        return GetCallReasonInfoFor5xxResponse(objMessage);
+        return Handle5xxResponse(objMessage);
     }
     else if (SipStatusCode::SC_600 <= nStatusCode && nStatusCode < SipStatusCode::SC_MAX)
     {
-        return GetCallReasonInfoFor6xxResponse(objMessage);
+        return Handle6xxResponse(objMessage);
     }
     return CallReasonInfo(CODE_SIP_SERVER_ERROR);
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor3xxResponse(IN const IMessage& objMessage)
+CallReasonInfo UpdateErrorHandler::Handle3xxResponse(IN const IMessage& objMessage)
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -111,8 +108,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor3xxResponse(IN const IMes
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor4xxResponse(
-        IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -140,7 +136,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor4xxResponse(
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage)
+CallReasonInfo UpdateErrorHandler::Handle5xxResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -149,13 +145,15 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(IN const IMes
         case SipStatusCode::SC_501:
         case SipStatusCode::SC_502:
             return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode);
+        case SipStatusCode::SC_503:
+            return Handle503Response(objMessage);
     }
 
     return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage)
+CallReasonInfo UpdateErrorHandler::Handle6xxResponse(IN const IMessage& objMessage)
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -169,33 +167,42 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMes
 }
 
 PRIVATE
-void UpdateErrorHandler::Handle503Response(IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::Handle503Response(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    if (IsRegisterWithNextPcscfRequiredFor503(nRetryAfter, objMessage.GetMethod()))
+    {
+        RegisterFor503(nRetryAfter);
+        return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, objMessage.GetStatusCode());
+    }
 
-    RegisterWithNextPcscfIfRequired(nRetryAfter);
+    IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
+    m_objContext.GetPassiveTimerHolder().AddTimer(
+            IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfterInMillis);
+
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, objMessage.GetStatusCode());
 }
 
 PRIVATE
-void UpdateErrorHandler::RegisterWithNextPcscfIfRequired(IN IMS_SINT32 nRetryAfter) const
+void UpdateErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
 {
     IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
-        if (nRetryAfter < 0)
-        {
-            pAosConnector->RegisterWithNextPcscf(0);
-            return;
-        }
+        pAosConnector->RegisterWithNextPcscf(nRetryAfter > 0 ? nRetryAfter : 0);
+    }
+}
 
-        if (nRetryAfter * 1000 > Engine::GetConfiguration()
+PRIVATE
+IMS_BOOL UpdateErrorHandler::IsRegisterWithNextPcscfRequiredFor503(
+        IN IMS_SINT32 nRetryAfter, IN const SipMethod& objMethod) const
+{
+    return nRetryAfter <= 0 ||
+            nRetryAfter * 1000 > Engine::GetConfiguration()
                                          ->GetSipConfig(m_objContext.GetSlotId())
                                          ->GetSipConfigV()
-                                         ->GetTimerValue(ISipConfigV::TIMER_F))
-        {
-            pAosConnector->RegisterWithNextPcscf(nRetryAfter);
-            return;
-        }
-    }
+                                         ->GetTimerValue(objMethod.Equals(SipMethod::INVITE)
+                                                         ? ISipConfigV::TIMER_B
+                                                         : ISipConfigV::TIMER_F);
 }

@@ -32,6 +32,7 @@
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
+#include "call/MtcCallManager.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessageBodyPart.h"
@@ -462,6 +463,11 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         SetTimerForImsCallBlocking(nRetryAfterInMillis);
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+    }
+
+    if (!m_objContext.GetCallManager().GetCallsByState(IMtcCall::State::ESTABLISHED).IsEmpty())
+    {
+        return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, objMessage.GetStatusCode());
     }
 
     if (IsRegisterWithNextPcscfAndRedialRequiredFor503(nRetryAfter))

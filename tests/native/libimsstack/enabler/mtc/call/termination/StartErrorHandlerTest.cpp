@@ -27,7 +27,9 @@
 #include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -67,6 +69,7 @@ public:
     MockIMtcImsEventReceiver objImsEventReceiver;
     Ims3gppData objIms3gppData;
     TestConfigService* m_pConfigService;
+    MockIMtcCallManager objCallManager;
 
     StartErrorHandler* pHandler;
 
@@ -99,6 +102,7 @@ protected:
                 .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
 
         ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
+        ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
         pHandler = new StartErrorHandler(objCallContext, objSession);
     }
@@ -705,6 +709,20 @@ TEST_F(StartErrorHandlerTest,
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(0);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithActiveCallReturnsServiceUnavailable)
+{
+    SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(-1));
+
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objCall;
+    objCalls.Append(&objCall);
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
 }
 
 TEST_F(StartErrorHandlerTest,

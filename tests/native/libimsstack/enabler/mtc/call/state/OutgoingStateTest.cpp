@@ -26,6 +26,7 @@
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
 #include "call/MockISilentRedialHelper.h"
@@ -93,6 +94,7 @@ public:
     MediaInfo objMediaInfo;
     ImsList<IMtcSession*> objSessions;
     MockIMtcImsEventReceiver objImsEventReceiver;
+    MockIMtcCallManager objCallManager;
 
 protected:
     virtual void SetUp() override
@@ -122,6 +124,7 @@ protected:
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
 
         pEpsFbTrigger = new MockEpsFallbackTrigger(objCallContext);
         ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
@@ -846,6 +849,8 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
+    ImsList<IMtcCall*> objCalls;
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));

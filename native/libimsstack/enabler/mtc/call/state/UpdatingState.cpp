@@ -289,7 +289,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
-    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE)
+    if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE ||
+            objReason.nCode == CODE_SIP_SERVICE_UNAVAILABLE)
     {
         HandleTerminate(objReason);
         m_objContext.GetUiNotifier().SendTerminated(objReason);

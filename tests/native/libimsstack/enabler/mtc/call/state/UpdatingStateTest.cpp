@@ -15,8 +15,12 @@
  */
 
 #include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
+#include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "PlatformContext.h"
+#include "SipMethod.h"
 #include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -32,6 +36,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
@@ -72,6 +77,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        objConfigService.SetCarrierConfig(&(objConfigService.GetMockCarrierConfig()));
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
 
@@ -467,6 +473,30 @@ TEST_F(UpdatingStateTest, OnTerminatedByRemoteErrorTerminatesCall)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_404));
+
+    EXPECT_CALL(objUiNotifier, SendTerminated(_));
+    EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdateFailed(&objSession));
+}
+
+TEST_F(UpdatingStateTest, OnServiceUnavailableErrorTerminatesCall)
+{
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessageUtils,
+            GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, AString::ConstNull()))
+            .WillByDefault(Return(nAnyRetryAfter));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+    MockIMtcService objMtcService;
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
+    MockIMtcAosConnector objAosConnector;
+    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
     EXPECT_CALL(objUiNotifier, SendTerminated(_));
     EXPECT_EQ(CallStateName::TERMINATING, pUpdatingState->SessionUpdateFailed(&objSession));
