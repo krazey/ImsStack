@@ -342,7 +342,7 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
         }
         else
         {
-            IMS_SINT32 nTmpAs = m_pAudioNego->GetMediaBandwidth();
+            IMS_SINT32 nTmpAs = m_pAudioNego->GetNegotiatedBandwidth();
 
             if (nTmpAs > 0)
             {
@@ -366,7 +366,7 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
         if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
         {
-            IMS_SINT32 nTmpAS = m_pVideoNego->GetMediaBandwidth();
+            IMS_SINT32 nTmpAS = m_pVideoNego->GetNegotiatedBandwidth();
 
             if (nTmpAS > 0)
             {
@@ -390,7 +390,7 @@ IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
         if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
         {
-            IMS_SINT32 nTmpAS = m_pTextNego->GetMediaBandwidth();
+            IMS_SINT32 nTmpAS = m_pTextNego->GetNegotiatedBandwidth();
 
             if (nTmpAS > 0)
             {

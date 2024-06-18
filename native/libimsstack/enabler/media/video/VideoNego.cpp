@@ -142,28 +142,6 @@ PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
 }
 
 PUBLIC
-MEDIA_DIRECTION VideoNego::GetNegotiatedDirection()
-{
-    if (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pLatestOaModel = IMS_NULL;
-        pLatestOaModel = GetNegotiatedOaModel();
-
-        if (pLatestOaModel == IMS_NULL)
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-
-        if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)
-        {
-            return pLatestOaModel->pNegotiatedProfile->eDirection;
-        }
-    }
-
-    return MEDIA_DIRECTION_INVALID;
-}
-
-PUBLIC
 VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
 {
     if (m_listOaModel.GetSize() > 0)
@@ -204,51 +182,6 @@ VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
     }
 
     return VIDEO_RESOLUTION_NOT_USED;
-}
-
-PUBLIC
-IMS_SINT32 VideoNego::GetNegotiatedRtpPort()
-{
-    CONST IMS_SINT32 PORT_NONE = -1;
-    if (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pLatestOaModel = GetNegotiatedOaModel();
-
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->IsAllProfileExist() == IMS_FALSE)
-        {
-            return PORT_NONE;
-        }
-
-        IMS_TRACE_I("GetNegotiatedRtpPort() - Previous negotiated port[%d] found",
-                pLatestOaModel->pNegotiatedProfile->nDataPort, 0, 0);
-        return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->nDataPort;
-    }
-
-    return PORT_NONE;
-}
-
-PUBLIC
-IMS_SINT32 VideoNego::GetMediaBandwidth()
-{
-    if (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
-
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->pLocalProfile == IMS_NULL)
-        {
-            return -1;
-        }
-
-        // returned negotiated bandwidth.
-        if (pLatestOaModel->pNegotiatedProfile != IMS_NULL)
-        {
-            return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->nBandwidthAs;
-        }
-
-        return (IMS_SINT32)pLatestOaModel->pLocalProfile->nBandwidthAs;
-    }
-
-    return -1;
 }
 
 PUBLIC VideoConfiguration* VideoNego::ConfigCasting(IN MediaConfiguration* pConfig)

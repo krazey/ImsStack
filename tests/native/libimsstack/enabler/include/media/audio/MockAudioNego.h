@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(AUDIO_CODEC_BITRATE, GetNegotiatedAudioCodecRate, (), (override));
     MOCK_METHOD(IMS_BOOL, HasNegotiatedDtmf, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedRtpPort, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetMediaBandwidth, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNegotiatedBandwidth, (), (override));
 };
 
 #endif

@@ -78,11 +78,6 @@ public:
             OUT IMS_SINT32& eDir);
 
     /**
-     * @brief Get the negotiated audio direction
-     */
-    virtual MEDIA_DIRECTION GetNegotiatedDirection(void);
-
-    /**
      * @brief Get the negotiated audio codec
      */
     virtual AUDIO_CODEC GetNegotiatedCodec(void);
@@ -96,16 +91,6 @@ public:
      * @brief Get if the telephony-event is negotiated
      */
     virtual IMS_BOOL HasNegotiatedDtmf(void);
-
-    /**
-     * @brief Get the port number from the negotiated profile
-     */
-    virtual IMS_SINT32 GetNegotiatedRtpPort(void);
-
-    /**
-     * @brief Get the negotiated audio bandwidth
-     */
-    virtual IMS_SINT32 GetMediaBandwidth(void);
 
     /**
      * @brief static cast from MediaConfiguration to AudioConfiguration

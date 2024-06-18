@@ -79,24 +79,9 @@ public:
             OUT IMS_SINT32& eDir);
 
     /**
-     * @brief Get the negotiated audio direction
-     */
-    virtual MEDIA_DIRECTION GetNegotiatedDirection();
-
-    /**
      * @brief Get the negotiated audio codec
      */
     virtual TEXT_CODEC GetNegotiatedCodec();
-
-    /**
-     * @brief Get the port number from the negotiated profile
-     */
-    virtual IMS_SINT32 GetNegotiatedRtpPort();
-
-    /**
-     * @brief Get the negotiated audio bandwidth
-     */
-    virtual IMS_SINT32 GetMediaBandwidth();
 
     /**
      * @brief static cast from MediaConfiguration to TextConfiguration

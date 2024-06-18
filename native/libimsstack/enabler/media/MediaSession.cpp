@@ -667,7 +667,7 @@ IMS_SINT32 MediaSession::GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
     if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_AUDIO)) {
         AudioNego* pAudioNego = pMediaNego->GetAudioNego();
         if (pAudioNego == IMS_NULL) return 0;
-        return (IMS_SINT32)pAudioNego->GetMediaBandwidth();
+        return (IMS_SINT32)pAudioNego->GetNegotiatedBandwidth();
     }
     return 0;
 }
