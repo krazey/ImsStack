@@ -2666,49 +2666,55 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             log("MoPendingCall :: msg=" + msg.what);
 
             switch (msg.what) {
-            case EVENT_SERVICE_STATE_CHANGED: {
+                case EVENT_SERVICE_STATE_CHANGED: {
+                    if (mServiceType != ImsCallProfile.SERVICE_TYPE_NORMAL) {
+                        logi("MoPendingCall :: Service type is not matching, ignore");
+                        break;
+                    }
                     MtcServiceState ss = (MtcServiceState) msg.obj;
+                    logi("MoPendingCall :: " + ss);
 
-                logi("MoPendingCall :: " + ss);
+                    int result = startCall(ss);
 
-                int result = startCall(ss);
+                    if (result == RESULT_NOK) {
+                        notifyPendingCallStartFailed();
+                    }
 
-                if (result == RESULT_NOK) {
+                    if (result != RESULT_IGNORE) {
+                        dispose();
+                    }
+                    break;
+                }
+
+                case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
+                    if (mServiceType != ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
+                        logi("MoPendingCall :: Service type is not matching, ignore");
+                        break;
+                    }
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
+                    logi("MoPendingCall :: " + ss);
+
+                    int result = startEmergencyCall(ss);
+
+                    if (result == RESULT_NOK) {
+                        notifyPendingECallStartFailed(ss);
+                    }
+
+                    if (result != RESULT_IGNORE) {
+                        dispose();
+                    }
+                    break;
+                }
+
+                case EVENT_IMS_REG_WAITING_TIMER_EXPIRED: {
+                    logi("MoPendingCall :: IMS-REG waiting timer expired");
                     notifyPendingCallStartFailed();
-                }
-
-                if (result != RESULT_IGNORE) {
                     dispose();
-                }
-                break;
-            }
-
-            case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
-                    MtcServiceState ss = (MtcServiceState) msg.obj;
-
-                logi("MoPendingCall :: " + ss);
-
-                int result = startEmergencyCall(ss);
-
-                if (result == RESULT_NOK) {
-                    notifyPendingECallStartFailed(ss);
+                    break;
                 }
 
-                if (result != RESULT_IGNORE) {
-                    dispose();
-                }
-                break;
-            }
-
-            case EVENT_IMS_REG_WAITING_TIMER_EXPIRED: {
-                logi("MoPendingCall :: IMS-REG waiting timer expired");
-                notifyPendingCallStartFailed();
-                dispose();
-                break;
-            }
-
-            default:
-                break;
+                default:
+                    break;
             }
         }
 

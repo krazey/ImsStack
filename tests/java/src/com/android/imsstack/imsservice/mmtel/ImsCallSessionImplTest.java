@@ -55,11 +55,14 @@ import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.CallTracker;
+import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
+import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionImpl.ImsCallExtManagerProxy;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
@@ -85,6 +88,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     private ConfigInterface mMockConfigInterface;
     private ImsCallContext mMockCallContext;
     private CallTracker mMockCallTracker;
+    private IServiceStateTracker mMockServiceStateTracker;
     private MtcCall mMockMtcCall;
     private ImsCallProfile mImsCallProfile;
     private TestImsCallSessionImpl mImsCallSession;
@@ -108,6 +112,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockCallTracker = Mockito.mock(CallTracker.class);
+        mMockServiceStateTracker = Mockito.mock(IServiceStateTracker.class);
         mMockCallInfo = Mockito.mock(CallInfo.class);
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
         mMockImsCallManager = Mockito.mock(ImsCallManager.class);
@@ -127,6 +132,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         MessageExecutor executor = new MessageExecutor(mTestableLooper.getLooper());
         when(mMockCallContext.getExecutor()).thenReturn(executor);
         when(mMockCallContext.getCallHandler()).thenReturn(executor);
+        when(mMockCallContext.getCallLooper()).thenReturn(mTestableLooper.getLooper());
+        when(mMockCallContext.getServiceStateTracker()).thenReturn(mMockServiceStateTracker);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
                 MSimUtils.DEFAULT_SLOT_ID);
@@ -234,6 +241,60 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
         mImsCallSession.start(null, mImsCallProfile);
         verify(mMockMtcCall, times(2)).start(anyInt(), anyObject(), anyObject(),
+                any(MediaInfo.class), any(SuppInfo.class));
+    }
+
+    @Test
+    public void testStartEmergencyCallAndNormalServiceOpened() {
+        final ArgumentCaptor<IServiceStateTracker.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IServiceStateTracker.Listener.class);
+        when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))
+                .thenReturn(false);
+
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL, true);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback);
+
+        mImsCallSession.start(null, mImsCallProfile);
+
+        verify(mMockServiceStateTracker).addListener(listenerCaptor.capture());
+        final IServiceStateTracker.Listener listener = listenerCaptor.getValue();
+
+        listener.onNormalServiceStateChanged(
+                new MtcServiceState(IUMtcService.SERVICE_VOIP, IUMtcService.ES_OPENED, 0));
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMtcCall, times(0)).start(anyInt(), anyObject(), anyObject(),
+                any(MediaInfo.class), any(SuppInfo.class));
+    }
+
+    @Test
+    public void testStartEmergencyCallAndEmergencyServiceOpened() {
+        final ArgumentCaptor<IServiceStateTracker.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IServiceStateTracker.Listener.class);
+        when(mMockServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY))
+                .thenReturn(false);
+
+        mImsCallProfile = new ImsCallProfile(
+                ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE);
+        mImsCallProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL, true);
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback);
+
+        mImsCallSession.start(null, mImsCallProfile);
+
+        verify(mMockServiceStateTracker).addListener(listenerCaptor.capture());
+        final IServiceStateTracker.Listener listener = listenerCaptor.getValue();
+
+        listener.onEmergencyServiceStateChanged(
+                new MtcServiceState(IUMtcService.SERVICE_EMERGENCY, IUMtcService.ES_OPENED, 0));
+        mTestableLooper.processAllMessages();
+
+        verify(mMockMtcCall, times(1)).start(anyInt(), anyObject(), anyObject(),
                 any(MediaInfo.class), any(SuppInfo.class));
     }
 
