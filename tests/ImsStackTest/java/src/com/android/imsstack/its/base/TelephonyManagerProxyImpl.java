@@ -503,7 +503,7 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
             mSimInfoRecord.setSerialNumber(TestConstants.SIM_SERIAL_NUMBER_2);
             mSimInfoRecord.setImsi(TestConstants.MCC_MNC + TestConstants.PHONE_NUMBER_2);
         }
-        mSimInfoRecord.setOperator(TestConstants.MCC);
+        mSimInfoRecord.setOperator(TestConstants.MCC_MNC);
         mSimInfoRecord.setCountryIso("");
         mSimInfoRecord.setGroupIdLevel1(null);
         mSimInfoRecord.setOperatorName(TestConstants.OPERATOR_ALPHA_LONG);
