@@ -192,7 +192,6 @@ private:
     IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
     IMS_BOOL GetAvpfFromAttributes_EX(
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
-    OaModel* GetNegotiatedOaModel();
 
     /**
      * @brief Get the width and height from video resolution enum id
