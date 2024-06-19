@@ -97,6 +97,13 @@ public:
     virtual IMS_BOOL IsNr() const = 0;
 
     /**
+     * @brief Checks if the UE is currently in LTE and has combined attach type.
+     *
+     * @return True if it's in LTE and has combined attach type.
+     */
+    virtual IMS_BOOL IsEpsCombinedAttach() const = 0;
+
+    /**
      * @brief Checks if the UE is currently registered through an ePDG.
      *
      * @return True if it's in ePDG.
