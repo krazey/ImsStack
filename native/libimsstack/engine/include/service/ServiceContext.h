@@ -18,7 +18,8 @@
 
 #include "IServiceContext.h"
 
-class ServiceContextPrivate;
+class Configuration;
+class ServiceManager;
 
 /**
  * A context class for providing the singleton instances for service layer.
@@ -35,7 +36,7 @@ public:
 
 public:
     IConfiguration* GetConfiguration() const override;
-    IServiceManager* GetServiceManager() const override;
+    IServiceManager* GetServiceManager() override;
 
     /**
      * @brief Sets the specific service context to return their own instances.
@@ -55,7 +56,8 @@ public:
     static void DestroyInstance();
 
 private:
-    ServiceContextPrivate* m_pPrivate;
+    Configuration* m_pConfiguration;
+    ServiceManager* m_pServiceManager;
     IServiceContext* m_piServiceContext;
 
     static ServiceContext* s_pContext;

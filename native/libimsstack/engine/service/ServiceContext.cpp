@@ -18,44 +18,23 @@
 #include "ServiceContext.h"
 #include "ServiceManager.h"
 
-class ServiceContextPrivate : public IServiceContext
-{
-public:
-    inline ServiceContextPrivate() :
-            m_pConfiguration(new Configuration()),
-            m_pServiceManager(new ServiceManager())
-    {
-    }
-    inline virtual ~ServiceContextPrivate()
-    {
-        delete m_pConfiguration;
-        delete m_pServiceManager;
-    }
-
-public:
-    ServiceContextPrivate(IN const ServiceContextPrivate&) = delete;
-    ServiceContextPrivate& operator=(IN const ServiceContextPrivate&) = delete;
-
-public:
-    inline Configuration* GetConfiguration() const override { return m_pConfiguration; }
-    inline ServiceManager* GetServiceManager() const override { return m_pServiceManager; }
-
-private:
-    Configuration* m_pConfiguration;
-    ServiceManager* m_pServiceManager;
-};
-
 PUBLIC GLOBAL ServiceContext* ServiceContext::s_pContext = IMS_NULL;
 
 PRIVATE ServiceContext::ServiceContext() :
-        m_pPrivate(new ServiceContextPrivate()),
+        m_pConfiguration(new Configuration()),
+        m_pServiceManager(IMS_NULL),
         m_piServiceContext(IMS_NULL)
 {
 }
 
 PRIVATE VIRTUAL ServiceContext::~ServiceContext()
 {
-    delete m_pPrivate;
+    if (m_pServiceManager != IMS_NULL)
+    {
+        delete m_pServiceManager;
+    }
+
+    delete m_pConfiguration;
 }
 
 PUBLIC VIRTUAL IConfiguration* ServiceContext::GetConfiguration() const
@@ -65,17 +44,22 @@ PUBLIC VIRTUAL IConfiguration* ServiceContext::GetConfiguration() const
         return m_piServiceContext->GetConfiguration();
     }
 
-    return m_pPrivate->GetConfiguration();
+    return m_pConfiguration;
 }
 
-PUBLIC VIRTUAL IServiceManager* ServiceContext::GetServiceManager() const
+PUBLIC VIRTUAL IServiceManager* ServiceContext::GetServiceManager()
 {
     if (m_piServiceContext != IMS_NULL)
     {
         return m_piServiceContext->GetServiceManager();
     }
 
-    return m_pPrivate->GetServiceManager();
+    if (m_pServiceManager == IMS_NULL)
+    {
+        m_pServiceManager = new ServiceManager();
+    }
+
+    return m_pServiceManager;
 }
 
 PUBLIC GLOBAL ServiceContext* ServiceContext::GetInstance()

@@ -24,10 +24,10 @@ class MockIServiceContext : public IServiceContext
 {
 public:
     MockIServiceContext() = default;
-    virtual ~MockIServiceContext() = default;
+    ~MockIServiceContext() override = default;
 
     MOCK_METHOD(IConfiguration*, GetConfiguration, (), (const, override));
-    MOCK_METHOD(IServiceManager*, GetServiceManager, (), (const, override));
+    MOCK_METHOD(IServiceManager*, GetServiceManager, (), (override));
 };
 
 #endif

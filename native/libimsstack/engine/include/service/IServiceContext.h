@@ -37,8 +37,9 @@ public:
 
     /**
      * @brief Returns the IServiceManager instance.
+     *        Creates a new instance if it does not exist.
      */
-    virtual IServiceManager* GetServiceManager() const = 0;
+    virtual IServiceManager* GetServiceManager() = 0;
 };
 
 #endif

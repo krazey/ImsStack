@@ -16,13 +16,11 @@
 #include <gtest/gtest.h>
 
 #include "PlatformContext.h"
-#include "PlatformService.h"
 
-#include "Engine.h"
 #include "ServiceContext.h"
 
 #include "MockIServiceContext.h"
-#include "TestThreadService.h"
+#include "TestMutexService.h"
 
 using ::testing::Return;
 
@@ -33,24 +31,20 @@ class ServiceContextTest : public ::testing::Test
 {
 public:
     inline ServiceContextTest() :
-            m_pThreadService(IMS_NULL),
-            m_pOldThreadService(IMS_NULL),
             m_pServiceContext(IMS_NULL)
     {
     }
 
 protected:
-    TestThreadService* m_pThreadService;
-    PlatformService* m_pOldThreadService;
+    TestMutexService m_objMutexService;
 
     ServiceContext* m_pServiceContext;
 
 protected:
     void SetUp() override
     {
-        m_pThreadService = new TestThreadService();
-        m_pOldThreadService = PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_THREAD, m_pThreadService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_MUTEX, &m_objMutexService);
 
         m_pServiceContext = ServiceContext::GetInstance();
     }
@@ -59,9 +53,7 @@ protected:
     {
         ServiceContext::DestroyInstance();
 
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_THREAD, m_pOldThreadService);
-        delete m_pThreadService;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_MUTEX, IMS_NULL);
     }
 };
 
