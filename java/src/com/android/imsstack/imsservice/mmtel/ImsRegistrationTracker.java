@@ -126,8 +126,9 @@ public class ImsRegistrationTracker {
     }
 
     public void dispose() {
-        mRegTracker.notifyDeregistered(mRegTracker.getNetworkType(),
-                IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED, null);
+        mRegTracker.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                mRegTracker.getNetworkType(), IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED,
+                null);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -699,17 +700,20 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
-            logi("ImsRegistrationTracker notifyDeregistered - network=" + networkType
-                    + ", reason =" + reason + ", message =" + message);
+        public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+            logi("ImsRegistrationTracker notifyDeregistered - type=" + regType
+                    + ", network=" + networkType + ", reason =" + reason + ", message =" + message);
             int radioTech = convertToTelephonyNetworkType(networkType);
-            mRegImpl.notifyDeregistered(radioTech, reason, message);
-            boolean networkTypeChanged = updateNetworkType(
-                    IAosRegistrationListener.NetworkType.NONE);
-            boolean featureChanged = updateFeatures(FeatureTagMask.NONE);
+            mRegImpl.notifyDeregistered(regType, radioTech, reason, message);
 
-            if (networkTypeChanged || featureChanged) {
-                updateFeatureCapabilities();
+            if (regType == RegistrationType.NORMAL) {
+                boolean networkTypeChanged = updateNetworkType(
+                        IAosRegistrationListener.NetworkType.NONE);
+                boolean featureChanged = updateFeatures(FeatureTagMask.NONE);
+
+                if (networkTypeChanged || featureChanged) {
+                    updateFeatureCapabilities();
+                }
             }
         }
 

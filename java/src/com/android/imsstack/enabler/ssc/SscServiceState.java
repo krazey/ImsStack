@@ -778,7 +778,11 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
+        public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
 
             if (mImsRegistrationState) {

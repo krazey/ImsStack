@@ -47,11 +47,12 @@ public interface IAosRegistrationListener {
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
+     * @param regType Type of the registration. See {@link RegistrationType}.
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
      * @param message associated with why registration was disconnected.
      */
-    void notifyDeregistered(int networkType, int reason, String message);
+    void notifyDeregistered(int regType, int networkType, int reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology to the other

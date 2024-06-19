@@ -729,7 +729,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
 
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
-            l.notifyDeregistered(networkType, reason, getErrorMessage(reason));
+            l.notifyDeregistered(RegistrationType.NORMAL, networkType, reason,
+                    getErrorMessage(reason));
+        }
+    }
+
+    private void onDeregisteredForEmergency(int regType, int networkType, int reason) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
+            l.notifyDeregistered(regType, networkType, reason, getErrorMessage(reason));
         }
     }
 
@@ -807,10 +814,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void updateDeregistered(int networkType, int reason) {
-        ImsLog.d(mSlotId, "updateDeregistered :: networkType(" + networkType + "), reason("
-                + reason + ")");
-        mHandler.post(() -> onDeregistered(networkType, reason));
+    private void updateDeregistered(int regType, int networkType, int reason) {
+        ImsLog.d(mSlotId, "updateDeregistered :: regType(" + regType + "), networkType("
+                + networkType + "), reason(" + reason + ")");
+
+        if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
+            mHandler.post(() -> onDeregisteredForEmergency(regType, networkType, reason));
+        } else {
+            mHandler.post(() -> onDeregistered(networkType, reason));
+        }
     }
 
     private void updateTechnologyChangeFailed(int regType, int networkType, int reason) {
@@ -970,10 +982,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     updateRegistering(regType, networkType, featureTagBits, featureTags);
                 }
                 case IIAosService.N2J_NOTIFY_DEREGISTERED -> {
+                    int regType = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
-                    updateDeregistered(networkType, reason);
+                    updateDeregistered(regType, networkType, reason);
                 }
                 case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
                     int regType = parcel.readInt();

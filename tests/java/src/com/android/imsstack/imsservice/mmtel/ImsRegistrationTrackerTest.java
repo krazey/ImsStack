@@ -236,7 +236,8 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyDeRegistered() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
@@ -259,7 +260,8 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyDeRegistered_WithError() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode
                         .CODE_REGISTRATION_ERROR_WFC_SUB_403, null);
         assertEquals(false, mRegTracker.isRegistered());
@@ -283,7 +285,8 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyDeRegistered_WithPLMNError() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,

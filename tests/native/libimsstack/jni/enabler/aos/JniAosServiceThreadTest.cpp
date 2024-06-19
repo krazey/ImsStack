@@ -74,7 +74,7 @@ TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyDeregistered)
 {
     // GIVEN
     // WHEN
-    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyDeregistered(0, 0);
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyDeregistered(0, 0, 0);
 
     // THEN
     EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));

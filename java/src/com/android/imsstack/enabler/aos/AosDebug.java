@@ -1145,8 +1145,9 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
-            logi(mSlotId, "notifyDeregistered - networkType:" + networkType
+        public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+            logi(mSlotId, "notifyDeregistered - regType:" + regType
+                    + ", networkType:" + networkType
                     + ", reason:" + reason + "message:" + message);
             Message.obtain(mHandler,
                     DEBUG_NOTIFY_DEREGISTERED, networkType, reason).sendToTarget();

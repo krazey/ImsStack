@@ -146,7 +146,8 @@ public class ImsFeatureManagerTest {
 
     @Test
     public void testupdateFeatureCapabilities_deReg() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         when(mMockUt.isUtAvailable()).thenReturn(true);
 

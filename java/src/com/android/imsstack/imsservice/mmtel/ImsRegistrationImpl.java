@@ -85,9 +85,25 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyDeregistered(int networkType, int reason, String message) {
+    public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+        logi("notifyDeregistered: [" + RegistrationType.toString(regType) + "]");
 
-        onDeregistered(getReasonInfo(reason, message), getSuggestedAction(reason), networkType);
+        if (regType == RegistrationType.NORMAL) {
+            onDeregistered(getReasonInfo(reason, message), getSuggestedAction(reason),
+                    networkType);
+            return;
+        }
+
+        ImsRegistrationAttributes.Builder attrBuilder =
+                new ImsRegistrationAttributes.Builder(networkType)
+                .setFlagRegistrationTypeEmergency();
+
+        if (regType == RegistrationType.FAKE) {
+            attrBuilder.setFlagVirtualRegistrationForEmergencyCall();
+        }
+
+        onDeregistered(getReasonInfo(reason, message),
+                RegistrationManager.SUGGESTED_ACTION_NONE, attrBuilder.build());
     }
 
     @Override

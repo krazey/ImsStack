@@ -419,13 +419,18 @@ void AosApplication::ResetBlock(IN BLOCK_REASON nReason)
 PROTECTED
 void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
 {
+    if (!IsRegTypeNormal())
+    {
+        return;
+    }
+
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (piService != IMS_NULL)
     {
         A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
-        piService->NotifyDeregistered((eReason == AosReasonCode::CLEAR_RAT_BLOCKS)
-                        ? AosNetworkType::NONE
-                        : GetNetworkTypeForImsRegState(),
+        piService->NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL,
+                (eReason == AosReasonCode::CLEAR_RAT_BLOCKS) ? AosNetworkType::NONE
+                                                             : GetNetworkTypeForImsRegState(),
                 eReason);
     }
 }

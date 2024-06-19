@@ -726,6 +726,7 @@ PROTECTED void AosERegistration::ProcessFakeMode()
 {
     A_IMS_TRACE_I(REGID, "ProcessFakeMode", 0, 0, 0);
 
+    NotifyDeregistered();
     SetFakeReg(IMS_TRUE);
     SetMode(MODE_FAKE);
     SetReinitiationRequested(IMS_TRUE);

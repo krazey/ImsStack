@@ -136,13 +136,15 @@ public:
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param eReason associated with why registration was disconnected.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class NetworkType
      * @see class AosReasonCode
      */
     virtual IMS_BOOL NotifyDeregistered(
-            IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
