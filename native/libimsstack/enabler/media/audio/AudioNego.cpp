@@ -39,7 +39,7 @@ __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
-        BaseNego(nSlotId)
+        BaseNego(nSlotId, MEDIA_TYPE_AUDIO)
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
 }

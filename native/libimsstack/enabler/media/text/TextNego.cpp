@@ -28,7 +28,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
-        BaseNego(nSlotId)
+        BaseNego(nSlotId, MEDIA_TYPE_TEXT)
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
 }

@@ -32,7 +32,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
-        BaseNego(nSlotId),
+        BaseNego(nSlotId, MEDIA_TYPE_VIDEO),
         m_bNegotiatedCvoResult(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);

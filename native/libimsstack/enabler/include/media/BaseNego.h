@@ -74,7 +74,8 @@ public:
         };
     };
 
-    explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0);
+    explicit BaseNego(IN const IMS_SINT32 nSlotId = IMS_SLOT_0,
+            IN const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_NOTUSED);
     virtual ~BaseNego();
 
     /**
@@ -206,6 +207,7 @@ protected:
             IN IMS_BOOL bEnforceReofferMode) = 0;
 
 protected:
+    MEDIA_CONTENT_TYPE m_eType;
     MediaBaseProfile* m_pBaseProfile;
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;

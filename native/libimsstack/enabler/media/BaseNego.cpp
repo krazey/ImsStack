@@ -22,8 +22,9 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC BaseNego::BaseNego(IMS_SINT32 nSlotId) :
+PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TYPE eType) :
         ImsSlot(nSlotId),
+        m_eType(eType),
         m_pBaseProfile(new MediaBaseProfile()),
         m_listOaModel(ImsList<OaModel*>()),
         m_pConfig(IMS_NULL),
