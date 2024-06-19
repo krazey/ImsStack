@@ -550,6 +550,26 @@ PUBLIC VIRTUAL AosRegistrationType AosRegistration::GetRegType()
     return m_eRegType;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosRegistration::GetImsRegType()
+{
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        return IMS_REG_TYPE_NORMAL;
+    }
+
+    if (m_eRegType == AosRegistrationType::EMERGENCY)
+    {
+        return (IsFakeRegistration() ? IMS_REG_TYPE_FAKE : IMS_REG_TYPE_EMERGENCY);
+    }
+
+    if (m_eRegType == AosRegistrationType::FAKE)
+    {
+        return IMS_REG_TYPE_FAKE;
+    }
+
+    return IMS_REG_TYPE_INVALID;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosRegistration::IsRegistered()
 {
     return (IsRefreshing() || m_nState == STATE_REGISTERED);
@@ -594,9 +614,13 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
 
     m_nState = nState;
 
-    if (m_eRegType == AosRegistrationType::NORMAL)
+    if (m_eRegType != AosRegistrationType::RCS)
     {
         UpdateDetailState(m_nState);
+    }
+
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
         if (!IsRegTrying())
         {
             SetTraffic(IMS_FALSE);
@@ -1031,7 +1055,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     m_eImsRegNetwork = eImsRegNetwork;
 
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
+    IMS_SINT32 nImsRegType = GetImsRegType();
+    if (piService != IMS_NULL && nImsRegType != IAosRegistration::IMS_REG_TYPE_INVALID)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
@@ -1046,7 +1071,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERED)
         {
             ImsList<AString> objFeatureTags = ImsList<AString>();
-            piService->NotifyRegistered(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistered(
+                    nImsRegType, m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
     }
 }

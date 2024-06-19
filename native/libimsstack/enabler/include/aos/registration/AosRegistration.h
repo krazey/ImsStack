@@ -87,6 +87,7 @@ public:
             IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
     IMS_UINT32 GetState() override;
     AosRegistrationType GetRegType() override;
+    IMS_SINT32 GetImsRegType() override;
 
     IMS_BOOL IsRegistered() override;
     IMS_BOOL IsRefreshing() override;

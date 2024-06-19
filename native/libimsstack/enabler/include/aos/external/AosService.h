@@ -79,13 +79,13 @@ public:
     void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) override;
 
     // Native -> Java
-    IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
     IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const ImsList<AString>& objFeatureTags) override;
     IMS_BOOL NotifyDeregistered(IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
-    IMS_BOOL NotifyTechnologyChangeFailed(
-            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
+    IMS_BOOL NotifyTechnologyChangeFailed(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_SINT32 nCauseCode) override;
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;

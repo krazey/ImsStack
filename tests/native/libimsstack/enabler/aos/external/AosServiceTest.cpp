@@ -19,6 +19,7 @@
 
 #include "external/AosService.h"
 #include "interface/IAosEmergencyListener.h"
+#include "interface/IAosRegistration.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServiceSettingListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -970,7 +971,8 @@ TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
 TEST_F(AosServiceTest, NotifyRegistered)
 {
     const ImsList<AString> objFeatureTags;
-    EXPECT_TRUE(m_pAosService->NotifyRegistered(AosNetworkType::LTE, 1, objFeatureTags));
+    EXPECT_TRUE(m_pAosService->NotifyRegistered(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyRegistering)
@@ -986,7 +988,8 @@ TEST_F(AosServiceTest, NotifyDeregistered)
 
 TEST_F(AosServiceTest, NotifyTechnologyChangeFailed)
 {
-    EXPECT_TRUE(m_pAosService->NotifyTechnologyChangeFailed(AosNetworkType::LTE, 1));
+    EXPECT_TRUE(m_pAosService->NotifyTechnologyChangeFailed(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1));
 }
 
 TEST_F(AosServiceTest, NotifyAssociatedUriChanged)

@@ -180,7 +180,7 @@ public class ImsRegistrationTrackerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE, features, new ArraySet<String>());
 
         assertEquals(true, mRegTracker.isRegistered());
@@ -211,8 +211,8 @@ public class ImsRegistrationTrackerTest {
         Set<String> tags = new ArraySet<>();
         tags.add("+g.3gpp.smsip");
 
-        mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
-                features, tags);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.IWLAN, features, tags);
 
         assertEquals(true, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
@@ -307,12 +307,15 @@ public class ImsRegistrationTrackerTest {
     @Test
     public void testnotifyTechnologyChangeFailed() {
         assertNotNull(mRegTracker.getRegistration());
-        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.NONE,
+        mAosRegListener.notifyTechnologyChangeFailed(
+                IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.NONE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
         assertNotNull(mRegTracker.getRegistration());
-        mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.LTE,
+        mAosRegListener.notifyTechnologyChangeFailed(
+                IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
                 DataFailCause.IWLAN_IKEV2_AUTH_FAILURE, null);
-
     }
 
     @Test
@@ -735,8 +738,8 @@ public class ImsRegistrationTrackerTest {
         Set<String> tags = new ArraySet<>();
         tags.add("+g.3gpp.smsip");
 
-        mAosRegListener.notifyRegistered(IAosRegistrationListener.NetworkType.IWLAN,
-                features, tags);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.IWLAN, features, tags);
         assertEquals(IAosRegistrationListener.NetworkType.IWLAN,
                 mRegTracker.getRegisteredNetworkType());
         mRegTracker.refreshCallRegistrationState();

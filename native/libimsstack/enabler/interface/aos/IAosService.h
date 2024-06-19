@@ -108,14 +108,16 @@ public:
     /**
      * Notify the application that the device is connected to the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
      * @param objFeatureTags Type of ImsList<AString>&.
-     * @see class ImsAosFeature
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
+     * @see class ImsAosFeature
      */
-    virtual IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) = 0;
+    virtual IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
      * Notify the application that the device is trying to connect to the IMS network.
@@ -144,13 +146,15 @@ public:
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The technology that has failed to be changed to.
      * @param nCauseCode Handover failure cause.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
      * @see class android.telephony.DataFailCause
      */
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
-            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -383,7 +387,7 @@ enum class AosPhoneNumberRetryCommand
 {
     INITIAL = 0,
     REFRESH = 1,
-    CLEAR = 2,
+    CLEAR = 2
 };
 
 #endif  // INTERFACE_AOS_SERVICE_H_

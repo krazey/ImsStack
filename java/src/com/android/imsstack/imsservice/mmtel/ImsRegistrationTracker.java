@@ -662,24 +662,25 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyRegistered(int networkType, int featureTagBits,
+        public void notifyRegistered(int regType, int networkType, int featureTagBits,
                 Set<String> featureTags) {
             logi("ImsRegistrationTracker notifyRegistered");
 
             int radioTech = convertToTelephonyNetworkType(networkType);
 
             if (featureTags.isEmpty()) {
-                mRegImpl.notifyRegistered(radioTech, makeFeatureTags(featureTagBits));
+                mRegImpl.notifyRegistered(regType, radioTech, makeFeatureTags(featureTagBits));
             } else {
-                mRegImpl.notifyRegistered(radioTech, featureTags);
+                mRegImpl.notifyRegistered(regType, radioTech, featureTags);
             }
 
-            boolean networkTypeChanged = updateNetworkType(networkType);
+            if (regType == RegistrationType.NORMAL) {
+                boolean networkTypeChanged = updateNetworkType(networkType);
+                boolean featureChanged = updateFeatures(featureTagBits);
 
-            boolean featureChanged = updateFeatures(featureTagBits);
-
-            if (networkTypeChanged || featureChanged) {
-                updateFeatureCapabilities();
+                if (networkTypeChanged || featureChanged) {
+                    updateFeatureCapabilities();
+                }
             }
         }
 
@@ -713,10 +714,11 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int reason, String message) {
+        public void notifyTechnologyChangeFailed(int regType, int networkType, int reason,
+                String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
 
-            mRegImpl.notifyTechnologyChangeFailed(radioTech, reason, message);
+            mRegImpl.notifyTechnologyChangeFailed(regType, radioTech, reason, message);
         }
 
         @Override

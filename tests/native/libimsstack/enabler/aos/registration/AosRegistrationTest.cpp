@@ -1068,7 +1068,7 @@ TEST_F(AosRegistrationTest, UnavailableFeatureTagCommandUpdatesDetailRegState)
     m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
     m_pAosRegistration->SetImsRegState(AosRegistration::IMS_REG_STATE_REGISTERING);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyRegistered(_, _, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyRegistered(_, _, _, _)).Times(1);
 
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG);
 }
@@ -5821,4 +5821,51 @@ TEST_F(AosRegistrationTest, StopSubscriptionReturnsTrueIfSucceedToStop)
     IMS_BOOL bResult = m_pAosRegistration->StopSubscription();
 
     EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyRegisteredForEmergencyTypeWhenRegistrationSucceeds)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyRegistered(IAosRegistration::IMS_REG_TYPE_EMERGENCY, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldNotifyRegisteredForEmergencyTypeAsFakeTypeIfFakeRegWhenRegistrationSucceeds)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pAosRegistration->SetFakeReg(IMS_TRUE);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyRegisteredForFakeTypeWhenRegistrationSucceeds)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegistered(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    // THEN: The GIVEN condition should be met.
 }

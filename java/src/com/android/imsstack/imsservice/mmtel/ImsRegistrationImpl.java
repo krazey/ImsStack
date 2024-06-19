@@ -27,6 +27,7 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
 import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
 import com.android.imsstack.util.ImsLog;
@@ -48,14 +49,21 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyRegistered(int networkType, @NonNull Set<String> featureTags) {
-        logi("notifyRegistered: " + featureTags);
+    public void notifyRegistered(int regType, int networkType, @NonNull Set<String> featureTags) {
+        logi("notifyRegistered: [" + RegistrationType.toString(regType) + "]" + featureTags);
 
-        ImsRegistrationAttributes regAttributes =
+        ImsRegistrationAttributes.Builder attrBuilder =
                 new ImsRegistrationAttributes.Builder(networkType)
-                .setFeatureTags(featureTags)
-                .build();
-        onRegistered(regAttributes);
+                .setFeatureTags(featureTags);
+
+        if (regType == RegistrationType.EMERGENCY) {
+            attrBuilder.setFlagRegistrationTypeEmergency();
+        } else if (regType == RegistrationType.FAKE) {
+            attrBuilder.setFlagRegistrationTypeEmergency();
+            attrBuilder.setFlagVirtualRegistrationForEmergencyCall();
+        }
+
+        onRegistered(attrBuilder.build());
     }
 
     @Override
@@ -76,8 +84,23 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyTechnologyChangeFailed(int networkType, int reason, String message) {
-        onTechnologyChangeFailed(networkType, getReasonInfo(reason, message));
+    public void notifyTechnologyChangeFailed(int regType, int networkType, int reason,
+            String message) {
+        logi("notifyTechnologyChangeFailed: [" + RegistrationType.toString(regType) + "]");
+
+        if (regType == RegistrationType.NORMAL) {
+            onTechnologyChangeFailed(networkType, getReasonInfo(reason, message));
+            return;
+        }
+
+        if (regType == RegistrationType.EMERGENCY) {
+            ImsRegistrationAttributes regAttributes =
+                    new ImsRegistrationAttributes.Builder(networkType)
+                    .setFlagRegistrationTypeEmergency()
+                    .build();
+
+            onTechnologyChangeFailed(getReasonInfo(reason, message), regAttributes);
+        }
     }
 
     public void notifyAssociatedUriChanged(Uri[] uris) {

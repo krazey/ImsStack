@@ -25,11 +25,14 @@ public interface IAosRegistrationListener {
     /**
      * Notify the application that the device is connected to the IMS network.
      *
+     * @param regType Type of the registration. See {@link RegistrationType}.
      * @param networkType The radio access technology. See {@link NetworkType}.
-     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
+     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistered(int networkType, int featureTagBits, Set<String> featureTags);
+    void notifyRegistered(int regType, int networkType, int featureTagBits,
+            Set<String> featureTags);
+
     /**
      * Notify the application that the device is trying to connect to the IMS network.
      *
@@ -52,11 +55,12 @@ public interface IAosRegistrationListener {
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *
+     * @param regType Type of the registration. See {@link RegistrationType}.
      * @param networkType The technology that has failed to be changed to. See {@link NetworkType}.
      * @param causeCode The handover failure cause. See {@link android.telephony.DataFailCause}.
      * @param message The handover failure message.
      */
-    void notifyTechnologyChangeFailed(int networkType, int causeCode, String message);
+    void notifyTechnologyChangeFailed(int regType, int networkType, int causeCode, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -105,6 +109,39 @@ public interface IAosRegistrationListener {
         public static final int DEREGISTERED = 0;
         public static final int REGISTERING = 1;
         public static final int REGISTERED = 2;
+    }
+
+    /**
+     * Registration Type
+     *
+     * This indicates the type of the registration which will be reported to the Telephony.
+     * It is not equivalent to AosRegistrationType in native.
+     *
+     * NORMAL       Used for non-emergency registration status.
+     * EMERGENCY    Used for emergency registration status.
+     * FAKE         Used when an emergency call is initiated without emergency registration.
+     *              It includes both the case that UE never try an emergency registration
+     *              and the case that UE fails the emergency registration.
+     */
+    class RegistrationType {
+        public static final int NORMAL = 0;
+        public static final int EMERGENCY = 1;
+        public static final int FAKE = 2;
+
+        /**
+         * This method returns a String for the given registration type.
+         *
+         * @param regType The registration Type.
+         * @return A String for the given registration type.
+         */
+        public static String toString(int regType) {
+            return switch (regType) {
+                case NORMAL -> "NORMAL";
+                case EMERGENCY -> "EMERGENCY";
+                case FAKE -> "FAKE";
+                default -> "NONE";
+            };
+        }
     }
 
     /**
