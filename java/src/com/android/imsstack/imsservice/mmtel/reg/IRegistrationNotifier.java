@@ -35,11 +35,12 @@ public interface IRegistrationNotifier {
     /**
      * Notify the application that the device is trying to connect to the IMS network.
      *
+     * @param regType a type of the registration.(@see IAosRegistrationListener.RegistrationType)
      * @param networkType the radio access technology.
      * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
      * registration.
      */
-    void notifyRegistering(int networkType, @NonNull Set<String> featureTags);
+    void notifyRegistering(int regType, int networkType, @NonNull Set<String> featureTags);
 
     /**
      * Notify the application that the device is disconnected from the IMS network.

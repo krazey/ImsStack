@@ -155,7 +155,7 @@ public class ImsRegistrationTrackerTest {
         tags.add("+g.3gpp.smsip");
         tags.add("video");
 
-        mAosRegListener.notifyRegistering(
+        mAosRegListener.notifyRegistering(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE, features, tags);
 
         assertEquals(IAosRegistrationListener.NetworkType.LTE,
@@ -164,7 +164,7 @@ public class ImsRegistrationTrackerTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
 
-        mAosRegListener.notifyRegistering(
+        mAosRegListener.notifyRegistering(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.IWLAN, features, new ArraySet<String>());
 
         assertEquals(IAosRegistrationListener.NetworkType.LTE,

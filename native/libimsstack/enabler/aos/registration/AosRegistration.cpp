@@ -1066,7 +1066,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
             ImsList<AString> objFeatureTags = ImsList<AString>();
-            piService->NotifyRegistering(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistering(
+                    nImsRegType, m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERED)
         {

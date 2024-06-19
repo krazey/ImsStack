@@ -5869,3 +5869,47 @@ TEST_F(AosRegistrationTest, ShouldNotifyRegisteredForFakeTypeWhenRegistrationSuc
 
     // THEN: The GIVEN condition should be met.
 }
+
+TEST_F(AosRegistrationTest, ShouldNotifyRegisteringForEmergencyTypeWhenTryRegistration)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyRegistering(IAosRegistration::IMS_REG_TYPE_EMERGENCY, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest,
+        ShouldNotifyRegisteringForEmergencyTypeAsFakeTypeIfFakeRegWhenTryRegistration)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pAosRegistration->SetFakeReg(IMS_TRUE);
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegistering(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosRegistrationTest, ShouldNotifyRegisteringForFakeTypeWhenTryRegistration)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::FAKE);
+
+    EXPECT_CALL(
+            m_objMockIAosService, NotifyRegistering(IAosRegistration::IMS_REG_TYPE_FAKE, _, _, _));
+
+    // WHEN
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    // THEN: The GIVEN condition should be met.
+}

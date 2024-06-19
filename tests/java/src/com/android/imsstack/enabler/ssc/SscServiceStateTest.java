@@ -992,7 +992,7 @@ public class SscServiceStateTest {
         createAndInitSscServiceState();
         mSscServiceState.mUtAvailability = false;
 
-        mSscServiceState.mRegiStateListener.notifyRegistering(0, 0, null);
+        mSscServiceState.mRegiStateListener.notifyRegistering(0, 0, 0, null);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockUtInterface);

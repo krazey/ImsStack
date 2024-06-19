@@ -946,6 +946,7 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERING);
+        parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.LTE);
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
@@ -957,8 +958,8 @@ public class AosServiceTest extends ImsStackTest {
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.REGISTERING, mAosService.getRegistrationState());
-        verify(mMockAosRegistrationListener).notifyRegistering(NetworkType.LTE,
-                FeatureTagMask.MMTEL, featureTags);
+        verify(mMockAosRegistrationListener).notifyRegistering(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL, featureTags);
     }
 
     @Test

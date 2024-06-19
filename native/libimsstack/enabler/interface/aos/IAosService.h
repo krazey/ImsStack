@@ -122,13 +122,15 @@ public:
     /**
      * Notify the application that the device is trying to connect to the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
      * @param objFeatureTags Type of ImsList<AString>&.
-     * @see class ImsAosFeature
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class NetworkType
+     * @see class ImsAosFeature
      */
-    virtual IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType,
+    virtual IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**

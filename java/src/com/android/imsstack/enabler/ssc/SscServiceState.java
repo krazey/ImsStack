@@ -768,8 +768,12 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, int networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             // do nothing
         }
 

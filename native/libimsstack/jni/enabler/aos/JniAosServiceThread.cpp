@@ -60,13 +60,14 @@ IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SI
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
+IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
         IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistering", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_REGISTERING);
+    objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nFeatureTagBits);
 

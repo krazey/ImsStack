@@ -609,15 +609,16 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN IMS_SINT32 nRegType,
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN IMS_SINT32 nRegType,
+        IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+        IN const ImsList<AString>& objFeatureTags)
 {
     A_IMS_TRACE_I(AOSTAG, "NotifyRegistering", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyRegistering(
-                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 
     return IMS_TRUE;

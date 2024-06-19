@@ -1153,7 +1153,7 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, int networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
             // Do nothing.
         }

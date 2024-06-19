@@ -685,16 +685,16 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, int networkType, int featureTagBits,
                 Set<String> featureTags) {
             logi("ImsRegistrationTracker notifyRegistering");
 
             int radioTech = convertToTelephonyNetworkType(networkType);
 
             if (featureTags.isEmpty()) {
-                mRegImpl.notifyRegistering(radioTech, makeFeatureTags(featureTagBits));
+                mRegImpl.notifyRegistering(regType, radioTech, makeFeatureTags(featureTagBits));
             } else {
-                mRegImpl.notifyRegistering(radioTech, featureTags);
+                mRegImpl.notifyRegistering(regType, radioTech, featureTags);
             }
         }
 

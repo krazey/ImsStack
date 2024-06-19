@@ -978,7 +978,8 @@ TEST_F(AosServiceTest, NotifyRegistered)
 TEST_F(AosServiceTest, NotifyRegistering)
 {
     const ImsList<AString> objFeatureTags;
-    EXPECT_TRUE(m_pAosService->NotifyRegistering(AosNetworkType::LTE, 1, objFeatureTags));
+    EXPECT_TRUE(m_pAosService->NotifyRegistering(
+            IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyDeregistered)
