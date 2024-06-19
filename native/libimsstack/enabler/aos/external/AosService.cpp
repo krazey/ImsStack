@@ -827,6 +827,11 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
         strCapabilities.Append("CALL_COMPOSER ");
     }
 
+    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY))
+    {
+        strCapabilities.Append("CALL_COMPOSER_BUSINESS_ONLY ");
+    }
+
     if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE))
     {
         strCapabilities.Append("OPTIONS_UCE ");

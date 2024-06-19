@@ -183,11 +183,12 @@ public interface IAosRegistrationListener {
         public static final int UT = 1 << 2;
         public static final int SMS = 1 << 3;
         public static final int CALL_COMPOSER = 1 << 4;
+        public static final int CALL_COMPOSER_BUSINESS_ONLY = 1 << 5;
         /** RcsFeature capability
         * {@link android.telephony.ims.feature.RcsFeature.RcsImsCapabilities}.
         */
-        public static final int OPTIONS_UCE = 1 << 5;
-        public static final int PRESENCE_UCE = 1 << 6;
+        public static final int OPTIONS_UCE = 1 << 6;
+        public static final int PRESENCE_UCE = 1 << 7;
         // Internal capability
         public static final int TEXT = 1 << 11;
 
@@ -199,6 +200,8 @@ public interface IAosRegistrationListener {
             appendToken(sb, capabilities, UT, "ut");
             appendToken(sb, capabilities, SMS, "sms");
             appendToken(sb, capabilities, CALL_COMPOSER, "call_composer");
+            appendToken(sb, capabilities, CALL_COMPOSER_BUSINESS_ONLY,
+                    "call_composer_business_only");
             appendToken(sb, capabilities, OPTIONS_UCE, "options_uce");
             appendToken(sb, capabilities, PRESENCE_UCE, "presence_uce");
             appendToken(sb, capabilities, TEXT, "text");
