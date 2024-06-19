@@ -174,7 +174,7 @@ protected:
     void ProcessLocationInfo(IN LocationInfo eState);
     void ProcessLteInfoEvent(IN IMS_UINT32 nState);
 
-    void ResetImsDisableReason();
+    void ClearRegistrationAndDataFailureBlocks();
 
     SERVICE_TYPE GetServiceType();
     void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
