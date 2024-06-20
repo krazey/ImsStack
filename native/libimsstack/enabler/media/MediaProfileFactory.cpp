@@ -126,6 +126,42 @@ MediaBaseProfile* MediaProfileFactory::CreateProfile(IN MediaEnvironment* pEnvir
     return pProfile;
 }
 
+PUBLIC
+MediaBaseProfile* MediaProfileFactory::CreateProfile(
+        IN MEDIA_CONTENT_TYPE eType, IN MediaBaseProfile* pProfile)
+{
+    MediaBaseProfile* pNewProfile = IMS_NULL;
+
+    switch (eType)
+    {
+        case MEDIA_TYPE_AUDIO:
+            pNewProfile = CreateAudioProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<AudioProfile*>(pNewProfile) = *static_cast<AudioProfile*>(pProfile);
+            }
+            break;
+        case MEDIA_TYPE_TEXT:
+            pNewProfile = CreateTextProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<TextProfile*>(pNewProfile) = *static_cast<TextProfile*>(pProfile);
+            }
+            break;
+        case MEDIA_TYPE_VIDEO:
+            pNewProfile = CreateVideoProfile();
+            if (pProfile != IMS_NULL)
+            {
+                *static_cast<VideoProfile*>(pNewProfile) = *static_cast<VideoProfile*>(pProfile);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return pNewProfile;
+}
+
 PRIVATE MediaBaseProfile* MediaProfileFactory::CreateCodecPayloads(
         IN MediaBaseProfile* pProfile, IN MediaConfiguration* pConfig)
 {

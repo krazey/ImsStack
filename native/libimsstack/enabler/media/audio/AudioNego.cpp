@@ -78,10 +78,11 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
     IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
 
     OaModel objOaModel;
-    objOaModel.pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+    objOaModel.pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    objOaModel.pPeerProfile = new AudioProfile();
+    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
             IMS_TRUE)
@@ -90,7 +91,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
     }
 
     // Make a negotiated profile from the local and peer profile
-    objOaModel.pNegotiatedProfile = new AudioProfile();
+    objOaModel.pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeNegotiatedProfile(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
                 GetNegotiatedProfile(&objOaModel)) != IMS_TRUE)
@@ -350,7 +352,8 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
-    pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+    pNewOaModel->pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
 
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
@@ -429,8 +432,9 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             delete pNewOaModel->pNegotiatedProfile;
         }
 
-        pNewOaModel->pNegotiatedProfile = new AudioProfile();
-        if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
+        pNewOaModel->pNegotiatedProfile =
+    MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO); if
+    (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
                     pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
         {
             delete pNewOaModel;
@@ -501,7 +505,8 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (m_listOaModel.GetSize() == 0)
     {
-        pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
     }
     else
     {
@@ -530,13 +535,15 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
                     pPrevOaModel->pNegotiatedProfile->nDataPort == 0))
         {
-            pNewOaModel->pLocalProfile = new AudioProfile(GetNegotiatedProfile(pPrevOaModel));
+            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                    MEDIA_TYPE_AUDIO, GetNegotiatedProfile(pPrevOaModel));
         }
         else
         {
             if (bEnforceReofferMode == IMS_TRUE)
             {
-                pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                        MEDIA_TYPE_AUDIO, m_pBaseProfile);
             }
             else
             {
@@ -546,12 +553,13 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
                 if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
                 {
-                    pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                            MEDIA_TYPE_AUDIO, m_pBaseProfile);
                 }
                 else if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
                 {
-                    pNewOaModel->pLocalProfile =
-                            new AudioProfile(GetNegotiatedProfile(pPrevOaModel));
+                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                            MEDIA_TYPE_AUDIO, GetNegotiatedProfile(pPrevOaModel));
                 }
             }
         }
@@ -627,7 +635,8 @@ void AudioNego::Copy(IN const AudioNego* pAudioNego)
     MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
     delete m_pBaseProfile;
-    m_pBaseProfile = new AudioProfile(ProfileCasting(pAudioNego->m_pBaseProfile));
+    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_AUDIO, pAudioNego->m_pBaseProfile);
 
     if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
@@ -639,7 +648,8 @@ void AudioNego::Copy(IN const AudioNego* pAudioNego)
     if (pAudioNego->m_listOaModel.IsEmpty() == IMS_FALSE)
     {
         OaModel* pNewOaModel = new OaModel();
-        pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
         m_listOaModel.Append(pNewOaModel);
     }
 
@@ -661,10 +671,11 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new AudioProfile(ProfileCasting(m_pBaseProfile));
+    pNewOaModel->pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new AudioProfile();
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
             IMS_TRUE)
@@ -674,7 +685,8 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
     }
 
     // Make a negotiated profile from the local and peer profile
-    pNewOaModel->pNegotiatedProfile = new AudioProfile();
+    pNewOaModel->pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
                 GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
@@ -719,7 +731,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     }
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new AudioProfile();
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
             IMS_TRUE)
@@ -730,7 +742,8 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     }
 
     // Make a negotiated profile with the local, peer profile
-    pNewOaModel->pNegotiatedProfile = new AudioProfile();
+    pNewOaModel->pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO);
 
     if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_FALSE,
                 GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)

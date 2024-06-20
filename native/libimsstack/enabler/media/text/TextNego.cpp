@@ -67,10 +67,11 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
 
     OaModel objOaModel;
-    objOaModel.pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+    objOaModel.pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    objOaModel.pPeerProfile = new TextProfile();
+    objOaModel.pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
             IMS_TRUE)
@@ -79,7 +80,8 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     }
 
     // Make a negotiated profile from the local and peer profile
-    objOaModel.pNegotiatedProfile = new TextProfile();
+    objOaModel.pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeNegotiatedProfile(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
                 GetNegotiatedProfile(&objOaModel)) != IMS_TRUE)
@@ -187,7 +189,8 @@ PROTECTED IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+    pNewOaModel->pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
 
     if (pNewOaModel->pLocalProfile == IMS_NULL)
     {
@@ -339,7 +342,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (m_listOaModel.GetSize() == 0)
     {
-        pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
         bIsFullCapability = IMS_TRUE;
     }
     else
@@ -364,7 +368,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         if (pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0 ||
                 bEnforceReofferMode == IMS_TRUE)
         {
-            pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+            pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                    MEDIA_TYPE_TEXT, m_pBaseProfile);
             bIsFullCapability = IMS_TRUE;
             IMS_TRACE_I("TextNego::FormReOffer() - Fullcapability - enforce reoffer[%d]",
                     bEnforceReofferMode, 0, 0);
@@ -376,21 +381,23 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                 if (m_pBaseProfile->lstPayload.GetSize() > 0)
                 {
                     IMS_TRACE_I("FormReoffer() - Fullcapability", 0, 0, 0);
-                    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                            MEDIA_TYPE_TEXT, m_pBaseProfile);
                     bIsFullCapability = IMS_TRUE;
                 }
                 else
                 {
                     // this case is only for reoffer but no src profile payload existed
                     IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
-                    pNewOaModel->pLocalProfile =
-                            new TextProfile(GetNegotiatedProfile(pPrevOaModel));
+                    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                            MEDIA_TYPE_TEXT, GetNegotiatedProfile(pPrevOaModel));
                 }
             }
             else
             {
                 IMS_TRACE_I("FormReoffer() - use nego profile", 0, 0, 0);
-                pNewOaModel->pLocalProfile = new TextProfile(GetNegotiatedProfile(pPrevOaModel));
+                pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+                        MEDIA_TYPE_TEXT, GetNegotiatedProfile(pPrevOaModel));
             }
         }
     }
@@ -457,7 +464,8 @@ void TextNego::Copy(IN const TextNego* pTextNego)
     MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
     delete m_pBaseProfile;
-    m_pBaseProfile = new TextProfile(ProfileCasting(pTextNego->m_pBaseProfile));
+    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_TEXT, pTextNego->m_pBaseProfile);
 
     if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
@@ -473,7 +481,8 @@ void TextNego::Copy(IN const TextNego* pTextNego)
 
     OaModel* pNewOaModel = new OaModel();
     OaModel* pOldOaModel = pTextNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = new TextProfile(GetLocalProfile(pOldOaModel));
+    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_TEXT, GetLocalProfile(pOldOaModel));
     m_listOaModel.Append(pNewOaModel);
 
     m_pConfig = pTextNego->m_pConfig;
@@ -491,10 +500,11 @@ PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+    pNewOaModel->pLocalProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT, m_pBaseProfile);
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new TextProfile();
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
             IMS_TRUE)
@@ -505,7 +515,8 @@ PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
     }
 
     // Make a negotiated profile from Local & Peer profile
-    pNewOaModel->pNegotiatedProfile = new TextProfile();
+    pNewOaModel->pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
                 GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
@@ -549,7 +560,7 @@ PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
     }
 
     // Make a destination profile from SDP
-    pNewOaModel->pPeerProfile = new TextProfile();
+    pNewOaModel->pPeerProfile = MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
             IMS_TRUE)
@@ -561,7 +572,8 @@ PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
     }
 
     // Make a negotiated profile from Local & Peer profile
-    pNewOaModel->pNegotiatedProfile = new TextProfile();
+    pNewOaModel->pNegotiatedProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
     if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_FALSE,
                 GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
