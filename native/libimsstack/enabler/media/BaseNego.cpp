@@ -94,6 +94,26 @@ PUBLIC VIRTUAL IMS_BOOL BaseNego::FormSdp(IN NEGO_STATE eNegoState,
     }
 }
 
+PUBLIC VIRTUAL void BaseNego::NegotiateSdp(IN NEGO_STATE eNegoState,
+        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+        OUT IMS_SINT32& nDirection)
+{
+    nDirection = MEDIA_DIRECTION_INVALID;
+
+    switch (eNegoState)
+    {
+        case STATE_IDLE:
+        case STATE_NEGOTIATED:
+            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            break;
+        case STATE_OFFER_SENT:
+            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
+            break;
+        default:
+            break;
+    }
+}
+
 PUBLIC VIRTUAL void BaseNego::FinalizeSdp(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {

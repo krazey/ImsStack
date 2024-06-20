@@ -95,26 +95,6 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void TextNego::NegotiateSdp(IN NEGO_STATE eNegoState,
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT IMS_SINT32& nDirection)
-{
-    nDirection = MEDIA_DIRECTION_INVALID;
-
-    switch (eNegoState)
-    {
-        case STATE_IDLE:
-        case STATE_NEGOTIATED:
-            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
-            break;
-        case STATE_OFFER_SENT:
-            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
-            break;
-        default:
-            break;
-    }
-}
-
 PUBLIC
 TEXT_CODEC TextNego::GetNegotiatedCodec(void)
 {
@@ -450,46 +430,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
-PRIVATE
-void TextNego::Copy(IN const TextNego* pTextNego)
-{
-    if (m_pBaseProfile == IMS_NULL || pTextNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I(
-            "Copy() - referenced OaModel list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
-
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-
-    delete m_pBaseProfile;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_TEXT, pTextNego->m_pBaseProfile);
-
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-    {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-    }
-
-    m_pEnvironment = pTextNego->m_pEnvironment;
-
-    if (pTextNego->m_listOaModel.GetSize() < 1)
-    {
-        return;
-    }
-
-    OaModel* pNewOaModel = new OaModel();
-    OaModel* pOldOaModel = pTextNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_TEXT, GetLocalProfile(pOldOaModel));
-    m_listOaModel.Append(pNewOaModel);
-
-    m_pConfig = pTextNego->m_pConfig;
-    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
-}
-
-PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
+PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -534,7 +475,7 @@ PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
+PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
@@ -590,6 +531,45 @@ PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
 
     // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->eDirection;
+}
+
+PRIVATE
+void TextNego::Copy(IN const TextNego* pTextNego)
+{
+    if (m_pBaseProfile == IMS_NULL || pTextNego == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I(
+            "Copy() - referenced OaModel list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
+
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+
+    delete m_pBaseProfile;
+    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_TEXT, pTextNego->m_pBaseProfile);
+
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    {
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+    }
+
+    m_pEnvironment = pTextNego->m_pEnvironment;
+
+    if (pTextNego->m_listOaModel.GetSize() < 1)
+    {
+        return;
+    }
+
+    OaModel* pNewOaModel = new OaModel();
+    OaModel* pOldOaModel = pTextNego->m_listOaModel.GetAt(0);
+    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_TEXT, GetLocalProfile(pOldOaModel));
+    m_listOaModel.Append(pNewOaModel);
+
+    m_pConfig = pTextNego->m_pConfig;
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
 }
 
 PRIVATE

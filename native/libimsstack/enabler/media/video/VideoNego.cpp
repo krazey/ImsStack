@@ -100,26 +100,6 @@ PUBLIC VIRTUAL IMS_BOOL VideoNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void VideoNego::NegotiateSdp(NEGO_STATE eNegoState,
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT IMS_SINT32& nDirection)
-{
-    nDirection = MEDIA_DIRECTION_INVALID;
-
-    switch (eNegoState)
-    {
-        case STATE_IDLE:
-        case STATE_NEGOTIATED:
-            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
-            break;
-        case STATE_OFFER_SENT:
-            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
-            break;
-        default:
-            break;
-    }
-}
-
 PUBLIC
 VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
 {
@@ -420,46 +400,7 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
-PRIVATE
-void VideoNego::Copy(IN const VideoNego* pVideoNego)
-{
-    if (m_pBaseProfile == IMS_NULL || pVideoNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("Copy() - listOaModel size[%d]", pVideoNego->m_listOaModel.GetSize(), 0, 0);
-
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-
-    delete m_pBaseProfile;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_VIDEO, pVideoNego->m_pBaseProfile);
-
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-    {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-    }
-
-    m_bNegotiatedCvoResult = pVideoNego->m_bNegotiatedCvoResult;
-    m_pEnvironment = pVideoNego->m_pEnvironment;
-
-    if (pVideoNego->m_listOaModel.GetSize() < 1)
-    {
-        return;
-    }
-
-    OaModel* pNewOaModel = new OaModel();
-    OaModel* pOldOaModel = pVideoNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_VIDEO, GetLocalProfile(pOldOaModel));
-    m_listOaModel.Append(pNewOaModel);
-
-    IMS_TRACE_I("Copy() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
-    return;
-}
-
-PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
+PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -506,7 +447,7 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateOffer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE IMS_SINT32 VideoNego::NegotiateAnswer(
+PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
@@ -557,6 +498,45 @@ PRIVATE IMS_SINT32 VideoNego::NegotiateAnswer(
 
     // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->eDirection;
+}
+
+PRIVATE
+void VideoNego::Copy(IN const VideoNego* pVideoNego)
+{
+    if (m_pBaseProfile == IMS_NULL || pVideoNego == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("Copy() - listOaModel size[%d]", pVideoNego->m_listOaModel.GetSize(), 0, 0);
+
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+
+    delete m_pBaseProfile;
+    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_VIDEO, pVideoNego->m_pBaseProfile);
+
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    {
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+    }
+
+    m_bNegotiatedCvoResult = pVideoNego->m_bNegotiatedCvoResult;
+    m_pEnvironment = pVideoNego->m_pEnvironment;
+
+    if (pVideoNego->m_listOaModel.GetSize() < 1)
+    {
+        return;
+    }
+
+    OaModel* pNewOaModel = new OaModel();
+    OaModel* pOldOaModel = pVideoNego->m_listOaModel.GetAt(0);
+    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_VIDEO, GetLocalProfile(pOldOaModel));
+    m_listOaModel.Append(pNewOaModel);
+
+    IMS_TRACE_I("Copy() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
+    return;
 }
 
 PRIVATE
