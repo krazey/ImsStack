@@ -212,7 +212,7 @@ protected:
     void DestroyListOaModel();
     virtual IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile) = 0;
-
+    void Copy(IN const BaseNego* pNego);
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
     virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,

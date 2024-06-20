@@ -409,6 +409,43 @@ PROTECTED void BaseNego::DestroyListOaModel()
 }
 
 PROTECTED
+void BaseNego::Copy(IN const BaseNego* pNego)
+{
+    if (pNego == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("Copy()", 0, 0, 0);
+
+    if (m_pBaseProfile != IMS_NULL)
+    {
+        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+        delete m_pBaseProfile;
+    }
+
+    m_pBaseProfile =
+            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pNego->m_pBaseProfile);
+
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    {
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+    }
+
+    m_pEnvironment = pNego->m_pEnvironment;
+    m_pConfig = pNego->m_pConfig;
+
+    OaModel* pNewOaModel = new OaModel();
+    if (pNewOaModel != IMS_NULL)
+    {
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile);
+        m_listOaModel.Append(pNewOaModel);
+    }
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
+}
+
+PROTECTED
 IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
 {

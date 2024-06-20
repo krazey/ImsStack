@@ -450,44 +450,6 @@ PROTECTED MEDIA_DIRECTION VideoNego::NegotiateAnswer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE
-void VideoNego::Copy(IN const VideoNego* pVideoNego)
-{
-    if (m_pBaseProfile == IMS_NULL || pVideoNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("Copy() - listOaModel size[%d]", pVideoNego->m_listOaModel.GetSize(), 0, 0);
-
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-
-    delete m_pBaseProfile;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_VIDEO, pVideoNego->m_pBaseProfile);
-
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-    {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-    }
-
-    m_pEnvironment = pVideoNego->m_pEnvironment;
-
-    if (pVideoNego->m_listOaModel.GetSize() < 1)
-    {
-        return;
-    }
-
-    OaModel* pNewOaModel = new OaModel();
-    OaModel* pOldOaModel = pVideoNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_VIDEO, GetLocalProfile(pOldOaModel));
-    m_listOaModel.Append(pNewOaModel);
-
-    IMS_TRACE_I("Copy() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
-    return;
-}
-
 PROTECTED
 IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)
