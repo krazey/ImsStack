@@ -294,11 +294,13 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void controlRegistration() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
 
-        mAosService.controlRegistration(IAosRegistration.RequestType.START,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.IMS_SERVICE.getValue());
+        mAosService.controlRegistration(IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
 
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
     }
@@ -795,7 +797,8 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimNotPresent() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_NOT_PRESENT);
@@ -819,7 +822,8 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimNotReady() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_NOT_READY);
@@ -845,7 +849,8 @@ public class AosServiceTest extends ImsStackTest {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);
@@ -877,7 +882,8 @@ public class AosServiceTest extends ImsStackTest {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
                 IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_REFRESH_STARTED);
@@ -904,7 +910,8 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void imsServiceRegistryListener_onImsOnOffChanged() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.RequestType.STOP.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(false);
 

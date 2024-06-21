@@ -70,8 +70,8 @@ class MockIAosRegistration implements IAosRegistration {
 
     @Override
     public void controlRegistration(int requestType, int pcscfOrder, int cause) {
-        assertEquals(IAosRegistration.RequestType.STOP, requestType);
-        assertEquals(IAosRegistration.Pcscf.CURRENT, pcscfOrder);
+        assertEquals(IAosRegistration.RequestType.STOP.getValue(), requestType);
+        assertEquals(IAosRegistration.Pcscf.CURRENT.getValue(), pcscfOrder);
         assertEquals(IAosRegistration.Cause.RADIO_SIM_REMOVED.getValue(), cause);
     }
 

@@ -113,22 +113,44 @@ public interface IAosRegistration {
     int getRegistrationState();
 
     /**
-     * Request Type
+     * Represents the types of requests that can be made.
+     * Each request type is associated with a corresponding integer value.
      */
-    class RequestType {
-        public static final int START = 0;
-        public static final int REFRESH = 1;
-        public static final int STOP = 2;
-        public static final int START_IMS_EST_TIMER = 3;
+    enum RequestType {
+        START(0),
+        REFRESH(1),
+        STOP(2),
+        START_IMS_EST_TIMER(3);
+
+        private final int mValue;
+
+        RequestType(int value) {
+            mValue = value;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * PCSCF
+     * Represents the order of P-CSCF addresses.
+     * Each P-CSCF order is associated with a corresponding integer value.
      */
-    class Pcscf {
-        public static final int FIRST = 0;
-        public static final int CURRENT = 1;
-        public static final int NEXT = 2;
+    enum Pcscf {
+        FIRST(0),
+        CURRENT(1),
+        NEXT(2);
+
+        private final int mValue;
+
+        Pcscf(int value) {
+            mValue = value;
+        }
+
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**

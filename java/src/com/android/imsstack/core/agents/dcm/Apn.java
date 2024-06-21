@@ -1239,8 +1239,8 @@ public abstract class Apn extends Handler implements IApn {
                         if (mDcSettings != null && mDcSettings.isCdmalessFeatureTagRequired()) {
                             if (mAosReg != null) {
                                 mAosReg.controlRegistration(
-                                        IAosRegistration.RequestType.START_IMS_EST_TIMER,
-                                        IAosRegistration.Pcscf.CURRENT,
+                                        IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
+                                        IAosRegistration.Pcscf.CURRENT.getValue(),
                                         IAosRegistration.Cause.DATA_CONNECTING.getValue());
                             }
                         }
@@ -1254,8 +1254,9 @@ public abstract class Apn extends Handler implements IApn {
                         if (mAosReg != null) {
                             if (mAosReg.getRegisteredNetworkType()
                                     != IAosRegistrationListener.NetworkType.NONE) {
-                                mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                                        IAosRegistration.Pcscf.CURRENT,
+                                mAosReg.controlRegistration(
+                                        IAosRegistration.RequestType.STOP.getValue(),
+                                        IAosRegistration.Pcscf.CURRENT.getValue(),
                                         IAosRegistration.Cause.DATA.getValue());
                             }
                         }
