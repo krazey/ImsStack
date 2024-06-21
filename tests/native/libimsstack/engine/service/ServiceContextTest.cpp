@@ -19,7 +19,9 @@
 
 #include "ServiceContext.h"
 
+#include "MockIConfiguration.h"
 #include "MockIServiceContext.h"
+#include "MockIServiceManager.h"
 #include "TestMutexService.h"
 
 using ::testing::Return;
@@ -65,13 +67,17 @@ TEST_F(ServiceContextTest, Accessors)
 
 TEST_F(ServiceContextTest, AccessorsWithExternalServiceContext)
 {
+    MockIConfiguration objConfiguration;
+    MockIServiceManager objServiceManager;
     MockIServiceContext objServiceContext;
+    EXPECT_CALL(objServiceContext, GetConfiguration()).Times(1).WillOnce(Return(&objConfiguration));
+    EXPECT_CALL(objServiceContext, GetServiceManager())
+            .Times(1)
+            .WillOnce(Return(&objServiceManager));
     m_pServiceContext->SetServiceContext(&objServiceContext);
-    EXPECT_CALL(objServiceContext, GetConfiguration()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(objServiceContext, GetServiceManager()).Times(1).WillOnce(Return(nullptr));
 
-    EXPECT_EQ(m_pServiceContext->GetConfiguration(), nullptr);
-    EXPECT_EQ(m_pServiceContext->GetServiceManager(), nullptr);
+    EXPECT_EQ(m_pServiceContext->GetConfiguration(), &objConfiguration);
+    EXPECT_EQ(m_pServiceContext->GetServiceManager(), &objServiceManager);
 }
 
 }  // namespace android

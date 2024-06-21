@@ -17,10 +17,9 @@
 
 #include "Engine.h"
 #include "RegistrationContext.h"
-#include "ServiceContext.h"
 
 #include "MockIRegistrationContext.h"
-#include "MockIServiceContext.h"
+#include "TestEngine.h"
 
 using ::testing::Return;
 
@@ -32,17 +31,15 @@ class EngineTest : public ::testing::Test
 protected:
     void SetUp() override {}
     void TearDown() override {}
+
+protected:
+    TestEngine m_objEngine;
 };
 
 TEST_F(EngineTest, GetConfiguration)
 {
-    MockIServiceContext objServiceContext;
-    ServiceContext::GetInstance()->SetServiceContext(&objServiceContext);
-    EXPECT_CALL(objServiceContext, GetConfiguration()).Times(1).WillOnce(Return(nullptr));
-
-    EXPECT_EQ(Engine::GetConfiguration(), nullptr);
-
-    ServiceContext::GetInstance()->SetServiceContext(IMS_NULL);
+    MockIConfiguration& objConfiguration = m_objEngine.GetMockConfiguration();
+    EXPECT_EQ(Engine::GetConfiguration(), &objConfiguration);
 }
 
 TEST_F(EngineTest, GetRegistrationManager)
