@@ -13,25 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_ENGINE_H_
-#define TEST_ENGINE_H_
+#include "RegistrationContext.h"
 
-#include "MockIConfiguration.h"
-#include "MockIRegistrationManager.h"
+#include "TestRegistrationContext.h"
 
-class TestEnginePrivate;
-
-class TestEngine
+TestRegistrationContext::TestRegistrationContext()
 {
-public:
-    TestEngine();
-    ~TestEngine();
+    RegistrationContext::GetInstance()->SetRegistrationContext(this);
+}
 
-    MockIConfiguration& GetMockConfiguration();
-    MockIRegistrationManager& GetMockRegistrationManager();
-
-private:
-    TestEnginePrivate* m_pPrivate;
-};
-
-#endif
+TestRegistrationContext::~TestRegistrationContext()
+{
+    RegistrationContext::GetInstance()->SetRegistrationContext(IMS_NULL);
+}

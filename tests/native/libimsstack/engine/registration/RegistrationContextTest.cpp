@@ -19,7 +19,9 @@
 
 #include "RegistrationContext.h"
 
+#include "MockIRegInfoManager.h"
 #include "MockIRegistrationContext.h"
+#include "MockIRegistrationManager.h"
 #include "TestMutexService.h"
 
 using ::testing::Return;
@@ -64,15 +66,19 @@ TEST_F(RegistrationContextTest, Accessors)
 
 TEST_F(RegistrationContextTest, AccessorsWithExternalRegistrationContext)
 {
+    MockIRegInfoManager objRegInfoManager;
+    MockIRegistrationManager objRegistrationManager;
     MockIRegistrationContext objRegistrationContext;
-    m_pRegistrationContext->SetRegistrationContext(&objRegistrationContext);
     EXPECT_CALL(objRegistrationContext, GetRegistrationManager())
             .Times(1)
-            .WillOnce(Return(nullptr));
-    EXPECT_CALL(objRegistrationContext, GetRegInfoManager()).Times(1).WillOnce(Return(nullptr));
+            .WillOnce(Return(&objRegistrationManager));
+    EXPECT_CALL(objRegistrationContext, GetRegInfoManager())
+            .Times(1)
+            .WillOnce(Return(&objRegInfoManager));
+    m_pRegistrationContext->SetRegistrationContext(&objRegistrationContext);
 
-    EXPECT_EQ(m_pRegistrationContext->GetRegistrationManager(), nullptr);
-    EXPECT_EQ(m_pRegistrationContext->GetRegInfoManager(), nullptr);
+    EXPECT_EQ(m_pRegistrationContext->GetRegistrationManager(), &objRegistrationManager);
+    EXPECT_EQ(m_pRegistrationContext->GetRegInfoManager(), &objRegInfoManager);
 }
 
 }  // namespace android
