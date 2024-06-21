@@ -84,7 +84,6 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
-    void Copy(IN const VideoNego* pVideoNego);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,

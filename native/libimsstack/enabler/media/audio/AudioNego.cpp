@@ -645,42 +645,6 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
 
-PRIVATE
-void AudioNego::Copy(IN const AudioNego* pAudioNego)
-{
-    if (m_pBaseProfile == IMS_NULL || pAudioNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I(
-            "Copy() - referenced OaModel list size[%d]", pAudioNego->m_listOaModel.GetSize(), 0, 0);
-
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-
-    delete m_pBaseProfile;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_AUDIO, pAudioNego->m_pBaseProfile);
-
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-    {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-    }
-
-    m_pEnvironment = pAudioNego->m_pEnvironment;
-
-    if (pAudioNego->m_listOaModel.IsEmpty() == IMS_FALSE)
-    {
-        OaModel* pNewOaModel = new OaModel();
-        pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
-        m_listOaModel.Append(pNewOaModel);
-    }
-
-    m_pConfig = pAudioNego->m_pConfig;
-    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
-}
-
 PROTECTED
 IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)

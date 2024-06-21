@@ -94,7 +94,6 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
-    void Copy(IN const AudioNego* pAudioNego);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
     IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,

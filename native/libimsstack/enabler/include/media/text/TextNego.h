@@ -84,7 +84,6 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
-    void Copy(IN const TextNego* pTextNego);
     IMS_BOOL MakeProfileFromSDP(IN ISessionDescriptor* pSessionDescriptor,
             IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
     IMS_BOOL MakeNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
