@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "TestEngine.h"
+#include "TestRegistrationContext.h"
 #include "TestServiceContext.h"
 
 class TestEnginePrivate
@@ -25,9 +25,11 @@ public:
 
 public:
     inline TestServiceContext& GetServiceContext() { return m_objServiceContext; }
+    inline TestRegistrationContext& GetRegistrationContext() { return m_objRegistrationContext; }
 
 private:
     TestServiceContext m_objServiceContext;
+    TestRegistrationContext m_objRegistrationContext;
 };
 
 TestEngine::TestEngine() :
@@ -43,4 +45,9 @@ TestEngine::~TestEngine()
 MockIConfiguration& TestEngine::GetMockConfiguration()
 {
     return m_pPrivate->GetServiceContext().GetMockConfiguration();
+}
+
+MockIRegistrationManager& TestEngine::GetMockRegistrationManager()
+{
+    return m_pPrivate->GetRegistrationContext().GetMockRegistrationManager();
 }
