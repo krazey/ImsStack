@@ -32,8 +32,7 @@
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
-        BaseNego(nSlotId, MEDIA_TYPE_VIDEO),
-        m_bNegotiatedCvoResult(IMS_FALSE)
+        BaseNego(nSlotId, MEDIA_TYPE_VIDEO)
 {
     IMS_TRACE_I("+VideoNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -521,7 +520,6 @@ void VideoNego::Copy(IN const VideoNego* pVideoNego)
         MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
     }
 
-    m_bNegotiatedCvoResult = pVideoNego->m_bNegotiatedCvoResult;
     m_pEnvironment = pVideoNego->m_pEnvironment;
 
     if (pVideoNego->m_listOaModel.GetSize() < 1)
@@ -1181,8 +1179,6 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             }
         }
     }
-
-    m_bNegotiatedCvoResult = (pProfile->nCvoId > 0) ? IMS_TRUE : IMS_FALSE;
 
     IMS_TRACE_I("MakeProfileFromSdp() - Ended[%d]", pProfile->lstPayload.GetSize(), 0, 0);
     return IMS_TRUE;

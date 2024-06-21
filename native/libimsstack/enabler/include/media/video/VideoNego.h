@@ -139,8 +139,6 @@ private:
     IMS_BOOL GetWidthHeightFromResolutionId(
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
-
-    IMS_BOOL m_bNegotiatedCvoResult;
 };
 
 #endif
