@@ -25,6 +25,9 @@
     <!-- Ut/Xcap AOSP -->
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
 
+    <!-- Ut/Xcap Config -->
+    <string name="imsss.xcap_auid_prefix_string">/MyService</string>
+
     <!-- ImsMedia -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="0">
