@@ -106,26 +106,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void AudioNego::NegotiateSdp(IN NEGO_STATE eNegoState,
-        IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-        OUT IMS_SINT32& nDirection)
-{
-    nDirection = MEDIA_DIRECTION_INVALID;
-
-    switch (eNegoState)
-    {
-        case STATE_IDLE:
-        case STATE_NEGOTIATED:
-            nDirection = NegotiateOffer(pSessionDescriptor, pDescriptor);
-            break;
-        case STATE_OFFER_SENT:
-            nDirection = NegotiateAnswer(pSessionDescriptor, pDescriptor);
-            break;
-        default:
-            break;
-    }
-}
-
 PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
 {
     MediaBaseProfile::BasePayload* pNegotiatedPayload = GetNegotiatedPayload();
@@ -621,43 +601,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     return bSDPMade;
 }
 
-PRIVATE
-void AudioNego::Copy(IN const AudioNego* pAudioNego)
-{
-    if (m_pBaseProfile == IMS_NULL || pAudioNego == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I(
-            "Copy() - referenced OaModel list size[%d]", pAudioNego->m_listOaModel.GetSize(), 0, 0);
-
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-
-    delete m_pBaseProfile;
-    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
-            MEDIA_TYPE_AUDIO, pAudioNego->m_pBaseProfile);
-
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
-    {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
-    }
-
-    m_pEnvironment = pAudioNego->m_pEnvironment;
-
-    if (pAudioNego->m_listOaModel.IsEmpty() == IMS_FALSE)
-    {
-        OaModel* pNewOaModel = new OaModel();
-        pNewOaModel->pLocalProfile =
-                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
-        m_listOaModel.Append(pNewOaModel);
-    }
-
-    m_pConfig = pAudioNego->m_pConfig;
-    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
-}
-
-PRIVATE
+PROTECTED
 MEDIA_DIRECTION AudioNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
@@ -760,6 +704,42 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
 
     // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->eDirection;
+}
+
+PRIVATE
+void AudioNego::Copy(IN const AudioNego* pAudioNego)
+{
+    if (m_pBaseProfile == IMS_NULL || pAudioNego == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I(
+            "Copy() - referenced OaModel list size[%d]", pAudioNego->m_listOaModel.GetSize(), 0, 0);
+
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+
+    delete m_pBaseProfile;
+    m_pBaseProfile = MediaProfileFactory::GetInstance()->CreateProfile(
+            MEDIA_TYPE_AUDIO, pAudioNego->m_pBaseProfile);
+
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    {
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+    }
+
+    m_pEnvironment = pAudioNego->m_pEnvironment;
+
+    if (pAudioNego->m_listOaModel.IsEmpty() == IMS_FALSE)
+    {
+        OaModel* pNewOaModel = new OaModel();
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_AUDIO, m_pBaseProfile);
+        m_listOaModel.Append(pNewOaModel);
+    }
+
+    m_pConfig = pAudioNego->m_pConfig;
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
 }
 
 PRIVATE

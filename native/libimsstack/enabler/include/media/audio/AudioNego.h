@@ -47,19 +47,6 @@ public:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
 
     /**
-     * @brief Negotiate the SDP and make the negotiate profile based on the nego state
-     *
-     * @param eNegoState The negotiation state which decide how to use the profile from the OA model
-     * list
-     * @param pSessionDescriptor The SDP descriptor instance to negotiate the session level SDP
-     * @param pDescriptor The SDP descriptor instance to negotiate the media level SDP
-     * @param eDir The media direction of the SDP
-     */
-    virtual void NegotiateSdp(IN const NEGO_STATE eNegoState,
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
-            OUT IMS_SINT32& eDir);
-
-    /**
      * @brief Get the negotiated audio codec
      */
     virtual AUDIO_CODEC GetNegotiatedCodec(void);
@@ -101,13 +88,13 @@ protected:
     IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable,
             IN IMS_BOOL bEnforceReofferMode) override;
+    MEDIA_DIRECTION NegotiateOffer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
+    MEDIA_DIRECTION NegotiateAnswer(
+            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
     void Copy(IN const AudioNego* pAudioNego);
-    MEDIA_DIRECTION NegotiateOffer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    MEDIA_DIRECTION NegotiateAnswer(
-            IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
