@@ -146,14 +146,18 @@ public class RegistrationHelper {
         int slotId = info.getSlotId();
         testBase.writeTestConfig(slotId, info.getConfig());
 
-        initSystemProxiesWithRegistrationInfo(info);
+        initSystemProxiesWithRegistrationInfo(testBase, info);
 
         triggerInServiceWithServiceState(slotId, info.getServiceState());
 
         int subId = getSubId(slotId);
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
 
+        if (testBase.isEnablerStoppable()) {
+            testBase.updateCarrierConfig(slotId, subId);
+        }
         testBase.startEnabler(slotId);
+
         getCarrierConfigManagerProxy().notifyCarrierConfigChanged(
                 slotId, subId, telephony.getSimCarrierId(), telephony.getSimSpecificCarrierId());
     }
@@ -161,10 +165,13 @@ public class RegistrationHelper {
     /**
      * Initializes the default values of the system proxies.
      *
+     * @param testBase The {@link ImsStackTestBase} instance.
      * @param info The {@link RegistrationInfo} object containing IMS registration information.
      * @throws NullPointerException if {@code testBase} or {@code info} is null.
      */
-    public final void initSystemProxiesWithRegistrationInfo(@NonNull RegistrationInfo info) {
+    public final void initSystemProxiesWithRegistrationInfo(@NonNull ImsStackTestBase testBase,
+            @NonNull RegistrationInfo info) {
+        Objects.requireNonNull(testBase, "testBase must not be null.");
         Objects.requireNonNull(info, "info must not be null.");
 
         int subId = getSubId(info.getSlotId());
@@ -185,10 +192,12 @@ public class RegistrationHelper {
         setTelephonyValues(info);
 
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
-        telephony.setSimApplicationState(info.getSimApplicationState());
 
         // TODO: Need to be removed when ImsService can handle the startImsTraffic.
         telephony.setHalVersion(-2, -2);
+        telephony.setSimApplicationState(info.getSimApplicationState());
+        testBase.broadcastSimApplicationStateChanged(info.getSlotId(), subId,
+                info.getSimApplicationState());
 
         if (info.getSimCarrierId() != -1) {
             telephony.setSimCarrierId(info.getSimCarrierId());
