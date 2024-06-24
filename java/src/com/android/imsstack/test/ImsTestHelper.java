@@ -110,13 +110,10 @@ public final class ImsTestHelper {
             if (action.equals(INTENT_AOS_TEST)) {
                 String event = intent.getStringExtra("event");
                 if ("capa".equalsIgnoreCase(event)) {
-                    sendCapabilitiesChanged(
-                            intent.getIntExtra("slotid", 0),
-                            intent.getStringExtra("network"),
+                    sendCapabilitiesChanged(intent.getStringExtra("network"),
                             intent.getStringExtra("voice"), intent.getStringExtra("video"),
                             intent.getStringExtra("sms"),
-                            intent.getStringExtra("call_composer"),
-                            intent.getStringExtra("call_composer_business_only"));
+                            intent.getStringExtra("call_composer"));
                 } else if ("vops".equalsIgnoreCase(event)) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
@@ -133,30 +130,27 @@ public final class ImsTestHelper {
         }
 
         // CAPABILITIES CHANGED TEST
-        // extra parameter : network type, voice capa, video capa, sms capa, call_composer capa,
-        //                   call_composer_business_only capa
+        // extra parameter : network type, voice capa, video capa, sms capa, call_composer capa
         // network = LTE / NR / IWLAN / UTRAN (multiple use with comma separated)
         // capa = 0 / 1 (multiple use with comma separated in network input order.)
-        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST --ei slotid 0
+        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST
         //     --es event capa --es network LTE,NR,IWLAN,UTRAN --es voice 1,1,0,0 --es video 0,0,1,0
-        //     --es sms 1,1,1,0 --es call_composer 1,1,1,0 --es call_composer_business_only 1,1,1,0
-        private void sendCapabilitiesChanged(int slotId,
+        //     --es sms 1,1,1,0 --es call_composer 1,1,1,0
+        private void sendCapabilitiesChanged(
                 String strNetwork, String strVoice, String strVideo, String strSms,
-                String strCallComposer, String strBizCallComposer) {
-            ImsLog.d("sendCapabilitiesChanged :: slot id=" + slotId + ", network=" + strNetwork
-                    + ", voice=" + strVoice + ", video=" + strVideo + ", sms=" + strSms
-                    + ", call_composer=" + strCallComposer + ", call_composer_business_only="
-                    + strBizCallComposer);
+                String strCallComposer) {
+            ImsLog.d("sendCapabilitiesChanged :: network=" + strNetwork + ", voice=" + strVoice +
+                    ", video=" + strVideo + ", sms=" + strSms + ", call_composer="
+                    + strCallComposer);
 
             AosFactory aosFactory = AosFactory.getInstance();
-            IAosRegistration iAosRegistration = aosFactory.getAosRegistration(slotId);
+            IAosRegistration iAosRegistration = aosFactory.getAosRegistration(0);
 
             String[] strNetworks = strNetwork.split(",");
             String[] strVoices = strVoice.split(",");
             String[] strVideos = strVideo.split(",");
             String[] strSmss = strSms.split(",");
             String[] strCallComposers = strCallComposer.split(",");
-            String[] strBizCallComposers = strBizCallComposer.split(",");
 
             CapabilityPairs objCapabilityPairs = new CapabilityPairs();
 
@@ -188,11 +182,6 @@ public final class ImsTestHelper {
 
                 if (strCallComposers[i].equals("1")) {
                     nCapabilities |= IAosRegistrationListener.Capability.CALL_COMPOSER;
-                }
-
-                if (strBizCallComposers[i].equals("1")) {
-                    nCapabilities |=
-                            IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY;
                 }
 
                 objCapabilityPairs.addCapability(nNetwork, nCapabilities);

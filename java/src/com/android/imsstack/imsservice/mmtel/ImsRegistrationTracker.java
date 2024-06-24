@@ -526,8 +526,6 @@ public class ImsRegistrationTracker {
                 return IAosRegistrationListener.Capability.SMS;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER:
                 return IAosRegistrationListener.Capability.CALL_COMPOSER;
-            case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY:
-                return IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE: // FALL-THROUGH
             default:
                 return IAosRegistrationListener.Capability.NONE;
@@ -828,9 +826,6 @@ public class ImsRegistrationTracker {
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
                 case IAosRegistrationListener.Capability.CALL_COMPOSER:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER;
-                case IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY:
-                    return MmTelFeature.MmTelCapabilities
-                            .CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY;
                 case IAosRegistrationListener.Capability.NONE: // FALL-THROUGH
                 default:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;

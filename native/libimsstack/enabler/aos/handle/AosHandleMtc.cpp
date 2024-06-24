@@ -463,9 +463,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
             !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
 
     ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
-            (!IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER) &&
-                    !IsCapabilityExistedForNetworkType(
-                            m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY)),
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER),
             IMS_FALSE);
 
     // Manage holding blocks
