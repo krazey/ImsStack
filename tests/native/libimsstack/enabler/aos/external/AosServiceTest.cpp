@@ -1036,7 +1036,6 @@ TEST_F(AosServiceTest, GetCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1063,7 +1062,6 @@ TEST_F(AosServiceTest, GetCapabilitiesForNetwork_ReturnValue)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1094,7 +1092,6 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1115,8 +1112,6 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::CALL_COMPOSER));
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
-            AosNetworkType::LTE, AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
-    EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::OPTIONS_UCE));
     EXPECT_TRUE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::LTE, AosCapability::PRESENCE_UCE));
@@ -1132,8 +1127,6 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::CALL_COMPOSER));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
-            AosNetworkType::IWLAN, AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
-    EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::OPTIONS_UCE));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::PRESENCE_UCE));
@@ -1148,7 +1141,6 @@ TEST_F(AosServiceTest, PrintCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1158,7 +1150,6 @@ TEST_F(AosServiceTest, PrintCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1168,7 +1159,6 @@ TEST_F(AosServiceTest, PrintCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1178,7 +1168,6 @@ TEST_F(AosServiceTest, PrintCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
@@ -1188,20 +1177,15 @@ TEST_F(AosServiceTest, PrintCapabilities)
                     static_cast<IMS_UINT32>(AosCapability::UT) |
                     static_cast<IMS_UINT32>(AosCapability::SMS) |
                     static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
-                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY) |
                     static_cast<IMS_UINT32>(AosCapability::OPTIONS_UCE) |
                     static_cast<IMS_UINT32>(AosCapability::PRESENCE_UCE));
 
-    AString strExpect = AString("LTE : [ VOICE VIDEO UT SMS CALL_COMPOSER "
-                                "CALL_COMPOSER_BUSINESS_ONLY OPTIONS_UCE PRESENCE_UCE ] ");
-    strExpect.Append("IWLAN : [ VOICE VIDEO UT SMS CALL_COMPOSER CALL_COMPOSER_BUSINESS_ONLY "
-                     "OPTIONS_UCE PRESENCE_UCE ] ");
-    strExpect.Append("CROSS_SIM : [ VOICE VIDEO UT SMS CALL_COMPOSER CALL_COMPOSER_BUSINESS_ONLY "
-                     "OPTIONS_UCE PRESENCE_UCE ] ");
-    strExpect.Append("NR : [ VOICE VIDEO UT SMS CALL_COMPOSER CALL_COMPOSER_BUSINESS_ONLY "
-                     "OPTIONS_UCE PRESENCE_UCE ] ");
-    strExpect.Append("UTRAN : [ VOICE VIDEO UT SMS CALL_COMPOSER CALL_COMPOSER_BUSINESS_ONLY "
-                     "OPTIONS_UCE PRESENCE_UCE ] ");
+    AString strExpect =
+            AString("LTE : [ VOICE VIDEO UT SMS CALL_COMPOSER OPTIONS_UCE PRESENCE_UCE ] ");
+    strExpect.Append("IWLAN : [ VOICE VIDEO UT SMS CALL_COMPOSER OPTIONS_UCE PRESENCE_UCE ] ");
+    strExpect.Append("CROSS_SIM : [ VOICE VIDEO UT SMS CALL_COMPOSER OPTIONS_UCE PRESENCE_UCE ] ");
+    strExpect.Append("NR : [ VOICE VIDEO UT SMS CALL_COMPOSER OPTIONS_UCE PRESENCE_UCE ] ");
+    strExpect.Append("UTRAN : [ VOICE VIDEO UT SMS CALL_COMPOSER OPTIONS_UCE PRESENCE_UCE ] ");
 
     EXPECT_TRUE(m_pAosService->PrintCapabilities(objCapabilities).Equals(strExpect));
 }
