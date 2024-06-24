@@ -1676,6 +1676,160 @@ TEST_F(AosHandleMtcTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
 }
 
+TEST_F(AosHandleMtcTest,
+        BlockCallComposerCapabilityIfCallComposerBusinessOnlyIsRemovedWhileCallComposerIsNotExisted)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        UnblockCallComposerCapabilityIfCallComposerBusinessOnlyIsAddedWhileCallComposerIsNotExisted)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    SetCapabilities(objCapabilities);
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        BlockCallComposerCapabilityIfBothCallComposerAndCallComposerBusinessOnlyAreRemoved)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        UnblockCallComposerCapabilityIfBothCallComposerAndCallComposerBusinessOnlyAreAdded)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    SetCapabilities(objCapabilities);
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        NoChangeCallComposerCapabilityIfCallComposerBusinessOnlyIsRemovedWhileCallComposerIsExisted)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
+TEST_F(AosHandleMtcTest,
+        NoChangeCallComposerCapabilityIfCallComposerIsRemovedWhileCallComposerBusinessOnlyIsExisted)
+{
+    // GIVEN
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    SetCapabilities(objCapabilities);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+
+    // WHEN
+    objCapabilities.SetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER_BUSINESS_ONLY));
+    ProcessCapabilitiesChanged(objCapabilities);
+
+    // THEN
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_CALL_COMPOSER_CAPABILITY));
+}
+
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
 {
     // Test2: No capability(LTE,IWLAN,NR), Current network=LTE, Wfc available
