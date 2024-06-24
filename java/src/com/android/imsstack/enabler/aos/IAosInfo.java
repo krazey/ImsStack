@@ -17,6 +17,8 @@ package com.android.imsstack.enabler.aos;
 
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.Sim;
 
 /**
@@ -29,15 +31,17 @@ public interface IAosInfo {
      * Registers a new Listener to receive AoS Information updates.
      *
      * @param listener {@link IAosInfoListener} to listen to the events of this object.
+     * @throws NullPointerException if the listener is null.
      */
-    void addListener(IAosInfoListener listener);
+    void addListener(@NonNull IAosInfoListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosInfoListener)}.
      *
      * @param listener {@link IAosInfoListener} previously registered.
+     * @throws NullPointerException if the listener is null.
      */
-    void removeListener(IAosInfoListener listener);
+    void removeListener(@NonNull IAosInfoListener listener);
 
     /**
      * Called to notify the change of data roaming setting.
@@ -174,7 +178,7 @@ public interface IAosInfo {
      * Called to notify the update of emergency callback mode.
      * Native Listener : IAosEmergencyListener.
      *
-     * @param type {@code type} is callback mode entry {@link EmcCallbackType}
+     * @param type {@code type} is callback mode entry {@link EmcCallbackModeType}
      * @param state {@code state} is type of {@link EmcCallbackMode}.
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */

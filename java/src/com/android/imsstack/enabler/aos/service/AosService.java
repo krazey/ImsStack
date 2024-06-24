@@ -262,12 +262,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void addListener(IAosInfoListener listener) {
+    public void addListener(@NonNull IAosInfoListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
         mAosInfoListeners.add(listener);
     }
 
     @Override
-    public void removeListener(IAosInfoListener listener) {
+    public void removeListener(@NonNull IAosInfoListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
         mAosInfoListeners.remove(listener);
     }
 
