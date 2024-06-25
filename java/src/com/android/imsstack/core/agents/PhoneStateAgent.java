@@ -375,7 +375,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
         final NetworkRegistrationInfo wwanRegInfo = ss.getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-        return (wwanRegInfo != null) ? wwanRegInfo.getRegistrationState() :
+        return (wwanRegInfo != null) ? wwanRegInfo.getNetworkRegistrationState() :
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
     }
 
