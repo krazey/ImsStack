@@ -193,7 +193,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
 
-    if (IsNeedToIgnoreStartFailure())
+    if (IsNeedToIgnoreStartFailure() || m_bWaitingRedial)
     {
         return GetStateName();
     }
@@ -264,6 +264,17 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
+    if (objReason.nCode == CODE_INTERNAL_REDIAL)
+    {
+        if (objReason.nExtraCode == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF)
+        {
+            m_bWaitingRedial = IMS_TRUE;
+            return GetStateName();
+        }
+
+        return HandleSilentRedial(piSession, objReason);
+    }
+
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
@@ -393,6 +404,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
         return GetStateName();
     }
 
+    // The case that a PRACK request is rejected with a 503 error rarely happens.
+    // So, do not consider that case.
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_PRACK);
     IMS_TRACE_D("SessionPrackDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);

@@ -16,11 +16,15 @@
 
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "Ims3gpp.h"
 #include "ImsAosReason.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
@@ -92,10 +96,15 @@ public:
     MediaInfo objMediaInfo;
     ImsList<IMtcSession*> objSessions;
     MockIMtcCallManager objCallManager;
+    TestConfigService* pConfigService;
 
 protected:
     virtual void SetUp() override
     {
+        pConfigService = new TestConfigService();
+        pConfigService->SetCarrierConfig(&(pConfigService->GetMockCarrierConfig()));
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, pConfigService);
+
         objAckMethod = SipMethod::ACK;
         objInviteMethod = SipMethod::INVITE;
 
@@ -147,6 +156,9 @@ protected:
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
+        delete pConfigService;
         delete pOutgoingState;
         delete pConfigurationProxy;
         delete pSupplementaryService;
@@ -850,6 +862,9 @@ TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentNormalRedial)
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_18X_WAIT));
     EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .Times(0);
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pOutgoingState->OnAosStateChanged(
@@ -930,6 +945,58 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareConditi
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503WaitsRedial)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ImsList<IMtcCall*> objCalls;
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(0)).Times(1);
+
+    EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession)).Times(0);
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _)).Times(0);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, ImsAosReason::REG_NEW_REQUIRED));
+
+    EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith503InvokesRedial)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ImsList<IMtcCall*> objCalls;
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession)).Times(0);
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _)).Times(0);
+
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objCallContext.GetSlotId());
+    ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedRejectsRequestIfSdpOaFails)
