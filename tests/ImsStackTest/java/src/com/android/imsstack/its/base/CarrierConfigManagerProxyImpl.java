@@ -67,7 +67,6 @@ public class CarrierConfigManagerProxyImpl implements CarrierConfigManagerProxy 
         return CarrierConfigManager.getDefaultConfig();
     }
 
-    @Override
     public @NonNull PersistableBundle getConfigForSubId(int subId) {
         PersistableBundle config = mConfigs.get(subId);
         if (config != null) {
