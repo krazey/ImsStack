@@ -146,14 +146,14 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     unsigned int nLength = strlen(pReqMsg);
 
@@ -201,14 +201,14 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    SIP_CHAR* pRespMsg = const_cast<SIP_CHAR*>("SIP/2.0 200 OK\r\n\
+    SIP_CHAR* pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     int eTxnStatus = SipTxn::STATUS_INVALID;
@@ -670,14 +670,14 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
+    SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     unsigned int nLength = strlen(pReqMsg);
 

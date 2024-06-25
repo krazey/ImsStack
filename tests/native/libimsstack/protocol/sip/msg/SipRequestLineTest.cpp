@@ -103,7 +103,7 @@ TEST_F(SipRequestLineTest, EncodeRequestLine)
 
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec("sip:user@host", 13));
 
-    pRequestLine = new SipRequestLine(const_cast<SIP_CHAR*>("INVITE"), pSipAddrSpec, SIP_SIPVER);
+    pRequestLine = new SipRequestLine("INVITE", pSipAddrSpec, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
 
     /* method, addrspec and sip version present, success */

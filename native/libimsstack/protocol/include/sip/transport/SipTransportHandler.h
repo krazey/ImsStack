@@ -44,7 +44,7 @@ public:
      **************************************************************/
 
     SIP_BOOL OnSendTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,
-            IN SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
+            IN const SIP_CHAR* pSipBuffer, IN SIP_UINT32 nSipBufferLen,
             OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError);
 
     SIP_BOOL OnRecvTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,

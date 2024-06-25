@@ -128,8 +128,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 2 Message body 1 */
     SipMsgBody* pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 1"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel2->SetMsgBuffer("level2 - message body 1", 23));
     SipMsgBodyList* pMsgBobyList = pMessageBodyLevel2->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
@@ -138,8 +137,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 2 Message body 2 */
     pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 2"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel2->SetMsgBuffer("level2 - message body 2", 23));
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
     pMessageLevel2->SipDelete();
     pMsgBobyList->SipDelete();
@@ -152,8 +150,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     /* Level - 1 Message body 1 */
     SipMsgBody* pMessageLevel1 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel1 != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 1"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMsgBuffer("level1 - message body 1", 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
@@ -171,8 +168,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMimeHdr(pUnknownHeader));
     pUnknownHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 2"), 23));
+    EXPECT_EQ(SIP_TRUE, pMessageLevel1->SetMsgBuffer("level1 - message body 2", 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
@@ -226,7 +222,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     /* Empty message body, fail */
     EXPECT_EQ(SIP_FALSE, pMessageBody->EncodeBody(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("single body"), 11));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer("single body", 11));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -258,7 +254,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
 
     EXPECT_EQ(SIP_TRUE, pBody1->IsMessageBodySDP());
 
-    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer(const_cast<SIP_CHAR*>("sdp message body"), 16));
+    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer("sdp message body", 16));
 
     SipMsgBodyList* pMsgBobyList = pMessageBody->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);

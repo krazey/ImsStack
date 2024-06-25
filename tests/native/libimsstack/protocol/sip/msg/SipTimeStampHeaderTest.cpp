@@ -46,7 +46,7 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetTimeVal(const_cast<SIP_CHAR*>("12.56")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetTimeVal("12.56"));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -58,7 +58,7 @@ TEST_F(SipTimeStampHeaderTest, EncodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetDelay(const_cast<SIP_CHAR*>("1.30")));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetDelay("1.30"));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));

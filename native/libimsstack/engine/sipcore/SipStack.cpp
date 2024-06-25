@@ -849,11 +849,11 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         if (!IMS_UTIL_ZLIB_Uncompress(objCompBodyPart, objBodyPart))
         {
             IMS_TRACE_E(0, "Uncompressing a body part failed", 0, 0, 0);
-            delete[] pszBuffer;
+            DeleteStackString(pszBuffer);
             return IMS_FALSE;
         }
 
-        delete[] pszBuffer;
+        DeleteStackString(pszBuffer);
 
         if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
         {
@@ -3718,10 +3718,9 @@ GLOBAL IMS_BOOL SetRequestLine(
 {
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    pAddrSpec->DecodeAddrSpec(const_cast<IMS_CHAR*>(strUri.GetStr()), strUri.GetLength());
+    pAddrSpec->DecodeAddrSpec(strUri.GetStr(), strUri.GetLength());
 
-    SipRequestLine* pReqLine =
-            new SipRequestLine(const_cast<IMS_CHAR*>(strMethod.GetStr()), pAddrSpec, SIP_SIPVER);
+    SipRequestLine* pReqLine = new SipRequestLine(strMethod.GetStr(), pAddrSpec, SIP_SIPVER);
 
     pMessage->SetRequestline(pReqLine);
 

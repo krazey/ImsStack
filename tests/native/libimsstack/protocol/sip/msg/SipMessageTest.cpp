@@ -125,7 +125,7 @@ TEST_F(SipMessageTest, SetRequestline)
     pSipAddrSpec->SipDelete();
     pRequestLine->SipDelete();
 
-    pRequestLine = new SipRequestLine(const_cast<SIP_CHAR*>("TEST-METHOD"), nullptr, SIP_SIPVER);
+    pRequestLine = new SipRequestLine("TEST-METHOD", nullptr, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
 
     pMessage->SetRequestline(pRequestLine);

@@ -243,13 +243,13 @@ SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName);
 
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
 #ifdef SIP_STRICT_PARSING
-SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+SIP_BOOL IsValidAddress(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 #endif
 
 const SIP_CHAR* SipFindBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
-        SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
+        const SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
 
-SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName);
+SIP_INT32 SipGetMimeHdrType(const SIP_CHAR* pszHdrName);
 
 class SIPHdrAccess
 {

@@ -38,7 +38,7 @@ SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam
 }
 
 SipTransportParameter::SipTransportParameter(
-        SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol) :
+        const SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol) :
         m_pHostAddress(SIP_NULL),
         m_nPort(nPort),
         m_nTranspProtocol(eTranspProtocol),

@@ -48,7 +48,8 @@ public:
     {
     }
     explicit SipTransportParameter(SipTransportParameter* pTranspParam);
-    SipTransportParameter(SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
+    SipTransportParameter(
+            const SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
     virtual ~SipTransportParameter()
     {
         if (m_pHostAddress != SIP_NULL)

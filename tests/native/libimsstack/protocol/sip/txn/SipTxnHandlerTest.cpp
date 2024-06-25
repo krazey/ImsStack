@@ -238,8 +238,8 @@ CSeq: 1 INVITE\r\n\
         pSipTxnContext = new SipTxnContext();
         pSipUserData = new ISipUserData(pSipTxnContext);
 
-        pSipTranspParam = new SipTransportParameter(
-                const_cast<SIP_CHAR*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+        pSipTranspParam =
+                new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
         static const SipStackCallbacks stTestCallbacks = {
                 &Mock_FetchTransaction,

@@ -109,7 +109,7 @@ OnlyHeaderName&HeaderName=HeaderValue",
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    pSipUri->RemoveHdrParam(const_cast<SIP_CHAR*>("HeaderName"));
+    pSipUri->RemoveHdrParam("HeaderName");
     EXPECT_EQ(SIP_TRUE, pSipUri->EncodeSipUri(&pBuff));
     EXPECT_EQ(SIP_TRUE, pSipUri->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("UserName:password@192.168.1.2:9090;OnlyUriName;UriName=UriValue?\

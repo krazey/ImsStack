@@ -817,7 +817,7 @@ SipMsgBodyList::SipMsgBodyList(const SipMsgBodyList& objMsgBodyList) :
     }
 }
 
-SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary)
+SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, const SIP_CHAR* pszBoundary)
 {
     SIP_UINT32 nNumBodies = m_objBodyList.GetSize();
 
@@ -859,7 +859,7 @@ SIP_BOOL SipMsgBodyList::EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBo
 }
 
 SIP_BOOL SipMsgBodyList::GetEncodedMessageBody(
-        SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, SIP_CHAR* pszBoundary)
+        SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, const SIP_CHAR* pszBoundary)
 {
     SIP_UINT32 nCount = m_objBodyList.GetSize();
     if (nCount == SIP_ZERO)
@@ -944,7 +944,7 @@ SIP_BOOL SipMsgBodyList::DecodeSingleBody(const SIP_CHAR* pStartPt, const SIP_CH
 }
 
 SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
-        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary)
+        const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, const SIP_CHAR* pszBoundary)
 {
     /*Boundary check*/
     if (pszBoundary == SIP_NULL)

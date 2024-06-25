@@ -56,7 +56,7 @@
  *
  */
 SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
-        IN SipTransportParameter* pTranspParam, IN SIP_CHAR* pSipBuffer,
+        IN SipTransportParameter* pTranspParam, IN const SIP_CHAR* pSipBuffer,
         IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError)
 {
     (void)pnError;
