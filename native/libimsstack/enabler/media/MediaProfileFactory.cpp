@@ -284,7 +284,7 @@ PUBLIC
 MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(
         IN MediaBaseProfile::BasePayload* payload)
 {
-    switch (MediaProfileUtil::GetMediaType(payload->objRtpMap.strPayloadType))
+    switch (MediaProfileUtil::GetMediaType(payload->objRtpMap.GetPayloadType()))
     {
         case MEDIA_TYPE_AUDIO:
             return CreateAudioPayload(static_cast<AudioProfile::Payload*>(payload));

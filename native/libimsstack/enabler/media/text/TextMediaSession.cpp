@@ -134,7 +134,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
 
@@ -144,19 +144,19 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
                 continue;
             }
 
-            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.nSamplingRate / 1000));
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
+            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140_RED);
             pTextConfig->setRedundantPayload(pFmtp->nRedPayload);
             pTextConfig->setRedundantLevel(pFmtp->nRedLevel);
             break;
         }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
+        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
         {
-            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.nSamplingRate / 1000));
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
+            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140);
             pTextConfig->setRedundantPayload(0);
             pTextConfig->setRedundantLevel(0);

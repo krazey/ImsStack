@@ -109,7 +109,7 @@ VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
         return VIDEO_RESOLUTION_INVALID;
     }
 
-    if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+    if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
     {
         VideoProfile::AvcFmtp* pFmtp = (VideoProfile::AvcFmtp*)pPayload->pFmtp;
         if (pFmtp != IMS_NULL)
@@ -117,7 +117,7 @@ VIDEO_RESOLUTION VideoNego::GetNegotiatedResolution()
             return pFmtp->eResolution;
         }
     }
-    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
     {
         VideoProfile::HevcFmtp* pFmtp = (VideoProfile::HevcFmtp*)pPayload->pFmtp;
         if (pFmtp != IMS_NULL)
@@ -491,7 +491,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             continue;
         }
 
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.nPayloadNum);
+        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.GetPayloadNumber());
         objVideoFormat.AddElement(strPayloadNum);
     }
 
@@ -587,13 +587,14 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         }
 
         // make "rtpmap"
-        strRtpmap.Sprintf("%d %s/%d", pPayload->objRtpMap.nPayloadNum,
-                pPayload->objRtpMap.strPayloadType.GetStr(), pPayload->objRtpMap.nSamplingRate);
+        strRtpmap.Sprintf("%d %s/%d", pPayload->objRtpMap.GetPayloadNumber(),
+                pPayload->objRtpMap.GetPayloadType().GetStr(),
+                pPayload->objRtpMap.GetSamplingRate());
 
-        if (pPayload->objRtpMap.nChannel > 0)
+        if (pPayload->objRtpMap.GetChannel() > 0)
         {
             AString strChannel;
-            strChannel.Sprintf("/%d", pPayload->objRtpMap.nChannel);
+            strChannel.Sprintf("/%d", pPayload->objRtpMap.GetChannel());
             strRtpmap.Append(strChannel);
         }
 
@@ -604,7 +605,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         // ----------  sprop-parameter-sets=Z0LAFukDwKMg,aM4G4g=="
         SdpAvCodec* pFormat = new SdpAvCodec();
 
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
         {
             VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pPayload->pFmtp;
 
@@ -618,7 +619,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
             eResolution = pAvcFmtp->eResolution;
         }
-        else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
         {
             VideoProfile::HevcFmtp* pHevcFmtp = (VideoProfile::HevcFmtp*)pPayload->pFmtp;
 
@@ -647,7 +648,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         AString strCompletedFmtp = AString::ConstNull();
         if (!strFmtp.IsNULL())
         {
-            strCompletedFmtp.Sprintf("%d ", pPayload->objRtpMap.nPayloadNum);
+            strCompletedFmtp.Sprintf("%d ", pPayload->objRtpMap.GetPayloadNumber());
             strCompletedFmtp.Append(strFmtp);
         }
         if (pFormat == IMS_NULL)
@@ -664,7 +665,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         if (pPayload->bIncludeImageAttr == IMS_TRUE)
         {
             if (MakeImageAttributeLine(
-                        pPayload->objRtpMap.nPayloadNum, eResolution, strResolutionAttr))
+                        pPayload->objRtpMap.GetPayloadNumber(), eResolution, strResolutionAttr))
             {
                 pDescriptor->AddAttribute(SdpAttribute::IMAGEATTR, strResolutionAttr);
             }
@@ -673,7 +674,8 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         // make "framesize"
         if (pPayload->bIncludeFrameSize == IMS_TRUE)
         {
-            if (MakeFrameSizeLine(pPayload->objRtpMap.nPayloadNum, eResolution, strResolutionAttr))
+            if (MakeFrameSizeLine(
+                        pPayload->objRtpMap.GetPayloadNumber(), eResolution, strResolutionAttr))
             {
                 pDescriptor->AddAttribute(SdpAttribute::FRAMESIZE, strResolutionAttr);
             }
@@ -695,7 +697,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             else if (bTrrSupportedAll == IMS_FALSE &&
                     pPayload->objRtcpFbAttr.bTrrSupported == IMS_TRUE)
             {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.nPayloadNum;
+                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.GetPayloadNumber();
             }
 
             if (nPayloadNumForRtcpFb != -1)
@@ -720,7 +722,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             else if (bNackSupportedAll == IMS_FALSE &&
                     pPayload->objRtcpFbAttr.bNackSupported == IMS_TRUE)
             {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.nPayloadNum;
+                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.GetPayloadNumber();
             }
 
             if (nPayloadNumForRtcpFb != -1)
@@ -739,7 +741,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             else if (bPliSupportedAll == IMS_FALSE &&
                     pPayload->objRtcpFbAttr.bPliSupported == IMS_TRUE)
             {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.nPayloadNum;
+                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.GetPayloadNumber();
             }
 
             if (nPayloadNumForRtcpFb != -1)
@@ -759,7 +761,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             else if (bFirSupportedAll == IMS_FALSE &&
                     pPayload->objRtcpFbAttr.bFirSupported == IMS_TRUE)
             {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.nPayloadNum;
+                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.GetPayloadNumber();
             }
 
             if (nPayloadNumForRtcpFb != -1)
@@ -779,7 +781,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             else if (bTmmbrSupportedAll == IMS_FALSE &&
                     pPayload->objRtcpFbAttr.bTmmbrSupported == IMS_TRUE)
             {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.nPayloadNum;
+                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->objRtpMap.GetPayloadNumber();
             }
 
             if (nPayloadNumForRtcpFb != -1)
@@ -1108,7 +1110,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedPayload(IN VideoProfile::Payload* pLoc
     }
 
     *pNegoPayload = *pLocalPayload;
-    pNegoPayload->objRtpMap.nPayloadNum = pPeerPayload->objRtpMap.nPayloadNum;
+    pNegoPayload->objRtpMap.SetPayloadNumber(pPeerPayload->objRtpMap.GetPayloadNumber());
     pNegoPayload->bIncludeFrameSize = pLocalPayload->bIncludeFrameSize;
     pNegoPayload->bIncludeImageAttr = pLocalPayload->bIncludeImageAttr;
 
@@ -1231,7 +1233,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             continue;
         }
 
-        if (pPeerPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+        if (pPeerPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
         {
             // start source profile loop
             for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
@@ -1245,7 +1247,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 }
 
                 // find matched payload - H264 find options
-                if (pLocalPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+                if (pLocalPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
                 {
                     // FMTP compare
                     VideoProfile::AvcFmtp* pLocalFmtp =
@@ -1296,7 +1298,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                                 VideoProfile::Payload* pPotentialPayload =
                                         pLocalProfile->GetPayloadAt(nIndex);
 
-                                if (pPotentialPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
+                                if (pPotentialPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
                                             "H264"))
                                 {
                                     VideoProfile::AvcFmtp* pPotentialFmtp =
@@ -1457,8 +1459,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                             VideoProfile::Payload* pTempNegoLocalPayload =
                                     pLocalProfile->GetPayloadAt(
                                             pLocalProfile->nNegotiatedPayloadIndex);
-                            pTempNegoLocalPayload->objRtpMap.nPayloadNum =
-                                    pPeerPayload->objRtpMap.nPayloadNum;
+                            pTempNegoLocalPayload->objRtpMap.SetPayloadNumber(
+                                    pPeerPayload->objRtpMap.GetPayloadNumber());
                         }
                     }
 
@@ -1475,7 +1477,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 }
             }
         }
-        else if (pPeerPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+        else if (pPeerPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
         {
             // start source profile loop
             for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
@@ -1488,7 +1490,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 }
 
                 // find matched payload - H265 find options
-                if (pLocalPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+                if (pLocalPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
                 {
                     // FMTP compare
                     VideoProfile::HevcFmtp* pLocalFmtp =
@@ -1644,8 +1646,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                                     pLocalProfile->GetPayloadAt(
                                             pLocalProfile->nNegotiatedPayloadIndex);
 
-                            pTempNegoLocalPayload->objRtpMap.nPayloadNum =
-                                    pPeerPayload->objRtpMap.nPayloadNum;
+                            pTempNegoLocalPayload->objRtpMap.SetPayloadNumber(
+                                    pPeerPayload->objRtpMap.GetPayloadNumber());
                         }
                     }
 
@@ -1665,7 +1667,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         else
         {
             IMS_TRACE_D("MakeNegotiatedProfile() UNSUPPORTED codec[%s]",
-                    pPeerPayload->objRtpMap.strPayloadType.GetStr(), 0, 0);
+                    pPeerPayload->objRtpMap.GetPayloadType().GetStr(), 0, 0);
         }
     }
 
@@ -1685,7 +1687,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 return IMS_FALSE;
             }
 
-            if (pMatchedPeerPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+            if (pMatchedPeerPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
             {
                 VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pNegoPayload->pFmtp;
 
@@ -1779,8 +1781,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                         VideoProfile::Payload* pTempNegoLocalPayload =
                                 pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
 
-                        pTempNegoLocalPayload->objRtpMap.nPayloadNum =
-                                pPeerPayload->objRtpMap.nPayloadNum;
+                        pTempNegoLocalPayload->objRtpMap.SetPayloadNumber(
+                                pPeerPayload->objRtpMap.GetPayloadNumber());
                     }
                 }
 
@@ -1797,7 +1799,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     nNegotiatedMaxAs = pAvcFmtp->nAs;
                 }
             }
-            else if (pMatchedPeerPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+            else if (pMatchedPeerPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
             {
                 // Make a RTCP-FB negotiation result
                 if (pNegotiatedProfile->bSupportAvpf == IMS_TRUE)
@@ -1857,8 +1859,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                         VideoProfile::Payload* pTempNegoLocalPayload =
                                 pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
 
-                        pTempNegoLocalPayload->objRtpMap.nPayloadNum =
-                                pPeerPayload->objRtpMap.nPayloadNum;
+                        pTempNegoLocalPayload->objRtpMap.SetPayloadNumber(
+                                pPeerPayload->objRtpMap.GetPayloadNumber());
                     }
                 }
 
@@ -2159,12 +2161,12 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
             continue;
         }
 
-        if ((pOriginPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
-                    pTargetPayload->objRtpMap.strPayloadType)) &&
-                (pOriginPayload->objRtpMap.nSamplingRate ==
-                        pTargetPayload->objRtpMap.nSamplingRate))
+        if ((pOriginPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
+                    pTargetPayload->objRtpMap.GetPayloadType())) &&
+                (pOriginPayload->objRtpMap.GetSamplingRate() ==
+                        pTargetPayload->objRtpMap.GetSamplingRate()))
         {
-            if (pOriginPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+            if (pOriginPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
             {
                 VideoProfile::AvcFmtp* pOriginFmtp = (VideoProfile::AvcFmtp*)pOriginPayload->pFmtp;
                 VideoProfile::AvcFmtp* pReceivedFmtp =
@@ -2237,7 +2239,7 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
 
                 return pOriginPayload;
             }
-            else if (pOriginPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+            else if (pOriginPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
             {
                 VideoProfile::HevcFmtp* pOriginFmtp =
                         (VideoProfile::HevcFmtp*)pOriginPayload->pFmtp;
@@ -2306,7 +2308,8 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
     }
 
     // When there's no perfectly matched payload, use secondary (only resolution is mismatched)
-    if (pTempPayload != IMS_NULL && pTempPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+    if (pTempPayload != IMS_NULL &&
+            pTempPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
     {
         VideoProfile::AvcFmtp* pOriginFmtp = (VideoProfile::AvcFmtp*)pTempPayload->pFmtp;
         VideoProfile::AvcFmtp* pReceivedFmtp = (VideoProfile::AvcFmtp*)pTargetPayload->pFmtp;
@@ -2333,7 +2336,8 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
 
         return pTempPayload;
     }
-    if (pTempPayload != IMS_NULL && pTempPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+    if (pTempPayload != IMS_NULL &&
+            pTempPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
     {
         VideoProfile::HevcFmtp* pOriginFmtp = (VideoProfile::HevcFmtp*)pTempPayload->pFmtp;
         VideoProfile::HevcFmtp* pReceivedFmtp = (VideoProfile::HevcFmtp*)pTargetPayload->pFmtp;

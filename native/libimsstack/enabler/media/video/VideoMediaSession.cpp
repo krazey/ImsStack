@@ -107,8 +107,8 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     // Setting the network properties
     UpdateLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
-    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->objRtpMap.nPayloadNum);
-    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
+    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->objRtpMap.GetPayloadNumber());
+    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->objRtpMap.GetPayloadNumber());
     // remote network parameters
     pVideoConfig->setRemoteAddress(
             android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
@@ -195,7 +195,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
     }
 
-    if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+    if (pNegoPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
     {
         VideoProfile::AvcFmtp* pFmtp =
                 reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->pFmtp);
@@ -217,7 +217,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
-    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+    else if (pNegoPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
     {
         VideoProfile::HevcFmtp* pFmtp =
                 reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->pFmtp);
@@ -240,7 +240,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setResolutionHeight(nHeight);
     }
 
-    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
+    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.GetSamplingRate() / 1000));
     pVideoConfig->setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
     pVideoConfig->setCameraId(m_nCameraId);
     pVideoConfig->setCameraZoom(m_nCameraZoom);

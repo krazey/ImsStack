@@ -106,13 +106,13 @@ TEXT_CODEC TextNego::GetNegotiatedCodec(void)
     }
 
     IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
-            pPayload->objRtpMap.strPayloadType.GetStr(), 0, 0);
+            pPayload->objRtpMap.GetPayloadType().GetStr(), 0, 0);
 
-    if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
+    if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
     {
         return TEXT_CODEC_T140;
     }
-    else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
     {
         return TEXT_CODEC_T140_RED;
     }
@@ -523,7 +523,7 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp);
 
@@ -548,9 +548,9 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
                 IMS_TRACE_I("MakeSdpFromProfile() - RedSubPT, PT[%d] of PL(%d) / nRedPayload "
                             "[%d]",
-                        pTempPayload->objRtpMap.nPayloadNum, j, pRedFmtp->nRedPayload);
+                        pTempPayload->objRtpMap.GetPayloadNumber(), j, pRedFmtp->nRedPayload);
 
-                if (pTempPayload->objRtpMap.nPayloadNum == (IMS_UINT32)pRedFmtp->nRedPayload)
+                if (pTempPayload->objRtpMap.GetPayloadNumber() == (IMS_UINT32)pRedFmtp->nRedPayload)
                 {
                     bRedSubPTExist = IMS_TRUE;
                 }
@@ -561,8 +561,8 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                 IMS_TRACE_E(0,
                         "MakeSdpFromProfile() - SubPayloadtype for Redundancy isn't exist. skip "
                         "Payload, Payload[%s], PT[%d]",
-                        pPayload->objRtpMap.strPayloadType.GetStr(),
-                        pPayload->objRtpMap.nPayloadNum, 0);
+                        pPayload->objRtpMap.GetPayloadType().GetStr(),
+                        pPayload->objRtpMap.GetPayloadNumber(), 0);
                 pProfile->lstPayload.RemoveAt(i);
                 delete pPayload;
             }
@@ -586,7 +586,7 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
             continue;
         }
 
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.nPayloadNum);
+        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.GetPayloadNumber());
         objTextFormat.AddElement(strPayloadNum);
     }
 
@@ -628,12 +628,12 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
         }
 
         // make "rtpmap"
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.nPayloadNum);
-        strRtpmap.Sprintf("%s/%d", pPayload->objRtpMap.strPayloadType.GetStr(),
-                pPayload->objRtpMap.nSamplingRate);
+        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.GetPayloadNumber());
+        strRtpmap.Sprintf("%s/%d", pPayload->objRtpMap.GetPayloadType().GetStr(),
+                pPayload->objRtpMap.GetSamplingRate());
 
         // make "fmtp"
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pRedFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
 
@@ -854,15 +854,15 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140") ||
-                pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("t140") ||
+                pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
         {
             if (FindT140InProfile(pLocalProfile, pPayload) == IMS_TRUE)
             {
                 TextProfile::Payload* pT140 = new TextProfile::Payload();
                 pT140->SetRtpMap(pPayload->objRtpMap);
 
-                if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+                if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
                 {
                     pT140->pFmtp = new TextProfile::RedFmtp(
                             *static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp));
@@ -981,23 +981,25 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
             continue;
         }
 
-        if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
+        if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
         {
-            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
-                        pPayload->objRtpMap.strPayloadType) &&
-                    comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate)
+            if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
+                        pPayload->objRtpMap.GetPayloadType()) &&
+                    comparedPayload->objRtpMap.GetSamplingRate() ==
+                            pPayload->objRtpMap.GetSamplingRate())
             {
                 IMS_TRACE_D("FindT140InProfile() - Found T140 at [%d], Codec[%s]", i,
-                        comparedPayload->objRtpMap.strPayloadType.GetStr(), 0);
+                        comparedPayload->objRtpMap.GetPayloadType().GetStr(), 0);
 
                 return IMS_TRUE;
             }
         }
-        else if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+        else if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
         {
-            if (comparedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase(
-                        pPayload->objRtpMap.strPayloadType) &&
-                    comparedPayload->objRtpMap.nSamplingRate == pPayload->objRtpMap.nSamplingRate)
+            if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
+                        pPayload->objRtpMap.GetPayloadType()) &&
+                    comparedPayload->objRtpMap.GetSamplingRate() ==
+                            pPayload->objRtpMap.GetSamplingRate())
             {
                 TextProfile::RedFmtp* pComparedFmtp = (TextProfile::RedFmtp*)comparedPayload->pFmtp;
                 TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
@@ -1014,7 +1016,7 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
                 }
 
                 IMS_TRACE_D("FindT140InProfile() - Found RED at [%d], Codec[%s]", i,
-                        comparedPayload->objRtpMap.strPayloadType.GetStr(), 0);
+                        comparedPayload->objRtpMap.GetPayloadType().GetStr(), 0);
 
                 return IMS_TRUE;
             }

@@ -53,14 +53,8 @@ public:
     class RtpMap
     {
     public:
-        IMS_UINT32 nPayloadNum;    // Payload number
-        AString strPayloadType;    // Payload type name
-        IMS_UINT32 nSamplingRate;  // Sampling rate
-        IMS_SINT32 nChannel;       // Number of channels
-
-    public:
         RtpMap(IN const IMS_SINT32 channel = 0) :
-                nPayloadNum(0),
+                nPayloadNumber(0),
                 strPayloadType(AString::ConstNull()),
                 nSamplingRate(0),
                 nChannel(channel)
@@ -68,7 +62,7 @@ public:
         }
 
         RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
+                nPayloadNumber(obj.nPayloadNumber),
                 strPayloadType(obj.strPayloadType),
                 nSamplingRate(obj.nSamplingRate),
                 nChannel(obj.nChannel)
@@ -79,7 +73,7 @@ public:
         {
             if (this != &obj)
             {
-                nPayloadNum = obj.nPayloadNum;
+                nPayloadNumber = obj.nPayloadNumber;
                 strPayloadType = obj.strPayloadType;
                 nSamplingRate = obj.nSamplingRate;
                 nChannel = obj.nChannel;
@@ -89,15 +83,32 @@ public:
 
         bool operator==(IN const RtpMap& obj) const
         {
-            return (nPayloadNum == obj.nPayloadNum && strPayloadType == obj.strPayloadType &&
+            return (nPayloadNumber == obj.nPayloadNumber &&
+                    strPayloadType.EqualsIgnoreCase(obj.strPayloadType) &&
                     nSamplingRate == obj.nSamplingRate && nChannel == obj.nChannel);
         }
 
         bool operator!=(IN const RtpMap& obj) const
         {
-            return (nPayloadNum != obj.nPayloadNum || strPayloadType != obj.strPayloadType ||
+            return (nPayloadNumber != obj.nPayloadNumber ||
+                    !strPayloadType.EqualsIgnoreCase(obj.strPayloadType) ||
                     nSamplingRate != obj.nSamplingRate || nChannel != obj.nChannel);
         }
+
+        void SetPayloadNumber(IN const IMS_UINT32 payloadNumber) { nPayloadNumber = payloadNumber; }
+        IMS_UINT32 GetPayloadNumber() { return nPayloadNumber; }
+        void SetPayloadType(IN const AString& payloadType) { strPayloadType = payloadType; }
+        AString& GetPayloadType() { return strPayloadType; }
+        void SetSamplingRate(IN const IMS_UINT32 samplingRate) { nSamplingRate = samplingRate; }
+        IMS_UINT32 GetSamplingRate() { return nSamplingRate; }
+        void SetChannel(IN const IMS_SINT32 channel) { nChannel = channel; }
+        IMS_SINT32 GetChannel() { return nChannel; }
+
+    protected:
+        IMS_UINT32 nPayloadNumber;  // Payload number
+        AString strPayloadType;     // Payload type name
+        IMS_UINT32 nSamplingRate;   // Sampling rate
+        IMS_SINT32 nChannel;        // Number of channels
     };
 
     /**
@@ -136,21 +147,15 @@ public:
             return (*this);
         }
 
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-            objRtpMap.nChannel = objMap.nChannel;
-        };
+        void SetRtpMap(IN const RtpMap& objMap) { objRtpMap = objMap; };
 
         void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
                 IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel = 0)
         {
-            objRtpMap.nPayloadNum = payloadNum;
-            objRtpMap.strPayloadType = payloadType;
-            objRtpMap.nSamplingRate = samplingRate;
-            objRtpMap.nChannel = nChannel;
+            objRtpMap.SetPayloadNumber(payloadNum);
+            objRtpMap.SetPayloadType(payloadType);
+            objRtpMap.SetSamplingRate(samplingRate);
+            objRtpMap.SetChannel(nChannel);
         };
 
     protected:

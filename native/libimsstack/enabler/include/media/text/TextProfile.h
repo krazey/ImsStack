@@ -74,7 +74,7 @@ public:
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+            if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
             {
                 pFmtp = new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
             }
@@ -88,7 +88,7 @@ public:
             {
                 BasePayload::operator=(obj);
 
-                if (objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
+                if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
                 {
                     pFmtp = new TextProfile::RedFmtp(
                             *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
