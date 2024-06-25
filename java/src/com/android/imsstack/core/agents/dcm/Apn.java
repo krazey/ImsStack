@@ -359,8 +359,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mNetworkMonitoringCallback == null) {
-            mNetworkMonitoringCallback = new ImsNetworkCallback(
-                    mContext, mType.getType(), events, this);
+            mNetworkMonitoringCallback = new ImsNetworkCallback(mType.getType(), events, this);
             mNetworkMonitoringCallback.setSlotId(mSlotId);
         } else {
             mNetworkMonitoringCallback.setEvents(events);
@@ -422,7 +421,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mNetworkCallback == null) {
-            mNetworkCallback = new ImsNetworkCallback(mContext, mType.getType(), this);
+            mNetworkCallback = new ImsNetworkCallback(mType.getType(), this);
             mNetworkCallback.setSlotId(mSlotId);
         }
 
@@ -671,7 +670,6 @@ public abstract class Apn extends Handler implements IApn {
         public static final int EVENT_NET_PCSCF_CHANGED = 0x00000080;
         public static final int EVENT_ALL = 0x0000FFFF;
 
-        private final Context mContext;
         // DcConstants.TYPE_XXX
         private final int mType;
         private Handler mTarget;
@@ -685,15 +683,11 @@ public abstract class Apn extends Handler implements IApn {
         @VisibleForTesting
         protected boolean mIsPendingOnAvailable = false;
 
-        ImsNetworkCallback(Context context, int type, Handler target) {
-            mContext = context;
-            mType = type;
-            mEvents = EVENT_ALL;
-            mTarget = target;
+        ImsNetworkCallback(int type, Handler target) {
+            this(type, EVENT_ALL, target);
         }
 
-        ImsNetworkCallback(Context context, int type, int events, Handler target) {
-            mContext = context;
+        ImsNetworkCallback(int type, int events, Handler target) {
             mType = type;
             mEvents = events;
             mTarget = target;
