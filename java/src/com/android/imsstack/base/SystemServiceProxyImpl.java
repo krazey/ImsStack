@@ -119,13 +119,6 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
         }
 
         @Override
-        public @NonNull PersistableBundle getConfigForSubId(int subId) {
-            CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
-            PersistableBundle b = ccm != null ? ccm.getConfigForSubId(subId) : null;
-            return (b != null) ? b : getDefaultConfig();
-        }
-
-        @Override
         public @NonNull PersistableBundle getConfigForSubId(int subId, @NonNull String... keys) {
             CarrierConfigManager ccm = mContext.getSystemService(CarrierConfigManager.class);
             PersistableBundle b;
