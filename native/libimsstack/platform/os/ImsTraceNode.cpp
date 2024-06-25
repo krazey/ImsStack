@@ -70,8 +70,12 @@ void ImsTraceNode::Format(IN const IMS_CHAR* pszFormat, IN va_list args)
 {
     static const IMS_CHAR OVERFLOW[] = "___ TRACE OVERFLOW ___";
     IMS_SINT32 nBufferCount = MAX_BUFF_SIZE - (m_nHeaderLength + CRLF_SIZE);
-
-    m_nLength = Vsnprintf((m_pBuffer + m_nHeaderLength), nBufferCount, pszFormat, args);
+    // It's possible for methods that use a va_list to invalidate the data in it upon use.
+    // So, this copy will be used to call the next vsnprintf.
+    va_list backup_args;
+    va_copy(backup_args, args);
+    m_nLength = Vsnprintf((m_pBuffer + m_nHeaderLength), nBufferCount, pszFormat, backup_args);
+    va_end(backup_args);
 
     if (m_nLength < 0)
     {
@@ -86,18 +90,20 @@ void ImsTraceNode::Format(IN const IMS_CHAR* pszFormat, IN va_list args)
             m_pBuffer = IMS_NULL;
         }
 
+        IMS_SINT32 nNewBufferSize = m_nLength + m_nHeaderLength + CRLF_SIZE + 1;
         m_bAlloc = IMS_TRUE;
-        m_pBuffer = new IMS_CHAR[m_nLength + m_nHeaderLength + CRLF_SIZE + 1];
+        m_pBuffer = new IMS_CHAR[nNewBufferSize];
 
         if (m_pBuffer == IMS_NULL)
         {
             return;
         }
 
+        IMS_MEM_Memset(m_pBuffer, 0, nNewBufferSize);
         IMS_MEM_Memcpy(m_pBuffer, &m_acBuffer[0], m_nHeaderLength);
-        m_pBuffer[m_nHeaderLength] = '\0';
-
-        m_nLength = Vsnprintf((m_pBuffer + m_nHeaderLength), m_nLength, pszFormat, args);
+        va_copy(backup_args, args);
+        m_nLength = Vsnprintf((m_pBuffer + m_nHeaderLength), m_nLength, pszFormat, backup_args);
+        va_end(backup_args);
     }
 
     // Calculate a total log length
