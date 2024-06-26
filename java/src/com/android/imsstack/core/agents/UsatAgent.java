@@ -35,7 +35,6 @@ import com.android.imsstack.util.ImsUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -482,12 +481,8 @@ public class UsatAgent extends Handler implements UsatInterface {
                 } else if (tag == TAG_USSD_STRING || tag == TAG_USSD_STRING_1) {
                     ccType = Usat.CALL_CONTROL_TYPE_USSD;
 
-                    try {
-                        if (value.length != 0) {
-                            dialedString = new String(value, "UTF-8");
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        ImsLog.e(getSlotId(), "USAT: " + e);
+                    if (value.length != 0) {
+                        dialedString = new String(value, StandardCharsets.UTF_8);
                     }
                 } else if (tag == TAG_MEDIA_TYPE || tag == (TAG_MEDIA_TYPE | 0x80)) {
                     if (value.length != 0) {
@@ -1165,13 +1160,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return true if the operation is successfully done, false otherwise.
      */
     private static boolean writeUssdString(ByteArrayOutputStream buffer, String ussdString) {
-        byte[] ussdBytes = null;
-
-        try {
-            ussdBytes = ussdString.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
+        byte[] ussdBytes = ussdString.getBytes(StandardCharsets.UTF_8);
 
         if (ussdBytes == null) {
             return false;
