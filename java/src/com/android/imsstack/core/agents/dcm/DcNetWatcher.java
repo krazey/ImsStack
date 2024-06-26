@@ -51,6 +51,7 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -243,7 +244,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : 5G");
@@ -254,7 +255,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : 4G");
@@ -265,7 +266,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : 3G");
@@ -276,7 +277,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : eHRPD");
@@ -287,7 +288,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : 2G");
@@ -298,7 +299,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             ImsLog.i(
                     mSlotId,
                     "mRatPolicy : "
-                            + Integer.toHexString(mRatPolicy).toUpperCase()
+                            + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                             + ", mRat : "
                             + mRat
                             + ", ServiceState : EVDO");
@@ -308,7 +309,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         ImsLog.i(
                 mSlotId,
                 "mRatPolicy : "
-                        + Integer.toHexString(mRatPolicy).toUpperCase()
+                        + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US)
                         + ", mRat : "
                         + mRat
                         + ", ServiceState : Unavailable");
@@ -792,7 +793,7 @@ public class DcNetWatcher implements IDcNetWatcher {
                 mRatPolicy |= POLICY_RAT_WLAN;
             }
         }
-        ImsLog.i(mSlotId, "mRatPolicy=" + Integer.toHexString(mRatPolicy).toUpperCase());
+        ImsLog.i(mSlotId, "mRatPolicy=" + Integer.toHexString(mRatPolicy).toUpperCase(Locale.US));
     }
 
     private void handleNetworkOperatorChanged() {
