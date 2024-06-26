@@ -252,7 +252,8 @@ public class AcServiceTest {
         iAcServiceImplCallback.onReceivedProvisioning(
                 PROVISIONING_DATA.getBytes(StandardCharsets.UTF_8), deProvisioning);
 
-        String actual = new String(mTestAcServiceCallback0.getProvisioning(), "UTF-8");
+        String actual = new String(
+                mTestAcServiceCallback0.getProvisioning(), StandardCharsets.UTF_8);
         assertEquals(PROVISIONING_DATA, actual);
         assertEquals(deProvisioning, mTestAcServiceCallback0.getDeProvisioning());
     }
@@ -269,7 +270,8 @@ public class AcServiceTest {
         iAcServiceImplCallback.onReceivedPreProvisioning(
                 PRE_PROVISIONING_DATA.getBytes(StandardCharsets.UTF_8));
 
-        String actual = new String(mTestAcServiceCallback0.getPreProvisioning(), "UTF-8");
+        String actual = new String(
+                mTestAcServiceCallback0.getPreProvisioning(), StandardCharsets.UTF_8);
         assertEquals(PRE_PROVISIONING_DATA, actual);
     }
 
