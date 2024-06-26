@@ -21,7 +21,7 @@
 
 #include "MediaBaseProfile.h"
 
-const IMS_UINT32 PAYLOAD_NUM = 100;
+const IMS_UINT32 PAYLOAD_NUMBER = 100;
 const AString PAYLOAD_TYPE = "EVS";
 const IMS_UINT32 SAMPLEING_RATE = 16000;
 const IMS_SINT32 CHANNEL = 1;
@@ -38,26 +38,26 @@ const MEDIA_DIRECTION DIRECTION = MEDIA_DIRECTION_SEND_RECEIVE;
 TEST(MediaBaseProfileTest, TestRtpMapCreation)
 {
     MediaBaseProfile::RtpMap* rtpMap = new MediaBaseProfile::RtpMap();
-    EXPECT_EQ(rtpMap->nPayloadNum, 0);
-    EXPECT_EQ(rtpMap->strPayloadType, AString::ConstNull());
-    EXPECT_EQ(rtpMap->nSamplingRate, 0);
-    EXPECT_EQ(rtpMap->nChannel, 0);
+    EXPECT_EQ(rtpMap->GetPayloadNumber(), 0);
+    EXPECT_EQ(rtpMap->GetPayloadType(), AString::ConstNull());
+    EXPECT_EQ(rtpMap->GetSamplingRate(), 0);
+    EXPECT_EQ(rtpMap->GetChannel(), 0);
 
     MediaBaseProfile::RtpMap* rtpMap1 = new MediaBaseProfile::RtpMap(CHANNEL);
-    EXPECT_EQ(rtpMap1->nPayloadNum, 0);
-    EXPECT_EQ(rtpMap1->strPayloadType, AString::ConstNull());
-    EXPECT_EQ(rtpMap1->nSamplingRate, 0);
-    EXPECT_EQ(rtpMap1->nChannel, CHANNEL);
+    EXPECT_EQ(rtpMap1->GetPayloadNumber(), 0);
+    EXPECT_EQ(rtpMap1->GetPayloadType(), AString::ConstNull());
+    EXPECT_EQ(rtpMap1->GetSamplingRate(), 0);
+    EXPECT_EQ(rtpMap1->GetChannel(), CHANNEL);
 
-    rtpMap1->nPayloadNum = PAYLOAD_NUM;
-    rtpMap1->strPayloadType = PAYLOAD_TYPE;
-    rtpMap1->nSamplingRate = SAMPLEING_RATE;
+    rtpMap1->SetPayloadNumber(PAYLOAD_NUMBER);
+    rtpMap1->SetPayloadType(PAYLOAD_TYPE);
+    rtpMap1->SetSamplingRate(SAMPLEING_RATE);
 
     MediaBaseProfile::RtpMap* rtpMap2 = new MediaBaseProfile::RtpMap(*rtpMap1);
-    EXPECT_EQ(rtpMap2->nPayloadNum, PAYLOAD_NUM);
-    EXPECT_EQ(rtpMap2->strPayloadType, PAYLOAD_TYPE);
-    EXPECT_EQ(rtpMap2->nSamplingRate, SAMPLEING_RATE);
-    EXPECT_EQ(rtpMap2->nChannel, CHANNEL);
+    EXPECT_EQ(rtpMap2->GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(rtpMap2->GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(rtpMap2->GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(rtpMap2->GetChannel(), CHANNEL);
 
     delete rtpMap;
     delete rtpMap1;
@@ -68,21 +68,21 @@ TEST(MediaBaseProfileTest, TestRtpMapAssign)
 {
     MediaBaseProfile::RtpMap* rtpMap = new MediaBaseProfile::RtpMap();
     MediaBaseProfile::RtpMap* rtpMap1 = new MediaBaseProfile::RtpMap(CHANNEL);
-    rtpMap1->nPayloadNum = PAYLOAD_NUM;
-    rtpMap1->strPayloadType = PAYLOAD_TYPE;
-    rtpMap1->nSamplingRate = SAMPLEING_RATE;
+    rtpMap1->SetPayloadNumber(PAYLOAD_NUMBER);
+    rtpMap1->SetPayloadType(PAYLOAD_TYPE);
+    rtpMap1->SetSamplingRate(SAMPLEING_RATE);
 
-    EXPECT_EQ(rtpMap->nPayloadNum, 0);
-    EXPECT_EQ(rtpMap->strPayloadType, AString::ConstNull());
-    EXPECT_EQ(rtpMap->nSamplingRate, 0);
-    EXPECT_EQ(rtpMap->nChannel, 0);
+    EXPECT_EQ(rtpMap->GetPayloadNumber(), 0);
+    EXPECT_EQ(rtpMap->GetPayloadType(), AString::ConstNull());
+    EXPECT_EQ(rtpMap->GetSamplingRate(), 0);
+    EXPECT_EQ(rtpMap->GetChannel(), 0);
 
     *rtpMap = *rtpMap1;
 
-    EXPECT_EQ(rtpMap->nPayloadNum, PAYLOAD_NUM);
-    EXPECT_EQ(rtpMap->strPayloadType, PAYLOAD_TYPE);
-    EXPECT_EQ(rtpMap->nSamplingRate, SAMPLEING_RATE);
-    EXPECT_EQ(rtpMap->nChannel, CHANNEL);
+    EXPECT_EQ(rtpMap->GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(rtpMap->GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(rtpMap->GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(rtpMap->GetChannel(), CHANNEL);
 
     delete rtpMap;
     delete rtpMap1;
@@ -92,16 +92,16 @@ TEST(MediaBaseProfileTest, TestRtpMapAssignEqual)
 {
     MediaBaseProfile::RtpMap* rtpMap = new MediaBaseProfile::RtpMap();
     MediaBaseProfile::RtpMap* rtpMap1 = new MediaBaseProfile::RtpMap(CHANNEL);
-    rtpMap1->nPayloadNum = PAYLOAD_NUM;
-    rtpMap1->strPayloadType = PAYLOAD_TYPE;
-    rtpMap1->nSamplingRate = SAMPLEING_RATE;
+    rtpMap1->SetPayloadNumber(PAYLOAD_NUMBER);
+    rtpMap1->SetPayloadType(PAYLOAD_TYPE);
+    rtpMap1->SetSamplingRate(SAMPLEING_RATE);
 
     EXPECT_NE(*rtpMap, *rtpMap1);
 
     *rtpMap = *rtpMap1;
     EXPECT_EQ(*rtpMap, *rtpMap1);
 
-    rtpMap1->nSamplingRate = SAMPLEING_RATE + 1;
+    rtpMap1->SetSamplingRate(SAMPLEING_RATE + 1);
     EXPECT_NE(*rtpMap, *rtpMap1);
 
     delete rtpMap;
@@ -112,25 +112,25 @@ TEST(MediaBaseProfileTest, TestRtpMapEqual)
 {
     MediaBaseProfile::RtpMap* rtpMap = new MediaBaseProfile::RtpMap();
     MediaBaseProfile::RtpMap* rtpMap1 = new MediaBaseProfile::RtpMap(CHANNEL);
-    rtpMap1->nPayloadNum = PAYLOAD_NUM;
-    rtpMap1->strPayloadType = PAYLOAD_TYPE;
-    rtpMap1->nSamplingRate = SAMPLEING_RATE;
+    rtpMap1->SetPayloadNumber(PAYLOAD_NUMBER);
+    rtpMap1->SetPayloadType(PAYLOAD_TYPE);
+    rtpMap1->SetSamplingRate(SAMPLEING_RATE);
 
     EXPECT_NE(*rtpMap, *rtpMap1);
 
-    rtpMap->nPayloadNum = PAYLOAD_NUM;
+    rtpMap->SetPayloadNumber(PAYLOAD_NUMBER);
     EXPECT_NE(*rtpMap, *rtpMap1);
 
-    rtpMap->strPayloadType = PAYLOAD_TYPE;
+    rtpMap->SetPayloadType(PAYLOAD_TYPE);
     EXPECT_NE(*rtpMap, *rtpMap1);
 
-    rtpMap->nSamplingRate = SAMPLEING_RATE;
+    rtpMap->SetSamplingRate(SAMPLEING_RATE);
     EXPECT_NE(*rtpMap, *rtpMap1);
 
-    rtpMap->nChannel = CHANNEL;
+    rtpMap->SetChannel(CHANNEL);
     EXPECT_EQ(*rtpMap, *rtpMap1);
 
-    rtpMap->nPayloadNum = PAYLOAD_NUM + 1;
+    rtpMap->SetPayloadNumber(PAYLOAD_NUMBER + 1);
     EXPECT_NE(*rtpMap, *rtpMap1);
 
     delete rtpMap;
@@ -149,13 +149,13 @@ TEST(MediaBaseProfileTest, TestBasePayloadCreation)
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload(CHANNEL);
     EXPECT_NE(basePayload1->objRtpMap, tempRtpMap);
 
-    tempRtpMap.nChannel = CHANNEL;
+    tempRtpMap.SetChannel(CHANNEL);
     EXPECT_EQ(basePayload1->objRtpMap, tempRtpMap);
     EXPECT_EQ(basePayload1->pFmtp, nullptr);
 
-    basePayload1->objRtpMap.nPayloadNum = PAYLOAD_NUM;
-    basePayload1->objRtpMap.strPayloadType = PAYLOAD_TYPE;
-    basePayload1->objRtpMap.nSamplingRate = SAMPLEING_RATE;
+    basePayload1->objRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
+    basePayload1->objRtpMap.SetPayloadType(PAYLOAD_TYPE);
+    basePayload1->objRtpMap.SetSamplingRate(SAMPLEING_RATE);
 
     MediaBaseProfile::BasePayload* basePayload2 = new MediaBaseProfile::BasePayload(*basePayload1);
     EXPECT_EQ(basePayload2->objRtpMap, basePayload1->objRtpMap);
@@ -169,9 +169,9 @@ TEST(MediaBaseProfileTest, TestBasePayloadCreation)
 TEST(MediaBaseProfileTest, TestBasePayloadAssign)
 {
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload(CHANNEL);
-    basePayload->objRtpMap.nPayloadNum = PAYLOAD_NUM;
-    basePayload->objRtpMap.strPayloadType = PAYLOAD_TYPE;
-    basePayload->objRtpMap.nSamplingRate = SAMPLEING_RATE;
+    basePayload->objRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
+    basePayload->objRtpMap.SetPayloadType(PAYLOAD_TYPE);
+    basePayload->objRtpMap.SetSamplingRate(SAMPLEING_RATE);
 
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload();
 
@@ -191,36 +191,37 @@ TEST(MediaBaseProfileTest, TestBasePayloadSetRtpMap)
 {
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload();
 
-    basePayload->SetRtpMap(PAYLOAD_NUM, PAYLOAD_TYPE, SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.nPayloadNum, PAYLOAD_NUM);
-    EXPECT_EQ(basePayload->objRtpMap.strPayloadType, PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.nSamplingRate, SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.nChannel, 0);
+    basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), 0);
 
-    basePayload->SetRtpMap(PAYLOAD_NUM, PAYLOAD_TYPE, SAMPLEING_RATE, CHANNEL);
-    EXPECT_EQ(basePayload->objRtpMap.nPayloadNum, PAYLOAD_NUM);
-    EXPECT_EQ(basePayload->objRtpMap.strPayloadType, PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.nSamplingRate, SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.nChannel, CHANNEL);
+    basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE, CHANNEL);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), CHANNEL);
 
     MediaBaseProfile::RtpMap tempRtpMap;
 
     basePayload->SetRtpMap(tempRtpMap);
-    EXPECT_EQ(basePayload->objRtpMap.nPayloadNum, 0);
-    EXPECT_EQ(basePayload->objRtpMap.strPayloadType, AString::ConstNull());
-    EXPECT_EQ(basePayload->objRtpMap.nSamplingRate, 0);
-    EXPECT_EQ(basePayload->objRtpMap.nChannel, 0);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), 0);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), AString::ConstNull());
+    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), 0);
+    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), 0);
 
-    tempRtpMap.nChannel = CHANNEL;
-    tempRtpMap.nPayloadNum = PAYLOAD_NUM;
-    tempRtpMap.strPayloadType = PAYLOAD_TYPE;
-    tempRtpMap.nSamplingRate = SAMPLEING_RATE;
+    tempRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
+    tempRtpMap.SetPayloadType(PAYLOAD_TYPE);
+    tempRtpMap.SetSamplingRate(SAMPLEING_RATE);
+    tempRtpMap.SetChannel(CHANNEL);
 
     basePayload->SetRtpMap(tempRtpMap);
-    EXPECT_EQ(basePayload->objRtpMap.nPayloadNum, PAYLOAD_NUM);
-    EXPECT_EQ(basePayload->objRtpMap.strPayloadType, PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.nSamplingRate, SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.nChannel, CHANNEL);
+
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), CHANNEL);
 
     delete basePayload;
 }

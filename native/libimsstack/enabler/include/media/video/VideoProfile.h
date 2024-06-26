@@ -229,11 +229,11 @@ public:
                 strImageAttr(obj.strImageAttr),
                 objRtcpFbAttr(obj.objRtcpFbAttr)
         {
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+            if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
             {
                 pFmtp = new VideoProfile::AvcFmtp(static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
             }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+            else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
             {
                 pFmtp = new VideoProfile::HevcFmtp(static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
             }
@@ -247,12 +247,12 @@ public:
             {
                 BasePayload::operator=(obj);
 
-                if (objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
+                if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
                 {
                     pFmtp = new VideoProfile::AvcFmtp(
                             static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
                 }
-                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("H265"))
+                else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
                 {
                     pFmtp = new VideoProfile::HevcFmtp(
                             static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));

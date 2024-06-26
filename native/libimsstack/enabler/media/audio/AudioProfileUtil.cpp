@@ -406,8 +406,8 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             continue;
         }
 
-        if ((pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
-                (pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") == IMS_TRUE))
+        if ((pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
+                (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") == IMS_TRUE))
         {
             AudioProfile::AmrFmtp* pAmrFmtp =
                     reinterpret_cast<AudioProfile::AmrFmtp*>(pAudioPayload->pFmtp);
@@ -416,7 +416,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 continue;
             }
 
-            if (pAudioPayload->objRtpMap.nSamplingRate == 16000)
+            if (pAudioPayload->objRtpMap.GetSamplingRate() == 16000)
             {
                 nCurrCodec = AUDIO_CODEC_AMRWB;
             }
@@ -463,7 +463,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 nAsMax = nCurrAs;
             }
         }
-        else if (pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS") == IMS_TRUE)
+        else if (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS") == IMS_TRUE)
         {
             nCurrCodec = AUDIO_CODEC_EVS;
             AudioProfile::EvsFmtp* pEvsFmtp =
@@ -507,8 +507,8 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 nAsMax = nCurrAs;
             }
         }
-        else if ((pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") == IMS_TRUE) ||
-                (pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA") == IMS_TRUE))
+        else if ((pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU") == IMS_TRUE) ||
+                (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA") == IMS_TRUE))
         {
             if (72 > nAsMax)  // 72 is PCMU/PCMA AS value at IPv6
             {

@@ -277,16 +277,16 @@ public:
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                    objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+            if (objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+                    objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
             {
                 pFmtp = new AudioProfile::AmrFmtp(*static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
             }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+            else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
             {
                 pFmtp = new AudioProfile::EvsFmtp(*static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
             }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+            else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
             {
                 pFmtp = new AudioProfile::TelephoneEventFmtp(
                         *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
@@ -299,18 +299,18 @@ public:
             {
                 BasePayload::operator=(obj);
 
-                if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                        objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+                if (objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+                        objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
                 {
                     pFmtp = new AudioProfile::AmrFmtp(
                             *static_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
                 }
-                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+                else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
                 {
                     pFmtp = new AudioProfile::EvsFmtp(
                             *static_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
                 }
-                else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+                else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
                 {
                     pFmtp = new AudioProfile::TelephoneEventFmtp(
                             *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
