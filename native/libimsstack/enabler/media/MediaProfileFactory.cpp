@@ -979,10 +979,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetTransportCapa(OUT VideoProfile* pVide
     if (pVideoProfile != IMS_NULL)
     {
         AString strTemp("RTP/AVPF");
-        pVideoProfile->objCapaNego.mapTransportCapa.SetValue(++nTcap, strTemp);
+        pVideoProfile->objCapaNego.GetMapTcap().SetValue(++nTcap, strTemp);
 
         IMS_TRACE_I("SetTransportCapa() - Tcap[%d][%s]", nTcap,
-                pVideoProfile->objCapaNego.mapTransportCapa.GetValue(nTcap).GetStr(), 0);
+                pVideoProfile->objCapaNego.GetMapTcap().GetValue(nTcap).GetStr(), 0);
     }
 
     return nTcap;
@@ -1016,10 +1016,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfTrr(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp.Sprintf("%s %d", "rtcp-fb:* trr-int", pVideoConfig->GetRtcpInterval() * 1000);
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->objCapaNego.GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfTrr() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->objCapaNego.GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1035,10 +1035,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfNack(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* nack";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->objCapaNego.GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfNack() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->objCapaNego.GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1054,10 +1054,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfPli(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* nack pli";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->objCapaNego.GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfPli() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->objCapaNego.GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1073,10 +1073,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfFir(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* ccm fir";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->objCapaNego.GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfFir() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->objCapaNego.GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1092,10 +1092,10 @@ PRIVATE IMS_SINT32 MediaProfileFactory::SetVideoAvpfTmmbr(
         {
             AString strTemp = AString::ConstEmpty();
             strTemp = "rtcp-fb:* ccm tmmbr";
-            pVideoProfile->objCapaNego.mapAttributeCapa.SetValue(++nAcap, strTemp);
+            pVideoProfile->objCapaNego.GetMapAcap().SetValue(++nAcap, strTemp);
 
             IMS_TRACE_I("SetVideoAvpfTmmbr() - Acap[%d][%s]", nAcap,
-                    pVideoProfile->objCapaNego.mapAttributeCapa.GetValue(nAcap).GetStr(), 0);
+                    pVideoProfile->objCapaNego.GetMapAcap().GetValue(nAcap).GetStr(), 0);
         }
     }
 
@@ -1122,7 +1122,7 @@ PRIVATE void MediaProfileFactory::SetCapaNegoForAvpf(OUT VideoProfile* pVideoPro
 
         if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITHOUT_ACAP)
         {
-            pVideoProfile->objCapaNego.bIsAttCapaInPcfg = IMS_FALSE;
+            pVideoProfile->objCapaNego.SetAttCapaInPcfg(IMS_FALSE);
         }
         else if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITH_ACAP)
         {
@@ -1139,9 +1139,9 @@ PRIVATE void MediaProfileFactory::SetCapaNegoForAvpf(OUT VideoProfile* pVideoPro
                 strTmp.Append(strTmp2);
             }
             strPcfg.Append(strTmp);
-            pVideoProfile->objCapaNego.bIsAttCapaInPcfg = IMS_TRUE;
+            pVideoProfile->objCapaNego.SetAttCapaInPcfg(IMS_TRUE);
         }
-        pVideoProfile->objCapaNego.lstPotentialConfig.Append(strPcfg);
+        pVideoProfile->objCapaNego.GetListPcfg().Append(strPcfg);
     }
 }
 

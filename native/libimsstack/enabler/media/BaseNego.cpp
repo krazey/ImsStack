@@ -544,9 +544,9 @@ IMS_BOOL BaseNego::MakeAcfgProfileFromSdp(
 
     if (lstAcfgAttr.GetSize() > 0)
     {
-        pObjCapaNego->strNegotiatedAcfg = lstAcfgAttr.GetAt(0);
+        pObjCapaNego->SetAcfg(lstAcfgAttr.GetAt(0));
         IMS_TRACE_I("MakeAcfgProfileFromSdp() - Answer Case, media[%d], acfg[%s]", m_eType,
-                pObjCapaNego->strNegotiatedAcfg.GetStr(), 0);
+                pObjCapaNego->GetAcfg().GetStr(), 0);
         return IMS_TRUE;
     }
 
@@ -584,7 +584,7 @@ IMS_BOOL BaseNego::MakeTcapProfileFromSdp(
                 AString strTcap = "";
                 // mapped - key : 'number' value:'Tcap'
                 strTcap.Sprintf("%s", lstSplitSpace.GetAt(j).GetStr());
-                pObjCapaNego->mapTransportCapa.Add(nTcapInitNum, strTcap);
+                pObjCapaNego->GetMapTcap().Add(nTcapInitNum, strTcap);
                 IMS_TRACE_I("MakeTcapProfileFromSdp() - media[%d], add map[%d - %s]", m_eType,
                         nTcapInitNum, strTcap.GetStr());
                 nTcapInitNum++;
@@ -592,7 +592,7 @@ IMS_BOOL BaseNego::MakeTcapProfileFromSdp(
         }
     }
 
-    if (pObjCapaNego->mapTransportCapa.GetSize() == 0)
+    if (pObjCapaNego->GetMapTcap().GetSize() == 0)
     {
         IMS_TRACE_I("MakeTcapProfileFromSdp() - media[%d], no tcap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
@@ -642,17 +642,17 @@ IMS_BOOL BaseNego::MakeAcapProfileFromSdp(
         {
             IMS_TRACE_I("MakeAcapProfileFromSdp() - media[%d], add map[%d - %s]", m_eType, nAcapNum,
                     strAcap.GetStr());
-            pObjCapaNego->mapAttributeCapa.Add(nAcapNum, strAcap);
+            pObjCapaNego->GetMapAcap().Add(nAcapNum, strAcap);
         }
     }
 
-    if (pObjCapaNego->mapAttributeCapa.GetSize() == 0)
+    if (pObjCapaNego->GetMapAcap().GetSize() == 0)
     {
         IMS_TRACE_I("MakeAcapProfileFromSdp() - media[%d], no acap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
-    pObjCapaNego->bIsAttCapaInPcfg = IMS_TRUE;
+    pObjCapaNego->SetAttCapaInPcfg(IMS_TRUE);
 
     return IMS_TRUE;
 }
@@ -662,9 +662,9 @@ IMS_BOOL BaseNego::MakePcfgProfileFromSdp(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get Potential configuration list (pcfg) -"'prio #' SP"t=Tcap #' SP 'a=Acap #'" pair
-    pObjCapaNego->lstPotentialConfig = pDescriptor->GetAttributes(SdpAttribute::PCFG);
+    pObjCapaNego->SetListPcfg(pDescriptor->GetAttributes(SdpAttribute::PCFG));
 
-    if (pObjCapaNego->lstPotentialConfig.GetSize() == 0)
+    if (pObjCapaNego->GetListPcfg().GetSize() == 0)
     {
         IMS_TRACE_I("MakePcfgProfileFromSdp() - media[%d], no pcfg value in SDP", m_eType, 0, 0);
         return IMS_FALSE;

@@ -170,22 +170,39 @@ public:
     };
 
 public:
+    /**
+     * CapaNego for SDP Capability Negotiation Model (RFC 5939)
+     */
     class CapaNego
     {
     public:
-        ImsMap<IMS_SINT32, AString> mapTransportCapa;
-        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
-        ImsList<AString> lstPotentialConfig;
-        AString strNegotiatedAcfg;
-        IMS_BOOL bIsAttCapaInPcfg;
-
-    public:
         CapaNego() :
-                mapTransportCapa(ImsMap<IMS_SINT32, AString>()),
-                mapAttributeCapa(ImsMap<IMS_SINT32, AString>()),
-                lstPotentialConfig(ImsList<AString>()),
-                strNegotiatedAcfg(AString::ConstNull()),
-                bIsAttCapaInPcfg(IMS_FALSE){};
+                /* Transport Capability */
+                mapTcap(ImsMap<IMS_SINT32, AString>()),
+                /* Attribute Capability */
+                mapAcap(ImsMap<IMS_SINT32, AString>()),
+                /* Potential Configuration (pcfg) proposed */
+                listPcfg(ImsList<AString>()),
+                /* Actual configuration (acfg) negotiated */
+                strAcfg(AString::ConstNull()),
+                /* bool to check if acap is existed in pcfg */
+                bAcapInPcfg(IMS_FALSE){};
+
+        ImsMap<IMS_SINT32, AString>& GetMapTcap() { return mapTcap; }
+        ImsMap<IMS_SINT32, AString>& GetMapAcap() { return mapAcap; }
+        void SetListPcfg(ImsList<AString> pcfg) { listPcfg = pcfg; }
+        ImsList<AString>& GetListPcfg() { return listPcfg; }
+        void SetAcfg(IN const AString acfg) { strAcfg = acfg; }
+        AString& GetAcfg() { return strAcfg; }
+        void SetAttCapaInPcfg(IMS_BOOL acapInPcfg) { bAcapInPcfg = acapInPcfg; }
+        IMS_BOOL IsAttCapaInPcfg() { return bAcapInPcfg; }
+
+    private:
+        ImsMap<IMS_SINT32, AString> mapTcap;
+        ImsMap<IMS_SINT32, AString> mapAcap;
+        ImsList<AString> listPcfg;
+        AString strAcfg;
+        IMS_BOOL bAcapInPcfg;
     };
 
 public:

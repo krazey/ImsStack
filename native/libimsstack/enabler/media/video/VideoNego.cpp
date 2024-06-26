@@ -685,7 +685,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         if ((pProfile->bSupportAvpf == IMS_TRUE) &&
                 ((pProfile->bSupportCapaNegoForAvpf == IMS_FALSE) ||
                         (pProfile->bSupportCapaNegoForAvpf == IMS_TRUE &&
-                                pProfile->objCapaNego.bIsAttCapaInPcfg == IMS_FALSE)))
+                                pProfile->objCapaNego.IsAttCapaInPcfg() == IMS_FALSE)))
         {
             IMS_SINT32 nPayloadNumForRtcpFb = -1;
 
@@ -816,12 +816,12 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     if (pProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
     {
         // add "ACFG" if it's a initial answer
-        if (pProfile->objCapaNego.strNegotiatedAcfg.GetLength() > 0)
+        if (pProfile->objCapaNego.GetAcfg().GetLength() > 0)
         {
             AString strAcfg;
-            IMS_TRACE_D("MakeSdpFromProfile() - strNegotiatedAcfg [%s]",
-                    pProfile->objCapaNego.strNegotiatedAcfg.GetStr(), 0, 0);
-            strAcfg.Sprintf("%s", pProfile->objCapaNego.strNegotiatedAcfg.GetStr());
+            IMS_TRACE_D("MakeSdpFromProfile() - Negotiated Acfg [%s]",
+                    pProfile->objCapaNego.GetAcfg().GetStr(), 0, 0);
+            strAcfg.Sprintf("%s", pProfile->objCapaNego.GetAcfg().GetStr());
             pDescriptor->AddAttribute(SdpAttribute::ACFG, strAcfg);
         }
 
@@ -839,35 +839,35 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             AString strPcfg = "";
 
             IMS_TRACE_I("MakeSdpFromProfile() - Entered, PcfgSize[%d], TcapSize[%d], AcapSize[%d]",
-                    pProfile->objCapaNego.lstPotentialConfig.GetSize(),
-                    pProfile->objCapaNego.mapTransportCapa.GetSize(),
-                    pProfile->objCapaNego.mapAttributeCapa.GetSize());
+                    pProfile->objCapaNego.GetListPcfg().GetSize(),
+                    pProfile->objCapaNego.GetMapTcap().GetSize(),
+                    pProfile->objCapaNego.GetMapAcap().GetSize());
 
-            for (i = 0; i < pProfile->objCapaNego.mapTransportCapa.GetSize(); i++)
+            for (i = 0; i < pProfile->objCapaNego.GetMapTcap().GetSize(); i++)
             {
                 strTcap = "";
-                strTcap.Sprintf("%d %s", i + 1,
-                        pProfile->objCapaNego.mapTransportCapa.GetValueAt(i).GetStr());
+                strTcap.Sprintf(
+                        "%d %s", i + 1, pProfile->objCapaNego.GetMapTcap().GetValueAt(i).GetStr());
                 pDescriptor->AddAttribute(SdpAttribute::TCAP, strTcap);
             }
 
-            if (pProfile->objCapaNego.bIsAttCapaInPcfg == IMS_TRUE)
+            if (pProfile->objCapaNego.IsAttCapaInPcfg() == IMS_TRUE)
             {
-                for (i = 0; i < pProfile->objCapaNego.mapAttributeCapa.GetSize(); i++)
+                for (i = 0; i < pProfile->objCapaNego.GetMapAcap().GetSize(); i++)
                 {
                     strAcap = "";
                     strAcap.Sprintf("%d %s", i + 1,
-                            pProfile->objCapaNego.mapAttributeCapa.GetValueAt(i).GetStr());
+                            pProfile->objCapaNego.GetMapAcap().GetValueAt(i).GetStr());
                     pDescriptor->AddAttribute(SdpAttribute::ACAP, strAcap);
                     IMS_TRACE_I("MakeSdpFromProfile() - Add strAcap : %s", strAcap.GetStr(), 0, 0);
                 }
             }
 
-            for (i = 0; i < pProfile->objCapaNego.lstPotentialConfig.GetSize(); i++)
+            for (i = 0; i < pProfile->objCapaNego.GetListPcfg().GetSize(); i++)
             {
                 strPcfg = "";
                 strPcfg.Sprintf(
-                        "%d %s", i + 1, pProfile->objCapaNego.lstPotentialConfig.GetAt(i).GetStr());
+                        "%d %s", i + 1, pProfile->objCapaNego.GetListPcfg().GetAt(i).GetStr());
                 pDescriptor->AddAttribute(SdpAttribute::PCFG, strPcfg);
             }
         }
@@ -1181,11 +1181,9 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             // Check Negotiated Transport Type
             IMS_BOOL bNegotiatedAVPF = IMS_FALSE;
 
-            for (IMS_UINT32 i = 0; i < pNegotiatedProfile->objCapaNego.mapTransportCapa.GetSize();
-                    i++)
+            for (IMS_UINT32 i = 0; i < pNegotiatedProfile->objCapaNego.GetMapTcap().GetSize(); i++)
             {
-                AString strAttribute =
-                        pNegotiatedProfile->objCapaNego.mapTransportCapa.GetValueAt(i);
+                AString strAttribute = pNegotiatedProfile->objCapaNego.GetMapTcap().GetValueAt(i);
 
                 if (strAttribute != IMS_NULL && strAttribute.Contains("AVPF") == IMS_TRUE)
                 {
@@ -1199,8 +1197,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             }
         }
 
-        pNegotiatedProfile->objCapaNego.mapTransportCapa.Clear();
-        pNegotiatedProfile->objCapaNego.mapAttributeCapa.Clear();
+        pNegotiatedProfile->objCapaNego.GetMapTcap().Clear();
+        pNegotiatedProfile->objCapaNego.GetMapAcap().Clear();
     }
 
     pNegotiatedProfile->strTransportType =
@@ -2990,16 +2988,16 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
         }
     }
 
-    if (pCapaNego->mapAttributeCapa.GetSize() > 0)
+    if (pCapaNego->GetMapAcap().GetSize() > 0)
     {
         IMS_TRACE_D("NegotiateVideoMediaLine() - AttributeCapa value exist - Size[%d]",
-                pCapaNego->mapAttributeCapa.GetSize(), 0, 0);
-        for (IMS_UINT32 i = 0; i < pCapaNego->mapAttributeCapa.GetSize(); i++)
+                pCapaNego->GetMapAcap().GetSize(), 0, 0);
+        for (IMS_UINT32 i = 0; i < pCapaNego->GetMapAcap().GetSize(); i++)
         {
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("trr-int") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("trr-int") == IMS_TRUE)
             {
                 ImsList<AString> strTemp =
-                        pCapaNego->mapAttributeCapa.GetValueAt(i).Split(TextParser::CHAR_SP);
+                        pCapaNego->GetMapAcap().GetValueAt(i).Split(TextParser::CHAR_SP);
 
                 if (strTemp.GetSize() >= 2)
                 {
@@ -3007,13 +3005,13 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
                     pRtcpFbAttr->bTrrSupported = IMS_TRUE;
                 }
             }
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("nack") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("nack") == IMS_TRUE)
                 pRtcpFbAttr->bNackSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("pli") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("pli") == IMS_TRUE)
                 pRtcpFbAttr->bPliSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("fir") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("fir") == IMS_TRUE)
                 pRtcpFbAttr->bFirSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("tmmbr") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("tmmbr") == IMS_TRUE)
                 pRtcpFbAttr->bTmmbrSupported = IMS_TRUE;
         }
     }
@@ -3033,16 +3031,16 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(
         return IMS_FALSE;
 
     // check attribute..
-    if (pCapaNego->mapAttributeCapa.GetSize() > 0)
+    if (pCapaNego->GetMapAcap().GetSize() > 0)
     {
         IMS_TRACE_D("GetAvpfFromAttributes_EX() - AttributeCapa value exist - Size[%d]",
-                pCapaNego->mapAttributeCapa.GetSize(), 0, 0);
-        for (IMS_UINT32 i = 0; i < pCapaNego->mapAttributeCapa.GetSize(); i++)
+                pCapaNego->GetMapAcap().GetSize(), 0, 0);
+        for (IMS_UINT32 i = 0; i < pCapaNego->GetMapAcap().GetSize(); i++)
         {
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("trr-int") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("trr-int") == IMS_TRUE)
             {
                 ImsList<AString> strTemp =
-                        pCapaNego->mapAttributeCapa.GetValueAt(i).Split(TextParser::CHAR_SP);
+                        pCapaNego->GetMapAcap().GetValueAt(i).Split(TextParser::CHAR_SP);
 
                 if (strTemp.GetSize() >= 2)
                 {
@@ -3050,13 +3048,13 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(
                     pRtcpFbAttr->bTrrSupported = IMS_TRUE;
                 }
             }
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("nack") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("nack") == IMS_TRUE)
                 pRtcpFbAttr->bNackSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("pli") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("pli") == IMS_TRUE)
                 pRtcpFbAttr->bPliSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("fir") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("fir") == IMS_TRUE)
                 pRtcpFbAttr->bFirSupported = IMS_TRUE;
-            if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("tmmbr") == IMS_TRUE)
+            if (pCapaNego->GetMapAcap().GetValueAt(i).Contains("tmmbr") == IMS_TRUE)
                 pRtcpFbAttr->bTmmbrSupported = IMS_TRUE;
         }
         IMS_TRACE_D("GetAvpfFromAttributes_EX() - support = bNACK[%d], bPLI[%d], bTMMBR[%d]",
@@ -3084,22 +3082,21 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
     IMS_BOOL bAttributeCheckable = IMS_FALSE;
     IMS_BOOL bPCFGSupportable = IMS_FALSE;
 
-    ImsMap<IMS_SINT32, AString> mapLocalTCap = pLocalCapaNego->mapTransportCapa;
-    ImsMap<IMS_SINT32, AString> mapLocalACap = pLocalCapaNego->mapAttributeCapa;
+    ImsMap<IMS_SINT32, AString> mapLocalTCap = pLocalCapaNego->GetMapTcap();
+    ImsMap<IMS_SINT32, AString> mapLocalACap = pLocalCapaNego->GetMapAcap();
 
-    ImsList<AString> lstDstPCFG = pPeerCapaNego->lstPotentialConfig;
-    ImsMap<IMS_SINT32, AString> mapPeerTCap = pPeerCapaNego->mapTransportCapa;
-    ImsMap<IMS_SINT32, AString> mapPeerACap = pPeerCapaNego->mapAttributeCapa;
+    ImsList<AString> lstDstPCFG = pPeerCapaNego->GetListPcfg();
+    ImsMap<IMS_SINT32, AString> mapPeerTCap = pPeerCapaNego->GetMapTcap();
+    ImsMap<IMS_SINT32, AString> mapPeerACap = pPeerCapaNego->GetMapAcap();
 
-    if (pPeerCapaNego->strNegotiatedAcfg.GetLength() > 0)
+    if (pPeerCapaNego->GetAcfg().GetLength() > 0)
     {
         if (mapPeerTCap.IsEmpty() == IMS_TRUE)
         {
-            pNegotiatedCapaNego->mapTransportCapa = mapLocalTCap;
+            pNegotiatedCapaNego->GetMapTcap() = mapLocalTCap;
         }
 
-        IMS_TRACE_I("MakeNegotiatedCapaNego() ACFG - %s", pPeerCapaNego->strNegotiatedAcfg.GetStr(),
-                0, 0);
+        IMS_TRACE_I("MakeNegotiatedCapaNego() ACFG - %s", pPeerCapaNego->GetAcfg().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -3138,7 +3135,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                             bPCFGSupportable = IMS_TRUE;
 
                             // set Negotiated Transport Capa Nego Value...
-                            pNegotiatedCapaNego->mapTransportCapa.Add(
+                            pNegotiatedCapaNego->GetMapTcap().Add(
                                     lstSplitEquals.GetAt(1).ToInt32(), strTmp);
                             break;
                         }
@@ -3197,7 +3194,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                                 strDestAttributeCapa.Contains("nack") == IMS_TRUE)
                         {
                             cnt++;
-                            pNegotiatedCapaNego->mapAttributeCapa.Add(
+                            pNegotiatedCapaNego->GetMapAcap().Add(
                                     lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
                         }
                         else if (strDestAttributeCapa.Contains("ccm") == IMS_TRUE)
@@ -3206,7 +3203,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                                     strDestAttributeCapa.Contains("tmmbr") == IMS_TRUE)
                             {
                                 cnt++;
-                                pNegotiatedCapaNego->mapAttributeCapa.Add(
+                                pNegotiatedCapaNego->GetMapAcap().Add(
                                         lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
                             }
                         }
@@ -3221,7 +3218,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                                         lstSrcCryptoAttribute.GetAt(1)) == IMS_TRUE)
                             {
                                 cnt++;
-                                pNegotiatedCapaNego->mapAttributeCapa.Add(
+                                pNegotiatedCapaNego->GetMapAcap().Add(
                                         lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
 
                                 IMS_TRACE_I("MakeNegotiatedCapaNego()  strDestAttributeCapa.Equals "
@@ -3248,10 +3245,10 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
         // check capa nego success
         if (bPCFGSupportable == IMS_TRUE)
         {
-            pNegotiatedCapaNego->strNegotiatedAcfg.Sprintf("%s", strPCFGline.GetStr());
+            pNegotiatedCapaNego->GetAcfg().Sprintf("%s", strPCFGline.GetStr());
             IMS_TRACE_I("MakeNegotiatedCapaNego() UE support capa nego- ACFG [%s]",
                     strPCFGline.GetStr(), 0, 0);
-            // strNegotiatedAcfg value available, if capa nego success.
+            // strAcfg value available, if capa nego success.
             ret = IMS_TRUE;
             break;
         }
@@ -3259,8 +3256,8 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
         {
             // clear saved negotiatedCapaNego imfo.
             IMS_TRACE_I("MakeNegotiatedCapaNego() capa nego does not success pcfg[%d]", i, 0, 0);
-            pNegotiatedCapaNego->mapTransportCapa.Clear();
-            pNegotiatedCapaNego->mapAttributeCapa.Clear();
+            pNegotiatedCapaNego->GetMapTcap().Clear();
+            pNegotiatedCapaNego->GetMapAcap().Clear();
         }
     }
 
@@ -3278,9 +3275,9 @@ PRIVATE IMS_BOOL VideoNego::CheckAvpfFromProfile(IN VideoProfile* pProfile)
     AString strTcap = "";
     AString strAVPF = "AVPF";
 
-    for (i = 0; i < pProfile->objCapaNego.mapTransportCapa.GetSize(); i++)
+    for (i = 0; i < pProfile->objCapaNego.GetMapTcap().GetSize(); i++)
     {
-        strTcap = pProfile->objCapaNego.mapTransportCapa.GetValueAt(i);
+        strTcap = pProfile->objCapaNego.GetMapTcap().GetValueAt(i);
 
         if (strTcap.Contains(strAVPF) == IMS_TRUE)
         {

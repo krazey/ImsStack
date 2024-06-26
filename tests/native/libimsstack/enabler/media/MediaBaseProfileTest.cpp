@@ -230,11 +230,11 @@ TEST(MediaBaseProfileTest, TestCapaNegoCreation)
 {
     MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
 
-    EXPECT_EQ(capaNego->mapTransportCapa.GetSize(), 0);
-    EXPECT_EQ(capaNego->mapAttributeCapa.GetSize(), 0);
-    EXPECT_EQ(capaNego->lstPotentialConfig.GetSize(), 0);
-    EXPECT_EQ(capaNego->strNegotiatedAcfg, AString::ConstNull());
-    EXPECT_EQ(capaNego->bIsAttCapaInPcfg, IMS_FALSE);
+    EXPECT_EQ(capaNego->GetMapTcap().GetSize(), 0);
+    EXPECT_EQ(capaNego->GetListPcfg().GetSize(), 0);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 0);
+    EXPECT_EQ(capaNego->GetAcfg(), AString::ConstNull());
+    EXPECT_EQ(capaNego->IsAttCapaInPcfg(), IMS_FALSE);
 
     delete capaNego;
 }
