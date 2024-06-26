@@ -1054,14 +1054,9 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
 {
     switch (nAosReason)
     {
-        case ImsAosReason::OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
         case ImsAosReason::POWER_OFF:
             return CODE_LOCAL_POWER_OFF;
-        case ImsAosReason::NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
         case ImsAosReason::SERVICE_POLICY:
-        case ImsAosReason::SERVICE_BLOCKED:
         case ImsAosReason::REG_TERMINATING:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::DATA_DISCONNECTED:

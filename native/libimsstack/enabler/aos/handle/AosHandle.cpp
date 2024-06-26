@@ -610,7 +610,6 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
 
     switch (nAosReason)
     {
-        case AosReason::BAD_BATTERY:  // FALL-THROUGH
         case AosReason::POWER_OFF:
             nImsAosReason = ImsAosReason::POWER_OFF;
             break;
@@ -618,17 +617,8 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::DATA_DISCONNECTED:
             nImsAosReason = ImsAosReason::DATA_DISCONNECTED;
             break;
-        case AosReason::NO_LTE_COVERAGE:
-            nImsAosReason = ImsAosReason::NO_RAT_COVERAGE;
-            break;
         case AosReason::SERVICE_POLICY:
             nImsAosReason = ImsAosReason::SERVICE_POLICY;
-            break;
-        case AosReason::SERVICE_BLOCKED:
-            nImsAosReason = ImsAosReason::SERVICE_BLOCKED;
-            break;
-        case AosReason::SRV_OUT:
-            nImsAosReason = ImsAosReason::OUT_OF_SERVICE;
             break;
         case AosReason::REG_TERMINATED:
             nImsAosReason = ImsAosReason::REG_TERMINATED;

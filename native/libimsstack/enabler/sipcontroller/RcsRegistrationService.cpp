@@ -383,11 +383,8 @@ IMS_SINT32 RcsRegistrationService::GetReason(IN IMS_UINT32 nReason)
 {
     switch (nReason)
     {
-        case ImsAosReason::OUT_OF_SERVICE:
         case ImsAosReason::POWER_OFF:
-        case ImsAosReason::NO_RAT_COVERAGE:
         case ImsAosReason::SERVICE_POLICY:
-        case ImsAosReason::SERVICE_BLOCKED:
         case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
         case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
             return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_NOT_PROVISIONED);
