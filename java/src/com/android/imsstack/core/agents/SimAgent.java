@@ -200,7 +200,7 @@ public class SimAgent implements SimInterface {
                 return smp.getSmscAddress();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            ImsLog.e(getSlotId(), "getSmscAddress: " + e);
         }
         return null;
     }

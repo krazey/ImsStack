@@ -1247,7 +1247,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return 1 if a byte is less and equal that 0x7F, 2 if a byte is 0x81, 0 otherwise.
      */
     private static int sizeOfLengthField(byte firstByteOfLength) {
-        if (firstByteOfLength <= 0x7F) {
+        if ((int) firstByteOfLength <= 0x7F) {
             return 1;
         } else if (firstByteOfLength == (byte) 0x81) {
             return 2;

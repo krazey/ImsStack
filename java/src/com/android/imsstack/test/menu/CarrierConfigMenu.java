@@ -230,7 +230,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
             Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
             ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    private static SparseArray<ArrayList<String>> sConfigKeys = null;
+    private static SparseArray<List<String>> sConfigKeys = null;
 
     private int mSlotId = 0;
 
@@ -1099,7 +1099,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     }
 
     private void initConfigItems() {
-        SparseArray<ArrayList<String>> configKeys = getConfigKeys();
+        SparseArray<List<String>> configKeys = getConfigKeys();
 
         if (configKeys != null) {
             for (int i = 0; i < CONFIG_I_MAX; ++i) {
@@ -1116,7 +1116,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
         }
     }
 
-    private static SparseArray<ArrayList<String>> getConfigKeys() {
+    private static SparseArray<List<String>> getConfigKeys() {
         if (sConfigKeys == null) {
             ArrayList<String> publicConfigKeys = new ArrayList<>();
             ArrayList<String> assetsConfigKeys = new ArrayList<>();
