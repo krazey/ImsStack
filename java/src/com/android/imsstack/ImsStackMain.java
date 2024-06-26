@@ -239,7 +239,7 @@ public class ImsStackMain {
                 + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId);
 
         ImsCarrierResolver.Carrier carrier =
-                resolveImsCarrier(slotId, subId, carrierId, specificCarrierId);
+                resolveImsCarrier(slotId, carrierId, specificCarrierId);
 
         CarrierInfo.setSimOperatorCountry(carrier.getOperator(),
                 carrier.getOperatorSub(), carrier.getCountry(), slotId);
@@ -362,7 +362,7 @@ public class ImsStackMain {
                 subId, CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL));
     }
 
-    private static ImsCarrierResolver.Carrier resolveImsCarrier(int slotId, int subId,
+    private static ImsCarrierResolver.Carrier resolveImsCarrier(int slotId,
             int carrierId, int specificCarrierId) {
         int testCarrierId = ImsPrivateProperties.Persistent.getInt(
                 ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, slotId);
