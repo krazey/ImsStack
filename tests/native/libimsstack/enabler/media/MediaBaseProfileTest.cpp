@@ -239,6 +239,107 @@ TEST(MediaBaseProfileTest, TestCapaNegoCreation)
     delete capaNego;
 }
 
+TEST(MediaBaseProfileTest, TestCapaNegoTcap)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    EXPECT_EQ(capaNego->GetMapTcap().GetSize(), 0);
+
+    AString tempStr1 = "RTP/AVP";
+    AString tempStr2 = "RTP/AVPF";
+
+    capaNego->GetMapTcap().SetValue(1, tempStr1);
+    EXPECT_EQ(capaNego->GetMapTcap().GetSize(), 1);
+    EXPECT_EQ(capaNego->GetMapTcap().GetValue(1), tempStr1);
+
+    capaNego->GetMapTcap().SetValue(2, tempStr2);
+    EXPECT_EQ(capaNego->GetMapTcap().GetSize(), 2);
+    EXPECT_EQ(capaNego->GetMapTcap().GetValue(2), tempStr2);
+
+    delete capaNego;
+}
+
+TEST(MediaBaseProfileTest, TestCapaNegoAcap)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    AString tempStr1 = "rtcp-fb:* trr-int 2000";
+    AString tempStr2 = "rtcp-fb:* nack";
+    AString tempStr3 = "rtcp-fb:* nack pli";
+    AString tempStr4 = "rtcp-fb:* ccm fir";
+    AString tempStr5 = "rtcp-fb:* ccm tmmbr";
+
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 0);
+
+    capaNego->GetMapAcap().SetValue(1, tempStr1);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 1);
+    EXPECT_EQ(capaNego->GetMapAcap().GetValue(1), tempStr1);
+
+    capaNego->GetMapAcap().SetValue(2, tempStr2);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 2);
+    EXPECT_EQ(capaNego->GetMapAcap().GetValue(2), tempStr2);
+
+    capaNego->GetMapAcap().SetValue(3, tempStr3);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 3);
+    EXPECT_EQ(capaNego->GetMapAcap().GetValue(3), tempStr3);
+
+    capaNego->GetMapAcap().SetValue(4, tempStr4);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 4);
+    EXPECT_EQ(capaNego->GetMapAcap().GetValue(4), tempStr4);
+
+    capaNego->GetMapAcap().SetValue(5, tempStr5);
+    EXPECT_EQ(capaNego->GetMapAcap().GetSize(), 5);
+    EXPECT_EQ(capaNego->GetMapAcap().GetValue(5), tempStr5);
+
+    delete capaNego;
+}
+
+TEST(MediaBaseProfileTest, TestCapaNegoPcfg)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    EXPECT_EQ(capaNego->GetListPcfg().GetSize(), 0);
+
+    ImsList<AString> tempList;
+    AString tempStr1 = "t=1 a=1,2,3,4,5";
+    tempList.Append(tempStr1);
+
+    capaNego->SetListPcfg(tempList);
+    EXPECT_EQ(capaNego->GetListPcfg().GetSize(), 1);
+    EXPECT_EQ(capaNego->GetListPcfg().GetAt(0), tempStr1);
+
+    delete capaNego;
+}
+
+TEST(MediaBaseProfileTest, TestCapaNegoNegotiatedAcfg)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    EXPECT_EQ(capaNego->GetAcfg(), AString::ConstNull());
+
+    AString tempStr1 = "t=1 a=1";
+
+    capaNego->SetAcfg(tempStr1);
+    EXPECT_TRUE(capaNego->GetAcfg().GetLength() > 0);
+    EXPECT_EQ(capaNego->GetAcfg(), tempStr1);
+
+    delete capaNego;
+}
+
+TEST(MediaBaseProfileTest, TestCapaNegoAttCapaInPcfg)
+{
+    MediaBaseProfile::CapaNego* capaNego = new MediaBaseProfile::CapaNego();
+
+    EXPECT_EQ(capaNego->IsAttCapaInPcfg(), IMS_FALSE);
+
+    IMS_BOOL testBool = IMS_TRUE;
+
+    capaNego->SetAttCapaInPcfg(testBool);
+    EXPECT_EQ(capaNego->IsAttCapaInPcfg(), testBool);
+
+    delete capaNego;
+}
+
 TEST(MediaBaseProfileTest, TestMediaBaseProfileCreation)
 {
     MediaBaseProfile* baseProfile1 = new MediaBaseProfile();
