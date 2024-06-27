@@ -738,8 +738,6 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 {
     IMS_TRACE_D("HandleModificationSucceeded", 0, 0, 0);
 
-    NotifyHoldResumeState();
-
     IMS_BOOL bModified = m_objContext.GetUpdatingInfo().IsModified();
     CallStateName eCallStateName;
 
@@ -751,6 +749,8 @@ CallStateName UpdatingState::HandleModificationSucceeded()
     {
         eCallStateName = HandleReceivedModificationSucceeded();
     }
+
+    NotifyHoldResumeState();
 
     if (eCallStateName == CallStateName::ESTABLISHED)
     {

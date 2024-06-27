@@ -47,6 +47,7 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -760,6 +761,22 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedBy)
     EXPECT_CALL(objUiNotifier, SendUpdated).Times(0);
     EXPECT_CALL(objUiNotifier, SendUpdatedBy).Times(1);
     EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_)).Times(0);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAndSendHeldByInOrder)
+{
+    pUpdatingInfo->SetAlerted();
+    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_RECEIVE;
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
+        EXPECT_CALL(objUiNotifier, SendHeldBy).Times(1);
+    }
+
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdated(&objSession));
 }
 
