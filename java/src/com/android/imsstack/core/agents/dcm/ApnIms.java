@@ -21,6 +21,8 @@ import android.os.Message;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.TelephonyManager;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -35,16 +37,27 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for ims
  */
-public class ApnIms extends Apn {
-    protected boolean mIsCellularDefaultNetwork = false;
-    protected boolean mIsConnectedOverCrossSim = false;
-    protected DefaultNetworkCallback mDefaultNetworkCallback = null;
+public final class ApnIms extends Apn {
+    @VisibleForTesting
+    boolean mIsCellularDefaultNetwork = false;
+    @VisibleForTesting
+    boolean mIsConnectedOverCrossSim = false;
+    private DefaultNetworkCallback mDefaultNetworkCallback = null;
 
     // Public methods --------------------------------------------
     public ApnIms(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.IMS);
 
-        initializeApn();
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_PCSCF_CHANGED, new HandlePcscfChanged());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
+        registerHandler(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
+                new HandleDefaultNetworkStatusChanged());
+
+        registerConfigListener();
+        registerDefaultNetworkCallback();
     }
 
     // Interface implementation methods --------------------------
@@ -116,22 +129,6 @@ public class ApnIms extends Apn {
         return super.getApn();
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.IMS;
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
-        registerHandler(EVENT_PCSCF_CHANGED, new HandlePcscfChanged());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-        registerHandler(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
-                new HandleDefaultNetworkStatusChanged());
-
-        registerConfigListener();
-        registerDefaultNetworkCallback();
-    }
-
     /**
      * Called when carrier config changes
      * ApnIms register or unregister DefaultNetworkCallback according to the configuration
@@ -166,7 +163,8 @@ public class ApnIms extends Apn {
         }
     }
 
-    protected void registerDefaultNetworkCallback() {
+    @VisibleForTesting
+    void registerDefaultNetworkCallback() {
         if (!DeviceConfig.isMultiSimEnabled()) {
             ImsLog.i(mSlotId, "MultiSim is not enabled");
             return;
@@ -192,7 +190,8 @@ public class ApnIms extends Apn {
         }
     }
 
-    protected void unregisterDefaultNetworkCallback() {
+    @VisibleForTesting
+    void unregisterDefaultNetworkCallback() {
         if (mDefaultNetworkCallback == null) {
             ImsLog.i(mSlotId, "Default network callback has been not registered");
             return;
@@ -208,6 +207,7 @@ public class ApnIms extends Apn {
         mDefaultNetworkCallback = null;
     }
 
+    @Override
     protected boolean handleIpcanCategory(int networkType) {
         boolean ret = super.handleIpcanCategory(networkType);
 
@@ -222,7 +222,7 @@ public class ApnIms extends Apn {
         return ret;
     }
 
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -242,7 +242,7 @@ public class ApnIms extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -266,7 +266,7 @@ public class ApnIms extends Apn {
         }
     }
 
-    private class HandleIpChanged implements MsgProcInterface {
+    private final class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -284,7 +284,7 @@ public class ApnIms extends Apn {
         }
     }
 
-    private class HandlePcscfChanged implements MsgProcInterface {
+    private final class HandlePcscfChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "PCSCF address is changed");
@@ -293,7 +293,7 @@ public class ApnIms extends Apn {
         }
     }
 
-    private class HandleDataConnectionFailed implements MsgProcInterface {
+    private final class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");
@@ -319,7 +319,7 @@ public class ApnIms extends Apn {
     /**
      * This handle EVENT_DEFAULT_NETWORK_STATUS_CHANGED event
      */
-    private class HandleDefaultNetworkStatusChanged implements MsgProcInterface {
+    private final class HandleDefaultNetworkStatusChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");

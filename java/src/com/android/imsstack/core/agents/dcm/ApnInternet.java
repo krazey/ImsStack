@@ -28,15 +28,18 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for internet
  */
-public class ApnInternet extends Apn {
+public final class ApnInternet extends Apn {
 
     // Variables--------------------------------------------------
 
     // Public methods --------------------------------------------
     public ApnInternet(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.INTERNET);
 
-        initializeApn();
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+
+        registerCallback(ImsNetworkCallback.EVENT_ALL);
     }
 
     // Interface implementation methods --------------------------
@@ -45,17 +48,7 @@ public class ApnInternet extends Apn {
         super.cleanup();
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.INTERNET;
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-
-        registerCallback(ImsNetworkCallback.EVENT_ALL);
-    }
-
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -70,7 +63,7 @@ public class ApnInternet extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;

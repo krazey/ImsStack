@@ -152,7 +152,7 @@ public abstract class Apn extends Handler implements IApn {
     protected int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
     protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
-    protected LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
+    protected final LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
             new LinkedHashMap<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
@@ -161,18 +161,21 @@ public abstract class Apn extends Handler implements IApn {
     protected ConfigInterface.Listener mConfigListener;
     protected Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
-    protected Apn(Context context, int slotId) {
+    protected Apn(Context context, int slotId, EApnType type) {
         super(Looper.myLooper());
 
         mContext = context;
         mSlotId = slotId;
+        mType = type;
         mDcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
         mDcSettings = DcFactory.getDcAgent(IDcSettings.class, mSlotId);
         mDcNetWatcher = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
         mAosReg = AosFactory.getInstance().getAosRegistration(mSlotId);
 
-        registerEvent();
+        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
+        registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
+                new HandlePreciseDataConnectionStateChanged());
     }
 
     // Interface implementation methods --------------------------
@@ -445,14 +448,8 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    protected void registerHandler(int evt, MsgProcInterface proc) {
+    protected final void registerHandler(int evt, MsgProcInterface proc) {
         mMapMsgHandler.put(evt, proc);
-    }
-
-    protected void registerEvent() {
-        registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
-        registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
-                new HandlePreciseDataConnectionStateChanged());
     }
 
     protected EApnReqState getApnReqState() {
@@ -1151,9 +1148,9 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     /**
-    * This is common handler of each APN type to handle EVENT_NOTIFY_DATA_STATE_CHANGED event
-    * It notify the change of data connection state to IMS Native
-    */
+     * This is common handler of each APN type to handle EVENT_NOTIFY_DATA_STATE_CHANGED event
+     * It notify the change of data connection state to IMS Native
+     */
     protected class HandleDataStateChanged implements MsgProcInterface {
 
         @Override
