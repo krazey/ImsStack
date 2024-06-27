@@ -43,21 +43,15 @@ protected:
     }
 };
 
-TEST_F(ImsAosTest, GetImsAos)
+TEST_F(ImsAosTest, ImsAosListIsZeroWhenGetImsAosListWithMtcAppAndMtcService)
 {
     ImsList<IImsAos*> objImsAosList =
             ImsAos::GetImsAosList("ims.app.mtc", "ims.service.mtc", SLOT_ID);
-    EXPECT_LE(0, objImsAosList.GetSize());
+    EXPECT_EQ(objImsAosList.GetSize(), 0);
+}
 
-    objImsAosList = ImsAos::GetImsAosList("ims.app.mtc", "ims.service.mtc.emergency", SLOT_ID);
-    EXPECT_LE(0, objImsAosList.GetSize());
-
-    objImsAosList = ImsAos::GetImsAosList("ims.app.mts", "ims.service.mts", SLOT_ID);
-    EXPECT_LE(0, objImsAosList.GetSize());
-
-    ImsList<IImsAos*> objImsAosList2 = ImsAos::GetImsAosList("ims.app.mtc", SLOT_ID);
-    EXPECT_LE(0, objImsAosList2.GetSize());
-
-    objImsAosList2 = ImsAos::GetImsAosList("ims.app.mts", SLOT_ID);
-    EXPECT_LE(0, objImsAosList2.GetSize());
+TEST_F(ImsAosTest, ImsAosListIsZeroWhenGetImsAosListWithMtsApp)
+{
+    ImsList<IImsAos*> objImsAosList = ImsAos::GetImsAosList("ims.app.mts", SLOT_ID);
+    EXPECT_EQ(objImsAosList.GetSize(), 0);
 }
