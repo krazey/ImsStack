@@ -45,14 +45,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * This class provides all the SIM states and its related operations.
  */
-public class SimAgent implements SimInterface {
+public final class SimAgent implements SimInterface {
     /** SIM related notifications */
     @VisibleForTesting
-    protected static final int NOTIFICATION_ISIM_STATE_CHANGED = 101;
+    static final int NOTIFICATION_ISIM_STATE_CHANGED = 101;
     @VisibleForTesting
-    protected static final int NOTIFICATION_ISIM_AUTH = 102;
+    static final int NOTIFICATION_ISIM_AUTH = 102;
     @VisibleForTesting
-    protected static final int NOTIFICATION_USIM_AUTH = 201;
+    static final int NOTIFICATION_USIM_AUTH = 201;
 
     /** Defines event class for asynchronous SIM(USIM/ISIM) authentication */
     static final class AuthEvent {
@@ -444,7 +444,7 @@ public class SimAgent implements SimInterface {
     }
 
     @VisibleForTesting
-    protected void updateSimState() {
+    void updateSimState() {
         TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSlotId(), getSubId());
         int telephonyCardState = Sim.STATE_INVALID;
         int telephonySimState = Sim.STATE_INVALID;

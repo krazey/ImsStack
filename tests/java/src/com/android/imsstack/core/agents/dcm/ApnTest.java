@@ -113,7 +113,6 @@ public class ApnTest {
 
         // create the instance to test
         mApn = new FakeApn(mContext, SLOT0);
-        mApn.mType = EApnType.IMS;
         mConnectivityManagerProxy =
                 mTestAppContext.getSystemServiceProxy(ConnectivityManagerProxy.class);
 
@@ -1169,7 +1168,7 @@ public class ApnTest {
 
     private static class FakeApn extends Apn {
         FakeApn(Context context, int slotId) {
-            super(context, slotId);
+            super(context, slotId, EApnType.IMS);
         }
     }
 
