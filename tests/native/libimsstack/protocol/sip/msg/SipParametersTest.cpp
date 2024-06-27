@@ -18,6 +18,7 @@
 
 #include "msg/SipAddrSpec.h"
 #include "msg/SipParameters.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -118,7 +119,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     SipParameters* pParameters = new SipParameters();
     ASSERT_TRUE(pParameters != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -137,7 +138,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, objParameterList.Decode(pData, pData, ' '));
 
     pData = "OnlyName;param-name=param-value,param-value1";
-    const SIP_CHAR* pDataEnd = pData + strlen(pData) - 1;
+    const SIP_CHAR* pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     /* Decode with valid input, success */
     EXPECT_EQ(SIP_TRUE, objParameterList.Decode(pData, pDataEnd, ';'));
@@ -171,7 +172,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     SipParameterList& objNormalParameterList = pParameters->GetParameterList();
 
     pData = "OnlyName;param-name=param%20value,param-value1";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     SipUri* pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
@@ -209,7 +210,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     pSipUri->SetComponentType(IParameterComponent::HEADER);
 
     pData = "OnlyName;param-name=param%20value";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     EXPECT_EQ(SIP_TRUE, objHeaderParameterList.Decode(pData, pDataEnd, ';', pSipUri));
 
@@ -247,7 +248,7 @@ TEST_F(SipParametersTest, DecodeAndEncodeHdr)
     SipParameterList& objUriParameterList = pParameters->GetParameterList();
 
     pData = "OnlyName;transport=%24!%26";
-    pDataEnd = pData + strlen(pData) - 1;
+    pDataEnd = pData + SipPf_Strlen(pData) - 1;
 
     pSipUri->SetComponentType(IParameterComponent::URI);
 

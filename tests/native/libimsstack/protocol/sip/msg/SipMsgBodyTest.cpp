@@ -17,6 +17,7 @@
 
 #include "msg/SipMsgBody.h"
 #include "msg/SipUnknownHeader.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -35,7 +36,7 @@ TEST_F(SipMsgBodyTest, EncodeSingleMsgBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -79,7 +80,7 @@ TEST_F(SipMsgBodyTest, DecodeSingleMsgBody)
 
     const SIP_CHAR* pSingleBody = "This is a single body,\r\n\
 and no headers and boundary present\r\n";
-    int nLen = strlen(pSingleBody);
+    SIP_INT32 nLen = SipPf_Strlen(pSingleBody);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeSingleMsgBody(pSingleBody, pSingleBody + nLen));
     EXPECT_EQ(SIP_TRUE, pMessageBody->GetMsgBuffer(&pDecodeBody));
@@ -175,7 +176,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pMessageLevel1->SipDelete();
     pMsgBobyList->SipDelete();
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -213,7 +214,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -319,7 +320,7 @@ UnknownHeaderName1: UnknownHeaderValue1\r\n\
 \r\n\
 level1 - message body 2\r\n\
 --abcxz--\r\n";
-    int nLen = strlen(pMessage);
+    SIP_INT32 nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
 
@@ -437,7 +438,7 @@ level1 - message body 2\r\n\
     ASSERT_TRUE(pMessageBody != nullptr);
 
     pMessage = "\r\nlevel1 - message body with no headers\r\n";
-    nLen = strlen(pMessage);
+    nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
 
@@ -452,7 +453,7 @@ level1 - message body 2\r\n\
     ASSERT_TRUE(pMessageBody != nullptr);
 
     pMessage = "Content-Type: multipart/mixed;boundary=abcxz\r\n";
-    nLen = strlen(pMessage);
+    nLen = SipPf_Strlen(pMessage);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
     pMessageBody->SipDelete();

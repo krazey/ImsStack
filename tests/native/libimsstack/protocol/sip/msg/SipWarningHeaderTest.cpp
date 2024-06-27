@@ -35,7 +35,7 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 256;
+    const SIP_INT32 BUFFER_SIZE = 256;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

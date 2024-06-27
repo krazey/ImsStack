@@ -54,7 +54,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
             SipCSeqHeader::GetNewObj(SipHeaderBase::CSEQ, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

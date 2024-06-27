@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "msg/SipAddrSpec.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -57,7 +58,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     SipNameAddr* pSipNameAddr = new SipNameAddr();
     ASSERT_TRUE(pSipNameAddr != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -71,7 +72,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     EXPECT_EQ(SIP_FALSE, pSipNameAddr->DecodeNameAddr(nullptr, nullptr));
 
     const SIP_CHAR* pNameAddress = "DisplayName <http://absoluteuri.addrspec";
-    const SIP_CHAR* pEnd = pNameAddress + strlen(pNameAddress) - SIP_ONE;
+    const SIP_CHAR* pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
 
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
 
@@ -88,7 +89,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     ASSERT_TRUE(pSipNameAddr != nullptr);
 
     pNameAddress = "<http://absoluteuri.addrspec";
-    pEnd = pNameAddress + strlen(pNameAddress) - SIP_ONE;
+    pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
 
     EXPECT_STREQ(nullptr, pSipNameAddr->GetDisplayName());
@@ -108,7 +109,7 @@ TEST_F(SipNameAddrTest, EncodeAndDecodeNameAddr)
     ASSERT_TRUE(pSipNameAddr != nullptr);
 
     pNameAddress = "\"QuotedDispName\"<http://absoluteuri.addrspec";
-    pEnd = pNameAddress + strlen(pNameAddress) - SIP_ONE;
+    pEnd = pNameAddress + SipPf_Strlen(pNameAddress) - SIP_ONE;
     EXPECT_EQ(SIP_TRUE, pSipNameAddr->DecodeNameAddr(pNameAddress, pEnd));
 
     pBuff = &(aBuffer[0]);

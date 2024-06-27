@@ -17,6 +17,7 @@
 
 #include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
@@ -52,7 +53,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         pRespSipMsg = new SipMessage();
         pRespSipMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -64,7 +65,7 @@ To: <sip:userA@host>;tag=too\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
@@ -303,7 +304,7 @@ Call-ID: 1332\r\n\
 CSeq: 1 INVITE\r\n\
 RSeq: 2\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     delete pTxnFsmData;
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
 
@@ -321,8 +322,8 @@ RSeq: 2\r\n\
     const SIP_CHAR* pCallIdValue = "1332a-3c0d31@2409:192.168.35.156";
     const SIP_CHAR* pFromValue = "<sip:user@host>;tag=a89";
 
-    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
-    EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, strlen(pCallIdValue)));
+    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, SipPf_Strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, SipPf_Strlen(pCallIdValue)));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pCallIDHdr));
@@ -345,8 +346,8 @@ RSeq: 2\r\n\
     const SIP_CHAR* pToValue = "<sip:userA@host>;tag=one";
     pFromValue = "<sip:user@host>;tag=abcd";
 
-    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, SipPf_Strlen(pFromValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pFromHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
@@ -367,7 +368,7 @@ RSeq: 2\r\n\
     ASSERT_TRUE(pRSeqHdr != nullptr);
 
     pToValue = "<sip:userA@host>;tag=too";
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
     EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr("90", 1));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));

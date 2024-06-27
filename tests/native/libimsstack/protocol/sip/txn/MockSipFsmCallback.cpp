@@ -15,9 +15,10 @@
  */
 #include "SipUtil.h"
 #include "include/MockSipTransaction.h"
+#include "platform/SipString.h"
 #include "txn/SipTxn.h"
 
-static int count = 0;
+static SIP_INT32 count = 0;
 SipVector<MockSipTransaction*> objFsmTxnList;
 SIP_BOOL MockFsm_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
@@ -30,7 +31,7 @@ SIP_BOOL MockFsm_FetchTransaction(
     SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
     if (nOption == TXN_OPT_CREATE)
     {
-        if (strcmp(pTxnKey->GetMethod(), "BYE") == 0)
+        if (SipPf_Strcmp(pTxnKey->GetMethod(), "BYE") == 0)
         {
             return SIP_FALSE;
         }
@@ -70,7 +71,7 @@ SIP_BOOL MockFsm_FetchTransaction(
         {
             case SipMessage::REQ_TYPE:
             {
-                if (strcmp(pTxnKey->GetMethod(), "CANCEL") == 0)
+                if (SipPf_Strcmp(pTxnKey->GetMethod(), "CANCEL") == 0)
                 {
                     return SIP_TRUE;
                 }
@@ -78,7 +79,7 @@ SIP_BOOL MockFsm_FetchTransaction(
             }
             case SipMessage::RESP_TYPE:
             {
-                if (strcmp(pTxnKey->GetMethod(), "INVITE") == 0)
+                if (SipPf_Strcmp(pTxnKey->GetMethod(), "INVITE") == 0)
                 {
                     SIP_UINT16 nError;
                     SipMessage* pTempSipMsg = new SipMessage();

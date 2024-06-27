@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "msg/SipMsgBody.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -34,9 +35,9 @@ TEST_F(SipMsgBodyListTest, GetEncodedMessageBody)
     SipMsgBodyList* pList = new SipMsgBodyList();
     ASSERT_TRUE(pList != nullptr);
 
-    unsigned int nLen = 0;
+    SIP_UINT32 nLen = 0;
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -81,7 +82,7 @@ This is body2\r\n\
 --unique-boundary-1--\r\n";
 
     EXPECT_STREQ(pMsg, &(aBuffer[0]));
-    EXPECT_EQ(nLen, strlen(pMsg));
+    EXPECT_EQ(nLen, SipPf_Strlen(pMsg));
 
     pList->SipDelete();
 
@@ -123,9 +124,9 @@ This is \0body2\r\n\
 --unique-boundary-1--\r\n";
 
     // pNullCharMsg length = pMsg + 1 (extra '\0' character)
-    EXPECT_TRUE(memcmp(pNullCharMsg, &(aBuffer[0]), strlen(pMsg) + 1) == 0);
-    EXPECT_EQ(nLen, strlen(pMsg) + 1);
-    EXPECT_TRUE(nLen > strlen(&(aBuffer[0])));  // null character present check
+    EXPECT_TRUE(memcmp(pNullCharMsg, &(aBuffer[0]), SipPf_Strlen(pMsg) + 1) == 0);
+    EXPECT_EQ(nLen, SipPf_Strlen(pMsg) + 1);
+    EXPECT_TRUE(nLen > SipPf_Strlen(&(aBuffer[0])));  // null character present check
 
     pList->SipDelete();
 }
@@ -137,7 +138,7 @@ TEST_F(SipMsgBodyListTest, DecodeSingleBody)
 
     const SIP_CHAR* pSingleBody = "This is a single body,\r\n\
 and no headers and boundary present\r\n";
-    int nLen = strlen(pSingleBody);
+    SIP_INT32 nLen = SipPf_Strlen(pSingleBody);
 
     EXPECT_EQ(SIP_TRUE, pList->DecodeSingleBody(pSingleBody, pSingleBody + nLen));
 
@@ -171,7 +172,7 @@ Content-Type: application/body2\r\n\
 Test body 2\r\n\
 --unique-boundary--\r\n";
 
-    unsigned int nLen = strlen(pMsg);
+    SIP_UINT32 nLen = SipPf_Strlen(pMsg);
 
     EXPECT_EQ(SIP_TRUE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "unique-boundary"));
 
@@ -206,7 +207,7 @@ Content-Type: application/body2\r\n\
 Test body 2\r\n\
 --unique-boundary--\r\n";
 
-    nLen = strlen(pMsg);
+    nLen = SipPf_Strlen(pMsg);
 
     EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "mismatch-boundary"));
 
@@ -218,7 +219,7 @@ Test body 2\r\n\
 
     pMsg = "--unique-boundary";
 
-    nLen = strlen(pMsg);
+    nLen = SipPf_Strlen(pMsg);
 
     EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "unique-boundary"));
 

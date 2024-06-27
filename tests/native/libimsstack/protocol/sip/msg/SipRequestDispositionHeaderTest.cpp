@@ -17,6 +17,7 @@
 
 #include "msg/SipMsgUtil.h"
 #include "msg/SipRequestDispositionHeader.h"
+#include "platform/SipString.h"
 
 extern SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN];
 
@@ -72,7 +73,8 @@ TEST_F(SipRequestDispositionHeaderTest, DecodeHdr)
         ASSERT_TRUE(pHeader != nullptr);
 
         EXPECT_EQ(SIP_TRUE,
-                pHeader->DecodeHdr(gaszDirectivesArray[nCnt], strlen(gaszDirectivesArray[nCnt])));
+                pHeader->DecodeHdr(
+                        gaszDirectivesArray[nCnt], SipPf_Strlen(gaszDirectivesArray[nCnt])));
         pHeader->SipDelete();
     }
 }
