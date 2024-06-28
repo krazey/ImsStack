@@ -69,7 +69,7 @@
 
     <!-- Mtc -->
     <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
     <!-- Media -->

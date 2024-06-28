@@ -506,7 +506,7 @@
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
-        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
+        <item value="10004"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
     <int name="wifi_emergency_18x_timer_millis_int" value="0"/>
     <boolean name="support_canid_info_bool" value="false"/>
