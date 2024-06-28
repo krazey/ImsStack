@@ -1295,26 +1295,14 @@ TEST_F(AosHandleTest, SetReason_Test)
     m_pAosHandle->SetReason(AosReason::NONE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::NONE);
 
-    m_pAosHandle->SetReason(AosReason::SRV_OUT);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SRV_OUT);
-
     m_pAosHandle->SetReason(AosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::POWER_OFF);
-
-    m_pAosHandle->SetReason(AosReason::BAD_BATTERY);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::BAD_BATTERY);
 
     m_pAosHandle->SetReason(AosReason::AIRPLANE_MODE);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::AIRPLANE_MODE);
 
-    m_pAosHandle->SetReason(AosReason::NO_LTE_COVERAGE);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::NO_LTE_COVERAGE);
-
     m_pAosHandle->SetReason(AosReason::SERVICE_POLICY);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SERVICE_POLICY);
-
-    m_pAosHandle->SetReason(AosReason::SERVICE_BLOCKED);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::SERVICE_BLOCKED);
 
     m_pAosHandle->SetReason(AosReason::IMS_DISABLED);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::IMS_DISABLED);
@@ -1348,12 +1336,6 @@ TEST_F(AosHandleTest, SetReason_Test)
 
     m_pAosHandle->SetReason(AosReason::REG_TERMINATING);
     EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::REG_TERMINATING);
-
-    m_pAosHandle->SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::PCSCF_DISCOVERY_FAILED);
-
-    m_pAosHandle->SetReason(AosReason::UNKNOWN);
-    EXPECT_EQ(m_pAosHandle->GetReason(), AosReason::UNKNOWN);
 }
 
 TEST_F(AosHandleTest, ClearSuspendedReason_Test)
@@ -1383,19 +1365,13 @@ TEST_F(AosHandleTest, GetAppState_Test)
 TEST_F(AosHandleTest, GetImsAosReason_Test)
 {
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NONE), ImsAosReason::NOT_SPECIFIED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::BAD_BATTERY), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::POWER_OFF), ImsAosReason::POWER_OFF);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::AIRPLANE_MODE),
             ImsAosReason::DATA_DISCONNECTED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::DATA_DISCONNECTED),
             ImsAosReason::DATA_DISCONNECTED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::NO_LTE_COVERAGE),
-            ImsAosReason::NO_RAT_COVERAGE);
     EXPECT_EQ(
             m_pAosHandle->GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SERVICE_BLOCKED),
-            ImsAosReason::SERVICE_BLOCKED);
-    EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::SRV_OUT), ImsAosReason::OUT_OF_SERVICE);
     EXPECT_EQ(
             m_pAosHandle->GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(m_pAosHandle->GetImsAosReason(AosReason::INITIAL_REG_REQUESTED),

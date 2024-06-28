@@ -1035,7 +1035,6 @@ TEST_F(MtcConfigurationManagerTest,
 {
     ImsVector<IMS_SINT32> objArray;
     objArray.Push(ImsAosReason::POWER_OFF);
-    objArray.Push(ImsAosReason::OUT_OF_SERVICE);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
@@ -1048,8 +1047,6 @@ TEST_F(MtcConfigurationManagerTest,
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NONE));
     EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::POWER_OFF));
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::DATA_DISCONNECTED));
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::NO_RAT_COVERAGE));
-    EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::OUT_OF_SERVICE));
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToIgnore(ImsAosReason::REG_TERMINATED));
 }
 
