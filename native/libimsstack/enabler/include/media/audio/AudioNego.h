@@ -129,8 +129,6 @@ private:
             IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
-    IMS_BOOL MakeCapaNegoProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
 
     void SetSdpSessionIpAddress(
             OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);

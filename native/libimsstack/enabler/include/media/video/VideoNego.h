@@ -116,8 +116,6 @@ private:
             OUT AString& strImageAttr);
     IMS_BOOL MakeFrameSizeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
             OUT AString& strFrameSize);
-    IMS_BOOL MakeCapaNegoProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT VideoProfile::CapaNego* pObjCapaNego);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
