@@ -406,17 +406,17 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             continue;
         }
 
-        if ((pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
-                (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") == IMS_TRUE))
+        if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
+                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") == IMS_TRUE))
         {
             AudioProfile::AmrFmtp* pAmrFmtp =
-                    reinterpret_cast<AudioProfile::AmrFmtp*>(pAudioPayload->pFmtp);
+                    reinterpret_cast<AudioProfile::AmrFmtp*>(pAudioPayload->GetFmtp());
             if (pAmrFmtp == IMS_NULL)
             {
                 continue;
             }
 
-            if (pAudioPayload->objRtpMap.GetSamplingRate() == 16000)
+            if (pAudioPayload->GetRtpMap().GetSamplingRate() == 16000)
             {
                 nCurrCodec = AUDIO_CODEC_AMRWB;
             }
@@ -463,11 +463,11 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 nAsMax = nCurrAs;
             }
         }
-        else if (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS") == IMS_TRUE)
+        else if (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS") == IMS_TRUE)
         {
             nCurrCodec = AUDIO_CODEC_EVS;
             AudioProfile::EvsFmtp* pEvsFmtp =
-                    reinterpret_cast<AudioProfile::EvsFmtp*>(pAudioPayload->pFmtp);
+                    reinterpret_cast<AudioProfile::EvsFmtp*>(pAudioPayload->GetFmtp());
             if (pEvsFmtp == IMS_NULL)
             {
                 continue;
@@ -507,8 +507,9 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 nAsMax = nCurrAs;
             }
         }
-        else if ((pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU") == IMS_TRUE) ||
-                (pAudioPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA") == IMS_TRUE))
+        else if ((pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ==
+                         IMS_TRUE) ||
+                (pAudioPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA") == IMS_TRUE))
         {
             if (72 > nAsMax)  // 72 is PCMU/PCMA AS value at IPv6
             {
@@ -547,7 +548,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
 
     if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp = reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp);
+        AudioProfile::AmrFmtp* pAmrFmtp =
+                reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
         if (pAmrFmtp == NULL)
         {
             return NO_MODESET;
@@ -581,7 +583,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
     }
     else if (strCodec.EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp);
+        AudioProfile::EvsFmtp* pEvsFmtp =
+                reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
         if (pEvsFmtp == NULL)
         {
             return NO_MODESET;
@@ -650,7 +653,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
 
     if (strCodec.EqualsIgnoreCase("AMR") || strCodec.EqualsIgnoreCase("AMR-WB"))
     {
-        AudioProfile::AmrFmtp* pAmrFmtp = reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp);
+        AudioProfile::AmrFmtp* pAmrFmtp =
+                reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp());
         if (pAmrFmtp == NULL)
         {
             return NO_MODESET;
@@ -669,7 +673,8 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
     }
     else if (strCodec.EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp);
+        AudioProfile::EvsFmtp* pEvsFmtp =
+                reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp());
         if (pEvsFmtp == NULL)
         {
             return NO_MODESET;

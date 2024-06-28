@@ -56,8 +56,8 @@ protected:
         m_pLocalProfile->strTransportType = "RTP/AVP";
         VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
-        pAvcPayload->objRtpMap.SetPayloadType("H264");
-        pAvcPayload->pFmtp = pAvcFmtp;
+        pAvcPayload->GetRtpMap().SetPayloadType("H264");
+        pAvcPayload->SetFmtp(pAvcFmtp);
         m_pLocalProfile->lstPayload.Append(pAvcPayload);
         m_pLocalProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
 

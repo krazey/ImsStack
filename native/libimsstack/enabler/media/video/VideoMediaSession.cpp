@@ -107,8 +107,8 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     // Setting the network properties
     UpdateLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
-    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->objRtpMap.GetPayloadNumber());
-    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->objRtpMap.GetPayloadNumber());
+    pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->GetRtpMap().GetPayloadNumber());
+    pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
     // remote network parameters
     pVideoConfig->setRemoteAddress(
             android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
@@ -195,10 +195,10 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
     }
 
-    if (pNegoPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
+    if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
     {
         VideoProfile::AvcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->pFmtp);
+                reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
         pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->nProfile)));
@@ -217,10 +217,10 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
-    else if (pNegoPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
+    else if (pNegoPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
     {
         VideoProfile::HevcFmtp* pFmtp =
-                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->pFmtp);
+                reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
         pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->nProfile)));
@@ -240,7 +240,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setResolutionHeight(nHeight);
     }
 
-    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.GetSamplingRate() / 1000));
+    pVideoConfig->setSamplingRateKHz((int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
     pVideoConfig->setIntraFrameInterval(m_pConfig->GetVideoIframeIntervalSec());
     pVideoConfig->setCameraId(m_nCameraId);
     pVideoConfig->setCameraZoom(m_nCameraZoom);

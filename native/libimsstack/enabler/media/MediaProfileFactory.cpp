@@ -284,7 +284,7 @@ PUBLIC
 MediaBaseProfile::BasePayload* MediaProfileFactory::CreatePayload(
         IN MediaBaseProfile::BasePayload* payload)
 {
-    switch (MediaProfileUtil::GetMediaType(payload->objRtpMap.GetPayloadType()))
+    switch (MediaProfileUtil::GetMediaType(payload->GetRtpMap().GetPayloadType()))
     {
         case MEDIA_TYPE_AUDIO:
             return CreateAudioPayload(static_cast<AudioProfile::Payload*>(payload));
@@ -438,7 +438,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(pAmrConfig->GetPayloadType(), strCodecName,
             pAmrConfig->GetSamplingRate(), pAmrConfig->GetChannel());
-    pAmrPayload->pFmtp = pAmrFmtp;
+    pAmrPayload->SetFmtp(pAmrFmtp);
 
     IMS_TRACE_D("CreateAmrPayload() codec(%s), SamplingRate(%d)",
             ImsCodec::CodecToString(pAmrConfig->GetCodec()), pAmrConfig->GetSamplingRate(), 0);
@@ -548,7 +548,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
     AudioProfile::Payload* pEvsPayload = new AudioProfile::Payload();
     pEvsPayload->SetRtpMap(
             pEvsConfig->GetPayloadType(), strCodecName, 16000, pEvsConfig->GetChannel());
-    pEvsPayload->pFmtp = pEvsFmtp;
+    pEvsPayload->SetFmtp(pEvsFmtp);
 
     return pEvsPayload;
 }
@@ -574,7 +574,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateTelephoneEventPayload(
     AudioProfile::Payload* pTelephoneEventPayload = new AudioProfile::Payload();
     pTelephoneEventPayload->SetRtpMap(
             pDtmfConfig->GetPayloadType(), strCodecName, pDtmfConfig->GetSamplingRate(), 0);
-    pTelephoneEventPayload->pFmtp = pTelephoneEventFmtp;
+    pTelephoneEventPayload->SetFmtp(pTelephoneEventFmtp);
 
     IMS_TRACE_D("CreateTelephoneEventPayload() codec(%s), SamplingRate(%d)",
             ImsCodec::CodecToString(pDtmfConfig->GetCodec()), pDtmfConfig->GetSamplingRate(), 0);
@@ -734,7 +734,7 @@ PRIVATE TextProfile::Payload* MediaProfileFactory::CreateT140Payload(
         IMS_TRACE_I("CreateT140Payload() add fmtp - red level(%d), red payload(%d)",
                 pRedFmtp->nRedLevel, pRedFmtp->nRedPayload, 0);
 
-        pTextPayload->pFmtp = pRedFmtp;
+        pTextPayload->SetFmtp(pRedFmtp);
     }
     else
     {
@@ -838,7 +838,7 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateAvcPayload(
     }
 
     VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
-    pAvcPayload->pFmtp = pAvcFmtp;
+    pAvcPayload->SetFmtp(pAvcFmtp);
 
     SetVideoCodecPayload(pAvcConfig, pVideoConfig, pAvcPayload);
 
@@ -880,7 +880,7 @@ PRIVATE VideoProfile::Payload* MediaProfileFactory::CreateHevcPayload(
     }
 
     VideoProfile::Payload* pHevcPayload = new VideoProfile::Payload();
-    pHevcPayload->pFmtp = pHevcFmtp;
+    pHevcPayload->SetFmtp(pHevcFmtp);
 
     SetVideoCodecPayload(pHevcConfig, pVideoConfig, pHevcPayload);
 
@@ -1158,12 +1158,13 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
     {
         VideoProfile::Payload* pPayload = pVideoProfile->GetPayloadAt(i);
 
-        if (pPayload == IMS_NULL || pPayload->pFmtp == IMS_NULL)
+        if (pPayload == IMS_NULL || pPayload->GetFmtp() == IMS_NULL)
         {
             continue;
         }
 
-        IMS_SINT32 nFrameRate = static_cast<VideoProfile::VideoFmtp*>(pPayload->pFmtp)->nFrameRate;
+        IMS_SINT32 nFrameRate =
+                static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->nFrameRate;
 
         if (nFrameRate > nMaxFrameRate)
         {

@@ -118,10 +118,6 @@ public:
     class BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
-
-    public:
         BasePayload(IN const IMS_SINT32 channel = 0) :
                 objRtpMap(channel),
                 pFmtp(IMS_NULL)
@@ -158,6 +154,12 @@ public:
             objRtpMap.SetChannel(nChannel);
         };
 
+        RtpMap& GetRtpMap() { return objRtpMap; }
+
+        void SetFmtp(IN BaseFmtp* fmtp) { pFmtp = fmtp; }
+
+        BaseFmtp* GetFmtp() { return pFmtp; }
+
     protected:
         void deleteFmtp()
         {
@@ -167,6 +169,10 @@ public:
                 pFmtp = IMS_NULL;
             }
         }
+
+    protected:
+        RtpMap objRtpMap;
+        BaseFmtp* pFmtp;
     };
 
 public:
