@@ -67,7 +67,7 @@ protected:
     virtual void TearDown() override {}
 
     /* This utility is used only for receive message */
-    void FillTransportParameters(SIP_CHAR* pMsg)
+    void FillTransportParameters(const SIP_CHAR* pMsg)
     {
         unsigned short nError = 0;
         unsigned int nLength = strlen(pMsg);
@@ -141,7 +141,7 @@ TEST_F(SipTransportHandlerTest, OnSendTransp)
     SipTransportHandler objTranspHandler;
     SipTransportInfo* pTranspInfo = SIP_NULL;
 
-    SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -182,7 +182,7 @@ Content-Length: 0\r\n\
 TEST_F(SipTransportHandlerTest, OnRecvTransp)
 {
     /* INVITE Request */
-    SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -391,7 +391,7 @@ TEST_F(SipTransportHandlerTest, OnRecvTanspError)
 
     SipTransportInfo* pNewTranspInfo = SIP_NULL;
 
-    SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\

@@ -807,7 +807,7 @@ TEST_F(SipMessageTest, EncodeMsgAndDecCompleteMessage)
     pDecodeMessage->SipDelete();
 
     /* With single message body and mandatory headers, success */
-    SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\

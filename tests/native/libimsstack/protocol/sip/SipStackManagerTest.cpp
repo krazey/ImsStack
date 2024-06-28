@@ -146,7 +146,7 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -201,7 +201,7 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    SIP_CHAR* pRespMsg = "SIP/2.0 200 OK\r\n\
+    const SIP_CHAR* pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
@@ -670,7 +670,7 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
