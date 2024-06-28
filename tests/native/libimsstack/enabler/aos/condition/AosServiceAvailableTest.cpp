@@ -36,7 +36,9 @@ using ::testing::NiceMock;
 const IMS_SINT32 SLOT_ID = 0;
 const AString NAME = AString("AosServiceAvailable");
 
-#define DECLARE_USING(Base) using Base::RequestCommand;
+#define DECLARE_USING(Base) \
+    using Base::SetBlock;   \
+    using Base::RequestCommand;
 
 class TestAosServiceAvailable : public AosServiceAvailable
 {
@@ -67,8 +69,6 @@ public:
     }
 
     inline IAosBlock* GetBlock() { return m_piBlock; }
-
-    inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 
     inline void SetAvailableLastNotified(IN IMS_BOOL bAvailable)
     {

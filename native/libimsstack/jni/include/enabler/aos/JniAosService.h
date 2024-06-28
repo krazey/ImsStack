@@ -32,7 +32,6 @@ public:
 
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
 
-    inline void NotifyNativeEnablerSet() override {}
     IJniEnablerThread* GetJniThread() const override;
 
 private:

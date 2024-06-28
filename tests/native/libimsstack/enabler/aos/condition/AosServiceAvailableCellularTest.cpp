@@ -31,6 +31,7 @@ using ::testing::NiceMock;
 using ::testing::Return;
 
 #define DECLARE_USING(Base)                \
+    using Base::SetBlock;                  \
     using Base::HandleRoamingChanged;      \
     using Base::HandleAirplaneModeChanged; \
     using Base::HandleVopsChanged;
@@ -44,8 +45,6 @@ public:
             AosServiceAvailableCellular()
     {
     }
-
-    inline void SetBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 };
 
 class AosServiceAvailableCellularTest : public ::testing::Test
