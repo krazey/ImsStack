@@ -63,6 +63,7 @@ cc_defaults {
         "libimsstack-jni",
         "libimsstack-platform",
         "libimsstack-protocol",
+        "libimsstack-test-engine",
         "libpixelimsmedia_config",
     ],
 }

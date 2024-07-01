@@ -17,17 +17,15 @@
 #include <gtest/gtest.h>
 
 #include "CarrierConfig.h"
-#include "Engine.h"
 #include "IConfiguration.h"
 #include "IImsAosInfo.h"
 #include "ImsAosReason.h"
-#include "ImsServiceConfig.h"
-#include "ImsServiceConfigTypeDef.h"
 #include "MockICarrierConfig.h"
 #include "MtsServiceState.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "TestConnector.h"
 #include "../../interface/aos/MockIImsAos.h"
 #include "../../interface/aos/MockIImsAosInfo.h"
 
@@ -46,19 +44,13 @@ public:
     MockIImsAosInfo objMockIImsAosInfo;
     MtsServiceState* pMtsServiceState;
     TestConfigService* pConfigService;
+    TestConnector objConnector;
 
 protected:
     virtual void SetUp() override
     {
         pConfigService = new TestConfigService();
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, pConfigService);
-
-        /*
-         * To make Connector::Open() return valid IConnector even though
-         * MtsApp is not created during the test.
-         */
-        Engine::GetConfiguration()->SetAppConfig(
-                ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
         pMtsServiceState = new MtsServiceState(SLOT_ID);
 

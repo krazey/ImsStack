@@ -53,6 +53,31 @@ cc_defaults {
     ],
 }
 
+cc_library_static {
+    name: "libimsstack-test-engine",
+    defaults: [
+        "imsstack_native_test_engine_defaults",
+    ],
+    srcs: [
+        "TestConnector.cpp",
+        "TestEngine.cpp",
+        "registration/TestRegistrationContext.cpp",
+        "service/TestServiceContext.cpp",
+        "sipcore/TestSipProtocol.cpp",
+    ],
+    local_include_dirs: [
+        "include/core",
+        "include/registration",
+        "include/service",
+        "include/sipcore",
+        "interface",
+        "interface/core",
+        "interface/registration",
+        "interface/service",
+        "interface/sipcore",
+    ],
+}
+
 cc_test {
     name: "ImsStackNativeEngineTests",
     defaults: [

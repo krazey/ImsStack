@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 #include "CarrierConfig.h"
-#include "Engine.h"
 #include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
@@ -32,6 +31,7 @@
 #include "MtsDef.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "TestConnector.h"
 #include "TestImsRadioService.h"
 #include "TestPhoneInfoService.h"
 #include "core/MockIReference.h"
@@ -58,11 +58,13 @@ public:
     MockIImsAos objMockIImsEmergencyAos;
     MockIImsAosInfo objMockIImsAosInfo;
     MockIMtsServiceListener objMtsServiceListener;
+    MockICoreService objEmergencyCoreService;
     MtsService* pMtsService;
 
     TestConfigService objConfigService;
     TestImsRadioService objImsRadioService;
     TestPhoneInfoService objPhoneInfoService;
+    TestConnector objConnector;
 
 protected:
     virtual void SetUp() override
@@ -73,12 +75,6 @@ protected:
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
-        /*
-         * To make Connector::Open() return valid IConnector even though
-         * MtsApp is not created during the test.
-         */
-        Engine::GetConfiguration()->SetAppConfig(
-                ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
         ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
@@ -86,6 +82,9 @@ protected:
         ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
                 .WillByDefault(Return(IMS_FALSE));
+
+        objConnector.SetCoreService(ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY),
+                &objEmergencyCoreService);
 
         pMtsService = new MtsService(SLOT_ID);
         pMtsService->SetIImsAos(&objMockIImsAos);

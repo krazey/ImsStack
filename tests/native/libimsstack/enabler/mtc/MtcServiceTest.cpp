@@ -15,14 +15,11 @@
  */
 
 #include "CarrierConfig.h"
-#include "Engine.h"
 #include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
-#include "ImsServiceConfig.h"
-#include "ImsServiceConfigTypeDef.h"
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
@@ -35,6 +32,7 @@
 #include "MtcService.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "TestConnector.h"
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
@@ -122,6 +120,7 @@ public:
     TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
     MockIMtcImsEventReceiver objEventReceiver;
+    TestConnector objConnector;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -158,11 +157,6 @@ protected:
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
-
-        // to make Connector::Open() return valid IConnector even though MtcApp is not created
-        // during the test.
-        Engine::GetConfiguration()->SetAppConfig(
-                ImsServiceConfig::GetAppName(ImsAppId::MTC), SLOT_ID);
 
         pNormalMtcService = CreateNormalService();
         pEmergencyMtcService = CreateEmergencyService();
