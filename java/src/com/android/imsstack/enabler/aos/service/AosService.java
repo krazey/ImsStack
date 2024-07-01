@@ -315,13 +315,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void controlRegistration(int requestType, int pcscfOrder, int cause) {
+    public void controlRegistration(RequestType requestType, Pcscf pcscfOrder, Cause cause) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION);
-        parcel.writeInt(requestType);
-        parcel.writeInt(pcscfOrder);
-        parcel.writeInt(cause);
+        parcel.writeInt(requestType.getValue());
+        parcel.writeInt(pcscfOrder.getValue());
+        parcel.writeInt(cause.getValue());
 
         sendRequest(parcel);
     }
@@ -629,10 +629,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private void notifyImsServiceChanged() {
-        controlRegistration((isImsEnabled()) ? IAosRegistration.RequestType.START.getValue() :
-                IAosRegistration.RequestType.STOP.getValue(),
-                IAosRegistration.Pcscf.CURRENT.getValue(),
-                IAosRegistration.Cause.IMS_SERVICE.getValue());
+        controlRegistration((isImsEnabled()) ? IAosRegistration.RequestType.START :
+                IAosRegistration.RequestType.STOP,
+                IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.Cause.IMS_SERVICE);
     }
 
     private void adjustCapabilities(CapabilityPairs pairs) {

@@ -809,9 +809,9 @@ public class ApnTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockIAosReg).controlRegistration(
-                IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
-                IAosRegistration.Pcscf.CURRENT.getValue(),
-                IAosRegistration.Cause.DATA_CONNECTING.getValue());
+                IAosRegistration.RequestType.START_IMS_EST_TIMER,
+                IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.Cause.DATA_CONNECTING);
         assertEquals(TelephonyManager.DATA_CONNECTING, mApn.mPreciseDcState);
     }
 
@@ -828,8 +828,8 @@ public class ApnTest {
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP.getValue(),
-                IAosRegistration.Pcscf.CURRENT.getValue(), IAosRegistration.Cause.DATA.getValue());
+        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.STOP,
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA);
         assertEquals(TelephonyManager.DATA_DISCONNECTING, mApn.mPreciseDcState);
     }
 

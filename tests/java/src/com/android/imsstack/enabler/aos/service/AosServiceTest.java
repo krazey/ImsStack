@@ -298,9 +298,9 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
 
-        mAosService.controlRegistration(IAosRegistration.RequestType.START.getValue(),
-                IAosRegistration.Pcscf.CURRENT.getValue(),
-                IAosRegistration.Cause.IMS_SERVICE.getValue());
+        mAosService.controlRegistration(IAosRegistration.RequestType.START,
+                IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.Cause.IMS_SERVICE);
 
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
     }

@@ -660,8 +660,8 @@ public class ImsRegistrationTracker {
         }
 
         public void controlRegistration(int reason) {
-            mAosReg.controlRegistration(IAosRegistration.RequestType.STOP.getValue(),
-                    IAosRegistration.Pcscf.CURRENT.getValue(), reason);
+            mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                    IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.of(reason));
         }
 
         @Override

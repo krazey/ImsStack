@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -94,7 +93,7 @@ public interface IAosRegistration {
      * @param pcscfOrder Type of int {@link Pcscf}.
      * @param cause Type of int {@link Cause}.
      */
-    void controlRegistration(int requestType, int pcscfOrder, int cause);
+    void controlRegistration(RequestType requestType, Pcscf pcscfOrder, Cause cause);
 
     /**
      * This method is returns the network type in which the IMS registered.
@@ -213,13 +212,14 @@ public interface IAosRegistration {
          * Returns the Cause enum constant corresponding to the given integer value.
          *
          * @param value The integer value to look up.
-         * @return An Optional containing the Cause enum constant with the given value,
-         *         or an empty Optional if no such constant exists.
+         * @return The Cause enum constant with the given value, or
+         *         {@link #UNKNOWN} if no such constant exists.
          */
-        public static Optional<Cause> fromValue(int value) {
+        public static Cause of(int value) {
             return Arrays.stream(values())
-                    .filter(cause -> cause.mValue == value)
-                    .findFirst();
+                .filter(cause -> cause.mValue == value)
+                .findFirst()
+                .orElse(UNKNOWN);
         }
     }
 
