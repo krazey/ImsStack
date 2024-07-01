@@ -156,7 +156,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT0);
-        AosFactory.getInstance().mAosServices.put(SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceService(SLOT0, mMockAosService);
 
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, mMockUtInterface);
@@ -179,7 +179,7 @@ public class SscServiceStateTest {
         AgentFactory.getInstance().setAgent(WifiInterface.class, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
-        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, null);
 

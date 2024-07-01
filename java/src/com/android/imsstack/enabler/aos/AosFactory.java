@@ -15,41 +15,57 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Factory class to instantiate AoS components.
+ * Factory class for creating and managing AoS (Always On Service).
+ * This class provides a singleton instance for accessing various AoS services
+ * such as {@link AosService}, {@link AosSettingService}, and {@link AosDebug}.
  */
 public class AosFactory {
 
-    private static AosFactory sFactory = null;
+    private static volatile AosFactory sFactory;
 
-    @VisibleForTesting
-    public final Map<Integer, AosService> mAosServices =
-            new HashMap<Integer, AosService>(DeviceConfig.getSupportedSimCount());
-    @VisibleForTesting
-    final Map<Integer, AosSettingService> mAosSettingServices =
-            new HashMap<Integer, AosSettingService>(DeviceConfig.getSupportedSimCount());
-    @VisibleForTesting
-    final Map<Integer, AosDebug> mAosDebugs =
-            new HashMap<Integer, AosDebug>(DeviceConfig.getSupportedSimCount());
+    private final Map<Integer, AosService> mAosServices = new ConcurrentHashMap<>(
+            DeviceConfig.getSupportedSimCount());
+    private final Map<Integer, AosSettingService> mAosSettingServices = new ConcurrentHashMap<>(
+            DeviceConfig.getSupportedSimCount());
+    private final Map<Integer, AosDebug> mAosDebugs =  new ConcurrentHashMap<>(
+            DeviceConfig.getSupportedSimCount());
 
+    private AosFactory() { }
+
+    /**
+     * Returns the singleton instance of AosFactory.
+     *
+     * @return The singleton instance.
+     */
     public static AosFactory getInstance() {
         if (sFactory == null) {
-            sFactory = new AosFactory();
+            synchronized (AosFactory.class) {
+                if (sFactory == null) {
+                    sFactory = new AosFactory();
+                }
+            }
         }
-
         return sFactory;
     }
 
-    public synchronized void init(int slotId) {
+    /**
+     * Initializes AoS services for the given slot ID.
+     *
+     * @param slotId The ID of the SIM slot to initialize services for.
+     */
+    public void init(int slotId) {
         ImsLog.d(slotId, "");
 
         AosService aosService = new AosService();
@@ -67,79 +83,103 @@ public class AosFactory {
         }
     }
 
-    public synchronized void cleanup(int slotId) {
+    /**
+     * Cleans up AoS services for the given slot ID.
+     *
+     * @param slotId The ID of the SIM slot to clean up services for.
+     */
+    public void cleanup(int slotId) {
         ImsLog.d(slotId, "");
 
-        AosDebug aosDebug = mAosDebugs.get(slotId);
+        AosDebug aosDebug = mAosDebugs.remove(slotId);
         if (aosDebug != null) {
             aosDebug.cleanup();
-            mAosDebugs.remove(slotId);
         }
 
-        AosSettingService aosSettingService = mAosSettingServices.get(slotId);
+        AosSettingService aosSettingService = mAosSettingServices.remove(slotId);
         if (aosSettingService != null) {
             aosSettingService.cleanup();
-            mAosSettingServices.remove(slotId);
         }
 
-        AosService aosService = mAosServices.get(slotId);
+        AosService aosService = mAosServices.remove(slotId);
         if (aosService != null) {
             aosService.cleanup();
-            mAosServices.remove(slotId);
         }
     }
 
     /**
-     * Start the AoS service.
+     * Starts the AoS service for the specified slot ID.
      *
-     * @param slotId The slot-id to be started.
+     * @param slotId The slot ID to start the service for.
+     * @throws IllegalStateException If the AosService for the given slot ID is not found.
      */
-    public synchronized void start(int slotId) {
+    public void start(int slotId) {
         AosService aosService = mAosServices.get(slotId);
-        if (aosService != null) {
-            aosService.start();
+        if (aosService == null) {
+            throw new IllegalStateException("AosService not found for slotId: " + slotId);
         }
+        aosService.start();
     }
 
     /**
-     * Stop the AoS service.
+     * Stops the AoS service for the specified slot ID.
      *
-     * @param slotId The slot-id to be stopped.
+     * @param slotId The slot ID to stop the service for.
      */
-    public synchronized void stop(int slotId) {
+    public void stop(int slotId) {
         AosService aosService = mAosServices.get(slotId);
         if (aosService != null) {
             aosService.stop();
+        } else {
+            ImsLog.d(slotId, "AosService not found, cannot stop.");
         }
     }
 
     /**
-     * Returns IAosRegistration.
+     * Returns the {@link IAosRegistration} interface for the specified slot ID.
      *
-     * @param slotId The slot-id
-     * @return Returns the interface of AosService.
+     * @param slotId The slot ID to get the registration interface for.
+     * @return The {@link IAosRegistration} interface associated with the slot ID, or
+     *         {@code null} if not found.
      */
-    public synchronized IAosRegistration getAosRegistration(int slotId) {
+    @Nullable
+    public IAosRegistration getAosRegistration(int slotId) {
         return mAosServices.get(slotId);
     }
 
     /**
-     * Returns IAosInfo.
+     * Returns the {@link IAosInfo} interface for the specified slot ID.
      *
-     * @param slotId The slot-id
-     * @return Returns the interface of AosService.
+     * @param slotId The slot ID to get the AoS information for.
+     * @return The {@link IAosInfo} interface associated with the slot ID, or
+     *         {@code null} if not found.
      */
-    public synchronized IAosInfo getAosInfo(int slotId) {
+    @Nullable
+    public IAosInfo getAosInfo(int slotId) {
         return mAosServices.get(slotId);
     }
 
     /**
-     * Returns IAosDebug.
+     * Returns the {@link AosSettingService} instance for the specified slot ID.
      *
-     * @param slotId The slot-id
-     * @return Returns the interface of AosDebug.
+     * @param slotId The slot ID to get the setting service for.
+     * @return The {@link AosSettingService} instance associated with the slot ID, or
+     *         {@code null} if not found.
      */
-    public synchronized IAosDebug getAosDebug(int slotId) {
+    @Nullable
+    public AosSettingService getAosSettingService(int slotId) {
+        return mAosSettingServices.get(slotId);
+    }
+
+    /**
+     * Returns the {@link IAosDebug} interface for the specified slot ID.
+     *
+     * @param slotId The slot ID to get the debug interface for.
+     * @return The {@link IAosDebug} interface associated with the slot ID, or
+     *         {@code null} if not found.
+     */
+    @Nullable
+    public IAosDebug getAosDebug(int slotId) {
         return mAosDebugs.get(slotId);
     }
 
@@ -152,5 +192,51 @@ public class AosFactory {
     private static boolean isDebugScreenEnabled(int slotId) {
         return ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, false, slotId);
+    }
+
+    /**
+     * Replaces or removes the {@link AosService} associated with the given slot ID.
+     *
+     * @param slotId The slot ID to update.
+     * @param service The new {@link AosService} instance, or null to remove the existing service.
+     */
+    @VisibleForTesting
+    public void replaceService(int slotId, AosService service) {
+        if (service != null) {
+            mAosServices.put(slotId, service);
+        } else {
+            mAosServices.remove(slotId);
+        }
+    }
+
+    /**
+     * Replaces or removes the {@link AosSettingService} associated with the given slot ID.
+     *
+     * @param slotId The slot ID to update.
+     * @param settingService The new {@link AosSettingService} instance, or null to remove
+     *                       the existing service.
+     */
+    @VisibleForTesting
+    public void replaceSettingService(int slotId, AosSettingService settingService) {
+        if (settingService != null) {
+            mAosSettingServices.put(slotId, settingService);
+        } else {
+            mAosSettingServices.remove(slotId);
+        }
+    }
+
+    /**
+     * Replaces or removes the {@link AosDebug} associated with the given slot ID.
+     *
+     * @param slotId The slot ID to update.
+     * @param debug The new {@link AosDebug} instance, or null to remove the existing debug.
+     */
+    @VisibleForTesting
+    public void replaceDebug(int slotId, AosDebug debug) {
+        if (debug != null) {
+            mAosDebugs.put(slotId, debug);
+        } else {
+            mAosDebugs.remove(slotId);
+        }
     }
 }

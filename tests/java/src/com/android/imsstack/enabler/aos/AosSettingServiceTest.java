@@ -94,7 +94,7 @@ public class AosSettingServiceTest {
         mAosSettingService.cleanup();
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }
@@ -128,7 +128,7 @@ public class AosSettingServiceTest {
     @Test
     public void nativeStateListener_onNativeServiceReady() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
         ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
         verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
@@ -142,7 +142,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateNotChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
 
         Message msg = Message.obtain(mAosSettingService.mHandler,
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, false);
@@ -154,8 +154,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
-
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
         Message msg = Message.obtain(mAosSettingService.mHandler,
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, true);
         mAosSettingService.mHandler.handleMessage(msg);
@@ -166,8 +165,7 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_shutDown() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mockAosService);
-
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
         Message msg = Message.obtain(mAosSettingService.mHandler, AosSettingService.EVENT_SHUTDOWN);
         mAosSettingService.mHandler.handleMessage(msg);
 
