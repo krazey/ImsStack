@@ -56,6 +56,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                        \
+    using Base::SetState;                          \
+    using Base::GetState;                          \
     using Base::RemoveBlock;                       \
     using Base::SetSuspendedReason;                \
     using Base::SetHandleState;                    \
@@ -169,7 +171,7 @@ public:
     inline void SetAosInfo(IN IImsAosInfo* piAosInfo) { m_piInfo = piAosInfo; }
     inline void SetNetSrvIn(IN IMS_BOOL bNetSrvIn) { m_bNetSrvIn = bNetSrvIn; }
     inline IMS_BOOL GetNetSrvIn() { return m_bNetSrvIn; }
-    inline IImsAosInfo* GetAosInfo() { return m_piInfo; }
+    inline IImsAosInfo* GetAosInfo() override { return m_piInfo; }
     inline IMS_UINT32 GetReason() { return m_nReason; }
     inline void SetEpdgEnabled(IN IMS_BOOL bEnabled) { m_bEpdgEnabled = bEnabled; }
 
@@ -251,7 +253,7 @@ public:
         RestoreBlocks(m_objHoldingBlocksPolicyForWifi, m_nHoldingBlocksForWifi);
     }
 
-    inline IMS_BOOL IsBlocked() const { return m_bBlocked; }
+    inline IMS_BOOL IsBlocked() const override { return m_bBlocked; }
 
     IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const
     {
@@ -279,10 +281,6 @@ public:
     inline IMS_BOOL IsCsVoiceAvailable() { return m_bCsVoiceAvailable; }
 
     void AddBlock(IN IMS_UINT32 nBlock) { AddBlock(nBlock, m_nBlocks); }
-
-public:
-    void SetState(IN IMS_UINT32 nState) { AosHandle::SetState(nState); }
-    IMS_UINT32 GetState() { return AosHandle::GetState(); }
 };
 
 class AosHandleTest : public ::testing::Test
