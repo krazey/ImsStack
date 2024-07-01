@@ -89,8 +89,8 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
         return MEDIA_TYPE_INVALID;
     }
 
-    return (objOaModel.pNegotiatedProfile->lstPayload.GetSize() > 0 &&
-                   objOaModel.pNegotiatedProfile->nDataPort != 0)
+    return (objOaModel.pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
+                   objOaModel.pNegotiatedProfile->GetDataPort() != 0)
             ? IMS_TRUE
             : IMS_FALSE;
 }
@@ -191,7 +191,7 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
         IMS_TRACE_D("FormAnswer() - text session is not supported", 0, 0, 0);
 
         // copy the dest profile as nego profile
-        if (pNewOaModel->pPeerProfile->lstPayload.GetSize() > 0)
+        if (pNewOaModel->pPeerProfile->GetPayloadList().GetSize() > 0)
         {
             IMS_TRACE_D("FormAnswer() - use peer profile", 0, 0, 0);
             *pNewOaModel->pNegotiatedProfile = *GetPeerProfile(pNewOaModel);
@@ -201,14 +201,14 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
             // in case of no payload can be answer if there is no payload from dest profile
             // it is a very exceptional case - received offer should have payloads
             // use previous payload contained profile
-            if (pNewOaModel->pLocalProfile->lstPayload.GetSize() == 0)
+            if (pNewOaModel->pLocalProfile->GetPayloadList().GetSize() == 0)
             {
                 OaModel* pPrevOaModel = IMS_NULL;
                 pPrevOaModel = GetNegotiatedOaModel();  // get negotiated OA model which is previous
                                                         // nego result
 
                 if (pPrevOaModel != NULL &&
-                        pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() > 0)
+                        pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() > 0)
                 {
                     IMS_TRACE_D("FormAnswer() use previous nego payloads", 0, 0, 0);
                     *pNewOaModel->pNegotiatedProfile = *GetNegotiatedProfile(pPrevOaModel);
@@ -226,20 +226,20 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
             }
         }
 
-        pNewOaModel->pNegotiatedProfile->objIpAddress = pSessionDescriptor->GetLocalAddress();
-        pNewOaModel->pNegotiatedProfile->nBandwidthAs = 0;
-        pNewOaModel->pNegotiatedProfile->nBandwidthRs = 0;
-        pNewOaModel->pNegotiatedProfile->nBandwidthRr = 0;
-        pNewOaModel->pNegotiatedProfile->nDataPort = 0;
-        pNewOaModel->pNegotiatedProfile->nControlPort = 0;
-        pNewOaModel->pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+        pNewOaModel->pNegotiatedProfile->SetIpAddress(pSessionDescriptor->GetLocalAddress());
+        pNewOaModel->pNegotiatedProfile->SetBandwidthAs(0);
+        pNewOaModel->pNegotiatedProfile->SetBandwidthRs(0);
+        pNewOaModel->pNegotiatedProfile->SetBandwidthRr(0);
+        pNewOaModel->pNegotiatedProfile->SetDataPort(0);
+        pNewOaModel->pNegotiatedProfile->SetControlPort(0);
+        pNewOaModel->pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
     }
 
     // Modify a direction
     if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         IMS_TRACE_D("FormAnswer() - set direction[%d]", eDir, 0, 0);
-        pNewOaModel->pNegotiatedProfile->eDirection = eDir;
+        pNewOaModel->pNegotiatedProfile->SetDirection(eDir);
     }
 
     // Make the SDP from profile
@@ -298,7 +298,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             return IMS_FALSE;
         }
 
-        if (pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0 ||
+        if (pPrevOaModel->pNegotiatedProfile->GetPayloadList().GetSize() == 0 ||
                 bEnforceReofferMode == IMS_TRUE)
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
@@ -311,7 +311,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         {
             if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
             {
-                if (m_pBaseProfile->lstPayload.GetSize() > 0)
+                if (m_pBaseProfile->GetPayloadList().GetSize() > 0)
                 {
                     IMS_TRACE_I("FormReoffer() - Fullcapability", 0, 0, 0);
                     pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
@@ -344,36 +344,36 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->eDirection = eDir;
+        pNewOaModel->pLocalProfile->SetDirection(eDir);
     }
 
     // Modify a Rtp/RTCP port if text is not supported
     // TODO : change "bDisable" naming to be more clear
     if (bDisable)
     {
-        pNewOaModel->pLocalProfile->nDataPort = 0;
-        pNewOaModel->pLocalProfile->nControlPort = 0;
-        pNewOaModel->pLocalProfile->nBandwidthAs = 0;
-        pNewOaModel->pLocalProfile->nBandwidthRs = 0;
-        pNewOaModel->pLocalProfile->nBandwidthRr = 0;
+        pNewOaModel->pLocalProfile->SetDataPort(0);
+        pNewOaModel->pLocalProfile->SetControlPort(0);
+        pNewOaModel->pLocalProfile->SetBandwidthAs(0);
+        pNewOaModel->pLocalProfile->SetBandwidthRs(0);
+        pNewOaModel->pLocalProfile->SetBandwidthRr(0);
     }
     else
     {
-        pNewOaModel->pLocalProfile->nDataPort = m_pBaseProfile->nDataPort;
-        pNewOaModel->pLocalProfile->nControlPort = m_pBaseProfile->nControlPort;
+        pNewOaModel->pLocalProfile->SetDataPort(m_pBaseProfile->GetDataPort());
+        pNewOaModel->pLocalProfile->SetControlPort(m_pBaseProfile->GetControlPort());
 
         if (bIsFullCapability)
         {
             // set default AS value when srcProfile AS value is 0 in ReOffer case
-            if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+            if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
             {
                 IMS_TRACE_I("FormReoffer() LocalProfile AS value is 0, change to default AS value",
                         0, 0, 0);
-                pNewOaModel->pLocalProfile->nBandwidthAs = m_pBaseProfile->nBandwidthAs;
+                pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
             }
 
-            pNewOaModel->pLocalProfile->nBandwidthRs = m_pConfig->GetRsBandwidthBps();
-            pNewOaModel->pLocalProfile->nBandwidthRr = m_pConfig->GetRrBandwidthBps();
+            pNewOaModel->pLocalProfile->SetBandwidthRs(m_pConfig->GetRsBandwidthBps());
+            pNewOaModel->pLocalProfile->SetBandwidthRr(m_pConfig->GetRrBandwidthBps());
         }
     }
 
@@ -425,7 +425,7 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
     m_listOaModel.Append(pNewOaModel);
 
     // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
+    return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
@@ -483,7 +483,7 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
 
     // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
+    return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
 PROTECTED
@@ -503,18 +503,18 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // Make "c" & "o" line of session level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddress))
+    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
     {
         IMS_TRACE_D("MakeSdpFromProfile() - Ip is not matched, SessionIP[%s], ProfileIP[%s]",
                 pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->objIpAddress.ToCharString(), 0);
+                pProfile->GetIpAddress().ToCharString(), 0);
 
-        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddress.ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddress.ToString());
+        pSessionDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
+        pSessionDescriptor->SetOriginAddress(pProfile->GetIpAddress().ToString());
     }
 
     // Check and delete "red" type which contains invalid sub payload type
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
@@ -538,7 +538,7 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
             IMS_BOOL bRedSubPTExist = IMS_FALSE;
 
-            for (IMS_UINT32 j = 0; j < pProfile->lstPayload.GetSize(); j++)
+            for (IMS_UINT32 j = 0; j < pProfile->GetPayloadList().GetSize(); j++)
             {
                 TextProfile::Payload* pTempPayload = pProfile->GetPayloadAt(j);
 
@@ -565,21 +565,21 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                         "Payload, Payload[%s], PT[%d]",
                         pPayload->GetRtpMap().GetPayloadType().GetStr(),
                         pPayload->GetRtpMap().GetPayloadNumber(), 0);
-                pProfile->lstPayload.RemoveAt(i);
+                pProfile->GetPayloadList().RemoveAt(i);
                 delete pPayload;
             }
         }
     }
 
     IMS_TRACE_I("MakeSdpFromProfile() - After Check Validity, PayloadSize[%d]",
-            pProfile->lstPayload.GetSize(), 0, 0);
+            pProfile->GetPayloadList().GetSize(), 0, 0);
 
     // Make "m" line
     // ------ "m=text xxxx Rtp/AVP 100 98"
     AStringArray objTextFormat;
     AString strPayloadNum;
 
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
@@ -592,25 +592,25 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
         objTextFormat.AddElement(strPayloadNum);
     }
 
-    pDescriptor->SetMediaDescription(
-            SdpMedia::TYPE_TEXT, pProfile->nDataPort, SdpMedia::TRANSPORT_RTP_AVP, objTextFormat);
+    pDescriptor->SetMediaDescription(SdpMedia::TYPE_TEXT, pProfile->GetDataPort(),
+            SdpMedia::TRANSPORT_RTP_AVP, objTextFormat);
 
     // Make bandwidth
     // ------ "b=AS:xx"
     // ------ "b=AS:xx"
     // ------ "b=AS:xx"
-    if (pProfile->nBandwidthAs > 0)
+    if (pProfile->GetBandwidthAs() > 0)
     {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->nBandwidthAs);
+        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
 
-        if (pProfile->nBandwidthRs >= 0)
+        if (pProfile->GetBandwidthRs() >= 0)
         {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->nBandwidthRs);
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
         }
 
-        if (pProfile->nBandwidthRr >= 0)
+        if (pProfile->GetBandwidthRr() >= 0)
         {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->nBandwidthRr);
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
         }
     }
 
@@ -619,7 +619,7 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     // ------ "a=rtpmap:112 red/1000
     // ------ "a=fmtp:112 111/111/111"
     // ------ "a=rtpmap:111 t140/1000
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         AString strRtpmap, strFmtp;
         TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
@@ -672,8 +672,9 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     }
 
     // Make direction
-    pDescriptor->SetDirection(pProfile->eDirection);
-    IMS_TRACE_I("MakeSdpFromProfile() - payloadSize[%d]", pProfile->lstPayload.GetSize(), 0, 0);
+    pDescriptor->SetDirection(pProfile->GetDirection());
+    IMS_TRACE_I(
+            "MakeSdpFromProfile() - payloadSize[%d]", pProfile->GetPayloadList().GetSize(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -688,26 +689,26 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
     }
 
     // IP
-    pProfile->objIpAddress = pDescriptor->GetRemoteAddress();
+    pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
 
     // data & control port
-    pProfile->nDataPort = pDescriptor->GetRemotePort();
+    pProfile->SetDataPort(pDescriptor->GetRemotePort());
     if (pDescriptor->GetAttributeInt(SdpAttribute::RTCP) == IMediaDescriptor::INVALID_VALUE)
     {
-        pProfile->nControlPort = pProfile->nDataPort + 1;
+        pProfile->SetControlPort(pProfile->GetDataPort() + 1);
     }
     else
     {
-        pProfile->nControlPort = pDescriptor->GetAttributeInt(SdpAttribute::RTCP);
+        pProfile->SetControlPort(pDescriptor->GetAttributeInt(SdpAttribute::RTCP));
     }
 
     // bandwidth
-    pProfile->nBandwidthAs = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS);
-    pProfile->nBandwidthRs = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS);
-    pProfile->nBandwidthRr = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR);
+    pProfile->SetBandwidthAs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS));
+    pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
+    pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
 
-    IMS_TRACE_I("MakeProfileFromSDP() - AS[%d], RS[%d], RR[%d]", pProfile->nBandwidthAs,
-            pProfile->nBandwidthRs, pProfile->nBandwidthRr);
+    IMS_TRACE_I("MakeProfileFromSDP() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
+            pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
 
     // payload
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
@@ -785,18 +786,18 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
             continue;
         }
 
-        pProfile->lstPayload.Append(pPayload);
+        pProfile->GetPayloadList().Append(pPayload);
     }
 
     // direction
-    pProfile->eDirection = (MEDIA_DIRECTION)pDescriptor->GetDirection();
-    if (pProfile->eDirection == MEDIA_DIRECTION_INVALID)
+    pProfile->SetDirection((MEDIA_DIRECTION)pDescriptor->GetDirection());
+    if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
     {
         IMS_TRACE_D("MakeProfileFromSDP() - Text Media level Direction does not exist..", 0, 0, 0);
         // check session level attribute Direction
-        pProfile->eDirection = (MEDIA_DIRECTION)pSessionDescriptor->GetDirection();
-        if (pProfile->eDirection == MEDIA_DIRECTION_INVALID)
-            pProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+        pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
+        if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
+            pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     }
 
     IMS_TRACE_I("MakeProfileFromSDP() - Ended[%d]", 0, 0, 0);
@@ -816,27 +817,28 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Setting IP of mine
-    pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
+    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
 
     IMS_TRACE_D("MakeNegotiatedProfile() - local address[%s] PeerPayloadSize[%d]",
-            pLocalProfile->objIpAddress.ToCharString(), pPeerProfile->lstPayload.GetSize(), 0);
+            pLocalProfile->GetIpAddress().ToCharString(), pPeerProfile->GetPayloadList().GetSize(),
+            0);
 
     // Setting Rtp/RTCP port of mine
-    pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
-    pNegotiatedProfile->nControlPort = pLocalProfile->nControlPort;
+    pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
+    pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
 
-    if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
+    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
     {
-        *pNegotiatedProfile = (pPeerProfile->lstPayload.GetSize() > 0)
+        *pNegotiatedProfile = (pPeerProfile->GetPayloadList().GetSize() > 0)
                 ? *ProfileCasting(pPeerProfile)
                 : *ProfileCasting(pLocalProfile);
 
-        pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
-        pNegotiatedProfile->nDataPort = 0;
+        pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
+        pNegotiatedProfile->SetDataPort(0);
 
         IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the text[%d][%d],\
                 But nego is successful",
-                pNegotiatedProfile->nDataPort, pPeerProfile->nDataPort, 0);
+                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort(), 0);
         return IMS_TRUE;
     }
 
@@ -847,7 +849,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Compare each payload based destination's profile
-    for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
         TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
 
@@ -870,36 +872,36 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
                             *static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp())));
                 }
 
-                pNegotiatedProfile->lstPayload.Append(pT140);
+                pNegotiatedProfile->GetPayloadList().Append(pT140);
             }
         }
     }
 
     IMS_BOOL bRet = IMS_FALSE;
 
-    if (pNegotiatedProfile->lstPayload.GetSize() > 0)
+    if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
     {
         // Setting direction
-        if (pNegotiatedProfile->nDataPort != 0 && pPeerProfile->nDataPort != 0)
+        if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
         {
-            pNegotiatedProfile->eDirection = UpdateDirectionToMine(
-                    pPeerProfile->eDirection, pLocalProfile->eDirection, bIsOfferReceived);
+            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
+                    pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
         }
         else
         {
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
         }
 
         pNegotiatedProfile->bIsHold =
-                (pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
-                                                                                 : IMS_FALSE;
+                (pNegotiatedProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
+                                                                                     : IMS_FALSE;
         TextProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
                 pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
         bRet = IMS_TRUE;
     }
     else
     {
-        if (pLocalProfile->lstPayload.GetSize() > 0)
+        if (pLocalProfile->GetPayloadList().GetSize() > 0)
         {
             IMS_TRACE_D("MakeNegotiatedProfile() - no negotiated payload. use the LocalProfile and "
                         "make port 0 ",
@@ -912,27 +914,27 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
             IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
         }
 
-        pNegotiatedProfile->nDataPort = 0;
-        pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+        pNegotiatedProfile->SetDataPort(0);
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
     }
 
-    IMS_TRACE_D("MakeNegotiatedProfile() - eDirection=%d, nego rs=%d, rr=%d",
-            pNegotiatedProfile->eDirection, pNegotiatedProfile->nBandwidthRs,
-            pNegotiatedProfile->nBandwidthRr);
+    IMS_TRACE_D("MakeNegotiatedProfile() - Direction=%d, nego rs=%d, rr=%d",
+            pNegotiatedProfile->GetDirection(), pNegotiatedProfile->GetBandwidthRs(),
+            pNegotiatedProfile->GetBandwidthRr());
 
-    if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
+    if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
     {
-        pNegotiatedProfile->nRtcpInterval = 0;
+        pNegotiatedProfile->SetRtcpInterval(0);
         IMS_TRACE_D("MakeNegotiatedProfile() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
     }
     else
     {
-        pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpInterval();
+        pNegotiatedProfile->SetRtcpInterval(m_pConfig->GetRtcpInterval());
     }
 
     IMS_TRACE_D("MakeNegotiatedProfile() - negotiated payload size[%d], port[%d], direction[%d], ",
-            pNegotiatedProfile->lstPayload.GetSize(), pNegotiatedProfile->nDataPort,
-            pNegotiatedProfile->eDirection);
+            pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
+            pNegotiatedProfile->GetDirection());
     return bRet;
 }
 
@@ -974,7 +976,7 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
         return IMS_FALSE;
 
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         TextProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
 

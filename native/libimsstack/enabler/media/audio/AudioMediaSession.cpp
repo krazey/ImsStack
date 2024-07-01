@@ -169,7 +169,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         return IMS_FALSE;
     }
 
-    if (pNegoProfile->lstPayload.GetSize() == 0 || pPeerProfile->lstPayload.GetSize() == 0)
+    if (pNegoProfile->GetPayloadList().GetSize() == 0 ||
+            pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         IMS_TRACE_E(0, "UpdateRtpConfig() - no payload to update", 0, 0, 0);
         return IMS_FALSE;
@@ -180,17 +181,18 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioProfile::Payload* pNegoPayload;
 
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
+            pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
+            0);
 
     pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
-    if (pPeerProfile->nNegotiatedPayloadIndex < 0)
+    if (pPeerProfile->GetNegotiatedPayloadIndex() < 0)
     {
         pPeerPayload = pPeerProfile->GetPayloadAt(0);
     }
     else
     {
-        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->nNegotiatedPayloadIndex);
+        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->GetNegotiatedPayloadIndex());
     }
 
     if (pNegoPayload == IMS_NULL || pPeerPayload == IMS_NULL)
@@ -201,21 +203,21 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioConfig objAudioConfig;
 
     // Setting the network properties
-    SetLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
+    SetLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     objAudioConfig.setAccessNetwork(nAccessNetwork);
     objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
 
     // remote network parameters
     objAudioConfig.setRemoteAddress(
-            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
-    objAudioConfig.setRemotePort(pPeerProfile->nDataPort);
+            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
+    objAudioConfig.setRemotePort(pPeerProfile->GetDataPort());
     objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
 
     objAudioConfig.setRxPayloadTypeNumber(pPeerPayload->GetRtpMap().GetPayloadNumber());
 
     IMS_SINT32 nAudioDirection;
 
-    switch (pNegoProfile->eDirection)
+    switch (pNegoProfile->GetDirection())
     {
         case MEDIA_DIRECTION_RECEIVE:
             nAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
@@ -245,15 +247,15 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     // RTCP
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
-    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
-    if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
+    if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
     {
         objRtcpConfig.setIntervalSec(0);
     }
     else
     {
-        objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+        objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     }
 
     // RTCP-XR
@@ -309,10 +311,10 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         // AMR DTX on/off by source codec
         objAudioConfig.setDtxEnabled(IMS_FALSE);
 
-        if (pLocalProfile->nNegotiatedPayloadIndex >= 0)
+        if (pLocalProfile->GetNegotiatedPayloadIndex() >= 0)
         {
             AudioProfile::Payload* pLocalPayload =
-                    pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+                    pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
 
             if (pLocalPayload != IMS_NULL && pLocalPayload->GetFmtp() != IMS_NULL)
             {
@@ -420,7 +422,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
             objAudioConfig.getDtxEnabled());
 
     // Setting the DTMF properties
-    for (IMS_UINT32 i = 0; i < pNegoProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pNegoProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(i);
 

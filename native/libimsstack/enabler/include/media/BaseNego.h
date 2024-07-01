@@ -115,7 +115,7 @@ public:
      */
     virtual const IpAddress& GetLocalAddress()
     {
-        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->objIpAddress : IpAddress::NONE;
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->GetIpAddress() : IpAddress::NONE;
     }
 
     /**
@@ -125,7 +125,7 @@ public:
      */
     virtual IMS_UINT32 GetLocalPort()
     {
-        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->nDataPort : 0;
+        return (m_pBaseProfile != IMS_NULL) ? m_pBaseProfile->GetDataPort() : 0;
     };
 
     /**

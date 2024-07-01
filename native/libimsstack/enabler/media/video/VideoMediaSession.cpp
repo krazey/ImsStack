@@ -75,8 +75,9 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         return IMS_FALSE;
     }
 
-    if (pLocalProfile->lstPayload.GetSize() == 0 || pNegoProfile->lstPayload.GetSize() == 0 ||
-            pPeerProfile->lstPayload.GetSize() == 0)
+    if (pLocalProfile->GetPayloadList().GetSize() == 0 ||
+            pNegoProfile->GetPayloadList().GetSize() == 0 ||
+            pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         return IMS_FALSE;
     }
@@ -85,15 +86,16 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     VideoProfile::Payload* pNegoPayload;
 
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nPeerPayloadIndex[%d], nLocalPayloadIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
+            pPeerProfile->GetNegotiatedPayloadIndex(), pLocalProfile->GetNegotiatedPayloadIndex(),
+            0);
 
-    if (pLocalProfile->nNegotiatedPayloadIndex < 0)
+    if (pLocalProfile->GetNegotiatedPayloadIndex() < 0)
     {
         pLocalPayload = pLocalProfile->GetPayloadAt(0);
     }
     else
     {
-        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
     }
 
     pNegoPayload = pNegoProfile->GetPayloadAt(0);
@@ -106,13 +108,13 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
     // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
+    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     pVideoConfig->setTxPayloadTypeNumber(pLocalPayload->GetRtpMap().GetPayloadNumber());
     pVideoConfig->setRxPayloadTypeNumber(pNegoPayload->GetRtpMap().GetPayloadNumber());
     // remote network parameters
     pVideoConfig->setRemoteAddress(
-            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
-    pVideoConfig->setRemotePort(pPeerProfile->nDataPort);
+            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
+    pVideoConfig->setRemotePort(pPeerProfile->GetDataPort());
     pVideoConfig->setDscp(m_pConfig->GetVideoDscp());
     pVideoConfig->setMaxMtuBytes(1500);
 
@@ -130,13 +132,13 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     IMS_SINT32 nVideoDirection;
 
-    if (pNegoProfile->nDataPort == 0 || pLocalProfile->nDataPort == 0)
+    if (pNegoProfile->GetDataPort() == 0 || pLocalProfile->GetDataPort() == 0)
     {
         nVideoDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }
     else
     {
-        switch (pNegoProfile->eDirection)
+        switch (pNegoProfile->GetDirection())
         {
             case MEDIA_DIRECTION_RECEIVE:
                 nVideoDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
@@ -168,15 +170,15 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));
-    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
 
-    if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
+    if (pNegoProfile->GetBandwidthRs() == 0 && pNegoProfile->GetBandwidthRr() == 0)
     {
         objRtcpConfig.setIntervalSec(0);
     }
     else
     {
-        objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+        objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     }
 
     objRtcpConfig.setRtcpXrBlockTypes(0);

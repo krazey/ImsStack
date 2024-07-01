@@ -59,7 +59,7 @@ protected:
         AudioProfile::Payload* pSrcAmrPayload = new AudioProfile::Payload();
         pSrcAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
         pSrcAmrPayload->SetFmtp(new AudioProfile::AmrFmtp());
-        m_pLocalProfile->lstPayload.Append(pSrcAmrPayload);
+        m_pLocalProfile->GetPayloadList().Append(pSrcAmrPayload);
 
         m_pPeerProfile = new AudioProfile(*m_pLocalProfile);
         m_pNegoProfile = new AudioProfile(*m_pLocalProfile);

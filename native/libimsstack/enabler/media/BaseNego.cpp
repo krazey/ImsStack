@@ -41,7 +41,7 @@ PUBLIC VIRTUAL BaseNego::~BaseNego()
 
     if (m_pBaseProfile != IMS_NULL)
     {
-        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
         m_pBaseProfile->DeletePayloads();
     }
 
@@ -60,9 +60,9 @@ PUBLIC VIRTUAL void BaseNego::CreateProfiles(IN MediaEnvironment* pEnvironment,
         return;
     }
 
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->GetDataPort() != 0)
     {
-        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
     delete m_pBaseProfile;
 
@@ -183,24 +183,14 @@ PUBLIC const IpAddress& BaseNego::GetNegotiatedRemoteAddress()
 {
     MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->objIpAddress;
-    }
-
-    return IpAddress::NONE;
+    return (pProfile != IMS_NULL) ? pProfile->GetIpAddress() : IpAddress::NONE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
 {
     MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
-    if (pProfile != IMS_NULL)
-    {
-        return pProfile->nDataPort;
-    }
-
-    return MEDIA_PORT_INVALID;
+    return (pProfile != IMS_NULL) ? pProfile->GetDataPort() : MEDIA_PORT_INVALID;
 }
 
 PUBLIC VIRTUAL MediaBaseProfile* BaseNego::GetNegotiatedLocalProfile()
@@ -254,7 +244,7 @@ MEDIA_DIRECTION BaseNego::GetNegotiatedDirection()
 
         if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)
         {
-            return pLatestOaModel->pNegotiatedProfile->eDirection;
+            return pLatestOaModel->pNegotiatedProfile->GetDirection();
         }
     }
     return MEDIA_DIRECTION_INVALID;
@@ -275,9 +265,9 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedRtpPort()
         }
 
         IMS_TRACE_I("GetNegotiatedRtpPort() - Previous negotiated port[%d] found",
-                pLatestOaModel->pNegotiatedProfile->nDataPort, 0, 0);
+                pLatestOaModel->pNegotiatedProfile->GetDataPort(), 0, 0);
 
-        return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->nDataPort;
+        return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->GetDataPort();
     }
 
     return PORT_NONE;
@@ -295,8 +285,8 @@ PUBLIC IMS_SINT32 BaseNego::GetNegotiatedBandwidth()
         }
 
         return (GetNegotiatedProfile(pLatestOaModel) != IMS_NULL)
-                ? (IMS_SINT32)GetNegotiatedProfile(pLatestOaModel)->nBandwidthAs
-                : (IMS_SINT32)GetLocalProfile(pLatestOaModel)->nBandwidthAs;
+                ? (IMS_SINT32)GetNegotiatedProfile(pLatestOaModel)->GetBandwidthAs()
+                : (IMS_SINT32)GetLocalProfile(pLatestOaModel)->GetBandwidthAs();
     }
 
     return -1;
@@ -315,13 +305,13 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
 
         MediaBaseProfile* pProfile = GetNegotiatedProfile(pLatestOaModel);
 
-        if (pProfile->nDataPort == 0 || pProfile->lstPayload.GetSize() == 0)
+        if (pProfile->GetDataPort() == 0 || pProfile->GetPayloadList().GetSize() == 0)
         {
             return IMS_NULL;
         }
 
-        return (pProfile->nNegotiatedPayloadIndex > 0)
-                ? pProfile->GetPayloadAt(pProfile->nNegotiatedPayloadIndex)
+        return (pProfile->GetNegotiatedPayloadIndex() > 0)
+                ? pProfile->GetPayloadAt(pProfile->GetNegotiatedPayloadIndex())
                 : pProfile->GetPayloadAt(0);
     }
 
@@ -374,19 +364,19 @@ PUBLIC IMS_BOOL BaseNego::SetPort(IN IMS_UINT32 nPort)
         return IMS_FALSE;
     }
 
-    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
 
-    IMS_TRACE_I("SetPort() - Changed Data Port[%d]->[%d]", m_pBaseProfile->nDataPort, nPort, 0);
+    IMS_TRACE_I("SetPort() - Changed Data Port[%d]->[%d]", m_pBaseProfile->GetDataPort(), nPort, 0);
 
     if (nPort != 0)
     {
-        m_pBaseProfile->nDataPort = MediaNegoUtil::AcquireRtpPort(GetSlotId(), nPort);
-        m_pBaseProfile->nControlPort = m_pBaseProfile->nDataPort + 1;
+        m_pBaseProfile->SetDataPort(MediaNegoUtil::AcquireRtpPort(GetSlotId(), nPort));
+        m_pBaseProfile->SetControlPort(m_pBaseProfile->GetDataPort() + 1);
     }
     else
     {
-        m_pBaseProfile->nDataPort = 0;
-        m_pBaseProfile->nControlPort = 0;
+        m_pBaseProfile->SetDataPort(0);
+        m_pBaseProfile->SetControlPort(0);
 
         IMS_TRACE_I("SetPort() - Data Port is 0!!!", 0, 0, 0);
     }
@@ -420,16 +410,16 @@ void BaseNego::Copy(IN const BaseNego* pNego)
 
     if (m_pBaseProfile != IMS_NULL)
     {
-        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+        MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
         delete m_pBaseProfile;
     }
 
     m_pBaseProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pNego->m_pBaseProfile);
 
-    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->GetDataPort() != 0)
     {
-        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->GetDataPort());
     }
 
     m_pEnvironment = pNego->m_pEnvironment;
@@ -483,13 +473,13 @@ IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     if (IS_VALID_MEDIA_DIRECTION(eDir))
     {
         IMS_TRACE_I("FormOffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->eDirection = eDir;
+        pNewOaModel->pLocalProfile->SetDirection(eDir);
     }
 
     if (bDisable == IMS_TRUE)
     {
-        pNewOaModel->pLocalProfile->nDataPort = 0;
-        pNewOaModel->pLocalProfile->nControlPort = 0;
+        pNewOaModel->pLocalProfile->SetDataPort(0);
+        pNewOaModel->pLocalProfile->SetControlPort(0);
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
