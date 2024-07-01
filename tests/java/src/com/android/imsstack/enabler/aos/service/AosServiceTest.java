@@ -340,7 +340,7 @@ public class AosServiceTest extends ImsStackTest {
     public void notifyRoamingPreferredVoiceNetwork() {
         byte[] preferredVoiceNetworkData = createBytes(
                 IIAosService.J2N_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK,
-                RoamingPreferredVoiceNetwork.CELLULAR);
+                RoamingPreferredVoiceNetwork.CELLULAR.getValue());
 
         mAosService.notifyRoamingPreferredVoiceNetwork(RoamingPreferredVoiceNetwork.CELLULAR);
 
@@ -351,7 +351,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyServiceSetting() {
         byte[] serviceSettingData = createBytes(IIAosService.J2N_NOTIFY_SERVICE_SETTING,
-                ServiceSetting.ON, FeatureTagMask.MMTEL);
+                ServiceSetting.ON.getValue(), FeatureTagMask.MMTEL);
 
         mAosService.notifyServiceSetting(ServiceSetting.ON, FeatureTagMask.MMTEL);
 
@@ -441,7 +441,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyPhoneNumberState() {
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 1,
-                PhoneNumberState.SIM_LOADED);
+                PhoneNumberState.SIM_LOADED.getValue());
 
         mAosService.notifyPhoneNumberState(true, PhoneNumberState.SIM_LOADED);
 
@@ -563,7 +563,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onSimStateChanged_simLoaded() {
         byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
-                PhoneNumberState.SIM_LOADED);
+                PhoneNumberState.SIM_LOADED.getValue());
         when(mMockSimInterface.isSimLoaded()).thenReturn(true);
 
         mAosService.onSimStateChanged();
@@ -694,7 +694,7 @@ public class AosServiceTest extends ImsStackTest {
         listener.onLastKnownCountryUpdated();
 
         byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
-                LocationInfo.COUNTRY_CHANGED);
+                LocationInfo.COUNTRY_CHANGED.getValue());
         verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
     }
 
@@ -708,7 +708,7 @@ public class AosServiceTest extends ImsStackTest {
         listener.onInstantRequestedLocationUpdated();
 
         byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
-                LocationInfo.FIXED);
+                LocationInfo.FIXED.getValue());
         verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
     }
 
@@ -853,7 +853,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistration.Pcscf.CURRENT.getValue(),
                 IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
-                PhoneNumberState.SIM_LOADED);
+                PhoneNumberState.SIM_LOADED.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
                 Sim.ISIM_STATE_LOADED);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);

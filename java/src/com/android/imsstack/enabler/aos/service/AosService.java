@@ -81,12 +81,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private final LocationInterface.Listener mLocationListener = new LocationInterface.Listener() {
         @Override
         public void onLastKnownCountryUpdated() {
-            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.COUNTRY_CHANGED);
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                    LocationInfo.COUNTRY_CHANGED.getValue());
         }
 
         @Override
         public void onInstantRequestedLocationUpdated() {
-            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.FIXED);
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                    LocationInfo.FIXED.getValue());
         }
     };
     private Handler mHandler;
@@ -347,16 +349,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyRoamingPreferredVoiceNetwork(int state) {
-        sendRequest(IIAosService.J2N_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK, state);
+    public void notifyRoamingPreferredVoiceNetwork(RoamingPreferredVoiceNetwork state) {
+        sendRequest(IIAosService.J2N_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK, state.getValue());
     }
 
     @Override
-    public void notifyServiceSetting(int state, int serviceBits) {
+    public void notifyServiceSetting(ServiceSetting state, int serviceBits) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_NOTIFY_SERVICE_SETTING);
-        parcel.writeInt(state);
+        parcel.writeInt(state.getValue());
         parcel.writeInt(serviceBits);
         sendRequest(parcel);
     }
@@ -402,12 +404,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyPhoneNumberState(boolean isRefresh, int state) {
+    public void notifyPhoneNumberState(boolean isRefresh, PhoneNumberState state) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE);
         parcel.writeInt(isRefresh ? 1 : 0);
-        parcel.writeInt(state);
+        parcel.writeInt(state.getValue());
         sendRequest(parcel);
     }
 
@@ -423,12 +425,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyEmcCallbackModeChanged(int type, int state, long duration) {
+    public void notifyEmcCallbackModeChanged(
+            EmcCallbackModeType type, EmcCallbackModeState state, long duration) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED);
-        parcel.writeInt(type);
-        parcel.writeInt(state);
+        parcel.writeInt(type.getValue());
+        parcel.writeInt(state.getValue());
         parcel.writeLong(duration);
         sendRequest(parcel);
     }

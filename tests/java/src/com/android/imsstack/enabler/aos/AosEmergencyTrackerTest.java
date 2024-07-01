@@ -20,7 +20,7 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 
 import static org.mockito.Mockito.verify;
 
-import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackMode;
+import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeState;
 import com.android.imsstack.enabler.aos.IAosInfo.EmcCallbackModeType;
 import com.android.imsstack.enabler.aos.service.AosService;
 
@@ -54,18 +54,18 @@ public class AosEmergencyTrackerTest {
     @Test
     public void notifyEmcCallStart() {
         mAosEmcTracker.updateEmcCallbackMode(
-                EmcCallbackModeType.CALL, EmcCallbackMode.START, 10L);
+                EmcCallbackModeType.CALL, EmcCallbackModeState.START, 10L);
 
         verify(mMockAosService).notifyEmcCallbackModeChanged(
-                EmcCallbackModeType.CALL, EmcCallbackMode.START, 10L);
+                EmcCallbackModeType.CALL, EmcCallbackModeState.START, 10L);
     }
 
     @Test
     public void notifyEmcCallStopByEmc() {
         mAosEmcTracker.updateEmcCallbackMode(
-                EmcCallbackModeType.CALL, EmcCallbackMode.STOP_BY_EMC, 0L);
+                EmcCallbackModeType.CALL, EmcCallbackModeState.STOP_BY_EMC, 0L);
 
         verify(mMockAosService).notifyEmcCallbackModeChanged(
-                EmcCallbackModeType.CALL, EmcCallbackMode.STOP_BY_EMC, 0L);
+                EmcCallbackModeType.CALL, EmcCallbackModeState.STOP_BY_EMC, 0L);
     }
 }

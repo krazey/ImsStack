@@ -65,7 +65,7 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link RoamingPreferredVoiceNetwork}.
      */
-    void notifyRoamingPreferredVoiceNetwork(int state);
+    void notifyRoamingPreferredVoiceNetwork(RoamingPreferredVoiceNetwork state);
 
     /**
      * Called to notify the change of service setting.
@@ -77,7 +77,7 @@ public interface IAosInfo {
      *          Valid values are the following : ALL(0xFFFFFFFF), MMTEL(0x00000001),
      *          VIDEO(0x00000002), SMSIP(0x00000020), and so on
      */
-    void notifyServiceSetting(int state, int serviceBits);
+    void notifyServiceSetting(ServiceSetting state, int serviceBits);
 
     /**
      * Called to notify the change of TTY setting.
@@ -157,7 +157,7 @@ public interface IAosInfo {
      * action.
      * @param state {@code state} is type of {@link PhoneNumberState}
      */
-    void notifyPhoneNumberState(boolean isRefresh, int state);
+    void notifyPhoneNumberState(boolean isRefresh, PhoneNumberState state);
 
     /**
      * Called to notify the power off.
@@ -180,65 +180,158 @@ public interface IAosInfo {
      * Native Listener : IAosEmergencyListener.
      *
      * @param type {@code type} is callback mode entry {@link EmcCallbackModeType}
-     * @param state {@code state} is type of {@link EmcCallbackMode}.
+     * @param state {@code state} is type of {@link EmcCallbackModeState}.
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */
-    void notifyEmcCallbackModeChanged(int type, int state, long duration);
+    void notifyEmcCallbackModeChanged(
+            EmcCallbackModeType type, EmcCallbackModeState state, long duration);
 
     /**
-     * Roaming Preferred Voice Network
+     * Represents the preferred voice network for roaming.
      */
-    class RoamingPreferredVoiceNetwork {
+    enum RoamingPreferredVoiceNetwork {
 
-        public static final int CELLULAR = 0;
-        public static final int WIFI = 1;
+        CELLULAR(0),
+        WIFI(1);
+
+        private final int mValue;
+
+        RoamingPreferredVoiceNetwork(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this network type.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Service setting
+     * Represents the service setting.
      */
-    class ServiceSetting {
+    enum ServiceSetting {
 
-        public static final int OFF = 0;
-        public static final int ON = 1;
-        public static final int PRESENTITY = 2;
+        OFF(0),
+        ON(1),
+        PRESENTITY(2);
+
+        private final int mValue;
+
+        ServiceSetting(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this service setting.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Location Information
+     * Represents the status of location information.
      */
-    class LocationInfo {
+    enum LocationInfo {
 
-        public static final int FIXED = 1;
-        public static final int COUNTRY_CHANGED = 2;
-        public static final int CHANGED = 3;
-        public static final int AVAILABLE = 4;
+        FIXED(1),
+        COUNTRY_CHANGED(2),
+        CHANGED(3),
+        AVAILABLE(4);
+
+        private final int mValue;
+
+        LocationInfo(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this location status.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * PhoneNumber state
+     * Represents the state of a phone number.
      */
-    class PhoneNumberState {
+    enum PhoneNumberState {
 
-        public static final int SIM_LOADED = 0;
-        public static final int RETRY_SUCCESS = 1;
-        public static final int RETRY_FAILURE = 2;
+        SIM_LOADED(0),
+        RETRY_SUCCESS(1),
+        RETRY_FAILURE(2);
+
+        private final int mValue;
+
+        PhoneNumberState(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this phone number state.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Emergency callback mode type
+     * Represents the type of emergency callback mode.
      */
-    class EmcCallbackModeType {
-        public static final int CALL = 1;
-        public static final int SMS = 2;
-    };
+    enum EmcCallbackModeType {
+
+        CALL(1),
+        SMS(2);
+
+        private final int mValue;
+
+        EmcCallbackModeType(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this emergency callback mode type.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+    }
 
     /**
-     * Emergency callback mode state
+     * Represents the state of the emergency callback mode.
      */
-    class EmcCallbackMode {
-        public static final int STOP = 0;
-        public static final int START = 1;
-        public static final int STOP_BY_EMC = 2;
-    };
+    enum EmcCallbackModeState {
+
+        STOP(0),
+        START(1),
+        STOP_BY_EMC(2);
+
+        private final int mValue;
+
+        EmcCallbackModeState(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this emergency callback mode state.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+    }
 }
