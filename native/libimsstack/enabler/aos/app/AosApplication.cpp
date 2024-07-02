@@ -213,8 +213,7 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             break;
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
-            PostMessage(
-                    MSG_SCSCF_RESTORATION, AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED, nReason);
+            PostMessage(MSG_SCSCF_RESTORATION, 0, nReason);
             break;
 
         case ImsAosControl::IPSEC_DISABLED:
@@ -1267,7 +1266,9 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
 {
     /* Abnormal network connection error between P-CSCF and S-CSCF has been detected.
      * The case is explained in 3GPP 24.229 5.1.2A.1.6.
-     * It is sure that current P-CSCF is no longer available for any IMS services. */
+     * It is sure that current P-CSCF is no longer available for any IMS services.
+     * It will conduct a new registration regardless of RegRecoverHold scheme.
+     */
 
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
     IMS_UINT32 nUnavailableTimeForCurrentPcscf = LONG_TO_INT(objMsg.nLparam);
@@ -1275,13 +1276,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessScscfRestoration(IN IMSMSG& objMsg
             "ProcessScscfRestoration :: reason (%d), nUnavailableTimeForCurrentPcscf (%d)", nReason,
             nUnavailableTimeForCurrentPcscf, 0);
 
-    if (IsRegRecoveryHeld())
-    {
-        A_IMS_TRACE_I(APPID, "ProcessScscfRestoration :: recover is holded", 0, 0, 0);
-        m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
-        m_nRecoverReason = nReason;
-        return;
-    }
+    SetOffReason(AosReason::INITIAL_REG_REQUESTED);
 
     m_piRegistration->RequestCmd(
             IAosRegistration::CMD_SCSCF_RESTORATION, nUnavailableTimeForCurrentPcscf);
@@ -2571,10 +2566,6 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::UpdateRegRecoveryHeld()
                 if (m_nRecoverReason == AoSRegRecoveryType::PCSCF_CHANGE)
                 {
                     PostMessage(MSG_PCSCF_RECOVER, m_nRecoverReason, 0);
-                }
-                else if (m_nRecoverReason == AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED)
-                {
-                    PostMessage(MSG_SCSCF_RESTORATION, m_nRecoverReason, 0);
                 }
                 else
                 {

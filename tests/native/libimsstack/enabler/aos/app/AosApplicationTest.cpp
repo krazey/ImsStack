@@ -276,7 +276,8 @@ enum
     using Base::Timer_TimerExpired;                      \
     using Base::RegistrationControl_ControlRegistration; \
     using Base::ServicePhone_LocationInfoChanged;        \
-    using Base::ProcessRegTerminating;
+    using Base::ProcessRegTerminating;                   \
+    using Base::ProcessScscfRestoration;
 
 class TestAosApplication : public AosApplication
 {
@@ -2390,13 +2391,6 @@ TEST_F(AosApplicationTest, Process)
     EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
     EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
-    // pending feature on, not held - recover reason SCSCF_RESTORATION_REQUIRED
-    m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
-    m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
-    m_pAosApplication->SetRecoverReason(AoSRegRecoveryType::SCSCF_RESTORATION_REQUIRED);
-    EXPECT_TRUE(m_pAosApplication->UpdateRegRecoveryHeld());
-    EXPECT_FALSE(m_pAosApplication->IsRegRecoveryHeld());
-    EXPECT_FALSE(m_pAosApplication->IsFeatureOn(PENDING_REG_RECOVERY_HELD));
     // pending feature on, not held - recover reason other
     m_pAosApplication->SetRegRecoveryHeld(IMS_TRUE);
     m_pAosApplication->AddFeature(PENDING_REG_RECOVERY_HELD);
@@ -2926,4 +2920,31 @@ TEST_F(AosApplicationTest, UpdateConnectedServices)
 {
     EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillOnce(Return(IMS_TRUE));
     m_pAosApplication->UpdateConnectedServices(IMS_FALSE);
+}
+
+TEST_F(AosApplicationTest, ShouldSetOffReasonWithInitialRegRequestedInScscfRestoration)
+{
+    // GIVEN
+    m_pAosApplication->SetOffReason(AosReason::NONE);
+    ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 30);
+
+    // WHEN
+    m_pAosApplication->ProcessScscfRestoration(objMessage);
+
+    // THEN
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::INITIAL_REG_REQUESTED);
+}
+
+TEST_F(AosApplicationTest, ShouldRequestScscfRestorationToRegistration)
+{
+    // GIVEN
+    m_pAosApplication->SetOffReason(AosReason::NONE);
+    ImsMessage objMessage(MSG_SCSCF_RESTORATION, 0, 30);
+
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION, 30));
+
+    // WHEN
+    m_pAosApplication->ProcessScscfRestoration(objMessage);
+
+    // THEN: The GIVEN condition should be met.
 }
