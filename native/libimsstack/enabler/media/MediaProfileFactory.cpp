@@ -764,12 +764,12 @@ PRIVATE VideoProfile* MediaProfileFactory::SetVideoProfile(
                     ? "RTP/AVPF"
                     : "RTP/AVP");
 
-    pVideoProfile->nCvoId = pVideoConfig->GetCvoId();
+    pVideoProfile->SetCvoId(pVideoConfig->GetCvoId());
     MediaProfileUtil::SetRtcpRsRr(pVideoProfile, pVideoConfig);
 
     if (pVideoConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {
-        pVideoProfile->bSupportAvpf = IMS_TRUE;
+        pVideoProfile->SetSupportAvpf(IMS_TRUE);
 
         IMS_SINT32 nTcap, nAcap = 0;
 
@@ -780,7 +780,7 @@ PRIVATE VideoProfile* MediaProfileFactory::SetVideoProfile(
     }
 
     IMS_TRACE_D("SetVideoProfile - SupportAvpf[%d], SupportCapaNegoForAvpf[%d]",
-            pVideoProfile->bSupportAvpf, pVideoProfile->bSupportCapaNegoForAvpf, 0);
+            pVideoProfile->IsAvpfSupported(), pVideoProfile->IsCapaNegoForAvpfSupported(), 0);
 
     return pVideoProfile;
 }
@@ -1115,10 +1115,11 @@ PRIVATE void MediaProfileFactory::SetCapaNegoForAvpf(OUT VideoProfile* pVideoPro
 
     IMS_TRACE_I("SetCapaNegoForAvpf() - Acap[%d], Tcap[%d]", nTcap, nAcap, 0);
 
-    pVideoProfile->bSupportCapaNegoForAvpf =
-            (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE) ? IMS_TRUE : IMS_FALSE;
+    pVideoProfile->SetSupportCapaNegoForAvpf(
+            (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE) ? IMS_TRUE
+                                                                             : IMS_FALSE);
 
-    if (pVideoProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
+    if (pVideoProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
     {
         AString strPcfg = AString::ConstNull();
         strPcfg.Sprintf("t=%d", nTcap);
@@ -1178,5 +1179,5 @@ PRIVATE void MediaProfileFactory::SetMaxProfileFrameRate(OUT VideoProfile* pVide
                 nMaxFrameRate, nFrameRate, 0);
     }
 
-    pVideoProfile->nFrameRate = nMaxFrameRate;
+    pVideoProfile->SetFrameRate(nMaxFrameRate);
 }

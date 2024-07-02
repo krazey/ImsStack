@@ -248,7 +248,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     pVideoConfig->setCameraZoom(m_nCameraZoom);
     pVideoConfig->setPauseImagePath(android::String8("/image/path"));
     pVideoConfig->setDeviceOrientationDegree(0);
-    pVideoConfig->setCvoValue(pNegoProfile->nCvoId);
+    pVideoConfig->setCvoValue(pNegoProfile->GetCvoId());
 
     IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
 

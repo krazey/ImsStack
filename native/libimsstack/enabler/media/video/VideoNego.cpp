@@ -514,7 +514,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     IMS_BOOL bPliSupportedAll = IMS_TRUE;
     IMS_BOOL bFirSupportedAll = IMS_TRUE;
 
-    if (pProfile->bSupportAvpf == IMS_TRUE)
+    if (pProfile->IsAvpfSupported() == IMS_TRUE)
     {
         for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
         {
@@ -682,9 +682,9 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         }
 
         // make "rtcp-fb"
-        if ((pProfile->bSupportAvpf == IMS_TRUE) &&
-                ((pProfile->bSupportCapaNegoForAvpf == IMS_FALSE) ||
-                        (pProfile->bSupportCapaNegoForAvpf == IMS_TRUE &&
+        if ((pProfile->IsAvpfSupported() == IMS_TRUE) &&
+                ((pProfile->IsCapaNegoForAvpfSupported() == IMS_FALSE) ||
+                        (pProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE &&
                                 pProfile->GetCapaNego().IsAttCapaInPcfg() == IMS_FALSE)))
         {
             IMS_SINT32 nPayloadNumForRtcpFb = -1;
@@ -802,18 +802,18 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     pDescriptor->SetDirection(pProfile->GetDirection());
 
     // make framerate
-    pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, pProfile->nFrameRate);
+    pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, pProfile->GetFrameRate());
 
     // make CVO
-    if (pProfile->nCvoId > 0)
+    if (pProfile->GetCvoId() > 0)
     {
         AString strCvoAttribute;
-        strCvoAttribute.Sprintf("%d urn:3gpp:video-orientation", pProfile->nCvoId);
+        strCvoAttribute.Sprintf("%d urn:3gpp:video-orientation", pProfile->GetCvoId());
         pDescriptor->AddAttribute(SdpAttribute::ATTRIBUTE_OTHER, strCvoAttribute, "extmap");
     }
 
     // make Capa Nego Attribute
-    if (pProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
+    if (pProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
     {
         // add "ACFG" if it's a initial answer
         if (pProfile->GetCapaNego().GetAcfg().GetLength() > 0)
@@ -825,10 +825,10 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             pDescriptor->AddAttribute(SdpAttribute::ACFG, strAcfg);
         }
 
-        IMS_TRACE_D("MakeSdpFromProfile() bSupportAvpf[%d], Transport Type[%s]",
-                pProfile->bSupportAvpf, pProfile->GetTransportType().GetStr(), 0);
+        IMS_TRACE_D("MakeSdpFromProfile() Support Avpf[%d], Transport Type[%s]",
+                pProfile->IsAvpfSupported(), pProfile->GetTransportType().GetStr(), 0);
 
-        if (pProfile->bSupportAvpf == IMS_TRUE &&
+        if (pProfile->IsAvpfSupported() == IMS_TRUE &&
                 pProfile->GetTransportType().Contains("AVPF") == IMS_FALSE)
         {
             // make tcap, acap, pcfg for capa nego offer...
@@ -917,13 +917,13 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
         if (pProfile->GetTransportType().EqualsIgnoreCase("RTP/AVP") == IMS_TRUE)
         {
-            pProfile->bSupportAvpf = IMS_FALSE;
-            pProfile->bSupportCapaNegoForAvpf = IMS_FALSE;
+            pProfile->SetSupportAvpf(IMS_FALSE);
+            pProfile->SetSupportCapaNegoForAvpf(IMS_FALSE);
         }
         else if (pProfile->GetTransportType().EqualsIgnoreCase("RTP/AVPF") == IMS_TRUE)
         {
-            pProfile->bSupportAvpf = IMS_TRUE;
-            pProfile->bSupportCapaNegoForAvpf = IMS_TRUE;
+            pProfile->SetSupportAvpf(IMS_TRUE);
+            pProfile->SetSupportCapaNegoForAvpf(IMS_TRUE);
         }
     }
 
@@ -933,12 +933,12 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         // Get Capa nego value from the incoming SDP
         if (CheckAvpfFromProfile(pProfile) == IMS_TRUE)
         {
-            pProfile->bSupportCapaNegoForAvpf = IMS_TRUE;
+            pProfile->SetSupportCapaNegoForAvpf(IMS_TRUE);
         }
     }
 
-    IMS_TRACE_I("MakeProfileFromSdp() - bSupportAvpf[%d], bSupportCapaNegoForAvpf[%d]",
-            pProfile->bSupportAvpf, pProfile->bSupportCapaNegoForAvpf, 0);
+    IMS_TRACE_I("MakeProfileFromSdp() - Support Avpf[%d], Support CapaNego For Avpf[%d]",
+            pProfile->IsAvpfSupported(), pProfile->IsCapaNegoForAvpfSupported(), 0);
 
     // payload
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
@@ -1006,7 +1006,8 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
                     strFrameSizeFromSdp, pAvcFmtp->GetSpropParam()));
 
             // Create AVPF attributes
-            if ((pProfile->bSupportAvpf == IMS_TRUE) || (pProfile->bSupportCapaNegoForAvpf))
+            if ((pProfile->IsAvpfSupported() == IMS_TRUE) ||
+                    (pProfile->IsCapaNegoForAvpfSupported()))
             {
                 if (GetAvpfFromAttributes(pSdpCodec, &pProfile->GetCapaNego(),
                             &pPayload->GetRtcpFbAttr()) == IMS_FALSE)
@@ -1027,7 +1028,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
                     strFrameSizeFromSdp, pHevcFmtp->GetSpropParam()));
 
             // Create AVPF attributes
-            if (pProfile->bSupportAvpf == IMS_TRUE)
+            if (pProfile->IsAvpfSupported() == IMS_TRUE)
             {
                 if (GetAvpfFromAttributes(pSdpCodec, &pProfile->GetCapaNego(),
                             &pPayload->GetRtcpFbAttr()) == IMS_FALSE)
@@ -1062,7 +1063,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     }
 
     // framerate
-    pProfile->nFrameRate = pDescriptor->GetAttributeInt(SdpAttribute::FRAMERATE);
+    pProfile->SetFrameRate(pDescriptor->GetAttributeInt(SdpAttribute::FRAMERATE));
 
     // find CVO
     ImsList<AString> objAttributes =
@@ -1084,15 +1085,15 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
                     if (strSplitSlash.GetSize() > 0 && strSplitSlash.GetAt(0).GetLength() > 0)
                     {
-                        pProfile->nCvoId = strSplitSlash.GetAt(0).ToInt32();
+                        pProfile->SetCvoId(strSplitSlash.GetAt(0).ToInt32());
                     }
                 }
                 else
                 {
-                    pProfile->nCvoId = strSplitSpace.GetAt(0).ToInt32();
+                    pProfile->SetCvoId(strSplitSpace.GetAt(0).ToInt32());
                 }
 
-                IMS_TRACE_D("MakeProfileFromSdp() - CVO found. ID[%d]", pProfile->nCvoId, 0, 0);
+                IMS_TRACE_D("MakeProfileFromSdp() - CVO found. ID[%d]", pProfile->GetCvoId(), 0, 0);
             }
         }
     }
@@ -1157,18 +1158,19 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
     }
 
     // Setting profile type
-    if (pLocalProfile->bSupportAvpf == IMS_TRUE && pPeerProfile->bSupportAvpf == IMS_TRUE)
+    if (pLocalProfile->IsAvpfSupported() == IMS_TRUE && pPeerProfile->IsAvpfSupported() == IMS_TRUE)
     {
-        pNegotiatedProfile->bSupportAvpf = IMS_TRUE;
+        pNegotiatedProfile->SetSupportAvpf(IMS_TRUE);
     }
 
-    pNegotiatedProfile->bSupportCapaNegoForAvpf = pPeerProfile->bSupportCapaNegoForAvpf;
+    pNegotiatedProfile->SetSupportCapaNegoForAvpf(pPeerProfile->IsCapaNegoForAvpfSupported());
 
     IMS_TRACE_I("MakeNegotiatedProfile() - PeerProfile: CapaNegoForAVPF[%d], Avpf[%d]",
-            pNegotiatedProfile->bSupportCapaNegoForAvpf, pNegotiatedProfile->bSupportAvpf, 0);
+            pNegotiatedProfile->IsCapaNegoForAvpfSupported(), pNegotiatedProfile->IsAvpfSupported(),
+            0);
 
     // Capability Negotiation for AVPF, SRTP
-    if (pNegotiatedProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
+    if (pNegotiatedProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
     {
         if (MakeNegotiatedCapaNegoProfile(&(pLocalProfile->GetCapaNego()),
                     &(pPeerProfile->GetCapaNego()),
@@ -1193,9 +1195,9 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 }
             }
 
-            if (pNegotiatedProfile->bSupportCapaNegoForAvpf == IMS_TRUE)
+            if (pNegotiatedProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
             {
-                pNegotiatedProfile->bSupportAvpf = bNegotiatedAVPF;
+                pNegotiatedProfile->SetSupportAvpf(bNegotiatedAVPF);
             }
         }
 
@@ -1204,10 +1206,11 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
     }
 
     pNegotiatedProfile->SetTransportType(
-            (pNegotiatedProfile->bSupportAvpf == IMS_TRUE) ? "RTP/AVPF" : "RTP/AVP");
+            (pNegotiatedProfile->IsAvpfSupported() == IMS_TRUE) ? "RTP/AVPF" : "RTP/AVP");
 
     IMS_TRACE_D("MakeNegotiatedProfile() - AVPF enable[%d], Transport Type[%s]",
-            pNegotiatedProfile->bSupportAvpf, pNegotiatedProfile->GetTransportType().GetStr(), 0);
+            pNegotiatedProfile->IsAvpfSupported(), pNegotiatedProfile->GetTransportType().GetStr(),
+            0);
 
     // Compare each payload based destination's profile
     VideoProfile::Payload* pNegotiatedPayload = IMS_NULL;
@@ -1397,7 +1400,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     }
 
                     // Make a RTCP-FB negotiation result
-                    if (pNegotiatedProfile->bSupportAvpf == IMS_TRUE)
+                    if (pNegotiatedProfile->IsAvpfSupported() == IMS_TRUE)
                     {
                         if (pLocalPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE &&
                                 pPeerPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE)
@@ -1598,7 +1601,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     }
 
                     // Make a RTCP-FB negotiation result
-                    if (pNegotiatedProfile->bSupportAvpf == IMS_TRUE)
+                    if (pNegotiatedProfile->IsAvpfSupported() == IMS_TRUE)
                     {
                         if (pLocalPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE &&
                                 pPeerPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE)
@@ -1733,7 +1736,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 IMS_TRACE_D("MakeNegotiatedProfile() set profile[%s] set resolution[%d]",
                         pAvcFmtp->GetProfileLevelId().GetStr(), pAvcFmtp->GetResolution(), 0);
 
-                if (pNegotiatedProfile->bSupportAvpf == IMS_TRUE)
+                if (pNegotiatedProfile->IsAvpfSupported() == IMS_TRUE)
                 {
                     if (pLocalPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE &&
                             pPeerPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE)
@@ -1808,7 +1811,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
             else if (pMatchedPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
             {
                 // Make a RTCP-FB negotiation result
-                if (pNegotiatedProfile->bSupportAvpf == IMS_TRUE)
+                if (pNegotiatedProfile->IsAvpfSupported() == IMS_TRUE)
                 {
                     if (pLocalPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE &&
                             pPeerPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE)
@@ -1925,28 +1928,28 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 pPeerProfile, bIsOfferReceived, nNegotiatedMaxAs, pNegotiatedProfile);
 
         // Setting framerate
-        pNegotiatedProfile->nFrameRate = nNegotiatedMaxFrameRate;
+        pNegotiatedProfile->SetFrameRate(nNegotiatedMaxFrameRate);
 
         // Candidate Priority (no need in video)
 
         // CVO mode
-        if (pLocalProfile->nCvoId > 0 && pPeerProfile->nCvoId > 0)
+        if (pLocalProfile->GetCvoId() > 0 && pPeerProfile->GetCvoId() > 0)
         {
-            pNegotiatedProfile->nCvoId = pPeerProfile->nCvoId;
+            pNegotiatedProfile->SetCvoId(pPeerProfile->GetCvoId());
         }
         else
         {
             if (pNegotiatedProfile->GetDataPort() == 0)
             {
-                pNegotiatedProfile->nCvoId = pLocalProfile->nCvoId;
+                pNegotiatedProfile->SetCvoId(pLocalProfile->GetCvoId());
             }
             else
             {
-                pNegotiatedProfile->nCvoId = 0;
+                pNegotiatedProfile->SetCvoId(0);
             }
         }
 
-        IMS_TRACE_D("MakeNegotiatedProfile() nCvoId[%d]", pNegotiatedProfile->nCvoId, 0, 0);
+        IMS_TRACE_D("MakeNegotiatedProfile() CVO Id[%d]", pNegotiatedProfile->GetCvoId(), 0, 0);
 
         ret = IMS_TRUE;
     }

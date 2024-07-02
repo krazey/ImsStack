@@ -345,19 +345,13 @@ public:
     };
 
 public:
-    IMS_SINT32 nFrameRate;
-    IMS_BOOL bSupportAvpf;
-    IMS_SINT32 nCvoId;
-    IMS_BOOL bSupportCapaNegoForAvpf;
-
-public:
     VideoProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVPF", 0, 0, 0, 0, MEDIA_DIRECTION_INVALID),
-            nFrameRate(0),
-            bSupportAvpf(IMS_FALSE),
-            nCvoId(-1),
-            bSupportCapaNegoForAvpf(IMS_FALSE){};
+            m_nFrameRate(0),
+            m_bSupportAvpf(IMS_FALSE),
+            m_nCvoId(-1),
+            m_bSupportCapaNegoForAvpf(IMS_FALSE){};
 
     virtual ~VideoProfile() {}
 
@@ -368,19 +362,19 @@ public:
         {
             return;
         }
-        nFrameRate = profile->nFrameRate;
-        bSupportAvpf = profile->bSupportAvpf;
-        nCvoId = profile->nCvoId;
-        bSupportCapaNegoForAvpf = profile->bSupportCapaNegoForAvpf;
+        m_nFrameRate = profile->m_nFrameRate;
+        m_bSupportAvpf = profile->m_bSupportAvpf;
+        m_nCvoId = profile->m_nCvoId;
+        m_bSupportCapaNegoForAvpf = profile->m_bSupportCapaNegoForAvpf;
     }
 
     VideoProfile(IN const VideoProfile& obj) :
             MediaBaseProfile(obj)
     {
-        nFrameRate = obj.nFrameRate;
-        bSupportAvpf = obj.bSupportAvpf;
-        nCvoId = obj.nCvoId;
-        bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
+        m_nFrameRate = obj.m_nFrameRate;
+        m_bSupportAvpf = obj.m_bSupportAvpf;
+        m_nCvoId = obj.m_nCvoId;
+        m_bSupportCapaNegoForAvpf = obj.m_bSupportCapaNegoForAvpf;
     }
 
     VideoProfile& operator=(IN const VideoProfile& obj)
@@ -388,10 +382,10 @@ public:
         if (this != &obj)
         {
             MediaBaseProfile::operator=(obj);
-            nFrameRate = obj.nFrameRate;
-            bSupportAvpf = obj.bSupportAvpf;
-            nCvoId = obj.nCvoId;
-            bSupportCapaNegoForAvpf = obj.bSupportCapaNegoForAvpf;
+            m_nFrameRate = obj.m_nFrameRate;
+            m_bSupportAvpf = obj.m_bSupportAvpf;
+            m_nCvoId = obj.m_nCvoId;
+            m_bSupportCapaNegoForAvpf = obj.m_bSupportCapaNegoForAvpf;
         }
 
         return (*this);
@@ -402,6 +396,24 @@ public:
         BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
+
+    void SetFrameRate(IN const IMS_SINT32 nFrameRate) { m_nFrameRate = nFrameRate; }
+    IMS_SINT32 GetFrameRate() { return m_nFrameRate; }
+    void SetSupportAvpf(IN const IMS_BOOL bSupportAvpf) { m_bSupportAvpf = bSupportAvpf; }
+    IMS_BOOL IsAvpfSupported() { return m_bSupportAvpf; }
+    void SetCvoId(IN const IMS_SINT32 nCvoId) { m_nCvoId = nCvoId; }
+    IMS_SINT32 GetCvoId() { return m_nCvoId; }
+    void SetSupportCapaNegoForAvpf(IN const IMS_BOOL bSupportCapaNegoForAvpf)
+    {
+        m_bSupportCapaNegoForAvpf = bSupportCapaNegoForAvpf;
+    }
+    IMS_BOOL IsCapaNegoForAvpfSupported() { return m_bSupportCapaNegoForAvpf; }
+
+private:
+    IMS_SINT32 m_nFrameRate;
+    IMS_BOOL m_bSupportAvpf;
+    IMS_SINT32 m_nCvoId;
+    IMS_BOOL m_bSupportCapaNegoForAvpf;
 };
 
 #endif
