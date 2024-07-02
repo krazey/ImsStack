@@ -95,7 +95,7 @@ public class ImsTestHelperTest extends ImsStackTest {
 
         ImsServiceManager.setDefault(mImsServiceManager);
         when(mImsServiceManager.getCallApp(SLOT0)).thenReturn(mCallApp);
-        AosFactory.getInstance().mAosServices.put(SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceService(SLOT0, mMockAosService);
 
         mImsTestHelper = ImsTestHelper.getInstance();
         mImsTestHelper.init();
@@ -116,7 +116,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         }
 
         ImsServiceManager.setDefault(null);
-        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
         mBroadcastReceiver = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;

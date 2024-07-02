@@ -134,7 +134,7 @@ public class AosDebugTest extends ImsStackTest {
                 TelephonyInterface.class, mMockTelephonyInterface, TestAppContext.SLOT0);
 
         // AosFactory
-        AosFactory.getInstance().mAosServices.put(TestAppContext.SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mMockAosService);
 
         // FakeAosDebug
         mFakeAosDebug = new FakeAosDebug(TestAppContext.SLOT0);
@@ -153,8 +153,7 @@ public class AosDebugTest extends ImsStackTest {
         }
         super.tearDown();
 
-        AosFactory.getInstance().mAosServices.remove(TestAppContext.SLOT0);
-
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, null);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, TestAppContext.SLOT0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, TestAppContext.SLOT0);
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, TestAppContext.SLOT0);

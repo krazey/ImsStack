@@ -42,13 +42,13 @@ public class AosEmergencyTrackerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AosFactory.getInstance().mAosServices.put(SLOT0, mMockAosService);
+        AosFactory.getInstance().replaceService(SLOT0, mMockAosService);
         mAosEmcTracker = new AosEmergencyTracker(SLOT0);
     }
 
     @After
     public void cleanUp() throws Exception {
-        AosFactory.getInstance().mAosServices.remove(SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
     }
 
     @Test
