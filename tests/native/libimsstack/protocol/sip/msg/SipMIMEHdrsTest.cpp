@@ -18,6 +18,7 @@
 #include "msg/SipAuthBase.h"
 #include "msg/SipMsgBody.h"
 #include "msg/SipUnknownHeader.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -151,7 +152,7 @@ TEST_F(SipMIMEHdrsTest, EncodeMIMEHdrs)
     SipMIMEHdrs* pMimeHeaders = new SipMIMEHdrs();
     ASSERT_TRUE(pMimeHeaders != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -212,19 +213,19 @@ TEST_F(SipMIMEHdrsTest, DecodeMIMEHdrs)
     EXPECT_EQ(SIP_FALSE, pMimeHeaders->DecodeMIMEHdrs("", 0));
 
     const SIP_CHAR* pMimeHeader = "Content-Length: 33";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
 
     EXPECT_EQ(SIP_FALSE, pMimeHeaders->DecodeMIMEHdrs("c: text", 7));
 
     pMimeHeader = "Content-Language: fr";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
     pMimeHeaders->SipDelete();
 
     pMimeHeaders = new SipMIMEHdrs();
     ASSERT_TRUE(pMimeHeaders != nullptr);
 
     pMimeHeader = "Content-Transfer-Encoding: base64";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
 
     pMimeHeaders->SipDelete();
 
@@ -232,18 +233,18 @@ TEST_F(SipMIMEHdrsTest, DecodeMIMEHdrs)
     ASSERT_TRUE(pMimeHeaders != nullptr);
 
     pMimeHeader = "Content-Type: mediaType/mediaSubType";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
 
     pMimeHeader = "UnknownHeaderName1: UnknownHeaderValue1";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
 
     pMimeHeader = "UnknownHeaderName2: UnknownHeaderValue2";
-    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, strlen(pMimeHeader)));
+    EXPECT_EQ(SIP_TRUE, pMimeHeaders->DecodeMIMEHdrs(pMimeHeader, SipPf_Strlen(pMimeHeader)));
 
     const SIP_CHAR* pMimeHdrs = "Content-Type: mediaType/mediaSubType\r\n\
 UnknownHeaderName1: UnknownHeaderValue1\r\nUnknownHeaderName2: UnknownHeaderValue2\r\n";
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

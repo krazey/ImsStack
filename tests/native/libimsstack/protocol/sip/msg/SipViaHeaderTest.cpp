@@ -33,7 +33,7 @@ protected:
 
 TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
 {
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE];
     SIP_CHAR* pBuff = &aBuffer[0];
 

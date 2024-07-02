@@ -49,7 +49,7 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetHeaderName("Name"));
     EXPECT_STREQ("Name", pHeader->GetHeaderName());
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

@@ -78,7 +78,7 @@ TEST_F(SipPrivacyHeaderTest, AddPrivacy)
 
 TEST_F(SipPrivacyHeaderTest, EncodeHdr)
 {
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -158,7 +158,7 @@ TEST_F(SipPrivacyHeaderTest, DecodeHdr)
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode ; value */
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(";", 1));
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };

@@ -17,6 +17,7 @@
 
 #include "SipStackCallback.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
@@ -52,7 +53,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         static const SipStackCallbacks stTestCallbacks = {
                 &MockFsm_FetchTransaction,
@@ -150,7 +151,7 @@ Call-ID: 13459809802\r\n\
 CSeq: 1 INVITE\r\n\
 RSeq: 2\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
 
@@ -182,7 +183,7 @@ CSeq: 2 PRACK\r\n\
 RAck: 562 1 INVITE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
     nError = 0;
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
@@ -212,7 +213,7 @@ CSeq: 2 PRACK\r\n\
 RAck: 2 1 INVITE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
     nError = 0;
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);

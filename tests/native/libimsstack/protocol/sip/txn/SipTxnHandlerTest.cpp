@@ -18,6 +18,7 @@
 #include "SipStackCallback.h"
 #include "SipTxnContext.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxnHandler.h"
@@ -37,7 +38,7 @@ SIP_BOOL Mock_FetchTransaction(
 
     if (nOption == TXN_OPT_CREATE)
     {
-        if (strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
+        if (SipPf_Strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
         {
             return SIP_FALSE;
         }
@@ -56,12 +57,12 @@ SIP_BOOL Mock_FetchTransaction(
         {
             case SipMessage::REQ_TYPE:
             {
-                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
+                if (SipPf_Strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
                 {
                     return SIP_TRUE;
                 }
 
-                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "UPDATE") == 0)
+                if (SipPf_Strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "UPDATE") == 0)
                 {
                     SipMessage* pTempSipMsg = new SipMessage();
                     *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
@@ -220,7 +221,7 @@ To: <sip:userA@host>;tag=11df\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         // Response Msg
         pRespSipMsg = new SipMessage();
@@ -233,7 +234,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         pSipTxnContext = new SipTxnContext();
         pSipUserData = new ISipUserData(pSipTxnContext);
@@ -476,7 +477,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     /* Calling with invalid SipMessage : without To header */
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -491,7 +492,7 @@ To: <sip:user@host>;tag=abcd\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     /* Calling with invalid SipMessage : without From header */
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -507,7 +508,7 @@ To: <sip:user@host>;tag=abcd\r\n\
 From: <sip:user@host>;\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     /* Calling with invalid SipMessage : without Callid header */
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -523,7 +524,7 @@ From: <sip:user@host>;\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     /* Calling with invalid SipMessage : without Via header */
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -538,7 +539,7 @@ To: <sip:user@host>;tag=abcd\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     /* Calling with invalid SipMessage : without CSeq header */
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
@@ -577,7 +578,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different callid for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
@@ -593,7 +594,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different from tag for key comparison to mismatch */
     EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
@@ -609,7 +610,7 @@ To: <sip:userA@host>;tag=990\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     EXPECT_STREQ("990", pTxnKey->GetToTag());
     EXPECT_STREQ("z9hG4bs8", pTxnKey->GetViaBranchParam());
@@ -688,7 +689,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 MESSAGE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
     pTxnKey = new SipTxnKey(pNonInvSipMsg, &nError);
     EXPECT_EQ(SIP_TRUE,
@@ -798,7 +799,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
-    EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
     /* Calling with valid SipTxnKey by creating with NON INVITE req message
     first calling send txn to add txn to list.
@@ -842,7 +843,7 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
 
     const SIP_CHAR* pReqUri = "sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
-    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, strlen(pReqUri)));
+    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, SipPf_Strlen(pReqUri)));
     SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetRequestline(pobjReqLine));
@@ -853,8 +854,8 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     ASSERT_TRUE(pToHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
     const SIP_CHAR* pToValue = "<sip:1111@ims.mnc861.mcc405.3gppnetwork.org>";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
-    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, SipPf_Strlen(pToValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
 
@@ -887,7 +888,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
 
     const SIP_CHAR* pReqUri = "sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
-    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, strlen(pReqUri)));
+    ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, SipPf_Strlen(pReqUri)));
     SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetRequestline(pobjReqLine));
@@ -895,7 +896,7 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
     /* Calling with valid SipTxnKey by creating with req msg
@@ -933,7 +934,7 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
     const SIP_CHAR* pViaValue = "SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
+    EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, SipPf_Strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
     /* Calling with valid SipTxnKey by creating with req msg

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "msg/SipAddrSpec.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -46,7 +47,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -75,7 +76,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     const SIP_CHAR* pUri = "sip:192.168.2.2:9090;user=phone";
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, SipPf_Strlen(pUri)));
 
     EXPECT_EQ(SipUri::SCHEME_SIP, pSipAddrSpec->GetUriScheme());
 
@@ -121,7 +122,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
     pUri = "sip:alice@atlanta.com;maddr=239.255.255.1;ttl=15";
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, SipPf_Strlen(pUri)));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -137,7 +138,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
     pUri = "sip:AAuser:$=+,%3AB@host;method=REGISTER?to=proxy";
-    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, strlen(pUri)));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(pUri, SipPf_Strlen(pUri)));
 
     pSipUri = pSipAddrSpec->GetSipUri();
     ASSERT_TRUE(pSipUri != nullptr);

@@ -17,6 +17,7 @@
 
 #include "SipAbnfUtil.h"
 #include "msg/SipHeaderBase.h"
+#include "platform/SipString.h"
 
 namespace android
 {
@@ -135,7 +136,7 @@ TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
     SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 4096;
+    const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
@@ -276,7 +277,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
 
     /* Decode content-type with value and parameters */
     const SIP_CHAR* pValue = "multipart/mixed;boundary=b_4043f-000a3b";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
 
     EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
@@ -295,7 +296,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "multipart/mixed";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
 
     EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
@@ -314,7 +315,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
     pValue = ";boundary=b_4043f-000a3b";
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*' and multpile parameters */
@@ -322,7 +323,7 @@ TEST_F(SipHeaderBaseTest, DecodeParameter)
     ASSERT_TRUE(pHeader != nullptr);
 
     pValue = "*;param1=value1;param2=value2,value3";
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, SipPf_Strlen(pValue)));
     EXPECT_STREQ("*", pHeader->GetValue());
     EXPECT_EQ(2, pHeader->GetParamCount());
 

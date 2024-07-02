@@ -19,6 +19,7 @@
 #include "SipUtil.h"
 #include "SipVector.h"
 #include "include/MockSipTransaction.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
@@ -26,7 +27,7 @@
 #include "txn/SipTxnFsmData.h"
 
 SipVector<MockSipTransaction*> objTxnList;
-static int* pnTimerId = SIP_NULL;
+static SIP_INT32* pnTimerId = SIP_NULL;
 
 SIP_BOOL MockTxn_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
@@ -70,7 +71,7 @@ SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** 
 {
     if (pnTimerId == SIP_NULL)
     {
-        pnTimerId = new int[16];
+        pnTimerId = new SIP_INT32[16];
     }
     *ppvHandle = pnTimerId;
     return SIP_TRUE;
@@ -131,7 +132,7 @@ To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 \r\n";
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
 
         static const SipStackCallbacks stTestCallbacks = {
                 &MockTxn_FetchTransaction,
@@ -449,7 +450,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
 
     /* Invoking Timeout with invalid timerID */
-    int nTimerId = 0;
+    SIP_INT32 nTimerId = 0;
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
     CbkTxnTimeout(pTimeoutData, &nTimerId);
@@ -496,7 +497,7 @@ P-Access-Network-Info: 3GPP-UTRAN;utran-cell-id-3gpp=B20E\r\n\
 User-Agent: pixel\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
 
     pMsg = "SIP/2.0 406 Not Acceptable\r\n\
@@ -507,7 +508,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
 \r\n";
 
-    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, SipPf_Strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
     pInSipMsg->SipDelete();
