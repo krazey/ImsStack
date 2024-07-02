@@ -1429,6 +1429,23 @@ TEST_F(AosRegistrationTest, AddSpecificOperationWhileInRoamingAddsIpsecBlockReas
     EXPECT_EQ(m_pAosRegistration->GetIpsecBlockReason(), AosRegistration::IPSEC_BLOCK_ROAMING);
 }
 
+TEST_F(AosRegistrationTest, SetTcpTransportForEmergencyInRoaming)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    EXPECT_CALL(m_objMockIRegContact, AddUriParameter(_, _));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsERegWithOnlyTcpInRoaming())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSipOverIpsecInRoamingEnabled())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNetTracker, IsRoaming()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED));
+    EXPECT_CALL(m_objMockIRegParameter, SetTransportExt(Sip::TRANSPORT_EXT_TCP));
+
+    m_pAosRegistration->AddSpecificOperation();
+}
+
 TEST_F(AosRegistrationTest, AddAccesstypeFeatureTagWithNumericalValue)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())

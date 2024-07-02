@@ -1432,9 +1432,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
 
     StartRegBinding();
 
-    AddSpecificOperation();
-
     m_piRegParameter = m_piRegistration->GetParameter();
+
+    AddSpecificOperation();
 
     if (UpdatePreloadedRoute() == IMS_FALSE)
     {
@@ -1908,6 +1908,12 @@ PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()
     if (m_eRegType == AosRegistrationType::EMERGENCY)
     {
         m_piRegContact->AddUriParameter("sos");
+
+        if (GET_N_CONFIG(m_nSlotId)->IsERegWithOnlyTcpInRoaming() && m_piRegParameter != IMS_NULL &&
+                m_piContext->GetNetTracker()->IsRoaming())
+        {
+            m_piRegParameter->SetTransportExt(Sip::TRANSPORT_EXT_TCP);
+        }
     }
 
     if (!GET_N_CONFIG(m_nSlotId)->IsSipOverIpsecInRoamingEnabled())
