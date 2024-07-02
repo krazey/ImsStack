@@ -205,38 +205,59 @@ public:
     class RtcpFbAttributes
     {
     public:
-        IMS_BOOL bTrrSupported;
-        IMS_SINT32 nTrrInt;
-        IMS_BOOL bNackSupported;
-        IMS_BOOL bTmmbrSupported;
-        IMS_SINT32 nTmmbrSmaxPr;
-        IMS_BOOL bPliSupported;
-        IMS_BOOL bFirSupported;
-
-    public:
         RtcpFbAttributes() :
-                bTrrSupported(IMS_FALSE),
-                nTrrInt(0),
-                bNackSupported(IMS_FALSE),
-                bTmmbrSupported(IMS_FALSE),
-                nTmmbrSmaxPr(-1),
-                bPliSupported(IMS_FALSE),
-                bFirSupported(IMS_FALSE){};
+                m_bTrrSupported(IMS_FALSE),
+                m_nTrrInt(0),
+                m_bNackSupported(IMS_FALSE),
+                m_bTmmbrSupported(IMS_FALSE),
+                m_nTmmbrSmaxPr(-1),
+                m_bPliSupported(IMS_FALSE),
+                m_bFirSupported(IMS_FALSE){};
 
         RtcpFbAttributes& operator=(IN const RtcpFbAttributes& obj)
         {
             if (this != &obj)
             {
-                bTrrSupported = obj.bTrrSupported;
-                nTrrInt = obj.nTrrInt;
-                bNackSupported = obj.bNackSupported;
-                bTmmbrSupported = obj.bTmmbrSupported;
-                nTmmbrSmaxPr = obj.nTmmbrSmaxPr;
-                bPliSupported = obj.bPliSupported;
-                bFirSupported = obj.bFirSupported;
+                m_bTrrSupported = obj.m_bTrrSupported;
+                m_nTrrInt = obj.m_nTrrInt;
+                m_bNackSupported = obj.m_bNackSupported;
+                m_bTmmbrSupported = obj.m_bTmmbrSupported;
+                m_nTmmbrSmaxPr = obj.m_nTmmbrSmaxPr;
+                m_bPliSupported = obj.m_bPliSupported;
+                m_bFirSupported = obj.m_bFirSupported;
             }
             return (*this);
         }
+
+        void SetTrrSupported(IN const IMS_BOOL nTrrSupported) { m_bTrrSupported = nTrrSupported; }
+        IMS_BOOL IsTrrSupported() { return m_bTrrSupported; }
+        void SetTrrInt(IN const IMS_SINT32 nTrrInt) { m_nTrrInt = nTrrInt; }
+        IMS_SINT32 GetTrrInt() { return m_nTrrInt; }
+        void SetNackSupported(IN const IMS_BOOL bNackSupported)
+        {
+            m_bNackSupported = bNackSupported;
+        }
+        IMS_BOOL IsNackSupported() { return m_bNackSupported; }
+        void SetTmmbrSupported(IN const IMS_BOOL bTmmbrSupported)
+        {
+            m_bTmmbrSupported = bTmmbrSupported;
+        }
+        IMS_BOOL IsTmmbrSupported() { return m_bTmmbrSupported; }
+        void SetTmmbrSmaxPr(IN const IMS_SINT32 nTmmbrSmaxPr) { m_nTmmbrSmaxPr = nTmmbrSmaxPr; }
+        IMS_SINT32 GetTmmbrSmaxPr() { return m_nTmmbrSmaxPr; }
+        void SetPliSupported(IN const IMS_BOOL bPliSupported) { m_bPliSupported = bPliSupported; }
+        IMS_BOOL IsPliSupported() { return m_bPliSupported; }
+        void SetFirSupported(IN const IMS_BOOL bFirSupported) { m_bFirSupported = bFirSupported; }
+        IMS_BOOL IsFirSupported() { return m_bFirSupported; }
+
+    private:
+        IMS_BOOL m_bTrrSupported;
+        IMS_SINT32 m_nTrrInt;
+        IMS_BOOL m_bNackSupported;
+        IMS_BOOL m_bTmmbrSupported;
+        IMS_SINT32 m_nTmmbrSmaxPr;
+        IMS_BOOL m_bPliSupported;
+        IMS_BOOL m_bFirSupported;
     };
 
 public:

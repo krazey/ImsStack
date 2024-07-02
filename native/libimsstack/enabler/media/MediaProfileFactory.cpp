@@ -940,36 +940,37 @@ PRIVATE void MediaProfileFactory::SetVideoCodecPayload(IN CodecVideoConfig* pCod
     {
         if (pVideoConfig->IsVideoAvpfTrrEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bTrrSupported = IMS_TRUE;
-            pPayload->objRtcpFbAttr.nTrrInt = pVideoConfig->GetRtcpInterval() * 1000;
+            pPayload->objRtcpFbAttr.SetTrrSupported(IMS_TRUE);
+            pPayload->objRtcpFbAttr.SetTrrInt(pVideoConfig->GetRtcpInterval() * 1000);
         }
 
         if (pVideoConfig->IsVideoAvpfNackEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bNackSupported = IMS_TRUE;
+            pPayload->objRtcpFbAttr.SetNackSupported(IMS_TRUE);
         }
 
         if (pVideoConfig->IsVideoAvpfTmmbrEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bTmmbrSupported = IMS_TRUE;
-            pPayload->objRtcpFbAttr.nTmmbrSmaxPr = 40;
+            pPayload->objRtcpFbAttr.SetTmmbrSupported(IMS_TRUE);
+            pPayload->objRtcpFbAttr.SetTmmbrSmaxPr(40);
         }
 
         if (pVideoConfig->IsVideoAvpfPliEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bPliSupported = IMS_TRUE;
+            pPayload->objRtcpFbAttr.SetPliSupported(IMS_TRUE);
         }
 
         if (pVideoConfig->IsVideoAvpfFirEnabled() == IMS_TRUE)
         {
-            pPayload->objRtcpFbAttr.bFirSupported = IMS_TRUE;
+            pPayload->objRtcpFbAttr.SetFirSupported(IMS_TRUE);
         }
 
         IMS_TRACE_I("SetVideoCodecPayload() AVPF. TRR[%d], NACK[%d], TMMBR[%d]",
-                pPayload->objRtcpFbAttr.bTrrSupported, pPayload->objRtcpFbAttr.bNackSupported,
-                pPayload->objRtcpFbAttr.bTmmbrSupported);
+                pPayload->objRtcpFbAttr.IsTrrSupported(), pPayload->objRtcpFbAttr.IsNackSupported(),
+                pPayload->objRtcpFbAttr.IsTmmbrSupported());
         IMS_TRACE_I("SetVideoCodecPayload() AVPF. PLI[%d], FIR[%d]",
-                pPayload->objRtcpFbAttr.bPliSupported, pPayload->objRtcpFbAttr.bFirSupported, 0);
+                pPayload->objRtcpFbAttr.IsPliSupported(), pPayload->objRtcpFbAttr.IsFirSupported(),
+                0);
     }
 }
 
