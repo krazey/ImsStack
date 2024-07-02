@@ -705,10 +705,10 @@ PRIVATE TextProfile* MediaProfileFactory::SetTextProfile(
     TextConfiguration* pTextConfig = static_cast<TextConfiguration*>(pConfig);
 
     pTextProfile->SetTransportType("RTP/AVP");
-    pTextProfile->bKeepRedLevel = pTextConfig->IsTextCodecEmptyRedundantEnabled();
+    pTextProfile->SetKeepRedundantLevel(pTextConfig->IsTextCodecEmptyRedundantEnabled());
 
     IMS_TRACE_I("SetTextProfile() - transport type[%s], keep red level[%d]",
-            pTextProfile->GetTransportType().GetStr(), pTextProfile->bKeepRedLevel, 0);
+            pTextProfile->GetTransportType().GetStr(), pTextProfile->GetKeepRedundantLevel(), 0);
 
     return pTextProfile;
 }

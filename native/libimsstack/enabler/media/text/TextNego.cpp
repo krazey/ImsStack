@@ -892,9 +892,6 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
             pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
         }
 
-        pNegotiatedProfile->bIsHold =
-                (pNegotiatedProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
-                                                                                     : IMS_FALSE;
         TextProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
                 pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
         bRet = IMS_TRUE;

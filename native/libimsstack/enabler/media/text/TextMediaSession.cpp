@@ -172,7 +172,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
         }
     }
 
-    pTextConfig->setKeepRedundantLevel(pLocalProfile->bKeepRedLevel);
+    pTextConfig->setKeepRedundantLevel(pLocalProfile->GetKeepRedundantLevel());
 
     IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",
             pTextConfig->getMediaDirection(), pTextConfig->getTxPayloadTypeNumber(),
