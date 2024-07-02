@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Parcel;
 
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -28,6 +30,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.IUMtcService;
+import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
@@ -124,7 +127,8 @@ public final class ImsTestHelper {
                 sendSrvccEvent(intent.getIntExtra("type", -1));
             } else if (action.equals(INTENT_MTC_TEST)) {
                 sendMtcTestCommand(intent.getIntExtra("command", -1),
-                        intent.getIntExtra("slotid", 0), intent.getIntArrayExtra("extras"));
+                        intent.getIntExtra("slotid", 0), intent.getStringExtra("callee"),
+                        intent.getIntArrayExtra("extras"));
             } else if (action.equals(INTENT_QOS_TEST)) {
                 sendQosChanged(intent.getIntExtra("call", -1),
                         intent.getIntExtra("media", -1), intent.getStringExtra("ipaddress"),
@@ -241,10 +245,12 @@ public final class ImsTestHelper {
 
         // MTC TEST COMMAND (Native MTC only)
         // extra parameter : test command, WParam, LParam
-        // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_TEST
-        // .    --ei command 0 --ei slotid 0 --eia extras 0,0,1...
+        // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_START_TEST
+        //     --ei command 102 --ei slotid 0 --es callee +1234567890 --eia extras 1,3,-1,-1
         // no exception check for the array as it's only for test
-        private void sendMtcTestCommand(int command, int slotId, int[] extras) {
+
+        private void sendMtcTestCommand(
+                int command, int slotId, @Nullable String callee, int[] extras) {
             ImsLog.d("sendMtcTestCommand :: command=" + command);
 
             ImsServiceManager sm = ImsServiceManager.getDefault();
@@ -273,18 +279,19 @@ public final class ImsTestHelper {
                 sTempCall.open(extras[1], extras[2] != 0, extras[3] != 0, extras[4] != 0);
                 return;
             } else if (command == 102) {
-                // 0 : callType
-                // 1 : callee, 2 : actualCallee, 3 ~ 5 : audio/video/text direction
                 ImsLog.d("sendMtcTestCommand :: start call");
                 if (sTempCall == null) {
                     return;
                 }
+
                 MediaInfo mediaInfo = new MediaInfo();
-                mediaInfo.ADir = extras[3];
-                mediaInfo.VDir = extras[4];
-                mediaInfo.TDir = extras[5];
-                SuppInfo suppInfo = new SuppInfo();
-                sTempCall.start(extras[0], extras[1] + "", extras[2] + "", mediaInfo, suppInfo);
+
+                // 0 : callType
+                // 1 ~ 2 : audio/video/text direction
+                mediaInfo.ADir = extras[1];
+                mediaInfo.VDir = extras[2];
+                mediaInfo.TDir = extras[3];
+                sTempCall.start(extras[0], callee, callee, mediaInfo, new SuppInfo());
                 return;
             } else if (command == 103) {
                 // 0 : reason
@@ -300,6 +307,41 @@ public final class ImsTestHelper {
                     return;
                 }
                 sTempCall.close();
+                return;
+            } else if (command == 105) {
+                ImsLog.d("sendMtcTestCommand :: accept call");
+                if (sTempCall == null) {
+                    ImsLog.e("call is null");
+                    return;
+                }
+
+                MediaInfo mediaInfo = new MediaInfo();
+                mediaInfo.ADir = extras[1];
+                mediaInfo.VDir = extras[2];
+                mediaInfo.TDir = extras[3];
+                sTempCall.accept(extras[0], mediaInfo);
+                return;
+            } else if (command == 106) {
+                ImsLog.d("sendMtcTestCommand :: setCallListener");
+                mtcApp.setCallListener(new MtcApp.CallListener() {
+                    @Override
+                    public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
+                        ImsLog.d("onPreIncomingCallReceived");
+                        sTempCall = mtcApp.getPendingCall(nativeCallObject);
+                        if (sTempCall == null) {
+                            ImsLog.e("call is null");
+                            return;
+                        }
+                        sTempCall.setListener(new MtcCall.Listener() {
+                            @Override
+                            public void onCallIncomingReceived(MtcCall call,
+                                    IncomingMtcCall incomingCall) {
+                                ImsLog.d("onCallIncomingReceived");
+                                call.alertUser();
+                            }
+                        });
+                    }
+                });
                 return;
             }
 
@@ -326,7 +368,11 @@ public final class ImsTestHelper {
         // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_QOS_TEST
         // .    --ei call 0 --ei media 0 --es ipaddress 192.168.0.1 --ei port 50010 --ei result 1
         private void sendQosChanged(int call, int media, String ipAddress, int port, int result) {
-            ImsLog.d("sendQosChanged :: call=" + call + ", media=" + media);
+            ImsLog.d("sendQosChanged :: call=" + call
+                    + ", media=" + media
+                    + ", ipAddress=" + ipAddress
+                    + ", port=" + port
+                    + ", result=" + result);
 
             ImsServiceManager sm = ImsServiceManager.getDefault();
             ImsCallApp callApp = sm.getCallApp(0);
