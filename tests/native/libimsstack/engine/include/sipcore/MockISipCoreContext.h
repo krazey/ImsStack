@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PROTOCOL_PERMISSION_H_
-#define PROTOCOL_PERMISSION_H_
+#ifndef MOCK_I_SIP_CORE_CONTEXT_H_
+#define MOCK_I_SIP_CORE_CONTEXT_H_
 
-#include "Protocol.h"
+#include <gmock/gmock.h>
 
-class ProtocolPermission
+#include "ISipCoreContext.h"
+
+class MockISipCoreContext : public ISipCoreContext
 {
-private:
-    ProtocolPermission() = delete;
-
 public:
-    static Protocol* Lookup(IN const AString& strName);
-    static void RegisterProtocol(IN const AString& strName, IN Protocol* pProtocol);
-    static void UnregisterAllProtocols();
+    MockISipCoreContext() = default;
+    ~MockISipCoreContext() override = default;
+
+    MOCK_METHOD(Protocol*, GetSipProtocol, (), (const, override));
 };
 
 #endif

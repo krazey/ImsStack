@@ -28,31 +28,6 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PRIVATE
-ImsCoreProtocol::ImsCoreProtocol() :
-        ServiceProtocol()
-{
-}
-
-/**
- * @brief Returns a singleton object of IMS Core Protocol.
- *
- * It throws the error as follows:
- *   ILLEGAL_ARGUMENT,
- *   CONNECTION_NOT_FOUND
- */
-PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
-{
-    static ImsCoreProtocol* s_pImsCoreProtocol = IMS_NULL;
-
-    if (s_pImsCoreProtocol == IMS_NULL)
-    {
-        s_pImsCoreProtocol = new ImsCoreProtocol();
-    }
-
-    return s_pImsCoreProtocol;
-}
-
 /**
  * @brief Creates a IMS Service.
  *

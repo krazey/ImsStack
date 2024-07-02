@@ -27,29 +27,6 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-PRIVATE
-SipProtocol::SipProtocol() :
-        Protocol()
-{
-}
-
-PUBLIC VIRTUAL SipProtocol::~SipProtocol() {}
-
-/**
- * Returns a singleton object of SIP protocol.
- */
-PUBLIC GLOBAL SipProtocol* SipProtocol::GetInstance()
-{
-    static SipProtocol* s_pSipProtocol = IMS_NULL;
-
-    if (s_pSipProtocol == IMS_NULL)
-    {
-        s_pSipProtocol = new SipProtocol();
-    }
-
-    return s_pSipProtocol;
-}
-
 /**
  * Creates and opens a SIP Connection.
  */

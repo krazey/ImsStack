@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PROTOCOL_PERMISSION_H_
-#define PROTOCOL_PERMISSION_H_
+#ifndef INTERFACE_CORE_CONTEXT_H_
+#define INTERFACE_CORE_CONTEXT_H_
 
-#include "Protocol.h"
+class ServiceProtocol;
 
-class ProtocolPermission
+/**
+ * A context interface for providing the singleton instances for core (imscore) layer.
+ */
+class ICoreContext
 {
-private:
-    ProtocolPermission() = delete;
+protected:
+    virtual ~ICoreContext() = default;
 
 public:
-    static Protocol* Lookup(IN const AString& strName);
-    static void RegisterProtocol(IN const AString& strName, IN Protocol* pProtocol);
-    static void UnregisterAllProtocols();
+    /**
+     * @brief Returns the ImsCoreProtocol instance.
+     */
+    virtual ServiceProtocol* GetImsCoreProtocol() const = 0;
 };
 
 #endif
