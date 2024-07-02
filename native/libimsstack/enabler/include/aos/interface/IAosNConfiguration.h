@@ -272,6 +272,17 @@ public:
     virtual IMS_BOOL IsEmcRegOnRandomPcscf() const = 0;
 
     /**
+     * @brief Flag specifying if emergency registration is transmitted only over TCP
+     *        in roaming network.
+     *
+     *        If this is set as TRUE, it will be applied in all the SIP messages which are sent
+     *        via this emergency IMS registration.
+     *
+     * @return IMS_BOOL Return whether to be set or not to use only TCP transport.
+     */
+    virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
+
+    /**
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
      *        during IMS calls and performed immediately after they are released.
      *

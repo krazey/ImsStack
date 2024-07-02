@@ -684,6 +684,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPL
 const IMS_CHAR CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
         "ecall_based_on_p_associated_uri_of_normal_reg_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL[] = "ereg_on_random_pcscf_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL[] =
+        "ereg_set_tcp_only_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =

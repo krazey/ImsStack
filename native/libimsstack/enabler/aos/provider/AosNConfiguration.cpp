@@ -270,6 +270,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmcRegOnRandomPcscf() const
     return m_objAsset.bEmcRegOnRandomPcscf;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsERegWithOnlyTcpInRoaming() const
+{
+    return m_objAsset.bERegWithOnlyTcpInRoaming;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHeld() const
 {
     return m_objAsset.bHoldRegWithIpcanChangedDuringImsCall;
@@ -1223,6 +1228,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_ON_RANDOM_PCSCF_BOOL);
+    m_objAsset.bERegWithOnlyTcpInRoaming =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_EREG_SET_TCP_ONLY_IN_ROAMING_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL);
     m_objAsset.bIgnoreVopsForVolteEnable =
