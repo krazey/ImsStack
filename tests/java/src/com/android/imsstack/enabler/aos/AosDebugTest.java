@@ -403,9 +403,9 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageRegistered() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_REGISTER,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.REGISTER,
                 IAosDebug.DebugData.STR_IMS_REGISTERED);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_FEATURES,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.FEATURES,
                 "TEST_VALUE_FEATURES");
 
         // WHEN
@@ -419,9 +419,9 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageDeregistered() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_REGISTER,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.REGISTER,
                 IAosDebug.DebugData.STR_IMS_DEREGISTERED);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DEREGISTER_REASON,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DEREGISTER_REASON,
                 "TEST_VALUE_DEREGISTER_REASON");
 
         // WHEN
@@ -435,30 +435,30 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageDataConnected() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_CONNECTION_STATE, "CONNECTED");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_CELLULAR_DATA_RAT, "LTE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_CONNECTION_STATE, "CONNECTED");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.CELLULAR_DATA_RAT, "LTE");
 
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_TYPE, TEST_VALUE + 1);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_IP_ADDRESSES, TEST_VALUE + 2);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_INTERFACE_NAME, TEST_VALUE + 3);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_MTU, TEST_VALUE + 4);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_APN_NAME, TEST_VALUE + 5);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_APN_ENTRY_NAME, TEST_VALUE + 6);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_APN_TYPES, TEST_VALUE + 7);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_PCSCF_ADDRESSES, TEST_VALUE + 8);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_SERVICE_STATE, TEST_VALUE + 9);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_REG_STATE,  TEST_VALUE + 10);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_LTE_ATTACH_TYPE, TEST_VALUE + 11);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_ROAMING_STATE, TEST_VALUE + 12);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_VOICE_ROAMING_TYPE, TEST_VALUE + 13);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_ROAMING_TYPE, TEST_VALUE + 14);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_VOICE_RAT, TEST_VALUE + 15);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_OPERATOR, TEST_VALUE + 16);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_OPERATOR_NUMERIC,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_TYPE, TEST_VALUE + 1);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.IP_ADDRESSES, TEST_VALUE + 2);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.INTERFACE_NAME, TEST_VALUE + 3);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.MTU, TEST_VALUE + 4);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.APN_NAME, TEST_VALUE + 5);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.APN_ENTRY_NAME, TEST_VALUE + 6);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.APN_TYPES, TEST_VALUE + 7);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.PCSCF_ADDRESSES, TEST_VALUE + 8);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.SERVICE_STATE, TEST_VALUE + 9);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_REG_STATE,  TEST_VALUE + 10);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.LTE_ATTACH_TYPE, TEST_VALUE + 11);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.ROAMING_STATE, TEST_VALUE + 12);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.VOICE_ROAMING_TYPE, TEST_VALUE + 13);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_ROAMING_TYPE, TEST_VALUE + 14);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.VOICE_RAT, TEST_VALUE + 15);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_OPERATOR, TEST_VALUE + 16);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_OPERATOR_NUMERIC,
                 TEST_VALUE + 17);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_VOPS,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_SUPPORT_VOPS,
                 TEST_VALUE + 18);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_EMCBS,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_SUPPORT_EMCBS,
                 TEST_VALUE + 19);
 
         // WHEN
@@ -476,14 +476,14 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageSignalStrength() {
         //GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_CONNECTION_STATE, "CONNECTED");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_CONNECTION_STATE, "CONNECTED");
 
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, TEST_VALUE + 1);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, TEST_VALUE + 2);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, TEST_VALUE + 3);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, TEST_VALUE + 4);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, TEST_VALUE + 5);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ, TEST_VALUE + 6);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_LEVEL, TEST_VALUE + 1);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_DBM, TEST_VALUE + 2);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRP, TEST_VALUE + 3);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRQ, TEST_VALUE + 4);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRP, TEST_VALUE + 5);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRQ, TEST_VALUE + 6);
 
         // WHEN
         String text = mFakeAosDebug.getDebugMessage();
@@ -499,14 +499,14 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageWifiConnected() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_CONNECTION_STATE,
                 IAosDebug.DebugData.STR_CONNECTED);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_ADDRESSES, TEST_VALUE + 1);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_INTERFACE_NAME, TEST_VALUE + 2);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_RSSI, TEST_VALUE + 3);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_BSSID, TEST_VALUE + 4);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_SSID, TEST_VALUE + 5);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_MAC_ADDRESS, TEST_VALUE + 6);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_ADDRESSES, TEST_VALUE + 1);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_INTERFACE_NAME, TEST_VALUE + 2);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_RSSI, TEST_VALUE + 3);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_BSSID, TEST_VALUE + 4);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_SSID, TEST_VALUE + 5);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_MAC_ADDRESS, TEST_VALUE + 6);
 
         // WHEN
         String text = mFakeAosDebug.getDebugMessage();
@@ -522,14 +522,14 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testGetDebugMessageWifiDisconnected() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE,
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_CONNECTION_STATE,
                 IAosDebug.DebugData.STR_DISCONNECTED);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_ADDRESSES, TEST_VALUE + 1);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_INTERFACE_NAME, TEST_VALUE + 2);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_RSSI, TEST_VALUE + 3);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_BSSID, TEST_VALUE + 4);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_SSID, TEST_VALUE + 5);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_WIFI_MAC_ADDRESS, TEST_VALUE + 6);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_ADDRESSES, TEST_VALUE + 1);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_INTERFACE_NAME, TEST_VALUE + 2);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_RSSI, TEST_VALUE + 3);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_BSSID, TEST_VALUE + 4);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_SSID, TEST_VALUE + 5);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.WIFI_MAC_ADDRESS, TEST_VALUE + 6);
 
         // WHEN
         String text = mFakeAosDebug.getDebugMessage();
@@ -566,8 +566,10 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleMessageHandleAirplaneModeChangedStateIsTrue() {
         // GIVEN
-        for (int i = 0; i < IAosDebug.sClearableKeys.length; i++) {
-            mFakeAosDebug.mDebugData.put(IAosDebug.sClearableKeys[i], TEST_VALUE + i);
+        for (IAosDebug.DebugKey key : IAosDebug.DebugKey.values()) {
+            if (!IAosDebug.PRESERVED_KEYS.contains(key)) {
+                mFakeAosDebug.mDebugData.put(key, TEST_VALUE + key.getValue());
+            }
         }
 
         boolean isOn = true;
@@ -579,23 +581,26 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN Expects everything to be "STR_EMPTY" except "KEY_XXX_CONNECTION_STATE".
-        for (int i = 0; i < IAosDebug.sClearableKeys.length; i++) {
-            int key = IAosDebug.sClearableKeys[i];
-            if (key == IAosDebug.DebugData.KEY_DATA_CONNECTION_STATE
-                    || key == IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE) {
-                assertEquals(IAosDebug.DebugData.STR_DISCONNECTED,
-                        mFakeAosDebug.mDebugData.get(key));
-                continue;
+        for (IAosDebug.DebugKey key : IAosDebug.DebugKey.values()) {
+            if (!IAosDebug.PRESERVED_KEYS.contains(key)) {
+                if (key == IAosDebug.DebugKey.DATA_CONNECTION_STATE
+                        || key == IAosDebug.DebugKey.WIFI_CONNECTION_STATE) {
+                    assertEquals(IAosDebug.DebugData.STR_DISCONNECTED,
+                            mFakeAosDebug.mDebugData.get(key));
+                } else {
+                    assertEquals(IAosDebug.DebugData.STR_EMPTY, mFakeAosDebug.mDebugData.get(key));
+                }
             }
-            assertEquals(IAosDebug.DebugData.STR_EMPTY, mFakeAosDebug.mDebugData.get(key));
         }
     }
 
     @Test
     public void testHandleMessageHandleAirplaneModeChangedStateIsFalse() {
         // GIVEN
-        for (int i = 0; i < IAosDebug.sClearableKeys.length; i++) {
-            mFakeAosDebug.mDebugData.put(IAosDebug.sClearableKeys[i], TEST_VALUE + i);
+        for (IAosDebug.DebugKey key : IAosDebug.DebugKey.values()) {
+            if (!IAosDebug.PRESERVED_KEYS.contains(key)) {
+                mFakeAosDebug.mDebugData.put(key, TEST_VALUE + key.getValue());
+            }
         }
 
         boolean isOn = false;
@@ -607,9 +612,10 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN Expect the values of ClearableKeys to not change.
-        for (int i = 0; i < IAosDebug.sClearableKeys.length; i++) {
-            assertEquals(TEST_VALUE + i,
-                    mFakeAosDebug.mDebugData.get(IAosDebug.sClearableKeys[i]));
+        for (IAosDebug.DebugKey key : IAosDebug.DebugKey.values()) {
+            if (!IAosDebug.PRESERVED_KEYS.contains(key)) {
+                assertEquals(TEST_VALUE + key.getValue(), mFakeAosDebug.mDebugData.get(key));
+            }
         }
     }
 
@@ -640,7 +646,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(String.valueOf(TestAppContext.SUB_ID_2),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SUB_ID));
 
         verify(mMockSignalStrengthsListener, times(1)).unregister();
         // It must be called once in init() and once again in this function.
@@ -657,7 +663,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SUB_ID));
 
         verify(mMockSignalStrengthsListener, never()).unregister();
         // It must be called once in init().
@@ -674,7 +680,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SUB_ID));
 
         verify(mMockSimInterface, never()).getSubId();
         verify(mMockSignalStrengthsListener, never()).unregister();
@@ -692,7 +698,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(String.valueOf(TestAppContext.SUB_ID_1),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SUB_ID));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SUB_ID));
 
         verify(mMockSimInterface, never()).isSimLoadCompleted();
         verify(mMockSimInterface, never()).getSubId();
@@ -757,12 +763,12 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdateSignalStrengthDataUtran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_DBM, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRQ, "TEST_VALUE");
 
         CellSignalStrength css = new CellSignalStrengthWcdma();
         int network = AccessNetworkConstants.AccessNetworkType.UTRAN;
@@ -772,30 +778,30 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_LEVEL));
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_DBM));
 
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRP));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRQ));
 
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRP));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRQ));
     }
 
     @Test
     public void testUpdateSignalStrengthDataEutran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_DBM, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRQ, "TEST_VALUE");
 
         CellSignalStrength css = new CellSignalStrengthLte();
         int network = AccessNetworkConstants.AccessNetworkType.EUTRAN;
@@ -805,30 +811,30 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_LEVEL));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_DBM));
 
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRP));
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRQ));
 
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRP));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRQ));
     }
 
     @Test
     public void testUpdateSignalStrengthDataNgran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.UTRAN_DBM, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.EUTRAN_RSRQ, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NGRAN_SSRSRQ, "TEST_VALUE");
 
         CellSignalStrength css = new CellSignalStrengthNr();
         int network = AccessNetworkConstants.AccessNetworkType.NGRAN;
@@ -838,19 +844,19 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_LEVEL));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.UTRAN_DBM));
 
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRP));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.EUTRAN_RSRQ));
 
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRP));
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NGRAN_SSRSRQ));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NGRAN_SSRSRQ));
     }
 
     @Test
@@ -867,7 +873,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_CONNECTED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_CONNECTION_STATE));
     }
 
     @Test
@@ -884,7 +890,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_DISCONNECTED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_CONNECTION_STATE));
     }
 
     @Test
@@ -901,7 +907,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_DISCONNECTED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_CONNECTION_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_CONNECTION_STATE));
     }
 
     @Test
@@ -927,13 +933,13 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_RSSI)
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_RSSI)
                 .contains("100"));
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_BSSID)
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_BSSID)
                 .contains("test_bssid"));
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_SSID)
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_SSID)
                 .contains("test_ssid"));
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_MAC_ADDRESS)
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_MAC_ADDRESS)
                 .contains("test_address"));
     }
 
@@ -959,13 +965,13 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_RSSI)
+        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_RSSI)
                 .contains("100"));
-        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_BSSID)
+        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_BSSID)
                 .contains("test_bssid"));
-        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_SSID)
+        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_SSID)
                 .contains("test_ssid"));
-        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_WIFI_MAC_ADDRESS)
+        assertFalse(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.WIFI_MAC_ADDRESS)
                 .contains("test_address"));
     }
 
@@ -1002,7 +1008,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("In Service",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SERVICE_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SERVICE_STATE));
     }
 
     @Test
@@ -1015,7 +1021,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("Out of Service",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SERVICE_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SERVICE_STATE));
     }
 
     @Test
@@ -1028,7 +1034,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("Emergency call only",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SERVICE_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SERVICE_STATE));
     }
 
     @Test
@@ -1041,7 +1047,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("Radio off",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SERVICE_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SERVICE_STATE));
     }
 
     @Test
@@ -1054,15 +1060,15 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_SERVICE_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.SERVICE_STATE));
     }
 
     @Test
     public void testUpdateVoiceRatNetworkRegistrationInfoIsNull() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_VOICE_RAT, "TEST_NETWORK");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.VOICE_RAT, "TEST_NETWORK");
         assertEquals("TEST_NETWORK",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_VOICE_RAT));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.VOICE_RAT));
 
         when(mMockServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
 
@@ -1071,13 +1077,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_VOICE_RAT));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.VOICE_RAT));
     }
 
     @Test
     public void testUpdateDataRegStateNetworkRegistrationInfoIsNull() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_REG_STATE, "In Service");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_REG_STATE, "In Service");
 
         when(mMockServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
 
@@ -1086,13 +1092,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DATA_REG_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DATA_REG_STATE));
     }
 
     @Test
     public void testUpdateDataRegStateRadioOff() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_REG_STATE, "In Service");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.DATA_REG_STATE, "In Service");
 
         when(mMockServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
         when(mMockServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
@@ -1101,7 +1107,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.updateDataRegState(mMockServiceState);
 
         // THEN
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DATA_REG_STATE)
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DATA_REG_STATE)
                 .contains("Radio off"));
     }
 
@@ -1116,7 +1122,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(FakeAosDebug.getNetworkTypeToString(TelephonyManager.NETWORK_TYPE_LTE_CA),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_CELLULAR_DATA_RAT));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.CELLULAR_DATA_RAT));
     }
 
     @Test
@@ -1129,7 +1135,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(FakeAosDebug.getNetworkTypeToString(TelephonyManager.NETWORK_TYPE_UNKNOWN),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_CELLULAR_DATA_RAT));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.CELLULAR_DATA_RAT));
     }
 
     @Test
@@ -1142,7 +1148,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_OPERATOR_ALPHA_LONG",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NETWORK_OPERATOR));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NETWORK_OPERATOR));
     }
 
     @Test
@@ -1155,7 +1161,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_OPERATOR_NUMERIC",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NETWORK_OPERATOR_NUMERIC));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NETWORK_OPERATOR_NUMERIC));
     }
 
     @Test
@@ -1168,7 +1174,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("Roaming",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_ROAMING_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.ROAMING_STATE));
     }
 
     @Test
@@ -1181,7 +1187,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("Not Roaming",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_ROAMING_STATE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.ROAMING_STATE));
     }
 
     @Test
@@ -1194,7 +1200,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(FakeAosDebug.getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_VOICE_ROAMING_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.VOICE_ROAMING_TYPE));
     }
 
     @Test
@@ -1207,15 +1213,15 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(FakeAosDebug.getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DATA_ROAMING_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DATA_ROAMING_TYPE));
     }
 
     @Test
     public void testUpdateNetworkFeatureNetworkRegistrationInfoIsNull() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_VOPS, "SUPPORT");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_EMCBS, "SUPPORT");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_LTE_ATTACH_TYPE, "COMBINED");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_SUPPORT_VOPS, "SUPPORT");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.NETWORK_SUPPORT_EMCBS, "SUPPORT");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugKey.LTE_ATTACH_TYPE, "COMBINED");
 
         when(mMockServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
 
@@ -1224,11 +1230,11 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_VOPS));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NETWORK_SUPPORT_VOPS));
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_NETWORK_SUPPORT_EMCBS));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.NETWORK_SUPPORT_EMCBS));
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_LTE_ATTACH_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.LTE_ATTACH_TYPE));
     }
 
     @Test
@@ -1245,7 +1251,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_NAME),
                 "TEST_APN_NAME");
     }
 
@@ -1263,7 +1269,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_ENTRY_NAME),
                 "TEST_APN_ENTRY_NAME");
     }
 
@@ -1282,7 +1288,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        String apnTypes = mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES);
+        String apnTypes = mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_TYPES);
         assertTrue(apnTypes.contains("IMS"));
         assertTrue(apnTypes.contains("EMERGENCY"));
     }
@@ -1297,11 +1303,11 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_NAME),
                 IAosDebug.DebugData.STR_EMPTY);
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_TYPES),
                 IAosDebug.DebugData.STR_EMPTY);
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.APN_ENTRY_NAME),
                 IAosDebug.DebugData.STR_EMPTY);
     }
 
@@ -1323,11 +1329,11 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.IP_ADDRESSES),
                 lp.getAddresses().toString());
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.INTERFACE_NAME),
                 lp.getInterfaceName());
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.MTU),
                 String.valueOf(lp.getMtu()));
     }
 
@@ -1341,11 +1347,11 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.IP_ADDRESSES),
                 IAosDebug.DebugData.STR_EMPTY);
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.INTERFACE_NAME),
                 IAosDebug.DebugData.STR_EMPTY);
-        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU),
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.MTU),
                 IAosDebug.DebugData.STR_EMPTY);
     }
 
@@ -1364,13 +1370,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1388,13 +1394,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1412,13 +1418,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1436,13 +1442,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1460,13 +1466,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1484,13 +1490,13 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_REGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
         assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
     }
 
     @Test
@@ -1532,7 +1538,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES).contains(
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES).contains(
                 IAosRegistrationListener.FeatureTagMask.toString(featureTagBits)));
     }
 
@@ -1551,14 +1557,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1576,14 +1582,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1601,14 +1607,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1626,14 +1632,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1651,14 +1657,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1676,14 +1682,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1702,14 +1708,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1727,14 +1733,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1753,14 +1759,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1779,14 +1785,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1804,14 +1810,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1829,14 +1835,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1854,14 +1860,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1879,14 +1885,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1904,14 +1910,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1929,14 +1935,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1954,14 +1960,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -1979,14 +1985,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -2004,14 +2010,14 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_IMS_DEREGISTERED,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_REGISTER));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_TIME));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_TIME));
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_FEATURES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
         assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_DEREGISTER_REASON));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
     @Test
@@ -2034,7 +2040,7 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_CAPABILITIES).contains(
+        assertTrue(mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.CAPABILITIES).contains(
                 IAosRegistrationListener.Capability.toString(
                         IAosRegistrationListener.Capability.VOICE
                                 | IAosRegistrationListener.Capability.VIDEO
@@ -2057,7 +2063,7 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_CAPABILITIES));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.CAPABILITIES));
     }
 
     @Test
