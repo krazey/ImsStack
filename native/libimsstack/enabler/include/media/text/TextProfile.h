@@ -33,21 +33,17 @@ public:
     class RedFmtp : public BaseFmtp
     {
     public:
-        IMS_SINT32 nRedLevel;
-        IMS_SINT32 nRedPayload;
-
-    public:
         RedFmtp() :
-                nRedLevel(-1),
-                nRedPayload(-1){};
+                m_nRedLevel(-1),
+                m_nRedPayload(-1){};
 
         RedFmtp(IN IMS_SINT32 nRed, IN IMS_SINT32 nRedPT) :
-                nRedLevel(nRed),
-                nRedPayload(nRedPT){};
+                m_nRedLevel(nRed),
+                m_nRedPayload(nRedPT){};
 
         RedFmtp(IN const RedFmtp& obj) :
-                nRedLevel(obj.nRedLevel),
-                nRedPayload(obj.nRedPayload){};
+                m_nRedLevel(obj.m_nRedLevel),
+                m_nRedPayload(obj.m_nRedPayload){};
 
         virtual ~RedFmtp(){};
 
@@ -55,11 +51,20 @@ public:
         {
             if (this != &obj)
             {
-                nRedLevel = obj.nRedLevel;
-                nRedPayload = obj.nRedPayload;
+                m_nRedLevel = obj.m_nRedLevel;
+                m_nRedPayload = obj.m_nRedPayload;
             }
             return (*this);
         }
+
+        void SetRedLevel(IN const IMS_SINT32 nRedLevel) { m_nRedLevel = nRedLevel; }
+        IMS_SINT32 GetRedLevel() { return m_nRedLevel; }
+        void SetRedPayload(IN const IMS_SINT32 nRedPayload) { m_nRedPayload = nRedPayload; }
+        IMS_SINT32 GetRedPayload() { return m_nRedPayload; }
+
+    private:
+        IMS_SINT32 m_nRedLevel;
+        IMS_SINT32 m_nRedPayload;
     };
 
 public:

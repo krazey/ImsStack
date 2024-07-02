@@ -151,8 +151,8 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             pTextConfig->setSamplingRateKHz(
                     (int8_t)(pPayload->GetRtpMap().GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140_RED);
-            pTextConfig->setRedundantPayload(pFmtp->nRedPayload);
-            pTextConfig->setRedundantLevel(pFmtp->nRedLevel);
+            pTextConfig->setRedundantPayload(pFmtp->GetRedPayload());
+            pTextConfig->setRedundantLevel(pFmtp->GetRedLevel());
             break;
         }
         else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))

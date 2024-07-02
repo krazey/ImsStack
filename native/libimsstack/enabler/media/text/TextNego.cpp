@@ -533,8 +533,8 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                 continue;
             }
 
-            IMS_TRACE_I("MakeSdpFromProfile() - fmtp, nRedundancy [%d], nRedPayload[%d]",
-                    pRedFmtp->nRedLevel, pRedFmtp->nRedPayload, 0);
+            IMS_TRACE_I("MakeSdpFromProfile() - fmtp, Redundancy Level [%d], Red Payload[%d]",
+                    pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), 0);
 
             IMS_BOOL bRedSubPTExist = IMS_FALSE;
 
@@ -547,12 +547,12 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                     continue;
                 }
 
-                IMS_TRACE_I("MakeSdpFromProfile() - RedSubPT, PT[%d] of PL(%d) / nRedPayload "
+                IMS_TRACE_I("MakeSdpFromProfile() - RedSubPT, PT[%d] of PL(%d) / Red Payload "
                             "[%d]",
-                        pTempPayload->GetRtpMap().GetPayloadNumber(), j, pRedFmtp->nRedPayload);
+                        pTempPayload->GetRtpMap().GetPayloadNumber(), j, pRedFmtp->GetRedPayload());
 
                 if (pTempPayload->GetRtpMap().GetPayloadNumber() ==
-                        (IMS_UINT32)pRedFmtp->nRedPayload)
+                        (IMS_UINT32)pRedFmtp->GetRedPayload())
                 {
                     bRedSubPTExist = IMS_TRUE;
                 }
@@ -644,9 +644,9 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                 continue;
             }
 
-            IMS_UINT32 nCount = pRedFmtp->nRedLevel;
+            IMS_UINT32 nCount = pRedFmtp->GetRedLevel();
             AString TempSubPT;
-            TempSubPT.Sprintf("%d", pRedFmtp->nRedPayload);
+            TempSubPT.Sprintf("%d", pRedFmtp->GetRedPayload());
 
             while (nCount-- > 0)
             {
@@ -658,9 +658,9 @@ IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor
                 strFmtp.Append(TempSubPT);
             }
 
-            IMS_TRACE_I("MakeSdpFromProfile() - Add fmtp, nRedundancy[%d], nRedPayload[%d], "
+            IMS_TRACE_I("MakeSdpFromProfile() - Add fmtp, nRedundancy[%d], Red Payload[%d], "
                         "Fmtp[%s]",
-                    pRedFmtp->nRedLevel, pRedFmtp->nRedPayload, strFmtp.GetStr());
+                    pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), strFmtp.GetStr());
         }
 
         if (strFmtp.GetLength() == 0)
@@ -756,10 +756,10 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
                 if (pSDPCodec == IMS_NULL)
                     continue;
 
-                IMS_TRACE_I("MakeSdpFromProfile() - Check RedSubPT, PT[%d] of PL(%d) / nRedPayload "
+                IMS_TRACE_I("MakeSdpFromProfile() - Check RedSubPT, PT[%d] of PL(%d) / Red Payload "
                             "[%d]",
-                        pSDPCodec->GetPayloadType(), j, pRedFmtp->nRedPayload);
-                if (pSDPCodec->GetPayloadType() == pRedFmtp->nRedPayload)
+                        pSDPCodec->GetPayloadType(), j, pRedFmtp->GetRedPayload());
+                if (pSDPCodec->GetPayloadType() == pRedFmtp->GetRedPayload())
                 {
                     bRedSubPTExist = IMS_TRUE;
                 }
@@ -774,8 +774,8 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
                 continue;
             }
 
-            IMS_TRACE_I(
-                    "MakeProfileFromSDP() - Redundancy presented [%d]", pRedFmtp->nRedLevel, 0, 0);
+            IMS_TRACE_I("MakeProfileFromSDP() - Redundancy presented [%d]", pRedFmtp->GetRedLevel(),
+                    0, 0);
             pPayload->SetFmtp(pRedFmtp);
         }
         else if (!strCodecName.EqualsIgnoreCase("t140"))
@@ -945,27 +945,27 @@ PRIVATE IMS_BOOL TextNego::GetFmtpFromString(
         return IMS_FALSE;
 
     ImsList<AString> strArrTemp = strFmtp.Split('/');
-    pFmtp->nRedLevel = strArrTemp.GetSize();
+    pFmtp->SetRedLevel(strArrTemp.GetSize());
 
-    if (pFmtp->nRedLevel == 0)
+    if (pFmtp->GetRedLevel() == 0)
     {
         return IMS_FALSE;
     }
 
-    pFmtp->nRedPayload = strArrTemp.GetAt(0).ToInt32();
+    pFmtp->SetRedPayload(strArrTemp.GetAt(0).ToInt32());
 
-    for (IMS_SINT32 i = 0; i < pFmtp->nRedLevel - 1; i++)
+    for (IMS_SINT32 i = 0; i < pFmtp->GetRedLevel() - 1; i++)
     {
-        if (strArrTemp.GetAt(i).ToInt32() != pFmtp->nRedPayload)
+        if (strArrTemp.GetAt(i).ToInt32() != pFmtp->GetRedPayload())
         {
-            pFmtp->nRedLevel = -1;
-            pFmtp->nRedPayload = -1;
+            pFmtp->SetRedLevel(-1);
+            pFmtp->SetRedPayload(-1);
             return IMS_FALSE;
         }
     }
 
-    IMS_TRACE_D("GetFmtpFromString() Ended. nRedLevel[%d], nRedPayload[%d]", pFmtp->nRedLevel,
-            pFmtp->nRedPayload, 0);
+    IMS_TRACE_D("GetFmtpFromString() Ended. Red Level[%d], Red Payload[%d]", pFmtp->GetRedLevel(),
+            pFmtp->GetRedPayload(), 0);
 
     return IMS_TRUE;
 }
@@ -1014,8 +1014,8 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
                     continue;
                 }
 
-                if (pReceivedFmtp->nRedLevel > pComparedFmtp->nRedLevel ||
-                        pReceivedFmtp->nRedPayload < 0)
+                if (pReceivedFmtp->GetRedLevel() > pComparedFmtp->GetRedLevel() ||
+                        pReceivedFmtp->GetRedPayload() < 0)
                 {
                     continue;
                 }

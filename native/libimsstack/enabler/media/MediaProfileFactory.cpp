@@ -733,7 +733,7 @@ PRIVATE TextProfile::Payload* MediaProfileFactory::CreateT140Payload(
                 static_cast<TextConfiguration*>(pConfig)->GetT140PayloadType());
 
         IMS_TRACE_I("CreateT140Payload() add fmtp - red level(%d), red payload(%d)",
-                pRedFmtp->nRedLevel, pRedFmtp->nRedPayload, 0);
+                pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), 0);
 
         pTextPayload->SetFmtp(pRedFmtp);
     }
