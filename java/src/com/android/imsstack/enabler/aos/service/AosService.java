@@ -417,7 +417,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyCarrierSignalPcoValueChanged(Intent intent) {
+    public void notifyCarrierSignalPcoValueChanged(@NonNull Intent intent) {
+        Objects.requireNonNull(intent, "intent must not be null");
         mHandler.post(() -> handleCarrierSignalPcoValueChanged(intent));
     }
 

@@ -167,12 +167,13 @@ public interface IAosInfo {
     void notifyPowerOff();
 
     /**
-     * Called to notify the change of carrier signal PCO value.
-     * Native Listener : IAosServicePhoneListener.
+     * Notifies the listener of a change in carrier signal PCO value.
+     * Native Listener: IAosServicePhoneListener
      *
-     * @param intent Intent for Carrier signal pco value.
+     * @param intent Intent containing the carrier signal PCO value information.
+     * @throws NullPointerException if {@code intent} is null.
      */
-    void notifyCarrierSignalPcoValueChanged(Intent intent);
+    void notifyCarrierSignalPcoValueChanged(@NonNull Intent intent);
 
     /**
      * Called to notify the update of emergency callback mode.
