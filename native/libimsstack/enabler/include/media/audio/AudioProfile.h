@@ -452,48 +452,72 @@ public:
     };
 
 public:
-    class RTCPXRAttributes
+    class RtcpXrAttributes
     {
     public:
-        IMS_BOOL bSupportStatisticMetrics;
-        IMS_BOOL bSupportVoipMetrics;
-        IMS_BOOL bSupportPacketLossRle;
-        IMS_BOOL bSupportPacketDuplicatedRle;
+        RtcpXrAttributes() :
+                m_bSupportStatisticMetrics(IMS_FALSE),
+                m_bSupportVoipMetrics(IMS_FALSE),
+                m_bSupportPacketLossRle(IMS_FALSE),
+                m_bSupportPacketDuplicatedRle(IMS_FALSE){};
 
-    public:
-        RTCPXRAttributes() :
-                bSupportStatisticMetrics(IMS_FALSE),
-                bSupportVoipMetrics(IMS_FALSE),
-                bSupportPacketLossRle(IMS_FALSE),
-                bSupportPacketDuplicatedRle(IMS_FALSE){};
-
-        RTCPXRAttributes& operator=(const RTCPXRAttributes& p)
+        RtcpXrAttributes& operator=(const RtcpXrAttributes& p)
         {
             if (this != &p)
             {
-                bSupportStatisticMetrics = p.bSupportStatisticMetrics;
-                bSupportVoipMetrics = p.bSupportVoipMetrics;
-                bSupportPacketLossRle = p.bSupportPacketLossRle;
-                bSupportPacketDuplicatedRle = p.bSupportPacketDuplicatedRle;
+                m_bSupportStatisticMetrics = p.m_bSupportStatisticMetrics;
+                m_bSupportVoipMetrics = p.m_bSupportVoipMetrics;
+                m_bSupportPacketLossRle = p.m_bSupportPacketLossRle;
+                m_bSupportPacketDuplicatedRle = p.m_bSupportPacketDuplicatedRle;
             }
             return (*this);
         }
 
-        bool operator==(IN const RTCPXRAttributes& obj) const
+        bool operator==(IN const RtcpXrAttributes& obj) const
         {
-            return (bSupportStatisticMetrics == obj.bSupportStatisticMetrics &&
-                    bSupportVoipMetrics == obj.bSupportVoipMetrics &&
-                    bSupportPacketLossRle == obj.bSupportPacketLossRle &&
-                    bSupportPacketDuplicatedRle == obj.bSupportPacketDuplicatedRle);
+            return (m_bSupportStatisticMetrics == obj.m_bSupportStatisticMetrics &&
+                    m_bSupportVoipMetrics == obj.m_bSupportVoipMetrics &&
+                    m_bSupportPacketLossRle == obj.m_bSupportPacketLossRle &&
+                    m_bSupportPacketDuplicatedRle == obj.m_bSupportPacketDuplicatedRle);
         }
 
-        bool operator!=(IN const RTCPXRAttributes& obj) const
+        bool operator!=(IN const RtcpXrAttributes& obj) const
         {
-            return (bSupportStatisticMetrics != obj.bSupportStatisticMetrics ||
-                    bSupportVoipMetrics != obj.bSupportVoipMetrics ||
-                    bSupportPacketLossRle != obj.bSupportPacketLossRle ||
-                    bSupportPacketDuplicatedRle != obj.bSupportPacketDuplicatedRle);
+            return (m_bSupportStatisticMetrics != obj.m_bSupportStatisticMetrics ||
+                    m_bSupportVoipMetrics != obj.m_bSupportVoipMetrics ||
+                    m_bSupportPacketLossRle != obj.m_bSupportPacketLossRle ||
+                    m_bSupportPacketDuplicatedRle != obj.m_bSupportPacketDuplicatedRle);
         }
+
+        inline void SetSupportStatisticMetrics(IN const IMS_BOOL bSupportStatisticMetrics)
+        {
+            m_bSupportStatisticMetrics = bSupportStatisticMetrics;
+        }
+        inline IMS_BOOL IsSupportStatisticMetricsEnabled() { return m_bSupportStatisticMetrics; }
+        inline void SetSupportVoipMetrics(IN const IMS_BOOL bSupportVoipMetrics)
+        {
+            m_bSupportVoipMetrics = bSupportVoipMetrics;
+        }
+        inline IMS_BOOL IsSupportVoipMetricsEnabled() { return m_bSupportVoipMetrics; }
+        inline void SetSupportPacketLossRle(IN const IMS_BOOL bSupportPacketLossRle)
+        {
+            m_bSupportPacketLossRle = bSupportPacketLossRle;
+        }
+        inline IMS_BOOL IsSupportPacketLossRleEnabled() { return m_bSupportPacketLossRle; }
+        inline void SetSupportPacketDuplicatedRle(IN const IMS_BOOL bSupportPacketDuplicatedRle)
+        {
+            m_bSupportPacketDuplicatedRle = bSupportPacketDuplicatedRle;
+        }
+        inline IMS_BOOL IsSupportPacketDuplicatedRleEnabled()
+        {
+            return m_bSupportPacketDuplicatedRle;
+        }
+
+    private:
+        IMS_BOOL m_bSupportStatisticMetrics;
+        IMS_BOOL m_bSupportVoipMetrics;
+        IMS_BOOL m_bSupportPacketLossRle;
+        IMS_BOOL m_bSupportPacketDuplicatedRle;
     };
 
 public:
@@ -508,7 +532,7 @@ public:
     IMS_SINT32 nMaxPtime;
     ImsVector<AString> objCandidateAttr;
     IMS_BOOL bSupportRtcpXr;
-    RTCPXRAttributes objRtcpXrAttr;
+    RtcpXrAttributes objRtcpXrAttr;
     IMS_BOOL bRtcpDisableBeforeSetup;
     IMS_BOOL bAnbr;
 
@@ -520,7 +544,7 @@ public:
             nMaxPtime(0),
             objCandidateAttr(ImsVector<AString>()),
             bSupportRtcpXr(IMS_FALSE),
-            objRtcpXrAttr(RTCPXRAttributes()),
+            objRtcpXrAttr(RtcpXrAttributes()),
             bRtcpDisableBeforeSetup(IMS_FALSE),
             bAnbr(IMS_FALSE){};
 

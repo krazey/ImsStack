@@ -796,19 +796,19 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     if (pProfile->bSupportRtcpXr == IMS_TRUE &&
             pProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        if (pProfile->objRtcpXrAttr.bSupportStatisticMetrics)
+        if (pProfile->objRtcpXrAttr.IsSupportStatisticMetricsEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "stat-summary=loss,dup,jitt,HL");
         }
-        if (pProfile->objRtcpXrAttr.bSupportVoipMetrics)
+        if (pProfile->objRtcpXrAttr.IsSupportVoipMetricsEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "voip-metrics");
         }
-        if (pProfile->objRtcpXrAttr.bSupportPacketLossRle)
+        if (pProfile->objRtcpXrAttr.IsSupportPacketLossRleEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-loss-rle");
         }
-        if (pProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle)
+        if (pProfile->objRtcpXrAttr.IsSupportPacketDuplicatedRleEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-dup-rle");
         }
@@ -985,19 +985,19 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
         if (xrAttr.Contains("stat-summary"))
         {
-            pProfile->objRtcpXrAttr.bSupportStatisticMetrics = IMS_TRUE;
+            pProfile->objRtcpXrAttr.SetSupportStatisticMetrics(IMS_TRUE);
         }
         if (xrAttr.Contains("voip-metrics"))
         {
-            pProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
+            pProfile->objRtcpXrAttr.SetSupportVoipMetrics(IMS_TRUE);
         }
         if (xrAttr.Contains("pkt-loss-rle"))
         {
-            pProfile->objRtcpXrAttr.bSupportPacketLossRle = IMS_TRUE;
+            pProfile->objRtcpXrAttr.SetSupportPacketLossRle(IMS_TRUE);
         }
         if (xrAttr.Contains("pkt-dup-rle"))
         {
-            pProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
+            pProfile->objRtcpXrAttr.SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
     }
 
