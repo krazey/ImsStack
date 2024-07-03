@@ -329,7 +329,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
                 pNegoPayload->GetRtpMap().GetPayloadType(), pNegoPayload));
 
         // AMR padding mode
-        pAmrParams->setOctetAligned(pFmtp->nOctetAlign);
+        pAmrParams->setOctetAligned(pFmtp->GetOctetAlign());
         pAmrParams->setMaxRedundancyMillis(0);  // TODO::MEDIA insert real value
         objAudioConfig.setAmrParams(*pAmrParams);
         delete pAmrParams;

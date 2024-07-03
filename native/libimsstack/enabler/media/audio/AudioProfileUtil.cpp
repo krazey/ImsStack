@@ -450,14 +450,14 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 }
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
                     pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset);
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
                     pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset, IMS_TRUE);
             if (nCurrAs > nAsMax)
             {

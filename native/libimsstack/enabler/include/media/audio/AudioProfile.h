@@ -187,24 +187,33 @@ public:
             DEFAULT_OCTETALIGN = 0,
         };
 
-        IMS_SINT32 nOctetAlign;
-        IMS_BOOL bShowOctetAlign;
-
         AmrFmtp() :
                 AudioFmtp(),
-                nOctetAlign(DEFAULT_OCTETALIGN),
-                bShowOctetAlign(IMS_FALSE)
+                m_nOctetAlign(DEFAULT_OCTETALIGN),
+                m_bShowOctetAlign(IMS_FALSE)
         {
         }
 
         AmrFmtp(IN const AmrFmtp& objFmtp) :
                 AudioFmtp(objFmtp),
-                nOctetAlign(objFmtp.nOctetAlign),
-                bShowOctetAlign(objFmtp.bShowOctetAlign)
+                m_nOctetAlign(objFmtp.m_nOctetAlign),
+                m_bShowOctetAlign(objFmtp.m_bShowOctetAlign)
         {
         }
 
         virtual ~AmrFmtp(){};
+
+        inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
+        inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
+        inline void SetShowOctetAlign(IN const IMS_BOOL bShowOctetAlign)
+        {
+            m_bShowOctetAlign = bShowOctetAlign;
+        }
+        inline IMS_BOOL IsShowOctetAlignEnabled() { return m_bShowOctetAlign; }
+
+    private:
+        IMS_SINT32 m_nOctetAlign;
+        IMS_BOOL m_bShowOctetAlign;
     };
 
 public:

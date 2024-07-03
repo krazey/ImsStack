@@ -1444,7 +1444,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             }
 
             nAsValueOfNegoticatedCodec =
-                    AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+                    AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
                             pNegotiatedProfile->GetIpAddress().IsIPv6Address(), nModeSet);
         }
         else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
@@ -2107,8 +2107,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("octet-align") == IMS_TRUE)
         {
-            pFmtp->nOctetAlign = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowOctetAlign = IMS_TRUE;
+            pFmtp->SetOctetAlign((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowOctetAlign(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {
@@ -2143,7 +2143,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
     }
 
     IMS_TRACE_D("GetFmtpFromString() Ended. ModeSet[0x%04x], OctetAlign[%d], ModeChangeCapa[%d]",
-            pFmtp->GetModeSetList(), pFmtp->nOctetAlign, pFmtp->GetModeChangeCapability());
+            pFmtp->GetModeSetList(), pFmtp->GetOctetAlign(), pFmtp->GetModeChangeCapability());
     IMS_TRACE_D("GetFmtpFromString() Ended. MaxRed[%d]", pFmtp->GetMaxRed(), 0, 0);
 
     return IMS_TRUE;
@@ -2217,7 +2217,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
                 continue;
             }
 
-            if (pCompareFmtp->nOctetAlign != pReceivedFmtp->nOctetAlign)
+            if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign())
             {
                 continue;
             }
@@ -2250,9 +2250,9 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
             }
             else  // exactly matched
             {
-                IMS_TRACE_D("FindAmrInProfile() Found AMR at[%d], Codec[%s], nOctetAlign[%d]", i,
+                IMS_TRACE_D("FindAmrInProfile() Found AMR at[%d], Codec[%s], OctetAlign[%d]", i,
                         comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
-                        pCompareFmtp->nOctetAlign);
+                        pCompareFmtp->GetOctetAlign());
                 IMS_TRACE_D("FindAmrInProfile() Local/Peer is exactly matched[0x%04x][0x%04x] \
                         =>[0x%04x]",
                         pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
@@ -2869,12 +2869,12 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                     }
                     else
                     {
-                        if (pCompareFmtp->nOctetAlign != pReceivedFmtp->nOctetAlign )
+                        if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign() )
                         {
                             continue;
                         }
                     }*/
-                    if (pCompareFmtp->nOctetAlign != pReceivedFmtp->nOctetAlign)
+                    if (pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign())
                     {
                         continue;
                     }
@@ -2897,9 +2897,9 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                         {
                             nTempIndex = i;
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Found Similar AMR at[%d], \
-                                    Codec[%s], nOctetAlign[%d]",
+                                    Codec[%s], OctetAlign[%d]",
                                     i, comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
-                                    pCompareFmtp->nOctetAlign);
+                                    pCompareFmtp->GetOctetAlign());
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Local/Peer is not exactly \
                                     matched[0x%04x][0x%04x] =>[0x%04x]. Try next",
                                     pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
@@ -2910,9 +2910,9 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                     else  // exactly matched
                     {
                         IMS_TRACE_D("FindPayloadIndexFromProfile() Found AMR at[%d], Codec[%s], \
-                                nOctetAlign[%d]",
+                                OctetAlign[%d]",
                                 i, comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
-                                pCompareFmtp->nOctetAlign);
+                                pCompareFmtp->GetOctetAlign());
 
                         return i;
                     }

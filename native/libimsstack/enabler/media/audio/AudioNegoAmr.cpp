@@ -97,15 +97,15 @@ PUBLIC void AudioNegoAmr::AddOctetAlignToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, show=%d", pAmrFmtp->nOctetAlign,
-            pAmrFmtp->bShowOctetAlign, 0);
+    IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, show=%d", pAmrFmtp->GetOctetAlign(),
+            pAmrFmtp->IsShowOctetAlignEnabled(), 0);
 
-    if (pAmrFmtp->bShowOctetAlign == IMS_TRUE)
+    if (pAmrFmtp->IsShowOctetAlignEnabled() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("octet-align=%d", pAmrFmtp->nOctetAlign);
+        strTemp.Sprintf("octet-align=%d", pAmrFmtp->GetOctetAlign());
         strFmtp.Append(strTemp);
     }
 }

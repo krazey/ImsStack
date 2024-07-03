@@ -420,18 +420,18 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
     pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultAmrModeSetList());
     pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowAmrModeSet());
 
-    pAmrFmtp->bShowOctetAlign = IMS_FALSE;
+    pAmrFmtp->SetShowOctetAlign(IMS_FALSE);
     if (pAmrConfig->GetOctetAlign() != -1)
     {
-        pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
-        if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->GetModeSetList() == 0)
+        pAmrFmtp->SetOctetAlign(pAmrConfig->GetOctetAlign());
+        if (pAmrFmtp->GetOctetAlign() == 1 || pAmrFmtp->GetModeSetList() == 0)
         {
-            pAmrFmtp->bShowOctetAlign = IMS_TRUE;
+            pAmrFmtp->SetShowOctetAlign(IMS_TRUE);
         }
     }
     else
     {
-        pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
+        pAmrFmtp->SetOctetAlign(CodecAmrConfig::DEFAULT_OCTET_ALIGN);
     }
 
     strCodecName.Sprintf("%s", (pAmrConfig->GetSamplingRate() == 8000) ? "AMR" : "AMR-WB");

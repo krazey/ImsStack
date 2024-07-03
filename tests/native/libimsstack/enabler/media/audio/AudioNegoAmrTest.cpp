@@ -44,7 +44,7 @@ protected:
         m_pAmrFmtpNull = IMS_NULL;
 
         m_pAmrFmtpFull->SetModeSetList(7);
-        m_pAmrFmtpFull->nOctetAlign = 1;
+        m_pAmrFmtpFull->SetOctetAlign(1);
         m_pAmrFmtpFull->SetModeChangeCapability(2);
         m_pAmrFmtpFull->SetModeChangePeriod(1);
         m_pAmrFmtpFull->SetModeChangeNeighbor(1);
@@ -53,7 +53,7 @@ protected:
         m_pAmrFmtpFull->SetMaxPtime(240);
 
         m_pAmrFmtpFull->SetShowModeSet(IMS_TRUE);
-        m_pAmrFmtpFull->bShowOctetAlign = IMS_TRUE;
+        m_pAmrFmtpFull->SetShowOctetAlign(IMS_TRUE);
         m_pAmrFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
         m_pAmrFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
         m_pAmrFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
