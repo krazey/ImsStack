@@ -23,15 +23,16 @@
 #include <gmock/gmock.h>
 
 class IMtcCallContext;
+class IMtcCallManager;
 class CallConnectionIdManager;
 class ConferenceParticipantList;
 
 class MockConferenceEventNotifier : public ConferenceEventNotifier
 {
 public:
-    explicit MockConferenceEventNotifier(IN IMtcCallContext& objConfCallContext,
-            IN CallConnectionIdManager& objConnectionIdManager) :
-            ConferenceEventNotifier(objConfCallContext, objConnectionIdManager)
+    explicit MockConferenceEventNotifier(IN IMtcCallManager& objCallManager,
+            IN CallKey nConferenceCallKey, IN CallConnectionIdManager& objConnectionIdManager) :
+            ConferenceEventNotifier(objCallManager, nConferenceCallKey, objConnectionIdManager)
     {
     }
     ~MockConferenceEventNotifier() {}
@@ -42,15 +43,13 @@ public:
     MOCK_METHOD(void, NotifyGroupCallFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, NotifyExpanded, (), (override));
     MOCK_METHOD(void, NotifyExpandFailed, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(void, NotifyDropped,
-            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
-            (override));
+    MOCK_METHOD(
+            void, NotifyDropped, (IN ConferenceParticipantList & objParticipantList), (override));
     MOCK_METHOD(void, NotifyDropFailed,
             (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
-    MOCK_METHOD(void, NotifyJoined,
-            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
-            (override));
+    MOCK_METHOD(
+            void, NotifyJoined, (IN ConferenceParticipantList & objParticipantList), (override));
     MOCK_METHOD(void, NotifyJoinFailed,
             (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));

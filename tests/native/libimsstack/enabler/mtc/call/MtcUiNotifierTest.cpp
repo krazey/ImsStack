@@ -28,7 +28,6 @@
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/UpdatingInfo.h"
-#include "conferencecall/ConferenceDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
@@ -365,124 +364,6 @@ TEST_F(MtcUiNotifierTest, SendNotifyInfo)
     EXPECT_CALL(objMockCallThread, OnInformationNotificationReceived(_, _, _, _)).Times(0);
 
     pNotifier->SendNotifyInfo(0, strValue, -1, IMS_TRUE);
-}
-
-TEST_F(MtcUiNotifierTest, SendExpanded)
-{
-    // TODO: implement logic.
-    pNotifier->SendExpanded();
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    pNotifier->SendExpanded();
-}
-
-TEST_F(MtcUiNotifierTest, SendExpandFailed)
-{
-    // TODO: implement logic.
-    pNotifier->SendExpandFailed(*pReason);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    pNotifier->SendExpandFailed(*pReason);
-}
-
-TEST_F(MtcUiNotifierTest, SendExpandedBy)
-{
-    // TODO: implement logic.
-    pNotifier->SendExpandedBy(0);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    pNotifier->SendExpandedBy(0);
-}
-
-TEST_F(MtcUiNotifierTest, SendMerged)
-{
-    ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, objUsers)).Times(1);
-
-    pNotifier->SendMerged(objUsers);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _)).Times(0);
-
-    pNotifier->SendMerged(objUsers);
-}
-
-TEST_F(MtcUiNotifierTest, SendMergeFailed)
-{
-    EXPECT_CALL(objMockCallThread, OnMergeFailed(_)).Times(1);
-
-    pNotifier->SendMergeFailed(*pReason);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnMergeFailed(_)).Times(0);
-
-    pNotifier->SendMergeFailed(*pReason);
-}
-
-TEST_F(MtcUiNotifierTest, SendJoined)
-{
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded()).Times(1);
-
-    pNotifier->SendJoined(IMS_SUCCESS, *pReason);
-
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAddFailed(_)).Times(1);
-
-    pNotifier->SendJoined(IMS_FAILURE, *pReason);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded()).Times(0);
-
-    pNotifier->SendJoined(IMS_SUCCESS, *pReason);
-}
-
-TEST_F(MtcUiNotifierTest, SendDropped)
-{
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved()).Times(1);
-
-    pNotifier->SendDropped(IMS_SUCCESS, *pReason);
-
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoveFailed(_)).Times(1);
-
-    pNotifier->SendDropped(IMS_FAILURE, *pReason);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved()).Times(0);
-
-    pNotifier->SendDropped(IMS_SUCCESS, *pReason);
-}
-
-TEST_F(MtcUiNotifierTest, SendNotifyUsersInfo)
-{
-    ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
-
-    pNotifier->SendNotifyUsersInfo(objUsers);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_)).Times(0);
-
-    pNotifier->SendNotifyUsersInfo(objUsers);
-}
-
-TEST_F(MtcUiNotifierTest, SendNotifyConfInfo)
-{
-    const AString strDisplayText = "text";
-    const AString strSubject = "subject";
-    const IMS_SINT32 nUser = 1;
-    const IMS_SINT32 nMaxUser = 6;
-    const AString strHost = "host";
-
-    ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread,
-            OnConferenceInfoChanged(strDisplayText, strSubject, nUser, nMaxUser, strHost))
-            .Times(1);
-
-    pNotifier->SendNotifyConfInfo(strDisplayText, strSubject, nUser, nMaxUser, strHost);
-
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL, CALL_KEY);
-    EXPECT_CALL(objMockCallThread, OnConferenceInfoChanged(_, _, _, _, _)).Times(0);
-
-    pNotifier->SendNotifyConfInfo(strDisplayText, strSubject, nUser, nMaxUser, strHost);
 }
 
 TEST_F(MtcUiNotifierTest, SendReplacedBy)

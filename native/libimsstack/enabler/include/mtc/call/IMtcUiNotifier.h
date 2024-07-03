@@ -23,7 +23,6 @@
 
 class AString;
 struct CallReasonInfo;
-struct ConfUser;
 
 /**
  * This class provides the convenience APIs to notify UI of call events through JNI.
@@ -157,75 +156,6 @@ public:
      */
     virtual void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue,
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) = 0;
-
-    /**
-     * @brief
-     */
-    virtual void SendExpanded() = 0;
-
-    /**
-     * @brief
-     *
-     * @param objReason
-     */
-    virtual void SendExpandFailed(IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief
-     *
-     * @param nReplaceKey
-     */
-    virtual void SendExpandedBy(IN IMS_SINTP nReplaceKey = 0) = 0;
-
-    /**
-     * @brief Notifies that the call is merged.
-     *
-     * @param lstConfUser Participants of the conference call.
-     */
-    virtual void SendMerged(IN const ImsList<ConfUser*>& lstConfUser) = 0;
-
-    /**
-     * @brief Notifies that the call is failed to be merged.
-     *
-     * @param objReason The reason causing this event.
-     */
-    virtual void SendMergeFailed(IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that a participant is joined or failed to join to the conference call.
-     *
-     * @param nResult IMS_SUCCESS if successfully joined. Otherwise IMS_FAILURE.
-     * @param objReason Reason of the failure. Only applicable if it's failed.
-     */
-    virtual void SendJoined(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that a participant is dropped or failed to drop from the conference call.
-     *
-     * @param nResult IMS_SUCCESS if successfully dropped. Otherwise IMS_FAILURE.
-     * @param objReason Reason of the failure. Only applicable if it's failed.
-     */
-    virtual void SendDropped(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that the conference participants are changed.
-     *
-     * @param lstConfUser Changed participants of the conference call.
-     */
-    virtual void SendNotifyUsersInfo(IN const ImsList<ConfUser*>& lstConfUser) = 0;
-
-    /**
-     * @brief Notifies that properties of the conference call is changed.
-     *
-     * @param strDisplayText
-     * @param strSubject
-     * @param nUserCount
-     * @param nMaxUserCount
-     * @param strHostEntity
-     */
-    virtual void SendNotifyConfInfo(IN const AString& strDisplayText, IN const AString& strSubject,
-            IN IMS_SINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
-            IN const AString& strHostEntity) = 0;
 
     /**
      * @brief
