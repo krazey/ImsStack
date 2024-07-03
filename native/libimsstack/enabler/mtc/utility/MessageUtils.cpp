@@ -375,16 +375,9 @@ PUBLIC ImsList<AString> MessageUtils::GetUserIds(IN IMessage* piMessage, IN IMS_
         AString strUserPart;
         if (objSipAddress.IsSchemeSip())
         {
-            // TODO, Contains / GetIndexOf
-            if (objSipAddress.GetUser().Contains(TextParser::CHAR_SEMICOLON))
-            {
-                strUserPart = objSipAddress.GetUser().GetSubStr(
-                        0, objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON));
-            }
-            else
-            {
-                strUserPart = objSipAddress.GetUser();
-            }
+            IMS_SINT32 nSemicolonIndex =
+                    objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON);
+            strUserPart = objSipAddress.GetUser().GetSubStr(0, nSemicolonIndex);
         }
         else if (objSipAddress.IsSchemeTel())
         {
@@ -811,7 +804,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
         }
 
         ByteArray objContent = piBodyPart->GetContent();
-        // TODO: remove or check necessity
+        // To cover RJIL network issue: b/247729585
         objContent.Append(TextParser::CHAR_CR);
         objContent.Append(TextParser::CHAR_LF);
 
