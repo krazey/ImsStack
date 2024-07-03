@@ -725,7 +725,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 continue;
             }
 
-            strFmtp = pTEFmtp->strEvents;
+            strFmtp = pTEFmtp->GetEvents();
         }
         else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
@@ -915,11 +915,11 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             if (pSdpCodec->GetFormatSpecificParameter() != IMS_NULL &&
                     pSdpCodec->GetFormatSpecificParameter().GetLength() > 0)
             {
-                pTeFmtp->strEvents = pSdpCodec->GetFormatSpecificParameter();
+                pTeFmtp->SetEvents(pSdpCodec->GetFormatSpecificParameter());
             }
             else
             {
-                pTeFmtp->strEvents = "0-15";  // default value
+                pTeFmtp->SetEvents("0-15");  // default value
             }
 
             pPayload->SetFmtp(pTeFmtp);

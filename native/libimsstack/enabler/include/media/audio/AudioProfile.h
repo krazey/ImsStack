@@ -360,17 +360,14 @@ public:
     class TelephoneEventFmtp : public BaseFmtp
     {
     public:
-        AString strEvents;
-
-    public:
         TelephoneEventFmtp() :
-                strEvents("0-15"){};
+                m_strEvents("0-15"){};
 
         explicit TelephoneEventFmtp(IN const AString& events) :
-                strEvents(events){};
+                m_strEvents(events){};
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
-                strEvents(objFmtp.strEvents){};
+                m_strEvents(objFmtp.m_strEvents){};
 
         virtual ~TelephoneEventFmtp(){};
 
@@ -378,13 +375,22 @@ public:
         {
             if (this != &obj)
             {
-                strEvents = obj.strEvents;
+                m_strEvents = obj.m_strEvents;
             }
 
             return (*this);
         }
 
-        bool operator==(IN const TelephoneEventFmtp& obj) { return (strEvents == obj.strEvents); }
+        bool operator==(IN const TelephoneEventFmtp& obj)
+        {
+            return (m_strEvents == obj.m_strEvents);
+        }
+
+        inline void SetEvents(IN const AString strEvents) { m_strEvents = strEvents; }
+        inline AString& GetEvents() { return m_strEvents; }
+
+    private:
+        AString m_strEvents;
     };
 
 public:
