@@ -103,6 +103,8 @@ public class DcNetWatcher implements IDcNetWatcher {
     private int mVoiceServiceState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mDataServiceState = ServiceState.STATE_OUT_OF_SERVICE;
     private int mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
+    private int mNetworkRegistrationState =
+            NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
     private String mNetworkOperator = "";
     // mDataRoaming and mVoiceRoaming refer to the roamingType.
     // So they could be overridden by the carrier config
@@ -225,6 +227,8 @@ public class DcNetWatcher implements IDcNetWatcher {
         mVoiceServiceState = ServiceState.STATE_OUT_OF_SERVICE;
         mDataServiceState = ServiceState.STATE_OUT_OF_SERVICE;
         mLteDuplexMode = ServiceState.DUPLEX_MODE_UNKNOWN;
+        mNetworkRegistrationState =
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
         mNetworkOperator = "";
         mDataRoaming = false;
         mVoiceRoaming = false;
@@ -342,10 +346,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     @Override
     public int getMocnPlmnInfo() {
-        if (isLteEmergencyOnly()) {
-            return 0;
-        }
-
         // TODO : update MOCN PLMN info
         return 0;
     }
@@ -362,12 +362,7 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     @Override
     public boolean isLteEmergencyOnly() {
-        if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
-            return isEmergencyOnlyForVonr();
-        }
-
-        // TODO: check EMERGENCY_ATTACHED
-        return false;
+        return mNetworkRegistrationState == NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY;
     }
 
     @Override
@@ -680,6 +675,16 @@ public class DcNetWatcher implements IDcNetWatcher {
         return ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED;
     }
 
+    private static int getWwanNetworkRegistrationState(ServiceState ss) {
+        final NetworkRegistrationInfo wwanRegInfo =
+                ss.getNetworkRegistrationInfo(
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        return (wwanRegInfo != null) ? wwanRegInfo.getNetworkRegistrationState()
+                : NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+    }
+
     private boolean is1xRttRequired() {
         return ((mRatPolicy & POLICY_RAT_1XRTT) != 0);
     }
@@ -702,11 +707,6 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private boolean isEvdoRequired() {
         return ((mRatPolicy & POLICY_RAT_EVDO) != 0);
-    }
-
-    private boolean isEmergencyOnlyForVonr() {
-        // TODO: check EMERGENCY_ATTACHED
-        return false;
     }
 
     private static boolean is1xRtt(int rat) {
@@ -1088,6 +1088,9 @@ public class DcNetWatcher implements IDcNetWatcher {
             if (mDataRoamingType != dataRoamingType) {
                 mDataRoamingType = dataRoamingType;
             }
+
+            // WWAN network registration state
+            mNetworkRegistrationState = getWwanNetworkRegistrationState(serviceState);
         }
 
         private int getCellularDataRAT() {

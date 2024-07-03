@@ -515,12 +515,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testIsEmergencyOnlyForVonr() throws Exception {
-        assertEquals(false, invokeMethod(mDcNetWatcher, "isEmergencyOnlyForVonr",
-                new Class[] {}, new Object[] {}));
-    }
-
-    @Test
     public void testOnServiceStateChanged_handleVoiceServiceStateChanged() {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
 
@@ -756,6 +750,21 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnServiceStateChanged_handleNetworkRegistrationStateChanged() throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        assertEquals(true, mDcNetWatcher.isLteEmergencyOnly());
+    }
+
+    @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
         when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(1);
 
@@ -847,9 +856,14 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     @Test
-    public void testIsLteEmergencyOnly() {
+    public void testIsLteEmergencyOnly() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
+                mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
         assertEquals(false, mDcNetWatcher.isLteEmergencyOnly());
-        // TODO : no actual implementations so far
+
+        replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
+                mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
+        assertEquals(true, mDcNetWatcher.isLteEmergencyOnly());
     }
 
     @Test
