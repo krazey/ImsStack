@@ -477,7 +477,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             // find max br
             IMS_SINT32 nMaxBr = 0;
             {
-                if (pEvsFmtp->nBrList == 0)
+                if (pEvsFmtp->GetBrList() == 0)
                 {
                     nMaxBr = 6;
                 }
@@ -485,7 +485,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 {
                     for (nMaxBr = 6; nMaxBr >= 0; nMaxBr--)
                     {
-                        if (pEvsFmtp->nBrList & (1 << nMaxBr))
+                        if (pEvsFmtp->GetBrList() & (1 << nMaxBr))
                         {
                             break;
                         }
@@ -591,10 +591,10 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
         }
 
         // Primary mode
-        if (pEvsFmtp->nEvsModeSwitch != 1)
+        if (pEvsFmtp->GetEvsModeSwitch() != 1)
         {
             // check bitrate...
-            if (pEvsFmtp->nBrList == 0)
+            if (pEvsFmtp->GetBrList() == 0)
             {
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
@@ -603,7 +603,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
                 IMS_SINT32 nBitrate = 0;
                 for (nBitrate = 11; nBitrate >= 0; nBitrate--)
                 {
-                    IMS_UINT32 nMatch = pEvsFmtp->nBrList & (1 << nBitrate);
+                    IMS_UINT32 nMatch = pEvsFmtp->GetBrList() & (1 << nBitrate);
                     if (nMatch)
                     {
                         return nBitrate;
@@ -681,18 +681,18 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         }
 
         // Primary mode
-        if (pEvsFmtp->nEvsModeSwitch != 1)
+        if (pEvsFmtp->GetEvsModeSwitch() != 1)
         {
-            if (pEvsFmtp->nBrList == 0)
+            if (pEvsFmtp->GetBrList() == 0)
             {
                 IMS_TRACE_D(
-                        "nBrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
+                        "BrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->nBrList, 0, 0);
-                return pEvsFmtp->nBrList;
+                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetBrList(), 0, 0);
+                return pEvsFmtp->GetBrList();
             }
         }
         else  // AMR IO mode

@@ -358,29 +358,29 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         objAudioConfig.setDtxEnabled(pFmtp->IsDtxEnabled());
 
         EvsParams* pEvsParams = new EvsParams();
-        pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
+        pEvsParams->setChannelAwareMode((int8_t)pFmtp->GetChAwRecv());
 
         // TODO Media : use the Dest HFOnly
-        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->nHfOnly);
+        pEvsParams->setUseHeaderFullOnly((IMS_BOOL)pDestFmtp->GetHfOnly());
 
         IMS_SINT32 modeSet = AudioProfileUtil::GetModesetList("EVS", pNegoPayload);
 
         // evs primary mode conversion
-        if (pFmtp->nEvsModeSwitch == 0)
+        if (pFmtp->GetEvsModeSwitch() == 0)
         {  // evs primary mode
             modeSet = modeSet << 9;
         }
         pEvsParams->setEvsMode((int32_t)modeSet);
 
         // update bandwidth
-        IMS_SINT32 nEvsBandwidth = pFmtp->nBwList;
+        IMS_SINT32 nEvsBandwidth = pFmtp->GetBwList();
         // exception : evs AMR-WB IO mode
-        if (pFmtp->nEvsModeSwitch == 1)
+        if (pFmtp->GetEvsModeSwitch() == 1)
         {
             nEvsBandwidth = EvsParams::EVS_WIDE_BAND;
         }
         pEvsParams->setEvsBandwidth(nEvsBandwidth);
-        pEvsParams->setCodecModeRequest((int8_t)pFmtp->bSendCmr);
+        pEvsParams->setCodecModeRequest((int8_t)pFmtp->IsSendCmrEnabled());
 
         objAudioConfig.setEvsParams(*pEvsParams);
 

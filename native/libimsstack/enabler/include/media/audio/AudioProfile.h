@@ -235,73 +235,121 @@ public:
             DEFAULT_CHANNEL_AWMODE = 0,
         };
 
-        IMS_UINT32 nHfOnly;
-        IMS_UINT32 nEvsModeSwitch;
-        IMS_SINT32 nMaxRed;
-        IMS_UINT32 nBrList;
-        IMS_SINT32 nBrSend;
-        IMS_SINT32 nBrRecv;
-        IMS_UINT32 nBwList;
-        IMS_SINT32 nBwSend;
-        IMS_SINT32 nBwRecv;
-        IMS_SINT32 nCmr;
-        IMS_SINT32 nChAwRecv;
-        IMS_SINT32 nReceivedChAwRecv;
-
-        IMS_BOOL bShowHfOnly;
-        IMS_BOOL bShowEvsModeSwitch;
-        IMS_BOOL bShowCmr;
-        IMS_BOOL bShowChannelAwMode;
-        IMS_BOOL bShowBrList;
-        IMS_BOOL bShowBwList;
-        IMS_BOOL bSendCmr;
-
     public:
         EvsFmtp() :
-                nHfOnly(DEFAULT_HFMODE),
-                nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
-                nBrList(0),
-                nBrSend(0),
-                nBrRecv(0),
-                nBwList(0),
-                nBwSend(0),
-                nBwRecv(0),
-                nCmr(DEFAULT_CMR),
-                nChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                bShowHfOnly(IMS_FALSE),
-                bShowEvsModeSwitch(IMS_FALSE),
-                bShowCmr(IMS_FALSE),
-                bShowChannelAwMode(IMS_FALSE),
-                bShowBrList(IMS_TRUE),
-                bShowBwList(IMS_TRUE),
-                bSendCmr(IMS_FALSE)
+                m_nHfOnly(DEFAULT_HFMODE),
+                m_nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
+                m_nBrList(0),
+                m_nBrSend(0),
+                m_nBrRecv(0),
+                m_nBwList(0),
+                m_nBwSend(0),
+                m_nBwRecv(0),
+                m_nCmr(DEFAULT_CMR),
+                m_nChAwRecv(DEFAULT_CHANNEL_AWMODE),
+                m_nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
+                m_bShowHfOnly(IMS_FALSE),
+                m_bShowEvsModeSwitch(IMS_FALSE),
+                m_bShowCmr(IMS_FALSE),
+                m_bShowChannelAwMode(IMS_FALSE),
+                m_bShowBrList(IMS_TRUE),
+                m_bShowBwList(IMS_TRUE),
+                m_bSendCmr(IMS_FALSE)
         {
         }
 
         EvsFmtp(IN const EvsFmtp& objFmtp) :
-                nHfOnly(objFmtp.nHfOnly),
-                nEvsModeSwitch(objFmtp.nEvsModeSwitch),
-                nBrList(objFmtp.nBrList),
-                nBrSend(objFmtp.nBrSend),
-                nBrRecv(objFmtp.nBrRecv),
-                nBwList(objFmtp.nBwList),
-                nBwSend(objFmtp.nBwSend),
-                nBwRecv(objFmtp.nBwRecv),
-                nCmr(objFmtp.nCmr),
-                nChAwRecv(objFmtp.nChAwRecv),
-                nReceivedChAwRecv(objFmtp.nReceivedChAwRecv),
-                bShowHfOnly(objFmtp.bShowHfOnly),
-                bShowEvsModeSwitch(objFmtp.bShowEvsModeSwitch),
-                bShowCmr(objFmtp.bShowCmr),
-                bShowChannelAwMode(objFmtp.bShowChannelAwMode),
-                bShowBrList(objFmtp.bShowBrList),
-                bShowBwList(objFmtp.bShowBwList),
-                bSendCmr(objFmtp.bSendCmr)
+                m_nHfOnly(objFmtp.m_nHfOnly),
+                m_nEvsModeSwitch(objFmtp.m_nEvsModeSwitch),
+                m_nBrList(objFmtp.m_nBrList),
+                m_nBrSend(objFmtp.m_nBrSend),
+                m_nBrRecv(objFmtp.m_nBrRecv),
+                m_nBwList(objFmtp.m_nBwList),
+                m_nBwSend(objFmtp.m_nBwSend),
+                m_nBwRecv(objFmtp.m_nBwRecv),
+                m_nCmr(objFmtp.m_nCmr),
+                m_nChAwRecv(objFmtp.m_nChAwRecv),
+                m_nReceivedChAwRecv(objFmtp.m_nReceivedChAwRecv),
+                m_bShowHfOnly(objFmtp.m_bShowHfOnly),
+                m_bShowEvsModeSwitch(objFmtp.m_bShowEvsModeSwitch),
+                m_bShowCmr(objFmtp.m_bShowCmr),
+                m_bShowChannelAwMode(objFmtp.m_bShowChannelAwMode),
+                m_bShowBrList(objFmtp.m_bShowBrList),
+                m_bShowBwList(objFmtp.m_bShowBwList),
+                m_bSendCmr(objFmtp.m_bSendCmr)
         {
         }
 
         virtual ~EvsFmtp(){};
+
+        inline void SetHfOnly(IN const IMS_UINT32 nHfOnly) { m_nHfOnly = nHfOnly; }
+        inline IMS_UINT32 GetHfOnly() { return m_nHfOnly; }
+        inline void SetEvsModeSwitch(IN const IMS_UINT32 nEvsModeSwitch)
+        {
+            m_nEvsModeSwitch = nEvsModeSwitch;
+        }
+        inline IMS_UINT32 GetEvsModeSwitch() { return m_nEvsModeSwitch; }
+        inline void SetBrList(IN const IMS_UINT32 nBrList) { m_nBrList = nBrList; }
+        inline IMS_UINT32 GetBrList() { return m_nBrList; }
+        inline void SetBrSend(IN const IMS_SINT32 nBrSend) { m_nBrSend = nBrSend; }
+        inline IMS_SINT32 GetBrSend() { return m_nBrSend; }
+        inline void SetBrRecv(IN const IMS_SINT32 nBrRecv) { m_nBrRecv = nBrRecv; }
+        inline IMS_SINT32 GetBrRecv() { return m_nBrRecv; }
+        inline void SetBwList(IN const IMS_UINT32 nBwList) { m_nBwList = nBwList; }
+        inline IMS_UINT32 GetBwList() { return m_nBwList; }
+        inline void SetBwSend(IN const IMS_SINT32 nBwSend) { m_nBwSend = nBwSend; }
+        inline IMS_SINT32 GetBwSend() { return m_nBwSend; }
+        inline void SetBwRecv(IN const IMS_SINT32 nBwRecv) { m_nBwRecv = nBwRecv; }
+        inline IMS_SINT32 GetBwRecv() { return m_nBwRecv; }
+        inline void SetCmr(IN const IMS_SINT32 nCmr) { m_nCmr = nCmr; }
+        inline IMS_SINT32 GetCmr() { return m_nCmr; }
+        inline void SetChAwRecv(IN const IMS_SINT32 nChAwRecv) { m_nChAwRecv = nChAwRecv; }
+        inline IMS_SINT32 GetChAwRecv() { return m_nChAwRecv; }
+        inline void SetReceivedChAwRecv(IN const IMS_SINT32 nReceivedChAwRecv)
+        {
+            m_nReceivedChAwRecv = nReceivedChAwRecv;
+        }
+        inline IMS_SINT32 GetReceivedChAwRecv() { return m_nReceivedChAwRecv; }
+        inline void SetShowHfOnly(IN const IMS_BOOL bShowHfOnly) { m_bShowHfOnly = bShowHfOnly; }
+        inline IMS_BOOL IsShowHfOnlyEnabled() { return m_bShowHfOnly; }
+        inline void SetShowEvsModeSwitch(IN const IMS_BOOL bShowEvsModeSwitch)
+        {
+            m_bShowEvsModeSwitch = bShowEvsModeSwitch;
+        }
+        inline IMS_BOOL IsShowEvsModeSwitchEnabled() { return m_bShowEvsModeSwitch; }
+        inline void SetShowCmr(IN const IMS_BOOL bShowCmr) { m_bShowCmr = bShowCmr; }
+        inline IMS_BOOL IsShowCmrEnabled() { return m_bShowCmr; }
+        inline void SetShowChannelAwMode(IN const IMS_BOOL bShowChannelAwMode)
+        {
+            m_bShowChannelAwMode = bShowChannelAwMode;
+        }
+        inline IMS_BOOL IsShowChannelAwModeEnabled() { return m_bShowChannelAwMode; }
+        inline void SetShowBrList(IN const IMS_BOOL bShowBrList) { m_bShowBrList = bShowBrList; }
+        inline IMS_BOOL IsShowBrListEnabled() { return m_bShowBrList; }
+        inline void SetShowBwList(IN const IMS_BOOL bShowBwList) { m_bShowBwList = bShowBwList; }
+        inline IMS_BOOL IsShowBwListEnabled() { return m_bShowBwList; }
+        inline void SetSendCmr(IN const IMS_BOOL bSendCmr) { m_bSendCmr = bSendCmr; }
+        inline IMS_BOOL IsSendCmrEnabled() { return m_bSendCmr; }
+
+    private:
+        IMS_UINT32 m_nHfOnly;
+        IMS_UINT32 m_nEvsModeSwitch;
+        IMS_UINT32 m_nBrList;
+        IMS_SINT32 m_nBrSend;
+        IMS_SINT32 m_nBrRecv;
+        IMS_UINT32 m_nBwList;
+        IMS_SINT32 m_nBwSend;
+        IMS_SINT32 m_nBwRecv;
+        IMS_SINT32 m_nCmr;
+        IMS_SINT32 m_nChAwRecv;
+        IMS_SINT32 m_nReceivedChAwRecv;
+        IMS_BOOL m_bShowHfOnly;
+        IMS_BOOL m_bShowEvsModeSwitch;
+        IMS_BOOL m_bShowCmr;
+        IMS_BOOL m_bShowChannelAwMode;
+        IMS_BOOL m_bShowBrList;
+        IMS_BOOL m_bShowBwList;
+        IMS_BOOL m_bSendCmr;
     };
 
 public:

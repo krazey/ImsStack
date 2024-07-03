@@ -470,76 +470,76 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
     pEvsFmtp->SetModeSetList(pEvsConfig->GetAmrModeSetList());
     pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultAmrModeSetList());
     pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowAmrModeSet());
-    pEvsFmtp->nBrList = pEvsConfig->GetBrList();
-    pEvsFmtp->nBwList = pEvsConfig->GetBwList();
+    pEvsFmtp->SetBrList(pEvsConfig->GetBrList());
+    pEvsFmtp->SetBwList(pEvsConfig->GetBwList());
 
     // Bit-rate
-    if (pEvsFmtp->nBrList == 0)
+    if (pEvsFmtp->GetBrList() == 0)
     {
-        pEvsFmtp->nBrList = CodecEvsConfig::DEFAULT_BR_LIST;
-        pEvsFmtp->bShowBrList = IMS_FALSE;
+        pEvsFmtp->SetBrList(CodecEvsConfig::DEFAULT_BR_LIST);
+        pEvsFmtp->SetShowBrList(IMS_FALSE);
     }
     else
     {
-        pEvsFmtp->bShowBrList = IMS_TRUE;
+        pEvsFmtp->SetShowBrList(IMS_TRUE);
     }
 
     // Bandwidth
-    if (pEvsFmtp->nBwList == -1)
+    if (pEvsFmtp->GetBwList() == -1)
     {
-        pEvsFmtp->nBwList = CodecEvsConfig::DEFAULT_BW_LIST;
-        pEvsFmtp->bShowBrList = IMS_FALSE;
+        pEvsFmtp->SetBwList(CodecEvsConfig::DEFAULT_BW_LIST);
+        pEvsFmtp->SetShowBwList(IMS_FALSE);
     }
     else
     {
-        pEvsFmtp->bShowBwList = IMS_TRUE;
+        pEvsFmtp->SetShowBwList(IMS_TRUE);
     }
 
     pEvsFmtp->SetShowDtx(pEvsConfig->GetShowDtx());
 
     if (pEvsConfig->GetHfOnly() == -1)  // Not Present
     {
-        pEvsFmtp->nHfOnly = CodecEvsConfig::DEFAULT_HF_ONLY;
+        pEvsFmtp->SetHfOnly(CodecEvsConfig::DEFAULT_HF_ONLY);
     }
     else
     {
-        pEvsFmtp->nHfOnly = pEvsConfig->GetHfOnly();
-        pEvsFmtp->bShowHfOnly = IMS_TRUE;
+        pEvsFmtp->SetHfOnly(pEvsConfig->GetHfOnly());
+        pEvsFmtp->SetShowHfOnly(IMS_TRUE);
     }
 
     if (pEvsConfig->GetEvsModeSwitch() != -1)
     {
-        pEvsFmtp->nEvsModeSwitch = pEvsConfig->GetEvsModeSwitch();
-        pEvsFmtp->bShowEvsModeSwitch = IMS_TRUE;
+        pEvsFmtp->SetEvsModeSwitch(pEvsConfig->GetEvsModeSwitch());
+        pEvsFmtp->SetShowEvsModeSwitch(IMS_TRUE);
     }
     else
     {
-        pEvsFmtp->nEvsModeSwitch = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
-        pEvsFmtp->bShowEvsModeSwitch = IMS_FALSE;
+        pEvsFmtp->SetEvsModeSwitch(CodecEvsConfig::DEFAULT_EVS_MODESWITCH);
+        pEvsFmtp->SetShowEvsModeSwitch(IMS_FALSE);
     }
 
     if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
     {
-        pEvsFmtp->nCmr = CodecEvsConfig::DEFAULT_CMR;
+        pEvsFmtp->SetCmr(CodecEvsConfig::DEFAULT_CMR);
     }
     else
     {
-        pEvsFmtp->nCmr = pEvsConfig->GetCmr();
-        pEvsFmtp->bShowCmr = IMS_TRUE;
+        pEvsFmtp->SetCmr(pEvsConfig->GetCmr());
+        pEvsFmtp->SetShowCmr(IMS_TRUE);
     }
     if (pEvsConfig->GetChAwareRecv() != -1)
     {
-        pEvsFmtp->nChAwRecv = pEvsConfig->GetChAwareRecv();
-        pEvsFmtp->bShowChannelAwMode = IMS_TRUE;
+        pEvsFmtp->SetChAwRecv(pEvsConfig->GetChAwareRecv());
+        pEvsFmtp->SetShowChannelAwMode(IMS_TRUE);
 
         if (pEvsConfig->GetChAwareRecv() == 99)
         {
-            pEvsFmtp->nChAwRecv = -1;
+            pEvsFmtp->SetChAwRecv(-1);
         }
     }
     else
     {
-        pEvsFmtp->nChAwRecv = -1;
+        pEvsFmtp->SetChAwRecv(-1);
     }
 
     IMS_TRACE_D("EVS - GetShowDtx: %d GetShowAmrModeSet: %d", pEvsConfig->GetShowDtx(),
