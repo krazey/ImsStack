@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
 #include "ImsList.h"
 
 namespace android
@@ -62,6 +63,32 @@ TEST_F(ImsListTest, OperatorAssignment)
     objNewList = m_objList;
     EXPECT_EQ(objNewList.GetSize(), m_objList.GetSize());
     EXPECT_EQ(objNewList, m_objList);
+}
+
+TEST_F(ImsListTest, Contains)
+{
+    EXPECT_TRUE(m_objList.Contains(1));
+    EXPECT_TRUE(m_objList.Contains(10));
+    EXPECT_FALSE(m_objList.Contains(11));
+
+    ImsList<AString> objList;
+    AString strDog("dog");
+    AString strCat("cat");
+    AString strLion("lion");
+    objList.Append(strDog);
+    objList.Append(strCat);
+
+    EXPECT_TRUE(objList.Contains(strDog));
+    EXPECT_TRUE(objList.Contains(strCat));
+    EXPECT_FALSE(objList.Contains(strLion));
+
+    ImsList<AString*> objPointerList;
+    objPointerList.Append(&strDog);
+    objPointerList.Append(&strCat);
+
+    EXPECT_TRUE(objPointerList.Contains(&strDog));
+    EXPECT_TRUE(objPointerList.Contains(&strCat));
+    EXPECT_FALSE(objPointerList.Contains(&strLion));
 }
 
 TEST_F(ImsListTest, Equals)
@@ -190,6 +217,45 @@ TEST_F(ImsListTest, RemoveAt)
 
     ASSERT_TRUE(m_objList.RemoveElementsAt(0, m_objList.GetSize()));
     EXPECT_EQ(m_objList.GetSize(), 0);
+}
+
+TEST_F(ImsListTest, Remove)
+{
+    IMS_UINT32 nSize = m_objList.GetSize();
+    EXPECT_TRUE(m_objList.Remove(1));
+    EXPECT_EQ(nSize - 1, m_objList.GetSize());
+    EXPECT_EQ(2, m_objList.GetAt(0));
+    EXPECT_TRUE(m_objList.Remove(10));
+    EXPECT_EQ(nSize - 2, m_objList.GetSize());
+    EXPECT_EQ(9, m_objList.GetAt(m_objList.GetSize() - 1));
+    EXPECT_FALSE(m_objList.Remove(11));
+    EXPECT_EQ(nSize - 2, m_objList.GetSize());
+
+    ImsList<AString> objList;
+    AString strDog("dog");
+    AString strCat("cat");
+    AString strLion("lion");
+    objList.Append(strDog);
+    objList.Append(strCat);
+
+    EXPECT_TRUE(objList.Remove(strDog));
+    EXPECT_EQ(1, objList.GetSize());
+    EXPECT_EQ(strCat, objList.GetAt(0));
+    EXPECT_TRUE(objList.Remove(strCat));
+    EXPECT_EQ(0, objList.GetSize());
+    EXPECT_FALSE(objList.Remove(strLion));
+
+    ImsList<AString*> objPointerList;
+    objPointerList.Append(&strDog);
+    objPointerList.Append(&strCat);
+
+    EXPECT_TRUE(objPointerList.Remove(&strDog));
+    EXPECT_EQ(1, objPointerList.GetSize());
+    AString* pstrCat = objPointerList.GetAt(0);
+    EXPECT_EQ(strCat, *pstrCat);
+    EXPECT_TRUE(objPointerList.Remove(&strCat));
+    EXPECT_EQ(0, objPointerList.GetSize());
+    EXPECT_FALSE(objPointerList.Remove(&strLion));
 }
 
 }  // namespace android
