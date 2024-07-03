@@ -522,12 +522,13 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // when reoffer case - recover rtcpxr to default in sendrecv case
-    if (ProfileCasting(m_pBaseProfile)->bSupportRtcpXr == IMS_TRUE &&
+    if (ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported() == IMS_TRUE &&
             pNewOaModel->pLocalProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        GetLocalProfile(pNewOaModel)->bSupportRtcpXr =
-                ProfileCasting(m_pBaseProfile)->bSupportRtcpXr;
-        GetLocalProfile(pNewOaModel)->objRtcpXrAttr = ProfileCasting(m_pBaseProfile)->objRtcpXrAttr;
+        GetLocalProfile(pNewOaModel)
+                ->SetSupportRtcpXr(ProfileCasting(m_pBaseProfile)->IsRtcpXrSupported());
+        GetLocalProfile(pNewOaModel)
+                ->SetRtcpXrAttr(ProfileCasting(m_pBaseProfile)->GetRtcpXrAttr());
     }
 
     m_listOaModel.Append(pNewOaModel);
@@ -771,20 +772,20 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     }
 
     // set make ptime & maxptime
-    if (pProfile->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME)
+    if (pProfile->GetPtime() != AudioProfile::AmrFmtp::DEFAULT_PTIME)
     {
-        pDescriptor->AddAttributeInt(SdpAttribute::PTIME, pProfile->nPtime);
+        pDescriptor->AddAttributeInt(SdpAttribute::PTIME, pProfile->GetPtime());
     }
 
-    if (pProfile->nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME)
+    if (pProfile->GetMaxPtime() != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME)
     {
-        pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, pProfile->nMaxPtime);
+        pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, pProfile->GetMaxPtime());
     }
 
     // set candidate
-    for (IMS_UINT32 nIndex = 0; nIndex < pProfile->objCandidateAttr.GetSize(); nIndex++)
+    for (IMS_UINT32 nIndex = 0; nIndex < pProfile->GetCandidateAttr().GetSize(); nIndex++)
     {
-        AString strCandidateAttr = pProfile->objCandidateAttr.GetAt(nIndex);
+        AString strCandidateAttr = pProfile->GetCandidateAttr().GetAt(nIndex);
         if (strCandidateAttr.GetLength() != 0)
         {
             strCandidateAttr.Sprintf("%d, %s", nIndex + 1, strCandidateAttr.GetStr());
@@ -793,30 +794,31 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     }
 
     // set RTCP-XR -- RTCP-XR is for VZW, not a negotiation target by VZW requirement
-    if (pProfile->bSupportRtcpXr == IMS_TRUE &&
+    if (pProfile->IsRtcpXrSupported() == IMS_TRUE &&
             pProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        if (pProfile->objRtcpXrAttr.IsSupportStatisticMetricsEnabled())
+        if (pProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "stat-summary=loss,dup,jitt,HL");
         }
-        if (pProfile->objRtcpXrAttr.IsSupportVoipMetricsEnabled())
+        if (pProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "voip-metrics");
         }
-        if (pProfile->objRtcpXrAttr.IsSupportPacketLossRleEnabled())
+        if (pProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-loss-rle");
         }
-        if (pProfile->objRtcpXrAttr.IsSupportPacketDuplicatedRleEnabled())
+        if (pProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-dup-rle");
         }
 
-        IMS_TRACE_I("MakeSdpFromProfile() - bSupportRtcpXr[%d]", pProfile->bSupportRtcpXr, 0, 0);
+        IMS_TRACE_I(
+                "MakeSdpFromProfile() - SupportRtcpXr[%d]", pProfile->IsRtcpXrSupported(), 0, 0);
     }
 
-    if (pProfile->bAnbr)
+    if (pProfile->IsAnbrSupported())
     {
         pDescriptor->AddAttribute(SdpAttribute::ANBR, AString::ConstNull());
     }
@@ -968,15 +970,15 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     }
 
     // ptime & max_ptime
-    pProfile->nPtime = pDescriptor->GetAttributeInt(SdpAttribute::PTIME);
-    pProfile->nMaxPtime = pDescriptor->GetAttributeInt(SdpAttribute::MAXPTIME);
+    pProfile->SetPtime(pDescriptor->GetAttributeInt(SdpAttribute::PTIME));
+    pProfile->SetMaxPtime(pDescriptor->GetAttributeInt(SdpAttribute::MAXPTIME));
 
     // RTCP-XR
     ImsList<AString> lstRtcpXrAttr = pDescriptor->GetAttributes(SdpAttribute::RTCP_XR);
 
     if (lstRtcpXrAttr.GetSize() > 0)
     {
-        pProfile->bSupportRtcpXr = IMS_TRUE;
+        pProfile->SetSupportRtcpXr(IMS_TRUE);
     }
 
     for (IMS_UINT32 i = 0; i < lstRtcpXrAttr.GetSize(); i++)
@@ -985,27 +987,27 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
         if (xrAttr.Contains("stat-summary"))
         {
-            pProfile->objRtcpXrAttr.SetSupportStatisticMetrics(IMS_TRUE);
+            pProfile->GetRtcpXrAttr().SetSupportStatisticMetrics(IMS_TRUE);
         }
         if (xrAttr.Contains("voip-metrics"))
         {
-            pProfile->objRtcpXrAttr.SetSupportVoipMetrics(IMS_TRUE);
+            pProfile->GetRtcpXrAttr().SetSupportVoipMetrics(IMS_TRUE);
         }
         if (xrAttr.Contains("pkt-loss-rle"))
         {
-            pProfile->objRtcpXrAttr.SetSupportPacketLossRle(IMS_TRUE);
+            pProfile->GetRtcpXrAttr().SetSupportPacketLossRle(IMS_TRUE);
         }
         if (xrAttr.Contains("pkt-dup-rle"))
         {
-            pProfile->objRtcpXrAttr.SetSupportPacketDuplicatedRle(IMS_TRUE);
+            pProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
     }
 
     // ANBR
-    pProfile->bAnbr = IMS_FALSE;
+    pProfile->SetAnbr(IMS_FALSE);
     if (pDescriptor->GetAttribute(SdpAttribute::ANBR) == IMS_SUCCESS)
     {
-        pProfile->bAnbr = IMS_TRUE;
+        pProfile->SetAnbr(IMS_TRUE);
     }
 
     return IMS_TRUE;
@@ -1493,15 +1495,15 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pPeerProfile, bIsOfferReceived, nAsValueOfNegoticatedCodec, pNegotiatedProfile);
 
         // RTCP-XR
-        if (pLocalProfile->bSupportRtcpXr == IMS_TRUE &&
+        if (pLocalProfile->IsRtcpXrSupported() == IMS_TRUE &&
                 pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
         {
-            pNegotiatedProfile->bSupportRtcpXr = IMS_TRUE;
-            pNegotiatedProfile->objRtcpXrAttr = pLocalProfile->objRtcpXrAttr;
+            pNegotiatedProfile->SetSupportRtcpXr(IMS_TRUE);
+            pNegotiatedProfile->SetRtcpXrAttr(pLocalProfile->GetRtcpXrAttr());
         }
 
         IMS_TRACE_D("MakeNegotiatedProfile()-Rtcp Interval[%d], RTCP-XR support[%d]",
-                pNegotiatedProfile->GetRtcpInterval(), pNegotiatedProfile->bSupportRtcpXr, 0);
+                pNegotiatedProfile->GetRtcpInterval(), pNegotiatedProfile->IsRtcpXrSupported(), 0);
 
         /** Setting ptime & maxptime
          * [RFC3264]
@@ -1509,36 +1511,37 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
          * this indicates the packetization interval that the answerer would like to receive.
          * There is no requirement that the packetization interval be the same in each direction
          * for a particular stream.*/
-        if (pLocalProfile->nPtime < 20)
+        if (pLocalProfile->GetPtime() < 20)
         {
-            pNegotiatedProfile->nPtime = 20;
+            pNegotiatedProfile->SetPtime(20);
         }
         else
         {
-            pNegotiatedProfile->nPtime = pLocalProfile->nPtime;
+            pNegotiatedProfile->SetPtime(pLocalProfile->GetPtime());
         }
 
-        if (pLocalProfile->nMaxPtime < 20)
+        if (pLocalProfile->GetMaxPtime() < 20)
         {
-            pNegotiatedProfile->nMaxPtime = 240;
+            pNegotiatedProfile->SetMaxPtime(240);
         }
         else
         {
-            pNegotiatedProfile->nMaxPtime = pLocalProfile->nMaxPtime;
+            pNegotiatedProfile->SetMaxPtime(pLocalProfile->GetMaxPtime());
         }
 
         // Candidate Priority
-        pNegotiatedProfile->objCandidateAttr = pLocalProfile->objCandidateAttr;
+        pNegotiatedProfile->SetCandidateAttr(pLocalProfile->GetCandidateAttr());
 
         // ANBR
-        pNegotiatedProfile->bAnbr = IMS_FALSE;
-        if (pLocalProfile->bAnbr && pPeerProfile->bAnbr)
+        pNegotiatedProfile->SetAnbr(IMS_FALSE);
+        if (pLocalProfile->IsAnbrSupported() && pPeerProfile->IsAnbrSupported())
         {
-            pNegotiatedProfile->bAnbr = IMS_TRUE;
+            pNegotiatedProfile->SetAnbr(IMS_TRUE);
         }
 
         IMS_TRACE_D("MakeNegotiatedProfile() - anbr local: %d peer: %d nego: %d",
-                pLocalProfile->bAnbr, pPeerProfile->bAnbr, pNegotiatedProfile->bAnbr);
+                pLocalProfile->IsAnbrSupported(), pPeerProfile->IsAnbrSupported(),
+                pNegotiatedProfile->IsAnbrSupported());
 
         return IMS_TRUE;
     }

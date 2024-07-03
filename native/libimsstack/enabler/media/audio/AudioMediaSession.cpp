@@ -260,19 +260,19 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     // RTCP-XR
     IMS_UINT32 nRtcpXrBlocks = 0;
-    if (pNegoProfile->objRtcpXrAttr.IsSupportVoipMetricsEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_VOIP_METRICS_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.IsSupportStatisticMetricsEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_STATISTICS_SUMMARY_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.IsSupportPacketLossRleEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_LOSS_RLE_REPORT_BLOCK;
     }
-    if (pNegoProfile->objRtcpXrAttr.IsSupportPacketDuplicatedRleEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_DUPLICATE_RLE_REPORT_BLOCK;
     }
@@ -306,8 +306,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
         objAudioConfig.setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         // AMR DTX on/off by source codec
         objAudioConfig.setDtxEnabled(IMS_FALSE);
 
@@ -352,8 +352,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_EVS);
         objAudioConfig.setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
         // AMR DTX on/off by source codec
         objAudioConfig.setDtxEnabled(pFmtp->IsDtxEnabled());
 
@@ -407,8 +407,8 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         }
         objAudioConfig.setSamplingRateKHz(
                 (int8_t)(pNegoPayload->GetRtpMap().GetSamplingRate() / 1000));
-        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
+        objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->GetPtime());
+        objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->GetMaxPtime());
     }
     else
     {

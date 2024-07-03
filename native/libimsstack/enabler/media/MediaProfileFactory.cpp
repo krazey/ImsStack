@@ -373,9 +373,9 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(IN MediaBaseProfile* 
     AudioConfiguration* pAudioConfig = static_cast<AudioConfiguration*>(pConfig);
 
     pAudioProfile->SetTransportType("RTP/AVP");
-    pAudioProfile->objCandidateAttr = pAudioConfig->GetAudioCandidateAttribute();
-    pAudioProfile->nPtime = pAudioConfig->GetPtime();
-    pAudioProfile->nMaxPtime = pAudioConfig->GetMaxPtime();
+    pAudioProfile->SetCandidateAttr(pAudioConfig->GetAudioCandidateAttribute());
+    pAudioProfile->SetPtime(pAudioConfig->GetPtime());
+    pAudioProfile->SetMaxPtime(pAudioConfig->GetMaxPtime());
 
     MediaProfileUtil::SetRtcpRsRr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
@@ -391,8 +391,8 @@ PRIVATE AudioProfile* MediaProfileFactory::SetAudioProfile(IN MediaBaseProfile* 
         pAudioProfile->GetPayloadList().RemoveAt(0);
     }
 
-    IMS_TRACE_D("SetAudioProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
-            pAudioProfile->nMaxPtime, 0);
+    IMS_TRACE_D("SetAudioProfile() - Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
+            pAudioProfile->GetMaxPtime(), 0);
     IMS_TRACE_D("SetAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->GetBandwidthAs(),
             pAudioProfile->GetBandwidthRr(), pAudioProfile->GetBandwidthRs());
 

@@ -528,25 +528,15 @@ public:
         DEFAULT_MAXPTIME = 240,
     };
 
-    IMS_SINT32 nPtime;
-    IMS_SINT32 nMaxPtime;
-    ImsVector<AString> objCandidateAttr;
-    IMS_BOOL bSupportRtcpXr;
-    RtcpXrAttributes objRtcpXrAttr;
-    IMS_BOOL bRtcpDisableBeforeSetup;
-    IMS_BOOL bAnbr;
-
-public:
     AudioProfile() :
             MediaBaseProfile(
                     IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_SEND_RECEIVE),
-            nPtime(0),
-            nMaxPtime(0),
-            objCandidateAttr(ImsVector<AString>()),
-            bSupportRtcpXr(IMS_FALSE),
-            objRtcpXrAttr(RtcpXrAttributes()),
-            bRtcpDisableBeforeSetup(IMS_FALSE),
-            bAnbr(IMS_FALSE){};
+            m_nPtime(0),
+            m_nMaxPtime(0),
+            m_objCandidateAttr(ImsVector<AString>()),
+            m_bSupportRtcpXr(IMS_FALSE),
+            m_objRtcpXrAttr(RtcpXrAttributes()),
+            m_bAnbr(IMS_FALSE){};
 
     virtual ~AudioProfile(){};
 
@@ -557,25 +547,23 @@ public:
         {
             return;
         }
-        nPtime = profile->nPtime;
-        nMaxPtime = profile->nMaxPtime;
-        objCandidateAttr = profile->objCandidateAttr;
-        bSupportRtcpXr = profile->bSupportRtcpXr;
-        objRtcpXrAttr = profile->objRtcpXrAttr;
-        bRtcpDisableBeforeSetup = profile->bRtcpDisableBeforeSetup;
-        bAnbr = profile->bAnbr;
+        m_nPtime = profile->m_nPtime;
+        m_nMaxPtime = profile->m_nMaxPtime;
+        m_objCandidateAttr = profile->m_objCandidateAttr;
+        m_bSupportRtcpXr = profile->m_bSupportRtcpXr;
+        m_objRtcpXrAttr = profile->m_objRtcpXrAttr;
+        m_bAnbr = profile->m_bAnbr;
     }
 
     AudioProfile(IN const AudioProfile& obj) :
             MediaBaseProfile(obj)
     {
-        nPtime = obj.nPtime;
-        nMaxPtime = obj.nMaxPtime;
-        objCandidateAttr = obj.objCandidateAttr;
-        bSupportRtcpXr = obj.bSupportRtcpXr;
-        objRtcpXrAttr = obj.objRtcpXrAttr;
-        bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
-        bAnbr = obj.bAnbr;
+        m_nPtime = obj.m_nPtime;
+        m_nMaxPtime = obj.m_nMaxPtime;
+        m_objCandidateAttr = obj.m_objCandidateAttr;
+        m_bSupportRtcpXr = obj.m_bSupportRtcpXr;
+        m_objRtcpXrAttr = obj.m_objRtcpXrAttr;
+        m_bAnbr = obj.m_bAnbr;
     }
 
     AudioProfile& operator=(IN const AudioProfile& obj)
@@ -583,29 +571,26 @@ public:
         if (this != &obj)
         {
             MediaBaseProfile::operator=(obj);
-            nPtime = obj.nPtime;
-            nMaxPtime = obj.nMaxPtime;
-            objCandidateAttr = obj.objCandidateAttr;
-            bSupportRtcpXr = obj.bSupportRtcpXr;
-            objRtcpXrAttr = obj.objRtcpXrAttr;
-            bRtcpDisableBeforeSetup = obj.bRtcpDisableBeforeSetup;
-            bAnbr = obj.bAnbr;
+            m_nPtime = obj.m_nPtime;
+            m_nMaxPtime = obj.m_nMaxPtime;
+            m_objCandidateAttr = obj.m_objCandidateAttr;
+            m_bSupportRtcpXr = obj.m_bSupportRtcpXr;
+            m_objRtcpXrAttr = obj.m_objRtcpXrAttr;
+            m_bAnbr = obj.m_bAnbr;
         }
         return (*this);
     }
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (MediaBaseProfile::operator==(obj) && bSupportRtcpXr == obj.bSupportRtcpXr &&
-                objRtcpXrAttr == obj.objRtcpXrAttr &&
-                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup && bAnbr == obj.bAnbr);
+        return (MediaBaseProfile::operator==(obj) && m_bSupportRtcpXr == obj.m_bSupportRtcpXr &&
+                m_objRtcpXrAttr == obj.m_objRtcpXrAttr && m_bAnbr == obj.m_bAnbr);
     }
 
     bool operator!=(IN const AudioProfile& obj) const
     {
-        return (MediaBaseProfile::operator!=(obj) || bSupportRtcpXr != obj.bSupportRtcpXr ||
-                objRtcpXrAttr != obj.objRtcpXrAttr ||
-                bRtcpDisableBeforeSetup != obj.bRtcpDisableBeforeSetup || bAnbr != obj.bAnbr);
+        return (MediaBaseProfile::operator!=(obj) || m_bSupportRtcpXr != obj.m_bSupportRtcpXr ||
+                m_objRtcpXrAttr != obj.m_objRtcpXrAttr || m_bAnbr != obj.m_bAnbr);
     }
 
     Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
@@ -613,6 +598,36 @@ public:
         BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
+
+    inline void SetPtime(IN const IMS_SINT32 nPtime) { m_nPtime = nPtime; }
+    inline IMS_SINT32 GetPtime() { return m_nPtime; }
+    inline void SetMaxPtime(IN const IMS_SINT32 nMaxPtime) { m_nMaxPtime = nMaxPtime; }
+    inline IMS_SINT32 GetMaxPtime() { return m_nMaxPtime; }
+    inline void SetCandidateAttr(IN const ImsVector<AString> objCandidateAttr)
+    {
+        m_objCandidateAttr = objCandidateAttr;
+    }
+    inline ImsVector<AString>& GetCandidateAttr() { return m_objCandidateAttr; }
+    inline void SetSupportRtcpXr(IN const IMS_BOOL bSupportRtcpXr)
+    {
+        m_bSupportRtcpXr = bSupportRtcpXr;
+    }
+    inline IMS_BOOL IsRtcpXrSupported() { return m_bSupportRtcpXr; }
+    inline void SetRtcpXrAttr(IN const RtcpXrAttributes objRtcpXrAttr)
+    {
+        m_objRtcpXrAttr = objRtcpXrAttr;
+    }
+    inline RtcpXrAttributes& GetRtcpXrAttr() { return m_objRtcpXrAttr; }
+    inline void SetAnbr(IN const IMS_BOOL bAnbr) { m_bAnbr = bAnbr; }
+    inline IMS_BOOL IsAnbrSupported() { return m_bAnbr; }
+
+private:
+    IMS_SINT32 m_nPtime;
+    IMS_SINT32 m_nMaxPtime;
+    ImsVector<AString> m_objCandidateAttr;
+    IMS_BOOL m_bSupportRtcpXr;
+    RtcpXrAttributes m_objRtcpXrAttr;
+    IMS_BOOL m_bAnbr;
 };
 
 #endif

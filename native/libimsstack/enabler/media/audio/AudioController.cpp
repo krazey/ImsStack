@@ -108,9 +108,9 @@ IMS_BOOL AudioController::UpdateSession(
     m_nCurrentActiveNegoId = nNegoId;
 
     IMS_BOOL bAnbrResult = UpdateAnbrEnabledConfig(
-            nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->bAnbr);
+            nNegoId, pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported());
     IMS_TRACE_D("UpdateSession() - res: %d, anbr enable: %d", bAnbrResult,
-            pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->bAnbr, 0);
+            pNego->ProfileCasting(pNego->GetNegotiatedNegoProfile())->IsAnbrSupported(), 0);
 
     if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {

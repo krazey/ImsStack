@@ -77,35 +77,35 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
         return IMS_FALSE;
     }
 
-    pAudioProfile->bSupportRtcpXr = pConfig->IsRtcpXrEnabled();
+    pAudioProfile->SetSupportRtcpXr(pConfig->IsRtcpXrEnabled());
 
-    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->bSupportRtcpXr, 0, 0);
+    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
 
-    if (pAudioProfile->bSupportRtcpXr == IMS_TRUE)
+    if (pAudioProfile->IsRtcpXrSupported() == IMS_TRUE)
     {
         if (pConfig->IsRtcpXrVoipEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.SetSupportVoipMetrics(IMS_TRUE);
+            pAudioProfile->GetRtcpXrAttr().SetSupportVoipMetrics(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrStatisticsEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.SetSupportStatisticMetrics(IMS_TRUE);
+            pAudioProfile->GetRtcpXrAttr().SetSupportStatisticMetrics(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrPlrEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.SetSupportPacketLossRle(IMS_TRUE);
+            pAudioProfile->GetRtcpXrAttr().SetSupportPacketLossRle(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrPdrEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.SetSupportPacketDuplicatedRle(IMS_TRUE);
+            pAudioProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
 
         IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
-                pAudioProfile->objRtcpXrAttr.IsSupportVoipMetricsEnabled(),
-                pAudioProfile->objRtcpXrAttr.IsSupportStatisticMetricsEnabled(),
-                pAudioProfile->objRtcpXrAttr.IsSupportPacketLossRleEnabled());
+                pAudioProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled(),
+                pAudioProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled(),
+                pAudioProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled());
         IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
-                pAudioProfile->objRtcpXrAttr.IsSupportPacketDuplicatedRleEnabled(), 0, 0);
+                pAudioProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled(), 0, 0);
     }
 
     return IMS_TRUE;
@@ -724,8 +724,8 @@ PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
 
         if (pMediaSessionConfig != IMS_NULL)
         {
-            pProfile->bAnbr = pMediaSessionConfig->IsAnbrSupported();
-            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->bAnbr, 0, 0);
+            pProfile->SetAnbr(pMediaSessionConfig->IsAnbrSupported());
+            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->IsAnbrSupported(), 0, 0);
         }
     }
 }
