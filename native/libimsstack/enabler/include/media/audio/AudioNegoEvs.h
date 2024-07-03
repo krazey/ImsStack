@@ -22,27 +22,27 @@
 class AudioNegoEvs
 {
 public:
-    static AString SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* evsFmtp);
+    static AString SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp);
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
-    static void AddPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddMaxPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddDtxToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddEvsModeSwitchToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBwToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddCmrToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddChannelAwModeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
+    static void AddPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddMaxPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddDtxToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddEvsModeSwitchToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBwToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddCmrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddChannelAwModeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
     static void AddModeChangeCapabilityToFmtp(
-            IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddModeChangePeriodToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
+            IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddModeChangePeriodToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
     static void AddModeChangeNeighborToFmtp(
-            IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBwSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBrSendToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
-    static void AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& strFmtp);
+            IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBwSendToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBwRecvToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBrSendToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
+    static void AddBrRecvToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
 };
 #endif

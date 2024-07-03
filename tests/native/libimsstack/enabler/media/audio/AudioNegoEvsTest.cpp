@@ -43,15 +43,18 @@ class AudioNegoEvsTest : public ::testing::Test
 public:
     AudioProfile::EvsFmtp* m_pEvsFmtpFull;
     AudioProfile::EvsFmtp* m_pEvsFmtpEmpty;
+    AudioProfile::EvsFmtp* m_pEvsFmtpNull;
 
 protected:
     virtual void SetUp() override
     {
+        m_pEvsFmtpFull = new AudioProfile::EvsFmtp();
         m_pEvsFmtpEmpty = new AudioProfile::EvsFmtp();
+        m_pEvsFmtpNull = IMS_NULL;
+
         m_pEvsFmtpEmpty->bShowBrList = IMS_FALSE;
         m_pEvsFmtpEmpty->bShowBwList = IMS_FALSE;
 
-        m_pEvsFmtpFull = new AudioProfile::EvsFmtp();
         m_pEvsFmtpFull->SetPtime(20);
         m_pEvsFmtpFull->SetMaxPtime(240);
         m_pEvsFmtpFull->SetDtx(1);
@@ -97,6 +100,9 @@ protected:
 TEST_F(AudioNegoEvsTest, TestSetSdpFmtpFromEvsFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    strFmtp = AudioNegoEvs::SetSdpFmtpFromEvsFmtp(m_pEvsFmtpNull);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     strFmtp = AudioNegoEvs::SetSdpFmtpFromEvsFmtp(m_pEvsFmtpEmpty);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -157,6 +163,9 @@ TEST_F(AudioNegoEvsTest, TestAddPtimeToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddPtimeToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddPtimeToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -167,6 +176,9 @@ TEST_F(AudioNegoEvsTest, TestAddPtimeToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddMaxPtimeToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddMaxPtimeToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddMaxPtimeToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -179,6 +191,9 @@ TEST_F(AudioNegoEvsTest, TestAddDtxToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddDtxToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddDtxToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -189,6 +204,9 @@ TEST_F(AudioNegoEvsTest, TestAddDtxToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddHfOnlyToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddHfOnlyToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddHfOnlyToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -201,6 +219,9 @@ TEST_F(AudioNegoEvsTest, TestAddEvsModeSwitchToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddEvsModeSwitchToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddEvsModeSwitchToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -212,6 +233,9 @@ TEST_F(AudioNegoEvsTest, TestAddMaxRedToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddMaxRedToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddMaxRedToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -222,6 +246,9 @@ TEST_F(AudioNegoEvsTest, TestAddMaxRedToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddBwToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddBwToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddBwToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -249,6 +276,9 @@ TEST_F(AudioNegoEvsTest, TestAddBrToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddBrToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddBrToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -270,6 +300,9 @@ TEST_F(AudioNegoEvsTest, TestAddCmrToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddCmrToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddCmrToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -284,6 +317,9 @@ TEST_F(AudioNegoEvsTest, TestAddCmrToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddChannelAwModeToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddChannelAwModeToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddChannelAwModeToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -300,6 +336,9 @@ TEST_F(AudioNegoEvsTest, TestAddModeSetListToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddModeSetListToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddModeSetListToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -310,6 +349,9 @@ TEST_F(AudioNegoEvsTest, TestAddModeSetListToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddModeChangeCapabilityToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddModeChangeCapabilityToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddModeChangeCapabilityToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -322,6 +364,9 @@ TEST_F(AudioNegoEvsTest, TestAddModeChangePeriodToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddModeChangePeriodToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddModeChangePeriodToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -333,6 +378,9 @@ TEST_F(AudioNegoEvsTest, TestAddModeChangeNeighborToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddModeChangeNeighborToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddModeChangeNeighborToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -343,6 +391,9 @@ TEST_F(AudioNegoEvsTest, TestAddModeChangeNeighborToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddBwSendToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddBwSendToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddBwSendToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -370,6 +421,9 @@ TEST_F(AudioNegoEvsTest, TestAddBwRecvToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddBwRecvToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddBwRecvToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -396,6 +450,9 @@ TEST_F(AudioNegoEvsTest, TestAddBrSendToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoEvs::AddBrSendToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoEvs::AddBrSendToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -416,6 +473,9 @@ TEST_F(AudioNegoEvsTest, TestAddBrSendToFmtp)
 TEST_F(AudioNegoEvsTest, TestAddBrRecvToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoEvs::AddBrRecvToFmtp(m_pEvsFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoEvs::AddBrRecvToFmtp(m_pEvsFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());

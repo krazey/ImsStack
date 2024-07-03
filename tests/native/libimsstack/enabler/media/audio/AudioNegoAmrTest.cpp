@@ -34,12 +34,14 @@ class AudioNegoAmrTest : public ::testing::Test
 public:
     AudioProfile::AmrFmtp* m_pAmrFmtpFull;
     AudioProfile::AmrFmtp* m_pAmrFmtpEmpty;
+    AudioProfile::AmrFmtp* m_pAmrFmtpNull;
 
 protected:
     virtual void SetUp() override
     {
         m_pAmrFmtpFull = new AudioProfile::AmrFmtp();
         m_pAmrFmtpEmpty = new AudioProfile::AmrFmtp();
+        m_pAmrFmtpNull = IMS_NULL;
 
         m_pAmrFmtpFull->SetModeSetList(7);
         m_pAmrFmtpFull->nOctetAlign = 1;
@@ -70,6 +72,9 @@ protected:
 TEST_F(AudioNegoAmrTest, TestSetSdpFmtpFromAmrFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpNull);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpEmpty);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -127,6 +132,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeSetListToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddModeSetListToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddModeSetListToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -137,6 +145,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeSetListToFmtp)
 TEST_F(AudioNegoAmrTest, TestAddOctetAlignToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -149,6 +160,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangeCapabilityToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddModeChangeCapabilityToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -159,6 +173,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangeCapabilityToFmtp)
 TEST_F(AudioNegoAmrTest, TestAddModeChangePeriodToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddModeChangePeriodToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddModeChangePeriodToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -171,6 +188,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangeNeighborToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddModeChangeNeighborToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddModeChangeNeighborToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -181,6 +201,9 @@ TEST_F(AudioNegoAmrTest, TestAddModeChangeNeighborToFmtp)
 TEST_F(AudioNegoAmrTest, TestAddMaxRedToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddMaxRedToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddMaxRedToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
@@ -193,6 +216,9 @@ TEST_F(AudioNegoAmrTest, TestAddPtimeToFmtp)
 {
     AString strFmtp = AString::ConstNull();
 
+    AudioNegoAmr::AddPtimeToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
+
     AudioNegoAmr::AddPtimeToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
@@ -203,6 +229,9 @@ TEST_F(AudioNegoAmrTest, TestAddPtimeToFmtp)
 TEST_F(AudioNegoAmrTest, TestAddMaxPtimeToFmtp)
 {
     AString strFmtp = AString::ConstNull();
+
+    AudioNegoAmr::AddMaxPtimeToFmtp(m_pAmrFmtpNull, strFmtp);
+    EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddMaxPtimeToFmtp(m_pAmrFmtpEmpty, strFmtp);
     EXPECT_EQ(strFmtp, AString::ConstNull());
