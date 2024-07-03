@@ -183,8 +183,8 @@ IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
     TextProfile* pPeerProfile = pNego->ProfileCasting(pNego->GetNegotiatedPeerProfile());
     IMS_BOOL bEnableRtcp = IMS_TRUE;
 
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+    if (pPeerProfile != IMS_NULL && pPeerProfile->GetBandwidthRs() == 0 &&
+            pPeerProfile->GetBandwidthRr() == 0)
     {
         bEnableRtcp = IMS_FALSE;
     }

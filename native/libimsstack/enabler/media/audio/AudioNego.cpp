@@ -100,8 +100,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::IsMediaCodecFromSdpSupported(
         return MEDIA_TYPE_INVALID;
     }
 
-    return (objOaModel.pNegotiatedProfile->lstPayload.GetSize() > 0 &&
-                   objOaModel.pNegotiatedProfile->nDataPort != 0)
+    return (objOaModel.pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
+                   objOaModel.pNegotiatedProfile->GetDataPort() != 0)
             ? IMS_TRUE
             : IMS_FALSE;
 }
@@ -115,12 +115,12 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
         return AUDIO_CODEC_BITRATE_MAX;
     }
 
-    if (pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-            pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+    if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+            pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
         IMS_SINT32 nLargestModeSet = -1;
 
-        if (pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+        if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
             nLargestModeSet = AudioProfileUtil::GetLargestModesetInFmtp(
                                       "AMR-WB", PayloadCasting(pNegotiatedPayload)) +
@@ -135,10 +135,10 @@ PUBLIC VIRTUAL AUDIO_CODEC_BITRATE AudioNego::GetNegotiatedAudioCodecRate(void)
             return (AUDIO_CODEC_BITRATE)nLargestModeSet;
         }
     }
-    else if (pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+    else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
         AudioProfile::EvsFmtp* pEvsFmtp =
-                (AudioProfile::EvsFmtp*)PayloadCasting(pNegotiatedPayload)->pFmtp;
+                (AudioProfile::EvsFmtp*)PayloadCasting(pNegotiatedPayload)->GetFmtp();
         if (pEvsFmtp == IMS_NULL)
         {
             return AUDIO_CODEC_BITRATE_INVALID;
@@ -193,19 +193,19 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
     }
 
     IMS_TRACE_D("GetNegotiatedCodec() - Negotiated Payload Type is [%s]",
-            pPayload->objRtpMap.GetPayloadType().GetStr(), 0, 0);
+            pPayload->GetRtpMap().GetPayloadType().GetStr(), 0, 0);
 
-    if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
     {
         return AUDIO_CODEC_AMRWB;
     }
-    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
     {
         return AUDIO_CODEC_AMR;
     }
-    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
     {
-        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->pFmtp;
+        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
 
         if (pEvsFmtp == IMS_NULL)
         {
@@ -229,11 +229,11 @@ PUBLIC VIRTUAL AUDIO_CODEC AudioNego::GetNegotiatedCodec(void)
         }
         return AUDIO_CODEC_EVS;
     }
-    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU"))
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU"))
     {
         return AUDIO_CODEC_G711_PCMU;
     }
-    else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA"))
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA"))
     {
         return AUDIO_CODEC_G711_PCMA;
     }
@@ -256,7 +256,8 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
             return IMS_FALSE;
         }
 
-        for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->GetPayloadList().GetSize();
+                i++)
         {
             AudioProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(i);
 
@@ -265,7 +266,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
                 continue;
             }
 
-            if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+            if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
             {
                 IMS_TRACE_I("HasNegotiatedDtmf() - Negotiated DTMF found[%d]", i, 0, 0);
                 return IMS_TRUE;
@@ -364,14 +365,14 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
     // Modify a direction by Enabler
     if (eDir > MEDIA_DIRECTION_INVALID)
     {
-        pNewOaModel->pNegotiatedProfile->eDirection = eDir;
+        pNewOaModel->pNegotiatedProfile->SetDirection(eDir);
         IMS_TRACE_I("FormAnswer() - update audio direction[%d]", eDir, 0, 0);
     }
 
     if (bDisable == IMS_TRUE)
     {
-        pNewOaModel->pNegotiatedProfile->nDataPort = 0;
-        pNewOaModel->pNegotiatedProfile->nControlPort = 0;
+        pNewOaModel->pNegotiatedProfile->SetDataPort(0);
+        pNewOaModel->pNegotiatedProfile->SetControlPort(0);
     }
 
     // Make the SDP from profile
@@ -452,7 +453,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
         // reuse previous profile when negotiated profile data port is 0
         if ((pPrevOaModel->pNegotiatedProfile != IMS_NULL &&
-                    pPrevOaModel->pNegotiatedProfile->nDataPort == 0))
+                    pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0))
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
                     MEDIA_TYPE_AUDIO, GetNegotiatedProfile(pPrevOaModel));
@@ -492,17 +493,17 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // set default AS value when localProfile AS value is 0 in ReOffer case
-    if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+    if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
     {
         IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
-        pNewOaModel->pLocalProfile->nBandwidthAs = m_pBaseProfile->nBandwidthAs;
+        pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
     }
 
     // Modify a direction by Enabler
     if (eDir > MEDIA_DIRECTION_INVALID)
     {
         IMS_TRACE_I("FormReoffer() Enforced Set to direction[%d]", eDir, 0, 0);
-        pNewOaModel->pLocalProfile->eDirection = eDir;
+        pNewOaModel->pLocalProfile->SetDirection(eDir);
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
@@ -511,18 +512,18 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (bDisable == IMS_TRUE)
     {
-        pNewOaModel->pLocalProfile->nDataPort = 0;
-        pNewOaModel->pLocalProfile->nControlPort = 0;
+        pNewOaModel->pLocalProfile->SetDataPort(0);
+        pNewOaModel->pLocalProfile->SetControlPort(0);
     }
     else
     {
-        pNewOaModel->pLocalProfile->nDataPort = m_pBaseProfile->nDataPort;
-        pNewOaModel->pLocalProfile->nControlPort = m_pBaseProfile->nControlPort;
+        pNewOaModel->pLocalProfile->SetDataPort(m_pBaseProfile->GetDataPort());
+        pNewOaModel->pLocalProfile->SetControlPort(m_pBaseProfile->GetControlPort());
     }
 
     // when reoffer case - recover rtcpxr to default in sendrecv case
     if (ProfileCasting(m_pBaseProfile)->bSupportRtcpXr == IMS_TRUE &&
-            pNewOaModel->pLocalProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE)
+            pNewOaModel->pLocalProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
         GetLocalProfile(pNewOaModel)->bSupportRtcpXr =
                 ProfileCasting(m_pBaseProfile)->bSupportRtcpXr;
@@ -550,7 +551,7 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    IMS_TRACE_I("NegotiateOffer() - local port[%d]", m_pBaseProfile->nDataPort, 0, 0);
+    IMS_TRACE_I("NegotiateOffer() - local port[%d]", m_pBaseProfile->GetDataPort(), 0, 0);
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
@@ -585,7 +586,7 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
     m_listOaModel.Append(pNewOaModel);
 
     // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
+    return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
 PROTECTED
@@ -642,7 +643,7 @@ MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
 
     // Return the direction of negotiated profile
-    return pNewOaModel->pNegotiatedProfile->eDirection;
+    return pNewOaModel->pNegotiatedProfile->GetDirection();
 }
 
 PROTECTED
@@ -657,7 +658,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     AudioProfile* pProfile = ProfileCasting(pBaseProfile);
 
     IMS_TRACE_I("MakeSdpFromProfile() - PayloadSize[%d], AS[%d], port[%d]",
-            pProfile->lstPayload.GetSize(), pProfile->nBandwidthAs, pProfile->nDataPort);
+            pProfile->GetPayloadList().GetSize(), pProfile->GetBandwidthAs(),
+            pProfile->GetDataPort());
 
     // clean attr & bandwidth line
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
@@ -680,7 +682,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     // make each payload
     // ------"a=rtpmap:104 AMR-WB/16000/1"
     // ------"a=fmtp:110 mode-set=2; octet-align=1"
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         AString strRtpmap, strFmtp, strPayloadNum;
 
@@ -691,22 +693,22 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         }
 
         // set "rtpmap"
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.GetPayloadNumber());
-        strRtpmap.Sprintf("%s/%d", pPayload->objRtpMap.GetPayloadType().GetStr(),
-                pPayload->objRtpMap.GetSamplingRate());
+        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
+        strRtpmap.Sprintf("%s/%d", pPayload->GetRtpMap().GetPayloadType().GetStr(),
+                pPayload->GetRtpMap().GetSamplingRate());
 
-        if (pPayload->objRtpMap.GetChannel() > 0)
+        if (pPayload->GetRtpMap().GetChannel() > 0)
         {
             AString strChannel;
-            strChannel.Sprintf("/%d", pPayload->objRtpMap.GetChannel());
+            strChannel.Sprintf("/%d", pPayload->GetRtpMap().GetChannel());
             strRtpmap.Append(strChannel);
         }
 
         // set "fmtp"
-        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
-                pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
+        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
         {
-            AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pPayload->pFmtp;
+            AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
             if (pAmrFmtp == IMS_NULL)
             {
                 continue;
@@ -714,10 +716,10 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
             strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(pAmrFmtp);
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
         {
             AudioProfile::TelephoneEventFmtp* pTEFmtp =
-                    (AudioProfile::TelephoneEventFmtp*)pPayload->pFmtp;
+                    (AudioProfile::TelephoneEventFmtp*)pPayload->GetFmtp();
             if (pTEFmtp == IMS_NULL)
             {
                 continue;
@@ -725,9 +727,9 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
             strFmtp = pTEFmtp->strEvents;
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
-            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->pFmtp;
+            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
             if (pEvsFmtp == IMS_NULL)
             {
                 continue;
@@ -735,8 +737,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
             strFmtp = AudioNegoEvs::SetSdpFmtpFromEvsFmtp(pEvsFmtp);
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("pcmu") ||
-                pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("pcma"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcmu") ||
+                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcma"))
         {
             // set rtpmap, not fmtp
             strFmtp = AString::ConstNull();
@@ -758,14 +760,14 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     }
 
     // set make direction
-    pDescriptor->SetDirection(pProfile->eDirection);
+    pDescriptor->SetDirection(pProfile->GetDirection());
 
-    if (pProfile->eDirection > MEDIA_DIRECTION_INVALID &&
-            pProfile->eDirection <= MEDIA_DIRECTION_SEND_RECEIVE)
+    if (pProfile->GetDirection() > MEDIA_DIRECTION_INVALID &&
+            pProfile->GetDirection() <= MEDIA_DIRECTION_SEND_RECEIVE)
     {
         // Set Session Level Direction Attribute according to the media direction
         // (avoid conflict between media and audio)
-        pSessionDescriptor->SetDirection(pProfile->eDirection);
+        pSessionDescriptor->SetDirection(pProfile->GetDirection());
     }
 
     // set make ptime & maxptime
@@ -792,7 +794,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
     // set RTCP-XR -- RTCP-XR is for VZW, not a negotiation target by VZW requirement
     if (pProfile->bSupportRtcpXr == IMS_TRUE &&
-            pProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE)
+            pProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
         if (pProfile->objRtcpXrAttr.bSupportStatisticMetrics)
         {
@@ -836,30 +838,30 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     }
 
     // IP
-    pProfile->objIpAddress = pDescriptor->GetRemoteAddress();
+    pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
 
     // data & control port
-    pProfile->nDataPort = pDescriptor->GetRemotePort();
+    pProfile->SetDataPort(pDescriptor->GetRemotePort());
 
     if (pDescriptor->GetAttributeInt(SdpAttribute::RTCP) == IMediaDescriptor::INVALID_VALUE)
     {
-        pProfile->nControlPort = pProfile->nDataPort + 1;
+        pProfile->SetControlPort(pProfile->GetDataPort() + 1);
     }
     else
     {
-        pProfile->nControlPort = pDescriptor->GetAttributeInt(SdpAttribute::RTCP);
+        pProfile->SetControlPort(pDescriptor->GetAttributeInt(SdpAttribute::RTCP));
     }
 
     // bandwidth
-    pProfile->nBandwidthAs = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS);
-    pProfile->nBandwidthRs = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS);
-    pProfile->nBandwidthRr = pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR);
+    pProfile->SetBandwidthAs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS));
+    pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
+    pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
 
-    IMS_TRACE_I("MakeProfileFromSdp() - AS[%d], RS[%d], RR[%d]", pProfile->nBandwidthAs,
-            pProfile->nBandwidthRs, pProfile->nBandwidthRr);
+    IMS_TRACE_I("MakeProfileFromSdp() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
+            pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
 
     // read CapaNego profile From SDP
-    MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->objCapaNego));
+    MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->GetCapaNego()));
 
     // payload
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
@@ -901,7 +903,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             // Create AMR fmtp
             AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
             GetFmtpFromString(pSdpCodec->GetFormatSpecificParameter(), pAmrFmtp);
-            pPayload->pFmtp = pAmrFmtp;
+            pPayload->SetFmtp(pAmrFmtp);
         }
         else if (strCodecName.EqualsIgnoreCase("telephone-event"))
         {
@@ -920,7 +922,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
                 pTeFmtp->strEvents = "0-15";  // default value
             }
 
-            pPayload->pFmtp = pTeFmtp;
+            pPayload->SetFmtp(pTeFmtp);
         }
         else if (strCodecName.EqualsIgnoreCase("EVS"))
         {
@@ -929,7 +931,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             // check and get EVS fmtp
             GetFmtpFromString(pSdpCodec->GetFormatSpecificParameter(), pEvsFmtp);
             // set Fmpt to payload
-            pPayload->pFmtp = pEvsFmtp;
+            pPayload->SetFmtp(pEvsFmtp);
         }
         else if (nPayloadTypeNumber == 0 || nPayloadTypeNumber == 8)
         {  // PCMU or PCMA case
@@ -946,22 +948,22 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
         if (pPayload != IMS_NULL)
         {
-            pProfile->lstPayload.Append(pPayload);
+            pProfile->GetPayloadList().Append(pPayload);
         }
     }
 
     // direction
-    pProfile->eDirection = (MEDIA_DIRECTION)pDescriptor->GetDirection();
+    pProfile->SetDirection((MEDIA_DIRECTION)pDescriptor->GetDirection());
 
-    if (pProfile->eDirection == MEDIA_DIRECTION_INVALID)
+    if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
     {
         IMS_TRACE_D("MakeProfileFromSdp() - Audio Direction does not exist", 0, 0, 0);
         // check session level attribute Direction
-        pProfile->eDirection = (MEDIA_DIRECTION)pSessionDescriptor->GetDirection();
+        pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
 
-        if (pProfile->eDirection == MEDIA_DIRECTION_INVALID)
+        if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
         {
-            pProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+            pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
         }
     }
 
@@ -1025,23 +1027,23 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     }
 
     // Setting IP of mine
-    pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
+    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
 
     IMS_TRACE_D("MakeNegotiatedProfile() - IPAddr nego[%s] src[%s] DestPayloadSize[%d]",
-            pNegotiatedProfile->objIpAddress.ToCharString(),
-            pLocalProfile->objIpAddress.ToCharString(), pPeerProfile->lstPayload.GetSize());
+            pNegotiatedProfile->GetIpAddress().ToCharString(),
+            pLocalProfile->GetIpAddress().ToCharString(), pPeerProfile->GetPayloadList().GetSize());
 
     // Setting RTP/RTCP port of mine
-    pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
-    pNegotiatedProfile->nControlPort = pLocalProfile->nControlPort;
+    pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
+    pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
 
-    if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
+    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
     {
         // Reset the negotiated profile to local profile
         *pNegotiatedProfile = *pLocalProfile;
-        pNegotiatedProfile->nDataPort = 0;
+        pNegotiatedProfile->SetDataPort(0);
         IMS_TRACE_D("MakeNegotiatedProfile() ZERO Port. DO NOT Use the audio[%d][%d]",
-                pNegotiatedProfile->nDataPort, pPeerProfile->nDataPort, 0);
+                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort(), 0);
     }
 
     // Compare each payload based destination's profile
@@ -1058,50 +1060,50 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     // find negotiation aduioCodec, because of telephonyEvent negotiation
     ImsList<AudioProfile::Payload*> templstNegotiatedPayloads;
 
-    for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
         {
             continue;
         }
-        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-                pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
             if ((templstNegotiatedPayloads.GetSize() == 0) &&
                     FindAmrInProfile(pLocalProfile, pPayload, bIsOfferReceived, &nNegoModeSetList,
                             &nNegoDefaultRtpModeSet) == IMS_TRUE)
             {
                 AudioProfile::Payload* pAMR = new AudioProfile::Payload();
-                pAMR->SetRtpMap(pPayload->objRtpMap);
-                pAMR->pFmtp = new AudioProfile::AmrFmtp(
-                        *static_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp));
+                pAMR->SetRtpMap(pPayload->GetRtpMap());
+                pAMR->SetFmtp(new AudioProfile::AmrFmtp(
+                        *static_cast<AudioProfile::AmrFmtp*>(pPayload->GetFmtp())));
                 templstNegotiatedPayloads.Append(pAMR);
             }
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
             if ((templstNegotiatedPayloads.GetSize() == 0) &&
                     FindEvsInProfile(pLocalProfile, pPayload, bIsOfferReceived, &BandwidthNegoList,
                             &BitrateNegoList, &ModeSetNegoList) == IMS_TRUE)
             {
                 AudioProfile::Payload* pEVS = new AudioProfile::Payload();
-                pEVS->SetRtpMap(pPayload->objRtpMap);
+                pEVS->SetRtpMap(pPayload->GetRtpMap());
 
-                pEVS->pFmtp = new AudioProfile::EvsFmtp(
-                        *static_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp));
+                pEVS->SetFmtp(new AudioProfile::EvsFmtp(
+                        *static_cast<AudioProfile::EvsFmtp*>(pPayload->GetFmtp())));
 
                 templstNegotiatedPayloads.Append(pEVS);
             }
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU") ||
-                pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ||
+                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA"))
         {
             if ((templstNegotiatedPayloads.GetSize() == 0) &&
                     FindPcmInProfile(pLocalProfile, pPayload) == IMS_TRUE)
             {
                 AudioProfile::Payload* pPCM = new AudioProfile::Payload();
-                pPCM->SetRtpMap(pPayload->objRtpMap);
+                pPCM->SetRtpMap(pPayload->GetRtpMap());
 
                 templstNegotiatedPayloads.Append(pPCM);
             }
@@ -1111,7 +1113,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     IMS_TRACE_D("MakeNegotiatedProfile() - temp negotiated payload list[%d]",
             templstNegotiatedPayloads.GetSize(), 0, 0);
 
-    for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(i);
         if (pDestPayload == IMS_NULL)
@@ -1119,24 +1121,24 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             continue;
         }
 
-        if (pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-                pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+        if (pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+                pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
             if ((lstNegotiatedPayloads.GetSize() == 0) &&
                     FindAmrInProfile(pLocalProfile, pDestPayload, bIsOfferReceived,
                             &nNegoModeSetList, &nNegoDefaultRtpModeSet) == IMS_TRUE)
             {
                 AudioProfile::Payload* pAMR = new AudioProfile::Payload();
-                pAMR->SetRtpMap(pDestPayload->objRtpMap);
+                pAMR->SetRtpMap(pDestPayload->GetRtpMap());
 
                 IMS_SINT32 nSrcPayloadIndex =
-                        FindPayloadIndexFromProfile(pDestPayload->objRtpMap.GetPayloadType(),
+                        FindPayloadIndexFromProfile(pDestPayload->GetRtpMap().GetPayloadType(),
                                 pLocalProfile, pDestPayload, bIsOfferReceived);
                 AudioProfile::AmrFmtp* pSrc_Fmtp =
                         (AudioProfile::AmrFmtp*)pLocalProfile->GetPayloadAt(nSrcPayloadIndex)
-                                ->pFmtp;
+                                ->GetFmtp();
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
-                        *static_cast<AudioProfile::AmrFmtp*>(pDestPayload->pFmtp));
+                        *static_cast<AudioProfile::AmrFmtp*>(pDestPayload->GetFmtp()));
                 pAmrFmtp->nModeSetList = nNegoModeSetList;
                 pAmrFmtp->nDefaultRtpModeSet = nNegoDefaultRtpModeSet;
 
@@ -1149,40 +1151,40 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pAmrFmtp->bShowModeChangePeriod = pSrc_Fmtp->bShowModeChangePeriod;
                 pAmrFmtp->nModeChangePeriod = pSrc_Fmtp->nModeChangePeriod;
 
-                pAMR->pFmtp = pAmrFmtp;
-                pNegotiatedProfile->lstPayload.Append(pAMR);
+                pAMR->SetFmtp(pAmrFmtp);
+                pNegotiatedProfile->GetPayloadList().Append(pAMR);
                 lstNegotiatedPayloads.Append(pAMR);
 
-                if (pPeerProfile->nNegotiatedPayloadIndex == -1)
+                if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list.
-                    pPeerProfile->nNegotiatedPayloadIndex = i;
+                    pPeerProfile->SetNegotiatedPayloadIndex(i);
                     // set nego payload index at src profile
-                    pLocalProfile->nNegotiatedPayloadIndex = nSrcPayloadIndex;
+                    pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
                     IMS_TRACE_D("MakeNegotiatedProfile() - nego payload index[%d]",
-                            pLocalProfile->nNegotiatedPayloadIndex, 0, 0);
+                            pLocalProfile->GetNegotiatedPayloadIndex(), 0, 0);
 
                     // MT case : change src PT# to dest PT#
                     if (bIsOfferReceived == IMS_TRUE &&
-                            pLocalProfile->nNegotiatedPayloadIndex != -1)
+                            pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                     {
-                        AudioProfile::Payload* pTempNegoSrcPayload =
-                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+                        AudioProfile::Payload* pTempNegoSrcPayload = pLocalProfile->GetPayloadAt(
+                                pLocalProfile->GetNegotiatedPayloadIndex());
 
-                        pTempNegoSrcPayload->objRtpMap.SetPayloadNumber(
-                                pDestPayload->objRtpMap.GetPayloadNumber());
+                        pTempNegoSrcPayload->GetRtpMap().SetPayloadNumber(
+                                pDestPayload->GetRtpMap().GetPayloadNumber());
                     }
                 }
 
-                if (pNegotiatedProfile->nNegotiatedPayloadIndex == -1)
+                if (pNegotiatedProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list at NegotiatedProfile.
-                    pNegotiatedProfile->nNegotiatedPayloadIndex =
-                            pNegotiatedProfile->lstPayload.GetSize() - 1;
+                    pNegotiatedProfile->SetNegotiatedPayloadIndex(
+                            pNegotiatedProfile->GetPayloadList().GetSize() - 1);
                 }
             }
         }
-        else if (pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+        else if (pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
             BandwidthNegoList = 0;
             BitrateNegoList = 0;
@@ -1193,15 +1195,15 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             &BandwidthNegoList, &BitrateNegoList, &ModeSetNegoList) == IMS_TRUE)
             {
                 AudioProfile::Payload* pEVS = new AudioProfile::Payload();
-                pEVS->SetRtpMap(pDestPayload->objRtpMap);
+                pEVS->SetRtpMap(pDestPayload->GetRtpMap());
                 IMS_SINT32 nSrcPayloadIndex =
-                        FindPayloadIndexFromProfile(pDestPayload->objRtpMap.GetPayloadType(),
+                        FindPayloadIndexFromProfile(pDestPayload->GetRtpMap().GetPayloadType(),
                                 pLocalProfile, pDestPayload, bIsOfferReceived);
                 AudioProfile::EvsFmtp* pSrc_Fmtp =
                         (AudioProfile::EvsFmtp*)pLocalProfile->GetPayloadAt(nSrcPayloadIndex)
-                                ->pFmtp;
+                                ->GetFmtp();
                 AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp(
-                        *reinterpret_cast<AudioProfile::EvsFmtp*>(pDestPayload->pFmtp));
+                        *reinterpret_cast<AudioProfile::EvsFmtp*>(pDestPayload->GetFmtp()));
                 pEvsFmtp->nBwList = BandwidthNegoList;
                 pEvsFmtp->nBrList = BitrateNegoList;
                 pEvsFmtp->nModeSetList = ModeSetNegoList;
@@ -1276,37 +1278,37 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     }
                 }
 
-                pEVS->pFmtp = pEvsFmtp;
-                pNegotiatedProfile->lstPayload.Append(pEVS);
+                pEVS->SetFmtp(pEvsFmtp);
+                pNegotiatedProfile->GetPayloadList().Append(pEVS);
                 lstNegotiatedPayloads.Append(pEVS);
 
-                if (pPeerProfile->nNegotiatedPayloadIndex == -1)
+                if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list
-                    pPeerProfile->nNegotiatedPayloadIndex = i;
+                    pPeerProfile->SetNegotiatedPayloadIndex(i);
                     // set nego payload index at src profile
-                    pLocalProfile->nNegotiatedPayloadIndex = nSrcPayloadIndex;
+                    pLocalProfile->SetNegotiatedPayloadIndex(nSrcPayloadIndex);
 
                     // MT case : change src PT# to dest PT#
                     if (bIsOfferReceived == IMS_TRUE &&
-                            pLocalProfile->nNegotiatedPayloadIndex != -1)
+                            pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                     {
-                        AudioProfile::Payload* pTempNegoSrcPayload =
-                                pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
+                        AudioProfile::Payload* pTempNegoSrcPayload = pLocalProfile->GetPayloadAt(
+                                pLocalProfile->GetNegotiatedPayloadIndex());
 
-                        pTempNegoSrcPayload->objRtpMap.SetPayloadNumber(
-                                pDestPayload->objRtpMap.GetPayloadNumber());
+                        pTempNegoSrcPayload->GetRtpMap().SetPayloadNumber(
+                                pDestPayload->GetRtpMap().GetPayloadNumber());
                     }
                 }
-                if (pNegotiatedProfile->nNegotiatedPayloadIndex == -1)
+                if (pNegotiatedProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list at NegotiatedProfile
-                    pNegotiatedProfile->nNegotiatedPayloadIndex =
-                            pNegotiatedProfile->lstPayload.GetSize() - 1;
+                    pNegotiatedProfile->SetNegotiatedPayloadIndex(
+                            pNegotiatedProfile->GetPayloadList().GetSize() - 1);
                 }
             }
         }
-        else if (pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+        else if (pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
         {
             if (templstNegotiatedPayloads.GetSize() == 0)
             {
@@ -1318,45 +1320,46 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             for (IMS_UINT32 j = 0; j < templstNegotiatedPayloads.GetSize(); j++)
             {
                 pNegotiatedPayload = templstNegotiatedPayloads.GetAt(j);
-                if (pNegotiatedPayload->objRtpMap.GetSamplingRate() ==
-                        pDestPayload->objRtpMap.GetSamplingRate())
+                if (pNegotiatedPayload->GetRtpMap().GetSamplingRate() ==
+                        pDestPayload->GetRtpMap().GetSamplingRate())
                 {
                     AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
-                    pTelephoneEvent->SetRtpMap(pDestPayload->objRtpMap);
-                    pTelephoneEvent->pFmtp = new AudioProfile::TelephoneEventFmtp(
-                            *static_cast<AudioProfile::TelephoneEventFmtp*>(pDestPayload->pFmtp));
+                    pTelephoneEvent->SetRtpMap(pDestPayload->GetRtpMap());
+                    pTelephoneEvent->SetFmtp(new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(
+                                    pDestPayload->GetFmtp())));
 
-                    pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
+                    pNegotiatedProfile->GetPayloadList().Append(pTelephoneEvent);
                     bProperNegotiatedTe = IMS_TRUE;
                     break;
                 }
             }
         }
-        else if (pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU") ||
-                pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA"))
+        else if (pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ||
+                pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA"))
         {
             if ((lstNegotiatedPayloads.GetSize() == 0) &&
                     FindPcmInProfile(pLocalProfile, pDestPayload) == IMS_TRUE)
             {
                 AudioProfile::Payload* pPCM = new AudioProfile::Payload();
-                pPCM->SetRtpMap(pDestPayload->objRtpMap);
-                pNegotiatedProfile->lstPayload.Append(pPCM);
+                pPCM->SetRtpMap(pDestPayload->GetRtpMap());
+                pNegotiatedProfile->GetPayloadList().Append(pPCM);
                 lstNegotiatedPayloads.Append(pPCM);
 
-                if (pPeerProfile->nNegotiatedPayloadIndex == -1)
+                if (pPeerProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list
-                    pPeerProfile->nNegotiatedPayloadIndex = i;
-                    pLocalProfile->nNegotiatedPayloadIndex =
-                            FindPayloadIndexFromProfile(pDestPayload->objRtpMap.GetPayloadType(),
-                                    pLocalProfile, pDestPayload, bIsOfferReceived);
+                    pPeerProfile->SetNegotiatedPayloadIndex(i);
+                    pLocalProfile->SetNegotiatedPayloadIndex(
+                            FindPayloadIndexFromProfile(pDestPayload->GetRtpMap().GetPayloadType(),
+                                    pLocalProfile, pDestPayload, bIsOfferReceived));
                 }
 
-                if (pNegotiatedProfile->nNegotiatedPayloadIndex == -1)
+                if (pNegotiatedProfile->GetNegotiatedPayloadIndex() == -1)
                 {
                     // Set the index of negotiated payload from the list at NegotiatedProfile
-                    pNegotiatedProfile->nNegotiatedPayloadIndex =
-                            pNegotiatedProfile->lstPayload.GetSize() - 1;
+                    pNegotiatedProfile->SetNegotiatedPayloadIndex(
+                            pNegotiatedProfile->GetPayloadList().GetSize() - 1);
                 }
             }
         }
@@ -1373,14 +1376,14 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
         templstNegotiatedPayloads.RemoveAt(0);
     }
 
-    IMS_TRACE_D("MakeNegotiatedProfile() nNegotiatedPayloadIndex[%d]",
-            pPeerProfile->nNegotiatedPayloadIndex, 0, 0);
+    IMS_TRACE_D("MakeNegotiatedProfile() Negotiated Payload Index[%d]",
+            pPeerProfile->GetNegotiatedPayloadIndex(), 0, 0);
 
     // accept 8K DTMF when AMR-WB calling if ther are no proper DTMF payload
-    if (bProperNegotiatedTe == IMS_FALSE && pNegotiatedProfile->lstPayload.GetSize() > 0 &&
+    if (bProperNegotiatedTe == IMS_FALSE && pNegotiatedProfile->GetPayloadList().GetSize() > 0 &&
             lstNegotiatedPayloads.GetSize() > 0)
     {
-        for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
         {
             AudioProfile::Payload* pDestPayload = pPeerProfile->GetPayloadAt(i);
 
@@ -1388,21 +1391,22 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
             {
                 continue;
             }
-            if (pDestPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+            if (pDestPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
             {
                 // for acceptable 8K DTMF when AMR-WB calling
                 pNegotiatedPayload = lstNegotiatedPayloads.GetAt(0);
-                if (pNegotiatedPayload->objRtpMap.GetSamplingRate() >
-                        pDestPayload->objRtpMap.GetSamplingRate())
+                if (pNegotiatedPayload->GetRtpMap().GetSamplingRate() >
+                        pDestPayload->GetRtpMap().GetSamplingRate())
                 {
                     IMS_TRACE_D("MakeNegotiatedProfile() - Accept sampling rate[%d]->[%d]",
-                            pNegotiatedPayload->objRtpMap.GetSamplingRate(),
-                            pDestPayload->objRtpMap.GetSamplingRate(), 0);
+                            pNegotiatedPayload->GetRtpMap().GetSamplingRate(),
+                            pDestPayload->GetRtpMap().GetSamplingRate(), 0);
                     AudioProfile::Payload* pTelephoneEvent = new AudioProfile::Payload();
-                    pTelephoneEvent->SetRtpMap(pDestPayload->objRtpMap);
-                    pTelephoneEvent->pFmtp = new AudioProfile::TelephoneEventFmtp(
-                            *static_cast<AudioProfile::TelephoneEventFmtp*>(pDestPayload->pFmtp));
-                    pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
+                    pTelephoneEvent->SetRtpMap(pDestPayload->GetRtpMap());
+                    pTelephoneEvent->SetFmtp(new AudioProfile::TelephoneEventFmtp(
+                            *static_cast<AudioProfile::TelephoneEventFmtp*>(
+                                    pDestPayload->GetFmtp())));
+                    pNegotiatedProfile->GetPayloadList().Append(pTelephoneEvent);
                 }
             }
         }
@@ -1420,13 +1424,13 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
         IMS_SINT32 nModeSet;
 
         // find largest AS value..
-        if (pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-                pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+        if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+                pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
             AUDIO_CODEC nCurrCodec;
 
-            AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pNegotiatedPayload->pFmtp;
-            if (pNegotiatedPayload->objRtpMap.GetSamplingRate() == 8000)
+            AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pNegotiatedPayload->GetFmtp();
+            if (pNegotiatedPayload->GetRtpMap().GetSamplingRate() == 8000)
             {
                 nCurrCodec = AUDIO_CODEC_AMR;
                 nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("AMR", pNegotiatedPayload);
@@ -1439,46 +1443,46 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
             nAsValueOfNegoticatedCodec =
                     AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
-                            pNegotiatedProfile->objIpAddress.IsIPv6Address(), nModeSet);
+                            pNegotiatedProfile->GetIpAddress().IsIPv6Address(), nModeSet);
         }
-        else if (pNegotiatedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+        else if (pNegotiatedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
-            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->pFmtp;
+            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->GetFmtp();
             AUDIO_CODEC nCurrCodec = AUDIO_CODEC_EVS;
             nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegotiatedPayload);
             nAsValueOfNegoticatedCodec = AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec,
-                    pNegotiatedProfile->objIpAddress.IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
+                    pNegotiatedProfile->GetIpAddress().IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
                     nModeSet);
         }
 
         // Setting direction
-        pNegotiatedProfile->eDirection = UpdateDirectionToMine(
-                pPeerProfile->eDirection, pLocalProfile->eDirection, bIsOfferReceived);
+        pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
+                pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
 
-        if (pNegotiatedProfile->eDirection == MEDIA_DIRECTION_INVALID)
+        if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
         {
             IMS_TRACE_E(0, "MakeNegotiatedProfile() - invalid direction.", 0, 0, 0);
             return IMS_FALSE;
         }
 
         // if the case using different interval in live and hold, set here.
-        pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-        pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+        pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+        pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
-        if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
+        if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
         {
-            pNegotiatedProfile->nRtcpInterval = 0;
+            pNegotiatedProfile->SetRtcpInterval(0);
             IMS_TRACE_D(
                     "MakeNegotiatedProfile() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
         }
         else
         {
-            pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpInterval();
+            pNegotiatedProfile->SetRtcpInterval(m_pConfig->GetRtcpInterval());
 
-            if (pNegotiatedProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE &&
+            if (pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE &&
                     m_pConfig->GetRtcpLiveInterval() > 0)
             {
-                pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpLiveInterval();
+                pNegotiatedProfile->SetRtcpInterval(m_pConfig->GetRtcpLiveInterval());
             }
         }
 
@@ -1487,14 +1491,14 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
         // RTCP-XR
         if (pLocalProfile->bSupportRtcpXr == IMS_TRUE &&
-                pNegotiatedProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE)
+                pNegotiatedProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
         {
             pNegotiatedProfile->bSupportRtcpXr = IMS_TRUE;
             pNegotiatedProfile->objRtcpXrAttr = pLocalProfile->objRtcpXrAttr;
         }
 
-        IMS_TRACE_D("MakeNegotiatedProfile()-nRtcpInterval[%d], RTCP-XR support[%d]",
-                pNegotiatedProfile->nRtcpInterval, pNegotiatedProfile->bSupportRtcpXr, 0);
+        IMS_TRACE_D("MakeNegotiatedProfile()-Rtcp Interval[%d], RTCP-XR support[%d]",
+                pNegotiatedProfile->GetRtcpInterval(), pNegotiatedProfile->bSupportRtcpXr, 0);
 
         /** Setting ptime & maxptime
          * [RFC3264]
@@ -1946,7 +1950,7 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
 
     for (IMS_UINT32 legacyCheck = 0; legacyCheck < EVS_NEGO_RETRY_COUNT; legacyCheck++)
     {
-        for (IMS_UINT32 i = 0; i < pLocalProfile->lstPayload.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < pLocalProfile->GetPayloadList().GetSize(); i++)
         {
             AudioProfile::Payload* comparedPayload = pLocalProfile->GetPayloadAt(i);
 
@@ -1955,18 +1959,19 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
                 continue;
             }
 
-            if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
             {
                 AudioProfile::EvsFmtp* pCompareFmtp =
-                        (AudioProfile::EvsFmtp*)comparedPayload->pFmtp;
-                AudioProfile::EvsFmtp* pReceivedFmtp = (AudioProfile::EvsFmtp*)pDstPayload->pFmtp;
+                        (AudioProfile::EvsFmtp*)comparedPayload->GetFmtp();
+                AudioProfile::EvsFmtp* pReceivedFmtp =
+                        (AudioProfile::EvsFmtp*)pDstPayload->GetFmtp();
                 if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                 {
                     continue;
                 }
 
-                if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                            pDstPayload->objRtpMap.GetPayloadType()) == IMS_FALSE)
+                if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                            pDstPayload->GetRtpMap().GetPayloadType()) == IMS_FALSE)
                 {
                     continue;
                 }
@@ -2002,8 +2007,8 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
                     {
                         continue;      //vzw req. if offer is nb only, no evs negotiation
                 }
-                    if (pDstPayload->objRtpMap.GetPayloadNumber()
-                            != comparedPayload->objRtpMap.GetPayloadNumber())
+                    if (pDstPayload->GetRtpMap().GetPayloadNumber()
+                            != comparedPayload->GetRtpMap().GetPayloadNumber())
                     {
                         continue;     //vzw req. payload number based negotiation
                     }
@@ -2179,7 +2184,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
     IMS_UINT32 nTempDefaultNegoModeSetList = 0;
     IMS_BOOL bModeSetFound = IMS_FALSE;
 
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
 
@@ -2188,23 +2193,24 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
             continue;
         }
 
-        if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-                comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+        if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+                comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
         {
-            AudioProfile::AmrFmtp* pCompareFmtp = (AudioProfile::AmrFmtp*)comparedPayload->pFmtp;
-            AudioProfile::AmrFmtp* pReceivedFmtp = (AudioProfile::AmrFmtp*)pPayload->pFmtp;
+            AudioProfile::AmrFmtp* pCompareFmtp =
+                    (AudioProfile::AmrFmtp*)comparedPayload->GetFmtp();
+            AudioProfile::AmrFmtp* pReceivedFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
 
             if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
             {
                 continue;
             }
-            if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                        pPayload->objRtpMap.GetPayloadType()) == IMS_FALSE)
+            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                        pPayload->GetRtpMap().GetPayloadType()) == IMS_FALSE)
             {
                 continue;
             }
-            if (comparedPayload->objRtpMap.GetSamplingRate() !=
-                    pPayload->objRtpMap.GetSamplingRate())
+            if (comparedPayload->GetRtpMap().GetSamplingRate() !=
+                    pPayload->GetRtpMap().GetSamplingRate())
             {
                 continue;
             }
@@ -2243,7 +2249,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
             else  // exactly matched
             {
                 IMS_TRACE_D("FindAmrInProfile() Found AMR at[%d], Codec[%s], nOctetAlign[%d]", i,
-                        comparedPayload->objRtpMap.GetPayloadType().GetStr(),
+                        comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
                         pCompareFmtp->nOctetAlign);
                 IMS_TRACE_D("FindAmrInProfile() Local/Peer is exactly matched[0x%04x][0x%04x] \
                         =>[0x%04x]",
@@ -2279,7 +2285,7 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
         return IMS_FALSE;
     }
 
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
 
@@ -2288,30 +2294,30 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
             continue;
         }
 
-        if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMU") ||
-                comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("PCMA"))
+        if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ||
+                comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMA"))
         {
-            if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                        pPayload->objRtpMap.GetPayloadType()) == IMS_FALSE)
+            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                        pPayload->GetRtpMap().GetPayloadType()) == IMS_FALSE)
             {
                 continue;
             }
-            if (comparedPayload->objRtpMap.GetSamplingRate() !=
-                    pPayload->objRtpMap.GetSamplingRate())
+            if (comparedPayload->GetRtpMap().GetSamplingRate() !=
+                    pPayload->GetRtpMap().GetSamplingRate())
             {
                 continue;
             }
 
             IMS_TRACE_D("FindPcmInProfile() Found G.711 at[%d], Codec[%s], nSamplingRate[%d]", i,
-                    comparedPayload->objRtpMap.GetPayloadType().GetStr(),
-                    pPayload->objRtpMap.GetSamplingRate());
+                    comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
+                    pPayload->GetRtpMap().GetSamplingRate());
 
             return IMS_TRUE;
         }
     }
 
     // IMS_TRACE_D("FindPcmInProfile() Not Found G.711[%s], SamplingRate[%d]",
-    // pPayload->objRtpMap.GetPayloadType().GetStr(), pPayload->objRtpMap.GetSamplingRate(), 0);
+    // pPayload->GetRtpMap().GetPayloadType().GetStr(), pPayload->GetRtpMap().GetSamplingRate(), 0);
 
     return IMS_FALSE;
 }
@@ -2811,7 +2817,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
 
     for (IMS_UINT32 legacyCheck = 0; legacyCheck < EVS_NEGO_RETRY_COUNT; legacyCheck++)
     {
-        for (IMS_UINT32 i = 0; i < pLocalProfile->lstPayload.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < pLocalProfile->GetPayloadList().GetSize(); i++)
         {
             AudioProfile::Payload* comparedPayload = pLocalProfile->GetPayloadAt(i);
 
@@ -2826,28 +2832,28 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                 {
                     continue;
                 }
-                if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR") ||
-                        comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB"))
+                if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR") ||
+                        comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"))
                 {
                     IMS_UINT32 pnNegoModeSetList = 0;
                     IMS_UINT32 pnNegoDefaultRtpModeSet = 0;
                     AudioProfile::AmrFmtp* pCompareFmtp =
-                            (AudioProfile::AmrFmtp*)comparedPayload->pFmtp;
+                            (AudioProfile::AmrFmtp*)comparedPayload->GetFmtp();
                     AudioProfile::AmrFmtp* pReceivedFmtp =
-                            (AudioProfile::AmrFmtp*)pDstPayload->pFmtp;
+                            (AudioProfile::AmrFmtp*)pDstPayload->GetFmtp();
 
                     if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                     {
                         continue;
                     }
 
-                    if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                                pDstPayload->objRtpMap.GetPayloadType()) == IMS_FALSE)
+                    if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                                pDstPayload->GetRtpMap().GetPayloadType()) == IMS_FALSE)
                     {
                         continue;
                     }
-                    if (comparedPayload->objRtpMap.GetSamplingRate() !=
-                            pDstPayload->objRtpMap.GetSamplingRate())
+                    if (comparedPayload->GetRtpMap().GetSamplingRate() !=
+                            pDstPayload->GetRtpMap().GetSamplingRate())
                     {
                         continue;
                     }
@@ -2889,7 +2895,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                             nTempIndex = i;
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Found Similar AMR at[%d], \
                                     Codec[%s], nOctetAlign[%d]",
-                                    i, comparedPayload->objRtpMap.GetPayloadType().GetStr(),
+                                    i, comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
                                     pCompareFmtp->nOctetAlign);
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Local/Peer is not exactly \
                                     matched[0x%04x][0x%04x] =>[0x%04x]. Try next",
@@ -2902,7 +2908,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                     {
                         IMS_TRACE_D("FindPayloadIndexFromProfile() Found AMR at[%d], Codec[%s], \
                                 nOctetAlign[%d]",
-                                i, comparedPayload->objRtpMap.GetPayloadType().GetStr(),
+                                i, comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
                                 pCompareFmtp->nOctetAlign);
 
                         return i;
@@ -2911,23 +2917,23 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
             }
             else if (strCodecName.EqualsIgnoreCase("EVS"))
             {
-                if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+                if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
                 {
                     IMS_UINT32 BandwidthNegoList;
                     IMS_UINT32 BitrateNegoList;
                     IMS_UINT32 ModeSetNegoList;
                     AudioProfile::EvsFmtp* pCompareFmtp =
-                            (AudioProfile::EvsFmtp*)comparedPayload->pFmtp;
+                            (AudioProfile::EvsFmtp*)comparedPayload->GetFmtp();
                     AudioProfile::EvsFmtp* pReceivedFmtp =
-                            (AudioProfile::EvsFmtp*)pDstPayload->pFmtp;
+                            (AudioProfile::EvsFmtp*)pDstPayload->GetFmtp();
 
                     if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
                     {
                         continue;
                     }
 
-                    if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                                pDstPayload->objRtpMap.GetPayloadType()) == IMS_FALSE)
+                    if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                                pDstPayload->GetRtpMap().GetPayloadType()) == IMS_FALSE)
                     {
                         continue;
                     }
@@ -2963,8 +2969,8 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                         {
                             continue;      //vzw req. if offer is nb only, no evs negotiation
                         }
-                        if (pDstPayload->objRtpMap.GetPayloadNumber() !=
-                                comparedPayload->objRtpMap.GetPayloadNumber())
+                        if (pDstPayload->GetRtpMap().GetPayloadNumber() !=
+                                comparedPayload->GetRtpMap().GetPayloadNumber())
                         {
                             continue;     //vzw req. payload number based negotiation
                         }
@@ -2972,7 +2978,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
 
                     IMS_TRACE_D("FindPayloadIndexFromProfile() Found EVS at[%d], Codec[%s], \
                             nEvsModeSwitch[%d]",
-                            i, comparedPayload->objRtpMap.GetPayloadType().GetStr(),
+                            i, comparedPayload->GetRtpMap().GetPayloadType().GetStr(),
                             pCompareFmtp->nEvsModeSwitch);
 
                     return i;
@@ -2985,11 +2991,11 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                 {
                     continue;
                 }
-                if (comparedPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase(
-                            pDstPayload->objRtpMap.GetPayloadType()))
+                if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
+                            pDstPayload->GetRtpMap().GetPayloadType()))
                 {
                     IMS_TRACE_D("FindPayloadIndexFromProfile() Found G.711(%s) Found at[%d]",
-                            comparedPayload->objRtpMap.GetPayloadType().GetStr(), i, 0);
+                            comparedPayload->GetRtpMap().GetPayloadType().GetStr(), i, 0);
 
                     return i;
                 }
@@ -3058,14 +3064,14 @@ MEDIA_DIRECTION AudioNego::UpdateDirectionToMine(
 PRIVATE void AudioNego::SetSdpSessionIpAddress(
         OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile)
 {
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->objIpAddress))
+    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
     {
         IMS_TRACE_D("SetSdpSessionIpAddress() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
                 pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->objIpAddress.ToCharString(), 0);
+                pProfile->GetIpAddress().ToCharString(), 0);
 
-        pSessionDescriptor->SetConnectionAddress(pProfile->objIpAddress.ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->objIpAddress.ToString());
+        pSessionDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
+        pSessionDescriptor->SetOriginAddress(pProfile->GetIpAddress().ToString());
     }
 }
 
@@ -3074,7 +3080,7 @@ PRIVATE void AudioNego::SetSdpMediaDescription(
 {
     AStringArray objAudioFormat;
     AString strPayloadNum;
-    for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
         AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
@@ -3082,30 +3088,30 @@ PRIVATE void AudioNego::SetSdpMediaDescription(
             continue;
         }
 
-        strPayloadNum.Sprintf("%d", pPayload->objRtpMap.GetPayloadNumber());
+        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
         objAudioFormat.AddElement(strPayloadNum);
     }
 
     // Set transport type and port number
-    pDescriptor->SetMediaDescription(
-            SdpMedia::TYPE_AUDIO, pProfile->nDataPort, SdpMedia::TRANSPORT_RTP_AVP, objAudioFormat);
+    pDescriptor->SetMediaDescription(SdpMedia::TYPE_AUDIO, pProfile->GetDataPort(),
+            SdpMedia::TRANSPORT_RTP_AVP, objAudioFormat);
 }
 
 PRIVATE void AudioNego::SetSdpMediaBandwidth(
         OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
 {
-    if (pProfile->nBandwidthAs > 0)
+    if (pProfile->GetBandwidthAs() > 0)
     {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->nBandwidthAs);
+        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
 
-        if (pProfile->nBandwidthRs >= 0)
+        if (pProfile->GetBandwidthRs() >= 0)
         {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->nBandwidthRs);
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
         }
 
-        if (pProfile->nBandwidthRr >= 0)
+        if (pProfile->GetBandwidthRr() >= 0)
         {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->nBandwidthRr);
+            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
         }
     }
 }

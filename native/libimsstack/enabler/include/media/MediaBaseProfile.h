@@ -118,10 +118,6 @@ public:
     class BasePayload
     {
     public:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
-
-    public:
         BasePayload(IN const IMS_SINT32 channel = 0) :
                 objRtpMap(channel),
                 pFmtp(IMS_NULL)
@@ -158,6 +154,12 @@ public:
             objRtpMap.SetChannel(nChannel);
         };
 
+        RtpMap& GetRtpMap() { return objRtpMap; }
+
+        void SetFmtp(IN BaseFmtp* fmtp) { pFmtp = fmtp; }
+
+        BaseFmtp* GetFmtp() { return pFmtp; }
+
     protected:
         void deleteFmtp()
         {
@@ -167,6 +169,10 @@ public:
                 pFmtp = IMS_NULL;
             }
         }
+
+    protected:
+        RtpMap objRtpMap;
+        BaseFmtp* pFmtp;
     };
 
 public:
@@ -206,19 +212,6 @@ public:
     };
 
 public:
-    IpAddress objIpAddress;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
-    MEDIA_DIRECTION eDirection;
-    CapaNego objCapaNego;
-    IMS_SINT32 nNegotiatedPayloadIndex;
-    ImsList<BasePayload*> lstPayload;
-
     MediaBaseProfile(IN const IpAddress ipAddress = IpAddress::IPv6NONE,
             IN const IMS_UINT32 dataPort = 0, IN const IMS_UINT32 controlPort = 0,
             IN const AString transportType = "RTP/AVP", IN const IMS_UINT32 rtcpInterval = 0,
@@ -236,7 +229,7 @@ public:
             eDirection(direction),
             objCapaNego(CapaNego()),
             nNegotiatedPayloadIndex(-1),
-            lstPayload(ImsList<BasePayload*>())
+            listPayload(ImsList<BasePayload*>())
     {
     }
 
@@ -261,7 +254,7 @@ public:
         nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
 
         DeletePayloads();
-        CopyPayloads(profile->lstPayload);
+        CopyPayloads(profile->listPayload);
     }
 
     MediaBaseProfile(const MediaBaseProfile& obj)
@@ -279,7 +272,7 @@ public:
         nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
 
         DeletePayloads();
-        CopyPayloads(obj.lstPayload);
+        CopyPayloads(obj.listPayload);
     }
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
@@ -299,7 +292,7 @@ public:
             nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
 
             DeletePayloads();
-            CopyPayloads(obj.lstPayload);
+            CopyPayloads(obj.listPayload);
         }
         return (*this);
     }
@@ -324,11 +317,48 @@ public:
 
     virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
     {
-        return (lstPayload.GetSize() > nIndex) ? lstPayload.GetAt(nIndex) : IMS_NULL;
+        return (listPayload.GetSize() > nIndex) ? listPayload.GetAt(nIndex) : IMS_NULL;
     }
 
     void DeletePayloads();
     void CopyPayloads(IN ImsList<BasePayload*> payloadList);
+
+    void SetIpAddress(IN const IpAddress ipAddress) { objIpAddress = ipAddress; }
+    IpAddress& GetIpAddress() { return objIpAddress; }
+    void SetDataPort(IN const IMS_UINT32 port) { nDataPort = port; }
+    IMS_UINT32 GetDataPort() { return nDataPort; }
+    void SetControlPort(IN const IMS_UINT32 port) { nControlPort = port; }
+    IMS_UINT32 GetControlPort() { return nControlPort; }
+    void SetTransportType(IN const AString transportType) { strTransportType = transportType; }
+    AString& GetTransportType() { return strTransportType; }
+    void SetRtcpInterval(IN const IMS_UINT32 interval) { nRtcpInterval = interval; }
+    IMS_UINT32 GetRtcpInterval() { return nRtcpInterval; }
+    void SetBandwidthAs(IN const IMS_SINT32 as) { nBandwidthAs = as; }
+    IMS_SINT32 GetBandwidthAs() { return nBandwidthAs; }
+    void SetBandwidthRs(IN const IMS_SINT32 rs) { nBandwidthRs = rs; }
+    IMS_SINT32 GetBandwidthRs() { return nBandwidthRs; }
+    void SetBandwidthRr(IN const IMS_SINT32 rr) { nBandwidthRr = rr; }
+    IMS_SINT32 GetBandwidthRr() { return nBandwidthRr; }
+    void SetDirection(IN const MEDIA_DIRECTION direction) { eDirection = direction; }
+    MEDIA_DIRECTION GetDirection() { return eDirection; }
+    CapaNego& GetCapaNego() { return objCapaNego; }
+    void SetNegotiatedPayloadIndex(IN const IMS_SINT32 index) { nNegotiatedPayloadIndex = index; }
+    IMS_SINT32 GetNegotiatedPayloadIndex() { return nNegotiatedPayloadIndex; }
+    ImsList<BasePayload*>& GetPayloadList() { return listPayload; }
+
+private:
+    IpAddress objIpAddress;
+    IMS_UINT32 nDataPort;
+    IMS_UINT32 nControlPort;
+    AString strTransportType;
+    IMS_UINT32 nRtcpInterval;
+    IMS_SINT32 nBandwidthAs;
+    IMS_SINT32 nBandwidthRs;
+    IMS_SINT32 nBandwidthRr;
+    MEDIA_DIRECTION eDirection;
+    CapaNego objCapaNego;
+    IMS_SINT32 nNegotiatedPayloadIndex;
+    ImsList<BasePayload*> listPayload;
 };
 
 #endif

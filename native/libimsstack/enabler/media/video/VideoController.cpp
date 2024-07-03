@@ -203,9 +203,9 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
         return IMS_FALSE;
     }
 
-    IMS_BOOL bEnableRtcp = (pPeerProfile->nBandwidthRs == 0 && pPeerProfile->nBandwidthRr == 0)
-            ? IMS_FALSE
-            : IMS_TRUE;
+    IMS_BOOL bEnableRtcp =
+            (pPeerProfile->GetBandwidthRs() == 0 && pPeerProfile->GetBandwidthRr() == 0) ? IMS_FALSE
+                                                                                         : IMS_TRUE;
     IMS_BOOL bActiveSession =
             (m_pSession->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE : IMS_FALSE;
 

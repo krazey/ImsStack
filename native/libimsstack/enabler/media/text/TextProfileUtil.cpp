@@ -32,75 +32,76 @@ PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration
 
     if (bIsOfferReceived == IMS_FALSE)
     {
-        if (pPeerProfile->nBandwidthAs > 0)
+        if (pPeerProfile->GetBandwidthAs() > 0)
         {
-            pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
+            pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
         }
         else
         {
-            pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
+            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
         }
 
-        if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
+        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
         {
-            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
             IMS_TRACE_D("MakeNegotiatedProfile() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-                    pLocalProfile->nBandwidthAs, pLocalProfile->nBandwidthRs,
-                    pLocalProfile->nBandwidthRr);
+                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+                    pLocalProfile->GetBandwidthRr());
         }
 
-        pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-        pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
     else
     {
         if (nASValueOfNegoticatedCodec > 0)
         {
-            pNegotiatedProfile->nBandwidthAs = nASValueOfNegoticatedCodec;
+            pNegotiatedProfile->SetBandwidthAs(nASValueOfNegoticatedCodec);
 
-            if (nASValueOfNegoticatedCodec > pPeerProfile->nBandwidthAs &&
-                    pPeerProfile->nBandwidthAs > 0)
+            if (nASValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs() &&
+                    pPeerProfile->GetBandwidthAs() > 0)
             {
-                pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
+                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
             }
         }
         else
         {
-            pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
+            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
         }
 
         // Exception Handling (b=RS/RR line is not included in Answer SDP)
-        if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
+        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
         {
-            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
             IMS_TRACE_D("MakeNegotiatedBandwidth() - AS[%d] RS[%d] RR[%d]",
-                    pLocalProfile->nBandwidthAs, pLocalProfile->nBandwidthRs,
-                    pLocalProfile->nBandwidthRr);
+                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+                    pLocalProfile->GetBandwidthRr());
             return;
         }
 
         // Dest RS & RR == Zero case, rtcp should be disable and RS & RR == Zero in IR.92
         // release 12.
-        if (pPeerProfile->nBandwidthRs == 0 && pPeerProfile->nBandwidthRr == 0)
+        if (pPeerProfile->GetBandwidthRs() == 0 && pPeerProfile->GetBandwidthRr() == 0)
         {
-            pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
             IMS_TRACE_D("MakeNegotiatedProfile() - AS[%d], RTCP disable & use dest RS[%d] RR[%d]",
-                    pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
-                    pNegotiatedProfile->nBandwidthRr);
+                    pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                    pNegotiatedProfile->GetBandwidthRr());
 
             return;
         }
 
-        pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-        pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
 
     IMS_TRACE_D("MakeNegotiatedProfile() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-            pLocalProfile->nBandwidthAs, pLocalProfile->nBandwidthRs, pLocalProfile->nBandwidthRr);
+            pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+            pLocalProfile->GetBandwidthRr());
 }

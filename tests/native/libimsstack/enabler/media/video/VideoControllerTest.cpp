@@ -53,13 +53,13 @@ protected:
         m_objListener.DelegateToFake();
 
         m_pLocalProfile = new VideoProfile();
-        m_pLocalProfile->strTransportType = "RTP/AVP";
+        m_pLocalProfile->SetTransportType("RTP/AVP");
         VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
-        pAvcPayload->objRtpMap.SetPayloadType("H264");
-        pAvcPayload->pFmtp = pAvcFmtp;
-        m_pLocalProfile->lstPayload.Append(pAvcPayload);
-        m_pLocalProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+        pAvcPayload->GetRtpMap().SetPayloadType("H264");
+        pAvcPayload->SetFmtp(pAvcFmtp);
+        m_pLocalProfile->GetPayloadList().Append(pAvcPayload);
+        m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
         m_pPeerProfile = new VideoProfile(*m_pLocalProfile);
         m_pNegoProfile = new VideoProfile(*m_pLocalProfile);

@@ -71,7 +71,8 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
         return IMS_FALSE;
     }
 
-    if (pNegoProfile->lstPayload.GetSize() == 0 || pPeerProfile->lstPayload.GetSize() == 0)
+    if (pNegoProfile->GetPayloadList().GetSize() == 0 ||
+            pPeerProfile->GetPayloadList().GetSize() == 0)
     {
         return IMS_FALSE;
     }
@@ -79,21 +80,22 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
     TextConfig* pTextConfig = REINTERPRET_CAST(TextConfig*, m_pRtpConfig);
 
     // Setting the network properties
-    UpdateLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
+    UpdateLocalEndPoint(pNegoProfile->GetIpAddress(), pNegoProfile->GetDataPort());
     // remote network parameters
-    pTextConfig->setRemoteAddress(android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
-    pTextConfig->setRemotePort(pPeerProfile->nDataPort);
+    pTextConfig->setRemoteAddress(
+            android::String8(pPeerProfile->GetIpAddress().ToString().GetStr()));
+    pTextConfig->setRemotePort(pPeerProfile->GetDataPort());
     pTextConfig->setDscp(0); /** TODO: add interface to get text dscp value */
 
     IMS_SINT32 nTextDirection;
 
-    if (pNegoProfile->nDataPort == 0 || pLocalProfile->nDataPort == 0)
+    if (pNegoProfile->GetDataPort() == 0 || pLocalProfile->GetDataPort() == 0)
     {
         nTextDirection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }
     else
     {
-        switch (pNegoProfile->eDirection)
+        switch (pNegoProfile->GetDirection())
         {
             case MEDIA_DIRECTION_SEND_RECEIVE:
                 nTextDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
@@ -115,8 +117,8 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
-    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
-    objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
+    objRtcpConfig.setTransmitPort(pPeerProfile->GetControlPort());
+    objRtcpConfig.setIntervalSec(pNegoProfile->GetRtcpInterval());
     objRtcpConfig.setRtcpXrBlockTypes(0);
     pTextConfig->setRtcpConfig(objRtcpConfig);
 
@@ -124,7 +126,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             objRtcpConfig.getTransmitPort(), objRtcpConfig.getIntervalSec(),
             objRtcpConfig.getRtcpXrBlockTypes());
 
-    for (IMS_UINT32 nIdxPayload = 0; nIdxPayload < pNegoProfile->lstPayload.GetSize();
+    for (IMS_UINT32 nIdxPayload = 0; nIdxPayload < pNegoProfile->GetPayloadList().GetSize();
             nIdxPayload++)
     {
         TextProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(nIdxPayload);
@@ -134,9 +136,9 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             continue;
         }
 
-        if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("red"))
+        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
         {
-            TextProfile::RedFmtp* pFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
+            TextProfile::RedFmtp* pFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
 
             if (pFmtp == IMS_NULL)
             {
@@ -144,19 +146,21 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
                 continue;
             }
 
-            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
-            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
-            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.GetSamplingRate() / 1000));
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->GetRtpMap().GetPayloadNumber());
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->GetRtpMap().GetPayloadNumber());
+            pTextConfig->setSamplingRateKHz(
+                    (int8_t)(pPayload->GetRtpMap().GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140_RED);
             pTextConfig->setRedundantPayload(pFmtp->nRedPayload);
             pTextConfig->setRedundantLevel(pFmtp->nRedLevel);
             break;
         }
-        else if (pPayload->objRtpMap.GetPayloadType().EqualsIgnoreCase("t140"))
+        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
         {
-            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
-            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.GetPayloadNumber());
-            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.GetSamplingRate() / 1000));
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->GetRtpMap().GetPayloadNumber());
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->GetRtpMap().GetPayloadNumber());
+            pTextConfig->setSamplingRateKHz(
+                    (int8_t)(pPayload->GetRtpMap().GetSamplingRate() / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140);
             pTextConfig->setRedundantPayload(0);
             pTextConfig->setRedundantLevel(0);

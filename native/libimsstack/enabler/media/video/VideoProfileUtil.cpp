@@ -33,7 +33,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::UpdateVideoProfile(
 
     IMS_TRACE_D("UpdateVideoProfile()", 0, 0, 0);
 
-    pVideoProfile->objIpAddress = pEnvironment->pIService->GetIpAddress();
+    pVideoProfile->SetIpAddress(pEnvironment->pIService->GetIpAddress());
 
     return IMS_TRUE;
 }
@@ -335,20 +335,20 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
         // 1. Set AS Value
         // Exception Handling (b= AS line is not included in Answer SDP)
 
-        pNegotiatedProfile->nBandwidthAs = (pPeerProfile->nBandwidthAs > 0)
-                ? pPeerProfile->nBandwidthAs
-                : pLocalProfile->nBandwidthAs;
+        pNegotiatedProfile->SetBandwidthAs((pPeerProfile->GetBandwidthAs() > 0)
+                        ? pPeerProfile->GetBandwidthAs()
+                        : pLocalProfile->GetBandwidthAs());
 
         // 2. Set RS/RR Value
         // 2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
-        if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
+        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
         {
-            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
             IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-                    pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
-                    pNegotiatedProfile->nBandwidthRr);
+                    pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                    pNegotiatedProfile->GetBandwidthRr());
 
             return IMS_TRUE;
         }
@@ -357,13 +357,13 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
         // if RS/RR is used for RTCP Nego value
         if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
         {
-            pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
         }
         else
         {
-            pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-            pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
         }
     }
     else
@@ -375,28 +375,28 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
             // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
             if (pConfig->GetBandwidthNegoOption() ==
                             MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE &&
-                    nAsValueOfNegoticatedCodec > pPeerProfile->nBandwidthAs &&
-                    pPeerProfile->nBandwidthAs > 0)
+                    nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs() &&
+                    pPeerProfile->GetBandwidthAs() > 0)
             {
-                pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
+                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
             }
             else
             {
-                pNegotiatedProfile->nBandwidthAs = nAsValueOfNegoticatedCodec;
+                pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
             }
         }
         else
         {
-            pNegotiatedProfile->nBandwidthAs =
-                    (pPeerProfile->nBandwidthAs > pLocalProfile->nBandwidthAs)
-                    ? pLocalProfile->nBandwidthAs
-                    : pPeerProfile->nBandwidthAs;
+            pNegotiatedProfile->SetBandwidthAs(
+                    (pPeerProfile->GetBandwidthAs() > pLocalProfile->GetBandwidthAs())
+                            ? pLocalProfile->GetBandwidthAs()
+                            : pPeerProfile->GetBandwidthAs());
         }
 
         // 3. Set RS/RR Value
-        if (pPeerProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE &&
-                pPeerProfile->eDirection != MEDIA_DIRECTION_RECEIVE &&
-                pPeerProfile->eDirection != MEDIA_DIRECTION_SEND)
+        if (pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND_RECEIVE &&
+                pPeerProfile->GetDirection() != MEDIA_DIRECTION_RECEIVE &&
+                pPeerProfile->GetDirection() != MEDIA_DIRECTION_SEND)
         {
             // 3.1 Hold Case
             MediaProfileUtil::SetRtcpRsRr(pNegotiatedProfile, pConfig);
@@ -405,14 +405,15 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
         {
             // 3.2 Active Call Case
             // 3.2.1 Exception Handling (b=RS/RR line is not included in Answer SDP)
-            if (pNegotiatedProfile->nBandwidthRs < 0 || pNegotiatedProfile->nBandwidthRr < 0)
+            if (pNegotiatedProfile->GetBandwidthRs() < 0 ||
+                    pNegotiatedProfile->GetBandwidthRr() < 0)
             {
-                pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+                pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+                pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
                 IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-                        pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
-                        pNegotiatedProfile->nBandwidthRr);
+                        pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                        pNegotiatedProfile->GetBandwidthRr());
 
                 return IMS_TRUE;
             }
@@ -421,21 +422,21 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
             if (pConfig->GetBandwidthNegoOption() == MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE)
             {
                 // only use rtcp when rtcp state is enable
-                pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+                pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+                pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
             }
             else
             {
                 // default case (RS/RR is not negotiated value)
-                pNegotiatedProfile->nBandwidthRs = pLocalProfile->nBandwidthRs;
-                pNegotiatedProfile->nBandwidthRr = pLocalProfile->nBandwidthRr;
+                pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+                pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
             }
         }
     }
 
     IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
-            pNegotiatedProfile->nBandwidthAs, pNegotiatedProfile->nBandwidthRs,
-            pNegotiatedProfile->nBandwidthRr);
+            pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+            pNegotiatedProfile->GetBandwidthRr());
 
     return IMS_TRUE;
 }

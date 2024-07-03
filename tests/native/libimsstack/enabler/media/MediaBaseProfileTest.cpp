@@ -143,23 +143,23 @@ TEST(MediaBaseProfileTest, TestBasePayloadCreation)
     MediaBaseProfile::RtpMap tempRtpMap;
 
     // Compare default values
-    EXPECT_EQ(basePayload->objRtpMap, tempRtpMap);
-    EXPECT_EQ(basePayload->pFmtp, nullptr);
+    EXPECT_EQ(basePayload->GetRtpMap(), tempRtpMap);
+    EXPECT_EQ(basePayload->GetFmtp(), nullptr);
 
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload(CHANNEL);
-    EXPECT_NE(basePayload1->objRtpMap, tempRtpMap);
+    EXPECT_NE(basePayload1->GetRtpMap(), tempRtpMap);
 
     tempRtpMap.SetChannel(CHANNEL);
-    EXPECT_EQ(basePayload1->objRtpMap, tempRtpMap);
-    EXPECT_EQ(basePayload1->pFmtp, nullptr);
+    EXPECT_EQ(basePayload1->GetRtpMap(), tempRtpMap);
+    EXPECT_EQ(basePayload1->GetFmtp(), nullptr);
 
-    basePayload1->objRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
-    basePayload1->objRtpMap.SetPayloadType(PAYLOAD_TYPE);
-    basePayload1->objRtpMap.SetSamplingRate(SAMPLEING_RATE);
+    basePayload1->GetRtpMap().SetPayloadNumber(PAYLOAD_NUMBER);
+    basePayload1->GetRtpMap().SetPayloadType(PAYLOAD_TYPE);
+    basePayload1->GetRtpMap().SetSamplingRate(SAMPLEING_RATE);
 
     MediaBaseProfile::BasePayload* basePayload2 = new MediaBaseProfile::BasePayload(*basePayload1);
-    EXPECT_EQ(basePayload2->objRtpMap, basePayload1->objRtpMap);
-    EXPECT_EQ(basePayload2->pFmtp, nullptr);
+    EXPECT_EQ(basePayload2->GetRtpMap(), basePayload1->GetRtpMap());
+    EXPECT_EQ(basePayload2->GetFmtp(), nullptr);
 
     delete basePayload;
     delete basePayload1;
@@ -169,19 +169,19 @@ TEST(MediaBaseProfileTest, TestBasePayloadCreation)
 TEST(MediaBaseProfileTest, TestBasePayloadAssign)
 {
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload(CHANNEL);
-    basePayload->objRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
-    basePayload->objRtpMap.SetPayloadType(PAYLOAD_TYPE);
-    basePayload->objRtpMap.SetSamplingRate(SAMPLEING_RATE);
+    basePayload->GetRtpMap().SetPayloadNumber(PAYLOAD_NUMBER);
+    basePayload->GetRtpMap().SetPayloadType(PAYLOAD_TYPE);
+    basePayload->GetRtpMap().SetSamplingRate(SAMPLEING_RATE);
 
     MediaBaseProfile::BasePayload* basePayload1 = new MediaBaseProfile::BasePayload();
 
-    EXPECT_NE(basePayload->objRtpMap, basePayload1->objRtpMap);
-    EXPECT_EQ(basePayload->pFmtp, nullptr);
+    EXPECT_NE(basePayload->GetRtpMap(), basePayload1->GetRtpMap());
+    EXPECT_EQ(basePayload->GetFmtp(), nullptr);
 
     *basePayload1 = *basePayload;
 
-    EXPECT_EQ(basePayload1->objRtpMap, basePayload->objRtpMap);
-    EXPECT_EQ(basePayload1->pFmtp, nullptr);
+    EXPECT_EQ(basePayload1->GetRtpMap(), basePayload->GetRtpMap());
+    EXPECT_EQ(basePayload1->GetFmtp(), nullptr);
 
     delete basePayload;
     delete basePayload1;
@@ -192,24 +192,24 @@ TEST(MediaBaseProfileTest, TestBasePayloadSetRtpMap)
     MediaBaseProfile::BasePayload* basePayload = new MediaBaseProfile::BasePayload();
 
     basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), 0);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetChannel(), 0);
 
     basePayload->SetRtpMap(PAYLOAD_NUMBER, PAYLOAD_TYPE, SAMPLEING_RATE, CHANNEL);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), CHANNEL);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetChannel(), CHANNEL);
 
     MediaBaseProfile::RtpMap tempRtpMap;
 
     basePayload->SetRtpMap(tempRtpMap);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), 0);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), AString::ConstNull());
-    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), 0);
-    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), 0);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadNumber(), 0);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadType(), AString::ConstNull());
+    EXPECT_EQ(basePayload->GetRtpMap().GetSamplingRate(), 0);
+    EXPECT_EQ(basePayload->GetRtpMap().GetChannel(), 0);
 
     tempRtpMap.SetPayloadNumber(PAYLOAD_NUMBER);
     tempRtpMap.SetPayloadType(PAYLOAD_TYPE);
@@ -218,10 +218,10 @@ TEST(MediaBaseProfileTest, TestBasePayloadSetRtpMap)
 
     basePayload->SetRtpMap(tempRtpMap);
 
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadNumber(), PAYLOAD_NUMBER);
-    EXPECT_EQ(basePayload->objRtpMap.GetPayloadType(), PAYLOAD_TYPE);
-    EXPECT_EQ(basePayload->objRtpMap.GetSamplingRate(), SAMPLEING_RATE);
-    EXPECT_EQ(basePayload->objRtpMap.GetChannel(), CHANNEL);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadNumber(), PAYLOAD_NUMBER);
+    EXPECT_EQ(basePayload->GetRtpMap().GetPayloadType(), PAYLOAD_TYPE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetSamplingRate(), SAMPLEING_RATE);
+    EXPECT_EQ(basePayload->GetRtpMap().GetChannel(), CHANNEL);
 
     delete basePayload;
 }
@@ -343,47 +343,47 @@ TEST(MediaBaseProfileTest, TestCapaNegoAttCapaInPcfg)
 TEST(MediaBaseProfileTest, TestMediaBaseProfileCreation)
 {
     MediaBaseProfile* baseProfile1 = new MediaBaseProfile();
-    EXPECT_EQ(baseProfile1->objIpAddress, IpAddress::IPv6NONE);
-    EXPECT_EQ(baseProfile1->nDataPort, 0);
-    EXPECT_EQ(baseProfile1->nControlPort, 0);
-    EXPECT_EQ(baseProfile1->strTransportType, "RTP/AVP");
-    EXPECT_EQ(baseProfile1->nRtcpInterval, 0);
-    EXPECT_EQ(baseProfile1->nBandwidthAs, 0);
-    EXPECT_EQ(baseProfile1->nBandwidthRs, 0);
-    EXPECT_EQ(baseProfile1->nBandwidthRr, 0);
-    EXPECT_EQ(baseProfile1->eDirection, MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(baseProfile1->GetIpAddress(), IpAddress::IPv6NONE);
+    EXPECT_EQ(baseProfile1->GetDataPort(), 0);
+    EXPECT_EQ(baseProfile1->GetControlPort(), 0);
+    EXPECT_EQ(baseProfile1->GetTransportType(), "RTP/AVP");
+    EXPECT_EQ(baseProfile1->GetRtcpInterval(), 0);
+    EXPECT_EQ(baseProfile1->GetBandwidthAs(), 0);
+    EXPECT_EQ(baseProfile1->GetBandwidthRs(), 0);
+    EXPECT_EQ(baseProfile1->GetBandwidthRr(), 0);
+    EXPECT_EQ(baseProfile1->GetDirection(), MEDIA_DIRECTION_INVALID);
 
-    baseProfile1->objIpAddress = IP_ADDRESS;
-    baseProfile1->nDataPort = DATA_PORT;
-    baseProfile1->nControlPort = CONTROL_PORT;
-    baseProfile1->strTransportType = TRANSPORT_TYPE;
-    baseProfile1->nRtcpInterval = RTCP_INTERVAL;
-    baseProfile1->nBandwidthAs = AS;
-    baseProfile1->nBandwidthRs = RS;
-    baseProfile1->nBandwidthRr = RR;
-    baseProfile1->eDirection = DIRECTION;
+    baseProfile1->SetIpAddress(IP_ADDRESS);
+    baseProfile1->SetDataPort(DATA_PORT);
+    baseProfile1->SetControlPort(CONTROL_PORT);
+    baseProfile1->SetTransportType(TRANSPORT_TYPE);
+    baseProfile1->SetRtcpInterval(RTCP_INTERVAL);
+    baseProfile1->SetBandwidthAs(AS);
+    baseProfile1->SetBandwidthRs(RS);
+    baseProfile1->SetBandwidthRr(RR);
+    baseProfile1->SetDirection(DIRECTION);
 
     MediaBaseProfile* baseProfile2 = new MediaBaseProfile(baseProfile1);
-    EXPECT_EQ(baseProfile2->objIpAddress, IP_ADDRESS);
-    EXPECT_EQ(baseProfile2->nDataPort, DATA_PORT);
-    EXPECT_EQ(baseProfile2->nControlPort, CONTROL_PORT);
-    EXPECT_EQ(baseProfile2->strTransportType, TRANSPORT_TYPE);
-    EXPECT_EQ(baseProfile2->nRtcpInterval, RTCP_INTERVAL);
-    EXPECT_EQ(baseProfile2->nBandwidthAs, AS);
-    EXPECT_EQ(baseProfile2->nBandwidthRs, RS);
-    EXPECT_EQ(baseProfile2->nBandwidthRr, RR);
-    EXPECT_EQ(baseProfile2->eDirection, DIRECTION);
+    EXPECT_EQ(baseProfile2->GetIpAddress(), IP_ADDRESS);
+    EXPECT_EQ(baseProfile2->GetDataPort(), DATA_PORT);
+    EXPECT_EQ(baseProfile2->GetControlPort(), CONTROL_PORT);
+    EXPECT_EQ(baseProfile2->GetTransportType(), TRANSPORT_TYPE);
+    EXPECT_EQ(baseProfile2->GetRtcpInterval(), RTCP_INTERVAL);
+    EXPECT_EQ(baseProfile2->GetBandwidthAs(), AS);
+    EXPECT_EQ(baseProfile2->GetBandwidthRs(), RS);
+    EXPECT_EQ(baseProfile2->GetBandwidthRr(), RR);
+    EXPECT_EQ(baseProfile2->GetDirection(), DIRECTION);
 
     MediaBaseProfile* baseProfile3 = new MediaBaseProfile(*baseProfile2);
-    EXPECT_EQ(baseProfile3->objIpAddress, IP_ADDRESS);
-    EXPECT_EQ(baseProfile3->nDataPort, DATA_PORT);
-    EXPECT_EQ(baseProfile3->nControlPort, CONTROL_PORT);
-    EXPECT_EQ(baseProfile3->strTransportType, TRANSPORT_TYPE);
-    EXPECT_EQ(baseProfile3->nRtcpInterval, RTCP_INTERVAL);
-    EXPECT_EQ(baseProfile3->nBandwidthAs, AS);
-    EXPECT_EQ(baseProfile3->nBandwidthRs, RS);
-    EXPECT_EQ(baseProfile3->nBandwidthRr, RR);
-    EXPECT_EQ(baseProfile3->eDirection, DIRECTION);
+    EXPECT_EQ(baseProfile3->GetIpAddress(), IP_ADDRESS);
+    EXPECT_EQ(baseProfile3->GetDataPort(), DATA_PORT);
+    EXPECT_EQ(baseProfile3->GetControlPort(), CONTROL_PORT);
+    EXPECT_EQ(baseProfile3->GetTransportType(), TRANSPORT_TYPE);
+    EXPECT_EQ(baseProfile3->GetRtcpInterval(), RTCP_INTERVAL);
+    EXPECT_EQ(baseProfile3->GetBandwidthAs(), AS);
+    EXPECT_EQ(baseProfile3->GetBandwidthRs(), RS);
+    EXPECT_EQ(baseProfile3->GetBandwidthRr(), RR);
+    EXPECT_EQ(baseProfile3->GetDirection(), DIRECTION);
 
     delete baseProfile1;
     delete baseProfile2;
@@ -395,27 +395,27 @@ TEST(MediaBaseProfileTest, TestMediaBaseProfileAssign)
     MediaBaseProfile* baseProfile1 = new MediaBaseProfile();
     MediaBaseProfile* baseProfile2 = new MediaBaseProfile();
 
-    baseProfile1->objIpAddress = IP_ADDRESS;
-    baseProfile1->nDataPort = DATA_PORT;
-    baseProfile1->nControlPort = CONTROL_PORT;
-    baseProfile1->strTransportType = TRANSPORT_TYPE;
-    baseProfile1->nRtcpInterval = RTCP_INTERVAL;
-    baseProfile1->nBandwidthAs = AS;
-    baseProfile1->nBandwidthRs = RS;
-    baseProfile1->nBandwidthRr = RR;
-    baseProfile1->eDirection = DIRECTION;
+    baseProfile1->SetIpAddress(IP_ADDRESS);
+    baseProfile1->SetDataPort(DATA_PORT);
+    baseProfile1->SetControlPort(CONTROL_PORT);
+    baseProfile1->SetTransportType(TRANSPORT_TYPE);
+    baseProfile1->SetRtcpInterval(RTCP_INTERVAL);
+    baseProfile1->SetBandwidthAs(AS);
+    baseProfile1->SetBandwidthRs(RS);
+    baseProfile1->SetBandwidthRr(RR);
+    baseProfile1->SetDirection(DIRECTION);
 
     *baseProfile2 = *baseProfile1;
 
-    EXPECT_EQ(baseProfile2->objIpAddress, IP_ADDRESS);
-    EXPECT_EQ(baseProfile2->nDataPort, DATA_PORT);
-    EXPECT_EQ(baseProfile2->nControlPort, CONTROL_PORT);
-    EXPECT_EQ(baseProfile2->strTransportType, TRANSPORT_TYPE);
-    EXPECT_EQ(baseProfile2->nRtcpInterval, RTCP_INTERVAL);
-    EXPECT_EQ(baseProfile2->nBandwidthAs, AS);
-    EXPECT_EQ(baseProfile2->nBandwidthRs, RS);
-    EXPECT_EQ(baseProfile2->nBandwidthRr, RR);
-    EXPECT_EQ(baseProfile2->eDirection, DIRECTION);
+    EXPECT_EQ(baseProfile2->GetIpAddress(), IP_ADDRESS);
+    EXPECT_EQ(baseProfile2->GetDataPort(), DATA_PORT);
+    EXPECT_EQ(baseProfile2->GetControlPort(), CONTROL_PORT);
+    EXPECT_EQ(baseProfile2->GetTransportType(), TRANSPORT_TYPE);
+    EXPECT_EQ(baseProfile2->GetRtcpInterval(), RTCP_INTERVAL);
+    EXPECT_EQ(baseProfile2->GetBandwidthAs(), AS);
+    EXPECT_EQ(baseProfile2->GetBandwidthRs(), RS);
+    EXPECT_EQ(baseProfile2->GetBandwidthRr(), RR);
+    EXPECT_EQ(baseProfile2->GetDirection(), DIRECTION);
 
     delete baseProfile1;
     delete baseProfile2;
@@ -428,31 +428,31 @@ TEST(MediaBaseProfileTest, TestMediaBaseProfileEqualNotEqual)
 
     EXPECT_EQ(*baseProfile1, *baseProfile2);
 
-    baseProfile1->objIpAddress = IP_ADDRESS;
-    baseProfile1->nDataPort = DATA_PORT;
-    baseProfile1->nControlPort = CONTROL_PORT;
-    baseProfile1->strTransportType = TRANSPORT_TYPE;
-    baseProfile1->nRtcpInterval = RTCP_INTERVAL;
-    baseProfile1->nBandwidthAs = AS;
-    baseProfile1->nBandwidthRs = RS;
-    baseProfile1->nBandwidthRr = RR;
-    baseProfile1->eDirection = DIRECTION;
+    baseProfile1->SetIpAddress(IP_ADDRESS);
+    baseProfile1->SetDataPort(DATA_PORT);
+    baseProfile1->SetControlPort(CONTROL_PORT);
+    baseProfile1->SetTransportType(TRANSPORT_TYPE);
+    baseProfile1->SetRtcpInterval(RTCP_INTERVAL);
+    baseProfile1->SetBandwidthAs(AS);
+    baseProfile1->SetBandwidthRs(RS);
+    baseProfile1->SetBandwidthRr(RR);
+    baseProfile1->SetDirection(DIRECTION);
 
     EXPECT_NE(*baseProfile1, *baseProfile2);
 
-    baseProfile2->objIpAddress = IP_ADDRESS;
-    baseProfile2->nDataPort = DATA_PORT;
-    baseProfile2->nControlPort = CONTROL_PORT;
-    baseProfile2->strTransportType = TRANSPORT_TYPE;
-    baseProfile2->nRtcpInterval = RTCP_INTERVAL;
-    baseProfile2->nBandwidthAs = AS;
-    baseProfile2->nBandwidthRs = RS;
-    baseProfile2->nBandwidthRr = RR;
-    baseProfile2->eDirection = DIRECTION;
+    baseProfile2->SetIpAddress(IP_ADDRESS);
+    baseProfile2->SetDataPort(DATA_PORT);
+    baseProfile2->SetControlPort(CONTROL_PORT);
+    baseProfile2->SetTransportType(TRANSPORT_TYPE);
+    baseProfile2->SetRtcpInterval(RTCP_INTERVAL);
+    baseProfile2->SetBandwidthAs(AS);
+    baseProfile2->SetBandwidthRs(RS);
+    baseProfile2->SetBandwidthRr(RR);
+    baseProfile2->SetDirection(DIRECTION);
 
     EXPECT_EQ(*baseProfile1, *baseProfile2);
 
-    baseProfile2->nControlPort = DATA_PORT;
+    baseProfile2->SetControlPort(DATA_PORT);
 
     EXPECT_NE(*baseProfile1, *baseProfile2);
 
