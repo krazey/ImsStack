@@ -16,6 +16,7 @@
 #ifndef IMS_VECTOR_H_
 #define IMS_VECTOR_H_
 
+#include <algorithm>
 #include <vector>
 
 #include "ImsNew.h"
@@ -41,6 +42,8 @@ public:
         m_objVector.clear();
         Shrink();
     }
+    // Checks if the specified element exists in this vector.
+    inline IMS_BOOL Contains(IN const T& element) const;
     // Checks if both vectors are same.
     inline IMS_BOOL Equals(IN const ImsVector<T>& other) const;
 
@@ -127,10 +130,12 @@ public:
     //
     // Remove elements
     //
-    // Remove several elements
+    // Removes several elements
     inline IMS_SLONG RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
-    // Remove one element
+    // Removes one element
     inline IMS_SLONG RemoveAt(IN IMS_UINT32 nIndex) { return RemoveElementsAt(nIndex); }
+    // Removes all elements that match the specified element.
+    inline IMS_BOOL Remove(IN const T& element);
 
     inline void Shrink();
 
@@ -169,6 +174,14 @@ inline ImsVector<T>& ImsVector<T>::operator=(IN const ImsVector<T>& other)
     }
 
     return (*this);
+}
+
+PUBLIC
+template <class T>
+inline IMS_BOOL ImsVector<T>::Contains(IN const T& element) const
+{
+    auto it = std::find(m_objVector.begin(), m_objVector.end(), element);
+    return it != m_objVector.end() ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC
@@ -354,6 +367,14 @@ inline IMS_SLONG ImsVector<T>::RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UIN
     Shrink();
 
     return nIndex;
+}
+
+PUBLIC
+template <class T>
+inline IMS_BOOL ImsVector<T>::Remove(IN const T& element)
+{
+    auto count = std::erase(m_objVector, element);
+    return count > 0 ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC

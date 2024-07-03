@@ -45,6 +45,8 @@ public:
 public:
     // Empty the list
     inline void Clear() { ImsVector<T>::Clear(); }
+    // Checks if the specified element exists in this list.
+    inline IMS_BOOL Contains(IN const T& element) const { return ImsVector<T>::Contains(element); }
     // Checks if both lists are same.
     inline IMS_BOOL Equals(IN const ImsList<T>& other) const { return ImsVector<T>::Equals(other); }
 
@@ -109,16 +111,18 @@ public:
     //
     // Remove elements
     //
-    // Remove several elements
+    // Removes several elements
     inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1)
     {
         return (ImsVector<T>::RemoveElementsAt(nIndex, nCount) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
-    // Remove one element
+    // Removes one element
     inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex)
     {
         return (ImsVector<T>::RemoveAt(nIndex) >= 0) ? IMS_TRUE : IMS_FALSE;
     }
+    // Removes all elements that match the specified element.
+    inline IMS_BOOL Remove(IN const T& element) { return ImsVector<T>::Remove(element); }
 };
 
 // Overrides operators
