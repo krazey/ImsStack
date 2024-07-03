@@ -1626,6 +1626,11 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
 }
 
+TEST_F(AosHandleTest, ShouldReturnTextFeatureIfTheBlockReasonForTextCapabilityIsGiven)
+{
+    EXPECT_EQ(m_pAosHandle->GetAosFeature(AosHandle::BLOCK_TEXT_CAPABILITY), ImsAosFeature::TEXT);
+}
+
 TEST_F(AosHandleTest, BackupAllBlocks_Test1)
 {
     // Test1: Valid cellular, wfc unavailable

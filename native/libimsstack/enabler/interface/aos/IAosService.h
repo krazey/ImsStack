@@ -371,7 +371,10 @@ enum class AosCapability
     CALL_COMPOSER = 1 << 4,
     CALL_COMPOSER_BUSINESS_ONLY = 1 << 5,
     OPTIONS_UCE = 1 << 6,
-    PRESENCE_UCE = 1 << 7
+    PRESENCE_UCE = 1 << 7,
+
+    // Internal capabilities
+    TEXT = 1 << 11
 };
 
 /**

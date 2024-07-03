@@ -842,6 +842,11 @@ PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapa
         strCapabilities.Append("PRESENCE_UCE ");
     }
 
+    if (nCapabilities & static_cast<IMS_UINT32>(AosCapability::TEXT))
+    {
+        strCapabilities.Append("TEXT ");
+    }
+
     strCapabilities.Append("] ");
 
     return strCapabilities;

@@ -798,6 +798,10 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
             nFeature = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
             break;
 
+        case BLOCK_TEXT_CAPABILITY:
+            nFeature = ImsAosFeature::TEXT;
+            break;
+
         default:
             break;
     }

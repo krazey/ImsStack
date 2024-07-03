@@ -160,12 +160,13 @@ public:
         BLOCK_VIWIFI_CAPABILITY = 0x8,
         BLOCK_CALL_COMPOSER_CAPABILITY = 0x10,
         BLOCK_SMS_CAPABILITY = 0x20,
+        BLOCK_TEXT_CAPABILITY = 0x40,
 
         // Network
-        BLOCK_VOPS = 0x40,
-        BLOCK_SSAC = 0x80,
-        BLOCK_NETWORK = 0x100,
-        BLOCK_3G = 0x200
+        BLOCK_VOPS = 0x80,
+        BLOCK_SSAC = 0x100,
+        BLOCK_NETWORK = 0x200,
+        BLOCK_3G = 0x400
     };
 
 protected:

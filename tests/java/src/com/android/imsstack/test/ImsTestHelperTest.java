@@ -133,6 +133,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intent.putExtra("video", "1,1,1,0");
         intent.putExtra("voice", "1,1,1,0");
         intent.putExtra("sms", "1,1,1,0");
+        intent.putExtra("text", "1,1,1,0");
         intent.putExtra("call_composer", "1,1,0,0");
         intent.putExtra("call_composer_business_only", "1,1,0,0");
         mBroadcastReceiver.onReceive(mContext, intent);
@@ -144,18 +145,21 @@ public class ImsTestHelperTest extends ImsStackTest {
                 IAosRegistrationListener.Capability.VOICE
                 | IAosRegistrationListener.Capability.VIDEO
                 | IAosRegistrationListener.Capability.SMS
+                | IAosRegistrationListener.Capability.TEXT
                 | IAosRegistrationListener.Capability.CALL_COMPOSER
                 | IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
                 IAosRegistrationListener.Capability.VOICE
                 | IAosRegistrationListener.Capability.VIDEO
                 | IAosRegistrationListener.Capability.SMS
+                | IAosRegistrationListener.Capability.TEXT
                 | IAosRegistrationListener.Capability.CALL_COMPOSER
                 | IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
                 IAosRegistrationListener.Capability.VOICE
                 | IAosRegistrationListener.Capability.VIDEO
-                | IAosRegistrationListener.Capability.SMS);
+                | IAosRegistrationListener.Capability.SMS
+                | IAosRegistrationListener.Capability.TEXT);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.UTRAN,
                 IAosRegistrationListener.Capability.NONE);
 
