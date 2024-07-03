@@ -52,12 +52,12 @@ protected:
         m_pEvsFmtpEmpty->bShowBwList = IMS_FALSE;
 
         m_pEvsFmtpFull = new AudioProfile::EvsFmtp();
-        m_pEvsFmtpFull->nPtime = 20;
-        m_pEvsFmtpFull->nMaxPtime = 240;
-        m_pEvsFmtpFull->bDtx = 1;
+        m_pEvsFmtpFull->SetPtime(20);
+        m_pEvsFmtpFull->SetMaxPtime(240);
+        m_pEvsFmtpFull->SetDtx(1);
         m_pEvsFmtpFull->nHfOnly = 1;
         m_pEvsFmtpFull->nEvsModeSwitch = 1;
-        m_pEvsFmtpFull->nMaxRed = 220;
+        m_pEvsFmtpFull->SetMaxRed(220);
         m_pEvsFmtpFull->nBrList = 31;
         m_pEvsFmtpFull->nBrSend = 31;
         m_pEvsFmtpFull->nBrRecv = 31;
@@ -67,25 +67,25 @@ protected:
         m_pEvsFmtpFull->nCmr = 1;
         m_pEvsFmtpFull->nChAwRecv = 1;
         m_pEvsFmtpFull->nReceivedChAwRecv = 1;
-        m_pEvsFmtpFull->nModeSetList = 7;
-        m_pEvsFmtpFull->nDefaultRtpModeSet = 15;
-        m_pEvsFmtpFull->nModeChangeCapability = 2;
-        m_pEvsFmtpFull->nModeChangePeriod = 1;
-        m_pEvsFmtpFull->nModeChangeNeighbor = 1;
+        m_pEvsFmtpFull->SetModeSetList(7);
+        m_pEvsFmtpFull->SetDefaultRtpModeSet(15);
+        m_pEvsFmtpFull->SetModeChangeCapability(2);
+        m_pEvsFmtpFull->SetModeChangePeriod(1);
+        m_pEvsFmtpFull->SetModeChangeNeighbor(1);
 
-        m_pEvsFmtpFull->bShowPtime = IMS_TRUE;
-        m_pEvsFmtpFull->bShowMaxPtime = IMS_TRUE;
-        m_pEvsFmtpFull->bShowDtx = IMS_TRUE;
+        m_pEvsFmtpFull->SetShowPtime(IMS_TRUE);
+        m_pEvsFmtpFull->SetShowMaxPtime(IMS_TRUE);
+        m_pEvsFmtpFull->SetShowDtx(IMS_TRUE);
         m_pEvsFmtpFull->bShowHfOnly = IMS_TRUE;
         m_pEvsFmtpFull->bShowEvsModeSwitch = IMS_TRUE;
-        m_pEvsFmtpFull->bShowMaxRed = IMS_TRUE;
+        m_pEvsFmtpFull->SetShowMaxRed(IMS_TRUE);
         m_pEvsFmtpFull->bShowCmr = IMS_TRUE;
         m_pEvsFmtpFull->bShowChannelAwMode = IMS_TRUE;
-        m_pEvsFmtpFull->bShowModeChangeCapability = IMS_TRUE;
-        m_pEvsFmtpFull->bShowModeChangePeriod = IMS_TRUE;
-        m_pEvsFmtpFull->bShowModeChangeNeighbor = IMS_TRUE;
+        m_pEvsFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
+        m_pEvsFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
+        m_pEvsFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
         m_pEvsFmtpFull->bSendCmr = IMS_TRUE;
-        m_pEvsFmtpFull->bShowModeSet = IMS_TRUE;
+        m_pEvsFmtpFull->SetShowModeSet(IMS_TRUE);
     }
     virtual void TearDown() override
     {

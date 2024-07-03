@@ -416,15 +416,15 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
 
     SetAudioCodecFmtp(pAmrConfig, pAudioConfig, pAmrFmtp);
 
-    pAmrFmtp->nModeSetList = pAmrConfig->GetAmrModeSetList();
-    pAmrFmtp->nDefaultRtpModeSet = pAmrConfig->GetDefaultAmrModeSetList();
-    pAmrFmtp->bShowModeSet = pAmrConfig->GetShowAmrModeSet();
+    pAmrFmtp->SetModeSetList(pAmrConfig->GetAmrModeSetList());
+    pAmrFmtp->SetDefaultRtpModeSet(pAmrConfig->GetDefaultAmrModeSetList());
+    pAmrFmtp->SetShowModeSet(pAmrConfig->GetShowAmrModeSet());
 
     pAmrFmtp->bShowOctetAlign = IMS_FALSE;
     if (pAmrConfig->GetOctetAlign() != -1)
     {
         pAmrFmtp->nOctetAlign = pAmrConfig->GetOctetAlign();
-        if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->nModeSetList == 0)
+        if (pAmrFmtp->nOctetAlign == 1 || pAmrFmtp->GetModeSetList() == 0)
         {
             pAmrFmtp->bShowOctetAlign = IMS_TRUE;
         }
@@ -467,9 +467,9 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
     SetAudioCodecFmtp(pEvsConfig, pAudioConfig, pEvsFmtp);
 
     // Mode set list
-    pEvsFmtp->nModeSetList = pEvsConfig->GetAmrModeSetList();
-    pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultAmrModeSetList();
-    pEvsFmtp->bShowModeSet = pEvsConfig->GetShowAmrModeSet();
+    pEvsFmtp->SetModeSetList(pEvsConfig->GetAmrModeSetList());
+    pEvsFmtp->SetDefaultRtpModeSet(pEvsConfig->GetDefaultAmrModeSetList());
+    pEvsFmtp->SetShowModeSet(pEvsConfig->GetShowAmrModeSet());
     pEvsFmtp->nBrList = pEvsConfig->GetBrList();
     pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
@@ -495,7 +495,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateEvsPayload(
         pEvsFmtp->bShowBwList = IMS_TRUE;
     }
 
-    pEvsFmtp->bShowDtx = pEvsConfig->GetShowDtx();
+    pEvsFmtp->SetShowDtx(pEvsConfig->GetShowDtx());
 
     if (pEvsConfig->GetHfOnly() == -1)  // Not Present
     {
@@ -626,71 +626,71 @@ PRIVATE void MediaProfileFactory::SetAudioCodecFmtp(IN CodecAudioConfig* pCodecC
 
     if (pCodecConfig->GetModeChangeCapability() != NOT_PRESENT)
     {
-        pFmtp->nModeChangeCapability = pCodecConfig->GetModeChangeCapability();
-        pFmtp->bShowModeChangeCapability = IMS_TRUE;
+        pFmtp->SetModeChangeCapability(pCodecConfig->GetModeChangeCapability());
+        pFmtp->SetShowModeChangeCapability(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangeCapability = CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY;
-        pFmtp->bShowModeChangeCapability = IMS_FALSE;
+        pFmtp->SetModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY);
+        pFmtp->SetShowModeChangeCapability(IMS_FALSE);
     }
 
     if (pCodecConfig->GetModeChangePeriod() != NOT_PRESENT)
     {
-        pFmtp->nModeChangePeriod = pCodecConfig->GetModeChangePeriod();
-        pFmtp->bShowModeChangePeriod = IMS_TRUE;
+        pFmtp->SetModeChangePeriod(pCodecConfig->GetModeChangePeriod());
+        pFmtp->SetShowModeChangePeriod(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangePeriod = CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD;
-        pFmtp->bShowModeChangePeriod = IMS_FALSE;
+        pFmtp->SetModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD);
+        pFmtp->SetShowModeChangePeriod(IMS_FALSE);
     }
 
     if (pCodecConfig->GetModeChangeNeighbor() != NOT_PRESENT)
     {
-        pFmtp->nModeChangeNeighbor = pCodecConfig->GetModeChangeNeighbor();
-        pFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+        pFmtp->SetModeChangeNeighbor(pCodecConfig->GetModeChangeNeighbor());
+        pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
     }
     else
     {
-        pFmtp->nModeChangeNeighbor = CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR;
-        pFmtp->bShowModeChangeNeighbor = IMS_FALSE;
+        pFmtp->SetModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
+        pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
     }
 
     if (pAudioConfig->GetPtime() != NOT_PRESENT)
     {
-        pFmtp->nPtime = pAudioConfig->GetPtime();
-        pFmtp->bShowPtime = IMS_TRUE;
+        pFmtp->SetPtime(pAudioConfig->GetPtime());
+        pFmtp->SetShowPtime(IMS_TRUE);
     }
     else
     {
-        pFmtp->nPtime = AudioConfiguration::DEFAULT_PTIME;
-        pFmtp->bShowPtime = IMS_FALSE;
+        pFmtp->SetPtime(AudioConfiguration::DEFAULT_PTIME);
+        pFmtp->SetShowPtime(IMS_FALSE);
     }
 
     if (pAudioConfig->GetMaxPtime() != NOT_PRESENT)
     {
-        pFmtp->nMaxPtime = pAudioConfig->GetMaxPtime();
-        pFmtp->bShowMaxPtime = IMS_TRUE;
+        pFmtp->SetMaxPtime(pAudioConfig->GetMaxPtime());
+        pFmtp->SetShowMaxPtime(IMS_TRUE);
     }
     else
     {
-        pFmtp->nMaxPtime = AudioConfiguration::DEFAULT_MAX_PTIME;
-        pFmtp->bShowMaxPtime = IMS_FALSE;
+        pFmtp->SetMaxPtime(AudioConfiguration::DEFAULT_MAX_PTIME);
+        pFmtp->SetShowMaxPtime(IMS_FALSE);
     }
 
     if (pAudioConfig->GetMaxRed() != NOT_PRESENT)
     {
-        pFmtp->nMaxRed = pAudioConfig->GetMaxRed();
-        pFmtp->bShowMaxRed = IMS_TRUE;
+        pFmtp->SetMaxRed(pAudioConfig->GetMaxRed());
+        pFmtp->SetShowMaxRed(IMS_TRUE);
     }
     else
     {
-        pFmtp->nMaxRed = AudioConfiguration::DEFAULT_MAX_RED;
-        pFmtp->bShowMaxRed = IMS_FALSE;
+        pFmtp->SetMaxRed(AudioConfiguration::DEFAULT_MAX_RED);
+        pFmtp->SetShowMaxRed(IMS_FALSE);
     }
 
-    pFmtp->bDtx = pCodecConfig->GetDtx();
+    pFmtp->SetDtx(pCodecConfig->GetDtx());
 }
 
 PRIVATE TextProfile* MediaProfileFactory::SetTextProfile(

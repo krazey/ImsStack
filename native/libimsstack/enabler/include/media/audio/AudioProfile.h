@@ -45,69 +45,134 @@ public:
             DEFAULT_DTX = 1,
         };
 
-        IMS_UINT32 nModeSetList;
-        IMS_UINT32 nDefaultRtpModeSet;
-        IMS_SINT32 nModeChangeCapability;
-        IMS_SINT32 nModeChangePeriod;
-        IMS_SINT32 nModeChangeNeighbor;
-        IMS_SINT32 nMaxRed;
-        IMS_SINT32 nPtime;
-        IMS_SINT32 nMaxPtime;
-        IMS_BOOL bDtx;
-
-        IMS_BOOL bShowModeSet;
-        IMS_BOOL bShowModeChangeCapability;
-        IMS_BOOL bShowModeChangePeriod;
-        IMS_BOOL bShowModeChangeNeighbor;
-        IMS_BOOL bShowMaxRed;
-        IMS_BOOL bShowPtime;
-        IMS_BOOL bShowMaxPtime;
-        IMS_BOOL bShowDtx;
-
     public:
         AudioFmtp() :
-                nModeSetList(DEFAULT_MODESETLIST),
-                nDefaultRtpModeSet(DEFAULT_MODESETLIST),
-                nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-                nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-                nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                nMaxRed(DEFAULT_MAXRED),
-                nPtime(DEFAULT_PTIME),
-                nMaxPtime(DEFAULT_MAXPTIME),
-                bDtx(DEFAULT_DTX),
-                bShowModeSet(IMS_FALSE),
-                bShowModeChangeCapability(IMS_FALSE),
-                bShowModeChangePeriod(IMS_FALSE),
-                bShowModeChangeNeighbor(IMS_FALSE),
-                bShowMaxRed(IMS_FALSE),
-                bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE),
-                bShowDtx(IMS_FALSE)
+                m_nModeSetList(DEFAULT_MODESETLIST),
+                m_nDefaultRtpModeSet(DEFAULT_MODESETLIST),
+                m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
+                m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
+                m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
+                m_nMaxRed(DEFAULT_MAXRED),
+                m_nPtime(DEFAULT_PTIME),
+                m_nMaxPtime(DEFAULT_MAXPTIME),
+                m_bDtx(DEFAULT_DTX),
+                m_bShowModeSet(IMS_FALSE),
+                m_bShowModeChangeCapability(IMS_FALSE),
+                m_bShowModeChangePeriod(IMS_FALSE),
+                m_bShowModeChangeNeighbor(IMS_FALSE),
+                m_bShowMaxRed(IMS_FALSE),
+                m_bShowPtime(IMS_FALSE),
+                m_bShowMaxPtime(IMS_FALSE),
+                m_bShowDtx(IMS_FALSE)
         {
         }
 
         AudioFmtp(IN const AudioFmtp& objFmtp) :
-                nModeSetList(objFmtp.nModeSetList),
-                nDefaultRtpModeSet(objFmtp.nDefaultRtpModeSet),
-                nModeChangeCapability(objFmtp.nModeChangeCapability),
-                nModeChangePeriod(objFmtp.nModeChangePeriod),
-                nModeChangeNeighbor(objFmtp.nModeChangeNeighbor),
-                nMaxRed(objFmtp.nMaxRed),
-                nPtime(objFmtp.nPtime),
-                nMaxPtime(objFmtp.nMaxPtime),
-                bDtx(objFmtp.bDtx),
-                bShowModeSet(objFmtp.bShowModeSet),
-                bShowModeChangeCapability(objFmtp.bShowModeChangeCapability),
-                bShowModeChangePeriod(objFmtp.bShowModeChangePeriod),
-                bShowModeChangeNeighbor(objFmtp.bShowModeChangeNeighbor),
-                bShowMaxRed(objFmtp.bShowMaxRed),
-                bShowPtime(objFmtp.bShowPtime),
-                bShowMaxPtime(objFmtp.bShowMaxPtime),
-                bShowDtx(objFmtp.bShowDtx)
+                m_nModeSetList(objFmtp.m_nModeSetList),
+                m_nDefaultRtpModeSet(objFmtp.m_nDefaultRtpModeSet),
+                m_nModeChangeCapability(objFmtp.m_nModeChangeCapability),
+                m_nModeChangePeriod(objFmtp.m_nModeChangePeriod),
+                m_nModeChangeNeighbor(objFmtp.m_nModeChangeNeighbor),
+                m_nMaxRed(objFmtp.m_nMaxRed),
+                m_nPtime(objFmtp.m_nPtime),
+                m_nMaxPtime(objFmtp.m_nMaxPtime),
+                m_bDtx(objFmtp.m_bDtx),
+                m_bShowModeSet(objFmtp.m_bShowModeSet),
+                m_bShowModeChangeCapability(objFmtp.m_bShowModeChangeCapability),
+                m_bShowModeChangePeriod(objFmtp.m_bShowModeChangePeriod),
+                m_bShowModeChangeNeighbor(objFmtp.m_bShowModeChangeNeighbor),
+                m_bShowMaxRed(objFmtp.m_bShowMaxRed),
+                m_bShowPtime(objFmtp.m_bShowPtime),
+                m_bShowMaxPtime(objFmtp.m_bShowMaxPtime),
+                m_bShowDtx(objFmtp.m_bShowDtx)
         {
         }
 
         virtual ~AudioFmtp(){};
+
+        inline void SetModeSetList(IN const IMS_UINT32 nModeSetList)
+        {
+            m_nModeSetList = nModeSetList;
+        }
+        inline IMS_UINT32 GetModeSetList() { return m_nModeSetList; }
+        inline void SetDefaultRtpModeSet(IN const IMS_UINT32 nDefaultRtpModeSet)
+        {
+            m_nDefaultRtpModeSet = nDefaultRtpModeSet;
+        }
+        inline IMS_UINT32 GetDefaultRtpModeSet() { return m_nDefaultRtpModeSet; }
+        inline void SetModeChangeCapability(IN const IMS_SINT32 nModeChangeCapability)
+        {
+            m_nModeChangeCapability = nModeChangeCapability;
+        }
+        inline IMS_SINT32 GetModeChangeCapability() { return m_nModeChangeCapability; }
+        inline void SetModeChangePeriod(IN const IMS_SINT32 nModeChangePeriod)
+        {
+            m_nModeChangePeriod = nModeChangePeriod;
+        }
+        inline IMS_SINT32 GetModeChangePeriod() { return m_nModeChangePeriod; }
+        inline void SetModeChangeNeighbor(IN const IMS_SINT32 nModeChangeNeighbor)
+        {
+            m_nModeChangeNeighbor = nModeChangeNeighbor;
+        }
+        inline IMS_SINT32 GetModeChangeNeighbor() { return m_nModeChangeNeighbor; }
+        inline void SetMaxRed(IN const IMS_SINT32 nMaxRed) { m_nMaxRed = nMaxRed; }
+        inline IMS_SINT32 GetMaxRed() { return m_nMaxRed; }
+        inline void SetPtime(IN const IMS_SINT32 nPtime) { m_nPtime = nPtime; }
+        inline IMS_SINT32 GetPtime() { return m_nPtime; }
+        inline void SetMaxPtime(IN const IMS_SINT32 nMaxPtime) { m_nMaxPtime = nMaxPtime; }
+        inline IMS_SINT32 GetMaxPtime() { return m_nMaxPtime; }
+        inline void SetDtx(IN const IMS_BOOL bDtx) { m_bDtx = bDtx; }
+        inline IMS_BOOL IsDtxEnabled() { return m_bDtx; }
+        inline void SetShowModeSet(IN const IMS_BOOL bShowModeSet)
+        {
+            m_bShowModeSet = bShowModeSet;
+        }
+        inline IMS_BOOL IsShowModeSetEnabled() { return m_bShowModeSet; }
+        inline void SetShowModeChangeCapability(IN const IMS_BOOL bShowModeChangeCapability)
+        {
+            m_bShowModeChangeCapability = bShowModeChangeCapability;
+        }
+        inline IMS_BOOL IsShowModeChangeCapabilityEnabled() { return m_bShowModeChangeCapability; }
+        inline void SetShowModeChangePeriod(IN const IMS_BOOL bShowModeChangePeriod)
+        {
+            m_bShowModeChangePeriod = bShowModeChangePeriod;
+        }
+        inline IMS_BOOL IsShowModeChangePeriodEnabled() { return m_bShowModeChangePeriod; }
+        inline void SetShowModeChangeNeighbor(IN const IMS_BOOL bShowModeChangeNeighbor)
+        {
+            m_bShowModeChangeNeighbor = bShowModeChangeNeighbor;
+        }
+        inline IMS_BOOL IsShowModeChangeNeighborEnabled() { return m_bShowModeChangeNeighbor; }
+        inline void SetShowMaxRed(IN const IMS_BOOL bShowMaxRed) { m_bShowMaxRed = bShowMaxRed; }
+        inline IMS_BOOL IsShowMaxRedEnabled() { return m_bShowMaxRed; }
+        inline void SetShowPtime(IN const IMS_BOOL bShowPtime) { m_bShowPtime = bShowPtime; }
+        inline IMS_BOOL IsShowPtimeEnabled() { return m_bShowPtime; }
+        inline void SetShowMaxPtime(IN const IMS_BOOL bShowMaxPtime)
+        {
+            m_bShowMaxPtime = bShowMaxPtime;
+        }
+        inline IMS_BOOL IsShowMaxPtimeEnabled() { return m_bShowMaxPtime; }
+        inline void SetShowDtx(IN const IMS_BOOL bShowDtx) { m_bShowDtx = bShowDtx; }
+        inline IMS_BOOL IsShowDtxEnabled() { return m_bShowDtx; }
+
+    private:
+        IMS_UINT32 m_nModeSetList;
+        IMS_UINT32 m_nDefaultRtpModeSet;
+        IMS_SINT32 m_nModeChangeCapability;
+        IMS_SINT32 m_nModeChangePeriod;
+        IMS_SINT32 m_nModeChangeNeighbor;
+        IMS_SINT32 m_nMaxRed;
+        IMS_SINT32 m_nPtime;
+        IMS_SINT32 m_nMaxPtime;
+        IMS_BOOL m_bDtx;
+        IMS_BOOL m_bShowModeSet;
+        IMS_BOOL m_bShowModeChangeCapability;
+        IMS_BOOL m_bShowModeChangePeriod;
+        IMS_BOOL m_bShowModeChangeNeighbor;
+        IMS_BOOL m_bShowMaxRed;
+        IMS_BOOL m_bShowPtime;
+        IMS_BOOL m_bShowMaxPtime;
+        IMS_BOOL m_bShowDtx;
     };
 
     /**

@@ -69,59 +69,62 @@ PUBLIC void AudioNegoEvs::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString
 
 PUBLIC void AudioNegoEvs::AddPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, show=%d", profile->nPtime, profile->bShowMaxPtime, 0);
+    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, show=%d", profile->GetPtime(),
+            profile->IsShowMaxPtimeEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nPtime != AudioProfile::EvsFmtp::DEFAULT_PTIME && profile->bShowPtime == IMS_TRUE)
+    if (profile->GetPtime() != AudioProfile::EvsFmtp::DEFAULT_PTIME &&
+            profile->IsShowPtimeEnabled() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("ptime=%d", profile->nPtime);
+        strTemp.Sprintf("ptime=%d", profile->GetPtime());
         fmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddMaxPtimeToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I(
-            "AddMaxPtimeToFmtp() ptime=%d, show=%d", profile->nMaxPtime, profile->bShowMaxPtime, 0);
+    IMS_TRACE_I("AddMaxPtimeToFmtp() ptime=%d, show=%d", profile->GetMaxPtime(),
+            profile->IsShowMaxPtimeEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nMaxPtime != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
-            profile->bShowMaxPtime == IMS_TRUE)
+    if (profile->GetMaxPtime() != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
+            profile->IsShowMaxPtimeEnabled() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("maxptime=%d", profile->nMaxPtime);
+        strTemp.Sprintf("maxptime=%d", profile->GetMaxPtime());
         fmtp.Append(strTemp);
     }
 }
 
 PUBLIC void AudioNegoEvs::AddDtxToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, show=%d", profile->bDtx, profile->bShowDtx, 0);
+    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, show=%d", profile->IsDtxEnabled(),
+            profile->IsShowDtxEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowDtx == IMS_TRUE)
+    if (profile->IsShowDtxEnabled() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("dtx=%d", profile->bDtx);
+        strTemp.Sprintf("dtx=%d", profile->IsDtxEnabled());
         fmtp.Append(strTemp);
     }
 }
@@ -168,19 +171,20 @@ PUBLIC void AudioNegoEvs::AddEvsModeSwitchToFmtp(
 
 PUBLIC void AudioNegoEvs::AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, show=%d", profile->nMaxRed, profile->bShowMaxRed, 0);
+    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, show=%d", profile->GetMaxRed(),
+            profile->IsShowMaxRedEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowMaxRed == IMS_TRUE)
+    if (profile->IsShowMaxRedEnabled() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("max-red=%d", profile->nMaxRed);
+        strTemp.Sprintf("max-red=%d", profile->GetMaxRed());
         fmtp.Append(strTemp);
     }
 }
@@ -330,15 +334,15 @@ PUBLIC void AudioNegoEvs::AddChannelAwModeToFmtp(
 
 PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
-    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, show=%d", profile->nModeSetList,
-            profile->bShowModeSet, 0);
+    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, show=%d", profile->GetModeSetList(),
+            profile->IsShowModeSetEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->nModeSetList != 0 && profile->bShowModeSet)
+    if (profile->GetModeSetList() != 0 && profile->IsShowModeSetEnabled())
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -347,7 +351,7 @@ PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(IN AudioProfile::EvsFmtp* profile
 
         for (nModeSet = 0; nModeSet <= MODESET_MAX_AMRWB; nModeSet++)
         {
-            IMS_UINT32 nMatch = (profile->nModeSetList) & (1 << nModeSet);
+            IMS_UINT32 nMatch = (profile->GetModeSetList()) & (1 << nModeSet);
             if (nMatch)
             {
                 AppendSeparatorIfNotEmpty(strTemp, COMMA);
@@ -365,19 +369,19 @@ PUBLIC void AudioNegoEvs::AddModeChangeCapabilityToFmtp(
         IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
     IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, show=%d",
-            profile->nModeChangeCapability, profile->bShowModeChangeCapability, 0);
+            profile->GetModeChangeCapability(), profile->IsShowModeChangeCapabilityEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangeCapability == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    if (profile->IsShowModeChangeCapabilityEnabled() == IMS_TRUE && profile->nEvsModeSwitch == 1)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-capability=%d", profile->nModeChangeCapability);
+        strTemp.Sprintf("mode-change-capability=%d", profile->GetModeChangeCapability());
         fmtp.Append(strTemp);
     }
 }
@@ -386,19 +390,19 @@ PUBLIC void AudioNegoEvs::AddModeChangePeriodToFmtp(
         IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
     IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, show=%d",
-            profile->nModeChangePeriod, profile->bShowModeChangePeriod, 0);
+            profile->GetModeChangePeriod(), profile->IsShowModeChangePeriodEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangePeriod == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    if (profile->IsShowModeChangePeriodEnabled() == IMS_TRUE && profile->nEvsModeSwitch == 1)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-period=%d", profile->nModeChangePeriod);
+        strTemp.Sprintf("mode-change-period=%d", profile->GetModeChangePeriod());
         fmtp.Append(strTemp);
     }
 }
@@ -407,19 +411,19 @@ PUBLIC void AudioNegoEvs::AddModeChangeNeighborToFmtp(
         IN AudioProfile::EvsFmtp* profile, OUT AString& fmtp)
 {
     IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, show=%d",
-            profile->nModeChangeNeighbor, profile->bShowModeChangeNeighbor, 0);
+            profile->GetModeChangeNeighbor(), profile->IsShowModeChangeNeighborEnabled(), 0);
 
     if (profile == IMS_NULL)
     {
         return;
     }
 
-    if (profile->bShowModeChangeNeighbor == IMS_TRUE && profile->nEvsModeSwitch == 1)
+    if (profile->IsShowModeChangeNeighborEnabled() == IMS_TRUE && profile->nEvsModeSwitch == 1)
     {
         AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
         AString strTemp;
-        strTemp.Sprintf("mode-change-neighbor=%d", profile->nModeChangeNeighbor);
+        strTemp.Sprintf("mode-change-neighbor=%d", profile->GetModeChangeNeighbor());
         fmtp.Append(strTemp);
     }
 }

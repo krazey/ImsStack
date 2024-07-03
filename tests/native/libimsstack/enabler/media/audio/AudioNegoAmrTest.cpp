@@ -41,23 +41,23 @@ protected:
         m_pAmrFmtpFull = new AudioProfile::AmrFmtp();
         m_pAmrFmtpEmpty = new AudioProfile::AmrFmtp();
 
-        m_pAmrFmtpFull->nModeSetList = 7;
+        m_pAmrFmtpFull->SetModeSetList(7);
         m_pAmrFmtpFull->nOctetAlign = 1;
-        m_pAmrFmtpFull->nModeChangeCapability = 2;
-        m_pAmrFmtpFull->nModeChangePeriod = 1;
-        m_pAmrFmtpFull->nModeChangeNeighbor = 1;
-        m_pAmrFmtpFull->nMaxRed = 220;
-        m_pAmrFmtpFull->nPtime = 20;
-        m_pAmrFmtpFull->nMaxPtime = 240;
+        m_pAmrFmtpFull->SetModeChangeCapability(2);
+        m_pAmrFmtpFull->SetModeChangePeriod(1);
+        m_pAmrFmtpFull->SetModeChangeNeighbor(1);
+        m_pAmrFmtpFull->SetMaxRed(220);
+        m_pAmrFmtpFull->SetPtime(20);
+        m_pAmrFmtpFull->SetMaxPtime(240);
 
-        m_pAmrFmtpFull->bShowModeSet = IMS_TRUE;
+        m_pAmrFmtpFull->SetShowModeSet(IMS_TRUE);
         m_pAmrFmtpFull->bShowOctetAlign = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangeCapability = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangePeriod = IMS_TRUE;
-        m_pAmrFmtpFull->bShowModeChangeNeighbor = IMS_TRUE;
-        m_pAmrFmtpFull->bShowMaxRed = IMS_TRUE;
-        m_pAmrFmtpFull->bShowPtime = IMS_TRUE;
-        m_pAmrFmtpFull->bShowMaxPtime = IMS_TRUE;
+        m_pAmrFmtpFull->SetShowModeChangeCapability(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowModeChangePeriod(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowModeChangeNeighbor(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowMaxRed(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowPtime(IMS_TRUE);
+        m_pAmrFmtpFull->SetShowMaxPtime(IMS_TRUE);
     }
 
     virtual void TearDown() override

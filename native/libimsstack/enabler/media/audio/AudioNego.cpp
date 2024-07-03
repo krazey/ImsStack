@@ -1139,17 +1139,18 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                                 ->GetFmtp();
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
                         *static_cast<AudioProfile::AmrFmtp*>(pDestPayload->GetFmtp()));
-                pAmrFmtp->nModeSetList = nNegoModeSetList;
-                pAmrFmtp->nDefaultRtpModeSet = nNegoDefaultRtpModeSet;
+                pAmrFmtp->SetModeSetList(nNegoModeSetList);
+                pAmrFmtp->SetDefaultRtpModeSet(nNegoDefaultRtpModeSet);
 
-                pAmrFmtp->bDtx = pSrc_Fmtp->bDtx;
+                pAmrFmtp->SetDtx(pSrc_Fmtp->IsDtxEnabled());
 
-                pAmrFmtp->bShowModeChangeCapability = pSrc_Fmtp->bShowModeChangeCapability;
-                pAmrFmtp->nModeChangeCapability = pSrc_Fmtp->nModeChangeCapability;
-                pAmrFmtp->bShowModeChangeNeighbor = pSrc_Fmtp->bShowModeChangeNeighbor;
-                pAmrFmtp->nModeChangeNeighbor = pSrc_Fmtp->nModeChangeNeighbor;
-                pAmrFmtp->bShowModeChangePeriod = pSrc_Fmtp->bShowModeChangePeriod;
-                pAmrFmtp->nModeChangePeriod = pSrc_Fmtp->nModeChangePeriod;
+                pAmrFmtp->SetShowModeChangeCapability(
+                        pSrc_Fmtp->IsShowModeChangeCapabilityEnabled());
+                pAmrFmtp->SetModeChangeCapability(pSrc_Fmtp->GetModeChangeCapability());
+                pAmrFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsShowModeChangeNeighborEnabled());
+                pAmrFmtp->SetModeChangeNeighbor(pSrc_Fmtp->GetModeChangeNeighbor());
+                pAmrFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsShowModeChangePeriodEnabled());
+                pAmrFmtp->SetModeChangePeriod(pSrc_Fmtp->GetModeChangePeriod());
 
                 pAMR->SetFmtp(pAmrFmtp);
                 pNegotiatedProfile->GetPayloadList().Append(pAMR);
@@ -1206,20 +1207,21 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                         *reinterpret_cast<AudioProfile::EvsFmtp*>(pDestPayload->GetFmtp()));
                 pEvsFmtp->nBwList = BandwidthNegoList;
                 pEvsFmtp->nBrList = BitrateNegoList;
-                pEvsFmtp->nModeSetList = ModeSetNegoList;
+                pEvsFmtp->SetModeSetList(ModeSetNegoList);
 
-                if (pEvsFmtp->bDtx != pSrc_Fmtp->bDtx)
+                if (pEvsFmtp->IsDtxEnabled() != pSrc_Fmtp->IsDtxEnabled())
                 {
                     IMS_TRACE_D("MakeNegotiatedProfile() - DTX updated in the destination profile",
                             0, 0, 0);
                 }
 
-                pEvsFmtp->bShowModeChangeCapability = pSrc_Fmtp->bShowModeChangeCapability;
-                pEvsFmtp->nModeChangeCapability = pSrc_Fmtp->nModeChangeCapability;
-                pEvsFmtp->bShowModeChangeNeighbor = pSrc_Fmtp->bShowModeChangeNeighbor;
-                pEvsFmtp->nModeChangeNeighbor = pSrc_Fmtp->nModeChangeNeighbor;
-                pEvsFmtp->bShowModeChangePeriod = pSrc_Fmtp->bShowModeChangePeriod;
-                pEvsFmtp->nModeChangePeriod = pSrc_Fmtp->nModeChangePeriod;
+                pEvsFmtp->SetShowModeChangeCapability(
+                        pSrc_Fmtp->IsShowModeChangeCapabilityEnabled());
+                pEvsFmtp->SetModeChangeCapability(pSrc_Fmtp->GetModeChangeCapability());
+                pEvsFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsShowModeChangeNeighborEnabled());
+                pEvsFmtp->SetModeChangeNeighbor(pSrc_Fmtp->GetModeChangeNeighbor());
+                pEvsFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsShowModeChangePeriodEnabled());
+                pEvsFmtp->SetModeChangePeriod(pSrc_Fmtp->GetModeChangePeriod());
 
                 // check uni direction attribute
                 if (pEvsFmtp->nBrSend != 0)
@@ -1272,8 +1274,8 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     // if max BR is 13.2kbps, then set a"mode-set" attribute
                     if (((pEvsFmtp->nBrList & 0x10) != 0) && ((pEvsFmtp->nBrList & 0xFFE0) == 0))
                     {
-                        pEvsFmtp->nModeSetList = 0x07;  // mode-set = 0,1,2;
-                        pEvsFmtp->bShowModeSet = IMS_TRUE;
+                        pEvsFmtp->SetModeSetList(0x07);  // mode-set = 0,1,2;
+                        pEvsFmtp->SetShowModeSet(IMS_TRUE);
                         IMS_TRACE_D("MakeNegotiatedProfile() - add EVS mode-set", 0, 0, 0);
                     }
                 }
@@ -1578,18 +1580,18 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
 
         if (objSplitEqual.GetAt(0).Equals("ptime") == IMS_TRUE)
         {
-            pFmtp->nPtime = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowPtime = IMS_TRUE;
+            pFmtp->SetPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowPtime(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("maxptime") == IMS_TRUE)
         {
-            pFmtp->nMaxPtime = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowMaxPtime = IMS_TRUE;
+            pFmtp->SetMaxPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowMaxPtime(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("dtx") == IMS_TRUE)
         {
-            pFmtp->bDtx = (IMS_BOOL)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowDtx = IMS_TRUE;
+            pFmtp->SetDtx((IMS_BOOL)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowDtx(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("hf-only") == IMS_TRUE)
         {
@@ -1603,8 +1605,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("max-red") == IMS_TRUE)
         {
-            pFmtp->nMaxRed = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowMaxRed = IMS_TRUE;
+            pFmtp->SetMaxRed((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowMaxRed(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("br") == IMS_TRUE)
         {
@@ -1721,24 +1723,24 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
             for (IMS_UINT32 j = 0; j < objSplitComma.GetSize(); j++)
             {
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
-                pFmtp->nModeSetList = (pFmtp->nModeSetList | (1 << nModeSet));
+                pFmtp->SetModeSetList((pFmtp->GetModeSetList() | (1 << nModeSet)));
             }
-            pFmtp->bShowModeSet = IMS_TRUE;
+            pFmtp->SetShowModeSet(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {
-            pFmtp->nModeChangeCapability = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangeCapability = IMS_TRUE;
+            pFmtp->SetModeChangeCapability((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangeCapability(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-period") == IMS_TRUE)
         {
-            pFmtp->nModeChangePeriod = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangePeriod = IMS_TRUE;
+            pFmtp->SetModeChangePeriod((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangePeriod(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-neighbor") == IMS_TRUE)
         {
-            pFmtp->nModeChangeNeighbor = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+            pFmtp->SetModeChangeNeighbor((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("br-send") == IMS_TRUE)
         {
@@ -1929,9 +1931,9 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         pFmtp->bShowBwList = IMS_FALSE;
     }
 
-    IMS_TRACE_D("GetFmtpFromString() - EVS : ModeSet[0x%04x], nBitrate[0x%04x], nBandwidth[0x%04x]",
-            pFmtp->nModeSetList, pFmtp->nBrList, pFmtp->nBwList);
-    IMS_TRACE_D("GetFmtpFromString() - EVS : nMaxRed[%d], nReceivedChAwRecv[%d]", pFmtp->nMaxRed,
+    IMS_TRACE_D("GetFmtpFromString() - EVS : ModeSet[0x%04x], Bitrate[0x%04x], Bandwidth[0x%04x]",
+            pFmtp->GetModeSetList(), pFmtp->nBrList, pFmtp->nBwList);
+    IMS_TRACE_D("GetFmtpFromString() - EVS : MaxRed[%d], ReceivedChAwRecv[%d]", pFmtp->GetMaxRed(),
             pFmtp->nReceivedChAwRecv, 0);
 
     return IMS_TRUE;
@@ -2099,8 +2101,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
             for (IMS_UINT32 j = 0; j < objSplitComma.GetSize(); j++)
             {
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
-                pFmtp->nModeSetList = (pFmtp->nModeSetList | (1 << nModeSet));
-                pFmtp->bShowModeSet = IMS_TRUE;
+                pFmtp->SetModeSetList((pFmtp->GetModeSetList() | (1 << nModeSet)));
+                pFmtp->SetShowModeSet(IMS_TRUE);
             }
         }
         else if (objSplitEqual.GetAt(0).Equals("octet-align") == IMS_TRUE)
@@ -2110,39 +2112,39 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {
-            pFmtp->nModeChangeCapability = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangeCapability = IMS_TRUE;
+            pFmtp->SetModeChangeCapability((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangeCapability(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-period") == IMS_TRUE)
         {
-            pFmtp->nModeChangePeriod = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangePeriod = IMS_TRUE;
+            pFmtp->SetModeChangePeriod((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangePeriod(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-neighbor") == IMS_TRUE)
         {
-            pFmtp->nModeChangeNeighbor = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowModeChangeNeighbor = IMS_TRUE;
+            pFmtp->SetModeChangeNeighbor((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowModeChangeNeighbor(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("max-red") == IMS_TRUE)
         {
-            pFmtp->nMaxRed = (IMS_UINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowMaxRed = IMS_TRUE;
+            pFmtp->SetMaxRed((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowMaxRed(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("ptime") == IMS_TRUE)
         {
-            pFmtp->nPtime = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowPtime = IMS_TRUE;
+            pFmtp->SetPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowPtime(IMS_TRUE);
         }
         else if (objSplitEqual.GetAt(0).Equals("maxptime") == IMS_TRUE)
         {
-            pFmtp->nMaxPtime = (IMS_SINT32)objSplitEqual.GetAt(1).ToInt32();
-            pFmtp->bShowMaxPtime = IMS_TRUE;
+            pFmtp->SetMaxPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
+            pFmtp->SetShowMaxPtime(IMS_TRUE);
         }
     }
 
-    IMS_TRACE_D("GetFmtpFromString() Ended. ModeSet[0x%04x], nOctetAlign[%d], nModeChangeCapa[%d]",
-            pFmtp->nModeSetList, pFmtp->nOctetAlign, pFmtp->nModeChangeCapability);
-    IMS_TRACE_D("GetFmtpFromString() Ended. nMaxRed[%d]", pFmtp->nMaxRed, 0, 0);
+    IMS_TRACE_D("GetFmtpFromString() Ended. ModeSet[0x%04x], OctetAlign[%d], ModeChangeCapa[%d]",
+            pFmtp->GetModeSetList(), pFmtp->nOctetAlign, pFmtp->GetModeChangeCapability());
+    IMS_TRACE_D("GetFmtpFromString() Ended. MaxRed[%d]", pFmtp->GetMaxRed(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -2241,7 +2243,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
                     bModeSetFound = IMS_TRUE;
                     IMS_TRACE_I("FindAmrInProfile() Local/Peer is not exactly matched\
                             [0x%04x][0x%04x] =>[0x%04x]. Try next",
-                            pCompareFmtp->nModeSetList, pReceivedFmtp->nModeSetList,
+                            pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
                             *pnNegoModeSetList);
                 }
                 continue;
@@ -2253,7 +2255,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
                         pCompareFmtp->nOctetAlign);
                 IMS_TRACE_D("FindAmrInProfile() Local/Peer is exactly matched[0x%04x][0x%04x] \
                         =>[0x%04x]",
-                        pCompareFmtp->nModeSetList, pReceivedFmtp->nModeSetList,
+                        pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
                         *pnNegoModeSetList);
 
                 return IMS_TRUE;
@@ -2267,7 +2269,7 @@ IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
         *pnNegoModeSetList = nTempNegoModeSetList;
         *pnNegoDefaultRtpModeSet = nTempDefaultNegoModeSetList;
 
-        IMS_TRACE_D("FindAmrInProfile() Found Similar AMR with nModeSetList[0x%04x], "
+        IMS_TRACE_D("FindAmrInProfile() Found Similar AMR with ModeSet List[0x%04x], "
                     "nDefaultModeSetList[0x%04x]",
                 *pnNegoModeSetList, *pnNegoDefaultRtpModeSet, 0);
 
@@ -2328,40 +2330,40 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet)
 {
     IMS_TRACE_I("CompareModeSet() - Src modeSet[0x%04x] Dest modeSet[0x%04x], bIsOfferReceived[%d]",
-            pSrcFmtp->nModeSetList, pDestFmtp->nModeSetList, bIsOfferReceived);
+            pSrcFmtp->GetModeSetList(), pDestFmtp->GetModeSetList(), bIsOfferReceived);
     IMS_TRACE_I("CompareModeSet() - Src defaultmodeSet[0x%04x] Dest defaultmodeSet[0x%04x]",
-            pSrcFmtp->nDefaultRtpModeSet, pDestFmtp->nDefaultRtpModeSet, 0);
+            pSrcFmtp->GetDefaultRtpModeSet(), pDestFmtp->GetDefaultRtpModeSet(), 0);
 
     IMS_SINT32 nResult = 1;  // -1 : no matched, 0 : similar, 1 : exactly matched
 
     if (bIsOfferReceived == IMS_TRUE)  // MT Case
     {
-        if (pDestFmtp->nModeSetList != 0)
+        if (pDestFmtp->GetModeSetList() != 0)
         {
-            *nNegoModeSet = pDestFmtp->nModeSetList;
+            *nNegoModeSet = pDestFmtp->GetModeSetList();
         }
-        else if (pSrcFmtp->nModeSetList != 0)
+        else if (pSrcFmtp->GetModeSetList() != 0)
         {
-            *nNegoModeSet = pSrcFmtp->nModeSetList;
+            *nNegoModeSet = pSrcFmtp->GetModeSetList();
         }
         else
         {
             *nNegoModeSet = 0;  // MO, MT both has no mode-set
-            *nNegoDefaultRtpModeSet = pSrcFmtp->nDefaultRtpModeSet;
+            *nNegoDefaultRtpModeSet = pSrcFmtp->GetDefaultRtpModeSet();
         }
     }
     else  // MO Case
     {
-        if ((pSrcFmtp->nModeSetList == 0) && (pDestFmtp->nModeSetList == 0))
+        if ((pSrcFmtp->GetModeSetList() == 0) && (pDestFmtp->GetModeSetList() == 0))
         {
             *nNegoModeSet = 0;
-            *nNegoDefaultRtpModeSet = pSrcFmtp->nDefaultRtpModeSet;
+            *nNegoDefaultRtpModeSet = pSrcFmtp->GetDefaultRtpModeSet();
         }
-        else if ((pSrcFmtp->nModeSetList != 0) && (pDestFmtp->nModeSetList != 0))
+        else if ((pSrcFmtp->GetModeSetList() != 0) && (pDestFmtp->GetModeSetList() != 0))
         {
-            *nNegoModeSet = pSrcFmtp->nModeSetList & pDestFmtp->nModeSetList;
+            *nNegoModeSet = pSrcFmtp->GetModeSetList() & pDestFmtp->GetModeSetList();
 
-            if (pSrcFmtp->nModeSetList != pDestFmtp->nModeSetList)
+            if (pSrcFmtp->GetModeSetList() != pDestFmtp->GetModeSetList())
             {
                 nResult = 0;
             }
@@ -2372,7 +2374,8 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
                         "CompareModeSet() - ModeSet Not Matched - isFinal: %d", bReturnMode, 0, 0);
                 if (bReturnMode == RETURN_MODE_SIMILAR)
                 {
-                    *nNegoModeSet = pDestFmtp->nModeSetList;  // Copy Dest Mode-set to Nego Mode-set
+                    *nNegoModeSet =
+                            pDestFmtp->GetModeSetList();  // Copy Dest Mode-set to Nego Mode-set
                     IMS_TRACE_D("CompareModeSet() - Copy Dest Mode-set", 0, 0, 0);
                 }
                 else
@@ -2384,7 +2387,7 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
         }
         else  // one of two has no modeset
         {
-            *nNegoModeSet = pSrcFmtp->nModeSetList | pDestFmtp->nModeSetList;
+            *nNegoModeSet = pSrcFmtp->GetModeSetList() | pDestFmtp->GetModeSetList();
         }
     }
 
@@ -2401,9 +2404,9 @@ IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
         OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
     IMS_TRACE_D("CompareEvsBwBrMode() - Src Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
-            pSrcFmtp->nBwList, pSrcFmtp->nBrList, pSrcFmtp->nModeSetList);
+            pSrcFmtp->nBwList, pSrcFmtp->nBrList, pSrcFmtp->GetModeSetList());
     IMS_TRACE_D("CompareEvsBwBrMode() - Dest Bandwidth[0x%04x], Bitrate[0x%04x], modeSet[0x%04x]",
-            pDestFmtp->nBwList, pDestFmtp->nBrList, pDestFmtp->nModeSetList);
+            pDestFmtp->nBwList, pDestFmtp->nBrList, pDestFmtp->GetModeSetList());
 
     if (m_pConfig == IMS_NULL)
     {
@@ -2414,13 +2417,13 @@ IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
     if (pDestFmtp->nEvsModeSwitch == 1)  // AMR IO Mode
     {
         // Set AMR ModeSet lis.
-        if ((pSrcFmtp->nModeSetList == 0) && (pDestFmtp->nModeSetList == 0))
+        if ((pSrcFmtp->GetModeSetList() == 0) && (pDestFmtp->GetModeSetList() == 0))
         {
             *nNegoModeList = 0;
         }
-        else if ((pSrcFmtp->nModeSetList != 0) && (pDestFmtp->nModeSetList != 0))
+        else if ((pSrcFmtp->GetModeSetList() != 0) && (pDestFmtp->GetModeSetList() != 0))
         {
-            *nNegoModeList = pSrcFmtp->nModeSetList & pDestFmtp->nModeSetList;
+            *nNegoModeList = pSrcFmtp->GetModeSetList() & pDestFmtp->GetModeSetList();
 
             if (*nNegoModeList == 0)
             {
@@ -2430,7 +2433,7 @@ IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
         }
         else
         {
-            *nNegoModeList = pSrcFmtp->nModeSetList | pDestFmtp->nModeSetList;
+            *nNegoModeList = pSrcFmtp->GetModeSetList() | pDestFmtp->GetModeSetList();
         }
 
         // in case of EVS AMR IO Mode, dest bw/br list added
@@ -2630,9 +2633,9 @@ IMS_BOOL AudioNego::CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
         }
 
         // in case of EVS Primary Mode, dest modeset list added
-        if (pDestFmtp->nModeSetList != 0)
+        if (pDestFmtp->GetModeSetList() != 0)
         {
-            *nNegoModeList = pDestFmtp->nModeSetList;
+            *nNegoModeList = pDestFmtp->GetModeSetList();
         }
     }
     return IMS_TRUE;
@@ -2644,21 +2647,21 @@ IMS_BOOL AudioNego::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
         OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList)
 {
     IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Src BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
-            pSrcFmtp->nBwList, pSrcFmtp->nBrList, pSrcFmtp->nModeSetList);
+            pSrcFmtp->nBwList, pSrcFmtp->nBrList, pSrcFmtp->GetModeSetList());
     IMS_TRACE_D("CompareEvsBwBrModeLegacy() - Dest BW[0x%04x], BR[0x%04x], modeSet[0x%04x]",
-            pDestFmtp->nBwList, pDestFmtp->nBrList, pDestFmtp->nModeSetList);
+            pDestFmtp->nBwList, pDestFmtp->nBrList, pDestFmtp->GetModeSetList());
 
     // check EVS ModeSwitch
     if (pDestFmtp->nEvsModeSwitch == 1)  // AMR IO Mode
     {
         // Set AMR ModeSet lis.
-        if ((pSrcFmtp->nModeSetList == 0) && (pDestFmtp->nModeSetList == 0))
+        if ((pSrcFmtp->GetModeSetList() == 0) && (pDestFmtp->GetModeSetList() == 0))
         {
             *nNegoModeList = 0;
         }
-        else if ((pSrcFmtp->nModeSetList != 0) && (pDestFmtp->nModeSetList != 0))
+        else if ((pSrcFmtp->GetModeSetList() != 0) && (pDestFmtp->GetModeSetList() != 0))
         {
-            *nNegoModeList = pSrcFmtp->nModeSetList & pDestFmtp->nModeSetList;
+            *nNegoModeList = pSrcFmtp->GetModeSetList() & pDestFmtp->GetModeSetList();
 
             if (*nNegoModeList == 0)
             {
@@ -2669,7 +2672,7 @@ IMS_BOOL AudioNego::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
         }
         else
         {
-            *nNegoModeList = pSrcFmtp->nModeSetList | pDestFmtp->nModeSetList;
+            *nNegoModeList = pSrcFmtp->GetModeSetList() | pDestFmtp->GetModeSetList();
         }
 
         // in case of EVS AMR IO Mode, dest bw/br list added
@@ -2771,9 +2774,9 @@ IMS_BOOL AudioNego::CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
         }
 
         // in case of EVS Primary Mode, dest modeset list added
-        if (pDestFmtp->nModeSetList != 0)
+        if (pDestFmtp->GetModeSetList() != 0)
         {
-            *nNegoModeList = pDestFmtp->nModeSetList;
+            *nNegoModeList = pDestFmtp->GetModeSetList();
         }
     }
     return IMS_TRUE;
@@ -2899,7 +2902,7 @@ PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AStrin
                                     pCompareFmtp->nOctetAlign);
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Local/Peer is not exactly \
                                     matched[0x%04x][0x%04x] =>[0x%04x]. Try next",
-                                    pCompareFmtp->nModeSetList, pReceivedFmtp->nModeSetList,
+                                    pCompareFmtp->GetModeSetList(), pReceivedFmtp->GetModeSetList(),
                                     pnNegoModeSetList);
                         }
                         continue;
