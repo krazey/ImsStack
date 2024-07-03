@@ -504,7 +504,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Refresh_NotifyTimerExpired(
     bDoImplicitRefresh = IMS_FALSE;
     // TODO: if session_timer_update_required_in_session_update_by_reinvite_bool is true,
     // no need to refresh. session timer is updated by re-INVITE.
-    m_objContext.GetUpdatingInfo().SetPendingUpdate(IMS_TRUE);
+    m_objContext.GetUpdatingInfo().SetPendingUpdate();
     return GetStateName();
 }
 

@@ -42,11 +42,7 @@ public:
     inline void SetRequestingType(IN UpdateType eType) { m_eRequestingType = eType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
-    inline void SetPendingUpdate(IN IMS_BOOL bHasPendingUpdate)
-    {
-        // TODO: check if setting to false is required.
-        m_bHasPendingUpdate = bHasPendingUpdate;
-    }
+    inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
 
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;

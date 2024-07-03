@@ -135,26 +135,18 @@ protected:
     }
 };
 
-TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoHasPendingUpdateAsDefaultValue)
+TEST_F(UpdatingStateTest, OnExitDoesNotSendUpdateIfPendingUpdateIsNotSet)
 {
     EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
 
     pUpdatingState->OnExit();
 }
 
-TEST_F(UpdatingStateTest, OnExitDoesntSendUpdateIfUpdatingInfoDoesntHavePendingUpdate)
-{
-    EXPECT_CALL(objMtcSession, Update(_, _, _)).Times(0);
-
-    pUpdatingInfo->SetPendingUpdate(IMS_FALSE);
-    pUpdatingState->OnExit();
-}
-
-TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
+TEST_F(UpdatingStateTest, OnExitSendsUpdateIfPendingUpdateIsSet)
 {
     EXPECT_CALL(objMtcSession, Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID)).Times(1);
 
-    pUpdatingInfo->SetPendingUpdate(IMS_TRUE);
+    pUpdatingInfo->SetPendingUpdate();
     pUpdatingState->OnExit();
 }
 
