@@ -15,6 +15,9 @@
  */
 
 #include "CallReasonInfo.h"
+#include "JniEnablerConnector.h"
+#include "MockIJniEnabler.h"
+#include "MockIJniMtcCallThread.h"
 #include "MtcDef.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -36,6 +39,8 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+LOCAL CallKey CONFERENCE_CALL_KEY = 999;
+LOCAL IMS_SINT32 SLOT_ID = 0;
 LOCAL IMS_SINT32 MAX_COUNT = 6;
 LOCAL IMS_UINT32 CONF_SIZE = 1;
 
@@ -45,14 +50,18 @@ namespace android
 class ConferenceEventNotifierTest : public ::testing::Test
 {
 public:
+    MockIMtcCallManager objCallManager;
+    MockIMtcCall objConferenceCall;
     MockIMtcCallContext objContext;
-    MockIMtcUiNotifier objUiNotifier;
+    MockIJniEnabler objMockJniEnabler;
+    MockIJniMtcCallThread objMockCallThread;
     MockCallConnectionIdManager* pIdManager;
     MockIMtcMediaManager objMediaManager;
     MockICallStateProxy objCallStateProxy;
     MockConferenceParticipantList* pParticipantList;
     ConferenceParticipantList::ConferenceParticipant* pParticipant;
 
+    JniEnablerConnector* pConnector;
     ConferenceEventNotifier* pNotifier;
     ImsList<ConfUser*> objUsers;
     ConfUser objUser;
@@ -62,6 +71,16 @@ public:
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objCallManager, GetCallByCallKey(CONFERENCE_CALL_KEY))
+                .WillByDefault(Return(&objConferenceCall));
+        ON_CALL(objConferenceCall, GetKey).WillByDefault(Return(CONFERENCE_CALL_KEY));
+        ON_CALL(objConferenceCall, GetCallContext).WillByDefault(ReturnRef(objContext));
+
+        pConnector = &JniEnablerConnector::GetInstance();
+        pConnector->SetJniEnabler(
+                SLOT_ID, EnablerType::MTC_CALL, &objMockJniEnabler, CONFERENCE_CALL_KEY);
+        ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockCallThread));
+
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objCallStateProxy, AddListener(_)).WillByDefault(Return());
 
@@ -70,13 +89,11 @@ protected:
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objMediaManager, GetMediaInfo()).WillByDefault(ReturnRef(objMediaInfo));
 
-        ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
-
         SetUpMockParticipantList();
 
         pAnyReason = new CallReasonInfo(CODE_UNSPECIFIED);
 
-        pNotifier = new ConferenceEventNotifier(objContext, *pIdManager);
+        pNotifier = new ConferenceEventNotifier(objCallManager, CONFERENCE_CALL_KEY, *pIdManager);
     }
 
     virtual void TearDown() override
@@ -86,6 +103,7 @@ protected:
         delete pAnyReason;
         delete pParticipantList;
         delete pParticipant;
+        delete pConnector;
     }
 
     void SetUpMockParticipantList()
@@ -110,13 +128,13 @@ TEST_F(ConferenceEventNotifierTest, NotifyMerged)
     MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
-    EXPECT_CALL(objUiNotifier, SendMerged(objUsers));
+    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, objUsers)).Times(1);
     pNotifier->NotifyMerged(*pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyMergeFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendMergeFailed(*pAnyReason));
+    EXPECT_CALL(objMockCallThread, OnMergeFailed(_)).Times(1);
     pNotifier->NotifyMergeFailed(*pAnyReason);
 }
 
@@ -142,50 +160,59 @@ TEST_F(ConferenceEventNotifierTest, NotifyExpandFailed)
 
 TEST_F(ConferenceEventNotifierTest, NotifyDropped)
 {
-    EXPECT_CALL(objUiNotifier, SendDropped(IMS_SUCCESS, *pAnyReason));
-    EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
-    pNotifier->NotifyDropped(*pAnyReason, *pParticipantList);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved()).Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
+    pNotifier->NotifyDropped(*pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyDropFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendDropped(IMS_FAILURE, *pAnyReason));
-    EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoveFailed(_)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
     pNotifier->NotifyDropFailed(*pAnyReason, *pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyJoined)
 {
-    EXPECT_CALL(objUiNotifier, SendJoined(IMS_SUCCESS, *pAnyReason));
-    EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
-    pNotifier->NotifyJoined(*pAnyReason, *pParticipantList);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded()).Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
+    pNotifier->NotifyJoined(*pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyJoinFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendJoined(IMS_FAILURE, *pAnyReason));
-    EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAddFailed(_)).Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
     pNotifier->NotifyJoinFailed(*pAnyReason, *pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyConferenceInfo)
 {
     AString strEmpty("");
-    EXPECT_CALL(
-            objUiNotifier, SendNotifyConfInfo(strEmpty, strEmpty, CONF_SIZE, MAX_COUNT, strEmpty));
+    EXPECT_CALL(objMockCallThread,
+            OnConferenceInfoChanged(strEmpty, strEmpty, CONF_SIZE, MAX_COUNT, strEmpty))
+            .Times(1);
     pNotifier->NotifyConferenceInfo(*pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyUsersInfo)
 {
-    EXPECT_CALL(objUiNotifier, SendNotifyUsersInfo(objUsers));
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(objUsers)).Times(1);
+    pNotifier->NotifyUsersInfo(*pParticipantList);
+}
+
+TEST_F(ConferenceEventNotifierTest, DoesNotNotifyIfConferenceCallDoesNotExist)
+{
+    // GetCallByCallKey Returns a NullCall
+    ON_CALL(objConferenceCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
+
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_)).Times(0);
     pNotifier->NotifyUsersInfo(*pParticipantList);
 }
 
 TEST_F(ConferenceEventNotifierTest, NotifyIndividualCallTerminated)
 {
     CallKey n1To1Key = 1000;
-    MockIMtcCallManager objCallManager;
     MockIMtcCall obj1To1Call;
     MockIMtcCallContext obj1To1CallContext;
     MockIMtcUiNotifier obj1To1CallNotifier;

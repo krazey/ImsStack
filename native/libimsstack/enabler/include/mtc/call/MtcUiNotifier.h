@@ -26,7 +26,6 @@ class AString;
 class IMtcCallContext;
 class IJniMtcCallThread;
 struct CallReasonInfo;
-struct ConfUser;
 
 class MtcUiNotifier final : public IMtcUiNotifier
 {
@@ -56,17 +55,6 @@ public:
     void SendUpdatedBy() override;
     void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue, IN IMS_SINT32 nValue,
             IN IMS_BOOL bValue) override;
-    void SendExpanded() override;
-    void SendExpandFailed(IN const CallReasonInfo& objReason) override;
-    void SendExpandedBy(IN IMS_SINTP nReplaceKey) override;
-    void SendMerged(IN const ImsList<ConfUser*>& lstConfUser) override;
-    void SendMergeFailed(IN const CallReasonInfo& objReason) override;
-    void SendJoined(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
-    void SendDropped(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
-    void SendNotifyUsersInfo(IN const ImsList<ConfUser*>& lstConfUser) override;
-    void SendNotifyConfInfo(IN const AString& strDisplayText, IN const AString& strSubject,
-            IN IMS_SINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
-            IN const AString& strHostEntity) override;
     void SendReplacedBy(IN IMS_SINTP nKey, IN IMS_UINTP nType) override;
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendCallPushCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;

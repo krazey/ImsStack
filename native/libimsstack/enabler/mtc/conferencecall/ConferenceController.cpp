@@ -49,7 +49,7 @@ ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext&
         m_objFactory(objFactory),
         m_pParticipantList(objFactory.CreateParticipantList()),
         m_pNotifier(objFactory.CreateEventNotifier(
-                GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
+                GetConferenceCall()->GetKey(), objConnectionIdManager)),
         m_pOperationQueue(objFactory.CreateOperationQueue()),
         m_pSubscription(IMS_NULL),
         m_objIConfReferences(ImsList<IConferenceReference*>()),
@@ -811,10 +811,10 @@ PROTECTED VIRTUAL void ConferenceController::NotifyCmdResult()
             m_pNotifier->NotifyMerged(*m_pParticipantList);
             break;
         case STATE_JOINING:
-            m_pNotifier->NotifyJoined(CallReasonInfo(CODE_NONE), *m_pParticipantList);
+            m_pNotifier->NotifyJoined(*m_pParticipantList);
             break;
         case STATE_DROPPING:
-            m_pNotifier->NotifyDropped(CallReasonInfo(CODE_NONE), *m_pParticipantList);
+            m_pNotifier->NotifyDropped(*m_pParticipantList);
             break;
         default:  // STATE_IDLE
             break;
