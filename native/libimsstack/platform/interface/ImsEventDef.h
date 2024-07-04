@@ -58,30 +58,12 @@
 #define IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED  (0x1)
 #define IMS_LTE_INFO_EXTRA_SMS_ONLY            (0x2)
 
-#define IMS_EVENT_NR_INFO                      (0x00000040)
-// WParam
-#define IMS_NR_INFO_UNKNOWN                    (0)
-#define IMS_NR_INFO_REGISTRATION               (1)
-#define IMS_NR_INFO_DEREGISTRATION             (2)
-#define IMS_NR_INFO_EMERGENCY_REGISTRATION     (3)
-
-#define IMS_EVENT_IMS_VOICE_OVER_PS_STATE      (0x00000080)
+#define IMS_EVENT_IMS_VOICE_OVER_PS_STATE      (0x00000040)
 // WParam
 #define IMS_VOICE_OVER_PS_NOT_SUPPORTED        (0)
 #define IMS_VOICE_OVER_PS_SUPPORTED            (1)
 
-// LTE STATE
-#define IMS_EVENT_LTE_STATE                    (0x00000100)
-// WParam
-#define IMS_LTE_RACH_REJECT_WITH_WAITTIME      (11)  // LParam (waittime : ms)
-#define IMS_LTE_RACH_IGNORE_DURING_T300_3TIMES (12)
-#define IMS_LTE_SR_REJECT_WITH_EMM9_EMM10      (13)
-#define IMS_LTE_SR_REJECT_WITH_EMM17_3TIMES    (14)
-#define IMS_LTE_SR_IGNORE_DURING_5SEC          (15)
-#define IMS_LTE_BARRING_MO_DATA                (16)
-#define IMS_LTE_SR_REJECT_WITH_EMM             (17)  // LParam (waittime : ms)
-
-#define IMS_EVENT_WFC_SETTING_CHANGED          (0x00000200)
+#define IMS_EVENT_WFC_SETTING_CHANGED          (0x00000080)
 // WParam
 #define IMS_WFC_ON                             (1)
 #define IMS_WFC_OFF                            (0)
@@ -91,16 +73,13 @@
 #define MODE_WFC_PREFERRED                     (2)
 
 // Event for modem state
-#define IMS_EVENT_VOLTE_SETTING                (0x00000400)
+#define IMS_EVENT_VOLTE_SETTING                (0x00000100)
 // WParam
 #define IMS_VOLTE_SETTING_OFF                  (0)
 #define IMS_VOLTE_SETTING_ON                   (1)
 #define IMS_VOLTE_SETTING_UNKNOWN              (2)
 
-// AC Barring
-#define IMS_EVENT_AC_BARRING_STATE             (0x00000800)
-
-#define IMS_EVENT_REG_CONTROL                  (0x00001000)
+#define IMS_EVENT_REG_CONTROL                  (0x00000200)
 // WParam
 #define IMS_REG_CONTROL_RECOVER                (1)
 #define IMS_REG_CONTROL_UPDATE                 (2)
@@ -120,7 +99,7 @@
 // IMS_REG_CONTROL_PCSCF
 #define IMS_REG_CONTROL_PCSCF_SAME_CHANGED     (71)
 
-#define IMS_EVENT_RTT_SETTING                  (0x00002000)
+#define IMS_EVENT_RTT_SETTING                  (0x00000400)
 // WParam
 #define IMS_RTT_MODE_NONE                      (-1)
 #define IMS_RTT_CAPABLE_OFF                    (0)

@@ -462,9 +462,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
         case IMS_EVENT_CSCALL_STATE:
             return "IMS_EVENT_CSCALL_STATE";
 
-        case IMS_EVENT_LTE_STATE:
-            return "IMS_EVENT_LTE_STATE";
-
         case IMS_EVENT_LTE_INFO:
             return "IMS_EVENT_LTE_INFO";
 
