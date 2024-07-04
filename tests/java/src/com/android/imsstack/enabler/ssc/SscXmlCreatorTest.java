@@ -732,6 +732,19 @@ public class SscXmlCreatorTest {
     }
 
     @Test
+    public void createXml_updateIcbWhenNoMatchingRuleInXml() {
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.ICB,
+                SscConstant.CONDITION_BAIC, null);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNull(xml);
+    }
+
+    @Test
     public void createXml_updateIcbEnable() {
         SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
