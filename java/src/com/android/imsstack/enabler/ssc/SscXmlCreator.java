@@ -524,6 +524,10 @@ public class SscXmlCreator {
                         data.getCondition());
             }
 
+            if (ruleId == null) {
+                return null;
+            }
+
             Element cbRuleElement = updateRuleElement(doc, slotId, ruleId, data.getState());
             if (cbRuleElement == null) {
                 return null;
