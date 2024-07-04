@@ -564,7 +564,7 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
 }
 
 PROTECTED
-const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
+ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
     return Engine::GetConfiguration()->GetSubscriberConfig(
