@@ -25,7 +25,6 @@
 #include "PlatformContext.h"
 #include "SipHeaderName.h"
 #include "TestPhoneInfoService.h"
-#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
@@ -34,9 +33,8 @@
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
 #include "private/ConfigurationManager.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
 #include "utility/MockIMessageUtils.h"
+#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -383,25 +381,20 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeo
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
-    MockISipMessage objSipMessage;
-    MockISipMessageBodyPart objSipMessageBodyPart;
-    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
 
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("no")));
 
-    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
-                    AString("Content-Length")));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
-                    _));
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
 
     MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_FALSE);
 }
@@ -413,25 +406,20 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolo
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
-    MockISipMessage objSipMessage;
-    MockISipMessageBodyPart objSipMessageBodyPart;
-    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
 
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("yes")));
 
-    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
-                    AString("Content-Length")));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
-                    _));
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
 
     MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_TRUE);
 }

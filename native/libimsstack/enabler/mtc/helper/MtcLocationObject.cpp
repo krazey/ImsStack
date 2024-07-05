@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ByteArray.h"
 #include "CarrierConfig.h"
 #include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
@@ -22,7 +23,6 @@
 #include "IDocument.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
-#include "ISipMessage.h"
 #include "ISubscriberConfig.h"
 #include "IXmlStreamWriter.h"
 #include "MtcDef.h"
@@ -167,13 +167,12 @@ void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
     objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING,
             bGeolocationRouting ? GEOLOCATION_ROUTING_YES : GEOLOCATION_ROUTING_NO);
 
-    ISipMessageBodyPart* piBodyPart = objMessage.GetMessage()->CreateSdpBodyPart();
-    piBodyPart->SetContent(objContent);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, GetContentLengthHeader(objContent),
-            SipHeaderName::CONTENT_LENGTH);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_ID, GetContentIdHeader(strCid));
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, GetContentDispositionHeader());
+    IMessageBodyPart* pBodyPart = objMessage.CreateBodyPart();
+    pBodyPart->SetContent(objContent);
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_LENGTH, GetContentLengthHeader(objContent));
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_ID, GetContentIdHeader(strCid));
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_TYPE, CONTENT_TYPE_PIDF_XML);
+    pBodyPart->SetHeader(SipHeaderName::CONTENT_DISPOSITION, GetContentDispositionHeader());
 }
 
 PUBLIC

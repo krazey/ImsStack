@@ -17,6 +17,7 @@
 #ifndef MTC_LOCATION_OBJECT_H_
 #define MTC_LOCATION_OBJECT_H_
 
+#include "AString.h"
 #include "ByteArray.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
