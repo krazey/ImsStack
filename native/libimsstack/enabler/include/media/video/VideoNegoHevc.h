@@ -26,10 +26,10 @@ class VideoNegoHevc
 public:
     static AString SetSdpFmtpFromHevcFmtp(IN VideoProfile::HevcFmtp* hevcFmtp);
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
-    static void AddProfileIdToFmtp(IN VideoProfile::HevcFmtp* profile, OUT AString& strFmtp);
-    static void AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* profile, OUT AString& strFmtp);
+    static void AddProfileIdToFmtp(IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& strFmtp);
+    static void AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& strFmtp);
     static void AddPacketizationModeToFmtp(
-            IN VideoProfile::HevcFmtp* profile, OUT AString& strFmtp);
-    static void AddSpropParamsToFmtp(IN VideoProfile::HevcFmtp* profile, OUT AString& strFmtp);
+            IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& strFmtp);
+    static void AddSpropParamsToFmtp(IN VideoProfile::HevcFmtp* hevcFmtp, OUT AString& strFmtp);
 };
 #endif

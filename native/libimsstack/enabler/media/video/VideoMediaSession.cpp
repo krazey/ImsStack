@@ -203,19 +203,19 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
                 reinterpret_cast<VideoProfile::AvcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_AVC);
-        pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->nProfile)));
+        pVideoConfig->setCodecProfile(convertAvcProfile((pFmtp->GetProfile())));
 
         /** TODO: check the case for setting AVC_LEVEL_1B */
-        pVideoConfig->setCodecLevel(convertAvcLevel(pFmtp->nLevel));
+        pVideoConfig->setCodecLevel(convertAvcLevel(pFmtp->GetLevel()));
 
-        pVideoConfig->setFramerate(pFmtp->nFrameRate);
-        pVideoConfig->setBitrate(pFmtp->nBitrate);
-        pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
+        pVideoConfig->setFramerate(pFmtp->GetFramerate());
+        pVideoConfig->setBitrate(pFmtp->GetBitrate());
+        pVideoConfig->setPacketizationMode(pFmtp->GetPacketizationMode());
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->GetSpropParam().GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
-        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
+        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->GetResolution(), &nWidth, &nHeight);
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
@@ -225,19 +225,19 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
                 reinterpret_cast<VideoProfile::HevcFmtp*>(pNegoPayload->GetFmtp());
 
         pVideoConfig->setCodecType(VideoConfig::CODEC_HEVC);
-        pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->nProfile)));
+        pVideoConfig->setCodecProfile(convertHevcProfile((pFmtp->GetProfile())));
 
         /** TODO: check the case for setting HIGHTIER */
-        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->nLevel));
+        pVideoConfig->setCodecLevel(convertHevcLevel(pFmtp->GetLevel()));
 
-        pVideoConfig->setFramerate(pFmtp->nFrameRate);
-        pVideoConfig->setBitrate(pFmtp->nBitrate);
-        pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
-        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
+        pVideoConfig->setFramerate(pFmtp->GetFramerate());
+        pVideoConfig->setBitrate(pFmtp->GetBitrate());
+        pVideoConfig->setPacketizationMode(pFmtp->GetPacketizationMode());
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->GetSpropParam().GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
-        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
+        VideoProfileUtil::GetWidthHeightFromResolution(pFmtp->GetResolution(), &nWidth, &nHeight);
         pVideoConfig->setResolutionWidth(nWidth);
         pVideoConfig->setResolutionHeight(nHeight);
     }
@@ -248,27 +248,27 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     pVideoConfig->setCameraZoom(m_nCameraZoom);
     pVideoConfig->setPauseImagePath(android::String8("/image/path"));
     pVideoConfig->setDeviceOrientationDegree(0);
-    pVideoConfig->setCvoValue(pNegoProfile->nCvoId);
+    pVideoConfig->setCvoValue(pNegoProfile->GetCvoId());
 
     IMS_UINT32 nRtcpFbAttr = VideoConfig::RTP_FB_NONE;
 
-    if (pNegoPayload->objRtcpFbAttr.bNackSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsNackSupported())
     {
         nRtcpFbAttr |= VideoConfig::RTP_FB_NACK;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bTmmbrSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsTmmbrSupported())
     {
         nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBR;
         nRtcpFbAttr |= VideoConfig::RTP_FB_TMMBN;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bPliSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsPliSupported())
     {
         nRtcpFbAttr |= VideoConfig::PSFB_PLI;
     }
 
-    if (pNegoPayload->objRtcpFbAttr.bFirSupported)
+    if (pNegoPayload->GetRtcpFbAttr().IsFirSupported())
     {
         nRtcpFbAttr |= VideoConfig::PSFB_FIR;
     }
