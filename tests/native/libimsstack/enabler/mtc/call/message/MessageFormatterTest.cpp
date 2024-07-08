@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "../../../../config/interface/common/MockISubscriberConfig.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "FeatureCaps.h"
@@ -26,6 +27,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
+#include "core/MockIMessageBodyPart.h"
 #include "core/MockISession.h"
 #include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MtcSupplementaryService.h"
@@ -38,13 +40,15 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-LOCAL IMS_SINT32 SLOT_ID = 0;
-
 using ::testing::_;
 using ::testing::AnyOf;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+LOCAL const IMS_SINT32 SLOT_ID = 0;
+LOCAL const AString HOME_DOMAIN = "homedomain";
+LOCAL const AString PRIVATE_USER_ID = "prid";
 
 namespace android
 {
@@ -60,10 +64,12 @@ public:
 
     CallInfo objCallInfo;
     MockIMessage objMessage;
+    MockIMessageBodyPart objBodyPart;
     MockISipMessage objSipMessage;
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objSession;
+    MockISubscriberConfig objSubscriberConfig;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
@@ -83,9 +89,14 @@ protected:
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+        ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
+
+        ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(HOME_DOMAIN));
+        ON_CALL(objSubscriberConfig, GetPrivateUserId).WillByDefault(ReturnRef(PRIVATE_USER_ID));
 
         pFormatter = new MessageFormatter(objContext, objSession);
     }
@@ -199,10 +210,36 @@ TEST_F(MessageFormatterTest, FormStartMessageWithIncompleteCallComposerLocation)
 
 TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerLocation)
 {
+    const ByteArray objContent =
+            ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                      "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                      "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                      "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                      "xmlns:gml=\"http://www.opengis.net/gml\" "
+                      "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" entity=\"pres:prid\">\n"
+                      "<dm:person id=\"\">\n"
+                      "<gp:geopriv>\n"
+                      "<gp:location-info>\n"
+                      "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">\n"
+                      "<gml:pos>1 2</gml:pos>\n"
+                      "</gs:Circle>\n"
+                      "</gp:location-info>\n"
+                      "<gp:usage-rules/>\n"
+                      "</gp:geopriv>\n"
+                      "</dm:person>\n"
+                      "</presence>\n");
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("500")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), _));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
+
     pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LAT, AString("1"));
     pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LONG, AString("2"));
-    // TODO: Location is hard to test now
-    // EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
 }
 
 TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)

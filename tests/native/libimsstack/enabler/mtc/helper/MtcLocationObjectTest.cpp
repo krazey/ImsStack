@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include "CarrierConfig.h"
 #include "GeolocationHelper.h"
 #include "INetworkWatcher.h"
@@ -34,7 +35,6 @@
 #include "helper/MtcSupplementaryService.h"
 #include "private/ConfigurationManager.h"
 #include "utility/MockIMessageUtils.h"
-#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;

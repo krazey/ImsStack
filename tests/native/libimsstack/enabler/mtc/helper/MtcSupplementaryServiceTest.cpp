@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include "ByteArray.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MockIMessageBodyPart.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
 #include "call/MockIMtcCallContext.h"
@@ -524,16 +526,20 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
             CALLING_NUM_VERSTAT_VERIFIED);
 }
 
-TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
+TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElementsFromEmptyMessage)
 {
     pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
+
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT), nullptr);
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG), nullptr);
-    EXPECT_FALSE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS), nullptr);
+}
 
+TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElementsFromMessageWithCallComposerInfo)
+{
     ImsList<AString> lstPriorityHeaders;
     lstPriorityHeaders.Append("none");
     ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::PRIORITY)))
@@ -554,12 +560,49 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
     ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::ORGANIZATION)))
             .WillByDefault(Return(lstOrganizationHeaders));
 
+    MockIMessageBodyPart objLocationBody;
+    ByteArray objLocationContent(  // From RCC.20
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "entity=\"tel:+491711234567\">"
+            "<dm:person id=\"sh2204\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+            "<gml:pos>47.577866 -122.164080</gml:pos>"
+            "<gs:radius uom=\"urn:ogc:def:uom:EPSG::9001\">30</gs:radius>"
+            "</gs:Circle>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "</dm:person>"
+            "</presence>");
+    ON_CALL(objLocationBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("application/pidf+xml")));
+    ON_CALL(objLocationBody, GetContent).WillByDefault(ReturnRef(objLocationContent));
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objLocationBody);
+    ON_CALL(objMockIMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
     pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
-    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
-    // TODO: Location is hard to test now
-    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY)->nValue,
+            CALL_COMPOSER_PRIORITY_NONE);
+    EXPECT_STREQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT)->strValue.GetStr(),
+            "subject");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL)->strValue.GetStr(),
+            "https://it-is-a/picture.jpg");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT)->strValue.GetStr(),
+            "47.577866");
+    EXPECT_STREQ(
+            pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG)->strValue.GetStr(),
+            "-122.164080");
+    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_IS_BUSINESS)->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateSessionId)
