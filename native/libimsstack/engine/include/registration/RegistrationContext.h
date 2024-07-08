@@ -20,6 +20,7 @@
 
 class RegInfoManager;
 class RegistrationManager;
+class SipConnectionNotifierManager;
 
 /**
  * A context class for providing the singleton instances for registration layer.
@@ -37,6 +38,7 @@ public:
 public:
     IRegistrationManager* GetRegistrationManager() override;
     IRegInfoManager* GetRegInfoManager() override;
+    ISipConnectionNotifierManager* GetSipConnectionNotifierManager() override;
 
     /**
      * @brief Sets the specific registration context to return its own instances.
@@ -58,6 +60,7 @@ public:
 private:
     RegistrationManager* m_pRegistrationManager;
     RegInfoManager* m_pRegInfoManager;
+    SipConnectionNotifierManager* m_pScnManager;
     IRegistrationContext* m_piRegistrationContext;
 
     static RegistrationContext* s_pContext;

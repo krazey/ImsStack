@@ -20,6 +20,7 @@
 
 class IRegInfoManager;
 class IRegistrationManager;
+class ISipConnectionNotifierManager;
 
 /**
  * A context interface for providing the singleton instances for registration layer.
@@ -41,6 +42,11 @@ public:
      *        Creates a new instance if it does not exist.
      */
     virtual IRegInfoManager* GetRegInfoManager() = 0;
+
+    /**
+     * @brief Returns the ISipConnectionNotifierManager instance.
+     */
+    virtual ISipConnectionNotifierManager* GetSipConnectionNotifierManager() = 0;
 };
 
 #endif
