@@ -106,7 +106,7 @@ TEST_F(JniMtcServiceThreadTest, OnServiceChanged)
 TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
 {
     IMS_UINT32 eType = IuMtcService::E_SERVICE_CHANGED;
-    IuMtcService::EmergencyServiceState eState = IuMtcService::EmergencyServiceState::IN_CALL;
+    IuMtcService::EmergencyServiceState eState = IuMtcService::EmergencyServiceState::OPENED;
     ServiceType eServiceType = ServiceType::EMERGENCY;
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);

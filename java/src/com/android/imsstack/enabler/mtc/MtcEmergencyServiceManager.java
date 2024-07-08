@@ -128,9 +128,6 @@ public class MtcEmergencyServiceManager {
             case IUMtcService.ES_UNAVAILABLE:
                 onEsUnavailable();
                 break;
-            case IUMtcService.ES_IN_CALL: // TODO: remove
-                onEsInCall();
-                break;
             default:
                 break;
         }
@@ -161,10 +158,6 @@ public class MtcEmergencyServiceManager {
     private void onEsUnavailable() {
         log("onEsUnavailable");
         releaseCall();
-    }
-
-    private void onEsInCall() {
-        log("onEsInCall");
     }
 
     private int convertEmergencyRouting(@EmergencyCallRouting int emergencyRoutingIn) {

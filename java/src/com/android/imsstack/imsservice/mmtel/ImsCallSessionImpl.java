@@ -2774,8 +2774,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
 
                 return RESULT_OK;
-            } else if ((ss.mExtraState == IUMtcService.ES_IN_CALL)
-                    || (ss.mExtraState == IUMtcService.ES_OPENING)) {
+            } else if (ss.mExtraState == IUMtcService.ES_OPENING) {
                 stopImsRegWaitingTimer();
                 return RESULT_IGNORE;
             }
