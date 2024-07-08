@@ -576,9 +576,11 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         ImsStreamMediaProfile proposalMediaProfile = getProposedStreamMediaProfile();
         int audioQuality = mediaProfile.getAudioQuality();
         int videoQuality = mediaProfile.getVideoQuality();
+        int audioDirection = mediaProfile.getAudioDirection();
         int videoDirection = mediaProfile.getVideoDirection();
 
-        // Overwrites the audio/video quality information from the proposed media profile
+        // Overwrites the audio/video quality and direction information
+        // from the proposed media profile for request from the network.
         if (!sessionModificationRequest && (proposalMediaProfile != null)) {
             if (mediaProfile.getAudioQuality() != proposalMediaProfile.getAudioQuality()) {
                 log("MediaProfile :: audioQuality - " + mediaProfile.getAudioQuality()
@@ -591,18 +593,22 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                         + " >> " + proposalMediaProfile.getVideoQuality());
                 videoQuality = proposalMediaProfile.getVideoQuality();
             }
+
+            if (audioDirection != proposalMediaProfile.getAudioDirection()) {
+                audioDirection = proposalMediaProfile.getAudioDirection();
+            }
         }
 
-        int direction = ImsCallMediaUtils.getDirectionFromVideoProfileForMediaInfo(
+        int receivedVideoDir = ImsCallMediaUtils.getDirectionFromVideoProfileForMediaInfo(
                 profile.getVideoState());
 
-        if (direction == MediaInfo.DIRECTION_INVALID) {
+        if (receivedVideoDir == MediaInfo.DIRECTION_INVALID) {
             // Audio only
             videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
             videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
         } else {
-            videoDirection
-                    = ImsCallMediaUtils.getDirectionFromMediaInfoForMediaProfile(direction);
+            videoDirection =
+                    ImsCallMediaUtils.getDirectionFromMediaInfoForMediaProfile(receivedVideoDir);
 
             // Keep the current preferred media quality
 
@@ -613,8 +619,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             }
         }
 
-        return new ImsStreamMediaProfile(audioQuality,
-                mediaProfile.getAudioDirection(), videoQuality, videoDirection,
+        return new ImsStreamMediaProfile(audioQuality, audioDirection, videoQuality, videoDirection,
                 mediaProfile.getRttMode());
     }
 

@@ -226,25 +226,6 @@ IMS_BOOL UpdatingInfo::IsDowngraded() const
     return eOriginalCallType == CallType::VIDEO_RTT;
 }
 
-PUBLIC
-void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const
-{
-    if (objMediaInfo.eAudioDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eAudioDirection = m_objAlertingInfo.eAudioDirection;
-    }
-
-    if (objMediaInfo.eVideoDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eVideoDirection = m_objAlertingInfo.eVideoDirection;
-    }
-
-    if (objMediaInfo.eTextDirection != DIRECTION_INVALID)
-    {
-        objMediaInfo.eTextDirection = m_objAlertingInfo.eTextDirection;
-    }
-}
-
 PRIVATE
 CallType UpdatingInfo::GetCurrentCallType() const
 {
