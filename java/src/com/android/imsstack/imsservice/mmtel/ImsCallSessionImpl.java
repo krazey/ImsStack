@@ -167,12 +167,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             CallTracker ct, MtcCall call,
             String callId, ImsCallProfile profile, boolean isMO) {
         this(callContext, ct, call, callId, profile, isMO,
-                new ImsCallSessionCallback(callContext.getExecutor()));
+                new ImsCallSessionCallback(callContext.getExecutor()), null);
     }
 
     @VisibleForTesting
     public ImsCallSessionImpl(ICallContext callContext, CallTracker ct, MtcCall call,
-            String callId, ImsCallProfile profile, boolean isMO, ImsCallSessionCallback callBack) {
+            String callId, ImsCallProfile profile, boolean isMO, ImsCallSessionCallback callBack,
+            ImsVideoCallSession videoCallSession) {
 
         mCallContext = callContext;
 
@@ -188,7 +189,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             MtcCall.setListener(call, mConferenceListenerProxy);
         }
 
-        mVideoCallSession = new ImsVideoCallSession(mCallContext, this, isMO);
+        mVideoCallSession = videoCallSession == null
+                ? new ImsVideoCallSession(mCallContext, this, isMO) : videoCallSession;
         mVideoCallProvider = ImsVideoCallProviderFactory.createVideoCallProvider(
                 mVideoCallSession,
                 (call != null) ? call.getMediaSession() : null);
@@ -919,6 +921,25 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void update(int callType, ImsStreamMediaProfile profile) {
+        if (mVideoCallSession.isClearedSessionModificationInfo()) {
+            ImsStreamMediaProfile existingMediaProfile = mCallProfile.getMediaProfile();
+            int videoDirection = existingMediaProfile.getVideoDirection();
+            if (videoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE) {
+                videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
+            }
+
+            ImsCallProfile callProfile = ImsCallUtils.createCallProfile(
+                    mCallProfile.getServiceType(), ImsCallMediaUtils.getVideoCallType(profile),
+                    existingMediaProfile.getAudioQuality(),
+                    existingMediaProfile.getAudioDirection(),
+                    existingMediaProfile.getVideoQuality(), videoDirection,
+                    existingMediaProfile.getRttMode());
+            setCallInfo(callProfile);
+
+            mCallback.invokeUpdated(ImsCallSessionImpl.this, callProfile);
+            return;
+        }
+
         final int requestedCallType = callType;
         final ImsStreamMediaProfile requestedProfile = profile;
 
