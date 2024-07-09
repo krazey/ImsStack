@@ -23,6 +23,7 @@
 #include "MockIRegistrationContext.h"
 #include "MockIRegistrationManager.h"
 #include "TestMutexService.h"
+#include "util/MockISipConnectionNotifierManager.h"
 
 using ::testing::Return;
 
@@ -62,6 +63,7 @@ TEST_F(RegistrationContextTest, Accessors)
 {
     EXPECT_NE(m_pRegistrationContext->GetRegistrationManager(), nullptr);
     EXPECT_NE(m_pRegistrationContext->GetRegInfoManager(), nullptr);
+    EXPECT_NE(m_pRegistrationContext->GetSipConnectionNotifierManager(), nullptr);
 }
 
 TEST_F(RegistrationContextTest, AccessorsWithExternalRegistrationContext)
@@ -69,16 +71,21 @@ TEST_F(RegistrationContextTest, AccessorsWithExternalRegistrationContext)
     MockIRegInfoManager objRegInfoManager;
     MockIRegistrationManager objRegistrationManager;
     MockIRegistrationContext objRegistrationContext;
+    MockISipConnectionNotifierManager objScnManager;
     EXPECT_CALL(objRegistrationContext, GetRegistrationManager())
             .Times(1)
             .WillOnce(Return(&objRegistrationManager));
     EXPECT_CALL(objRegistrationContext, GetRegInfoManager())
             .Times(1)
             .WillOnce(Return(&objRegInfoManager));
+    EXPECT_CALL(objRegistrationContext, GetSipConnectionNotifierManager())
+            .Times(1)
+            .WillOnce(Return(&objScnManager));
     m_pRegistrationContext->SetRegistrationContext(&objRegistrationContext);
 
     EXPECT_EQ(m_pRegistrationContext->GetRegistrationManager(), &objRegistrationManager);
     EXPECT_EQ(m_pRegistrationContext->GetRegInfoManager(), &objRegInfoManager);
+    EXPECT_EQ(m_pRegistrationContext->GetSipConnectionNotifierManager(), &objScnManager);
 }
 
 }  // namespace android

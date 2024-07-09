@@ -20,6 +20,7 @@
 
 #include "MockIRegInfoManager.h"
 #include "MockIRegistrationManager.h"
+#include "util/MockISipConnectionNotifierManager.h"
 
 class TestRegistrationContext : public IRegistrationContext
 {
@@ -32,16 +33,25 @@ public:
         return &m_objRegistrationManager;
     }
     inline IRegInfoManager* GetRegInfoManager() override { return &m_objRegInfoManager; };
+    inline ISipConnectionNotifierManager* GetSipConnectionNotifierManager() override
+    {
+        return &m_objScnManager;
+    }
 
     inline MockIRegistrationManager& GetMockRegistrationManager()
     {
         return m_objRegistrationManager;
     }
     inline MockIRegInfoManager& GetMockRegInfoManager() { return m_objRegInfoManager; }
+    inline MockISipConnectionNotifierManager& GetMockSipConnectionNotifierManager()
+    {
+        return m_objScnManager;
+    }
 
 private:
     MockIRegistrationManager m_objRegistrationManager;
     MockIRegInfoManager m_objRegInfoManager;
+    MockISipConnectionNotifierManager m_objScnManager;
 };
 
 #endif

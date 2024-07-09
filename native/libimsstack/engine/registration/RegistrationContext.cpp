@@ -18,12 +18,14 @@
 #include "RegInfoManager.h"
 #include "RegistrationContext.h"
 #include "RegistrationManager.h"
+#include "util/SipConnectionNotifierManager.h"
 
 PUBLIC GLOBAL RegistrationContext* RegistrationContext::s_pContext = IMS_NULL;
 
 PRIVATE RegistrationContext::RegistrationContext() :
         m_pRegistrationManager(IMS_NULL),
         m_pRegInfoManager(IMS_NULL),
+        m_pScnManager(IMS_NULL),
         m_piRegistrationContext(IMS_NULL)
 {
 }
@@ -38,6 +40,11 @@ PRIVATE VIRTUAL RegistrationContext::~RegistrationContext()
     if (m_pRegistrationManager != IMS_NULL)
     {
         delete m_pRegistrationManager;
+    }
+
+    if (m_pScnManager != IMS_NULL)
+    {
+        delete m_pScnManager;
     }
 }
 
@@ -69,6 +76,21 @@ PUBLIC VIRTUAL IRegInfoManager* RegistrationContext::GetRegInfoManager()
     }
 
     return m_pRegInfoManager;
+}
+
+PUBLIC ISipConnectionNotifierManager* RegistrationContext::GetSipConnectionNotifierManager()
+{
+    if (m_piRegistrationContext != IMS_NULL)
+    {
+        return m_piRegistrationContext->GetSipConnectionNotifierManager();
+    }
+
+    if (m_pScnManager == IMS_NULL)
+    {
+        m_pScnManager = new SipConnectionNotifierManager();
+    }
+
+    return m_pScnManager;
 }
 
 PUBLIC GLOBAL RegistrationContext* RegistrationContext::GetInstance()

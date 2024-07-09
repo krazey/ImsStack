@@ -28,6 +28,7 @@ public:
 
     MOCK_METHOD(IRegistrationManager*, GetRegistrationManager, (), (override));
     MOCK_METHOD(IRegInfoManager*, GetRegInfoManager, (), (override));
+    MOCK_METHOD(ISipConnectionNotifierManager*, GetSipConnectionNotifierManager, (), (override));
 };
 
 #endif
