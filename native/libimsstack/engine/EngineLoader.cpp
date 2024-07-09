@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include "EngineLoader.h"
+#include "RegistrationContext.h"
 #include "StaticSip.h"
 #include "base/Ims.h"
 #include "base/SubscriberTracker.h"
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 
 // It will be called by EnablerThread to load a proper component for each slot.
 
@@ -31,7 +32,7 @@ PUBLIC GLOBAL void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
 
     // core
     Ims::Init(nSlotId);
-    SipConnectionNotifierManager::Init(nSlotId);
+    RegistrationContext::GetInstance()->GetSipConnectionNotifierManager()->Init(nSlotId);
 }
 
 PUBLIC GLOBAL void EngineLoader::Uninitialize(IN IMS_SINT32 nSlotId)

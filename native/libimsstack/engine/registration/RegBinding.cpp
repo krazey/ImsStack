@@ -24,10 +24,11 @@
 #include "RegBinding.h"
 #include "RegInfo.h"
 #include "RegStateTracker.h"
+#include "RegistrationContext.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -560,7 +561,8 @@ PROTECTED VIRTUAL void RegBinding::SetListener(IN IRegBindingListener* piListene
 PRIVATE
 void RegBinding::CreateSipConnectionNotifier()
 {
-    SipConnectionNotifierManager* pScnMngr = SipConnectionNotifierManager::GetInstance();
+    ISipConnectionNotifierManager* piScnManager =
+            RegistrationContext::GetInstance()->GetSipConnectionNotifierManager();
 
     if (m_piRegEx == IMS_NULL)
     {
@@ -587,7 +589,7 @@ void RegBinding::CreateSipConnectionNotifier()
     }
 
     // RFC5626_FLOW_CONTROL : GetPortFlowControl()
-    m_piScn = pScnMngr->CreateConnectionNotifier(m_piContact->GetContactAddress().GetScheme(),
+    m_piScn = piScnManager->CreateConnectionNotifier(m_piContact->GetContactAddress().GetScheme(),
             m_piContact->GetIpAddress(), GetPortUs(), GetPortUc(), GetPortFlowControl(), strParams,
             m_piRegEx->GetStateTracker()->GetAuthorizedAor());
 
@@ -624,7 +626,7 @@ void RegBinding::CreateSipConnectionNotifier()
             m_piRegEx->RemoveReferenceForScnErrorListener();
         }
 
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(piTempScn);
+        piScnManager->ReleaseConnectionNotifier(piTempScn);
     }
 }
 
@@ -641,7 +643,9 @@ void RegBinding::DestroySipConnectionNotifier()
         m_piScn->RemoveErrorListener(m_piRegEx);
     }
 
-    SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piScn);
+    RegistrationContext::GetInstance()
+            ->GetSipConnectionNotifierManager()
+            ->ReleaseConnectionNotifier(m_piScn);
     m_piScn = IMS_NULL;
 }
 

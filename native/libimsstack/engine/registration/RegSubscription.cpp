@@ -42,7 +42,7 @@
 #include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -96,8 +96,10 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (!m_pRegStateTracker.IsNull())
     {
-        m_piReferredScn = SipConnectionNotifierManager::GetInstance()->GetConnectionNotifier(
-                m_pRegStateTracker->GetIpAddress(), m_pRegStateTracker->GetPortUs());
+        m_piReferredScn = RegistrationContext::GetInstance()
+                                  ->GetSipConnectionNotifierManager()
+                                  ->GetConnectionNotifier(m_pRegStateTracker->GetIpAddress(),
+                                          m_pRegStateTracker->GetPortUs());
     }
 }
 
@@ -137,11 +139,9 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     }
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    RegistrationContext::GetInstance()
+            ->GetSipConnectionNotifierManager()
+            ->ReleaseConnectionNotifier(m_piReferredScn);
 
     IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
 }
@@ -190,11 +190,9 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    RegistrationContext::GetInstance()
+            ->GetSipConnectionNotifierManager()
+            ->ReleaseConnectionNotifier(m_piReferredScn);
 
     // SIP_MESSAGE_MEDIATOR
     SetSipMessageMediator(IMS_NULL);

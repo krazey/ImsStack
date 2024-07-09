@@ -48,7 +48,6 @@
 #include "util/CallerPreferenceManager.h"
 #include "util/MethodManager.h"
 #include "util/PreferenceHeader.h"
-#include "util/SipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_IMS__;
