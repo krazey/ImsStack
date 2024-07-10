@@ -446,7 +446,7 @@ GLOBAL IMS_BOOL CorrectMessageBody(IN_OUT ::SipMessage*& pMessage)
 
             if (pContentType == IMS_NULL)
             {
-                return IMS_NULL;
+                return IMS_FALSE;
             }
 
             AString strName(Sip::STR_BOUNDARY);
@@ -3547,7 +3547,7 @@ GLOBAL IMS_BOOL SetHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMess
     if ((nType <= SipHeaderBase::TYPE_INVALID) || (nType >= SipHeaderBase::TYPE_END))
     {
         IMS_TRACE_D("SetHeader: Invalid header type(%d)", nType, 0, 0);
-        return IMS_NULL;
+        return IMS_FALSE;
     }
 
     // The existing value of the header will be overwritten with new value.
