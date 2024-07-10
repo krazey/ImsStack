@@ -39,7 +39,7 @@ public:
                 m_nBitrate(0),
                 m_nFrameRate(0),
                 m_nAs(0),
-                m_nProfile(AVC_PROFILE_NONE),
+                m_nProfile(0),
                 m_nLevel(0),
                 m_nPacketizationMode(1),
                 m_strSpropParam(AString::ConstNull()),
@@ -194,7 +194,7 @@ public:
 
         HevcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
                 IN const IMS_UINT32 nFrameRate, IN const IMS_UINT32 nAs,
-                IN const VIDEO_PROFILE_HEVC nProfile, IN const IMS_UINT32 nLevel,
+                IN const IMS_UINT32 nProfile, IN const IMS_UINT32 nLevel,
                 IN const IMS_UINT32 nPacketization, IN const AString strSprop) :
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
