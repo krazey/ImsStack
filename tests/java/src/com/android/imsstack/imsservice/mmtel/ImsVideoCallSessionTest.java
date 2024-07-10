@@ -50,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -253,14 +254,27 @@ public class ImsVideoCallSessionTest {
         clearInvocations(mImsCallSession);
 
         callProfile = null;
+        MediaInfo proposalMediaInfo = new MediaInfo(MediaInfo.AUDIO_QUALITY_AMR_NB,
+                MediaInfo.VIDEO_QUALITY_QCIF, MediaInfo.DIRECTION_SEND_RECEIVE,
+                MediaInfo.DIRECTION_SEND_RECEIVE, MediaInfo.DIRECTION_INACTIVE,
+                MediaInfo.GTTMODE_FULL);
+        mVideoSession.receiveSessionModifyRequest(IVideoCallSession.MODIFICATION_CALL_TYPE,
+                proposalMediaInfo);
+        ImsStreamMediaProfile OriginalMediaProfile = new ImsStreamMediaProfile(
+                ImsStreamMediaProfile.AUDIO_QUALITY_NONE, ImsStreamMediaProfile.DIRECTION_RECEIVE,
+                ImsStreamMediaProfile.VIDEO_QUALITY_NONE, ImsStreamMediaProfile.DIRECTION_INACTIVE);
         callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
-                ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
+                ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, new Bundle(), OriginalMediaProfile);
         videoProfile = new VideoProfile(VideoProfile.STATE_PAUSED, VideoProfile.QUALITY_HIGH);
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE,
                 IVideoCallSession.MODIFICATION_VIDEO_PROFILE);
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
         mVideoSession.sendSessionModifyResponse(videoProfile);
-        verify(mImsCallSession).accept(anyInt(), any(ImsStreamMediaProfile.class));
+        ArgumentCaptor<ImsStreamMediaProfile> mediaProfileCaptor =
+                ArgumentCaptor.forClass(ImsStreamMediaProfile.class);
+        verify(mImsCallSession).accept(anyInt(), mediaProfileCaptor.capture());
+        assertEquals(ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
+                mediaProfileCaptor.getValue().mAudioDirection);
 
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
         doReturn(callProfile).when(mImsCallSession).getCallProfile();

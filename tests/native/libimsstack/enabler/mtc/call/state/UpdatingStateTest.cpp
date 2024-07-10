@@ -175,9 +175,6 @@ TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
 {
-    MediaInfo objChangedMediaInfo;
-    objChangedMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
-    pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
@@ -186,15 +183,12 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstabli
     EXPECT_CALL(objUiNotifier, SendUpdated).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED,
-            pUpdatingState->AcceptUpdate(CallType::VIDEO_RTT, objChangedMediaInfo));
-    EXPECT_EQ(DIRECTION_SEND_RECEIVE, objChangedMediaInfo.eAudioDirection);
+            pUpdatingState->AcceptUpdate(CallType::VIDEO_RTT, objMediaInfo));
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate)
 {
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
-    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
-    pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND;
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
@@ -207,7 +201,6 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
-    EXPECT_EQ(DIRECTION_SEND, objMediaInfo.eAudioDirection);
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)

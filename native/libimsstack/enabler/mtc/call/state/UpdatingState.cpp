@@ -102,7 +102,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     IMtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
     pSession->SetCallType(eCallType);
-    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)

@@ -61,7 +61,6 @@ public:
     IMS_BOOL IsModified() const;
     IMS_BOOL IsDowngraded() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
-    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
 
 private:
     // This returns the original CallType before this update is successfully completed.
