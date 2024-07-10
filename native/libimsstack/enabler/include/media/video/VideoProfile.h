@@ -80,26 +80,35 @@ public:
 
         virtual ~VideoFmtp(){};
 
-        void SetResolution(IN const VIDEO_RESOLUTION eResolution) { m_eResolution = eResolution; }
-        VIDEO_RESOLUTION GetResolution() { return m_eResolution; }
-        void SetBitrate(IN const IMS_SINT32 nBitrate) { m_nBitrate = nBitrate; }
-        IMS_SINT32 GetBitrate() { return m_nBitrate; }
-        void SetFramerate(IN const IMS_SINT32 nFrameRate) { m_nFrameRate = nFrameRate; }
-        IMS_SINT32 GetFramerate() { return m_nFrameRate; }
-        void SetAs(IN const IMS_SINT32 nAs) { m_nAs = nAs; }
-        IMS_SINT32 GetAs() { return m_nAs; }
-        void SetProfile(IN const IMS_SINT32 nProfile) { m_nProfile = nProfile; }
-        IMS_SINT32 GetProfile() { return m_nProfile; }
-        void SetLevel(IN const IMS_SINT32 nLevel) { m_nLevel = nLevel; }
-        IMS_SINT32 GetLevel() { return m_nLevel; }
-        void SetPacketizationMode(IN const IMS_SINT32 nMode) { m_nPacketizationMode = nMode; }
-        IMS_SINT32 GetPacketizationMode() { return m_nPacketizationMode; }
-        void SetSpropParam(IN const AString strSprop) { m_strSpropParam = strSprop; }
-        AString& GetSpropParam() { return m_strSpropParam; }
-        void SetShowPacketizationMode(IN const IMS_BOOL nShow) { m_bShowPacketizationMode = nShow; }
-        IMS_BOOL IsPacketizationModeVisible() { return m_bShowPacketizationMode; }
-        void SetShowSpropParam(IN const IMS_BOOL nShow) { m_bShowSpropParam = nShow; }
-        IMS_BOOL IsSpropParamVisible() { return m_bShowSpropParam; }
+        inline void SetResolution(IN const VIDEO_RESOLUTION eResolution)
+        {
+            m_eResolution = eResolution;
+        }
+        inline VIDEO_RESOLUTION GetResolution() { return m_eResolution; }
+        inline void SetBitrate(IN const IMS_SINT32 nBitrate) { m_nBitrate = nBitrate; }
+        inline IMS_SINT32 GetBitrate() { return m_nBitrate; }
+        inline void SetFramerate(IN const IMS_SINT32 nFrameRate) { m_nFrameRate = nFrameRate; }
+        inline IMS_SINT32 GetFramerate() { return m_nFrameRate; }
+        inline void SetAs(IN const IMS_SINT32 nAs) { m_nAs = nAs; }
+        inline IMS_SINT32 GetAs() { return m_nAs; }
+        inline void SetProfile(IN const IMS_SINT32 nProfile) { m_nProfile = nProfile; }
+        inline IMS_SINT32 GetProfile() { return m_nProfile; }
+        inline void SetLevel(IN const IMS_SINT32 nLevel) { m_nLevel = nLevel; }
+        inline IMS_SINT32 GetLevel() { return m_nLevel; }
+        inline void SetPacketizationMode(IN const IMS_SINT32 nMode)
+        {
+            m_nPacketizationMode = nMode;
+        }
+        inline IMS_SINT32 GetPacketizationMode() { return m_nPacketizationMode; }
+        inline void SetSpropParam(IN const AString strSprop) { m_strSpropParam = strSprop; }
+        inline AString& GetSpropParam() { return m_strSpropParam; }
+        inline void SetShowPacketizationMode(IN const IMS_BOOL nShow)
+        {
+            m_bShowPacketizationMode = nShow;
+        }
+        inline IMS_BOOL IsPacketizationModeVisible() { return m_bShowPacketizationMode; }
+        inline void SetShowSpropParam(IN const IMS_BOOL nShow) { m_bShowSpropParam = nShow; }
+        inline IMS_BOOL IsSpropParamVisible() { return m_bShowSpropParam; }
 
     private:
         VIDEO_RESOLUTION m_eResolution;
@@ -146,13 +155,16 @@ public:
 
         virtual ~AvcFmtp(){};
 
-        void SetProfileLevelId(IN const AString strProfileLevelId)
+        inline void SetProfileLevelId(IN const AString strProfileLevelId)
         {
             m_strProfileLevelId = strProfileLevelId;
         }
-        AString& GetProfileLevelId() { return m_strProfileLevelId; }
-        void SetShowProfileLevelId(IN const IMS_BOOL nShow) { m_bShowProfileLevelId = nShow; }
-        IMS_BOOL IsProfileLevelIdVisible() { return m_bShowProfileLevelId; }
+        inline AString& GetProfileLevelId() { return m_strProfileLevelId; }
+        inline void SetShowProfileLevelId(IN const IMS_BOOL nShow)
+        {
+            m_bShowProfileLevelId = nShow;
+        }
+        inline IMS_BOOL IsProfileLevelIdVisible() { return m_bShowProfileLevelId; }
 
     private:
         AString m_strProfileLevelId;
@@ -191,10 +203,10 @@ public:
 
         virtual ~HevcFmtp(){};
 
-        void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
-        IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
-        void SetShowLevel(IN const IMS_BOOL nShow) { m_bShowLevel = nShow; }
-        IMS_BOOL IsLevelVisible() { return m_bShowLevel; }
+        inline void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
+        inline IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
+        inline void SetShowLevel(IN const IMS_BOOL nShow) { m_bShowLevel = nShow; }
+        inline IMS_BOOL IsLevelVisible() { return m_bShowLevel; }
 
     private:
         IMS_BOOL m_bShowProfile;
@@ -229,26 +241,38 @@ public:
             return (*this);
         }
 
-        void SetTrrSupported(IN const IMS_BOOL nTrrSupported) { m_bTrrSupported = nTrrSupported; }
-        IMS_BOOL IsTrrSupported() { return m_bTrrSupported; }
-        void SetTrrInt(IN const IMS_SINT32 nTrrInt) { m_nTrrInt = nTrrInt; }
-        IMS_SINT32 GetTrrInt() { return m_nTrrInt; }
-        void SetNackSupported(IN const IMS_BOOL bNackSupported)
+        inline void SetTrrSupported(IN const IMS_BOOL nTrrSupported)
+        {
+            m_bTrrSupported = nTrrSupported;
+        }
+        inline IMS_BOOL IsTrrSupported() { return m_bTrrSupported; }
+        inline void SetTrrInt(IN const IMS_SINT32 nTrrInt) { m_nTrrInt = nTrrInt; }
+        inline IMS_SINT32 GetTrrInt() { return m_nTrrInt; }
+        inline void SetNackSupported(IN const IMS_BOOL bNackSupported)
         {
             m_bNackSupported = bNackSupported;
         }
-        IMS_BOOL IsNackSupported() { return m_bNackSupported; }
-        void SetTmmbrSupported(IN const IMS_BOOL bTmmbrSupported)
+        inline IMS_BOOL IsNackSupported() { return m_bNackSupported; }
+        inline void SetTmmbrSupported(IN const IMS_BOOL bTmmbrSupported)
         {
             m_bTmmbrSupported = bTmmbrSupported;
         }
-        IMS_BOOL IsTmmbrSupported() { return m_bTmmbrSupported; }
-        void SetTmmbrSmaxPr(IN const IMS_SINT32 nTmmbrSmaxPr) { m_nTmmbrSmaxPr = nTmmbrSmaxPr; }
-        IMS_SINT32 GetTmmbrSmaxPr() { return m_nTmmbrSmaxPr; }
-        void SetPliSupported(IN const IMS_BOOL bPliSupported) { m_bPliSupported = bPliSupported; }
-        IMS_BOOL IsPliSupported() { return m_bPliSupported; }
-        void SetFirSupported(IN const IMS_BOOL bFirSupported) { m_bFirSupported = bFirSupported; }
-        IMS_BOOL IsFirSupported() { return m_bFirSupported; }
+        inline IMS_BOOL IsTmmbrSupported() { return m_bTmmbrSupported; }
+        inline void SetTmmbrSmaxPr(IN const IMS_SINT32 nTmmbrSmaxPr)
+        {
+            m_nTmmbrSmaxPr = nTmmbrSmaxPr;
+        }
+        inline IMS_SINT32 GetTmmbrSmaxPr() { return m_nTmmbrSmaxPr; }
+        inline void SetPliSupported(IN const IMS_BOOL bPliSupported)
+        {
+            m_bPliSupported = bPliSupported;
+        }
+        inline IMS_BOOL IsPliSupported() { return m_bPliSupported; }
+        inline void SetFirSupported(IN const IMS_BOOL bFirSupported)
+        {
+            m_bFirSupported = bFirSupported;
+        }
+        inline IMS_BOOL IsFirSupported() { return m_bFirSupported; }
 
     private:
         IMS_BOOL m_bTrrSupported;
@@ -281,13 +305,18 @@ public:
                 m_strImageAttr(obj.m_strImageAttr),
                 m_objRtcpFbAttr(obj.m_objRtcpFbAttr)
         {
-            if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
+            if (obj.m_pFmtp != IMS_NULL)
             {
-                pFmtp = new VideoProfile::AvcFmtp(static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
-            }
-            else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
-            {
-                pFmtp = new VideoProfile::HevcFmtp(static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
+                if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
+                {
+                    m_pFmtp = new VideoProfile::AvcFmtp(
+                            static_cast<VideoProfile::AvcFmtp*>(obj.m_pFmtp));
+                }
+                else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
+                {
+                    m_pFmtp = new VideoProfile::HevcFmtp(
+                            static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
+                }
             }
         }
 
@@ -298,16 +327,18 @@ public:
             if (this != &obj)
             {
                 BasePayload::operator=(obj);
-
-                if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
+                if (obj.m_pFmtp != IMS_NULL)
                 {
-                    pFmtp = new VideoProfile::AvcFmtp(
-                            static_cast<VideoProfile::AvcFmtp*>(obj.pFmtp));
-                }
-                else if (objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
-                {
-                    pFmtp = new VideoProfile::HevcFmtp(
-                            static_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
+                    if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
+                    {
+                        m_pFmtp = new VideoProfile::AvcFmtp(
+                                static_cast<VideoProfile::AvcFmtp*>(obj.m_pFmtp));
+                    }
+                    else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
+                    {
+                        m_pFmtp = new VideoProfile::HevcFmtp(
+                                static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
+                    }
                 }
 
                 m_bIncludeImageAttr = obj.m_bIncludeImageAttr;
@@ -319,23 +350,23 @@ public:
             return (*this);
         }
 
-        void SetIncludeImageAttr(IN const IMS_BOOL bIncludeImageAttr)
+        inline void SetIncludeImageAttr(IN const IMS_BOOL bIncludeImageAttr)
         {
             m_bIncludeImageAttr = bIncludeImageAttr;
         }
-        IMS_BOOL IsImageAttrIncluded() { return m_bIncludeImageAttr; }
-        void SetIncludeFrameSize(IN const IMS_BOOL bIncludeFrameSize)
+        inline IMS_BOOL IsImageAttrIncluded() { return m_bIncludeImageAttr; }
+        inline void SetIncludeFrameSize(IN const IMS_BOOL bIncludeFrameSize)
         {
             m_bIncludeFrameSize = bIncludeFrameSize;
         }
-        IMS_BOOL IsFrameSizeIncluded() { return m_bIncludeFrameSize; }
-        void SetImageAttr(IN const AString strImageAttr) { m_strImageAttr = strImageAttr; }
-        AString& GetImageAttr() { return m_strImageAttr; }
-        void SetRtcpFbAttr(IN const RtcpFbAttributes objRtcpFbAttr)
+        inline IMS_BOOL IsFrameSizeIncluded() { return m_bIncludeFrameSize; }
+        inline void SetImageAttr(IN const AString strImageAttr) { m_strImageAttr = strImageAttr; }
+        inline AString& GetImageAttr() { return m_strImageAttr; }
+        inline void SetRtcpFbAttr(IN const RtcpFbAttributes objRtcpFbAttr)
         {
             m_objRtcpFbAttr = objRtcpFbAttr;
         }
-        RtcpFbAttributes& GetRtcpFbAttr() { return m_objRtcpFbAttr; }
+        inline RtcpFbAttributes& GetRtcpFbAttr() { return m_objRtcpFbAttr; }
 
     private:
         IMS_BOOL m_bIncludeImageAttr;
@@ -397,17 +428,17 @@ public:
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 
-    void SetFrameRate(IN const IMS_SINT32 nFrameRate) { m_nFrameRate = nFrameRate; }
-    IMS_SINT32 GetFrameRate() { return m_nFrameRate; }
-    void SetSupportAvpf(IN const IMS_BOOL bSupportAvpf) { m_bSupportAvpf = bSupportAvpf; }
-    IMS_BOOL IsAvpfSupported() { return m_bSupportAvpf; }
-    void SetCvoId(IN const IMS_SINT32 nCvoId) { m_nCvoId = nCvoId; }
-    IMS_SINT32 GetCvoId() { return m_nCvoId; }
-    void SetSupportCapaNegoForAvpf(IN const IMS_BOOL bSupportCapaNegoForAvpf)
+    inline void SetFrameRate(IN const IMS_SINT32 nFrameRate) { m_nFrameRate = nFrameRate; }
+    inline IMS_SINT32 GetFrameRate() { return m_nFrameRate; }
+    inline void SetSupportAvpf(IN const IMS_BOOL bSupportAvpf) { m_bSupportAvpf = bSupportAvpf; }
+    inline IMS_BOOL IsAvpfSupported() { return m_bSupportAvpf; }
+    inline void SetCvoId(IN const IMS_SINT32 nCvoId) { m_nCvoId = nCvoId; }
+    inline IMS_SINT32 GetCvoId() { return m_nCvoId; }
+    inline void SetSupportCapaNegoForAvpf(IN const IMS_BOOL bSupportCapaNegoForAvpf)
     {
         m_bSupportCapaNegoForAvpf = bSupportCapaNegoForAvpf;
     }
-    IMS_BOOL IsCapaNegoForAvpfSupported() { return m_bSupportCapaNegoForAvpf; }
+    inline IMS_BOOL IsCapaNegoForAvpfSupported() { return m_bSupportCapaNegoForAvpf; }
 
 private:
     IMS_SINT32 m_nFrameRate;

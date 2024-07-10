@@ -19,12 +19,12 @@
 
 PUBLIC void MediaBaseProfile::DeletePayloads()
 {
-    while (listPayload.GetSize() > 0)
+    while (m_lstPayload.GetSize() > 0)
     {
-        BasePayload* pPayload = listPayload.GetAt(0);
+        BasePayload* pPayload = m_lstPayload.GetAt(0);
 
         delete pPayload;
-        listPayload.RemoveAt(0);
+        m_lstPayload.RemoveAt(0);
     }
 }
 
@@ -34,6 +34,6 @@ PUBLIC void MediaBaseProfile::CopyPayloads(IN ImsList<BasePayload*> payloadList)
     {
         BasePayload* pNewPayload =
                 MediaProfileFactory::GetInstance()->CreatePayload(payloadList.GetAt(i));
-        listPayload.Append(pNewPayload);
+        m_lstPayload.Append(pNewPayload);
     }
 }

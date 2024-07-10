@@ -57,10 +57,10 @@ public:
             return (*this);
         }
 
-        void SetRedLevel(IN const IMS_SINT32 nRedLevel) { m_nRedLevel = nRedLevel; }
-        IMS_SINT32 GetRedLevel() { return m_nRedLevel; }
-        void SetRedPayload(IN const IMS_SINT32 nRedPayload) { m_nRedPayload = nRedPayload; }
-        IMS_SINT32 GetRedPayload() { return m_nRedPayload; }
+        inline void SetRedLevel(IN const IMS_SINT32 nRedLevel) { m_nRedLevel = nRedLevel; }
+        inline IMS_SINT32 GetRedLevel() { return m_nRedLevel; }
+        inline void SetRedPayload(IN const IMS_SINT32 nRedPayload) { m_nRedPayload = nRedPayload; }
+        inline IMS_SINT32 GetRedPayload() { return m_nRedPayload; }
 
     private:
         IMS_SINT32 m_nRedLevel;
@@ -79,9 +79,10 @@ public:
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
-            if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.pFmtp != IMS_NULL)
+            if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
             {
-                pFmtp = new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                m_pFmtp =
+                        new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(obj.m_pFmtp));
             }
         }
 
@@ -93,10 +94,10 @@ public:
             {
                 BasePayload::operator=(obj);
 
-                if (objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.pFmtp != IMS_NULL)
+                if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("red") && obj.m_pFmtp != IMS_NULL)
                 {
-                    pFmtp = new TextProfile::RedFmtp(
-                            *static_cast<TextProfile::RedFmtp*>(obj.pFmtp));
+                    m_pFmtp = new TextProfile::RedFmtp(
+                            *static_cast<TextProfile::RedFmtp*>(obj.m_pFmtp));
                 }
             }
 
@@ -155,8 +156,11 @@ public:
         return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
     }
 
-    void SetKeepRedundantLevel(IN const IMS_BOOL bKeepRedLevel) { m_bKeepRedLevel = bKeepRedLevel; }
-    IMS_BOOL GetKeepRedundantLevel() { return m_bKeepRedLevel; }
+    inline void SetKeepRedundantLevel(IN const IMS_BOOL bKeepRedLevel)
+    {
+        m_bKeepRedLevel = bKeepRedLevel;
+    }
+    inline IMS_BOOL GetKeepRedundantLevel() { return m_bKeepRedLevel; }
 
 private:
     IMS_BOOL m_bKeepRedLevel;

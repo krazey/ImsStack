@@ -54,18 +54,18 @@ public:
     {
     public:
         RtpMap(IN const IMS_SINT32 channel = 0) :
-                nPayloadNumber(0),
-                strPayloadType(AString::ConstNull()),
-                nSamplingRate(0),
-                nChannel(channel)
+                m_nPayloadNumber(0),
+                m_strPayloadType(AString::ConstNull()),
+                m_nSamplingRate(0),
+                m_nChannel(channel)
         {
         }
 
         RtpMap(IN const RtpMap& obj) :
-                nPayloadNumber(obj.nPayloadNumber),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate),
-                nChannel(obj.nChannel)
+                m_nPayloadNumber(obj.m_nPayloadNumber),
+                m_strPayloadType(obj.m_strPayloadType),
+                m_nSamplingRate(obj.m_nSamplingRate),
+                m_nChannel(obj.m_nChannel)
         {
         }
 
@@ -73,42 +73,51 @@ public:
         {
             if (this != &obj)
             {
-                nPayloadNumber = obj.nPayloadNumber;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-                nChannel = obj.nChannel;
+                m_nPayloadNumber = obj.m_nPayloadNumber;
+                m_strPayloadType = obj.m_strPayloadType;
+                m_nSamplingRate = obj.m_nSamplingRate;
+                m_nChannel = obj.m_nChannel;
             }
             return (*this);
         }
 
         bool operator==(IN const RtpMap& obj) const
         {
-            return (nPayloadNumber == obj.nPayloadNumber &&
-                    strPayloadType.EqualsIgnoreCase(obj.strPayloadType) &&
-                    nSamplingRate == obj.nSamplingRate && nChannel == obj.nChannel);
+            return (m_nPayloadNumber == obj.m_nPayloadNumber &&
+                    m_strPayloadType.EqualsIgnoreCase(obj.m_strPayloadType) &&
+                    m_nSamplingRate == obj.m_nSamplingRate && m_nChannel == obj.m_nChannel);
         }
 
         bool operator!=(IN const RtpMap& obj) const
         {
-            return (nPayloadNumber != obj.nPayloadNumber ||
-                    !strPayloadType.EqualsIgnoreCase(obj.strPayloadType) ||
-                    nSamplingRate != obj.nSamplingRate || nChannel != obj.nChannel);
+            return (m_nPayloadNumber != obj.m_nPayloadNumber ||
+                    !m_strPayloadType.EqualsIgnoreCase(obj.m_strPayloadType) ||
+                    m_nSamplingRate != obj.m_nSamplingRate || m_nChannel != obj.m_nChannel);
         }
 
-        void SetPayloadNumber(IN const IMS_UINT32 payloadNumber) { nPayloadNumber = payloadNumber; }
-        IMS_UINT32 GetPayloadNumber() { return nPayloadNumber; }
-        void SetPayloadType(IN const AString& payloadType) { strPayloadType = payloadType; }
-        AString& GetPayloadType() { return strPayloadType; }
-        void SetSamplingRate(IN const IMS_UINT32 samplingRate) { nSamplingRate = samplingRate; }
-        IMS_UINT32 GetSamplingRate() { return nSamplingRate; }
-        void SetChannel(IN const IMS_SINT32 channel) { nChannel = channel; }
-        IMS_SINT32 GetChannel() { return nChannel; }
+        inline void SetPayloadNumber(IN const IMS_UINT32 nPayloadNumber)
+        {
+            m_nPayloadNumber = nPayloadNumber;
+        }
+        inline IMS_UINT32 GetPayloadNumber() { return m_nPayloadNumber; }
+        inline void SetPayloadType(IN const AString& strPayloadType)
+        {
+            m_strPayloadType = strPayloadType;
+        }
+        inline AString& GetPayloadType() { return m_strPayloadType; }
+        inline void SetSamplingRate(IN const IMS_UINT32 nSamplingRate)
+        {
+            m_nSamplingRate = nSamplingRate;
+        }
+        inline IMS_UINT32 GetSamplingRate() { return m_nSamplingRate; }
+        inline void SetChannel(IN const IMS_SINT32 nChannel) { m_nChannel = nChannel; }
+        inline IMS_SINT32 GetChannel() { return m_nChannel; }
 
     protected:
-        IMS_UINT32 nPayloadNumber;  // Payload number
-        AString strPayloadType;     // Payload type name
-        IMS_UINT32 nSamplingRate;   // Sampling rate
-        IMS_SINT32 nChannel;        // Number of channels
+        IMS_UINT32 m_nPayloadNumber;  // Payload number
+        AString m_strPayloadType;     // Payload type name
+        IMS_UINT32 m_nSamplingRate;   // Sampling rate
+        IMS_SINT32 m_nChannel;        // Number of channels
     };
 
     /**
@@ -119,14 +128,14 @@ public:
     {
     public:
         BasePayload(IN const IMS_SINT32 channel = 0) :
-                objRtpMap(channel),
-                pFmtp(IMS_NULL)
+                m_objRtpMap(channel),
+                m_pFmtp(IMS_NULL)
         {
         }
 
         BasePayload(IN const BasePayload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                m_objRtpMap(obj.m_objRtpMap),
+                m_pFmtp(IMS_NULL)
         {
         }
 
@@ -136,43 +145,40 @@ public:
         {
             if (this != &obj)
             {
-                objRtpMap = obj.objRtpMap;
+                m_objRtpMap = obj.m_objRtpMap;
                 deleteFmtp();
             }
 
             return (*this);
         }
 
-        void SetRtpMap(IN const RtpMap& objMap) { objRtpMap = objMap; };
-
         void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
-                IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel = 0)
+                IN const IMS_UINT32 samplingRate, IN const IMS_SINT32 m_nChannel = 0)
         {
-            objRtpMap.SetPayloadNumber(payloadNum);
-            objRtpMap.SetPayloadType(payloadType);
-            objRtpMap.SetSamplingRate(samplingRate);
-            objRtpMap.SetChannel(nChannel);
+            m_objRtpMap.SetPayloadNumber(payloadNum);
+            m_objRtpMap.SetPayloadType(payloadType);
+            m_objRtpMap.SetSamplingRate(samplingRate);
+            m_objRtpMap.SetChannel(m_nChannel);
         };
 
-        RtpMap& GetRtpMap() { return objRtpMap; }
-
-        void SetFmtp(IN BaseFmtp* fmtp) { pFmtp = fmtp; }
-
-        BaseFmtp* GetFmtp() { return pFmtp; }
+        inline void SetRtpMap(IN const RtpMap& objRtpMap) { m_objRtpMap = objRtpMap; };
+        inline RtpMap& GetRtpMap() { return m_objRtpMap; }
+        inline void SetFmtp(IN BaseFmtp* pFmtp) { m_pFmtp = pFmtp; }
+        inline BaseFmtp* GetFmtp() { return m_pFmtp; }
 
     protected:
         void deleteFmtp()
         {
-            if (pFmtp != IMS_NULL)
+            if (m_pFmtp != IMS_NULL)
             {
-                delete pFmtp;
-                pFmtp = IMS_NULL;
+                delete m_pFmtp;
+                m_pFmtp = IMS_NULL;
             }
         }
 
     protected:
-        RtpMap objRtpMap;
-        BaseFmtp* pFmtp;
+        RtpMap m_objRtpMap;
+        BaseFmtp* m_pFmtp;
     };
 
 public:
@@ -184,31 +190,31 @@ public:
     public:
         CapaNego() :
                 /* Transport Capability */
-                mapTcap(ImsMap<IMS_SINT32, AString>()),
+                m_mapTcap(ImsMap<IMS_SINT32, AString>()),
                 /* Attribute Capability */
-                mapAcap(ImsMap<IMS_SINT32, AString>()),
+                m_mapAcap(ImsMap<IMS_SINT32, AString>()),
                 /* Potential Configuration (pcfg) proposed */
-                listPcfg(ImsList<AString>()),
+                m_lstPcfg(ImsList<AString>()),
                 /* Actual configuration (acfg) negotiated */
-                strAcfg(AString::ConstNull()),
+                m_strAcfg(AString::ConstNull()),
                 /* bool to check if acap is existed in pcfg */
-                bAcapInPcfg(IMS_FALSE){};
+                m_bAcapInPcfg(IMS_FALSE){};
 
-        ImsMap<IMS_SINT32, AString>& GetMapTcap() { return mapTcap; }
-        ImsMap<IMS_SINT32, AString>& GetMapAcap() { return mapAcap; }
-        void SetListPcfg(ImsList<AString> pcfg) { listPcfg = pcfg; }
-        ImsList<AString>& GetListPcfg() { return listPcfg; }
-        void SetAcfg(IN const AString acfg) { strAcfg = acfg; }
-        AString& GetAcfg() { return strAcfg; }
-        void SetAttCapaInPcfg(IMS_BOOL acapInPcfg) { bAcapInPcfg = acapInPcfg; }
-        IMS_BOOL IsAttCapaInPcfg() { return bAcapInPcfg; }
+        inline ImsMap<IMS_SINT32, AString>& GetMapTcap() { return m_mapTcap; }
+        inline ImsMap<IMS_SINT32, AString>& GetMapAcap() { return m_mapAcap; }
+        inline void SetListPcfg(ImsList<AString> lstPcfg) { m_lstPcfg = lstPcfg; }
+        inline ImsList<AString>& GetListPcfg() { return m_lstPcfg; }
+        inline void SetAcfg(IN const AString strAcfg) { m_strAcfg = strAcfg; }
+        inline AString& GetAcfg() { return m_strAcfg; }
+        inline void SetAttCapaInPcfg(IMS_BOOL bAcapInPcfg) { m_bAcapInPcfg = bAcapInPcfg; }
+        inline IMS_BOOL IsAttCapaInPcfg() { return m_bAcapInPcfg; }
 
     private:
-        ImsMap<IMS_SINT32, AString> mapTcap;
-        ImsMap<IMS_SINT32, AString> mapAcap;
-        ImsList<AString> listPcfg;
-        AString strAcfg;
-        IMS_BOOL bAcapInPcfg;
+        ImsMap<IMS_SINT32, AString> m_mapTcap;
+        ImsMap<IMS_SINT32, AString> m_mapAcap;
+        ImsList<AString> m_lstPcfg;
+        AString m_strAcfg;
+        IMS_BOOL m_bAcapInPcfg;
     };
 
 public:
@@ -218,18 +224,18 @@ public:
             IN const IMS_SINT32 bandwidthAs = 0, IN const IMS_SINT32 bandwidthRs = 0,
             IN const IMS_SINT32 bandwidthRr = 0,
             IN const MEDIA_DIRECTION direction = MEDIA_DIRECTION_INVALID) :
-            objIpAddress(ipAddress),
-            nDataPort(dataPort),
-            nControlPort(controlPort),
-            strTransportType(transportType),
-            nRtcpInterval(rtcpInterval),
-            nBandwidthAs(bandwidthAs),
-            nBandwidthRs(bandwidthRs),
-            nBandwidthRr(bandwidthRr),
-            eDirection(direction),
-            objCapaNego(CapaNego()),
-            nNegotiatedPayloadIndex(-1),
-            listPayload(ImsList<BasePayload*>())
+            m_objIpAddress(ipAddress),
+            m_nDataPort(dataPort),
+            m_nControlPort(controlPort),
+            m_strTransportType(transportType),
+            m_nRtcpInterval(rtcpInterval),
+            m_nBandwidthAs(bandwidthAs),
+            m_nBandwidthRs(bandwidthRs),
+            m_nBandwidthRr(bandwidthRr),
+            m_eDirection(direction),
+            m_objCapaNego(CapaNego()),
+            m_nNegotiatedPayloadIndex(-1),
+            m_lstPayload(ImsList<BasePayload*>())
     {
     }
 
@@ -241,124 +247,135 @@ public:
         {
             return;
         }
-        objIpAddress = profile->objIpAddress;
-        nDataPort = profile->nDataPort;
-        nControlPort = profile->nControlPort;
-        strTransportType = profile->strTransportType;
-        nRtcpInterval = profile->nRtcpInterval;
-        nBandwidthAs = profile->nBandwidthAs;
-        nBandwidthRs = profile->nBandwidthRs;
-        nBandwidthRr = profile->nBandwidthRr;
-        eDirection = profile->eDirection;
-        objCapaNego = profile->objCapaNego;
-        nNegotiatedPayloadIndex = profile->nNegotiatedPayloadIndex;
+        m_objIpAddress = profile->m_objIpAddress;
+        m_nDataPort = profile->m_nDataPort;
+        m_nControlPort = profile->m_nControlPort;
+        m_strTransportType = profile->m_strTransportType;
+        m_nRtcpInterval = profile->m_nRtcpInterval;
+        m_nBandwidthAs = profile->m_nBandwidthAs;
+        m_nBandwidthRs = profile->m_nBandwidthRs;
+        m_nBandwidthRr = profile->m_nBandwidthRr;
+        m_eDirection = profile->m_eDirection;
+        m_objCapaNego = profile->m_objCapaNego;
+        m_nNegotiatedPayloadIndex = profile->m_nNegotiatedPayloadIndex;
 
         DeletePayloads();
-        CopyPayloads(profile->listPayload);
+        CopyPayloads(profile->m_lstPayload);
     }
 
     MediaBaseProfile(const MediaBaseProfile& obj)
     {
-        objIpAddress = obj.objIpAddress;
-        nDataPort = obj.nDataPort;
-        nControlPort = obj.nControlPort;
-        strTransportType = obj.strTransportType;
-        nRtcpInterval = obj.nRtcpInterval;
-        nBandwidthAs = obj.nBandwidthAs;
-        nBandwidthRs = obj.nBandwidthRs;
-        nBandwidthRr = obj.nBandwidthRr;
-        eDirection = obj.eDirection;
-        objCapaNego = obj.objCapaNego;
-        nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+        m_objIpAddress = obj.m_objIpAddress;
+        m_nDataPort = obj.m_nDataPort;
+        m_nControlPort = obj.m_nControlPort;
+        m_strTransportType = obj.m_strTransportType;
+        m_nRtcpInterval = obj.m_nRtcpInterval;
+        m_nBandwidthAs = obj.m_nBandwidthAs;
+        m_nBandwidthRs = obj.m_nBandwidthRs;
+        m_nBandwidthRr = obj.m_nBandwidthRr;
+        m_eDirection = obj.m_eDirection;
+        m_objCapaNego = obj.m_objCapaNego;
+        m_nNegotiatedPayloadIndex = obj.m_nNegotiatedPayloadIndex;
 
         DeletePayloads();
-        CopyPayloads(obj.listPayload);
+        CopyPayloads(obj.m_lstPayload);
     }
 
     MediaBaseProfile& operator=(IN const MediaBaseProfile& obj)
     {
         if (this != &obj)
         {
-            objIpAddress = obj.objIpAddress;
-            nDataPort = obj.nDataPort;
-            nControlPort = obj.nControlPort;
-            strTransportType = obj.strTransportType;
-            nRtcpInterval = obj.nRtcpInterval;
-            nBandwidthAs = obj.nBandwidthAs;
-            nBandwidthRs = obj.nBandwidthRs;
-            nBandwidthRr = obj.nBandwidthRr;
-            eDirection = obj.eDirection;
-            objCapaNego = obj.objCapaNego;
-            nNegotiatedPayloadIndex = obj.nNegotiatedPayloadIndex;
+            m_objIpAddress = obj.m_objIpAddress;
+            m_nDataPort = obj.m_nDataPort;
+            m_nControlPort = obj.m_nControlPort;
+            m_strTransportType = obj.m_strTransportType;
+            m_nRtcpInterval = obj.m_nRtcpInterval;
+            m_nBandwidthAs = obj.m_nBandwidthAs;
+            m_nBandwidthRs = obj.m_nBandwidthRs;
+            m_nBandwidthRr = obj.m_nBandwidthRr;
+            m_eDirection = obj.m_eDirection;
+            m_objCapaNego = obj.m_objCapaNego;
+            m_nNegotiatedPayloadIndex = obj.m_nNegotiatedPayloadIndex;
 
             DeletePayloads();
-            CopyPayloads(obj.listPayload);
+            CopyPayloads(obj.m_lstPayload);
         }
         return (*this);
     }
 
     bool operator==(IN const MediaBaseProfile& obj) const
     {
-        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
-                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
-                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
-                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
-                eDirection == obj.eDirection);
+        return (m_objIpAddress == obj.m_objIpAddress && m_nDataPort == obj.m_nDataPort &&
+                m_nControlPort == obj.m_nControlPort &&
+                m_strTransportType == obj.m_strTransportType &&
+                m_nRtcpInterval == obj.m_nRtcpInterval && m_nBandwidthAs == obj.m_nBandwidthAs &&
+                m_nBandwidthRs == obj.m_nBandwidthRs && m_nBandwidthRr == obj.m_nBandwidthRr &&
+                m_eDirection == obj.m_eDirection);
     }
 
     bool operator!=(IN const MediaBaseProfile& obj) const
     {
-        return (objIpAddress != obj.objIpAddress || nDataPort != obj.nDataPort ||
-                nControlPort != obj.nControlPort || strTransportType != obj.strTransportType ||
-                nRtcpInterval != obj.nRtcpInterval || nBandwidthAs != obj.nBandwidthAs ||
-                nBandwidthRs != obj.nBandwidthRs || nBandwidthRr != obj.nBandwidthRr ||
-                eDirection != obj.eDirection);
+        return (m_objIpAddress != obj.m_objIpAddress || m_nDataPort != obj.m_nDataPort ||
+                m_nControlPort != obj.m_nControlPort ||
+                m_strTransportType != obj.m_strTransportType ||
+                m_nRtcpInterval != obj.m_nRtcpInterval || m_nBandwidthAs != obj.m_nBandwidthAs ||
+                m_nBandwidthRs != obj.m_nBandwidthRs || m_nBandwidthRr != obj.m_nBandwidthRr ||
+                m_eDirection != obj.m_eDirection);
     }
 
     virtual BasePayload* GetPayloadAt(IN IMS_UINT32 nIndex)
     {
-        return (listPayload.GetSize() > nIndex) ? listPayload.GetAt(nIndex) : IMS_NULL;
+        return (m_lstPayload.GetSize() > nIndex) ? m_lstPayload.GetAt(nIndex) : IMS_NULL;
     }
 
     void DeletePayloads();
     void CopyPayloads(IN ImsList<BasePayload*> payloadList);
 
-    void SetIpAddress(IN const IpAddress ipAddress) { objIpAddress = ipAddress; }
-    IpAddress& GetIpAddress() { return objIpAddress; }
-    void SetDataPort(IN const IMS_UINT32 port) { nDataPort = port; }
-    IMS_UINT32 GetDataPort() { return nDataPort; }
-    void SetControlPort(IN const IMS_UINT32 port) { nControlPort = port; }
-    IMS_UINT32 GetControlPort() { return nControlPort; }
-    void SetTransportType(IN const AString transportType) { strTransportType = transportType; }
-    AString& GetTransportType() { return strTransportType; }
-    void SetRtcpInterval(IN const IMS_UINT32 interval) { nRtcpInterval = interval; }
-    IMS_UINT32 GetRtcpInterval() { return nRtcpInterval; }
-    void SetBandwidthAs(IN const IMS_SINT32 as) { nBandwidthAs = as; }
-    IMS_SINT32 GetBandwidthAs() { return nBandwidthAs; }
-    void SetBandwidthRs(IN const IMS_SINT32 rs) { nBandwidthRs = rs; }
-    IMS_SINT32 GetBandwidthRs() { return nBandwidthRs; }
-    void SetBandwidthRr(IN const IMS_SINT32 rr) { nBandwidthRr = rr; }
-    IMS_SINT32 GetBandwidthRr() { return nBandwidthRr; }
-    void SetDirection(IN const MEDIA_DIRECTION direction) { eDirection = direction; }
-    MEDIA_DIRECTION GetDirection() { return eDirection; }
-    CapaNego& GetCapaNego() { return objCapaNego; }
-    void SetNegotiatedPayloadIndex(IN const IMS_SINT32 index) { nNegotiatedPayloadIndex = index; }
-    IMS_SINT32 GetNegotiatedPayloadIndex() { return nNegotiatedPayloadIndex; }
-    ImsList<BasePayload*>& GetPayloadList() { return listPayload; }
+    inline void SetIpAddress(IN const IpAddress objIpAddress) { m_objIpAddress = objIpAddress; }
+    inline IpAddress& GetIpAddress() { return m_objIpAddress; }
+    inline void SetDataPort(IN const IMS_UINT32 nDataPort) { m_nDataPort = nDataPort; }
+    inline IMS_UINT32 GetDataPort() { return m_nDataPort; }
+    inline void SetControlPort(IN const IMS_UINT32 nControlPort) { m_nControlPort = nControlPort; }
+    inline IMS_UINT32 GetControlPort() { return m_nControlPort; }
+    inline void SetTransportType(IN const AString strTransportType)
+    {
+        m_strTransportType = strTransportType;
+    }
+    inline AString& GetTransportType() { return m_strTransportType; }
+    inline void SetRtcpInterval(IN const IMS_UINT32 nRtcpInterval)
+    {
+        m_nRtcpInterval = nRtcpInterval;
+    }
+    inline IMS_UINT32 GetRtcpInterval() { return m_nRtcpInterval; }
+    inline void SetBandwidthAs(IN const IMS_SINT32 nBandwidthAs) { m_nBandwidthAs = nBandwidthAs; }
+    inline IMS_SINT32 GetBandwidthAs() { return m_nBandwidthAs; }
+    inline void SetBandwidthRs(IN const IMS_SINT32 nBandwidthRs) { m_nBandwidthRs = nBandwidthRs; }
+    inline IMS_SINT32 GetBandwidthRs() { return m_nBandwidthRs; }
+    inline void SetBandwidthRr(IN const IMS_SINT32 nBandwidthRr) { m_nBandwidthRr = nBandwidthRr; }
+    inline IMS_SINT32 GetBandwidthRr() { return m_nBandwidthRr; }
+    inline void SetDirection(IN const MEDIA_DIRECTION eDirection) { m_eDirection = eDirection; }
+    inline MEDIA_DIRECTION GetDirection() { return m_eDirection; }
+    inline CapaNego& GetCapaNego() { return m_objCapaNego; }
+    inline void SetNegotiatedPayloadIndex(IN const IMS_SINT32 nNegotiatedPayloadIndex)
+    {
+        m_nNegotiatedPayloadIndex = nNegotiatedPayloadIndex;
+    }
+    inline IMS_SINT32 GetNegotiatedPayloadIndex() { return m_nNegotiatedPayloadIndex; }
+    inline ImsList<BasePayload*>& GetPayloadList() { return m_lstPayload; }
 
 private:
-    IpAddress objIpAddress;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
-    MEDIA_DIRECTION eDirection;
-    CapaNego objCapaNego;
-    IMS_SINT32 nNegotiatedPayloadIndex;
-    ImsList<BasePayload*> listPayload;
+    IpAddress m_objIpAddress;
+    IMS_UINT32 m_nDataPort;
+    IMS_UINT32 m_nControlPort;
+    AString m_strTransportType;
+    IMS_UINT32 m_nRtcpInterval;
+    IMS_SINT32 m_nBandwidthAs;
+    IMS_SINT32 m_nBandwidthRs;
+    IMS_SINT32 m_nBandwidthRr;
+    MEDIA_DIRECTION m_eDirection;
+    CapaNego m_objCapaNego;
+    IMS_SINT32 m_nNegotiatedPayloadIndex;
+    ImsList<BasePayload*> m_lstPayload;
 };
 
 #endif
