@@ -85,18 +85,13 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
         return RESULT_INVALID_VERSION;
     }
 
+    IMS_RESULT eUserUpdateResult = UpdateParticipantList();
+
     // update xml version and max-user-count value.
     UpdateDescription();
-
-    // match and update Participant List
-    if (UpdateParticipantList() == IMS_FAILURE)
-    {
-        Clear();
-        return RESULT_NOTHING_UPDATED;
-    }
-
     Clear();
-    return RESULT_UPDATED;
+
+    return eUserUpdateResult == IMS_SUCCESS ? RESULT_UPDATED : RESULT_NOTHING_UPDATED;
 }
 
 PUBLIC
@@ -865,7 +860,11 @@ void ConferenceInfoUpdater::RemoveFromNotMatchedUserList(IN ConferenceInfo::User
 PROTECTED
 IMS_BOOL ConferenceInfoUpdater::IsInitialNotifyWithoutUsers() const
 {
-    // this can be removed. verified but not required.
+    if (m_pParticipantList->GetXmlVersion() > 0)
+    {
+        return IMS_FALSE;
+    }
+
     IMS_UINT32 nSize = m_pConferenceInfo->GetUsers().GetSize();
     if (nSize == 0)
     {
