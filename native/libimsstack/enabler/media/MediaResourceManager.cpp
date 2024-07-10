@@ -266,6 +266,6 @@ PUBLIC void MediaResourceManager::OnMediaMtuChanged(IN const IMS_UINT32 nMtu)
 
     if (pMediaManager != IMS_NULL)
     {
-        pMediaManager->SendMessage(IJniMedia::CHANGE_MTU, 0, IMS_NULL);
+        pMediaManager->SendMessage(IJniMedia::CHANGE_MTU, 0, 0);
     }
 }

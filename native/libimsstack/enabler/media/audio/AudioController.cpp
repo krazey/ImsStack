@@ -28,7 +28,7 @@ AudioController::AudioController() :
         m_eUpdateCondition(EARLY_SESSION),
         m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0),
-        m_nCurrentActiveNegoId(IMS_NULL)
+        m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID)
 {
     m_listAudioSession.Clear();
 }
@@ -291,7 +291,7 @@ IMS_BOOL AudioController::DeleteSession(IN IMS_UINTP nNegoId)
     IMS_TRACE_D("DeleteSession() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return IMS_FALSE;
     }
@@ -364,7 +364,7 @@ IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_B
     IMS_TRACE_D("UpdateAnbrEnabledConfig() - nNegoId[%" PFLS_x "], anbr enable[%d]", nNegoId,
             anbrEnabled, 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         IMS_TRACE_E(0, "UpdateAnbrEnabledConfig() - invalid param", 0, 0, 0);
         return IMS_FALSE;
@@ -511,7 +511,7 @@ PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UI
                 "], timer[%d]",
             nNegoId, m_nCurrentActiveNegoId, nTimer);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;
     }
@@ -529,7 +529,7 @@ PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
     IMS_TRACE_I("GetInactivityTimer() - Type[%d], nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]",
             eType, nNegoId, m_nCurrentActiveNegoId);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;
     }
@@ -551,7 +551,7 @@ AudioMediaSession* AudioController::FindAudioSession(IN IMS_UINTP nNegoId)
         return IMS_NULL;
     }
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return m_listAudioSession.GetAt(0);
     }

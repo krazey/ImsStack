@@ -55,7 +55,7 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
     if (piJniMediaSession == IMS_NULL)
     {
         IMS_TRACE_D("SendMessageToJava() - piJniMediaSession is null", 0, 0, 0);
-        return IMS_NULL;
+        return IMS_FALSE;
     }
 
     IJniMediaSessionThread* piThread =
