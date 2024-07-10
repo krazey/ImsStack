@@ -158,7 +158,7 @@ protected:
 TEST_F(UceAppTest, CallPre)
 {
     IMS_TRACE_D("CallPre", 0, 0, 0);
-    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, IMS_NULL);
+    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
 
     EXPECT_FALSE(pUceApp->callPre(objMsg));
 }
@@ -166,13 +166,13 @@ TEST_F(UceAppTest, CallPre)
 TEST_F(UceAppTest, SendMessage)
 {
     IMS_TRACE_D("SendMessage", 0, 0, 0);
-    IMSMSG objMsg(TestUceApp::AMSG_CREATE_SERVICE, 0, IMS_NULL);
+    IMSMSG objMsg(TestUceApp::AMSG_CREATE_SERVICE, 0, 0);
     EXPECT_TRUE(pUceApp->sendMessage(objMsg));
 
-    IMSMSG objMsg2(AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED, 0, IMS_NULL);
+    IMSMSG objMsg2(AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED, 0, 0);
     EXPECT_TRUE(pUceApp->sendMessage(objMsg2));
 
-    IMSMSG objMsg3(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, IMS_NULL);
+    IMSMSG objMsg3(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, 0);
     EXPECT_TRUE(pUceApp->sendMessage(objMsg3));
 }
 
@@ -181,7 +181,7 @@ TEST_F(UceAppTest, NotifyPublishState)
     IMS_TRACE_D("NotifyPublishState", 0, 0, 0);
     EXPECT_CALL(objMockIImsAosInfo, NotifyPublishState(_)).Times(1);
 
-    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, IMS_NULL);
+    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
     EXPECT_TRUE(pUceApp->sendMessage(objMsg));
 }
 
@@ -197,7 +197,7 @@ TEST_F(UceAppTest, AoSControl)
 TEST_F(UceAppTest, CallPost)
 {
     IMS_TRACE_D("CallPost", 0, 0, 0);
-    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, IMS_NULL);
+    IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
 
     EXPECT_TRUE(pUceApp->callPost(objMsg));
 }
