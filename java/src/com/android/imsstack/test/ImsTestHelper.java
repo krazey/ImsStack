@@ -118,6 +118,7 @@ public final class ImsTestHelper {
                             intent.getStringExtra("network"),
                             intent.getStringExtra("voice"), intent.getStringExtra("video"),
                             intent.getStringExtra("sms"),
+                            intent.getStringExtra("text"),
                             intent.getStringExtra("call_composer"),
                             intent.getStringExtra("call_composer_business_only"));
                 } else if ("vops".equalsIgnoreCase(event)) {
@@ -143,14 +144,15 @@ public final class ImsTestHelper {
         // capa = 0 / 1 (multiple use with comma separated in network input order.)
         // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST --ei slotid 0
         //     --es event capa --es network LTE,NR,IWLAN,UTRAN --es voice 1,1,0,0 --es video 0,0,1,0
-        //     --es sms 1,1,1,0 --es call_composer 1,1,1,0 --es call_composer_business_only 1,1,1,0
+        //     --es sms 1,1,1,0 --es text 1,1,1,0 --es call_composer 1,1,1,0
+        //     --es call_composer_business_only 1,1,1,0
         private void sendCapabilitiesChanged(int slotId,
-                String strNetwork, String strVoice, String strVideo, String strSms,
+                String strNetwork, String strVoice, String strVideo, String strSms, String strText,
                 String strCallComposer, String strBizCallComposer) {
             ImsLog.d("sendCapabilitiesChanged :: slot id=" + slotId + ", network=" + strNetwork
-                    + ", voice=" + strVoice + ", video=" + strVideo + ", sms=" + strSms
-                    + ", call_composer=" + strCallComposer + ", call_composer_business_only="
-                    + strBizCallComposer);
+                    + ", voice=" + strVoice + ", video=" + strVideo + ", sms=" + strSms + ", text="
+                    + strText + ", call_composer=" + strCallComposer
+                    + ", call_composer_business_only=" + strBizCallComposer);
 
             AosFactory aosFactory = AosFactory.getInstance();
             IAosRegistration iAosRegistration = aosFactory.getAosRegistration(slotId);
@@ -159,6 +161,7 @@ public final class ImsTestHelper {
             String[] strVoices = strVoice.split(",");
             String[] strVideos = strVideo.split(",");
             String[] strSmss = strSms.split(",");
+            String[] strTexts = strText.split(",");
             String[] strCallComposers = strCallComposer.split(",");
             String[] strBizCallComposers = strBizCallComposer.split(",");
 
@@ -188,6 +191,10 @@ public final class ImsTestHelper {
 
                 if (strSmss[i].equals("1")) {
                     nCapabilities |= IAosRegistrationListener.Capability.SMS;
+                }
+
+                if (strTexts[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.TEXT;
                 }
 
                 if (strCallComposers[i].equals("1")) {

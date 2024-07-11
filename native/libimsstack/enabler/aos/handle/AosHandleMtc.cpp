@@ -242,7 +242,7 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
         m_objFeatureTagList.AddFeature(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
     }
 
-    if (piConfig->IsRttSupported())
+    if (!AosHandle::IsHandleBlocked(BLOCK_TEXT_CAPABILITY))
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
     }
@@ -468,6 +468,9 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
                             m_nNetworkType, AosCapability::CALL_COMPOSER_BUSINESS_ONLY)),
             IMS_FALSE);
 
+    ProcessBlock(BLOCK_TEXT_CAPABILITY,
+            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::TEXT), IMS_FALSE);
+
     // Manage holding blocks
     if (IsEpdgEnabled())
     {
@@ -526,8 +529,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
                 IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
         IMS_BOOL bIsVideoCapable =
                 IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO);
-        IMS_BOOL bIsCallComposerCapable =
-                IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER);
 
         if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
         {
@@ -540,7 +541,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
         }
 
-        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY, !bIsCallComposerCapable, IMS_FALSE);
+        ProcessBlock(BLOCK_CALL_COMPOSER_CAPABILITY,
+                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::CALL_COMPOSER),
+                IMS_FALSE);
+        ProcessBlock(BLOCK_TEXT_CAPABILITY,
+                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::TEXT), IMS_FALSE);
 
         if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
         {

@@ -54,6 +54,7 @@ public class CarrierConfig {
         CarrierConfigManager.KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL,
         CarrierConfigManager.KEY_CARRIER_USSD_METHOD_INT,
         CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL,
+        CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL,
         CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL,
         CarrierConfigManager.KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL,
         CarrierConfigManager.KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL,

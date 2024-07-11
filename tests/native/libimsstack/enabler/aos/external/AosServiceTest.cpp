@@ -1227,3 +1227,16 @@ TEST_F(AosServiceTest, ShouldReturnAStringForTheCallComposerBusinessOnlyCapabili
     // THEN
     EXPECT_TRUE(strResult.Equals(strExpected));
 }
+
+TEST_F(AosServiceTest, ShouldReturnAStringForTheTextCapability)
+{
+    // GIVEN
+    const AString strExpected("[ TEXT ] ");
+
+    // WHEN
+    const AString strResult =
+            m_pAosService->CapabilitiesToString(static_cast<IMS_UINT32>(AosCapability::TEXT));
+
+    // THEN
+    EXPECT_TRUE(strResult.Equals(strExpected));
+}
