@@ -45,8 +45,7 @@ using ::testing::ReturnRef;
 using ::testing::SetArgPointee;
 
 const IMS_UINT32 TIMER_ICC_LOADED_WAITING = 100;
-const IMS_UINT32 TIMER_ISIM_RECOVERY = 101;
-const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 102;
+const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 101;
 
 class TestAosSubscriberManager : public AosSubscriberManager
 {
@@ -119,8 +118,6 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsInvalid);
     // TEST : GetIsimAt
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsGetIsimAt);
-    // TEST : ClearIsimRecovery
-    FRIEND_TEST(AosSubscriberManagerTest, SucceedClearIsimRecovery);
     // TEST : ConfigureAsDefault
     FRIEND_TEST(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenIsimTrueProvisioningDone);
     FRIEND_TEST(AosSubscriberManagerTest, FailedConfigureAsDefaultWithoutSubscriberConfig);
@@ -203,16 +200,8 @@ public:
     FRIEND_TEST(
             AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithRefreshCompleted);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotReady);
-    // TEST : ProcessIsimRecovery
-    FRIEND_TEST(
-            AosSubscriberManagerTest, ClearIsimRecoveryWhenProcessIsimRecoveryWithSupportIsimImsi);
-    FRIEND_TEST(AosSubscriberManagerTest, FailedProcessIsimRecoveryWhenTimerIsRunning);
     // TEST : ProcessPhoneRestarted
     FRIEND_TEST(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted);
-    // TEST : ProcessIsimRecoveryTimerExpired
-    FRIEND_TEST(AosSubscriberManagerTest, UpdateSubscriberAllWhenProcessIsimRecoveryTimerExpired);
-    FRIEND_TEST(AosSubscriberManagerTest,
-            FailedUpdateWhenProcessIsimRecoveryTimerExpiredWithoutSubscriberConfig);
     // TEST : ProcessPhoneRestartRecoveryTimerExpired
     FRIEND_TEST(AosSubscriberManagerTest, InvokesProcessPhoneNumberAvailableWhenSupportUsim);
     FRIEND_TEST(AosSubscriberManagerTest, InvokesProcessFallbackAndRestart);
@@ -749,13 +738,11 @@ TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenTimerIsNotRunning)
 {
     // GIVEN
     m_pSubscriberManager->m_piTimerToIccLoadedWaiting = IMS_NULL;
-    m_pSubscriberManager->m_piTimerToIsimRecovery = IMS_NULL;
     m_pSubscriberManager->m_piTimerToPhoneRestartRecovery = IMS_NULL;
 
     // WHEN
     // THEN
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_ICC_LOADED_WAITING));
-    EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_ISIM_RECOVERY));
     EXPECT_FALSE(m_pSubscriberManager->IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY));
 }
 
@@ -763,13 +750,11 @@ TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenTimerIsRunning)
 {
     // GIVEN
     m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 5000);
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 5000);
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 5000);
 
     // WHEN
     // THEN
     EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ICC_LOADED_WAITING));
-    EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_ISIM_RECOVERY));
     EXPECT_TRUE(m_pSubscriberManager->IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY));
 }
 
@@ -795,19 +780,6 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetIsimAt)
 
     // THEN
     EXPECT_EQ(nIndex, isimIndex);
-}
-
-TEST_F(AosSubscriberManagerTest, SucceedClearIsimRecovery)
-{
-    // GIVEN
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    // WHEN
-    m_pSubscriberManager->ClearIsimRecovery();
-
-    // THEN
-    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
 // TODO : FIXME
@@ -2110,47 +2082,6 @@ TEST_F(AosSubscriberManagerTest, ReturnsTrueWhenProcessIsimStateChangeWithNotRea
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosSubscriberManagerTest, ClearIsimRecoveryWhenProcessIsimRecoveryWithSupportIsimImsi)
-{
-    // GIVEN
-    ImsVector<IMS_SINT32> objImsIdentityPriority;
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI);
-
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(1);
-
-    // WHEN
-    m_pSubscriberManager->ProcessIsimRecovery();
-
-    // THEN
-    EXPECT_EQ(m_pSubscriberManager->m_nIsimRecoveryCount, 0);
-    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-}
-
-TEST_F(AosSubscriberManagerTest, FailedProcessIsimRecoveryWhenTimerIsRunning)
-{
-    // GIVEN
-    ImsVector<IMS_SINT32> objImsIdentityPriority;
-    objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);
-
-    m_pSubscriberManager->m_objImsIdentityPriority = objImsIdentityPriority;
-
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    EXPECT_CALL(m_objMockIAosService, NotifyAosIsimState(AosIsimState::INVALID)).Times(0);
-
-    // WHEN
-    m_pSubscriberManager->ProcessIsimRecovery();
-
-    // THEN
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-}
-
 TEST_F(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted)
 {
     // GIVEN
@@ -2161,44 +2092,6 @@ TEST_F(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted)
 
     // THEN
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
-}
-
-TEST_F(AosSubscriberManagerTest, UpdateSubscriberAllWhenProcessIsimRecoveryTimerExpired)
-{
-    // GIVEN
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    ON_CALL(m_objMockISubscriberConfig, GetConfigurable())
-            .WillByDefault(Return(&m_objMockIConfigurable));
-
-    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIBER_ALL, _))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    // WHEN
-    m_pSubscriberManager->ProcessIsimRecoveryTimerExpired();
-
-    // THEN
-    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-}
-
-TEST_F(AosSubscriberManagerTest,
-        FailedUpdateWhenProcessIsimRecoveryTimerExpiredWithoutSubscriberConfig)
-{
-    // GIVEN
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    ON_CALL(m_objMockISubscriberConfig, GetConfigurable()).WillByDefault(Return(nullptr));
-
-    EXPECT_CALL(m_objMockIConfigurable, Update(IConfigurable::CP_I_SUBSCRIBER_ALL, _)).Times(0);
-
-    // WHEN
-    m_pSubscriberManager->ProcessIsimRecoveryTimerExpired();
-
-    // THEN
-    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
 TEST_F(AosSubscriberManagerTest, InvokesProcessPhoneNumberAvailableWhenSupportUsim)
@@ -2706,18 +2599,14 @@ TEST_F(AosSubscriberManagerTest, FailedStartProcessWhenTimerExpiredWithInvalidTi
     m_pSubscriberManager->StartTimer(TIMER_ICC_LOADED_WAITING, 3);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
 
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
-
     m_pSubscriberManager->StartTimer(TIMER_PHONE_RESTART_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
+    EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 
     // WHEN : Expiration of an invalid timer does not affect other timers.
     m_pSubscriberManager->Timer_TimerExpired(IMS_NULL);
 
     // THEN
     EXPECT_NE(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
     EXPECT_NE(m_pSubscriberManager->m_piTimerToPhoneRestartRecovery, nullptr);
 }
 
@@ -2732,19 +2621,6 @@ TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenIccLoadedWaitingTimerExpir
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->m_piTimerToIccLoadedWaiting, nullptr);
-}
-
-TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenIsimRecoveryTimerExpired)
-{
-    // GIVEN
-    m_pSubscriberManager->StartTimer(TIMER_ISIM_RECOVERY, 3);
-    EXPECT_NE(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
-
-    // WHEN
-    m_pSubscriberManager->Timer_TimerExpired(m_pSubscriberManager->m_piTimerToIsimRecovery);
-
-    // THEN
-    EXPECT_EQ(m_pSubscriberManager->m_piTimerToIsimRecovery, nullptr);
 }
 
 TEST_F(AosSubscriberManagerTest, SucceedsStopTimerWhenRecoveryTimerExpired)
@@ -2911,7 +2787,6 @@ TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString)
 {
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_ICC_LOADED_WAITING),
             "TIMER_ICC_LOADED_WAITING");
-    EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_ISIM_RECOVERY), "TIMER_ISIM_RECOVERY");
     EXPECT_STREQ(m_pSubscriberManager->TimerToString(TIMER_PHONE_RESTART_RECOVERY),
             "TIMER_PHONE_RESTART_RECOVERY");
 }

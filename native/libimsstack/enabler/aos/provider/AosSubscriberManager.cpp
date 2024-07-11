@@ -50,9 +50,7 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_bUsim(IMS_FALSE),
         m_bUsimFallback(IMS_FALSE),
         m_bIsRefreshStarted(IMS_FALSE),
-        m_nIsimRecoveryCount(0),
         m_piTimerToIccLoadedWaiting(IMS_NULL),
-        m_piTimerToIsimRecovery(IMS_NULL),
         m_piTimerToPhoneRestartRecovery(IMS_NULL),
         m_bIsProvisioned(IMS_FALSE),
         m_bIsProvisionedForFake(IMS_FALSE),
@@ -339,21 +337,12 @@ IMS_BOOL AosSubscriberManager::IsRefreshStarted() const
 }
 
 PROTECTED
-IMS_BOOL AosSubscriberManager::IsIsimRecoveryAllowed() const
-{
-    return (m_nIsimRecoveryCount < ISIM_RECOVERY_MAX_COUNT);
-}
-
-PROTECTED
 IMS_BOOL AosSubscriberManager::IsTimerRunning(IN IMS_UINT32 nType) const
 {
     switch (nType)
     {
         case TIMER_ICC_LOADED_WAITING:
             return (m_piTimerToIccLoadedWaiting != IMS_NULL);
-
-        case TIMER_ISIM_RECOVERY:
-            return (m_piTimerToIsimRecovery != IMS_NULL);
 
         case TIMER_PHONE_RESTART_RECOVERY:
             return (m_piTimerToPhoneRestartRecovery != IMS_NULL);
@@ -373,13 +362,6 @@ PROTECTED
 IMS_UINT32 AosSubscriberManager::GetIsimAt() const
 {
     return m_nIsimIndexForImpu;
-}
-
-PROTECTED
-void AosSubscriberManager::ClearIsimRecovery()
-{
-    m_nIsimRecoveryCount = 0;
-    StopTimer(TIMER_ISIM_RECOVERY);
 }
 
 PROTECTED
@@ -1004,39 +986,6 @@ IMS_BOOL AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
     return IMS_FALSE;
 }
 
-PROTECTED
-void AosSubscriberManager::ProcessIsimRecovery()
-{
-    if (IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI))
-    {
-        ClearIsimRecovery();
-    }
-    else
-    {
-        if (IsTimerRunning(TIMER_ISIM_RECOVERY))
-        {
-            A_IMS_TRACE_D(AOSTAG, "ProcessIsimRecovery :: ignore due to exist timer", 0, 0, 0);
-            return;
-        }
-
-        if (IsIsimRecoveryAllowed())
-        {
-            StartTimer(TIMER_ISIM_RECOVERY,
-                    ISIM_RECOVERY_DEFAULT_INTERVAL * 1000 *
-                            AosUtil::GetInstance()->Pow(
-                                    ISIM_RECOVERY_DEFAULT_INTERVAL, m_nIsimRecoveryCount));
-            m_nIsimRecoveryCount++;
-            return;
-        }
-    }
-
-    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
-    {
-        piService->NotifyAosIsimState(AosIsimState::INVALID);
-    }
-}
-
 // Currently Not used
 PROTECTED
 void AosSubscriberManager::ProcessPhoneRestarted()
@@ -1050,20 +999,6 @@ PROTECTED
 void AosSubscriberManager::ProcessIccLoadedWaitingTimerExpired()
 {
     StopTimer(TIMER_ICC_LOADED_WAITING);
-}
-
-PROTECTED
-void AosSubscriberManager::ProcessIsimRecoveryTimerExpired()
-{
-    StopTimer(TIMER_ISIM_RECOVERY);
-
-    IConfigurable* piConfigurable =
-            (m_piSubscriberConfig != IMS_NULL) ? m_piSubscriberConfig->GetConfigurable() : IMS_NULL;
-
-    if (piConfigurable != IMS_NULL)
-    {
-        piConfigurable->Update(IConfigurable::CP_I_SUBSCRIBER_ALL);
-    }
 }
 
 PROTECTED
@@ -1173,10 +1108,6 @@ void AosSubscriberManager::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDurati
             ppiTimer = &m_piTimerToIccLoadedWaiting;
             break;
 
-        case TIMER_ISIM_RECOVERY:
-            ppiTimer = &m_piTimerToIsimRecovery;
-            break;
-
         case TIMER_PHONE_RESTART_RECOVERY:
             ppiTimer = &m_piTimerToPhoneRestartRecovery;
             break;
@@ -1204,10 +1135,6 @@ void AosSubscriberManager::StopTimer(IN IMS_UINT32 nType)
             ppiTimer = &m_piTimerToIccLoadedWaiting;
             break;
 
-        case TIMER_ISIM_RECOVERY:
-            ppiTimer = &m_piTimerToIsimRecovery;
-            break;
-
         case TIMER_PHONE_RESTART_RECOVERY:
             ppiTimer = &m_piTimerToPhoneRestartRecovery;
             break;
@@ -1230,11 +1157,6 @@ void AosSubscriberManager::ClearTimers()
     if (m_piTimerToIccLoadedWaiting != IMS_NULL)
     {
         StopTimer(TIMER_ICC_LOADED_WAITING);
-    }
-
-    if (m_piTimerToIsimRecovery != IMS_NULL)
-    {
-        StopTimer(TIMER_ISIM_RECOVERY);
     }
 
     if (m_piTimerToPhoneRestartRecovery != IMS_NULL)
@@ -1388,7 +1310,6 @@ void AosSubscriberManager::SubscriberConfig_InitCompleted()
             piService->NotifyAosIsimState(AosIsimState::VALID);
         }
 
-        ClearIsimRecovery();
         StopTimer(TIMER_PHONE_RESTART_RECOVERY);
         Restart();
     }
@@ -1399,8 +1320,6 @@ void AosSubscriberManager::SubscriberConfig_InitCompleted()
         // If fallback configuration is enabled, process the USIM provisioning
         if (IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM))
         {
-            ClearIsimRecovery();
-
             if (ProcessFallback(IMS_TRUE))
             {
                 Restart();
@@ -1414,8 +1333,6 @@ void AosSubscriberManager::SubscriberConfig_InitCompleted()
         else
         {
             ClearAll();
-
-            ProcessIsimRecovery();
         }
     }
 }
@@ -1429,7 +1346,6 @@ void AosSubscriberManager::SubscriberConfig_RefreshCompleted()
 
     if (CheckIsimValues())
     {
-        ClearIsimRecovery();
         StopTimer(TIMER_PHONE_RESTART_RECOVERY);
 
         Restart();
@@ -1459,8 +1375,6 @@ void AosSubscriberManager::SubscriberConfig_RefreshCompleted()
         // If fallback configuration is enabled, process the USIM provisioning
         if (IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM))
         {
-            ClearIsimRecovery();
-
             if (ProcessFallback(IMS_TRUE))
             {
                 Restart();
@@ -1475,8 +1389,6 @@ void AosSubscriberManager::SubscriberConfig_RefreshCompleted()
             ClearAll();
 
             NotifyState(IAosSubscriber::REFRESH_FAILED);
-
-            ProcessIsimRecovery();
         }
     }
 
@@ -1509,8 +1421,6 @@ void AosSubscriberManager::SubscriberConfig_NotifyError(IN IMS_SINT32 nErrorCode
     if (IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM) ||
             IsSupportFallback(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI))
     {
-        ClearIsimRecovery();
-
         if (IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY))
         {
             A_IMS_TRACE_I(AOSTAG,
@@ -1554,13 +1464,6 @@ void AosSubscriberManager::Timer_TimerExpired(IN ITimer* piTimer)
         ProcessIccLoadedWaitingTimerExpired();
         return;
     }
-
-    if (piTimer == m_piTimerToIsimRecovery)
-    {
-        ProcessIsimRecoveryTimerExpired();
-        return;
-    }
-
     if (piTimer == m_piTimerToPhoneRestartRecovery)
     {
         ProcessPhoneRestartRecoveryTimerExpired();
@@ -1666,9 +1569,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosSubscriberManager::TimerToString(IN IMS_UINT
     {
         case TIMER_ICC_LOADED_WAITING:
             return "TIMER_ICC_LOADED_WAITING";
-
-        case TIMER_ISIM_RECOVERY:
-            return "TIMER_ISIM_RECOVERY";
 
         case TIMER_PHONE_RESTART_RECOVERY:
             return "TIMER_PHONE_RESTART_RECOVERY";

@@ -70,7 +70,6 @@ protected:
     enum
     {
         TIMER_ICC_LOADED_WAITING = 100,
-        TIMER_ISIM_RECOVERY,
         TIMER_PHONE_RESTART_RECOVERY
     };
 
@@ -87,12 +86,10 @@ protected:
 
     IMS_BOOL IsProvisioned(IN IMS_BOOL bIsFake = IMS_FALSE) const;
     IMS_BOOL IsRefreshStarted() const;
-    IMS_BOOL IsIsimRecoveryAllowed() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportFallback(IN IMS_UINT32 nIdentity) const;
     IMS_UINT32 GetIsimAt() const;
 
-    void ClearIsimRecovery();
     void ConfigureAsDefault();
     void ConfigureAsFake();
 
@@ -112,10 +109,9 @@ protected:
     IMS_BOOL ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi);
     IMS_BOOL ProcessPhoneNumberAvailable(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
     IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
-    void ProcessIsimRecovery();
+
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
-    void ProcessIsimRecoveryTimerExpired();
     void ProcessPhoneRestartRecoveryTimerExpired();
 
     IMS_BOOL UpdateNConfiguration();
@@ -194,10 +190,8 @@ protected:
     IMS_BOOL m_bUsim;
     IMS_BOOL m_bUsimFallback;
     IMS_BOOL m_bIsRefreshStarted;
-    IMS_UINT32 m_nIsimRecoveryCount;
 
     ITimer* m_piTimerToIccLoadedWaiting;
-    ITimer* m_piTimerToIsimRecovery;
     ITimer* m_piTimerToPhoneRestartRecovery;
 
     IMS_BOOL m_bIsProvisioned;
@@ -215,8 +209,6 @@ protected:
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
-    static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
-    static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
     static const IMS_UINT32 DEFAULT_ISIM_INDEX_FOR_IMPU = 1;
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;
