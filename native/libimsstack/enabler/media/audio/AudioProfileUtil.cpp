@@ -77,35 +77,35 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
         return IMS_FALSE;
     }
 
-    pAudioProfile->bSupportRtcpXr = pConfig->IsRtcpXrEnabled();
+    pAudioProfile->SetSupportRtcpXr(pConfig->IsRtcpXrEnabled());
 
-    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->bSupportRtcpXr, 0, 0);
+    IMS_TRACE_D("SetRtcpXr() Support Rtcp-Xr[%d]", pAudioProfile->IsRtcpXrSupported(), 0, 0);
 
-    if (pAudioProfile->bSupportRtcpXr == IMS_TRUE)
+    if (pAudioProfile->IsRtcpXrSupported() == IMS_TRUE)
     {
         if (pConfig->IsRtcpXrVoipEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
+            pAudioProfile->GetRtcpXrAttr().SetSupportVoipMetrics(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrStatisticsEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics = IMS_TRUE;
+            pAudioProfile->GetRtcpXrAttr().SetSupportStatisticMetrics(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrPlrEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle = IMS_TRUE;
+            pAudioProfile->GetRtcpXrAttr().SetSupportPacketLossRle(IMS_TRUE);
         }
         if (pConfig->IsRtcpXrPdrEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle = IMS_TRUE;
+            pAudioProfile->GetRtcpXrAttr().SetSupportPacketDuplicatedRle(IMS_TRUE);
         }
 
         IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
-                pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics,
-                pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics,
-                pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle);
+                pAudioProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled(),
+                pAudioProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled(),
+                pAudioProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled());
         IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
-                pAudioProfile->objRtcpXrAttr.bSupportPacketDuplicatedRle, 0, 0);
+                pAudioProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled(), 0, 0);
     }
 
     return IMS_TRUE;
@@ -428,7 +428,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 
             // find max modeset
             IMS_SINT32 nMaxModeset = 0;
-            if (pAmrFmtp->nModeSetList == 0)
+            if (pAmrFmtp->GetModeSetList() == 0)
             {
                 if (nCurrCodec == AUDIO_CODEC_AMRWB)
                 {
@@ -443,21 +443,21 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             {
                 for (nMaxModeset = 8; nMaxModeset >= 0; nMaxModeset--)
                 {
-                    if (pAmrFmtp->nModeSetList & (1 << nMaxModeset))
+                    if (pAmrFmtp->GetModeSetList() & (1 << nMaxModeset))
                     {
                         break;
                     }
                 }
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
                     pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset);
             if (nCurrAs > nAsOptimal)
             {
                 nAsOptimal = nCurrAs;
             }
 
-            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->nOctetAlign,
+            nCurrAs = ConvertToBandwidthAS(nCurrCodec, pAmrFmtp->GetOctetAlign(),
                     pAudioProfile->GetIpAddress().IsIPv6Address(), nMaxModeset, IMS_TRUE);
             if (nCurrAs > nAsMax)
             {
@@ -477,7 +477,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             // find max br
             IMS_SINT32 nMaxBr = 0;
             {
-                if (pEvsFmtp->nBrList == 0)
+                if (pEvsFmtp->GetBrList() == 0)
                 {
                     nMaxBr = 6;
                 }
@@ -485,7 +485,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
                 {
                     for (nMaxBr = 6; nMaxBr >= 0; nMaxBr--)
                     {
-                        if (pEvsFmtp->nBrList & (1 << nMaxBr))
+                        if (pEvsFmtp->GetBrList() & (1 << nMaxBr))
                         {
                             break;
                         }
@@ -555,7 +555,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
             return NO_MODESET;
         }
 
-        if (pAmrFmtp->nModeSetList == 0)
+        if (pAmrFmtp->GetModeSetList() == 0)
         {
             if (strCodec.EqualsIgnoreCase("AMR"))
             {
@@ -571,7 +571,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
             IMS_SINT32 nModeSet;
             for (nModeSet = 8; nModeSet >= 0; nModeSet--)
             {
-                IMS_UINT32 nMatch = pAmrFmtp->nModeSetList & (1 << nModeSet);
+                IMS_UINT32 nMatch = pAmrFmtp->GetModeSetList() & (1 << nModeSet);
                 if (nMatch)
                 {
                     return nModeSet;
@@ -591,10 +591,10 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
         }
 
         // Primary mode
-        if (pEvsFmtp->nEvsModeSwitch != 1)
+        if (pEvsFmtp->GetEvsModeSwitch() != 1)
         {
             // check bitrate...
-            if (pEvsFmtp->nBrList == 0)
+            if (pEvsFmtp->GetBrList() == 0)
             {
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
@@ -603,7 +603,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
                 IMS_SINT32 nBitrate = 0;
                 for (nBitrate = 11; nBitrate >= 0; nBitrate--)
                 {
-                    IMS_UINT32 nMatch = pEvsFmtp->nBrList & (1 << nBitrate);
+                    IMS_UINT32 nMatch = pEvsFmtp->GetBrList() & (1 << nBitrate);
                     if (nMatch)
                     {
                         return nBitrate;
@@ -613,7 +613,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
         }
         else  // AMR IO mode
         {
-            if (pEvsFmtp->nModeSetList == 0)
+            if (pEvsFmtp->GetModeSetList() == 0)
             {
                 return EVS_IO_MODE_MAX_MODESET;
             }
@@ -622,7 +622,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
                 IMS_SINT32 nModeSet = 0;
                 for (nModeSet = 8; nModeSet >= 0; nModeSet--)
                 {
-                    IMS_UINT32 nMatch = pEvsFmtp->nModeSetList & (1 << nModeSet);
+                    IMS_UINT32 nMatch = pEvsFmtp->GetModeSetList() & (1 << nModeSet);
                     if (nMatch)
                     {
                         return nModeSet;
@@ -660,15 +660,15 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
             return NO_MODESET;
         }
 
-        if (pAmrFmtp->nModeSetList > 0)
+        if (pAmrFmtp->GetModeSetList() > 0)
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->nModeSetList, 0, 0);
-            return pAmrFmtp->nModeSetList;
+            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetModeSetList(), 0, 0);
+            return pAmrFmtp->GetModeSetList();
         }
         else
         {
-            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->nDefaultRtpModeSet, 0, 0);
-            return pAmrFmtp->nDefaultRtpModeSet;
+            IMS_TRACE_D("GetModesetList is %d", pAmrFmtp->GetDefaultRtpModeSet(), 0, 0);
+            return pAmrFmtp->GetDefaultRtpModeSet();
         }
     }
     else if (strCodec.EqualsIgnoreCase("EVS"))
@@ -681,31 +681,31 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
         }
 
         // Primary mode
-        if (pEvsFmtp->nEvsModeSwitch != 1)
+        if (pEvsFmtp->GetEvsModeSwitch() != 1)
         {
-            if (pEvsFmtp->nBrList == 0)
+            if (pEvsFmtp->GetBrList() == 0)
             {
                 IMS_TRACE_D(
-                        "nBrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
+                        "BrList is 0 -> GetModesetList is %d", EVS_PRIMARY_MODE_MAX_MODESET, 0, 0);
                 return EVS_PRIMARY_MODE_MAX_MODESET;
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->nBrList, 0, 0);
-                return pEvsFmtp->nBrList;
+                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetBrList(), 0, 0);
+                return pEvsFmtp->GetBrList();
             }
         }
         else  // AMR IO mode
         {
-            if (pEvsFmtp->nModeSetList > 0)
+            if (pEvsFmtp->GetModeSetList() > 0)
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->nModeSetList, 0, 0);
-                return pEvsFmtp->nModeSetList;
+                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetModeSetList(), 0, 0);
+                return pEvsFmtp->GetModeSetList();
             }
             else
             {
-                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->nDefaultRtpModeSet, 0, 0);
-                return pEvsFmtp->nDefaultRtpModeSet;
+                IMS_TRACE_D("GetModesetList is %d", pEvsFmtp->GetDefaultRtpModeSet(), 0, 0);
+                return pEvsFmtp->GetDefaultRtpModeSet();
             }
         }
     }
@@ -724,8 +724,8 @@ PUBLIC GLOBAL void AudioProfileUtil::SetAnbr(
 
         if (pMediaSessionConfig != IMS_NULL)
         {
-            pProfile->bAnbr = pMediaSessionConfig->IsAnbrSupported();
-            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->bAnbr, 0, 0);
+            pProfile->SetAnbr(pMediaSessionConfig->IsAnbrSupported());
+            IMS_TRACE_D("SetAnbr anbr : %d", pProfile->IsAnbrSupported(), 0, 0);
         }
     }
 }

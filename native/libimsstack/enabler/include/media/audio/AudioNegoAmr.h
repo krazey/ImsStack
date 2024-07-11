@@ -24,17 +24,17 @@ class AString;
 class AudioNegoAmr
 {
 public:
-    static AString SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* amrFmtp);
+    static AString SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp);
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
-    static void AddModeSetListToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
+    static void AddModeSetListToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
+    static void AddOctetAlignToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
     static void AddModeChangeCapabilityToFmtp(
-            IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddModeChangePeriodToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
+            IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
+    static void AddModeChangePeriodToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
     static void AddModeChangeNeighborToFmtp(
-            IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddPtimeToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
-    static void AddMaxPtimeToFmtp(IN AudioProfile::AmrFmtp* profile, OUT AString& strFmtp);
+            IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
+    static void AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
+    static void AddPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
+    static void AddMaxPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
 };
 #endif
