@@ -173,7 +173,6 @@ protected:
     // Log
     const IMS_CHAR* IdentityPriorityToString();
     static const IMS_CHAR* PrintIdentity(IN IMS_UINT32 nIdentity);
-    static const IMS_CHAR* UpdateEventToString(IN IMS_UINT32 nEvent);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

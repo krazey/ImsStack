@@ -668,56 +668,42 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     // IMPU
     if (!piConfigurable->Update(IConfigurable::CP_I_IMPU_0, strImpu))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_IMPU_0), 0, 0);
         return IMS_FALSE;
     }
 
     // IMPI
     if (!piConfigurable->Update(IConfigurable::CP_I_IMPI, strImpi))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_IMPI), 0, 0);
         return IMS_FALSE;
     }
 
     // Home Domain
     if (!piConfigurable->Update(IConfigurable::CP_I_HOME_DOMAIN_NAME, strHdn))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_HOME_DOMAIN_NAME), 0, 0);
         return IMS_FALSE;
     }
 
     // Phone Context
     if (!piConfigurable->Update(IConfigurable::CP_I_PHONE_CONTEXT, strHdn))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_PHONE_CONTEXT), 0, 0);
         return IMS_FALSE;
     }
 
     // Username
     if (!piConfigurable->Update(IConfigurable::CP_I_AUTH_USERNAME, strImpi))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_AUTH_USERNAME), 0, 0);
         return IMS_FALSE;
     }
 
     // Realm
     if (!piConfigurable->Update(IConfigurable::CP_I_AUTH_REALM, strHdn))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_AUTH_REALM), 0, 0);
         return IMS_FALSE;
     }
 
     // SCSCF
     if (!piConfigurable->Update(IConfigurable::CP_I_SERVER_SCSCF, strHdn))
     {
-        A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_SERVER_SCSCF), 0, 0);
         return IMS_FALSE;
     }
 
@@ -726,8 +712,6 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     {
         if (!piConfigurable->Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER))
         {
-            A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                    UpdateEventToString(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER), 0, 0);
             return IMS_FALSE;
         }
     }
@@ -795,16 +779,12 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
     if (!piConfigurable->Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM,
                 (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM) ? "true" : "false"))
     {
-        A_IMS_TRACE_D(AOSTAG, "Updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM), 0, 0);
         return IMS_FALSE;
     }
 
     if (!piConfigurable->Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM,
                 (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM) ? "true" : "false"))
     {
-        A_IMS_TRACE_D(AOSTAG, "Updating (%s) is failed",
-                UpdateEventToString(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM), 0, 0);
         return IMS_FALSE;
     }
 
@@ -1540,45 +1520,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosSubscriberManager::PrintIdentity(IN IMS_UINT
 
         default:
             return "CONF";
-    }
-}
-
-PROTECTED GLOBAL const IMS_CHAR* AosSubscriberManager::UpdateEventToString(IN IMS_UINT32 nEvent)
-{
-    switch (nEvent)
-    {
-        case IConfigurable::CP_I_IMPU_0:
-            return "CP_I_IMPU_0";
-
-        case IConfigurable::CP_I_IMPI:
-            return "CP_I_IMPI";
-
-        case IConfigurable::CP_I_HOME_DOMAIN_NAME:
-            return "CP_I_HOME_DOMAIN_NAME";
-
-        case IConfigurable::CP_I_PHONE_CONTEXT:
-            return "CP_I_PHONE_CONTEXT";
-
-        case IConfigurable::CP_I_AUTH_USERNAME:
-            return "CP_I_AUTH_USERNAME";
-
-        case IConfigurable::CP_I_AUTH_REALM:
-            return "CP_I_AUTH_REALM";
-
-        case IConfigurable::CP_I_SERVER_SCSCF:
-            return "CP_I_SERVER_SCSCF";
-
-        case IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER:
-            return "CP_I_WRITE_PROVISIONING_SUBSCRIBER";
-
-        case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM:
-            return "CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM";
-
-        case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM:
-            return "CP_I_SUBSCRIPTION_ATTRIBUTE_USIM";
-
-        default:
-            return "__INVALID__";
     }
 }
 

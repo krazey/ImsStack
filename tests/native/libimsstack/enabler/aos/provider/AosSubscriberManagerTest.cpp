@@ -253,9 +253,6 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsConfWhenIdentityPriorityToStringWithConf);
     // TEST : PrintIdentity
     FRIEND_TEST(AosSubscriberManagerTest, ReturnValidStringWhenPrintIdentity);
-    // TEST : UpdateEventToString
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsValidStringWhenUpdateEventToString);
-    FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenUpdateEventToStringWithInvalidEvent);
     // TEST : TimerToString
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString);
     FRIEND_TEST(AosSubscriberManagerTest, ReturnsInvalidWhenTimerToStringWithInvalidtimer);
@@ -2745,42 +2742,6 @@ TEST_F(AosSubscriberManagerTest, ReturnValidStringWhenPrintIdentity)
     EXPECT_STREQ(
             m_pSubscriberManager->PrintIdentity(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF),
             "CONF");
-}
-
-TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenUpdateEventToString)
-{
-    EXPECT_STREQ(
-            m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_IMPU_0), "CP_I_IMPU_0");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_IMPI), "CP_I_IMPI");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_HOME_DOMAIN_NAME),
-            "CP_I_HOME_DOMAIN_NAME");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_PHONE_CONTEXT),
-            "CP_I_PHONE_CONTEXT");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_AUTH_USERNAME),
-            "CP_I_AUTH_USERNAME");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_AUTH_REALM),
-            "CP_I_AUTH_REALM");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(IConfigurable::CP_I_SERVER_SCSCF),
-            "CP_I_SERVER_SCSCF");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(
-                         IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER),
-            "CP_I_WRITE_PROVISIONING_SUBSCRIBER");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(
-                         IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM),
-            "CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM");
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(
-                         IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM),
-            "CP_I_SUBSCRIPTION_ATTRIBUTE_USIM");
-}
-
-TEST_F(AosSubscriberManagerTest, ReturnsInvalidWhenUpdateEventToStringWithInvalidEvent)
-{
-    // GIVEN
-    const IMS_UINT32 INVALID_EVENT = 1000;
-
-    // WHEN
-    // THEN
-    EXPECT_STREQ(m_pSubscriberManager->UpdateEventToString(INVALID_EVENT), "__INVALID__");
 }
 
 TEST_F(AosSubscriberManagerTest, ReturnsValidStringWhenTimerToString)
