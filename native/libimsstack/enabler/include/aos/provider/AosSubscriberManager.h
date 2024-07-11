@@ -98,7 +98,7 @@ protected:
 
     IMS_BOOL CheckIsimValues();
 
-    const ISubscriberConfig* GetSubscriberConfiguration(
+    ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
     IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus);
     IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
@@ -187,8 +187,8 @@ protected:
     ImsList<IAosSubscriberManagerListener*> m_objListeners;
     ImsList<IAosSubscriberManagerListener*> m_objMonitorListeners;
 
-    const ISubscriberConfig* m_piSubscriberConfig;
-    const ISubscriberConfig* m_piSubscriberConfigFake;
+    ISubscriberConfig* m_piSubscriberConfig;
+    ISubscriberConfig* m_piSubscriberConfigFake;
 
     IMS_BOOL m_bIsim;
     IMS_BOOL m_bUsim;

@@ -681,7 +681,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetFakeImpus)
 TEST_F(AosSubscriberManagerTest, SucceedsInitWhenSubscriberConfigIsNotNull)
 {
     // GIVEN
-    EXPECT_CALL(m_objMockISubscriberConfig, SetListener(_)).Times(1);
+    EXPECT_CALL(m_objMockISubscriberConfig, SetListener(_, _)).Times(1);
 
     // WHEN
     m_pSubscriberManager->Init();
