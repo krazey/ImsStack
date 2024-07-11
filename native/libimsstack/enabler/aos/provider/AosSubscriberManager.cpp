@@ -54,6 +54,8 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_piTimerToPhoneRestartRecovery(IMS_NULL),
         m_bIsProvisioned(IMS_FALSE),
         m_bIsProvisionedForFake(IMS_FALSE),
+        m_nNotifyState(IAosSubscriber::NOT_READY),
+        m_nNotifyStateForFake(IAosSubscriber::NOT_READY),
         m_piNConfig(IMS_NULL),
         m_nIsimIndexForImpu(DEFAULT_ISIM_INDEX_FOR_IMPU),
         m_bSupportLimitedAdminSmsMode(IMS_FALSE),
@@ -1166,9 +1168,17 @@ void AosSubscriberManager::ClearTimers()
 }
 
 PROTECTED
-void AosSubscriberManager::NotifyState(IN IMS_UINT32 nState) const
+void AosSubscriberManager::NotifyState(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyState - State(%s)", StateToString(nState), 0, 0);
+    if (m_nNotifyState == nState)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(AOSTAG, "NotifyState :: Current(%s) -> New(%s)", StateToString(m_nNotifyState),
+            StateToString(nState), 0);
+    m_nNotifyState = nState;
+
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
         IAosSubscriberManagerListener* piListener = m_objListeners.GetAt(i);
@@ -1181,9 +1191,17 @@ void AosSubscriberManager::NotifyState(IN IMS_UINT32 nState) const
 }
 
 PROTECTED
-void AosSubscriberManager::NotifyMonitorState(IN IMS_UINT32 nState) const
+void AosSubscriberManager::NotifyMonitorState(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyMonitorState - State(%s)", StateToString(nState), 0, 0);
+    if (m_nNotifyStateForFake == nState)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(AOSTAG, "NotifyMonitorState :: Current(%s) -> New(%s)",
+            StateToString(m_nNotifyStateForFake), StateToString(nState), 0);
+    m_nNotifyStateForFake = nState;
+
     for (IMS_UINT32 i = 0; i < m_objMonitorListeners.GetSize(); ++i)
     {
         IAosSubscriberManagerListener* piListener = m_objMonitorListeners.GetAt(i);
@@ -1464,6 +1482,7 @@ void AosSubscriberManager::Timer_TimerExpired(IN ITimer* piTimer)
         ProcessIccLoadedWaitingTimerExpired();
         return;
     }
+
     if (piTimer == m_piTimerToPhoneRestartRecovery)
     {
         ProcessPhoneRestartRecoveryTimerExpired();

@@ -120,8 +120,8 @@ protected:
     void StopTimer(IN IMS_UINT32 nType);
     void ClearTimers();
 
-    void NotifyState(IN IMS_UINT32 nState) const;
-    void NotifyMonitorState(IN IMS_UINT32 nState) const;
+    void NotifyState(IN IMS_UINT32 nState);
+    void NotifyMonitorState(IN IMS_UINT32 nState);
 
     IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus);
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
@@ -196,6 +196,9 @@ protected:
 
     IMS_BOOL m_bIsProvisioned;
     IMS_BOOL m_bIsProvisionedForFake;
+
+    IMS_UINT32 m_nNotifyState;
+    IMS_UINT32 m_nNotifyStateForFake;
 
     AStringArray m_objPuids;
     AStringArray m_objPuidsForFake;
