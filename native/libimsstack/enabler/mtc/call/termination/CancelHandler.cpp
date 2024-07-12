@@ -22,6 +22,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+LOCAL const AString SIP_PROTOCOL = "SIP";
 LOCAL const AString REASON_TEXT_CALL_BUSY = "busy everywhere";
 LOCAL const AString REASON_TEXT_CALL_COMPLETED = "call completed elsewhere";
 LOCAL const AString REASON_TEXT_CALL_DECLINED = "declined";
@@ -41,8 +42,8 @@ CancelHandler::~CancelHandler() {}
 PUBLIC
 CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
-    ReasonHeaderValue objValue =
-            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
+    ReasonHeaderValue objValue = m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(
+            &objMessage, SIP_PROTOCOL);
     IMS_TRACE_D("Handle : [%d] [%s]", objValue.nCause, objValue.strText.GetStr(), 0);
 
     return GetCallReasonInfoFromReasonHeader(objValue.nCause, objValue.strText);
