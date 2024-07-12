@@ -21,6 +21,7 @@
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
 #include "ImsIdentity.h"
+#include "IAosService.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -97,22 +98,27 @@ protected:
 
     ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
-    IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus);
-    IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
+    IMS_BOOL UpdateImpuFromIsim(OUT AStringArray& objImpus);
+    IMS_BOOL UpdateSubscriberInfoWithTempImpu(
+            OUT AStringArray& objImpus, IN IMS_BOOL bIsIsim = IMS_FALSE);
 
     void RemoveImpu() const;
     IMS_BOOL UpdateImsi() const;
-    IMS_BOOL UpdateImsIdentity(IN IMS_UINT32 nIdentity);
+    void UpdateImsIdentity(IN IMS_UINT32 nIdentity);
     IMS_UINT32 GetIdentity(IN Index eIndex) const;
 
-    IMS_BOOL ProcessFallback(IN IMS_BOOL bToUsim);
-    IMS_BOOL ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi);
+    IMS_BOOL ReconfigureFallback(IN IMS_BOOL bToUsim);
     IMS_BOOL ProcessPhoneNumberAvailable();
     IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
 
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
     void ProcessPhoneRestartRecoveryTimerExpired();
+    void ProcessValidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+    void ProcessInvalidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+
+    IMS_BOOL CheckAndTryUsimFallback();
+    IMS_BOOL CheckAndTryIsimImsiFallback();
 
     IMS_BOOL UpdateNConfiguration();
 
@@ -122,6 +128,7 @@ protected:
 
     void NotifyState(IN IMS_UINT32 nState);
     void NotifyMonitorState(IN IMS_UINT32 nState);
+    void NotifyAosIsimState(IN AosIsimState eState);
 
     IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus);
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
@@ -198,6 +205,7 @@ protected:
 
     IMS_UINT32 m_nNotifyState;
     IMS_UINT32 m_nNotifyStateForFake;
+    AosIsimState m_eNotifyIsimState;
 
     AStringArray m_objPuids;
     AStringArray m_objPuidsForFake;
