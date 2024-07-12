@@ -302,7 +302,7 @@ void MtcUiNotifier::SendUpdated()
     }
 
     piThread->OnUpdated(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetUpdatingInfo().GetModifiedMediaInfoWithOriginalAudioDir(),
             m_objContext.GetSupplementaryService().GetServices());
 }
 

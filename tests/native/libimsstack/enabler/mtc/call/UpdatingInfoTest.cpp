@@ -98,6 +98,18 @@ TEST_F(UpdatingInfoTest, IsAlertedReturnsTrueAfterSet)
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsAlerted());
 }
 
+TEST_F(UpdatingInfoTest, GetModifiedMediaInfoWithOriginalAudioDirReturnsCorrectInfo)
+{
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objModifiedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    EXPECT_EQ(DIRECTION_SEND,
+            pUpdatingInfo->GetModifiedMediaInfoWithOriginalAudioDir().eAudioDirection);
+}
+
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToHeld)
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();

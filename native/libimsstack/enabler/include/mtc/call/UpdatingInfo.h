@@ -43,6 +43,7 @@ public:
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
     inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
+    MediaInfo GetModifiedMediaInfoWithOriginalAudioDir() const;
 
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;
