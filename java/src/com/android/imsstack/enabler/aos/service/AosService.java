@@ -75,10 +75,34 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener,
          IDcNetWatcher.Listener, IApn.Listener, ImsPhoneStateListener {
 
+    /** public constants */
     public static final int PCO_TARGET_ID = 0xff00;
     public static final int PCO_NONE_VALUE = 0;
 
-    private final LocationInterface.Listener mLocationListener = new LocationInterface.Listener() {
+    /** private members */
+    private long mNativeObject = 0;
+    private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
+    private Handler mHandler;
+    private RegistrationState mRegState = RegistrationState.DEREGISTERED;
+    private NativeStateListener mNativeStateListener;
+    private IPhoneStateNotifier mNotifier;
+
+    /** package-private members */
+    int mRegisteredNetworkType = NetworkType.NONE;
+    int mFeatureTagBits = 0;
+    int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    boolean mIsConnectedOverCrossSim = false;
+    CapabilityPairs mCapabilityPairs;
+
+    /** Final collections */
+    final Set<IAosRegistrationListener> mAosRegistrationListeners = new CopyOnWriteArraySet<>();
+    final Set<IAosInfoListener> mAosInfoListeners = new CopyOnWriteArraySet<>();
+    final Set<String> mFeatureTags = new CopyOnWriteArraySet<>();
+
+    /** Final listeners */
+    final ImsServiceRegistryListener mServiceRegistryListener = new ImsServiceRegistryListener();
+    final JniImsListenerProxy mJniImsListenerProxy = new JniImsListenerProxy();
+    final LocationInterface.Listener mLocationListener = new LocationInterface.Listener() {
         @Override
         public void onLastKnownCountryUpdated() {
             sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO,
@@ -91,41 +115,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     LocationInfo.FIXED.getValue());
         }
     };
-    private Handler mHandler;
-
-    @VisibleForTesting
-    final Set<IAosRegistrationListener> mAosRegistrationListeners =
-            new CopyOnWriteArraySet<IAosRegistrationListener>();
-    @VisibleForTesting
-    final Set<IAosInfoListener> mAosInfoListeners = new CopyOnWriteArraySet<IAosInfoListener>();
-
-    @VisibleForTesting
-    final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
-
-    @VisibleForTesting
-    CapabilityPairs mCapabilityPairs;
-
-    private long mNativeObject = 0;
-    @VisibleForTesting
-    JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
-    private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
-
-    @VisibleForTesting
-    int mRegisteredNetworkType = NetworkType.NONE;
-
-    private RegistrationState mRegState = RegistrationState.DEREGISTERED;
-
-    @VisibleForTesting
-    int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
-
-    @VisibleForTesting
-    int mFeatureTagBits = 0;
-    @VisibleForTesting
-    final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
-    @VisibleForTesting
-    boolean mIsConnectedOverCrossSim = false;
-    private NativeStateListener mNativeStateListener;
-    private IPhoneStateNotifier mNotifier = null;
 
     public void init(int slotId) {
         mSlotId = slotId;
@@ -134,7 +123,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         mNativeObject = JniImsProxy.getInterface(JniObjectId.AOS, mSlotId);
         if (mNativeObject != 0) {
-            JniImsProxy.setListener(mNativeObject, mNativeListener);
+            JniImsProxy.setListener(mNativeObject, mJniImsListenerProxy);
         }
 
         NativeStateInterface nsi =
@@ -145,12 +134,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
 
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
-        isr.addListener(mListener);
+        isr.addListener(mServiceRegistryListener);
     }
 
     public void cleanup() {
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
-        isr.removeListener(mListener);
+        isr.removeListener(mServiceRegistryListener);
 
         if (mNativeStateListener != null) {
             NativeStateInterface nsi =
@@ -947,6 +936,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    @VisibleForTesting
+    ImsServiceRegistryListener getServiceRegistryListener() {
+        return mServiceRegistryListener;
+    }
+
     private class ImsServiceRegistryListener implements ImsServiceRegistry.Listener {
         @Override
         public void onImsOnOffChanged() {
@@ -954,7 +948,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private class JNIImsListenerProxy implements JniImsListener {
+
+    @VisibleForTesting
+    JniImsListenerProxy getJniImsListenerProxy() {
+        return mJniImsListenerProxy;
+    }
+
+    private class JniImsListenerProxy implements JniImsListener {
 
         @Override
         public void onMessage(Parcel parcel) {
