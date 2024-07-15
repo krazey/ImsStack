@@ -797,19 +797,19 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     if (pProfile->IsRtcpXrSupported() == IMS_TRUE &&
             pProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
-        if (pProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled())
+        if (pProfile->GetRtcpXrAttr().IsStatisticMetricsSupported())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "stat-summary=loss,dup,jitt,HL");
         }
-        if (pProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled())
+        if (pProfile->GetRtcpXrAttr().IsVoipMetricsSupported())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "voip-metrics");
         }
-        if (pProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled())
+        if (pProfile->GetRtcpXrAttr().IsPacketLossRleSupported())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-loss-rle");
         }
-        if (pProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled())
+        if (pProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported())
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-dup-rle");
         }
@@ -1146,12 +1146,11 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
                 pAmrFmtp->SetDtx(pSrc_Fmtp->IsDtxEnabled());
 
-                pAmrFmtp->SetShowModeChangeCapability(
-                        pSrc_Fmtp->IsShowModeChangeCapabilityEnabled());
+                pAmrFmtp->SetShowModeChangeCapability(pSrc_Fmtp->IsModeChangeCapabilityVisible());
                 pAmrFmtp->SetModeChangeCapability(pSrc_Fmtp->GetModeChangeCapability());
-                pAmrFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsShowModeChangeNeighborEnabled());
+                pAmrFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsModeChangeNeighborVisible());
                 pAmrFmtp->SetModeChangeNeighbor(pSrc_Fmtp->GetModeChangeNeighbor());
-                pAmrFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsShowModeChangePeriodEnabled());
+                pAmrFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsModeChangePeriodVisible());
                 pAmrFmtp->SetModeChangePeriod(pSrc_Fmtp->GetModeChangePeriod());
 
                 pAMR->SetFmtp(pAmrFmtp);
@@ -1217,12 +1216,11 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             0, 0, 0);
                 }
 
-                pEvsFmtp->SetShowModeChangeCapability(
-                        pSrc_Fmtp->IsShowModeChangeCapabilityEnabled());
+                pEvsFmtp->SetShowModeChangeCapability(pSrc_Fmtp->IsModeChangeCapabilityVisible());
                 pEvsFmtp->SetModeChangeCapability(pSrc_Fmtp->GetModeChangeCapability());
-                pEvsFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsShowModeChangeNeighborEnabled());
+                pEvsFmtp->SetShowModeChangeNeighbor(pSrc_Fmtp->IsModeChangeNeighborVisible());
                 pEvsFmtp->SetModeChangeNeighbor(pSrc_Fmtp->GetModeChangeNeighbor());
-                pEvsFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsShowModeChangePeriodEnabled());
+                pEvsFmtp->SetShowModeChangePeriod(pSrc_Fmtp->IsModeChangePeriodVisible());
                 pEvsFmtp->SetModeChangePeriod(pSrc_Fmtp->GetModeChangePeriod());
 
                 // check uni direction attribute
@@ -2046,8 +2044,7 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
                     if (bIsOfferReceived != IMS_TRUE)
                     {
                         pReceivedFmtp->SetChAwRecv(pCompareFmtp->GetChAwRecv());
-                        pReceivedFmtp->SetShowChannelAwMode(
-                                pCompareFmtp->IsShowChannelAwModeEnabled());
+                        pReceivedFmtp->SetShowChannelAwMode(pCompareFmtp->IsChannelAwModeVisible());
                     }
                 }
 

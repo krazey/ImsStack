@@ -127,33 +127,33 @@ public:
         {
             m_bShowModeSet = bShowModeSet;
         }
-        inline IMS_BOOL IsShowModeSetEnabled() { return m_bShowModeSet; }
+        inline IMS_BOOL IsModeSetVisible() { return m_bShowModeSet; }
         inline void SetShowModeChangeCapability(IN const IMS_BOOL bShowModeChangeCapability)
         {
             m_bShowModeChangeCapability = bShowModeChangeCapability;
         }
-        inline IMS_BOOL IsShowModeChangeCapabilityEnabled() { return m_bShowModeChangeCapability; }
+        inline IMS_BOOL IsModeChangeCapabilityVisible() { return m_bShowModeChangeCapability; }
         inline void SetShowModeChangePeriod(IN const IMS_BOOL bShowModeChangePeriod)
         {
             m_bShowModeChangePeriod = bShowModeChangePeriod;
         }
-        inline IMS_BOOL IsShowModeChangePeriodEnabled() { return m_bShowModeChangePeriod; }
+        inline IMS_BOOL IsModeChangePeriodVisible() { return m_bShowModeChangePeriod; }
         inline void SetShowModeChangeNeighbor(IN const IMS_BOOL bShowModeChangeNeighbor)
         {
             m_bShowModeChangeNeighbor = bShowModeChangeNeighbor;
         }
-        inline IMS_BOOL IsShowModeChangeNeighborEnabled() { return m_bShowModeChangeNeighbor; }
+        inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bShowModeChangeNeighbor; }
         inline void SetShowMaxRed(IN const IMS_BOOL bShowMaxRed) { m_bShowMaxRed = bShowMaxRed; }
-        inline IMS_BOOL IsShowMaxRedEnabled() { return m_bShowMaxRed; }
+        inline IMS_BOOL IsMaxRedVisible() { return m_bShowMaxRed; }
         inline void SetShowPtime(IN const IMS_BOOL bShowPtime) { m_bShowPtime = bShowPtime; }
-        inline IMS_BOOL IsShowPtimeEnabled() { return m_bShowPtime; }
+        inline IMS_BOOL IsPtimeVisible() { return m_bShowPtime; }
         inline void SetShowMaxPtime(IN const IMS_BOOL bShowMaxPtime)
         {
             m_bShowMaxPtime = bShowMaxPtime;
         }
-        inline IMS_BOOL IsShowMaxPtimeEnabled() { return m_bShowMaxPtime; }
+        inline IMS_BOOL IsMaxPtimeVisible() { return m_bShowMaxPtime; }
         inline void SetShowDtx(IN const IMS_BOOL bShowDtx) { m_bShowDtx = bShowDtx; }
-        inline IMS_BOOL IsShowDtxEnabled() { return m_bShowDtx; }
+        inline IMS_BOOL IsDtxVisible() { return m_bShowDtx; }
 
     private:
         IMS_UINT32 m_nModeSetList;
@@ -209,7 +209,7 @@ public:
         {
             m_bShowOctetAlign = bShowOctetAlign;
         }
-        inline IMS_BOOL IsShowOctetAlignEnabled() { return m_bShowOctetAlign; }
+        inline IMS_BOOL IsOctetAlignVisible() { return m_bShowOctetAlign; }
 
     private:
         IMS_SINT32 m_nOctetAlign;
@@ -311,23 +311,23 @@ public:
         }
         inline IMS_SINT32 GetReceivedChAwRecv() { return m_nReceivedChAwRecv; }
         inline void SetShowHfOnly(IN const IMS_BOOL bShowHfOnly) { m_bShowHfOnly = bShowHfOnly; }
-        inline IMS_BOOL IsShowHfOnlyEnabled() { return m_bShowHfOnly; }
+        inline IMS_BOOL IsHfOnlyVisible() { return m_bShowHfOnly; }
         inline void SetShowEvsModeSwitch(IN const IMS_BOOL bShowEvsModeSwitch)
         {
             m_bShowEvsModeSwitch = bShowEvsModeSwitch;
         }
-        inline IMS_BOOL IsShowEvsModeSwitchEnabled() { return m_bShowEvsModeSwitch; }
+        inline IMS_BOOL IsEvsModeSwitchVisible() { return m_bShowEvsModeSwitch; }
         inline void SetShowCmr(IN const IMS_BOOL bShowCmr) { m_bShowCmr = bShowCmr; }
-        inline IMS_BOOL IsShowCmrEnabled() { return m_bShowCmr; }
+        inline IMS_BOOL IsCmrVisible() { return m_bShowCmr; }
         inline void SetShowChannelAwMode(IN const IMS_BOOL bShowChannelAwMode)
         {
             m_bShowChannelAwMode = bShowChannelAwMode;
         }
-        inline IMS_BOOL IsShowChannelAwModeEnabled() { return m_bShowChannelAwMode; }
+        inline IMS_BOOL IsChannelAwModeVisible() { return m_bShowChannelAwMode; }
         inline void SetShowBrList(IN const IMS_BOOL bShowBrList) { m_bShowBrList = bShowBrList; }
-        inline IMS_BOOL IsShowBrListEnabled() { return m_bShowBrList; }
+        inline IMS_BOOL IsBrListVisible() { return m_bShowBrList; }
         inline void SetShowBwList(IN const IMS_BOOL bShowBwList) { m_bShowBwList = bShowBwList; }
-        inline IMS_BOOL IsShowBwListEnabled() { return m_bShowBwList; }
+        inline IMS_BOOL IsBwListVisible() { return m_bShowBwList; }
         inline void SetSendCmr(IN const IMS_BOOL bSendCmr) { m_bSendCmr = bSendCmr; }
         inline IMS_BOOL IsSendCmrEnabled() { return m_bSendCmr; }
 
@@ -493,25 +493,22 @@ public:
         {
             m_bSupportStatisticMetrics = bSupportStatisticMetrics;
         }
-        inline IMS_BOOL IsSupportStatisticMetricsEnabled() { return m_bSupportStatisticMetrics; }
+        inline IMS_BOOL IsStatisticMetricsSupported() { return m_bSupportStatisticMetrics; }
         inline void SetSupportVoipMetrics(IN const IMS_BOOL bSupportVoipMetrics)
         {
             m_bSupportVoipMetrics = bSupportVoipMetrics;
         }
-        inline IMS_BOOL IsSupportVoipMetricsEnabled() { return m_bSupportVoipMetrics; }
+        inline IMS_BOOL IsVoipMetricsSupported() { return m_bSupportVoipMetrics; }
         inline void SetSupportPacketLossRle(IN const IMS_BOOL bSupportPacketLossRle)
         {
             m_bSupportPacketLossRle = bSupportPacketLossRle;
         }
-        inline IMS_BOOL IsSupportPacketLossRleEnabled() { return m_bSupportPacketLossRle; }
+        inline IMS_BOOL IsPacketLossRleSupported() { return m_bSupportPacketLossRle; }
         inline void SetSupportPacketDuplicatedRle(IN const IMS_BOOL bSupportPacketDuplicatedRle)
         {
             m_bSupportPacketDuplicatedRle = bSupportPacketDuplicatedRle;
         }
-        inline IMS_BOOL IsSupportPacketDuplicatedRleEnabled()
-        {
-            return m_bSupportPacketDuplicatedRle;
-        }
+        inline IMS_BOOL IsPacketDuplicatedRleSupported() { return m_bSupportPacketDuplicatedRle; }
 
     private:
         IMS_BOOL m_bSupportStatisticMetrics;

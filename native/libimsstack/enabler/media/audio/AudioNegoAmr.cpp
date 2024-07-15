@@ -64,10 +64,10 @@ PUBLIC void AudioNegoAmr::AddModeSetListToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeSetListToFmtp() mode-set list=%d, show mode-set=%d",
-            pAmrFmtp->GetModeSetList(), pAmrFmtp->IsShowModeSetEnabled(), 0);
+    IMS_TRACE_I("AddModeSetListToFmtp() mode-set list=%d, visible mode-set=%d",
+            pAmrFmtp->GetModeSetList(), pAmrFmtp->IsModeSetVisible(), 0);
 
-    if (pAmrFmtp->GetModeSetList() != 0 && pAmrFmtp->IsShowModeSetEnabled() == IMS_TRUE)
+    if (pAmrFmtp->GetModeSetList() != 0 && pAmrFmtp->IsModeSetVisible() == IMS_TRUE)
     {
         AString strMode, strTemp;
         IMS_UINT32 nModeSet;
@@ -97,10 +97,10 @@ PUBLIC void AudioNegoAmr::AddOctetAlignToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, show=%d", pAmrFmtp->GetOctetAlign(),
-            pAmrFmtp->IsShowOctetAlignEnabled(), 0);
+    IMS_TRACE_I("AddOctetAlignToFmtp() octet-align=%d, visible=%d", pAmrFmtp->GetOctetAlign(),
+            pAmrFmtp->IsOctetAlignVisible(), 0);
 
-    if (pAmrFmtp->IsShowOctetAlignEnabled() == IMS_TRUE)
+    if (pAmrFmtp->IsOctetAlignVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -118,10 +118,10 @@ PUBLIC void AudioNegoAmr::AddModeChangeCapabilityToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, show=%d",
-            pAmrFmtp->GetModeChangeCapability(), pAmrFmtp->IsShowModeChangeCapabilityEnabled(), 0);
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, visible=%d",
+            pAmrFmtp->GetModeChangeCapability(), pAmrFmtp->IsModeChangeCapabilityVisible(), 0);
 
-    if (pAmrFmtp->IsShowModeChangeCapabilityEnabled() == IMS_TRUE)
+    if (pAmrFmtp->IsModeChangeCapabilityVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -139,10 +139,10 @@ PUBLIC void AudioNegoAmr::AddModeChangePeriodToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, show=%d",
-            pAmrFmtp->GetModeChangePeriod(), pAmrFmtp->IsShowModeChangePeriodEnabled(), 0);
+    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, visible=%d",
+            pAmrFmtp->GetModeChangePeriod(), pAmrFmtp->IsModeChangePeriodVisible(), 0);
 
-    if (pAmrFmtp->IsShowModeChangePeriodEnabled() == IMS_TRUE)
+    if (pAmrFmtp->IsModeChangePeriodVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -160,10 +160,10 @@ PUBLIC void AudioNegoAmr::AddModeChangeNeighborToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, show=%d",
-            pAmrFmtp->GetModeChangeNeighbor(), pAmrFmtp->IsShowModeChangeNeighborEnabled(), 0);
+    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, visible=%d",
+            pAmrFmtp->GetModeChangeNeighbor(), pAmrFmtp->IsModeChangeNeighborVisible(), 0);
 
-    if (pAmrFmtp->IsShowModeChangeNeighborEnabled() == IMS_TRUE)
+    if (pAmrFmtp->IsModeChangeNeighborVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -180,10 +180,10 @@ PUBLIC void AudioNegoAmr::AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OU
         return;
     }
 
-    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, show=%d", pAmrFmtp->GetMaxRed(),
-            pAmrFmtp->IsShowMaxRedEnabled(), 0);
+    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, visible=%d", pAmrFmtp->GetMaxRed(),
+            pAmrFmtp->IsMaxRedVisible(), 0);
 
-    if (pAmrFmtp->IsShowMaxRedEnabled() == IMS_TRUE)
+    if (pAmrFmtp->IsMaxRedVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -200,11 +200,11 @@ PUBLIC void AudioNegoAmr::AddPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT
         return;
     }
 
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, show=%d", pAmrFmtp->GetPtime(),
-            pAmrFmtp->IsShowPtimeEnabled(), 0);
+    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, visible=%d", pAmrFmtp->GetPtime(),
+            pAmrFmtp->IsPtimeVisible(), 0);
 
     if (pAmrFmtp->GetPtime() != AudioProfile::AmrFmtp::DEFAULT_PTIME &&
-            pAmrFmtp->IsShowPtimeEnabled() == IMS_TRUE)
+            pAmrFmtp->IsPtimeVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -222,11 +222,11 @@ PUBLIC void AudioNegoAmr::AddMaxPtimeToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddMaxPtimeToFmtp() maxptime=%d, show=%d", pAmrFmtp->GetMaxPtime(),
-            pAmrFmtp->IsShowMaxPtimeEnabled(), 0);
+    IMS_TRACE_I("AddMaxPtimeToFmtp() maxptime=%d, visible=%d", pAmrFmtp->GetMaxPtime(),
+            pAmrFmtp->IsMaxPtimeVisible(), 0);
 
     if (pAmrFmtp->GetMaxPtime() != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME &&
-            pAmrFmtp->IsShowMaxPtimeEnabled() == IMS_TRUE)
+            pAmrFmtp->IsMaxPtimeVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 

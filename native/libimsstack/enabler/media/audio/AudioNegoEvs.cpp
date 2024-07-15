@@ -74,11 +74,11 @@ PUBLIC void AudioNegoEvs::AddPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT
         return;
     }
 
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, show=%d", pEvsFmtp->GetPtime(),
-            pEvsFmtp->IsShowMaxPtimeEnabled(), 0);
+    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, visible=%d", pEvsFmtp->GetPtime(),
+            pEvsFmtp->IsMaxPtimeVisible(), 0);
 
     if (pEvsFmtp->GetPtime() != AudioProfile::EvsFmtp::DEFAULT_PTIME &&
-            pEvsFmtp->IsShowPtimeEnabled() == IMS_TRUE)
+            pEvsFmtp->IsPtimeVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -96,11 +96,11 @@ PUBLIC void AudioNegoEvs::AddMaxPtimeToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddMaxPtimeToFmtp() ptime=%d, show=%d", pEvsFmtp->GetMaxPtime(),
-            pEvsFmtp->IsShowMaxPtimeEnabled(), 0);
+    IMS_TRACE_I("AddMaxPtimeToFmtp() ptime=%d, visible=%d", pEvsFmtp->GetMaxPtime(),
+            pEvsFmtp->IsMaxPtimeVisible(), 0);
 
     if (pEvsFmtp->GetMaxPtime() != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
-            pEvsFmtp->IsShowMaxPtimeEnabled() == IMS_TRUE)
+            pEvsFmtp->IsMaxPtimeVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -117,10 +117,10 @@ PUBLIC void AudioNegoEvs::AddDtxToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT A
         return;
     }
 
-    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, show=%d", pEvsFmtp->IsDtxEnabled(),
-            pEvsFmtp->IsShowDtxEnabled(), 0);
+    IMS_TRACE_I("AddDtxToFmtp() dtx=%d, visible=%d", pEvsFmtp->IsDtxEnabled(),
+            pEvsFmtp->IsDtxVisible(), 0);
 
-    if (pEvsFmtp->IsShowDtxEnabled() == IMS_TRUE)
+    if (pEvsFmtp->IsDtxVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -137,10 +137,10 @@ PUBLIC void AudioNegoEvs::AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OU
         return;
     }
 
-    IMS_TRACE_I("AddHfOnlyToFmtp() hf-only=%d, show=%d", pEvsFmtp->GetHfOnly(),
-            pEvsFmtp->IsShowHfOnlyEnabled(), 0);
+    IMS_TRACE_I("AddHfOnlyToFmtp() hf-only=%d, visible=%d", pEvsFmtp->GetHfOnly(),
+            pEvsFmtp->IsHfOnlyVisible(), 0);
 
-    if (pEvsFmtp->IsShowHfOnlyEnabled() == IMS_TRUE)
+    if (pEvsFmtp->IsHfOnlyVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -158,10 +158,10 @@ PUBLIC void AudioNegoEvs::AddEvsModeSwitchToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddEvsModeSwitchToFmtp() evs-mode-switch=%d, show=%d",
-            pEvsFmtp->GetEvsModeSwitch(), pEvsFmtp->IsShowEvsModeSwitchEnabled(), 0);
+    IMS_TRACE_I("AddEvsModeSwitchToFmtp() evs-mode-switch=%d, visible=%d",
+            pEvsFmtp->GetEvsModeSwitch(), pEvsFmtp->IsEvsModeSwitchVisible(), 0);
 
-    if (pEvsFmtp->IsShowEvsModeSwitchEnabled() == IMS_TRUE)
+    if (pEvsFmtp->IsEvsModeSwitchVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -178,10 +178,10 @@ PUBLIC void AudioNegoEvs::AddMaxRedToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OU
         return;
     }
 
-    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, show=%d", pEvsFmtp->GetMaxRed(),
-            pEvsFmtp->IsShowMaxRedEnabled(), 0);
+    IMS_TRACE_I("AddMaxRedToFmtp() max-red=%d, visible=%d", pEvsFmtp->GetMaxRed(),
+            pEvsFmtp->IsMaxRedVisible(), 0);
 
-    if (pEvsFmtp->IsShowMaxRedEnabled() == IMS_TRUE)
+    if (pEvsFmtp->IsMaxRedVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -198,10 +198,10 @@ PUBLIC void AudioNegoEvs::AddBwToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AS
         return;
     }
 
-    IMS_TRACE_I("AddBwToFmtp() bw-list=%d, show=%d", pEvsFmtp->GetBwList(),
-            pEvsFmtp->IsShowBwListEnabled(), 0);
+    IMS_TRACE_I("AddBwToFmtp() bw-list=%d, visible=%d", pEvsFmtp->GetBwList(),
+            pEvsFmtp->IsBwListVisible(), 0);
 
-    if (pEvsFmtp->GetBwList() != 0 && pEvsFmtp->IsShowBwListEnabled())
+    if (pEvsFmtp->GetBwList() != 0 && pEvsFmtp->IsBwListVisible())
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -253,10 +253,10 @@ PUBLIC void AudioNegoEvs::AddBrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AS
         return;
     }
 
-    IMS_TRACE_I("AddBrToFmtp() br-list=%d, show=%d", pEvsFmtp->GetBrList(),
-            pEvsFmtp->IsShowBrListEnabled(), 0);
+    IMS_TRACE_I("AddBrToFmtp() br-list=%d, visible=%d", pEvsFmtp->GetBrList(),
+            pEvsFmtp->IsBrListVisible(), 0);
 
-    if (pEvsFmtp->IsShowBrListEnabled() == IMS_TRUE)
+    if (pEvsFmtp->IsBrListVisible() == IMS_TRUE)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -304,9 +304,9 @@ PUBLIC void AudioNegoEvs::AddCmrToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT A
     }
 
     IMS_TRACE_I(
-            "AddCmrToFmtp() cmr=%d, show=%d", pEvsFmtp->GetCmr(), pEvsFmtp->IsShowCmrEnabled(), 0);
+            "AddCmrToFmtp() cmr=%d, visible=%d", pEvsFmtp->GetCmr(), pEvsFmtp->IsCmrVisible(), 0);
 
-    if (pEvsFmtp->IsShowCmrEnabled() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
+    if (pEvsFmtp->IsCmrVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -324,10 +324,10 @@ PUBLIC void AudioNegoEvs::AddChannelAwModeToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddChannelAwModeToFmtp() ch-aw-recv=%d, show=%d", pEvsFmtp->GetChAwRecv(),
-            pEvsFmtp->IsShowChannelAwModeEnabled(), 0);
+    IMS_TRACE_I("AddChannelAwModeToFmtp() ch-aw-recv=%d, visible=%d", pEvsFmtp->GetChAwRecv(),
+            pEvsFmtp->IsChannelAwModeVisible(), 0);
 
-    if (pEvsFmtp->IsShowChannelAwModeEnabled() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
+    if (pEvsFmtp->IsChannelAwModeVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() != 1)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -345,10 +345,10 @@ PUBLIC void AudioNegoEvs::AddModeSetListToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, show=%d", pEvsFmtp->GetModeSetList(),
-            pEvsFmtp->IsShowModeSetEnabled(), 0);
+    IMS_TRACE_I("AddModeSetListToFmtp() mode-set=%d, visible=%d", pEvsFmtp->GetModeSetList(),
+            pEvsFmtp->IsModeSetVisible(), 0);
 
-    if (pEvsFmtp->GetModeSetList() != 0 && pEvsFmtp->IsShowModeSetEnabled())
+    if (pEvsFmtp->GetModeSetList() != 0 && pEvsFmtp->IsModeSetVisible())
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -379,11 +379,10 @@ PUBLIC void AudioNegoEvs::AddModeChangeCapabilityToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, show=%d",
-            pEvsFmtp->GetModeChangeCapability(), pEvsFmtp->IsShowModeChangeCapabilityEnabled(), 0);
+    IMS_TRACE_I("AddModeChangeCapabilityToFmtp() mode-change-capability=%d, visible=%d",
+            pEvsFmtp->GetModeChangeCapability(), pEvsFmtp->IsModeChangeCapabilityVisible(), 0);
 
-    if (pEvsFmtp->IsShowModeChangeCapabilityEnabled() == IMS_TRUE &&
-            pEvsFmtp->GetEvsModeSwitch() == 1)
+    if (pEvsFmtp->IsModeChangeCapabilityVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -401,10 +400,10 @@ PUBLIC void AudioNegoEvs::AddModeChangePeriodToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, show=%d",
-            pEvsFmtp->GetModeChangePeriod(), pEvsFmtp->IsShowModeChangePeriodEnabled(), 0);
+    IMS_TRACE_I("AddModeChangePeriodToFmtp() mode-change-period=%d, visible=%d",
+            pEvsFmtp->GetModeChangePeriod(), pEvsFmtp->IsModeChangePeriodVisible(), 0);
 
-    if (pEvsFmtp->IsShowModeChangePeriodEnabled() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
+    if (pEvsFmtp->IsModeChangePeriodVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 
@@ -422,11 +421,10 @@ PUBLIC void AudioNegoEvs::AddModeChangeNeighborToFmtp(
         return;
     }
 
-    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, show=%d",
-            pEvsFmtp->GetModeChangeNeighbor(), pEvsFmtp->IsShowModeChangeNeighborEnabled(), 0);
+    IMS_TRACE_I("AddModeChangeNeighborToFmtp() mode-change-neighbor=%d, visible=%d",
+            pEvsFmtp->GetModeChangeNeighbor(), pEvsFmtp->IsModeChangeNeighborVisible(), 0);
 
-    if (pEvsFmtp->IsShowModeChangeNeighborEnabled() == IMS_TRUE &&
-            pEvsFmtp->GetEvsModeSwitch() == 1)
+    if (pEvsFmtp->IsModeChangeNeighborVisible() == IMS_TRUE && pEvsFmtp->GetEvsModeSwitch() == 1)
     {
         AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
 

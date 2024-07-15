@@ -53,10 +53,10 @@ PUBLIC void VideoNegoHevc::AddProfileIdToFmtp(
 {
     if (hevcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddProfileIdToFmtp() profile-id=%d, show=%d", hevcFmtp->GetProfile(),
-                hevcFmtp->IsShowProfileEnabled(), 0);
+        IMS_TRACE_I("AddProfileIdToFmtp() profile-id=%d, visible=%d", hevcFmtp->GetProfile(),
+                hevcFmtp->IsProfileVisible(), 0);
 
-        if (hevcFmtp->IsShowProfileEnabled() == IMS_TRUE)
+        if (hevcFmtp->IsProfileVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -71,10 +71,10 @@ PUBLIC void VideoNegoHevc::AddLevelIdToFmtp(IN VideoProfile::HevcFmtp* hevcFmtp,
 {
     if (hevcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddLevelIdToFmtp() level-id=%d, show=%d", hevcFmtp->GetLevel(),
-                hevcFmtp->IsShowLevelEnabled(), 0);
+        IMS_TRACE_I("AddLevelIdToFmtp() level-id=%d, visible=%d", hevcFmtp->GetLevel(),
+                hevcFmtp->IsLevelVisible(), 0);
 
-        if (hevcFmtp->IsShowLevelEnabled() == IMS_TRUE)
+        if (hevcFmtp->IsLevelVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -90,10 +90,10 @@ PUBLIC void VideoNegoHevc::AddPacketizationModeToFmtp(
 {
     if (hevcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, show=%d",
-                hevcFmtp->GetPacketizationMode(), hevcFmtp->IsShowPacketizationModeEnabled(), 0);
+        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, visible=%d",
+                hevcFmtp->GetPacketizationMode(), hevcFmtp->IsPacketizationModeVisible(), 0);
 
-        if (hevcFmtp->IsShowPacketizationModeEnabled() == IMS_TRUE)
+        if (hevcFmtp->IsPacketizationModeVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -109,10 +109,10 @@ PUBLIC void VideoNegoHevc::AddSpropParamsToFmtp(
 {
     if (hevcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddSpropParamsToFmtp() sprop parameter=%s, show=%d",
-                hevcFmtp->GetSpropParam().GetStr(), hevcFmtp->IsShowSpropParamEnabled(), 0);
+        IMS_TRACE_I("AddSpropParamsToFmtp() sprop parameter=%s, visible=%d",
+                hevcFmtp->GetSpropParam().GetStr(), hevcFmtp->IsSpropParamVisible(), 0);
 
-        if (hevcFmtp->IsShowSpropParamEnabled() == IMS_TRUE)
+        if (hevcFmtp->IsSpropParamVisible() == IMS_TRUE)
         {
             ImsList<AString> objSplitComma = hevcFmtp->GetSpropParam().Split(',');
 

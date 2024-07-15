@@ -53,10 +53,10 @@ PUBLIC void VideoNegoAvc::AddProfileLevelIdToFmtp(
 {
     if (avcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddProfileLevelIdToFmtp() profile-level-id=%s, show=%d",
-                avcFmtp->GetProfileLevelId().GetStr(), avcFmtp->IsShowProfileLevelIdEnabled(), 0);
+        IMS_TRACE_I("AddProfileLevelIdToFmtp() profile-level-id=%s, visible=%d",
+                avcFmtp->GetProfileLevelId().GetStr(), avcFmtp->IsProfileLevelIdVisible(), 0);
 
-        if (avcFmtp->IsShowProfileLevelIdEnabled() == IMS_TRUE)
+        if (avcFmtp->IsProfileLevelIdVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -72,10 +72,10 @@ PUBLIC void VideoNegoAvc::AddPacketizationModeToFmtp(
 {
     if (avcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, show=%d",
-                avcFmtp->GetPacketizationMode(), avcFmtp->IsShowPacketizationModeEnabled(), 0);
+        IMS_TRACE_I("AddPacketizationModeToFmtp() packetization-mode=%d, visible=%d",
+                avcFmtp->GetPacketizationMode(), avcFmtp->IsPacketizationModeVisible(), 0);
 
-        if (avcFmtp->IsShowPacketizationModeEnabled() == IMS_TRUE)
+        if (avcFmtp->IsPacketizationModeVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 
@@ -91,10 +91,10 @@ PUBLIC void VideoNegoAvc::AddSpropParameterSetsToFmtp(
 {
     if (avcFmtp != IMS_NULL)
     {
-        IMS_TRACE_I("AddProfileLevelIdToFmtp() sprop-parameter-sets=%s, show=%d",
-                avcFmtp->GetSpropParam().GetStr(), avcFmtp->IsShowSpropParamEnabled(), 0);
+        IMS_TRACE_I("AddProfileLevelIdToFmtp() sprop-parameter-sets=%s, visible=%d",
+                avcFmtp->GetSpropParam().GetStr(), avcFmtp->IsSpropParamVisible(), 0);
 
-        if (avcFmtp->IsShowSpropParamEnabled() == IMS_TRUE)
+        if (avcFmtp->IsSpropParamVisible() == IMS_TRUE)
         {
             AppendSeparatorIfNotEmpty(fmtp, SEMICOLON);
 

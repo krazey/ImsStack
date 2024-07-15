@@ -101,11 +101,11 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::SetRtcpXr(
         }
 
         IMS_TRACE_D("SetRtcpXr() VoipMetrics[%d], StatisticMetrics[%d], PacketLossRle[%d]",
-                pAudioProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled(),
-                pAudioProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled(),
-                pAudioProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled());
+                pAudioProfile->GetRtcpXrAttr().IsVoipMetricsSupported(),
+                pAudioProfile->GetRtcpXrAttr().IsStatisticMetricsSupported(),
+                pAudioProfile->GetRtcpXrAttr().IsPacketLossRleSupported());
         IMS_TRACE_D("SetRtcpXr() PacketDuplicatedRl[%d]",
-                pAudioProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled(), 0, 0);
+                pAudioProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported(), 0, 0);
     }
 
     return IMS_TRUE;

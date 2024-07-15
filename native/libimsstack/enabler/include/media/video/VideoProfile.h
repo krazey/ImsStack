@@ -97,9 +97,9 @@ public:
         void SetSpropParam(IN const AString strSprop) { m_strSpropParam = strSprop; }
         AString& GetSpropParam() { return m_strSpropParam; }
         void SetShowPacketizationMode(IN const IMS_BOOL nShow) { m_bShowPacketizationMode = nShow; }
-        IMS_BOOL IsShowPacketizationModeEnabled() { return m_bShowPacketizationMode; }
+        IMS_BOOL IsPacketizationModeVisible() { return m_bShowPacketizationMode; }
         void SetShowSpropParam(IN const IMS_BOOL nShow) { m_bShowSpropParam = nShow; }
-        IMS_BOOL IsShowSpropParamEnabled() { return m_bShowSpropParam; }
+        IMS_BOOL IsSpropParamVisible() { return m_bShowSpropParam; }
 
     private:
         VIDEO_RESOLUTION m_eResolution;
@@ -152,7 +152,7 @@ public:
         }
         AString& GetProfileLevelId() { return m_strProfileLevelId; }
         void SetShowProfileLevelId(IN const IMS_BOOL nShow) { m_bShowProfileLevelId = nShow; }
-        IMS_BOOL IsShowProfileLevelIdEnabled() { return m_bShowProfileLevelId; }
+        IMS_BOOL IsProfileLevelIdVisible() { return m_bShowProfileLevelId; }
 
     private:
         AString m_strProfileLevelId;
@@ -192,9 +192,9 @@ public:
         virtual ~HevcFmtp(){};
 
         void SetShowProfile(IN const IMS_BOOL nShow) { m_bShowProfile = nShow; }
-        IMS_BOOL IsShowProfileEnabled() { return m_bShowProfile; }
+        IMS_BOOL IsProfileVisible() { return m_bShowProfile; }
         void SetShowLevel(IN const IMS_BOOL nShow) { m_bShowLevel = nShow; }
-        IMS_BOOL IsShowLevelEnabled() { return m_bShowLevel; }
+        IMS_BOOL IsLevelVisible() { return m_bShowLevel; }
 
     private:
         IMS_BOOL m_bShowProfile;

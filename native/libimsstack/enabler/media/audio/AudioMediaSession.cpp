@@ -260,19 +260,19 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     // RTCP-XR
     IMS_UINT32 nRtcpXrBlocks = 0;
-    if (pNegoProfile->GetRtcpXrAttr().IsSupportVoipMetricsEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsVoipMetricsSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_VOIP_METRICS_REPORT_BLOCK;
     }
-    if (pNegoProfile->GetRtcpXrAttr().IsSupportStatisticMetricsEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsStatisticMetricsSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_STATISTICS_SUMMARY_REPORT_BLOCK;
     }
-    if (pNegoProfile->GetRtcpXrAttr().IsSupportPacketLossRleEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsPacketLossRleSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_LOSS_RLE_REPORT_BLOCK;
     }
-    if (pNegoProfile->GetRtcpXrAttr().IsSupportPacketDuplicatedRleEnabled())
+    if (pNegoProfile->GetRtcpXrAttr().IsPacketDuplicatedRleSupported())
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_DUPLICATE_RLE_REPORT_BLOCK;
     }
