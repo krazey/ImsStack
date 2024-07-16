@@ -154,7 +154,7 @@ protected:
 
     void AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
     void RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
-    IMS_BOOL IsHolded(IN IMS_UINT32 nEvent) const;
+    IMS_BOOL IsHeld(IN IMS_UINT32 nEvent) const;
     IMS_BOOL IsRefreshStarted() const;
 
     void SetInitialBlockReason();

@@ -649,7 +649,7 @@ void AosCondition::RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /*
 }
 
 PROTECTED
-IMS_BOOL AosCondition::IsHolded(IN IMS_UINT32 nEvent) const
+IMS_BOOL AosCondition::IsHeld(IN IMS_UINT32 nEvent) const
 {
     return (m_nHoldEvents & nEvent);
 }
@@ -736,7 +736,7 @@ PROTECTED
 void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCsState)
 {
     IMS_UINT32 nState = (nPsState == IMS_ROAMING_STATE_OFF) ? nCsState : IMS_ROAMING_STATE_ON;
-    if (IsHolded(HOLD_EVENT_ROAMING))
+    if (IsHeld(HOLD_EVENT_ROAMING))
     {
         return;
     }
@@ -768,7 +768,7 @@ void AosCondition::ProcessPhoneNumberAvailableEvent(
 PROTECTED
 void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 /*nServiceBits*/)
 {
-    if (IsHolded(HOLD_EVENT_IMS_SERVICE))
+    if (IsHeld(HOLD_EVENT_IMS_SERVICE))
     {
         return;
     }

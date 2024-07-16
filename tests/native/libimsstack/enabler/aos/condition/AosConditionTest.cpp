@@ -79,7 +79,7 @@ const AString PROFILE_ID = AString("test");
     using Base::IsListenerEnabled;                    \
     using Base::AddHold;                              \
     using Base::RemoveHold;                           \
-    using Base::IsHolded;                             \
+    using Base::IsHeld;                               \
     using Base::IsRefreshStarted;                     \
     using Base::RequestCommand;                       \
     using Base::UpdateRegistrationMode;
@@ -1132,7 +1132,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     m_pAosCondition->AddHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_TRUE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
+    EXPECT_TRUE(m_pAosCondition->IsHeld(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::ON, 0);
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
@@ -1144,7 +1144,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_On)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(4);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
+    EXPECT_FALSE(m_pAosCondition->IsHeld(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::ON, 0);
 }
@@ -1155,7 +1155,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
-    EXPECT_FALSE(m_pAosCondition->IsHolded(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
+    EXPECT_FALSE(m_pAosCondition->IsHeld(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
 
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
 }
