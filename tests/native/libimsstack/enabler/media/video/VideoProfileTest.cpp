@@ -32,6 +32,13 @@ const AString AVC_FMTP_PROFILE_LEVEL_ID = "42C00C";
 const IMS_BOOL AVC_FMTP_SHOW_PROFILE_LEVEL_ID = IMS_TRUE;
 const IMS_BOOL HEVC_FMTP_SHOW_PROFILE = IMS_TRUE;
 const IMS_BOOL HEVC_FMTP_SHOW_LEVEL = IMS_TRUE;
+const IMS_BOOL RTCP_FB_TRR_SUPPORTED = IMS_TRUE;
+const IMS_SINT32 RTCP_FB_TRR_INT = 1;
+const IMS_BOOL RTCP_FB_NACK_SUPPORTED = IMS_TRUE;
+const IMS_BOOL RTCP_FB_TMMBR_SUPPORTED = IMS_TRUE;
+const IMS_SINT32 RTCP_FB_TMMBR_SMAX = 1;
+const IMS_BOOL RTCP_FB_PLI_SUPPORTED = IMS_TRUE;
+const IMS_BOOL RTCP_FB_FIR_SUPPORTED = IMS_TRUE;
 
 class VideoProfileTest : public ::testing::Test
 {
@@ -293,4 +300,107 @@ TEST_F(VideoProfileTest, testHevcFmtpCreation)
 
     delete pFmtp1;
     delete pFmtp2;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesTrrSupported)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->IsTrrSupported(), IMS_FALSE);
+
+    pRtcpFb->SetTrrSupported(RTCP_FB_TRR_SUPPORTED);
+    EXPECT_EQ(pRtcpFb->IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesTrrInt)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->GetTrrInt(), 0);
+
+    pRtcpFb->SetTrrInt(RTCP_FB_TRR_INT);
+    EXPECT_EQ(pRtcpFb->GetTrrInt(), RTCP_FB_TRR_INT);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesNackSupported)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->IsNackSupported(), IMS_FALSE);
+
+    pRtcpFb->SetNackSupported(RTCP_FB_NACK_SUPPORTED);
+    EXPECT_EQ(pRtcpFb->IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesTmmbrSupported)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->IsTmmbrSupported(), IMS_FALSE);
+
+    pRtcpFb->SetTmmbrSupported(RTCP_FB_TMMBR_SUPPORTED);
+    EXPECT_EQ(pRtcpFb->IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesTmmbrSmaxPr)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->GetTmmbrSmaxPr(), -1);
+
+    pRtcpFb->SetTmmbrSmaxPr(RTCP_FB_TMMBR_SMAX);
+    EXPECT_EQ(pRtcpFb->GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesPliSupported)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->IsPliSupported(), IMS_FALSE);
+
+    pRtcpFb->SetPliSupported(RTCP_FB_PLI_SUPPORTED);
+    EXPECT_EQ(pRtcpFb->IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesFirSupported)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb = new VideoProfile::RtcpFbAttributes();
+    EXPECT_EQ(pRtcpFb->IsFirSupported(), IMS_FALSE);
+
+    pRtcpFb->SetFirSupported(RTCP_FB_FIR_SUPPORTED);
+    EXPECT_EQ(pRtcpFb->IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+
+    delete pRtcpFb;
+}
+
+TEST_F(VideoProfileTest, testRtcpFbAttributesAssign)
+{
+    VideoProfile::RtcpFbAttributes* pRtcpFb1 = new VideoProfile::RtcpFbAttributes();
+    pRtcpFb1->SetTrrSupported(RTCP_FB_TRR_SUPPORTED);
+    pRtcpFb1->SetTrrInt(RTCP_FB_TRR_INT);
+    pRtcpFb1->SetNackSupported(RTCP_FB_NACK_SUPPORTED);
+    pRtcpFb1->SetTmmbrSupported(RTCP_FB_TMMBR_SUPPORTED);
+    pRtcpFb1->SetTmmbrSmaxPr(RTCP_FB_TMMBR_SMAX);
+    pRtcpFb1->SetPliSupported(RTCP_FB_PLI_SUPPORTED);
+    pRtcpFb1->SetFirSupported(RTCP_FB_FIR_SUPPORTED);
+
+    VideoProfile::RtcpFbAttributes* pRtcpFb2 = new VideoProfile::RtcpFbAttributes();
+    *pRtcpFb2 = *pRtcpFb1;
+
+    EXPECT_EQ(pRtcpFb2->IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
+    EXPECT_EQ(pRtcpFb2->GetTrrInt(), RTCP_FB_TRR_INT);
+    EXPECT_EQ(pRtcpFb2->IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
+    EXPECT_EQ(pRtcpFb2->IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
+    EXPECT_EQ(pRtcpFb2->GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
+    EXPECT_EQ(pRtcpFb2->IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
+    EXPECT_EQ(pRtcpFb2->IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+
+    delete pRtcpFb1;
+    delete pRtcpFb2;
 }
