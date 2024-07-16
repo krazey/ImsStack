@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "IImsPrivateProperty.h"
+#include "INetworkWatcher.h"
 #include "ServiceEvent.h"
 #include "ServiceUtil.h"
 #include "ServiceTrace.h"
@@ -382,6 +383,12 @@ PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
 PROTECTED VIRTUAL void AosCondition::NetTracker_StatusChanged()
 {
     A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged()", 0, 0, 0);
+
+    if (m_bIsTtyOn)
+    {
+        ProcessTtyEvent(IMS_TRUE);
+    }
+
     SendConditionEvent(AosServiceAvailable::EVENT_NETWORK, 0, SERVICE_CELLULAR);
 }
 
@@ -532,11 +539,6 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_ServiceChanged(
 
 PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn)
 {
-    if (!GET_N_CONFIG(m_nSlotId)->IsVolteTtySupported())
-    {
-        return;
-    }
-
     ProcessTtyEvent(bIsOn);
 }
 
@@ -778,16 +780,12 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     A_IMS_TRACE_I(APPPROFILE, "ProcessTtyEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
     m_bIsTtyOn = bIsOn;
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported() || m_bIsCombinedAttached)
+    if (m_bIsTtyOn && IsDeregRequiredForTty())
     {
-        if (m_bIsTtyOn)
-        {
-            RequestCommand(REQUEST_STOP, AosReason::TTYMODEON);
-            ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
-        }
+        RequestCommand(REQUEST_STOP, AosReason::TTYMODEON);
+        ProcessBlockReason(IMS_TRUE, BLOCK_TTY_MODE_ON);
     }
-
-    if (!m_bIsTtyOn)
+    else
     {
         ProcessBlockReason(IMS_FALSE, BLOCK_TTY_MODE_ON);
     }
@@ -928,4 +926,39 @@ IMS_BOOL AosCondition::IsServiceBlockedByMenu() const
 
     A_IMS_TRACE_D(APPPROFILE, "IsServiceBlockedByMenu : %s", strTestImsDeregister.GetStr(), 0, 0);
     return strTestImsDeregister.Equals("YES");
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsRttSupported() const
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported())
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_pAvailableCellular != IMS_NULL && m_pAvailableCellular->IsRoaming())
+    {
+        return GET_N_CONFIG(m_nSlotId)->IsRttSupportedWhileRoaming();
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsCombinedAttached() const
+{
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker != IMS_NULL && piNetTracker->GetNetworkType() != NW_REPORT_RADIO_LTE)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_bIsCombinedAttached;
+}
+
+PROTECTED
+IMS_BOOL AosCondition::IsDeregRequiredForTty() const
+{
+    return !IsRttSupported() && !GET_N_CONFIG(m_nSlotId)->IsVolteTtySupported() &&
+            IsCombinedAttached();
 }

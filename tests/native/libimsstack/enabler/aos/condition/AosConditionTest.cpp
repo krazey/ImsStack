@@ -20,6 +20,7 @@
 #include "AosReason.h"
 #include "ImsEventDef.h"
 #include "ServiceNetworkPolicy.h"
+#include "INetworkWatcher.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosConditionListener.h"
@@ -83,7 +84,10 @@ const AString PROFILE_ID = AString("test");
     using Base::IsHeld;                               \
     using Base::IsRefreshStarted;                     \
     using Base::RequestCommand;                       \
-    using Base::UpdateRegistrationMode;
+    using Base::UpdateRegistrationMode;               \
+    using Base::IsRttSupported;                       \
+    using Base::IsCombinedAttached;                   \
+    using Base::IsDeregRequiredForTty;
 
 class TestAosCondition : public AosCondition
 {
@@ -141,7 +145,7 @@ public:
         m_bWifiServiceAvailable = bIsAvailable;
     }
 
-    inline IMS_BOOL IsCombinedAttached() { return m_bIsCombinedAttached; }
+    inline IMS_BOOL GetCombinedAttached() { return m_bIsCombinedAttached; }
 
     inline void SetCombinedAttached(IN IMS_BOOL bIsCombined)
     {
@@ -154,6 +158,8 @@ public:
     }
 
     inline IMS_UINT32 GetListeners() { return m_nListeners; }
+
+    inline void SetTtyOn(IN IMS_BOOL bIsOn) { m_bIsTtyOn = bIsOn; }
 };
 
 class AosConditionTest : public ::testing::Test
@@ -713,7 +719,7 @@ TEST_F(AosConditionTest, ShouldResetCombinedAttachWhenNotifyEventWithoutCombined
     m_pAosCondition->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, 0);
 
     // THEN
-    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
+    EXPECT_FALSE(m_pAosCondition->GetCombinedAttached());
 }
 
 TEST_F(AosConditionTest, ShouldSetCombinedAttachWhenNotifyEventWithCombinedAttached)
@@ -726,7 +732,7 @@ TEST_F(AosConditionTest, ShouldSetCombinedAttachWhenNotifyEventWithCombinedAttac
             IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
 
     // THEN
-    EXPECT_TRUE(m_pAosCondition->IsCombinedAttached());
+    EXPECT_TRUE(m_pAosCondition->GetCombinedAttached());
 }
 
 TEST_F(AosConditionTest, ShouldResetCombinedAttachWithSmsOnlyWhenNotifyEventWithCombinedAttached)
@@ -1197,57 +1203,62 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
     m_pAosCondition->ServiceSetting_ServiceChanged(ServiceSetting::OFF, 0);
 }
 
-TEST_F(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport)
+TEST_F(AosConditionTest, ShouldRequestRegStopAndSetBlockIfTtyIsTurnedOnWhenDeregIsRequired)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
-    m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
-}
-
-TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _));
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
-
+    // GIVEN
+    MockIAosConditionListener objMockIAosConditionListener;
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
     m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockIAosConditionListener,
+            Condition_RequestCommand(AosCondition::REQUEST_STOP, AosReason::TTYMODEON));
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_TTY_MODE_ON, _));
+
+    // WHEN
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
+
+    // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
+TEST_F(AosConditionTest, ShouldNotRequestRegStopAndNotSetBlockIfTtyIsTurnedOnWhenDeregIsNotRequired)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
-
+    // GIVEN
+    MockIAosConditionListener objMockIAosConditionListener;
+    m_pAosCondition->SetListener(&objMockIAosConditionListener);
     m_pAosCondition->SetCombinedAttached(IMS_TRUE);
-    m_pAosCondition->ServiceSetting_TtyChanged(IMS_FALSE);
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(objMockIAosConditionListener,
+            Condition_RequestCommand(AosCondition::REQUEST_STOP, AosReason::TTYMODEON))
+            .Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_TTY_MODE_ON, _)).Times(0);
+
+    // WHEN
+    m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
+
+    // THEN: The GIVEN condition should be met.
 }
 
-TEST_F(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport)
+TEST_F(AosConditionTest, ShouldResetBlockIfTtyIsTurnedOff)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
-            .WillRepeatedly(Return(IMS_FALSE));
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_TTY_MODE_ON, _));
 
-    m_pAosCondition->ServiceSetting_TtyChanged(IMS_TRUE);
+    // WHEN
     m_pAosCondition->ServiceSetting_TtyChanged(IMS_FALSE);
+
+    // THEN: The GIVEN condition should be met.
 }
 
 TEST_F(AosConditionTest, DisableNetTrackerListenerWhenConnectionTypeIsWifi)
@@ -1533,4 +1544,183 @@ TEST_F(AosConditionTest, UpdateRegistrationMode_IsNotReady)
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(0);
 
     m_pAosCondition->UpdateRegistrationMode();
+}
+
+TEST_F(AosConditionTest, RttIsNotSupportedOnHomeNetworkIfTheBaseConfigIsFalse)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsRttSupported());
+}
+
+TEST_F(AosConditionTest, RttIsNotSupportedOnRoamingNetworkIfTheBaseConfigIsFalse)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_ON, IMS_ROAMING_STATE_OFF);
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsRttSupported());
+}
+
+TEST_F(AosConditionTest, RttIsSupportedOnHomeNetworkIfTheBaseConfigIsTrue)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosCondition->IsRttSupported());
+}
+
+TEST_F(AosConditionTest, RttIsNotSupportedOnRoamingNetworkIfRoamingConfigIsFalse)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_ON, IMS_ROAMING_STATE_OFF);
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupportedWhileRoaming())
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsRttSupported());
+}
+
+TEST_F(AosConditionTest, RttIsSupportedOnRoamingNetworkIfBothBaseAndRoamingConfigsAreTrue)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_ROAMING_STATE, IMS_ROAMING_STATE_ON, IMS_ROAMING_STATE_OFF);
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupportedWhileRoaming())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosCondition->IsRttSupported());
+}
+
+TEST_F(AosConditionTest, ShouldReturnTrueIfCombinedAttachedOnLte)
+{
+    // GIVEN
+    m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosCondition->IsCombinedAttached());
+}
+
+TEST_F(AosConditionTest, ShouldReturnFalseIfNotCombinedAttachedOnLte)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
+}
+
+TEST_F(AosConditionTest, ShouldReturnFalseIfCombinedAttachedButNetworkIsNotLte)
+{
+    // GIVEN
+    m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_WLAN));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
+}
+
+TEST_F(AosConditionTest,
+        DeregIsRequiredForTtyIfRttIsNotSupportedAndVolteTtyNotSupportedAndCombinedAttached)
+{
+    // GIVEN
+    m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+
+    // WHEN & THEN
+    EXPECT_TRUE(m_pAosCondition->IsDeregRequiredForTty());
+}
+
+TEST_F(AosConditionTest, DeregIsNotRequiredForTtyIfRttIsSupported)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsDeregRequiredForTty());
+}
+
+TEST_F(AosConditionTest, DeregIsNotRequiredForTtyIfVolteTtyIsSupported)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsDeregRequiredForTty());
+}
+
+TEST_F(AosConditionTest, DeregIsNotRequiredForTtyIfNotCombinedAttched)
+{
+    // GIVEN
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    m_pAosCondition->SetCombinedAttached(IMS_FALSE);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosCondition->IsDeregRequiredForTty());
+}
+
+TEST_F(AosConditionTest, ShouldUnblockTtyModeOnIfUeMovesToNr)
+{
+    // GIVEN
+    m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    m_pAosCondition->SetTtyOn(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_TTY_MODE_ON, _));
+
+    // WHEN
+    m_pAosCondition->NetTracker_StatusChanged();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosConditionTest, ShouldReblockTtyModeOnIfUeMovesToLteWithCombinedAttach)
+{
+    // GIVEN
+    m_pAosCondition->SetCombinedAttached(IMS_TRUE);
+    m_pAosCondition->SetTtyOn(IMS_TRUE);
+    ON_CALL(m_objMockIAosAppContext, GetNetTracker())
+            .WillByDefault(Return(&m_objMockIAosNetTracker));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported()).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(BLOCK_TTY_MODE_ON, _));
+
+    // WHEN
+    m_pAosCondition->NetTracker_StatusChanged();
+
+    // THEN: The GIVEN condition should be met.
 }

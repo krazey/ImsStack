@@ -1120,7 +1120,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegRecovery(IN IMSMSG& objMsg)
 
     if (IsRegRecoveryHeld())
     {
-        A_IMS_TRACE_I(APPID, "ProcessRegRecovery :: recover is holded", 0, 0, 0);
+        A_IMS_TRACE_I(APPID, "ProcessRegRecovery :: recover is held", 0, 0, 0);
         m_pUtil->AddFeature(PENDING_REG_RECOVERY_HELD, m_nRegPending);
         m_nRecoverReason = nReason;
         return;
@@ -1155,7 +1155,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessIpcanChanged(IN IMSMSG& /* objMsg 
     {
         if (IsTimerRunning(TIMER_RECONFIG_GUARD))
         {
-            A_IMS_TRACE_I(APPID, "ProcessIpcanChanged :: ipcan is holded", 0, 0, 0);
+            A_IMS_TRACE_I(APPID, "ProcessIpcanChanged :: ipcan is held", 0, 0, 0);
             m_pUtil->RemoveFeature(PENDING_REG_UPDATE_HELD, m_nRegPending);
             m_pUtil->AddFeature(PENDING_IPCAN_HELD, m_nRegPending);
         }
