@@ -18,6 +18,8 @@
 
 #include <video/VideoProfile.h>
 
+const AString AVC_PAYLOAD_TYPE = "H264";
+const AString HEVC_PAYLOAD_TYPE = "H265";
 const VIDEO_RESOLUTION VIDEO_FMTP_RESOLUTION = VIDEO_RESOLUTION_QVGA_PR;
 const IMS_SINT32 VIDEO_FMTP_BITRATE = 1;
 const IMS_SINT32 VIDEO_FMTP_FRAMERATE = 33;
@@ -39,6 +41,9 @@ const IMS_BOOL RTCP_FB_TMMBR_SUPPORTED = IMS_TRUE;
 const IMS_SINT32 RTCP_FB_TMMBR_SMAX = 1;
 const IMS_BOOL RTCP_FB_PLI_SUPPORTED = IMS_TRUE;
 const IMS_BOOL RTCP_FB_FIR_SUPPORTED = IMS_TRUE;
+const IMS_BOOL VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR = IMS_TRUE;
+const IMS_BOOL VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE = IMS_TRUE;
+const AString VIDEO_PAYLOAD_IMAGE_ATTR = "send [x=480,y=640] recv [x=480,y=640]";
 
 class VideoProfileTest : public ::testing::Test
 {
@@ -403,4 +408,243 @@ TEST_F(VideoProfileTest, testRtcpFbAttributesAssign)
 
     delete pRtcpFb1;
     delete pRtcpFb2;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadIncludeImageAttr)
+{
+    VideoProfile::Payload* pPayload = new VideoProfile::Payload();
+    EXPECT_EQ(pPayload->IsImageAttrIncluded(), IMS_FALSE);
+
+    pPayload->SetIncludeImageAttr(VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+    EXPECT_EQ(pPayload->IsImageAttrIncluded(), VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+
+    delete pPayload;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadIncludeFrameSize)
+{
+    VideoProfile::Payload* pPayload = new VideoProfile::Payload();
+    EXPECT_EQ(pPayload->IsFrameSizeIncluded(), IMS_FALSE);
+
+    pPayload->SetIncludeFrameSize(VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+    EXPECT_EQ(pPayload->IsFrameSizeIncluded(), VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+
+    delete pPayload;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadImageAttr)
+{
+    VideoProfile::Payload* pPayload = new VideoProfile::Payload();
+    EXPECT_EQ(pPayload->GetImageAttr(), AString::ConstNull());
+
+    pPayload->SetImageAttr(VIDEO_PAYLOAD_IMAGE_ATTR);
+    EXPECT_EQ(pPayload->GetImageAttr(), VIDEO_PAYLOAD_IMAGE_ATTR);
+
+    delete pPayload;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadRtcpFbAttr)
+{
+    VideoProfile::Payload* pPayload = new VideoProfile::Payload();
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsTrrSupported(), IMS_FALSE);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().GetTrrInt(), 0);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsNackSupported(), IMS_FALSE);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsTmmbrSupported(), IMS_FALSE);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().GetTmmbrSmaxPr(), -1);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsPliSupported(), IMS_FALSE);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsFirSupported(), IMS_FALSE);
+
+    VideoProfile::RtcpFbAttributes objRtcpFb;
+    objRtcpFb.SetTrrSupported(RTCP_FB_TRR_SUPPORTED);
+    objRtcpFb.SetTrrInt(RTCP_FB_TRR_INT);
+    objRtcpFb.SetNackSupported(RTCP_FB_NACK_SUPPORTED);
+    objRtcpFb.SetTmmbrSupported(RTCP_FB_TMMBR_SUPPORTED);
+    objRtcpFb.SetTmmbrSmaxPr(RTCP_FB_TMMBR_SMAX);
+    objRtcpFb.SetPliSupported(RTCP_FB_PLI_SUPPORTED);
+    objRtcpFb.SetFirSupported(RTCP_FB_FIR_SUPPORTED);
+
+    pPayload->SetRtcpFbAttr(objRtcpFb);
+
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().GetTrrInt(), RTCP_FB_TRR_INT);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
+    EXPECT_EQ(pPayload->GetRtcpFbAttr().IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+
+    delete pPayload;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadCreation)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+
+    VideoProfile::RtcpFbAttributes objRtcpFb;
+    objRtcpFb.SetTrrSupported(RTCP_FB_TRR_SUPPORTED);
+    objRtcpFb.SetTrrInt(RTCP_FB_TRR_INT);
+    objRtcpFb.SetNackSupported(RTCP_FB_NACK_SUPPORTED);
+    objRtcpFb.SetTmmbrSupported(RTCP_FB_TMMBR_SUPPORTED);
+    objRtcpFb.SetTmmbrSmaxPr(RTCP_FB_TMMBR_SMAX);
+    objRtcpFb.SetPliSupported(RTCP_FB_PLI_SUPPORTED);
+    objRtcpFb.SetFirSupported(RTCP_FB_FIR_SUPPORTED);
+
+    pPayload1->SetIncludeImageAttr(VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+    pPayload1->SetIncludeFrameSize(VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+    pPayload1->SetImageAttr(VIDEO_PAYLOAD_IMAGE_ATTR);
+    pPayload1->SetRtcpFbAttr(objRtcpFb);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload(*pPayload1);
+
+    EXPECT_EQ(pPayload2->IsImageAttrIncluded(), VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+    EXPECT_EQ(pPayload2->IsFrameSizeIncluded(), VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+    EXPECT_EQ(pPayload2->GetImageAttr(), VIDEO_PAYLOAD_IMAGE_ATTR);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTrrInt(), RTCP_FB_TRR_INT);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+
+    delete pPayload1;
+    delete pPayload2;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadCreationForAvcFmtp)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    pPayload1->SetFmtp(pAvcFmtp);
+
+    VideoProfile::Payload* pPayload3 = new VideoProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
+            ->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+    EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
+            AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadCreationForHevcFmtp)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(HEVC_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+    pPayload1->SetFmtp(pHevcFmtp);
+
+    VideoProfile::Payload* pPayload3 = new VideoProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
+            HEVC_FMTP_SHOW_LEVEL);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadAssign)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+
+    VideoProfile::RtcpFbAttributes objRtcpFb;
+    objRtcpFb.SetTrrSupported(RTCP_FB_TRR_SUPPORTED);
+    objRtcpFb.SetTrrInt(RTCP_FB_TRR_INT);
+    objRtcpFb.SetNackSupported(RTCP_FB_NACK_SUPPORTED);
+    objRtcpFb.SetTmmbrSupported(RTCP_FB_TMMBR_SUPPORTED);
+    objRtcpFb.SetTmmbrSmaxPr(RTCP_FB_TMMBR_SMAX);
+    objRtcpFb.SetPliSupported(RTCP_FB_PLI_SUPPORTED);
+    objRtcpFb.SetFirSupported(RTCP_FB_FIR_SUPPORTED);
+
+    pPayload1->SetIncludeImageAttr(VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+    pPayload1->SetIncludeFrameSize(VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+    pPayload1->SetImageAttr(VIDEO_PAYLOAD_IMAGE_ATTR);
+    pPayload1->SetRtcpFbAttr(objRtcpFb);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
+    *pPayload2 = *pPayload1;
+
+    EXPECT_EQ(pPayload2->IsImageAttrIncluded(), VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR);
+    EXPECT_EQ(pPayload2->IsFrameSizeIncluded(), VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE);
+    EXPECT_EQ(pPayload2->GetImageAttr(), VIDEO_PAYLOAD_IMAGE_ATTR);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTrrSupported(), RTCP_FB_TRR_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTrrInt(), RTCP_FB_TRR_INT);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsNackSupported(), RTCP_FB_NACK_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsTmmbrSupported(), RTCP_FB_TMMBR_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().GetTmmbrSmaxPr(), RTCP_FB_TMMBR_SMAX);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsPliSupported(), RTCP_FB_PLI_SUPPORTED);
+    EXPECT_EQ(pPayload2->GetRtcpFbAttr().IsFirSupported(), RTCP_FB_FIR_SUPPORTED);
+
+    delete pPayload1;
+    delete pPayload2;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadAssignForAvcFmtp)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+    pPayload1->SetFmtp(pAvcFmtp);
+
+    VideoProfile::Payload* pPayload3 = new VideoProfile::Payload();
+    *pPayload3 = *pPayload1;
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())
+            ->SetShowProfileLevelId(AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+    EXPECT_EQ(static_cast<VideoProfile::AvcFmtp*>(pPayload3->GetFmtp())->IsProfileLevelIdVisible(),
+            AVC_FMTP_SHOW_PROFILE_LEVEL_ID);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(VideoProfileTest, testVideoPayloadAssignForHevcFmtp)
+{
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(HEVC_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    VideoProfile::HevcFmtp* pHevcFmtp = new VideoProfile::HevcFmtp();
+    pPayload1->SetFmtp(pHevcFmtp);
+
+    VideoProfile::Payload* pPayload3 = new VideoProfile::Payload();
+    *pPayload3 = *pPayload1;
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->SetShowLevel(HEVC_FMTP_SHOW_LEVEL);
+    EXPECT_EQ(static_cast<VideoProfile::HevcFmtp*>(pPayload3->GetFmtp())->IsLevelVisible(),
+            HEVC_FMTP_SHOW_LEVEL);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
 }

@@ -305,6 +305,28 @@ public:
                 m_strImageAttr(obj.m_strImageAttr),
                 m_objRtcpFbAttr(obj.m_objRtcpFbAttr)
         {
+            CreateVideoFmtp(obj);
+        }
+
+        virtual ~Payload() {}
+
+        Payload& operator=(IN const Payload& obj)
+        {
+            if (this != &obj)
+            {
+                BasePayload::operator=(obj);
+                CreateVideoFmtp(obj);
+                m_bIncludeImageAttr = obj.m_bIncludeImageAttr;
+                m_bIncludeFrameSize = obj.m_bIncludeFrameSize;
+                m_strImageAttr = obj.m_strImageAttr;
+                m_objRtcpFbAttr = obj.m_objRtcpFbAttr;
+            }
+
+            return (*this);
+        }
+
+        inline void CreateVideoFmtp(IN const Payload& obj)
+        {
             if (obj.m_pFmtp != IMS_NULL)
             {
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
@@ -318,36 +340,6 @@ public:
                             static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
                 }
             }
-        }
-
-        virtual ~Payload() {}
-
-        Payload& operator=(IN const Payload& obj)
-        {
-            if (this != &obj)
-            {
-                BasePayload::operator=(obj);
-                if (obj.m_pFmtp != IMS_NULL)
-                {
-                    if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
-                    {
-                        m_pFmtp = new VideoProfile::AvcFmtp(
-                                static_cast<VideoProfile::AvcFmtp*>(obj.m_pFmtp));
-                    }
-                    else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
-                    {
-                        m_pFmtp = new VideoProfile::HevcFmtp(
-                                static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
-                    }
-                }
-
-                m_bIncludeImageAttr = obj.m_bIncludeImageAttr;
-                m_bIncludeFrameSize = obj.m_bIncludeFrameSize;
-                m_strImageAttr = obj.m_strImageAttr;
-                m_objRtcpFbAttr = obj.m_objRtcpFbAttr;
-            }
-
-            return (*this);
         }
 
         inline void SetIncludeImageAttr(IN const IMS_BOOL bIncludeImageAttr)
