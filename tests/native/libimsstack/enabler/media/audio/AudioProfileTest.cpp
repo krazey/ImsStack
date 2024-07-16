@@ -35,6 +35,8 @@ const IMS_BOOL AUDIO_FMTP_SHOW_MAX_RED = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_PTIME = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MAX_PTIME = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_DTX = IMS_TRUE;
+const IMS_SINT32 AMR_FMTP_OCTET_ALIGN = 1;
+const IMS_BOOL AMR_FMTP_SHOW_OCTET_ALIGN = IMS_TRUE;
 
 class AudioProfileTest : public ::testing::Test
 {
@@ -297,6 +299,54 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     EXPECT_EQ(pFmtp2->IsPtimeVisible(), AUDIO_FMTP_SHOW_PTIME);
     EXPECT_EQ(pFmtp2->IsMaxPtimeVisible(), AUDIO_FMTP_SHOW_MAX_PTIME);
     EXPECT_EQ(pFmtp2->IsDtxVisible(), AUDIO_FMTP_SHOW_DTX);
+
+    delete pFmtp1;
+    delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testAmrFmtpOctetAlign)
+{
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    EXPECT_EQ(pFmtp->GetOctetAlign(), 0);
+
+    pFmtp->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(pFmtp->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testAmrFmtpShowOctetAlign)
+{
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    EXPECT_EQ(pFmtp->IsOctetAlignVisible(), IMS_FALSE);
+
+    pFmtp->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+    EXPECT_EQ(pFmtp->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testAmrFmtpCreationDefault)
+{
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+
+    EXPECT_EQ(pFmtp->GetOctetAlign(), 0);
+    EXPECT_EQ(pFmtp->IsOctetAlignVisible(), IMS_FALSE);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testAmrFmtpCreation)
+{
+    AudioProfile::AmrFmtp* pFmtp1 = new AudioProfile::AmrFmtp();
+
+    pFmtp1->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    pFmtp1->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    AudioProfile::AmrFmtp* pFmtp2 = new AudioProfile::AmrFmtp(*pFmtp1);
+
+    EXPECT_EQ(pFmtp2->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(pFmtp2->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
 
     delete pFmtp1;
     delete pFmtp2;
