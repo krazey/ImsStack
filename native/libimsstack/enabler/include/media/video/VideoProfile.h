@@ -378,19 +378,6 @@ public:
 
     virtual ~VideoProfile() {}
 
-    VideoProfile(IN VideoProfile* profile) :
-            MediaBaseProfile(profile)
-    {
-        if (profile == nullptr)
-        {
-            return;
-        }
-        m_nFrameRate = profile->m_nFrameRate;
-        m_bSupportAvpf = profile->m_bSupportAvpf;
-        m_nCvoId = profile->m_nCvoId;
-        m_bSupportCapaNegoForAvpf = profile->m_bSupportCapaNegoForAvpf;
-    }
-
     VideoProfile(IN const VideoProfile& obj) :
             MediaBaseProfile(obj)
     {

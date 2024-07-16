@@ -44,6 +44,10 @@ const IMS_BOOL RTCP_FB_FIR_SUPPORTED = IMS_TRUE;
 const IMS_BOOL VIDEO_PAYLOAD_INCLUDE_IMAGE_ATTR = IMS_TRUE;
 const IMS_BOOL VIDEO_PAYLOAD_INCLUDE_FRAME_SIZE = IMS_TRUE;
 const AString VIDEO_PAYLOAD_IMAGE_ATTR = "send [x=480,y=640] recv [x=480,y=640]";
+const IMS_SINT32 VIDEO_PROFILE_FRAMERATE = 33;
+const IMS_BOOL VIDEO_PROFILE_SUPPORT_AVPF = IMS_TRUE;
+const IMS_SINT32 VIDEO_PROFILE_CVO_ID = 1;
+const IMS_BOOL VIDEO_PROFILE_SUPPORT_CAPA_NEGO = IMS_TRUE;
 
 class VideoProfileTest : public ::testing::Test
 {
@@ -647,4 +651,124 @@ TEST_F(VideoProfileTest, testVideoPayloadAssignForHevcFmtp)
     delete pPayload1;
     delete pPayload2;
     delete pPayload3;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileFrameRate)
+{
+    VideoProfile* pProfile = new VideoProfile();
+    EXPECT_EQ(pProfile->GetFrameRate(), 0);
+
+    pProfile->SetFrameRate(VIDEO_PROFILE_FRAMERATE);
+    EXPECT_EQ(pProfile->GetFrameRate(), VIDEO_PROFILE_FRAMERATE);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileSupportAvpf)
+{
+    VideoProfile* pProfile = new VideoProfile();
+    EXPECT_EQ(pProfile->IsAvpfSupported(), IMS_FALSE);
+
+    pProfile->SetSupportAvpf(VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile->IsAvpfSupported(), VIDEO_PROFILE_SUPPORT_AVPF);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileCvoId)
+{
+    VideoProfile* pProfile = new VideoProfile();
+    EXPECT_EQ(pProfile->GetCvoId(), -1);
+
+    pProfile->SetCvoId(VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile->GetCvoId(), VIDEO_PROFILE_SUPPORT_AVPF);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileSupportCapaNegoForAvpf)
+{
+    VideoProfile* pProfile = new VideoProfile();
+    EXPECT_EQ(pProfile->IsCapaNegoForAvpfSupported(), IMS_FALSE);
+
+    pProfile->SetSupportCapaNegoForAvpf(VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+    EXPECT_EQ(pProfile->IsCapaNegoForAvpfSupported(), VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileGetPayloadAt)
+{
+    const IMS_SINT32 nPayload1 = 115;
+    const IMS_SINT32 nPayload2 = 116;
+
+    VideoProfile* pProfile = new VideoProfile();
+    VideoProfile::Payload* pPayload1 = new VideoProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(HEVC_PAYLOAD_TYPE);
+    pPayload1->GetRtpMap().SetPayloadNumber(nPayload1);
+    pProfile->GetPayloadList().Append(pPayload1);
+
+    VideoProfile::Payload* pPayload2 = new VideoProfile::Payload();
+    pPayload2->GetRtpMap().SetPayloadType(AVC_PAYLOAD_TYPE);
+    pPayload2->GetRtpMap().SetPayloadNumber(nPayload2);
+    pProfile->GetPayloadList().Append(pPayload2);
+
+    EXPECT_EQ(pProfile->GetPayloadList().GetSize(), 2);
+
+    EXPECT_EQ(pProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), nPayload1);
+    EXPECT_EQ(pProfile->GetPayloadAt(1)->GetRtpMap().GetPayloadNumber(), nPayload2);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileCreationDefault)
+{
+    VideoProfile* pProfile = new VideoProfile();
+    EXPECT_EQ(pProfile->GetFrameRate(), 0);
+    EXPECT_EQ(pProfile->IsAvpfSupported(), IMS_FALSE);
+    EXPECT_EQ(pProfile->GetCvoId(), -1);
+    EXPECT_EQ(pProfile->IsCapaNegoForAvpfSupported(), IMS_FALSE);
+
+    delete pProfile;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileCreationParameterizedObj)
+{
+    VideoProfile* pProfile1 = new VideoProfile();
+
+    pProfile1->SetFrameRate(VIDEO_PROFILE_FRAMERATE);
+    pProfile1->SetSupportAvpf(VIDEO_PROFILE_SUPPORT_AVPF);
+    pProfile1->SetCvoId(VIDEO_PROFILE_SUPPORT_AVPF);
+    pProfile1->SetSupportCapaNegoForAvpf(VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+
+    VideoProfile* pProfile2 = new VideoProfile(*pProfile1);
+
+    EXPECT_EQ(pProfile2->GetFrameRate(), VIDEO_PROFILE_FRAMERATE);
+    EXPECT_EQ(pProfile2->IsAvpfSupported(), VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile2->GetCvoId(), VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile2->IsCapaNegoForAvpfSupported(), VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+
+    delete pProfile1;
+    delete pProfile2;
+}
+
+TEST_F(VideoProfileTest, testVideoProfileAssign)
+{
+    VideoProfile* pProfile1 = new VideoProfile();
+
+    pProfile1->SetFrameRate(VIDEO_PROFILE_FRAMERATE);
+    pProfile1->SetSupportAvpf(VIDEO_PROFILE_SUPPORT_AVPF);
+    pProfile1->SetCvoId(VIDEO_PROFILE_SUPPORT_AVPF);
+    pProfile1->SetSupportCapaNegoForAvpf(VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+
+    VideoProfile* pProfile2 = new VideoProfile();
+    *pProfile2 = *pProfile1;
+
+    EXPECT_EQ(pProfile2->GetFrameRate(), VIDEO_PROFILE_FRAMERATE);
+    EXPECT_EQ(pProfile2->IsAvpfSupported(), VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile2->GetCvoId(), VIDEO_PROFILE_SUPPORT_AVPF);
+    EXPECT_EQ(pProfile2->IsCapaNegoForAvpfSupported(), VIDEO_PROFILE_SUPPORT_CAPA_NEGO);
+
+    delete pProfile1;
+    delete pProfile2;
 }
