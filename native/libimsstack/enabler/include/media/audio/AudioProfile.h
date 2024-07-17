@@ -381,9 +381,14 @@ public:
             return (*this);
         }
 
-        bool operator==(IN const TelephoneEventFmtp& obj)
+        bool operator==(IN const TelephoneEventFmtp& obj) const
         {
             return (m_strEvents == obj.m_strEvents);
+        }
+
+        bool operator!=(IN const TelephoneEventFmtp& obj) const
+        {
+            return (m_strEvents != obj.m_strEvents);
         }
 
         inline void SetEvents(IN const AString strEvents) { m_strEvents = strEvents; }

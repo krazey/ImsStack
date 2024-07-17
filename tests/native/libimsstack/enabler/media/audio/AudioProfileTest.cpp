@@ -37,6 +37,7 @@ const IMS_BOOL AUDIO_FMTP_SHOW_MAX_PTIME = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_DTX = IMS_TRUE;
 const IMS_SINT32 AMR_FMTP_OCTET_ALIGN = 1;
 const IMS_BOOL AMR_FMTP_SHOW_OCTET_ALIGN = IMS_TRUE;
+const AString TELEPHONY_EVENT_FMTP_EVENTS = "1-14";
 
 class AudioProfileTest : public ::testing::Test
 {
@@ -347,6 +348,71 @@ TEST_F(AudioProfileTest, testAmrFmtpCreation)
 
     EXPECT_EQ(pFmtp2->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
     EXPECT_EQ(pFmtp2->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    delete pFmtp1;
+    delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testTelephonyEventFmtpEvents)
+{
+    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+
+    EXPECT_EQ(pFmtp->GetEvents(), "0-15");
+
+    pFmtp->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
+    EXPECT_EQ(pFmtp->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testTelephonyEventFmtpCreationDefault)
+{
+    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+
+    EXPECT_EQ(pFmtp->GetEvents(), "0-15");
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testTelephonyEventFmtpCreation)
+{
+    AudioProfile::TelephoneEventFmtp* pFmtp1 =
+            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
+
+    EXPECT_EQ(pFmtp1->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
+
+    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp(*pFmtp1);
+    EXPECT_EQ(pFmtp2->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
+
+    delete pFmtp1;
+    delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testTelephonyEventFmtpAssign)
+{
+    AudioProfile::TelephoneEventFmtp* pFmtp1 =
+            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
+    EXPECT_EQ(pFmtp1->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
+
+    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp();
+    *pFmtp2 = *pFmtp1;
+    EXPECT_EQ(pFmtp2->GetEvents(), TELEPHONY_EVENT_FMTP_EVENTS);
+
+    delete pFmtp1;
+    delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testTelephonyEventFmtpEqual)
+{
+    AudioProfile::TelephoneEventFmtp* pFmtp1 =
+            new AudioProfile::TelephoneEventFmtp(TELEPHONY_EVENT_FMTP_EVENTS);
+    AudioProfile::TelephoneEventFmtp* pFmtp2 = new AudioProfile::TelephoneEventFmtp();
+
+    EXPECT_NE(*pFmtp1, *pFmtp2);
+
+    pFmtp2->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
+
+    EXPECT_EQ(*pFmtp1, *pFmtp2);
 
     delete pFmtp1;
     delete pFmtp2;
