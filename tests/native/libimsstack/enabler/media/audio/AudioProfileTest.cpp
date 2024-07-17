@@ -37,6 +37,24 @@ const IMS_BOOL AUDIO_FMTP_SHOW_MAX_PTIME = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_DTX = IMS_TRUE;
 const IMS_SINT32 AMR_FMTP_OCTET_ALIGN = 1;
 const IMS_BOOL AMR_FMTP_SHOW_OCTET_ALIGN = IMS_TRUE;
+const IMS_UINT32 EVS_FMTP_HF_ONLY = 1;
+const IMS_UINT32 EVS_FMTP_MODE_SWITCH = 1;
+const IMS_UINT32 EVS_FMTP_BR_LIST = 1;
+const IMS_SINT32 EVS_FMTP_BR_SEND = 1;
+const IMS_SINT32 EVS_FMTP_BR_RECV = 1;
+const IMS_UINT32 EVS_FMTP_BW_LIST = 1;
+const IMS_SINT32 EVS_FMTP_BW_SEND = 1;
+const IMS_SINT32 EVS_FMTP_BW_RECV = 1;
+const IMS_SINT32 EVS_FMTP_CMR = 1;
+const IMS_SINT32 EVS_FMTP_CH_AW_MODE = 1;
+const IMS_SINT32 EVS_FMTP_RECEIVED_CH_AW_MODE = 1;
+const IMS_BOOL EVS_FMTP_SHOW_HF_ONLY = IMS_TRUE;
+const IMS_BOOL EVS_FMTP_SHOW_MODE_SWITCH = IMS_TRUE;
+const IMS_BOOL EVS_FMTP_SHOW_CMR = IMS_TRUE;
+const IMS_BOOL EVS_FMTP_SHOW_CH_AW_MODE = IMS_TRUE;
+const IMS_BOOL EVS_FMTP_SHOW_BR_LIST = IMS_FALSE;
+const IMS_BOOL EVS_FMTP_SHOW_BW_LIST = IMS_FALSE;
+const IMS_BOOL EVS_FMTP_SEND_CMR = IMS_TRUE;
 const AString TELEPHONY_EVENT_FMTP_EVENTS = "1-14";
 
 class AudioProfileTest : public ::testing::Test
@@ -348,6 +366,278 @@ TEST_F(AudioProfileTest, testAmrFmtpCreation)
 
     EXPECT_EQ(pFmtp2->GetOctetAlign(), AMR_FMTP_OCTET_ALIGN);
     EXPECT_EQ(pFmtp2->IsOctetAlignVisible(), AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    delete pFmtp1;
+    delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpHfOnly)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetHfOnly(), 0);
+
+    pFmtp->SetHfOnly(EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(pFmtp->GetHfOnly(), EVS_FMTP_HF_ONLY);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpEvsModeSwitch)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetEvsModeSwitch(), 0);
+
+    pFmtp->SetEvsModeSwitch(EVS_FMTP_MODE_SWITCH);
+    EXPECT_EQ(pFmtp->GetEvsModeSwitch(), EVS_FMTP_MODE_SWITCH);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBrList)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBrList(), 0);
+
+    pFmtp->SetBrList(EVS_FMTP_BR_LIST);
+    EXPECT_EQ(pFmtp->GetBrList(), EVS_FMTP_BR_LIST);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBrSend)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBrSend(), 0);
+
+    pFmtp->SetBrSend(EVS_FMTP_BR_SEND);
+    EXPECT_EQ(pFmtp->GetBrSend(), EVS_FMTP_BR_SEND);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBrRecv)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBrRecv(), 0);
+
+    pFmtp->SetBrRecv(EVS_FMTP_BR_RECV);
+    EXPECT_EQ(pFmtp->GetBrRecv(), EVS_FMTP_BR_RECV);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBwList)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBwList(), 0);
+
+    pFmtp->SetBwList(EVS_FMTP_BW_LIST);
+    EXPECT_EQ(pFmtp->GetBwList(), EVS_FMTP_BW_LIST);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBwSend)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBwSend(), 0);
+
+    pFmtp->SetBwSend(EVS_FMTP_BW_SEND);
+    EXPECT_EQ(pFmtp->GetBwSend(), EVS_FMTP_BW_SEND);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpBwRecv)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetBwRecv(), 0);
+
+    pFmtp->SetBwRecv(EVS_FMTP_BW_RECV);
+    EXPECT_EQ(pFmtp->GetBwRecv(), EVS_FMTP_BW_RECV);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpCmr)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetCmr(), 0);
+
+    pFmtp->SetCmr(EVS_FMTP_CMR);
+    EXPECT_EQ(pFmtp->GetCmr(), EVS_FMTP_CMR);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpChAwMode)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetChAwRecv(), 0);
+
+    pFmtp->SetChAwRecv(EVS_FMTP_CH_AW_MODE);
+    EXPECT_EQ(pFmtp->GetChAwRecv(), EVS_FMTP_CH_AW_MODE);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpReceivedChAwMode)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->GetReceivedChAwRecv(), 0);
+
+    pFmtp->SetReceivedChAwRecv(EVS_FMTP_RECEIVED_CH_AW_MODE);
+    EXPECT_EQ(pFmtp->GetReceivedChAwRecv(), EVS_FMTP_RECEIVED_CH_AW_MODE);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowHfOnly)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsHfOnlyVisible(), IMS_FALSE);
+
+    pFmtp->SetShowHfOnly(EVS_FMTP_SHOW_HF_ONLY);
+    EXPECT_EQ(pFmtp->IsHfOnlyVisible(), EVS_FMTP_SHOW_HF_ONLY);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowEvsModeSwitch)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsEvsModeSwitchVisible(), IMS_FALSE);
+
+    pFmtp->SetShowEvsModeSwitch(EVS_FMTP_SHOW_MODE_SWITCH);
+    EXPECT_EQ(pFmtp->IsEvsModeSwitchVisible(), EVS_FMTP_SHOW_MODE_SWITCH);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowCmr)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsCmrVisible(), IMS_FALSE);
+
+    pFmtp->SetShowCmr(EVS_FMTP_SHOW_CMR);
+    EXPECT_EQ(pFmtp->IsCmrVisible(), EVS_FMTP_SHOW_CMR);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowChAwMode)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsChannelAwModeVisible(), IMS_FALSE);
+
+    pFmtp->SetShowChannelAwMode(EVS_FMTP_SHOW_CH_AW_MODE);
+    EXPECT_EQ(pFmtp->IsChannelAwModeVisible(), EVS_FMTP_SHOW_CH_AW_MODE);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowBrList)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsBrListVisible(), IMS_TRUE);
+
+    pFmtp->SetShowBrList(EVS_FMTP_SHOW_BR_LIST);
+    EXPECT_EQ(pFmtp->IsBrListVisible(), EVS_FMTP_SHOW_BR_LIST);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpShowBwList)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsBwListVisible(), IMS_TRUE);
+
+    pFmtp->SetShowBwList(EVS_FMTP_SHOW_BW_LIST);
+    EXPECT_EQ(pFmtp->IsBwListVisible(), EVS_FMTP_SHOW_BW_LIST);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpSendCmr)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    EXPECT_EQ(pFmtp->IsSendCmrEnabled(), IMS_FALSE);
+
+    pFmtp->SetSendCmr(EVS_FMTP_SEND_CMR);
+    EXPECT_EQ(pFmtp->IsSendCmrEnabled(), EVS_FMTP_SEND_CMR);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpCreationDefault)
+{
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+
+    EXPECT_EQ(pFmtp->GetHfOnly(), 0);
+    EXPECT_EQ(pFmtp->GetEvsModeSwitch(), 0);
+    EXPECT_EQ(pFmtp->GetBrList(), 0);
+    EXPECT_EQ(pFmtp->GetBrSend(), 0);
+    EXPECT_EQ(pFmtp->GetBrRecv(), 0);
+    EXPECT_EQ(pFmtp->GetBwList(), 0);
+    EXPECT_EQ(pFmtp->GetBwSend(), 0);
+    EXPECT_EQ(pFmtp->GetBwRecv(), 0);
+    EXPECT_EQ(pFmtp->GetCmr(), 0);
+    EXPECT_EQ(pFmtp->GetChAwRecv(), 0);
+    EXPECT_EQ(pFmtp->GetReceivedChAwRecv(), 0);
+    EXPECT_EQ(pFmtp->IsHfOnlyVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsEvsModeSwitchVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsCmrVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsChannelAwModeVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsBrListVisible(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->IsBwListVisible(), IMS_TRUE);
+    EXPECT_EQ(pFmtp->IsSendCmrEnabled(), IMS_FALSE);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testEvsFmtpCreation)
+{
+    AudioProfile::EvsFmtp* pFmtp1 = new AudioProfile::EvsFmtp();
+
+    pFmtp1->SetHfOnly(EVS_FMTP_HF_ONLY);
+    pFmtp1->SetEvsModeSwitch(EVS_FMTP_MODE_SWITCH);
+    pFmtp1->SetBrList(EVS_FMTP_BR_LIST);
+    pFmtp1->SetBrSend(EVS_FMTP_BR_SEND);
+    pFmtp1->SetBrRecv(EVS_FMTP_BR_RECV);
+    pFmtp1->SetBwList(EVS_FMTP_BW_LIST);
+    pFmtp1->SetBwSend(EVS_FMTP_BW_SEND);
+    pFmtp1->SetBwRecv(EVS_FMTP_BW_RECV);
+    pFmtp1->SetCmr(EVS_FMTP_CMR);
+    pFmtp1->SetChAwRecv(EVS_FMTP_CH_AW_MODE);
+    pFmtp1->SetReceivedChAwRecv(EVS_FMTP_RECEIVED_CH_AW_MODE);
+    pFmtp1->SetShowHfOnly(EVS_FMTP_SHOW_HF_ONLY);
+    pFmtp1->SetShowEvsModeSwitch(EVS_FMTP_SHOW_MODE_SWITCH);
+    pFmtp1->SetShowCmr(EVS_FMTP_SHOW_CMR);
+    pFmtp1->SetShowChannelAwMode(EVS_FMTP_SHOW_CH_AW_MODE);
+    pFmtp1->SetShowBrList(EVS_FMTP_SHOW_BR_LIST);
+    pFmtp1->SetShowBwList(EVS_FMTP_SHOW_BW_LIST);
+    pFmtp1->SetSendCmr(EVS_FMTP_SEND_CMR);
+
+    AudioProfile::EvsFmtp* pFmtp2 = new AudioProfile::EvsFmtp(*pFmtp1);
+
+    EXPECT_EQ(pFmtp2->GetHfOnly(), EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(pFmtp2->GetEvsModeSwitch(), EVS_FMTP_MODE_SWITCH);
+    EXPECT_EQ(pFmtp2->GetBrList(), EVS_FMTP_BR_LIST);
+    EXPECT_EQ(pFmtp2->GetBrSend(), EVS_FMTP_BR_SEND);
+    EXPECT_EQ(pFmtp2->GetBrRecv(), EVS_FMTP_BR_RECV);
+    EXPECT_EQ(pFmtp2->GetBwList(), EVS_FMTP_BW_LIST);
+    EXPECT_EQ(pFmtp2->GetBwSend(), EVS_FMTP_BW_SEND);
+    EXPECT_EQ(pFmtp2->GetBwRecv(), EVS_FMTP_BW_RECV);
+    EXPECT_EQ(pFmtp2->GetCmr(), EVS_FMTP_CMR);
+    EXPECT_EQ(pFmtp2->GetChAwRecv(), EVS_FMTP_CH_AW_MODE);
+    EXPECT_EQ(pFmtp2->GetReceivedChAwRecv(), EVS_FMTP_RECEIVED_CH_AW_MODE);
+    EXPECT_EQ(pFmtp2->IsHfOnlyVisible(), EVS_FMTP_SHOW_HF_ONLY);
+    EXPECT_EQ(pFmtp2->IsEvsModeSwitchVisible(), EVS_FMTP_SHOW_MODE_SWITCH);
+    EXPECT_EQ(pFmtp2->IsCmrVisible(), EVS_FMTP_SHOW_CMR);
+    EXPECT_EQ(pFmtp2->IsChannelAwModeVisible(), EVS_FMTP_SHOW_CH_AW_MODE);
+    EXPECT_EQ(pFmtp2->IsBrListVisible(), EVS_FMTP_SHOW_BR_LIST);
+    EXPECT_EQ(pFmtp2->IsBwListVisible(), EVS_FMTP_SHOW_BW_LIST);
+    EXPECT_EQ(pFmtp2->IsSendCmrEnabled(), EVS_FMTP_SEND_CMR);
 
     delete pFmtp1;
     delete pFmtp2;
