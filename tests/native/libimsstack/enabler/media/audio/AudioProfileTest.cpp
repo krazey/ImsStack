@@ -60,6 +60,10 @@ const IMS_BOOL EVS_FMTP_SHOW_BR_LIST = IMS_FALSE;
 const IMS_BOOL EVS_FMTP_SHOW_BW_LIST = IMS_FALSE;
 const IMS_BOOL EVS_FMTP_SEND_CMR = IMS_TRUE;
 const AString TELEPHONY_EVENT_FMTP_EVENTS = "1-14";
+const IMS_BOOL RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS = IMS_TRUE;
+const IMS_BOOL RTCP_XR_ATTR_SUPPORT_VOIP_METRICS = IMS_TRUE;
+const IMS_BOOL RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE = IMS_TRUE;
+const IMS_BOOL RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE = IMS_TRUE;
 
 class AudioProfileTest : public ::testing::Test
 {
@@ -906,4 +910,120 @@ TEST_F(AudioProfileTest, testAudioPayloadAssignForTelephoneEventFmtp)
 
     delete pPayload1;
     delete pPayload2;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesSupportStatisticMetrics)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), IMS_FALSE);
+
+    pRtcpXrAttr->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+    EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+
+    delete pRtcpXrAttr;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesSupportVoipMetrics)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), IMS_FALSE);
+
+    pRtcpXrAttr->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+    EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+
+    delete pRtcpXrAttr;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesSupportPacketLossRle)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), IMS_FALSE);
+
+    pRtcpXrAttr->SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+    EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+
+    delete pRtcpXrAttr;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesSupportPacketDuplicatedRle)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), IMS_FALSE);
+
+    pRtcpXrAttr->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+    EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+
+    delete pRtcpXrAttr;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesCreation)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(pRtcpXrAttr->IsStatisticMetricsSupported(), IMS_FALSE);
+    EXPECT_EQ(pRtcpXrAttr->IsVoipMetricsSupported(), IMS_FALSE);
+    EXPECT_EQ(pRtcpXrAttr->IsPacketLossRleSupported(), IMS_FALSE);
+    EXPECT_EQ(pRtcpXrAttr->IsPacketDuplicatedRleSupported(), IMS_FALSE);
+
+    delete pRtcpXrAttr;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesAssign)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr1 = new AudioProfile::RtcpXrAttributes();
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr2 = new AudioProfile::RtcpXrAttributes();
+
+    pRtcpXrAttr1->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+    pRtcpXrAttr1->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+    pRtcpXrAttr1->SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+    pRtcpXrAttr1->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+
+    *pRtcpXrAttr2 = *pRtcpXrAttr1;
+
+    EXPECT_EQ(pRtcpXrAttr2->IsStatisticMetricsSupported(), RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+    EXPECT_EQ(pRtcpXrAttr2->IsVoipMetricsSupported(), RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+    EXPECT_EQ(pRtcpXrAttr2->IsPacketLossRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+    EXPECT_EQ(pRtcpXrAttr2->IsPacketDuplicatedRleSupported(), RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+
+    delete pRtcpXrAttr1;
+    delete pRtcpXrAttr2;
+}
+
+TEST_F(AudioProfileTest, testRtcpXrAttributesEqualNotEqual)
+{
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr1 = new AudioProfile::RtcpXrAttributes();
+    AudioProfile::RtcpXrAttributes* pRtcpXrAttr2 = new AudioProfile::RtcpXrAttributes();
+
+    EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr1->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+    EXPECT_NE(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr2->SetSupportStatisticMetrics(RTCP_XR_ATTR_SUPPORT_STATISTIC_METRICS);
+    EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr1->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+    EXPECT_NE(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr2->SetSupportVoipMetrics(RTCP_XR_ATTR_SUPPORT_VOIP_METRICS);
+    EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr1->SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+    EXPECT_NE(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr2->SetSupportPacketLossRle(RTCP_XR_ATTR_SUPPORT_PACKET_LOSS_RLE);
+    EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr1->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+    EXPECT_NE(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    pRtcpXrAttr2->SetSupportPacketDuplicatedRle(RTCP_XR_ATTR_SUPPORT_PACKET_DUP_RLE);
+    EXPECT_EQ(*pRtcpXrAttr2, *pRtcpXrAttr1);
+
+    delete pRtcpXrAttr1;
+    delete pRtcpXrAttr2;
 }
