@@ -410,6 +410,24 @@ public:
         Payload(IN const Payload& obj) :
                 BasePayload(obj)
         {
+            CreateAudioFmtp(obj);
+        }
+
+        Payload& operator=(IN const Payload& obj)
+        {
+            if (this != &obj)
+            {
+                BasePayload::operator=(obj);
+                CreateAudioFmtp(obj);
+            }
+
+            return (*this);
+        }
+
+        virtual ~Payload() {}
+
+        inline void CreateAudioFmtp(IN const Payload& obj)
+        {
             if (obj.m_pFmtp != IMS_NULL)
             {
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
@@ -430,37 +448,6 @@ public:
                 }
             }
         }
-
-        Payload& operator=(IN const Payload& obj)
-        {
-            if (this != &obj)
-            {
-                BasePayload::operator=(obj);
-                if (obj.m_pFmtp != IMS_NULL)
-                {
-                    if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
-                            m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
-                    {
-                        m_pFmtp = new AudioProfile::AmrFmtp(
-                                *static_cast<AudioProfile::AmrFmtp*>(obj.m_pFmtp));
-                    }
-                    else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
-                    {
-                        m_pFmtp = new AudioProfile::EvsFmtp(
-                                *static_cast<AudioProfile::EvsFmtp*>(obj.m_pFmtp));
-                    }
-                    else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
-                    {
-                        m_pFmtp = new AudioProfile::TelephoneEventFmtp(
-                                *static_cast<AudioProfile::TelephoneEventFmtp*>(obj.m_pFmtp));
-                    }
-                }
-            }
-
-            return (*this);
-        }
-
-        virtual ~Payload() {}
     };
 
 public:

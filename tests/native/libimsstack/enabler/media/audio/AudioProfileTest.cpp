@@ -18,6 +18,10 @@
 
 #include <audio/AudioProfile.h>
 
+const AString AMR_PAYLOAD_TYPE = "AMR";
+const AString AMR_WB_PAYLOAD_TYPE = "AMR-WB";
+const AString EVS_PAYLOAD_TYPE = "EVS";
+const AString TELEPHONY_EVENT_PAYLOAD_TYPE = "telephone-event";
 const IMS_UINT32 AUDIO_FMTP_MODESET_LIST = 7;
 const IMS_UINT32 AUDIO_FMTP_DEFAULT_MODESET = 7;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 2;
@@ -706,4 +710,200 @@ TEST_F(AudioProfileTest, testTelephonyEventFmtpEqual)
 
     delete pFmtp1;
     delete pFmtp2;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadCreationForAmrFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AMR_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->GetOctetAlign(),
+            AMR_FMTP_OCTET_ALIGN);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadCreationForAmrWbFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AMR_WB_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())
+            ->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload3->GetFmtp())->IsOctetAlignVisible(),
+            AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadCreationForEvsFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(EVS_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::EvsFmtp*>(pPayload3->GetFmtp())->SetHfOnly(EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(static_cast<AudioProfile::EvsFmtp*>(pPayload3->GetFmtp())->GetHfOnly(),
+            EVS_FMTP_HF_ONLY);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadCreationForTelephoneEventFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(TELEPHONY_EVENT_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    AudioProfile::Payload* pPayload3 = new AudioProfile::Payload(*pPayload1);
+    EXPECT_NE(pPayload3->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload3->GetFmtp())
+            ->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
+    EXPECT_EQ(static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload3->GetFmtp())->GetEvents(),
+            TELEPHONY_EVENT_FMTP_EVENTS);
+
+    delete pPayload1;
+    delete pPayload2;
+    delete pPayload3;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadAssignForAmrFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AMR_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    *pPayload2 = *pPayload1;
+    EXPECT_NE(pPayload2->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->SetOctetAlign(AMR_FMTP_OCTET_ALIGN);
+    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->GetOctetAlign(),
+            AMR_FMTP_OCTET_ALIGN);
+
+    delete pPayload1;
+    delete pPayload2;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadAssignForAmrWbFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(AMR_WB_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::AmrFmtp* pFmtp = new AudioProfile::AmrFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    *pPayload2 = *pPayload1;
+    EXPECT_NE(pPayload2->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())
+            ->SetShowOctetAlign(AMR_FMTP_SHOW_OCTET_ALIGN);
+    EXPECT_EQ(static_cast<AudioProfile::AmrFmtp*>(pPayload2->GetFmtp())->IsOctetAlignVisible(),
+            AMR_FMTP_SHOW_OCTET_ALIGN);
+
+    delete pPayload1;
+    delete pPayload2;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadAssignForEvsFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(EVS_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::EvsFmtp* pFmtp = new AudioProfile::EvsFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    *pPayload2 = *pPayload1;
+    EXPECT_NE(pPayload2->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::EvsFmtp*>(pPayload2->GetFmtp())->SetHfOnly(EVS_FMTP_HF_ONLY);
+    EXPECT_EQ(static_cast<AudioProfile::EvsFmtp*>(pPayload2->GetFmtp())->GetHfOnly(),
+            EVS_FMTP_HF_ONLY);
+
+    delete pPayload1;
+    delete pPayload2;
+}
+
+TEST_F(AudioProfileTest, testAudioPayloadAssignForTelephoneEventFmtp)
+{
+    AudioProfile::Payload* pPayload1 = new AudioProfile::Payload();
+    pPayload1->GetRtpMap().SetPayloadType(TELEPHONY_EVENT_PAYLOAD_TYPE);
+    EXPECT_EQ(pPayload1->GetFmtp(), nullptr);
+
+    AudioProfile::Payload* pPayload2 = new AudioProfile::Payload();
+    *pPayload2 = *pPayload1;
+    EXPECT_EQ(pPayload2->GetFmtp(), nullptr);
+
+    AudioProfile::TelephoneEventFmtp* pFmtp = new AudioProfile::TelephoneEventFmtp();
+    pPayload1->SetFmtp(pFmtp);
+
+    *pPayload2 = *pPayload1;
+    EXPECT_NE(pPayload2->GetFmtp(), nullptr);
+
+    static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload2->GetFmtp())
+            ->SetEvents(TELEPHONY_EVENT_FMTP_EVENTS);
+    EXPECT_EQ(static_cast<AudioProfile::TelephoneEventFmtp*>(pPayload2->GetFmtp())->GetEvents(),
+            TELEPHONY_EVENT_FMTP_EVENTS);
+
+    delete pPayload1;
+    delete pPayload2;
 }
