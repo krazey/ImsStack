@@ -98,6 +98,17 @@ TEST_F(MtcCallManagerTest, DeInitUnregistersThisFromCallStateProxy)
     pCallManager->DeInit();
 }
 
+TEST_F(MtcCallManagerTest, DeInitClearsAllCalls)
+{
+    CallInfo objCallInfo;
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    ASSERT_EQ(2, pCallManager->GetCalls().GetSize());
+
+    pCallManager->DeInit();
+    ASSERT_EQ(0, pCallManager->GetCalls().GetSize());
+}
+
 TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 {
     CallInfo objCallInfo;
