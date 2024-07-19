@@ -29,7 +29,7 @@ class MediaProfile
 {
 public:
     inline MediaProfile() :
-            nNegoId(IMS_NULL),
+            nNegoId(UNDEFINED_NEGO_ID),
             ePemType(PemType::NONE),
             bActive(IMS_FALSE),
             bConfirmed(IMS_FALSE),

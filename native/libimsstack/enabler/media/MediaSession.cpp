@@ -134,7 +134,7 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
 
     if (pMediaNego == IMS_NULL)
     {
-        return IMS_NULL;
+        return UNDEFINED_NEGO_ID;
     }
 
     IMS_UINTP nMediaNego = reinterpret_cast<IMS_UINTP>(pMediaNego);
@@ -173,7 +173,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 {
     IMS_TRACE_D("DestroyProfile() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return IMS_FALSE;
     }
@@ -874,7 +874,7 @@ IMS_BOOL MediaSession::DeleteMediaNego(IN IMS_UINTP nNegoId)
     IMS_TRACE_D("DeleteMediaNego() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_objMapMediaNego.GetSize(), 0);
 
-    if (nNegoId == IMS_NULL)
+    if (nNegoId == UNDEFINED_NEGO_ID)
     {
         return IMS_FALSE;
     }
@@ -1162,10 +1162,10 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
                 if (MEDIA_IS_CONTAINED_THIS_TYPE(pParam->m_eMediaType, MEDIA_TYPE_AUDIO))
                 {
-                    if (m_objAudioController.GetInactivityTimer(NETWORK_TONE_INACTIVITY, IMS_NULL) >
-                            0)
+                    if (m_objAudioController.GetInactivityTimer(
+                                NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID) > 0)
                     {
-                        m_objAudioController.SetNetworkToneTimer(IMS_NULL, 0);
+                        m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
                     }
@@ -1186,11 +1186,11 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     ImsMediaNotifyQualityStatusParam* pParam =
                             reinterpret_cast<ImsMediaNotifyQualityStatusParam*>(nParam);
                     IMS_SINT32 nLocalNetworkToneTimer = m_objAudioController.GetInactivityTimer(
-                            NETWORK_TONE_INACTIVITY, IMS_NULL);
-                    IMS_SINT32 nLocalRtpTimer =
-                            m_objAudioController.GetInactivityTimer(RTP_INACTIVITY, IMS_NULL);
-                    IMS_SINT32 nLocalRtcpTimer =
-                            m_objAudioController.GetInactivityTimer(RTCP_INACTIVITY, IMS_NULL);
+                            NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID);
+                    IMS_SINT32 nLocalRtpTimer = m_objAudioController.GetInactivityTimer(
+                            RTP_INACTIVITY, UNDEFINED_NEGO_ID);
+                    IMS_SINT32 nLocalRtcpTimer = m_objAudioController.GetInactivityTimer(
+                            RTCP_INACTIVITY, UNDEFINED_NEGO_ID);
 
                     IMS_TRACE_I("OnNotify() - LocalNetworkToneTimer[%d], LocalRtpTimer[%d], "
                                 "LocalRtcpTimer[%d]",
@@ -1202,7 +1202,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                     if (nLocalNetworkToneTimer > 0 && pParam->m_nRtpInactivityTimerMillis > 0 &&
                             pParam->m_nRtpInactivityTimerMillis >= nLocalNetworkToneTimer)
                     {
-                        m_objAudioController.SetNetworkToneTimer(IMS_NULL, 0);
+                        m_objAudioController.SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
                         m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
                                 pParam->m_eMediaType, MEDIA_PROTOCOL_RTP);
                         m_pClientListener->MediaSession_Notify(

@@ -173,7 +173,7 @@ TEST_F(AudioControllerTest, testUpdateQualityThreshold)
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(IMS_NULL, m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(UNDEFINED_NEGO_ID, m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, m_pAudioNego), IMS_TRUE);
 }
 
@@ -197,7 +197,7 @@ TEST_F(AudioControllerTest, testInactivityTimer)
 
     m_pController->UpdateSession(negoId2, ACCESS_NETWORK, m_pAudioNego);
 
-    m_pController->SetNetworkToneTimer(IMS_NULL, inactivityTime3);
+    m_pController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, inactivityTime3);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
     EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime3);
 }

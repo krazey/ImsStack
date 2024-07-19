@@ -18,6 +18,7 @@
 #include "ICoreService.h"
 #include "ISipHeader.h"
 #include "IMediaManager.h"
+#include "MediaDef.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -459,7 +460,8 @@ PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
 
     // check the params for SetOptions()
     // check if negoId is necessary or not by the Media side.
-    m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0);
+    m_piMediaSession->SetOptions(
+            UNDEFINED_NEGO_ID, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
