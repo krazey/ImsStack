@@ -39,7 +39,7 @@ public:
                 m_nBitrate(0),
                 m_nFrameRate(0),
                 m_nAs(0),
-                m_nProfile(AVC_PROFILE_NONE),
+                m_nProfile(0),
                 m_nLevel(0),
                 m_nPacketizationMode(1),
                 m_strSpropParam(AString::ConstNull()),
@@ -194,7 +194,7 @@ public:
 
         HevcFmtp(IN const VIDEO_RESOLUTION eResolution, IN const IMS_UINT32 nBitrate,
                 IN const IMS_UINT32 nFrameRate, IN const IMS_UINT32 nAs,
-                IN const VIDEO_PROFILE_HEVC nProfile, IN const IMS_UINT32 nLevel,
+                IN const IMS_UINT32 nProfile, IN const IMS_UINT32 nLevel,
                 IN const IMS_UINT32 nPacketization, IN const AString strSprop) :
                 VideoFmtp(eResolution, nBitrate, nFrameRate, nAs, nProfile, nLevel, nPacketization,
                         strSprop),
@@ -305,6 +305,28 @@ public:
                 m_strImageAttr(obj.m_strImageAttr),
                 m_objRtcpFbAttr(obj.m_objRtcpFbAttr)
         {
+            CreateVideoFmtp(obj);
+        }
+
+        virtual ~Payload() {}
+
+        Payload& operator=(IN const Payload& obj)
+        {
+            if (this != &obj)
+            {
+                BasePayload::operator=(obj);
+                CreateVideoFmtp(obj);
+                m_bIncludeImageAttr = obj.m_bIncludeImageAttr;
+                m_bIncludeFrameSize = obj.m_bIncludeFrameSize;
+                m_strImageAttr = obj.m_strImageAttr;
+                m_objRtcpFbAttr = obj.m_objRtcpFbAttr;
+            }
+
+            return (*this);
+        }
+
+        inline void CreateVideoFmtp(IN const Payload& obj)
+        {
             if (obj.m_pFmtp != IMS_NULL)
             {
                 if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
@@ -318,36 +340,6 @@ public:
                             static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
                 }
             }
-        }
-
-        virtual ~Payload() {}
-
-        Payload& operator=(IN const Payload& obj)
-        {
-            if (this != &obj)
-            {
-                BasePayload::operator=(obj);
-                if (obj.m_pFmtp != IMS_NULL)
-                {
-                    if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H264"))
-                    {
-                        m_pFmtp = new VideoProfile::AvcFmtp(
-                                static_cast<VideoProfile::AvcFmtp*>(obj.m_pFmtp));
-                    }
-                    else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("H265"))
-                    {
-                        m_pFmtp = new VideoProfile::HevcFmtp(
-                                static_cast<VideoProfile::HevcFmtp*>(obj.m_pFmtp));
-                    }
-                }
-
-                m_bIncludeImageAttr = obj.m_bIncludeImageAttr;
-                m_bIncludeFrameSize = obj.m_bIncludeFrameSize;
-                m_strImageAttr = obj.m_strImageAttr;
-                m_objRtcpFbAttr = obj.m_objRtcpFbAttr;
-            }
-
-            return (*this);
         }
 
         inline void SetIncludeImageAttr(IN const IMS_BOOL bIncludeImageAttr)
@@ -385,19 +377,6 @@ public:
             m_bSupportCapaNegoForAvpf(IMS_FALSE){};
 
     virtual ~VideoProfile() {}
-
-    VideoProfile(IN VideoProfile* profile) :
-            MediaBaseProfile(profile)
-    {
-        if (profile == nullptr)
-        {
-            return;
-        }
-        m_nFrameRate = profile->m_nFrameRate;
-        m_bSupportAvpf = profile->m_bSupportAvpf;
-        m_nCvoId = profile->m_nCvoId;
-        m_bSupportCapaNegoForAvpf = profile->m_bSupportCapaNegoForAvpf;
-    }
 
     VideoProfile(IN const VideoProfile& obj) :
             MediaBaseProfile(obj)
