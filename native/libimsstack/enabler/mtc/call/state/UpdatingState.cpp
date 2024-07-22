@@ -144,7 +144,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo
         if (nRejectCode == SipStatusCode::SC_200)
         {
             return AcceptUpdate(pMtcSession->GetPreviousCallType(),
-                    m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+                    m_objContext.GetUpdatingInfo().GetOriginalInfo());
         }
     }
 
@@ -711,8 +711,8 @@ IMS_RESULT UpdatingState::SendRecoverUpdate()
     IMS_TRACE_D("SendUpdate", 0, 0, 0);
 
     m_objContext.GetUpdatingInfo().GetModifyingInfo() =
-            m_objContext.GetUpdatingInfo().GetNegotiatedInfo();
-    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
+            m_objContext.GetUpdatingInfo().GetOriginalInfo();
+    m_objContext.GetUpdatingInfo().GetOriginalInfo() =
             m_objContext.GetUpdatingInfo().GetModifiedInfo();
     m_objContext.GetUpdatingInfo().GetAlertingInfo().eAudioDirection = DIRECTION_INVALID;
     m_objContext.GetUpdatingInfo().GetModifiedInfo().eAudioDirection = DIRECTION_INVALID;

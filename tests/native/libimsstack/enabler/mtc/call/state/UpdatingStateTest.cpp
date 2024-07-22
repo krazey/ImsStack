@@ -264,7 +264,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
             .WillByDefault(Return(200));
 
     ON_CALL(objMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
-    objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaInfo;
+    objContext.GetUpdatingInfo().GetOriginalInfo() = objMediaInfo;
 
     // Copied from AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
@@ -576,13 +576,13 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerAct
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
 
     // Held case
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
     EXPECT_CALL(objUiNotifier, SendHoldFailed(_));
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
 
     // Resumed case
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     EXPECT_CALL(objUiNotifier, SendResumeFailed(_));
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
@@ -597,7 +597,7 @@ TEST_F(UpdatingStateTest, SessionUpdateReceivedDoesNothingIfGlareTimerInActive)
 
 TEST_F(UpdatingStateTest, SessionUpdatedNotifiesHeld)
 {
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
 
     EXPECT_CALL(objUiNotifier, SendHeld);
@@ -606,7 +606,7 @@ TEST_F(UpdatingStateTest, SessionUpdatedNotifiesHeld)
 
 TEST_F(UpdatingStateTest, SessionUpdatedNotifiesResumed)
 {
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_CALL(objUiNotifier, SendResumed);
@@ -615,7 +615,7 @@ TEST_F(UpdatingStateTest, SessionUpdatedNotifiesResumed)
 
 TEST_F(UpdatingStateTest, SessionUpdatedNotifiesHeldBy)
 {
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_RECEIVE;
 
     EXPECT_CALL(objUiNotifier, SendHeldBy);
@@ -624,7 +624,7 @@ TEST_F(UpdatingStateTest, SessionUpdatedNotifiesHeldBy)
 
 TEST_F(UpdatingStateTest, SessionUpdatedNotifiesResumedBy)
 {
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_RECEIVE;
     pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_CALL(objUiNotifier, SendResumedBy);
@@ -653,7 +653,7 @@ TEST_F(UpdatingStateTest,
 TEST_F(UpdatingStateTest, SessionUpdatedReturnsEstablishedStateIfResumedAsModifier)
 {
     pUpdatingInfo->SetModifier();
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
     pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     pUpdatingInfo->SetTargetCallType(CallType::VOIP);
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
@@ -752,7 +752,7 @@ TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedBy)
 TEST_F(UpdatingStateTest, SessionUpdatedInvokesSendUpdatedAndSendHeldByInOrder)
 {
     pUpdatingInfo->SetAlerted();
-    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
     pUpdatingInfo->GetModifiedInfo().eAudioDirection = DIRECTION_RECEIVE;
 
     {

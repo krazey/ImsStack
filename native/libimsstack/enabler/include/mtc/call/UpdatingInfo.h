@@ -32,7 +32,7 @@ public:
 public:
     inline CallType GetTargetCallType() const { return m_eTargetCallType; }
     inline UpdateType GetRequestingType() const { return m_eRequestingType; }
-    inline MediaInfo& GetNegotiatedInfo() { return m_objNegotiatedInfo; }
+    inline MediaInfo& GetOriginalInfo() { return m_objOriginalInfo; }
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
     inline MediaInfo& GetModifiedInfo() { return m_objModifiedInfo; }
@@ -71,7 +71,7 @@ private:
     IMtcCallContext& m_objContext;
     CallType m_eTargetCallType;
     UpdateType m_eRequestingType;
-    MediaInfo m_objNegotiatedInfo;  // Info before starting update.
+    MediaInfo m_objOriginalInfo;    // Info before starting update.
     MediaInfo m_objModifyingInfo;   // Info after sending update.
     MediaInfo m_objAlertingInfo;    // Info after receiving update.
     MediaInfo m_objModifiedInfo;    // Info after update completed.
