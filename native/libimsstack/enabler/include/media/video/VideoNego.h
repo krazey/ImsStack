@@ -21,6 +21,7 @@
 #include "MediaDef.h"
 #include "video/VideoDef.h"
 #include "config/VideoConfiguration.h"
+#include "video/VideoProfileExtractor.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego
@@ -84,34 +85,18 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
-    IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
-            IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
     IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::AvcFmtp* pFmtp);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::HevcFmtp* pFmtp);
     VideoProfile::Payload* FindPayloadInProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(
             IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
-    IMS_BOOL GetAvpfFromAttributes(IN SdpMediaFormat* pMediaFormat,
-            IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
-    IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes,
-            OUT IMS_UINT32* nIndex);
-    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType,
-            IN const AString& strImageAttrFromSdp, IN const AString& strFrameSizeFromSdp,
-            IN const AString& strSpropParam, IN IMS_SINT32 nQcif = -1);
-    IMS_BOOL GetWidthHeightFromSdp_ImageAttr(IN const AString& strImageAttrFromSdp,
-            OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
     IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
-    IMS_BOOL GetWidthHeightFromSdp_FrameSize(IN AString strFrameSizeFromSdp,
-            OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
-    VIDEO_RESOLUTION GetResolutionFromWidthHeight(IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight);
     IMS_BOOL MakeImageAttributeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
             OUT AString& strImageAttr);
     IMS_BOOL MakeFrameSizeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
@@ -119,9 +104,6 @@ private:
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
-    IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
-    IMS_BOOL GetAvpfFromAttributes_EX(
-            IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
 
     /**
      * @brief Get the width and height from video resolution enum id
@@ -134,6 +116,9 @@ private:
     IMS_BOOL GetWidthHeightFromResolutionId(
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
+
+private:
+    std::unique_ptr<VideoProfileExtractor> m_pProfileExtractor;
 };
 
 #endif

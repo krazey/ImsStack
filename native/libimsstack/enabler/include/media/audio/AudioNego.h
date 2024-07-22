@@ -20,6 +20,7 @@
 #include "BaseNego.h"
 #include "MediaDef.h"
 #include "audio/AudioDef.h"
+#include "audio/AudioProfileExtractor.h"
 #include "audio/AudioProfileUtil.h"
 #include "config/AudioConfiguration.h"
 
@@ -94,15 +95,11 @@ protected:
             OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
-    IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
     IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
             OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
             OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
@@ -134,6 +131,9 @@ private:
             OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
     void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+
+private:
+    std::unique_ptr<AudioProfileExtractor> m_pProfileExtractor;
 };
 
 #endif

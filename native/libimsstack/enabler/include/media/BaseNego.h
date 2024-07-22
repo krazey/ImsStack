@@ -23,6 +23,7 @@
 
 #include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
+#include "ProfileExtractor.h"
 #include "config/MediaConfiguration.h"
 
 class BaseNego : public ImsSlot
@@ -224,16 +225,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) = 0;
     virtual MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) = 0;
-    IMS_BOOL MakeCapaNegoProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeAcfgProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeTcapProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeAcapProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakePcfgProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
 
 protected:
     MEDIA_CONTENT_TYPE m_eType;
