@@ -34,28 +34,26 @@ import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+/**
+ * A service that manages AoS settings and handles related events.
+ */
 public class AosSettingService {
 
-    private final Object mLock = new Object();
-    @VisibleForTesting
+    /** public constants */
     static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
-    @VisibleForTesting
     static final int EVENT_REBOOT = 1002;
-    @VisibleForTesting
     static final int EVENT_SHUTDOWN = 1003;
 
-    @VisibleForTesting
-    UserMobileDataStateListener mUserMobileDataStateListener = null;
-    @VisibleForTesting
-    Handler mHandler = null;
-
-    private int mSlotId = 0;
+    /** private members */
+    private final Object mLock = new Object();
+    private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
-    private boolean mMobileDataEnabled = false;
-    @VisibleForTesting
-    IntentReceiverListener mIntentReceiverListener = null;
+    private boolean mMobileDataEnabled;
+    private Handler mHandler;
     private Sim.Listener mSimListener;
     private NativeStateListener mNativeStateListener;
+    private UserMobileDataStateListener mUserMobileDataStateListener;
+    private IntentReceiverListener mIntentReceiverListener;
 
     public AosSettingService(int slotId) {
         ImsLog.d(slotId, "");
@@ -78,11 +76,11 @@ public class AosSettingService {
         mIntentReceiverListener.register();
 
         mSimListener = new Sim.Listener() {
-                @Override
-                public void onSimStateChanged() {
-                    updateSubscription();
-                }
-            };
+            @Override
+            public void onSimStateChanged() {
+                updateSubscription();
+            }
+        };
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
         if (sim != null) {
             sim.addListener(mSimListener);
@@ -196,6 +194,11 @@ public class AosSettingService {
         }
     }
 
+    @VisibleForTesting
+    Handler getHandler() {
+        return mHandler;
+    }
+
     private final class SettingServiceHandler extends Handler {
         private SettingServiceHandler(Looper looper) {
             super(looper);
@@ -215,6 +218,10 @@ public class AosSettingService {
     }
 
     @VisibleForTesting
+    UserMobileDataStateListener getUserMobileDataStateListener() {
+        return mUserMobileDataStateListener;
+    }
+
     final class UserMobileDataStateListener extends TelephonyCallback implements
             TelephonyCallback.UserMobileDataStateListener {
 
@@ -237,7 +244,11 @@ public class AosSettingService {
     }
 
     @VisibleForTesting
-    class IntentReceiverListener extends BroadcastReceiver {
+    IntentReceiverListener getIntentReceiverListener() {
+        return mIntentReceiverListener;
+    }
+
+    final class IntentReceiverListener extends BroadcastReceiver {
         public void register() {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_REBOOT);
