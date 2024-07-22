@@ -1026,6 +1026,22 @@ IMS_UINT32 AosRegistration::GetRegFeatures()
 }
 
 PROTECTED
+void AosRegistration::NotifyFailureWithImsReason(IN IMS_SINT32 nReason)
+{
+    if (GetImsRegType() != IMS_REG_TYPE_NORMAL)
+    {
+        return;
+    }
+
+    if (nReason == IRegistration::REASON_TRANSACTION_TIMEOUT ||
+            nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR ||
+            nReason == IRegistration::REASON_SERVER_SOCKET_ERROR)
+    {
+        m_eImsReasonCode = AosReasonCode::CODE_NETWORK_RESP_TIMEOUT;
+    }
+}
+
+PROTECTED
 void AosRegistration::NotifyDeregistered()
 {
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
@@ -1052,7 +1068,8 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         case STATE_REGISTERED:
             nImsRegState = IMS_REG_STATE_REGISTERED;
             break;
-        case STATE_OFFLINE:
+        case STATE_OFFLINE:  // FALL-THROUGH
+        case STATE_REGSTOP:
             nImsRegState = IMS_REG_STATE_DEREGISTERED;
             break;
 
@@ -4977,6 +4994,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
 
     IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
     ProcessRequiredWfcErrMessage(nStatusCode);
+    NotifyFailureWithImsReason(nReason);
     ProcessRegEventChange(nStatusCode);
 
     switch (nReason)

@@ -425,6 +425,11 @@ public interface IAosRegistrationListener {
          * Clears blocks for all RATs.
          */
         public static final int CODE_CLEAR_RAT_BLOCKS = 20;
+        /**
+         * No response to REGISTER.
+         * TCP connection setup fails/timeout.
+         */
+        public static final int CODE_NETWORK_RESP_TIMEOUT = 21;
 
         public static String toString(int reasonCode) {
             return switch (reasonCode) {
@@ -453,6 +458,7 @@ public interface IAosRegistrationListener {
                 case CODE_LOCAL_NOT_REGISTERED -> "CODE_LOCAL_NOT_REGISTERED";
                 case CODE_RAT_BLOCK -> "CODE_RAT_BLOCK";
                 case CODE_CLEAR_RAT_BLOCKS -> "CODE_CLEAR_RAT_BLOCKS";
+                case CODE_NETWORK_RESP_TIMEOUT -> "CODE_NETWORK_RESP_TIMEOUT";
                 default -> "Unknown";
             };
         }

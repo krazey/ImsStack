@@ -103,7 +103,8 @@ using ::testing::SetArgReferee;
     using Base::DestroySubscription;                                          \
     using Base::GetActualWaitTime;                                            \
     using Base::GetNetworkTypeForImsRegState;                                 \
-    using Base::GetRegIpcanCategory;                                          \
+    using Base::GetReasonCode;                                                \
+    using Base::NotifyFailureWithImsReason;                                   \
     using Base::IncreaseConsecutiveFailCount;                                 \
     using Base::Init;                                                         \
     using Base::IsAppReady;                                                   \
@@ -1370,6 +1371,24 @@ TEST_F(AosRegistrationTest, GetNetworkTypeFromAosNetTracker)
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NR);
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::UTRAN);
     EXPECT_EQ(m_pAosRegistration->GetNetworkTypeForImsRegState(), AosNetworkType::NONE);
+}
+
+TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenNotifyFailureWithImsReasonForNormalType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->NotifyFailureWithImsReason(IRegistration::REASON_TRANSACTION_TIMEOUT);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+}
+
+TEST_F(AosRegistrationTest, DoNotSetReasonToTimeoutWhenNotifyFailureWithImsReasonForEmergencyType)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    m_pAosRegistration->NotifyFailureWithImsReason(IRegistration::REASON_TRANSACTION_TIMEOUT);
+
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, UpdatePreloadedRouteFailIfRegParameterIsNull)
@@ -4587,6 +4606,13 @@ TEST_F(AosRegistrationTest, RegistrationStartFailedWithTransactionTimeout)
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
 }
 
+TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithTransactionTimeout)
+{
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+}
+
 TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfErrorCodeOtherConfiguredWhenStartFailedWithOthers)
 {
     ImsVector<IMS_SINT32> objExtraRegErrCode;
@@ -4627,6 +4653,20 @@ TEST_F(AosRegistrationTest,
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
+}
+
+TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithClientSocketError)
+{
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+}
+
+TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithServerSocketError)
+{
+    m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_SERVER_SOCKET_ERROR);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, StartRetryTimerIfAwtRecoveryRequiredWhenStartFailedWithOthers)

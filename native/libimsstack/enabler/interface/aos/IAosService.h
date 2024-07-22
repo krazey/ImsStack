@@ -342,7 +342,12 @@ enum class AosReasonCode
     /**
      * Clears blocks for all RATs.
      */
-    CLEAR_RAT_BLOCKS = 20
+    CLEAR_RAT_BLOCKS = 20,
+    /**
+     * No response to REGISTER.
+     * TCP connection setup fails/timeout.
+     */
+    CODE_NETWORK_RESP_TIMEOUT = 21
 };
 
 /**

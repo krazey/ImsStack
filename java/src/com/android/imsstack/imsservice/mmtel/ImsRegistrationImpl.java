@@ -135,6 +135,10 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE,
                     ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE, null);
+        } else if (reason == IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT) {
+            return new ImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT, null);
         } else if (message != null && !message.trim().equals("")) {
             return new ImsReasonInfo(
                     ImsReasonInfo.CODE_REGISTRATION_ERROR,
