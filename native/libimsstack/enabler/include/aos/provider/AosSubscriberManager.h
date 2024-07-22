@@ -21,6 +21,7 @@
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
 #include "ImsIdentity.h"
+#include "IAosService.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -70,7 +71,6 @@ protected:
     enum
     {
         TIMER_ICC_LOADED_WAITING = 100,
-        TIMER_ISIM_RECOVERY,
         TIMER_PHONE_RESTART_RECOVERY
     };
 
@@ -87,12 +87,10 @@ protected:
 
     IMS_BOOL IsProvisioned(IN IMS_BOOL bIsFake = IMS_FALSE) const;
     IMS_BOOL IsRefreshStarted() const;
-    IMS_BOOL IsIsimRecoveryAllowed() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportFallback(IN IMS_UINT32 nIdentity) const;
     IMS_UINT32 GetIsimAt() const;
 
-    void ClearIsimRecovery();
     void ConfigureAsDefault();
     void ConfigureAsFake();
 
@@ -100,23 +98,27 @@ protected:
 
     ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
-    IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus);
-    IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
+    IMS_BOOL UpdateImpuFromIsim(OUT AStringArray& objImpus);
+    IMS_BOOL UpdateSubscriberInfoWithTempImpu(
+            OUT AStringArray& objImpus, IN IMS_BOOL bIsIsim = IMS_FALSE);
 
     void RemoveImpu() const;
     IMS_BOOL UpdateImsi() const;
-    IMS_BOOL UpdateImsIdentity(IN IMS_UINT32 nIdentity);
+    void UpdateImsIdentity(IN IMS_UINT32 nIdentity);
     IMS_UINT32 GetIdentity(IN Index eIndex) const;
 
-    IMS_BOOL ProcessFallback(IN IMS_BOOL bToUsim);
-    IMS_BOOL ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi);
-    IMS_BOOL ProcessPhoneNumberAvailable(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
+    IMS_BOOL ReconfigureFallback(IN IMS_BOOL bToUsim);
+    IMS_BOOL ProcessPhoneNumberAvailable();
     IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
-    void ProcessIsimRecovery();
+
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
-    void ProcessIsimRecoveryTimerExpired();
     void ProcessPhoneRestartRecoveryTimerExpired();
+    void ProcessValidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+    void ProcessInvalidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+
+    IMS_BOOL CheckAndTryUsimFallback();
+    IMS_BOOL CheckAndTryIsimImsiFallback();
 
     IMS_BOOL UpdateNConfiguration();
 
@@ -124,8 +126,9 @@ protected:
     void StopTimer(IN IMS_UINT32 nType);
     void ClearTimers();
 
-    void NotifyState(IN IMS_UINT32 nState) const;
-    void NotifyMonitorState(IN IMS_UINT32 nState) const;
+    void NotifyState(IN IMS_UINT32 nState);
+    void NotifyMonitorState(IN IMS_UINT32 nState);
+    void NotifyAosIsimState(IN AosIsimState eState);
 
     IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus);
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
@@ -177,7 +180,6 @@ protected:
     // Log
     const IMS_CHAR* IdentityPriorityToString();
     static const IMS_CHAR* PrintIdentity(IN IMS_UINT32 nIdentity);
-    static const IMS_CHAR* UpdateEventToString(IN IMS_UINT32 nEvent);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -194,14 +196,16 @@ protected:
     IMS_BOOL m_bUsim;
     IMS_BOOL m_bUsimFallback;
     IMS_BOOL m_bIsRefreshStarted;
-    IMS_UINT32 m_nIsimRecoveryCount;
 
     ITimer* m_piTimerToIccLoadedWaiting;
-    ITimer* m_piTimerToIsimRecovery;
     ITimer* m_piTimerToPhoneRestartRecovery;
 
     IMS_BOOL m_bIsProvisioned;
     IMS_BOOL m_bIsProvisionedForFake;
+
+    IMS_UINT32 m_nNotifyState;
+    IMS_UINT32 m_nNotifyStateForFake;
+    AosIsimState m_eNotifyIsimState;
 
     AStringArray m_objPuids;
     AStringArray m_objPuidsForFake;
@@ -215,8 +219,6 @@ protected:
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
-    static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
-    static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
     static const IMS_UINT32 DEFAULT_ISIM_INDEX_FOR_IMPU = 1;
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;

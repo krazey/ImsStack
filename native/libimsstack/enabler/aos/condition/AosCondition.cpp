@@ -396,8 +396,6 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
         UpdateRegistrationMode();
     }
 
-    const IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
-
     switch (nState)
     {
         case IAosSubscriber::REFRESH_STARTED:
@@ -406,33 +404,19 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
             m_bIsRefreshStarted = IMS_TRUE;
             break;
 
-        case IAosSubscriber::REFRESH_COMPLETED:
+        case IAosSubscriber::REFRESH_COMPLETED:  // FALL-THROUGH
+        case IAosSubscriber::READY:
             ProcessBlockReason(IMS_FALSE, BLOCK_SUBSCRIBER_INCOMPLETED);
-            ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
-
             if (IsRefreshStarted())
             {
                 m_bIsRefreshStarted = IMS_FALSE;
                 ClearRegistrationAndDataFailureBlocks();
             }
             break;
-
-        case IAosSubscriber::REFRESH_FAILED:
-            ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
-            break;
-
+        case IAosSubscriber::REFRESH_FAILED:  // FALL-THROUGH
+        case IAosSubscriber::NOT_READY:       // FALL-THROUGH
         default:
-            if (piSubscriber != IMS_NULL)
-            {
-                ProcessBlockReason((piSubscriber->IsReady()) ? IMS_FALSE : IMS_TRUE,
-                        BLOCK_SUBSCRIBER_INCOMPLETED);
-
-                if (IsRefreshStarted() && piSubscriber->IsReady())
-                {
-                    m_bIsRefreshStarted = IMS_FALSE;
-                    ClearRegistrationAndDataFailureBlocks();
-                }
-            }
+            ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED);
             break;
     }
 }

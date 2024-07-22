@@ -848,25 +848,24 @@ TEST_F(AosConditionTest, Block_Changed)
     m_pAosCondition->Block_Changed(0, 0);
 }
 
-TEST_F(AosConditionTest, Subscriber_StateChanged_RefreshCompleted_RefreshStartedFalse)
-{
-    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
-
-    m_pAosCondition->SetRefreshStarted(IMS_FALSE);
-    EXPECT_FALSE(m_pAosCondition->IsRefreshStarted());
-
-    m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::REFRESH_COMPLETED);
-}
-
-TEST_F(AosConditionTest, ShouldResetBlocksWhenReceiveRefreshCompleted)
+TEST_F(AosConditionTest, ShouldResetBlockSubscriberIncompletedWhenReceiveRefreshCompleted)
 {
     // GIVEN
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SUBSCRIBER_INCOMPLETED, _));
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _));
 
     // WHEN
     m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::REFRESH_COMPLETED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosConditionTest, ShouldResetBlockSubscriberIncompletedWhenReceiveReady)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SUBSCRIBER_INCOMPLETED, _));
+
+    // WHEN
+    m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::READY);
 
     // THEN: The GIVEN condition should be met.
 }
@@ -875,7 +874,23 @@ TEST_F(AosConditionTest, ShouldResetBlocksWhenReceiveRefreshCompletedAfterRefres
 {
     // GIVEN
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SUBSCRIBER_INCOMPLETED, _));
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _)).Times(2);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AUTHENTICATION_FAILED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED, _));
+
+    m_pAosCondition->SetRefreshStarted(IMS_TRUE);
+
+    // WHEN
+    m_pAosCondition->Subscriber_StateChanged(IAosSubscriber::REFRESH_COMPLETED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosConditionTest, ShouldResetBlocksWhenReceiveReadyAfterRefreshStarted)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SUBSCRIBER_INCOMPLETED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AUTHENTICATION_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED, _));
 
