@@ -44,7 +44,7 @@ BlindTransferController::~BlindTransferController()
 PUBLIC VIRTUAL void BlindTransferController::OnReferenceStarted()
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
-    OnCompleted();
+    OnSuccess();
 }
 
 PUBLIC VIRTUAL void BlindTransferController::Transfer(IN const AString& strNumber)

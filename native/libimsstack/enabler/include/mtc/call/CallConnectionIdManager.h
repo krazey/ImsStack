@@ -45,7 +45,6 @@ public:
     virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId) const;
 
 private:
-    // TODO: GetNewConnectionId?
     IMS_UINT32 GetNewIndex();
     IMS_SINT32 GetListIndexByCallKey(IN CallKey nCallKey);
     IMS_SINT32 GetListIndexByConnectionId(IN IMS_UINT32 nConnectionId);
