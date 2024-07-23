@@ -385,16 +385,24 @@ PROTECTED VIRTUAL void AosERegistration::SetRefreshPolicy()
     m_piRegistration->SetRefreshPolicy(IRegistration::REFRESH_POLICY_RATIO, 1200, 50, 50);
 }
 
+PROTECTED
+void AosERegistration::SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired)
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+    {
+        return;
+    }
+
+    AosRegistration::SetReregFailureReportOnIpcanChangeRequired(bRequired);
+    UpdateTransactionStarted();
+}
+
 PROTECTED VIRTUAL void AosERegistration::UpdateTransactionStarted()
 {
-    if (m_pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
-    {
-        m_bIsTransactionStarted = IsImsCall();
-    }
-    else
-    {
-        m_bIsTransactionStarted = IsImsCall() || IsRefreshRequiredByCbm();
-    }
+    m_bIsTransactionStarted = IsImsCall() ||
+            (GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported() &&
+                    m_pEModeInfo != IMS_NULL && IsRefreshRequiredByCbm()) ||
+            IsReregFailureReportOnIpcanChangeRequired();
 
     A_IMS_TRACE_D(REGID, "UpdateTransactionStarted :: (%s)",
             (m_bIsTransactionStarted) ? "READY" : "NOT READY", 0, 0);

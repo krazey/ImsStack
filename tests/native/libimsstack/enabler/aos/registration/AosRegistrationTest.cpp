@@ -1014,6 +1014,23 @@ TEST_F(AosRegistrationTest, DeferHandlingIpcanChangeIfCallExist)
     EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_UPDATE_HELD_BY_CALL));
 }
 
+TEST_F(AosRegistrationTest, TriggerUpdateWhenIpcanChangedRegardlessOfCallExistanceIfEmergencyType)
+{
+    // GIVEN
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+    ON_CALL(m_objMockIAosNConfiguration, IsRegWithIpcanChangedDuringImsCallHeld())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED);
+
+    // THEN
+    EXPECT_FALSE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_UPDATE_HELD_BY_CALL));
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("Update"), 1);
+}
+
 TEST_F(AosRegistrationTest, TriggerUpdateIfNoCallExistWhenRequestToHandleIpcanChange)
 {
     m_pAosRegistration->SetImsCall(IMS_FALSE);
@@ -1724,21 +1741,9 @@ TEST_F(AosRegistrationTest, DoNothingIfPreferredDscpIsDifferentWithConnectionWhe
     m_pAosRegistration->SetDynamicIpQos();
 }
 
-TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForEmergencyType)
+TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceed)
 {
     m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
-    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
-    m_pAosRegistration->SetImsCall(IMS_TRUE);
-
-    m_pAosRegistration->UpdateTransactionStarted();
-
-    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
-}
-
-TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceedForNormalType)
-{
-    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
-    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
     m_pAosRegistration->SetBlocked(IMS_FALSE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())

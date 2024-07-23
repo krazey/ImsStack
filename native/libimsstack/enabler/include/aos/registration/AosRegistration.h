@@ -109,7 +109,6 @@ protected:
     void SetRetryTime();
     IMS_BOOL SetTraffic(IN IMS_BOOL bStarted);
     void SetTrafficListener(IN IMS_BOOL bSet);
-    void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired);
     void UpdateRegIpcanCategory();
     void ClearPending();
     void ClearCallingNumberVerification();
@@ -212,6 +211,7 @@ protected:
     virtual void SetStaticIpQos();
     virtual void SetDynamicIpQos();
     virtual void SetActiveBindingsRestorationUsage();
+    virtual void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired);
 
     virtual void UpdateTransactionStarted();
     virtual void UpdateIpsecSupported(IN IMS_BOOL bSupported, IN IMS_UINT32 nReason = 0);

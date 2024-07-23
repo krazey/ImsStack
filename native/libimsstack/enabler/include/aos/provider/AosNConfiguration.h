@@ -75,6 +75,7 @@ public:
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;
+    IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const override;
     IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const override;
     IMS_BOOL IsDeregOn3gNetwork() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;

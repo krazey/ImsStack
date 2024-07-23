@@ -61,6 +61,7 @@ public:
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmcRegOnRandomPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsERegWithOnlyTcpInRoaming, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyReregSupportedOnIpcanChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));

@@ -720,6 +720,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_C
         "sms_over_ims_available_without_voice_capa_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
         "support_contact_user_info_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =
+        "support_erereg_on_ipcan_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[] =
         "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =

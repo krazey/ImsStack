@@ -180,6 +180,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() co
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyReregSupportedOnIpcanChange() const
+{
+    return m_objAsset.bSupportEmergencyReregOnIpcanChange;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReregRetryWithChangedCountryOnWifi() const
 {
     return m_objAsset.bReregWithChangedCountryOnWifi;
@@ -1264,6 +1269,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
     m_objAsset.bSupportContactUserInfo =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL);
+    m_objAsset.bSupportEmergencyReregOnIpcanChange =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL);
     m_objAsset.bSupportRegWithFeatureTagUnavailable = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =

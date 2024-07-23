@@ -759,12 +759,6 @@ void AosRegistration::SetTrafficListener(IN IMS_BOOL bSet)
 }
 
 PROTECTED
-void AosRegistration::SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired)
-{
-    m_bIsReregFailureReportOnIpcanChangeRequired = bRequired;
-}
-
-PROTECTED
 void AosRegistration::UpdateRegIpcanCategory()
 {
     m_nRegIpcanCategory = m_piContext->GetConnection()->GetIpcanCategory();
@@ -2453,23 +2447,21 @@ PROTECTED VIRTUAL void AosRegistration::SetActiveBindingsRestorationUsage()
     }
 }
 
+PROTECTED VIRTUAL void AosRegistration::SetReregFailureReportOnIpcanChangeRequired(
+        IN IMS_BOOL bRequired)
+{
+    m_bIsReregFailureReportOnIpcanChangeRequired = bRequired;
+}
+
 PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
 {
-    if (m_eRegType == AosRegistrationType::EMERGENCY)
+    if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() && GetState() == STATE_REFRESHSTOP)
     {
-        m_bIsTransactionStarted = IsImsCall();
+        SetHeldByCall(IMS_FALSE);
     }
-    else
-    {
-        if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
-                GetState() == STATE_REFRESHSTOP)
-        {
-            SetHeldByCall(IMS_FALSE);
-        }
 
-        m_bIsTransactionStarted =
-                !(IsBlocked() || IsHeldByCall() || IsRadioWaiting() || IsTrafficPriorityBlocked());
-    }
+    m_bIsTransactionStarted =
+            !(IsBlocked() || IsHeldByCall() || IsRadioWaiting() || IsTrafficPriorityBlocked());
 
     A_IMS_TRACE_I(REGID, "UpdateTransactionStarted :: (%s)",
             (m_bIsTransactionStarted) ? "READY" : "NOT READY", 0, 0);
@@ -2888,33 +2880,36 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpcanChanged()
 {
     A_IMS_TRACE_I(REGID, "ProcessIpcanChanged()", 0, 0, 0);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegWithIpcanChangedDuringImsCallHeld() && IsImsCall())
+    if (!IsRegTypeEqual(AosRegistrationType::EMERGENCY))
     {
-        // if required not to update while calling,
-        // then add feature PENDING_UPDATE.
-        // when calls end, it'll do an actual update.
-        m_pUtil->AddFeature(PENDING_UPDATE_HELD_BY_CALL, m_nTxnPending);
-
-        UpdateRegIpcanCategory();
-
-        if (GetState() == STATE_REGISTERED)
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithIpcanChangedDuringImsCallHeld() && IsImsCall())
         {
-            SetState(STATE_REFRESHING);
-            ReportTryingState();
+            // if required not to update while calling,
+            // then add feature PENDING_UPDATE.
+            // when calls end, it'll do an actual update.
+            m_pUtil->AddFeature(PENDING_UPDATE_HELD_BY_CALL, m_nTxnPending);
 
-            SetState(STATE_REGISTERED);
-            ReportStateChanged(RESULT_SUCCESS);
+            UpdateRegIpcanCategory();
+
+            if (GetState() == STATE_REGISTERED)
+            {
+                SetState(STATE_REFRESHING);
+                ReportTryingState();
+
+                SetState(STATE_REGISTERED);
+                ReportStateChanged(RESULT_SUCCESS);
+            }
+
+            return;
         }
     }
-    else
-    {
-        if (GetState() == STATE_REGISTERED)
-        {
-            SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
-        }
 
-        Update();
+    if (GetState() == STATE_REGISTERED)
+    {
+        SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
     }
+
+    Update();
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateIpcan()
