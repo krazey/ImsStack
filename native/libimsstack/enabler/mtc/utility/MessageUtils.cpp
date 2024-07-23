@@ -274,7 +274,10 @@ PUBLIC AString MessageUtils::GetParameterValue(IN const IMessage* piMessage,
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
         AString strValue;
-        ISipHeader* piSipHeader = SipParsingHelper::CreateHeader(eHeaderType, lstHeaders.GetAt(i));
+        ISipHeader* piSipHeader = eHeaderType == ISipHeader::UNKNOWN
+                ? SipParsingHelper::CreateHeader(strHeaderName, lstHeaders.GetAt(i))
+                : SipParsingHelper::CreateHeader(eHeaderType, lstHeaders.GetAt(i));
+
         if (piSipHeader == IMS_NULL)
         {
             continue;
