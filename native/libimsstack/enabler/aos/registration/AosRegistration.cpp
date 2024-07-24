@@ -3543,6 +3543,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsSupp
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage(IN IMS_SINT32 nStatusCode)
 {
+    if (!IsRegTypeEqual(AosRegistrationType::NORMAL))
+    {
+        return;
+    }
+
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
     {
         return;
@@ -4633,6 +4638,11 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessIpVersionChange()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRegEventChange(IN IMS_UINT32 nStatusCode)
 {
+    if (!IsRegTypeEqual(AosRegistrationType::NORMAL))
+    {
+        return;
+    }
+
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_piContext->GetSlotId())->GetUsatRegEventDownloadPolicy();
     if (nPolicy == CarrierConfig::Assets::USAT_REG_EVENT_NOT_DOWNLOAD)
     {

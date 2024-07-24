@@ -132,6 +132,7 @@ using ::testing::SetArgReferee;
     using Base::ProcessRegRequiredWithWaitTime;                               \
     using Base::ProcessRegTerminated;                                         \
     using Base::ProcessReinitiate;                                            \
+    using Base::ProcessRequiredWfcErrMessage;                                 \
     using Base::ProcessReregister;                                            \
     using Base::ProcessRetryInRegStopped;                                     \
     using Base::ProcessStartFailed_305;                                       \
@@ -3523,6 +3524,17 @@ TEST_F(AosRegistrationTest, DoNothingIfAosServiceIsNullWhenRegEventChange)
     m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
 }
 
+TEST_F(AosRegistrationTest, DoNothingIfRegTypeIsNotNormalWhenRegEventChange)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
+            .WillByDefault(Return(CarrierConfig::Assets::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD));
+
+    EXPECT_CALL(m_objMockIAosService, NotifyRegEventState(_, _)).Times(0);
+
+    m_pAosRegistration->ProcessRegEventChange(SipStatusCode::SC_403);
+}
+
 TEST_F(AosRegistrationTest, DoNothingIfConfiguredPolicyIsNotDownloadEventWhenRegEventChange)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
@@ -4676,6 +4688,15 @@ TEST_F(AosRegistrationTest, TriggerWfcErrMessageIfEpdgConnectedWhenStartFailedWi
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_STATUS_CODE);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_Others"), 1);
+}
+
+TEST_F(AosRegistrationTest, DoNothingIfEmergencyTypeWhenWfcErrMessageHandledWith403)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    m_pAosRegistration->ProcessRequiredWfcErrMessage(SipStatusCode::SC_403);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRequiredWfcErrMessage_403"), 0);
 }
 
 TEST_F(AosRegistrationTest, RegistrationUpdatedWhenRegistrationIsNullDoesNothing)
