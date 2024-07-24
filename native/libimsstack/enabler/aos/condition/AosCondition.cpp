@@ -348,7 +348,7 @@ PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
             break;
 
         case IMS_EVENT_LTE_INFO:
-            ProcessLteInfoEvent(nWParam);
+            ProcessLteInfoEvent(nWParam, nLParam);
             break;
 
         default:
@@ -811,11 +811,13 @@ void AosCondition::ProcessLocationInfo(IN LocationInfo eState)
 }
 
 PROTECTED
-void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
+void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessLteInfoEvent(), nState(%d)", nState, 0, 0);
+    A_IMS_TRACE_I(
+            APPPROFILE, "ProcessLteInfoEvent(), nState(%d), nStateEx(%d)", nState, nStateEx, 0);
 
-    m_bIsCombinedAttached = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
+    m_bIsCombinedAttached =
+            (nState == IMS_LTE_INFO_COMBINED_ATTACHED && nStateEx == IMS_LTE_INFO_EXTRA_NONE);
 }
 
 PROTECTED

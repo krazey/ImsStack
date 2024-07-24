@@ -172,7 +172,7 @@ protected:
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
     void ProcessImsVopsEvent(IN IMS_UINT32 nState);
     void ProcessLocationInfo(IN LocationInfo eState);
-    void ProcessLteInfoEvent(IN IMS_UINT32 nState);
+    void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
 
     void ClearRegistrationAndDataFailureBlocks();
 

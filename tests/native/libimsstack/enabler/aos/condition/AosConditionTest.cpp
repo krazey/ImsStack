@@ -721,10 +721,24 @@ TEST_F(AosConditionTest, ShouldSetCombinedAttachWhenNotifyEventWithCombinedAttac
     m_pAosCondition->Start();
 
     // WHEN
-    m_pAosCondition->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, 0);
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
 
     // THEN
     EXPECT_TRUE(m_pAosCondition->IsCombinedAttached());
+}
+
+TEST_F(AosConditionTest, ShouldResetCombinedAttachWithSmsOnlyWhenNotifyEventWithCombinedAttached)
+{
+    // GIVEN
+    m_pAosCondition->Start();
+
+    // WHEN
+    m_pAosCondition->Event_NotifyEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_SMS_ONLY);
+
+    // THEN
+    EXPECT_FALSE(m_pAosCondition->IsCombinedAttached());
 }
 
 TEST_F(AosConditionTest, ShouldSetCsCallStartedBlockWhenStateChangedInCaseOfCsAndOffhook)

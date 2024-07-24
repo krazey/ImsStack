@@ -2015,16 +2015,19 @@ PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
 
     if (nType == IMS_EVENT_LTE_INFO)
     {
-        if (m_nLteAttachState != nState)
+        if (m_nLteAttachState != nState || m_nLteExtraInfo != nStateEx)
         {
             m_nLteAttachState = nState;
+            m_nLteExtraInfo = nStateEx;
             m_piRegistration->RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY,
-                    (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED)
+                    (m_nLteAttachState == IMS_LTE_INFO_EPS_ONLY_ATTACHED ||
+                            (m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+                                    m_nLteExtraInfo != IMS_LTE_INFO_EXTRA_NONE))
                             ? IAosRegistration::REASON_SET_ENABLE
                             : IAosRegistration::REASON_SET_DISABLE);
         }
 
-        m_nLteExtraInfo = nStateEx;
+        return;
     }
 
     if (nType == IMS_EVENT_VOICE_SERVICE_STATE)
