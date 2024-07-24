@@ -44,7 +44,7 @@
 #endif
 
 #ifndef IMS_NULL
-#define IMS_NULL (0)
+#define IMS_NULL (nullptr)
 #endif
 
 #ifndef IMS_TRUE
