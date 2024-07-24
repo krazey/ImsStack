@@ -23,7 +23,6 @@
 
 #include "MediaBaseProfile.h"
 #include "MediaEnvironment.h"
-#include "ProfileExtractor.h"
 #include "config/MediaConfiguration.h"
 
 class BaseNego : public ImsSlot

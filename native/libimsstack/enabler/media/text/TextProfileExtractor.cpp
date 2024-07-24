@@ -94,8 +94,7 @@ PUBLIC IMS_BOOL TextProfileExtractor::Extract(IN ISessionDescriptor* pSessionDes
                 if (pSDPCodec == IMS_NULL)
                     continue;
 
-                IMS_TRACE_I("MakeSdpFromProfile() - Check RedSubPT, PT[%d] of PL(%d) / Red Payload "
-                            "[%d]",
+                IMS_TRACE_I("Extract() - Check RedSubPT, PT[%d] of PL[%d] / Red Payload [%d]",
                         pSDPCodec->GetPayloadType(), j, pRedFmtp->GetRedPayload());
                 if (pSDPCodec->GetPayloadType() == pRedFmtp->GetRedPayload())
                 {
