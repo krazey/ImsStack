@@ -46,6 +46,7 @@ public class SampleCallTest extends CallTestBase {
                 SystemProxyResolver.getTelephonyManagerProxy(getSubId(SLOT0));
         telephony.setHalVersion(-2, -2);
 
+        setEnablerStoppable(false);
         setUpBase(SLOT0);
 
         mImsRegistration = mImsServiceConnector.getRegistration();

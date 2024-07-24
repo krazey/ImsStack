@@ -135,6 +135,22 @@ const ImsList<IEnabler*>* EnablerFactory::GetEnablers(IN IMS_SINT32 nSlotId) con
     return m_objImsEnablers.GetValueAt(nIndex);
 }
 
+PUBLIC
+IMS_BOOL EnablerFactory::HasEnablers(IN IMS_SINT32 nSlotId) const
+{
+    LockGuard objLock(m_piLock);
+
+    IMS_SLONG nIndex = m_objImsEnablers.GetIndexOfKey(nSlotId);
+
+    if (nIndex < 0)
+    {
+        return IMS_FALSE;
+    }
+
+    ImsList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
+    return pEnablers != IMS_NULL && !pEnablers->IsEmpty();
+}
+
 PRIVATE
 void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId, OUT ImsList<IEnabler*>*& pEnablers)
 {

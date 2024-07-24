@@ -153,6 +153,7 @@ public class RegistrationHelper {
         int subId = getSubId(slotId);
         TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
 
+        testBase.startEnabler(slotId);
         getCarrierConfigManagerProxy().notifyCarrierConfigChanged(
                 slotId, subId, telephony.getSimCarrierId(), telephony.getSimSpecificCarrierId());
     }
