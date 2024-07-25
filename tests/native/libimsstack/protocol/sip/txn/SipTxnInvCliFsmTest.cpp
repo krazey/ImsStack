@@ -33,7 +33,7 @@ extern SIP_VOID MockFsm_ResetTimerCount();
 namespace android
 {
 
-class Sip_txn_InvCliFsmTest : public ::testing::Test
+class SipTxnInvCliFsmTest : public ::testing::Test
 {
 public:
     SipMessage* pSipMsg = SIP_NULL;
@@ -104,7 +104,7 @@ CSeq: 1 INVITE\r\n\
     }
 };
 
-TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
+TEST_F(SipTxnInvCliFsmTest, InvCli_IdleState)
 {
     SIP_UINT16 nError = 0;
     /* Calling with all null values */
@@ -168,7 +168,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     pTxnKey->SipDelete();
 }
 
-TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
+TEST_F(SipTxnInvCliFsmTest, InvCli_CallingState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -272,7 +272,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     pTxn->SipDelete();
 }
 
-TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
+TEST_F(SipTxnInvCliFsmTest, InvCli_ProceedingState)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
@@ -424,7 +424,7 @@ RSeq: 2\r\n\
     pTempSipMsg->SipDelete();
 }
 
-TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)
+TEST_F(SipTxnInvCliFsmTest, InvCli_CompletedState)
 {
     SIP_UINT16 nError = 0;
     SipTxn* pTxn = new SipTxn();
@@ -455,7 +455,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)
     delete pTxnFsmData;
 }
 
-TEST_F(Sip_txn_InvCliFsmTest, InvCli_InvalidState)
+TEST_F(SipTxnInvCliFsmTest, InvCli_InvalidState)
 {
     SIP_UINT16 nError = 0;
     EXPECT_EQ(SIP_FALSE,
