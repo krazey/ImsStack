@@ -1134,7 +1134,6 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     objUser1.nConnectionId = 1;
     lstConfUser.Append(&objUser1);
 
-    // TODO:
     // GetRemoteUri
     ImsList<AString> objAddresses;
     ON_CALL(*piSession, GetRemoteUserId).WillByDefault(Return(objAddresses));

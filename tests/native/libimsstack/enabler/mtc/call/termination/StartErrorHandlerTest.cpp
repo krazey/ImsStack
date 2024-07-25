@@ -684,9 +684,30 @@ TEST_F(StartErrorHandlerTest, Handle5xxResponses)
 
 TEST_F(StartErrorHandlerTest, Handle500Response)
 {
-    // TODO: more tests
     SetMessageCode(SipStatusCode::SC_500);
+    ON_CALL(objMessageUtils,
+            IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC, AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
+
+    ON_CALL(objMessageUtils,
+            IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC, AString::ConstNull()))
+            .WillByDefault(Return(IMS_FALSE));
+    const AString strFailureCause("FAILURE_CAUSE");
+    ON_CALL(objMessageUtils, GetCauseFromReasonHeader(&objMessage, strFailureCause))
+            .WillByDefault(Return(1));
+    const IMS_SINT32 nAnyExtraCode = 100;
+    ON_CALL(objMessageUtils, GetCauseFromReasonHeader(&objMessage, AString::ConstNull()))
+            .WillByDefault(Return(nAnyExtraCode));
+    const AString strFe("fe");
+    const AString strResponseSource("Response-Source");
+    const AString strFeParamValue("urn:3gpp:fe:p-cscf.orig");
+    ON_CALL(objMessageUtils,
+            GetParameterValue(&objMessage, strFe, ISipHeader::UNKNOWN, strResponseSource))
+            .WillByDefault(Return(strFeParamValue));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, nAnyExtraCode));
 }
 
 TEST_F(StartErrorHandlerTest,
