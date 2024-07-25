@@ -22,10 +22,11 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -137,18 +138,20 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @After
     public void tearDown() throws Exception {
-        mDcNetWatcher.cleanup();
         mDcNetWatcher.removeListener(mNetWatherListener);
-        super.tearDown();
+        mDcNetWatcher.cleanup();
 
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
         DcFactory.setDcAgent(IDcSettings.class, null, SLOT0);
 
         mSettingsProxy = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+
+        super.tearDown();
     }
 
     @Test
@@ -182,19 +185,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_5G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_4G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_5G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -203,19 +206,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_4G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_4G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_5G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -224,19 +227,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_3G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_3G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_4G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -245,19 +248,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_EHRPD);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_EHRPD);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_4G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -266,19 +269,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_2G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_GSM);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_2G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_3G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_GSM);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -287,19 +290,19 @@ public class DcNetWatcherTest extends ImsStackTest {
                 DcNetWatcher.POLICY_RAT_EVDO);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_EVDO_B);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+        assertTrue(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_EVDO);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
 
         replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
                 DcNetWatcher.POLICY_RAT_2G);
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_EVDO_A);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        assertFalse(mDcNetWatcher.isRatPolicyAvailable());
     }
 
     @Test
@@ -685,9 +688,9 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mNetWatherListener).onRoamingStateChanged(true);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
-        assertEquals(true, mDcNetWatcher.isRoaming());
-        assertEquals(true, mDcNetWatcher.isVoiceRoaming());
-        assertEquals(true, mDcNetWatcher.isDataNetworkRoaming());
+        assertTrue(mDcNetWatcher.isRoaming());
+        assertTrue(mDcNetWatcher.isVoiceRoaming());
+        assertTrue(mDcNetWatcher.isDataNetworkRoaming());
     }
 
     @Test
@@ -715,8 +718,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
                 ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
         assertEquals(ServiceState.DUPLEX_MODE_FDD, mDcNetWatcher.getLteDuplexMode());
-        assertEquals(true, mDcNetWatcher.isEmergencyServiceSupported());
-        assertEquals(false, mDcNetWatcher.isVopsSupported());
+        assertTrue(mDcNetWatcher.isEmergencyServiceSupported());
+        assertFalse(mDcNetWatcher.isVopsSupported());
     }
 
     @Test
@@ -761,12 +764,12 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        assertEquals(true, mDcNetWatcher.isLteEmergencyOnly());
+        assertTrue(mDcNetWatcher.isLteEmergencyOnly());
     }
 
     @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
-        when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(1);
+        when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,
@@ -775,13 +778,13 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         verify(mMockSystem).notifyAirplaneModeChanged(1);
         verify(mNetWatherListener).onAirplaneModeChanged(true);
-        assertEquals(true, mDcNetWatcher.isAirplaneMode());
+        assertTrue(mDcNetWatcher.isAirplaneMode());
     }
 
     @Test
-    public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenStateIsdifferentFromSetting()
+    public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenStateIsDifferentFromSetting()
             throws Exception {
-        when(mSettingsProxy.getInt(eq(AIRPLANE_MODE_ON), anyInt())).thenReturn(-1);
+        when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(-1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,
@@ -790,7 +793,7 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         verify(mMockSystem, never()).notifyAirplaneModeChanged(anyInt());
         verify(mNetWatherListener, never()).onAirplaneModeChanged(anyBoolean());
-        assertEquals(false, mDcNetWatcher.isAirplaneMode());
+        assertFalse(mDcNetWatcher.isAirplaneMode());
     }
 
     @Test
@@ -841,7 +844,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         receiver.onReceive(mTestAppContext.getContext(), intent);
 
-        assertEquals(true, mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
+        assertTrue(mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
                 DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED));
     }
 
@@ -859,11 +862,11 @@ public class DcNetWatcherTest extends ImsStackTest {
     public void testIsLteEmergencyOnly() throws Exception {
         replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
                 mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
-        assertEquals(false, mDcNetWatcher.isLteEmergencyOnly());
+        assertFalse(mDcNetWatcher.isLteEmergencyOnly());
 
         replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
                 mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
-        assertEquals(true, mDcNetWatcher.isLteEmergencyOnly());
+        assertTrue(mDcNetWatcher.isLteEmergencyOnly());
     }
 
     @Test
@@ -871,29 +874,29 @@ public class DcNetWatcherTest extends ImsStackTest {
         replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_CDMA);
 
-        assertEquals(true, mDcNetWatcher.is1xRtt());
+        assertTrue(mDcNetWatcher.is1xRtt());
     }
 
     @Test
     public void testIsVoiceRat4G() throws Exception {
         replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertEquals(false, mDcNetWatcher.isVoiceRat4G());
+        assertFalse(mDcNetWatcher.isVoiceRat4G());
 
         replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(true, mDcNetWatcher.isVoiceRat4G());
+        assertTrue(mDcNetWatcher.isVoiceRat4G());
     }
 
     @Test
     public void testIsVoiceRat5G() throws Exception {
         replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertEquals(false, mDcNetWatcher.isVoiceRat5G());
+        assertFalse(mDcNetWatcher.isVoiceRat5G());
 
         replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(true, mDcNetWatcher.isVoiceRat5G());
+        assertTrue(mDcNetWatcher.isVoiceRat5G());
     }
 
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
@@ -908,26 +911,22 @@ public class DcNetWatcherTest extends ImsStackTest {
     }
 
     private CellIdentity createCellIdentity(int networkType) {
-        switch (networkType) {
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0, "001", "01",
-                        "Test-SIM", "Test", Collections.emptyList(), null);
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return new CellIdentityNr(20, 0x333333, 2, new int[] {}, "001", "01", 0x555555555L,
-                        "Test-SIM", "Test", Collections.emptyList());
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return new CellIdentityWcdma(0x6666, 0x7777777, 3, 0, "001", "01", "Test-SIM",
-                        "Test", Collections.emptyList(), null);
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                return new CellIdentityGsm(0x8888, 0x9999, 0, 1, "001", "01", "Test-SIM", "Test",
-                        Collections.emptyList());
-            default:
-                return null;
-        }
+        return switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_LTE -> new CellIdentityLte(0x1111111, 13, 0x2222, 0,
+                    new int[]{}, 0, "001", "01",
+                    "Test-SIM", "Test", Collections.emptyList(), null);
+            case TelephonyManager.NETWORK_TYPE_NR -> new CellIdentityNr(20, 0x333333, 2,
+                    new int[]{}, "001", "01", 0x555555555L,
+                    "Test-SIM", "Test", Collections.emptyList());
+            case TelephonyManager.NETWORK_TYPE_UMTS, TelephonyManager.NETWORK_TYPE_HSDPA,
+                    TelephonyManager.NETWORK_TYPE_HSUPA, TelephonyManager.NETWORK_TYPE_HSPA,
+                    TelephonyManager.NETWORK_TYPE_HSPAP ->
+                    new CellIdentityWcdma(0x6666, 0x7777777, 3, 0, "001", "01", "Test-SIM",
+                            "Test", Collections.emptyList(), null);
+            case TelephonyManager.NETWORK_TYPE_GPRS, TelephonyManager.NETWORK_TYPE_EDGE ->
+                    new CellIdentityGsm(0x8888, 0x9999, 0, 1, "001", "01", "Test-SIM", "Test",
+                            Collections.emptyList());
+            default -> null;
+        };
     }
 }
