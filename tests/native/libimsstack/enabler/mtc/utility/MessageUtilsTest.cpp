@@ -367,20 +367,23 @@ TEST_F(MessageUtilsTest, GetParameterValue)
 
 TEST_F(MessageUtilsTest, GetParameterValueFromUnknownHeaderBody)
 {
-    // TODO: how to test
-    /*
     AString strParameterValue;
     AString strAnyParamName = "namewithvalue";
     ImsList<AString> objHeaders;
     objHeaders.Append("anyReaonHeader;nameonly;namewithvalue=value");
-    AString strUnknownHeaderName(SipHeaderName::REASON);
+    AString strUnknownHeaderName("unknown");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strUnknownHeaderName))
             .WillByDefault(Return(objHeaders));
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, AString::ConstNull()))
+            .WillByDefault(Return(ImsList<AString>()));
 
-    strParameterValue = objMessageUtils.GetParameterValue(piMessage, strAnyParamName,
-            ISipHeader::UNKNOWN, SipHeaderName::REASON);
+    strParameterValue =
+            objMessageUtils.GetParameterValue(piMessage, strAnyParamName, ISipHeader::UNKNOWN);
+    EXPECT_EQ(strParameterValue, AString::ConstNull());
+
+    strParameterValue = objMessageUtils.GetParameterValue(
+            piMessage, strAnyParamName, ISipHeader::UNKNOWN, strUnknownHeaderName);
     EXPECT_STREQ(strParameterValue.GetStr(), "value");
-    */
 }
 
 TEST_F(MessageUtilsTest, GetUserParts)
@@ -492,7 +495,7 @@ TEST_F(MessageUtilsTest, GetHosts)
     objHosts = objMessageUtils.GetHosts(piMessage, ANY_HEADER);
     EXPECT_EQ(objHosts.GetSize(), 2);
     EXPECT_STREQ(objHosts.GetAt(0).GetStr(), "ims.google.com");
-    EXPECT_STREQ(objHosts.GetAt(1).GetStr(), "12345");  // TODO: check
+    EXPECT_STREQ(objHosts.GetAt(1).GetStr(), "12345");
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     objHosts = objMessageUtils.GetHosts(piMessage, ANY_HEADER);
@@ -1040,7 +1043,7 @@ TEST_F(MessageUtilsTest, GenerateContentId)
 
     AString strEmptyHost;
     strContentId = objMessageUtils.GenerateContentId(strEmptyHost);
-    // TODO: how to check
+    EXPECT_FALSE(strContentId.Contains(strHost));
 }
 
 TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
