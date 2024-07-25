@@ -220,14 +220,17 @@ protected:
 
 TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
 {
-    MockUdpKeepAliveSender objKeepAliveSender(objCallContext);
-    ON_CALL(objCallContext, GetUdpKeepAliveSender).WillByDefault(ReturnRef(objKeepAliveSender));
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
-    EXPECT_CALL(objKeepAliveSender, Stop);
-    pOutgoingState->OnExit();
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(0));
-    EXPECT_CALL(objKeepAliveSender, Stop).Times(0);
+    MockUdpKeepAliveSender* pKeepAliveSender =
+            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+
+    EXPECT_CALL(*pKeepAliveSender, Stop);
     pOutgoingState->OnExit();
 }
 
@@ -418,14 +421,17 @@ TEST_F(OutgoingStateTest, HandleAosConnectedInvokesEpsFallbackApis)
 
 TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
 {
-    MockUdpKeepAliveSender objKeepAliveSender(objCallContext);
-    ON_CALL(objCallContext, GetUdpKeepAliveSender).WillByDefault(ReturnRef(objKeepAliveSender));
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
-    EXPECT_CALL(objKeepAliveSender, Stop);
-    pOutgoingState->OnReceivingMediaDataStarted(0, 0);
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(0));
-    EXPECT_CALL(objKeepAliveSender, Stop).Times(0);
+    MockUdpKeepAliveSender* pKeepAliveSender =
+            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+
+    EXPECT_CALL(*pKeepAliveSender, Stop);
     pOutgoingState->OnReceivingMediaDataStarted(0, 0);
 }
 
@@ -1317,14 +1323,14 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_NOANSWER, _)).Times(1);
-
-    MockUdpKeepAliveSender objKeepAliveSender(objCallContext);
-    ON_CALL(objCallContext, GetUdpKeepAliveSender).WillByDefault(ReturnRef(objKeepAliveSender));
+    MockUdpKeepAliveSender* pKeepAliveSender =
+            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
-    EXPECT_CALL(objKeepAliveSender, Start);
+    EXPECT_CALL(*pKeepAliveSender, Start).Times(1);
 
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 1);
 }
 
 TEST_F(OutgoingStateTest,

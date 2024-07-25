@@ -49,6 +49,7 @@
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
+#include "helper/UdpKeepAliveSender.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
@@ -738,15 +739,6 @@ TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
     EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());
 }
 
-TEST_F(MtcCallTest, GetUdpKeepAliveSenderCreatesInstance)
-{
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
-
-    UdpKeepAliveSender* pUdpKeepAliveSender = &objCall.GetUdpKeepAliveSender();
-
-    EXPECT_NE(nullptr, pUdpKeepAliveSender);
-}
-
 TEST_F(MtcCallTest, GetCurrentLocationDiscoveryControllerCreatesInstance)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
@@ -931,6 +923,16 @@ TEST_F(MtcCallTest, CreateClientConnectionReturnsConnectionFromISession)
     objCall.CreateSession(&objSession);
 
     EXPECT_EQ(&objClientConnection, objCall.CreateClientConnection(eAnyMethod));
+}
+
+TEST_F(MtcCallTest, CreateUdpKeepAliveSenderReturnsInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    UdpKeepAliveSender* pUdpKeepAliveSender = objCall.CreateUdpKeepAliveSender();
+    EXPECT_NE(nullptr, pUdpKeepAliveSender);
+
+    delete pUdpKeepAliveSender;
 }
 
 TEST_F(MtcCallTest, RemoveSessionDoesNothingIfNoMatchingSession)

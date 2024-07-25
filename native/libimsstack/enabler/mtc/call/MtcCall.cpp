@@ -71,7 +71,6 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objMessageMediator(MtcMessageMediator(*this)),
         m_pUssiController(IMS_NULL),
         m_pEpsFallbackTrigger(IMS_NULL),
-        m_pUdpKeepAliveSender(IMS_NULL),
         m_pCurrentLocationDiscoveryController(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
@@ -99,7 +98,6 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 
     delete m_pUssiController;
     delete m_pEpsFallbackTrigger;
-    delete m_pUdpKeepAliveSender;
     delete m_pCurrentLocationDiscoveryController;
 }
 
@@ -413,15 +411,6 @@ PUBLIC VIRTUAL EpsFallbackTrigger& MtcCall::GetEpsFallbackTrigger()
     return *m_pEpsFallbackTrigger;
 }
 
-PUBLIC VIRTUAL UdpKeepAliveSender& MtcCall::GetUdpKeepAliveSender()
-{
-    if (m_pUdpKeepAliveSender == IMS_NULL)
-    {
-        m_pUdpKeepAliveSender = new UdpKeepAliveSender(*this);
-    }
-    return *m_pUdpKeepAliveSender;
-}
-
 PUBLIC VIRTUAL CurrentLocationDiscoveryController& MtcCall::GetCurrentLocationDiscoveryController()
 {
     if (m_pCurrentLocationDiscoveryController == IMS_NULL)
@@ -511,6 +500,11 @@ PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN SipMetho
     }
 
     return piSipClientConnection;
+}
+
+PUBLIC VIRTUAL UdpKeepAliveSender* MtcCall::CreateUdpKeepAliveSender()
+{
+    return new UdpKeepAliveSender(*this);
 }
 
 PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)

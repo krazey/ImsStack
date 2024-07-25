@@ -20,12 +20,14 @@
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/state/MtcCallState.h"
+#include <memory>
 
 class AString;
 class IMessage;
 class IMtcCalContext;
 class IMtcSession;
 class SuppService;
+class UdpKeepAliveSender;
 enum class QosLossPolicy;
 
 class OutgoingState : public MtcCallState
@@ -80,6 +82,7 @@ private:
     void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void OnSessionForked(IN ISession* piOriginSession);
 
+    std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
     IMS_BOOL m_bTimer100WaitExpired;
     IMS_BOOL m_bWaitingRedial;
 };

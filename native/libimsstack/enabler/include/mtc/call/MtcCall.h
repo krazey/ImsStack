@@ -161,13 +161,13 @@ public:
     }
     UpdatingInfo& GetUpdatingInfo() override;
     EpsFallbackTrigger& GetEpsFallbackTrigger() override;
-    UdpKeepAliveSender& GetUdpKeepAliveSender() override;
     CurrentLocationDiscoveryController& GetCurrentLocationDiscoveryController() override;
     IMtcSession* CreateSession(IN ISession* piSession) override;
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
     ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
+    UdpKeepAliveSender* CreateUdpKeepAliveSender() override;
     void RemoveSession(IN const ISession* piSession) override;
     void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
     void DeleteUpdatingInfo() override;
@@ -336,7 +336,6 @@ private:
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
     EpsFallbackTrigger* m_pEpsFallbackTrigger;
-    UdpKeepAliveSender* m_pUdpKeepAliveSender;
     CurrentLocationDiscoveryController* m_pCurrentLocationDiscoveryController;
 };
 
