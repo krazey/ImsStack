@@ -36,6 +36,7 @@
 #include "precondition/QosDef.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/ISipMessage.h"
+#include "sipcore/MockISipKeepAliveHelper.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipMethod.h"
 #include "sipcore/SipStatusCode.h"
@@ -70,6 +71,7 @@ public:
     MockIMessageUtils objMessageUtils;
     MockMtcTimerWrapper objTimerWrapper;
     MockUssiController* pUssiController;
+    MockISipKeepAliveHelper objKeepAliveHelper;
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
     MockUdpKeepAliveSender* pUdpKeepAliveSender;
@@ -106,7 +108,7 @@ protected:
 
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pUdpKeepAliveSender = new MockUdpKeepAliveSender(objCallContext);
+        pUdpKeepAliveSender = new MockUdpKeepAliveSender(&objKeepAliveHelper, objCallContext);
         ON_CALL(objCallContext, CreateUdpKeepAliveSender)
                 .WillByDefault(Return(pUdpKeepAliveSender));
 

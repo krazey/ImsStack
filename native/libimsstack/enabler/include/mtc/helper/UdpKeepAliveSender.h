@@ -19,15 +19,16 @@
 
 #include "ITimer.h"
 #include "ImsTypeDef.h"
-#include "sipcore/ISipKeepAliveHelper.h"
 
 class IMtcCallContext;
+class ISipKeepAliveHelper;
 class MtcConfigurationProxy;
 
 class UdpKeepAliveSender : public ITimerListener
 {
 public:
-    explicit UdpKeepAliveSender(IN IMtcCallContext& objContext);
+    explicit UdpKeepAliveSender(
+            IN ISipKeepAliveHelper* pKeepAliveHelper, IN IMtcCallContext& objContext);
     virtual ~UdpKeepAliveSender();
     UdpKeepAliveSender(IN const UdpKeepAliveSender&) = delete;
     UdpKeepAliveSender& operator=(IN const UdpKeepAliveSender&) = delete;
@@ -39,13 +40,13 @@ public:
     virtual void Stop();
 
 private:
-    void SetTransportInfo();
+    void SetTransportInfo(IN const IMtcAosConnector* pAosConnector);
     void SendDummyPacket();
     void StopTimer();
 
-    IMtcCallContext& m_objContext;
-    ITimer* m_piTimer;
     ISipKeepAliveHelper* m_pKeepAliveHelper;
+    const IMS_UINT32 m_nIntervalInMillis;
+    ITimer* m_piTimer;
 };
 
 #endif

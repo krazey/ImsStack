@@ -39,6 +39,8 @@
 #include "helper/UdpKeepAliveSender.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "sipcore/ISipKeepAliveHelper.h"
+#include "sipcore/SipFactory.h"
 #include "sipcore/SipMethod.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiData.h"
@@ -504,7 +506,10 @@ PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN SipMetho
 
 PUBLIC VIRTUAL UdpKeepAliveSender* MtcCall::CreateUdpKeepAliveSender()
 {
-    return new UdpKeepAliveSender(*this);
+    ISipKeepAliveHelper* pKeepAliveHelper = SipFactory::CreateKeepAliveHelper(GetSlotId());
+
+    // UdpKeepAliveSender deletes pKeepAliveHelper.
+    return new UdpKeepAliveSender(pKeepAliveHelper, *this);
 }
 
 PUBLIC VIRTUAL void MtcCall::RemoveSession(IN const ISession* piSession)

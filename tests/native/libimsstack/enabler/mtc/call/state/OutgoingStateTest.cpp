@@ -56,6 +56,7 @@
 #include "precondition/QosDef.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
+#include "sipcore/MockISipKeepAliveHelper.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -90,6 +91,7 @@ public:
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
     MockIMtcExtension objExtension;
+    MockISipKeepAliveHelper objKeepAliveHelper;
     SipMethod objAckMethod;
     SipMethod objInviteMethod;
     MtcSupplementaryService* pSupplementaryService;
@@ -224,8 +226,8 @@ TEST_F(OutgoingStateTest, OnExitStopsUdpKeepAliveSenderIfSupported)
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    MockUdpKeepAliveSender* pKeepAliveSender =
-            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
+            &objKeepAliveHelper, objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
@@ -425,8 +427,8 @@ TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    MockUdpKeepAliveSender* pKeepAliveSender =
-            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
+            new MockISipKeepAliveHelper(), objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
@@ -1323,8 +1325,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
 
-    MockUdpKeepAliveSender* pKeepAliveSender =
-            new MockUdpKeepAliveSender(objCallContext);  // OutgoingState deletes it
+    MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
+            new MockISipKeepAliveHelper(), objCallContext);  // OutgoingState deletes it
     ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
     EXPECT_CALL(*pKeepAliveSender, Start).Times(1);
