@@ -21,20 +21,6 @@
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
 
-/*****************************************************************************
-  Macro
- *****************************************************************************/
-#define SIP_TRANSP_TCP       "TCP"
-#define SIP_TRANSP_UDP       "UDP"
-#define SIP_TRANSP_TLS       "TLS"
-
-#define SIP_VIA_LINE_TCP     "/TCP"
-#define SIP_VIA_LINE_UDP     "/UDP"
-#define SIP_VIA_LINE_TLS     "/TLS"
-
-#define SIP_VIA_ENC_FORMAT_1 "\r\nVia:"
-#define SIP_VIA_ENC_FORMAT_2 "\r\nv:"
-
 /****************************************************************************
   Member Function Implementations
  *****************************************************************************/
@@ -357,20 +343,26 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
 PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
         SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
 {
+    const SIP_CHAR STR_VIA_ENC_FORMAT[] = "\r\nVia:";
+    const SIP_CHAR STR_VIA_COMPACT_ENC_FORMAT[] = "\r\nv:";
     SIP_CHAR* pSipBuffer = pSentBuffer->GetSipBuffer();
-    SIP_CHAR* pszTemp = SipPf_Strstr(pSipBuffer, SIP_VIA_ENC_FORMAT_1);
+    SIP_CHAR* pszTemp = SipPf_Strstr(pSipBuffer, STR_VIA_ENC_FORMAT);
+
     if (pszTemp == SIP_NULL)
     {
-        pszTemp = SipPf_Strstr(pSipBuffer, SIP_VIA_ENC_FORMAT_2);
+        pszTemp = SipPf_Strstr(pSipBuffer, STR_VIA_COMPACT_ENC_FORMAT);
         if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
         }
     }
 
+    const SIP_CHAR STR_VIA_LINE_TCP[] = "/TCP";
+    const SIP_CHAR STR_VIA_LINE_UDP[] = "/UDP";
+
     if (eChangeProto == SipTransportInfo::PROTOCOL_TCP)
     {
-        pszTemp = SipPf_Strstr(pszTemp, SIP_VIA_LINE_UDP);
+        pszTemp = SipPf_Strstr(pszTemp, STR_VIA_LINE_UDP);
         if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
@@ -386,7 +378,7 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
     }
     else if (eChangeProto == SipTransportInfo::PROTOCOL_UDP)
     {
-        pszTemp = SipPf_Strstr(pszTemp, SIP_VIA_LINE_TCP);
+        pszTemp = SipPf_Strstr(pszTemp, STR_VIA_LINE_TCP);
         if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
@@ -416,13 +408,17 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
 
             return SIP_FALSE;
         }
+
+        const SIP_CHAR STR_TRANSPORT_TCP[] = "TCP";
+        const SIP_CHAR STR_TRANSPORT_UDP[] = "UDP";
+
         if (eChangeProto == SipTransportInfo::PROTOCOL_TCP)
         {
-            pViaHdr->SetProtocolName(SIP_TRANSP_TCP);
+            pViaHdr->SetProtocolName(STR_TRANSPORT_TCP);
         }
         else
         {
-            pViaHdr->SetProtocolName(SIP_TRANSP_UDP);
+            pViaHdr->SetProtocolName(STR_TRANSPORT_UDP);
         }
         pViaHdr->SipDelete();
     }
@@ -479,7 +475,7 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey, OUT
         OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
 {
     SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
+            SipTxn::OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {

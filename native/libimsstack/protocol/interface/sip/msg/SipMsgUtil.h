@@ -237,7 +237,7 @@ SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
 
 SIP_INT32 SipGetMsgType(const SIP_CHAR* pStartPoint);
 
-SIP_INT32 SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+SipUri::UriType SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName);
 

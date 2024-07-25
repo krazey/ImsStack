@@ -19,8 +19,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-#define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
-
 // clang-format off
 SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
         "Allow",  // 0
@@ -202,7 +200,7 @@ SIP_INT32 SipGetMsgType(const SIP_CHAR* pszStartPoint)
                                                                      : SipMessage::REQ_TYPE;
 }
 
-SIP_INT32 SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
+SipUri::UriType SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
     if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
@@ -308,6 +306,8 @@ SIP_INT32 SipGetMimeHdrType(const SIP_CHAR* pszHdrName)
     {
         return SipHeaderBase::UNKNOWN;
     }
+
+    const SIP_CHAR NAME_CONTENT_TRANSFER_ENCODING[] = "Content-Transfer-Encoding";
 
     switch (pszHdrName[0])
     {

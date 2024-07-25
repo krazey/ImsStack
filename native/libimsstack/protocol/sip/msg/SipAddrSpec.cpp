@@ -19,9 +19,6 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-#define SIP_SIP_ENC  "sip:"
-#define SIP_SIPS_ENC "sips:"
-
 SipUri::SipUri() :
         m_pszUser(SIP_NULL),
         m_pszPassword(SIP_NULL),
@@ -232,7 +229,6 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-#define MAX_PORT_LEN 20
 SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
 {
     /* encoding of user info
@@ -288,13 +284,11 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
         /*Encoding of Port*/
         if ((m_nPort != SIP_ZERO) && (m_nPort != SIP_UNSPECIFIED_PORT))
         {
-            // TODO Percent Encoding
-            SIP_CHAR szTmp[MAX_PORT_LEN];
-            memset(szTmp, 0x0, sizeof(szTmp));
+            const SIP_UINT16 MAX_PORT_LEN = 6;
+            SIP_CHAR szTmp[MAX_PORT_LEN] = {'\0'};
+
             SipPf_Sprintf(szTmp, "%u", m_nPort);
-
             SIP_ENC_COLON(*ppCurrPos);
-
             SipPf_Strcpy(*ppCurrPos, szTmp);
             SipEnc_UpdateCurrPos(ppCurrPos);
         }
@@ -563,6 +557,19 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
+const SIP_CHAR* SipUri::GetSchemeString(SipUri::UriType eUriType)
+{
+    switch (eUriType)
+    {
+        case SipUri::SCHEME_SIP:
+            return "sip";
+        case SipUri::SCHEME_SIPS:
+            return "sips";
+        default:
+            return SIP_NULL;
+    }
+}
+
 SipAddrSpec::SipAddrSpec() :
         m_eUriType(SipUri::SCHEME_SIP),
         m_pSipUri(SIP_NULL),
@@ -611,13 +618,12 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pSipUri != SIP_NULL)
     {
-        if (m_eUriType == SipUri::SCHEME_SIP)
+        const SIP_CHAR* pStrUri = SipUri::GetSchemeString(m_eUriType);
+
+        if (pStrUri != SIP_NULL)
         {
-            objBuffer += SIP_SIP_ENC;
-        }
-        else if (m_eUriType == SipUri::SCHEME_SIPS)
-        {
-            objBuffer += SIP_SIPS_ENC;
+            objBuffer += pStrUri;
+            objBuffer += COLON;
         }
 
         if (m_pSipUri->Encode(objBuffer, bParams) == SIP_FALSE)
@@ -643,15 +649,14 @@ SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
 {
     if (m_pSipUri != SIP_NULL)
     {
-        // implement this in cpp
         /*encoding of uri name*/
-        if (m_eUriType == SipUri::SCHEME_SIP)
+        const SIP_CHAR* pStrUri = SipUri::GetSchemeString(m_eUriType);
+
+        if (pStrUri != SIP_NULL)
         {
-            SipPf_Strcpy(*ppCurrPos, SIP_SIP_ENC);
-        }
-        else if (m_eUriType == SipUri::SCHEME_SIPS)
-        {
-            SipPf_Strcpy(*ppCurrPos, SIP_SIPS_ENC);
+            SipPf_Strcpy(*ppCurrPos, pStrUri);
+            SipEnc_UpdateCurrPos(ppCurrPos);
+            SIP_ENC_COLON(*ppCurrPos);
         }
 
         SipEnc_UpdateCurrPos(ppCurrPos);

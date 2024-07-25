@@ -37,7 +37,7 @@ SIP_BOOL MockTxn_FetchTransaction(
         return SIP_FALSE;
     }
     SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-    if (nOption == TXN_OPT_CREATE)
+    if (nOption == SipTxn::OPT_CREATE)
     {
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {

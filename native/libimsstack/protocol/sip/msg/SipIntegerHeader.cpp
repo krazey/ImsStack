@@ -18,8 +18,6 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-#define MAX_LEN 20
-
 SipIntegerHeader::SipIntegerHeader(SIP_INT32 eHeaderType) :
         SipHeaderBase(eHeaderType)
 {
@@ -50,6 +48,7 @@ SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
         }
     }
 
+    const SIP_UINT16 MAX_LEN = 11;
     SIP_CHAR szValue[MAX_LEN];
     SipPf_Sprintf(szValue, "%u", nValue);
     return SetValue(szValue);

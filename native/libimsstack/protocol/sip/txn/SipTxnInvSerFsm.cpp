@@ -22,14 +22,6 @@
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
-#define MIN(a, b)                ((a) < (b)) ? (a) : (b)
-
-/* RFC 3261: Sec 17.2.1
-   The server transaction MUST generate a 100
-   (Trying) response unless it knows that the TU will generate a
-   provisional or final response within 200 ms */
-#define SIP_MAX_TU_RESPONSE_TIME 200
-
 SIP_BOOL InvSerFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
@@ -56,7 +48,7 @@ static SIP_BOOL InvSerFsm_IdleStRecvInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
     }
 
     SIP_BOOL bStatus = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey),
-            TXN_OPT_CREATE, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
+            SipTxn::OPT_CREATE, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bStatus == SIP_FALSE)
     {
@@ -462,7 +454,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
             SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T2);
 
             /* MIN(2*T1, T2) seconds*/
-            nDuration = MIN(nNextDuration, nDurationT2);
+            nDuration = SIP_MIN(nNextDuration, nDurationT2);
 
             // Update the timer duration.
             if ((nDurationExpired + nDuration) >= nMaxDuration)

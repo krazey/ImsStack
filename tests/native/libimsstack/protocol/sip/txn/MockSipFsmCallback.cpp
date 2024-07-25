@@ -29,7 +29,7 @@ SIP_BOOL MockFsm_FetchTransaction(
     }
 
     SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-    if (nOption == TXN_OPT_CREATE)
+    if (nOption == SipTxn::OPT_CREATE)
     {
         if (SipPf_Strcmp(pTxnKey->GetMethod(), "BYE") == 0)
         {

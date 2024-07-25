@@ -22,8 +22,6 @@
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
 
-#define MIN(a, b) ((a) < (b)) ? (a) : (b)
-
 static SIP_BOOL NonInvCliFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
@@ -81,7 +79,7 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
                 SIP_UINT32 nNextDuration = nCurrentDuration << 1;
 
                 /* MIN(2*T1, T2) seconds*/
-                nDuration = MIN(nNextDuration, nDurationT2);
+                nDuration = SIP_MIN(nNextDuration, nDurationT2);
             }
             else /* SipTxn::NON_INV_CLI_PROCEEDING_ST */
             {
@@ -169,7 +167,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     }
 
     SIP_BOOL bStatus = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey),
-            TXN_OPT_CREATE, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
+            SipTxn::OPT_CREATE, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bStatus == SIP_FALSE)
     {

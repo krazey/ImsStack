@@ -19,8 +19,6 @@
 #include "ISipLoggerUtil.h"
 #include "SipDatatypes.h"
 
-#define MAX_FILENAME_SIZE 256
-
 class SipDefLoggerUtil : public ISipLoggerUtil
 {
 public:

@@ -65,6 +65,13 @@ private:
 
     SIP_INT32 m_eWkDay;
 
+    static constexpr SIP_UINT16 MAX_DATE = 31;
+    static constexpr SIP_UINT16 MAX_MIN_SEC = 60;
+    static constexpr SIP_UINT16 MAX_HOUR = 24;
+    static const SIP_CHAR STR_GMT[];
+    static const SIP_CHAR* WEEKDAY[];
+    static const SIP_CHAR* MONTH[];
+
 public:
     /*constructor*/
     SipDateHeader();
@@ -120,5 +127,7 @@ public:
 
 private:
     ~SipDateHeader();
+    static SIP_INT32 GetWeekDayType(SIP_CHAR* pszWeekDay);
+    static SIP_INT32 GetMonthType(SIP_CHAR* pszMonth);
 };
 #endif  //__SIP_DATE_HEADER_H__

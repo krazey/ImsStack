@@ -18,8 +18,6 @@
 #include "msg/SipRetryAfterHeader.h"
 #include "platform/SipString.h"
 
-#define MAX_RETRY_AFTER_LEN 12
-
 SipRetryAfterHeader::SipRetryAfterHeader() :
         SipHeaderBase(SipHeaderBase::RETRY_AFTER_SEC),
         m_nDeltaSec(SIP_ZERO),
@@ -59,6 +57,7 @@ SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams)
 SIP_BOOL SipRetryAfterHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
+    const SIP_UINT16 MAX_RETRY_AFTER_LEN = 11;
     SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
     SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
 

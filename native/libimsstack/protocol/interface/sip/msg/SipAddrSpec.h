@@ -26,7 +26,7 @@ class SipUri : public SipRefBase, public IParameterComponent
 {
 public:
     /*Enumeration for URI Scheme*/
-    enum
+    enum UriType
     {
         SCHEME_INVALID = SIP_INVALID,
         SCHEME_SIP,
@@ -95,6 +95,8 @@ public:
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
 
     SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName);
+
+    static const SIP_CHAR* GetSchemeString(UriType eUriType);
 };
 
 class SipAddrSpec : public SipRefBase
@@ -110,7 +112,7 @@ public:
     };
 
 private:
-    SIP_INT32 m_eUriType;
+    SipUri::UriType m_eUriType;
 
 protected:
     SipUri* m_pSipUri;
@@ -129,7 +131,7 @@ public:
     /*Function for decoding*/
     SIP_BOOL DecodeAddrSpec(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     /*function for getting the header type*/
-    inline SIP_INT32 GetUriScheme() const { return m_eUriType; }
+    inline SipUri::UriType GetUriScheme() const { return m_eUriType; }
 
     SipUri* GetSipUri();
 

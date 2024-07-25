@@ -18,8 +18,6 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-#define MAX_CSEQ_LEN 12
-
 SipCSeqHeader::SipCSeqHeader() :
         SipHeaderBase(SipHeaderBase::CSEQ),
         m_pszMethod(SIP_NULL),
@@ -65,14 +63,13 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         return SIP_FALSE;
     }
 
+    const SIP_UINT16 MAX_CSEQ_LEN = 11;
     SIP_CHAR szBuf[MAX_CSEQ_LEN];
-    SipPf_Sprintf(szBuf, "%u", m_nSeq);
 
+    SipPf_Sprintf(szBuf, "%u", m_nSeq);
     SipPf_Strcpy(*ppCurrPos, szBuf);
     SipEnc_UpdateCurrPos(ppCurrPos);
-
     SIP_ENC_SP(*ppCurrPos);
-
     SipPf_Strcpy(*ppCurrPos, m_pszMethod);
     SipEnc_UpdateCurrPos(ppCurrPos);
 

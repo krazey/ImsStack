@@ -162,9 +162,9 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
     SipPf_Strcpy(*ppCurrPos, m_pszHost);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-#define MAX_PORT_LEN 20
     if (m_nPort != SIP_ZERO)
     {
+        const SIP_UINT16 MAX_PORT_LEN = 6;
         SIP_CHAR szTmp[MAX_PORT_LEN];
         SipPf_Sprintf(szTmp, "%u", m_nPort);
 

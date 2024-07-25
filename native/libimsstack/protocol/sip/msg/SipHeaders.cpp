@@ -18,8 +18,6 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-#define NUM_OF_MANDATORY_HEADERS 5
-
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
@@ -348,6 +346,8 @@ SIP_BOOL SipHeaders::InsertHdr(SipHeaderBase* pHdr, SIP_UINT32 nIndex)
 
 SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
+    const SIP_UINT16 NUM_OF_MANDATORY_HEADERS = 5;
+
     SIP_INT32 arMandatoryHeaders[NUM_OF_MANDATORY_HEADERS] = {SipHeaderBase::VIA,
             SipHeaderBase::FROM, SipHeaderBase::TO, SipHeaderBase::CALL_ID, SipHeaderBase::CSEQ};
 

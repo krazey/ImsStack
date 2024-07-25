@@ -15,10 +15,6 @@
  */
 #include "SipConfiguration.h"
 
-// 3GPP-based timer intervals
-#define DEFAULT_T1 2000
-#define DEFAULT_T2 16000
-
 SipConfiguration* SipConfiguration::pSipConfig = SIP_NULL;
 
 SipConfiguration::SipConfiguration()
@@ -29,6 +25,9 @@ SipConfiguration::SipConfiguration()
     m_nParseStyle = ~SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE;
     m_nParseStyle &= ~SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     m_nParseStyle &= ~SipConfiguration::MSG_OPT_DECODE_STRICT;
+
+    const SIP_UINT32 DEFAULT_T1 = 2000;
+    const SIP_UINT32 DEFAULT_T2 = 16000;
 
     m_nT1 = DEFAULT_T1;
     m_nT2 = DEFAULT_T2;

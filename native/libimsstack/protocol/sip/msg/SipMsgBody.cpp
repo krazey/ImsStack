@@ -20,8 +20,6 @@
 #include "platform/SipMemory.h"
 #include "platform/SipString.h"
 
-#define MAX_BODY_SIZE 1500
-
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipMIMEHdrs::SipMIMEHdrs() :
