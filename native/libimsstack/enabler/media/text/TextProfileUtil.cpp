@@ -46,7 +46,7 @@ PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration
             pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
 
-            IMS_TRACE_D("MakeNegotiatedProfile() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+            IMS_TRACE_D("Negotiate() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
                     pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
                     pLocalProfile->GetBandwidthRr());
         }
@@ -90,7 +90,7 @@ PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration
             pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
             pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
 
-            IMS_TRACE_D("MakeNegotiatedProfile() - AS[%d], RTCP disable & use dest RS[%d] RR[%d]",
+            IMS_TRACE_D("Negotiate() - AS[%d], RTCP disable & use dest RS[%d] RR[%d]",
                     pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
                     pNegotiatedProfile->GetBandwidthRr());
 
@@ -101,7 +101,7 @@ PUBLIC GLOBAL void TextProfileUtil::MakeNegotiatedBandwidth(IN TextConfiguration
         pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
     }
 
-    IMS_TRACE_D("MakeNegotiatedProfile() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+    IMS_TRACE_D("Negotiate() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
             pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
             pLocalProfile->GetBandwidthRr());
 }

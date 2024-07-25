@@ -23,6 +23,7 @@
 #include "audio/AudioProfileExtractor.h"
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"
+#include "audio/AudioSdpNegotiator.h"
 #include "config/AudioConfiguration.h"
 
 /**
@@ -92,39 +93,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
     MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
-
-private:
-    IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
-    IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
-            OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
-    IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
-            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
-            OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
-    IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
-            IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
-            OUT IMS_UINT32* nNegoDefaultRtpModeSet);
-    IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
-            OUT IMS_UINT32* nNegoModeList);
-    IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
-            OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
-    IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase);
-    IMS_SINT32 FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
-    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
 
 private:
     std::unique_ptr<AudioProfileExtractor> m_pProfileExtractor;

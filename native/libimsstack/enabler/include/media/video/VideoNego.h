@@ -23,6 +23,7 @@
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileExtractor.h"
 #include "video/VideoSdpGenerator.h"
+#include "video/VideoSdpNegotiator.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego
@@ -84,23 +85,10 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
 
 private:
-    IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
-            IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
-    IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
     VideoProfile::Payload* FindPayloadInProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
-    IMS_SINT32 FindPayloadIndexFromProfile(
-            IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload);
-    MEDIA_DIRECTION UpdateDirectionToMine(
-            IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
     IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
-    IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
-            IN VideoProfile::CapaNego* pDestCapaNego,
-            OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
-
-    VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
 private:
     std::unique_ptr<VideoProfileExtractor> m_pProfileExtractor;
