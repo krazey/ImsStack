@@ -16,6 +16,8 @@ public:
     virtual ~ProfileExtractor();
 
 protected:
+    void Extract(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
+            OUT MediaBaseProfile* pProfile);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
     IMS_BOOL MakeAcfgProfileFromSdp(

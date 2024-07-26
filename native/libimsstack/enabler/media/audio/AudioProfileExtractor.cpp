@@ -21,33 +21,15 @@ PUBLIC
 IMS_BOOL AudioProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile)
 {
-    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
+        IMS_TRACE_E(0, "Extract() - invalid argument", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    // IP
-    pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
+    IMS_TRACE_I("Extract()", 0, 0, 0);
 
-    // data & control port
-    pProfile->SetDataPort(pDescriptor->GetRemotePort());
-
-    if (pDescriptor->GetAttributeInt(SdpAttribute::RTCP) == IMediaDescriptor::INVALID_VALUE)
-    {
-        pProfile->SetControlPort(pProfile->GetDataPort() + 1);
-    }
-    else
-    {
-        pProfile->SetControlPort(pDescriptor->GetAttributeInt(SdpAttribute::RTCP));
-    }
-
-    // bandwidth
-    pProfile->SetBandwidthAs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS));
-    pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
-    pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
-
-    IMS_TRACE_I("Extract() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
-            pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
+    ProfileExtractor::Extract(pSessionDescriptor, pDescriptor, pProfile);
 
     // read CapaNego profile From SDP
     MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->GetCapaNego()));
@@ -138,21 +120,6 @@ IMS_BOOL AudioProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescripto
         if (pPayload != IMS_NULL)
         {
             pProfile->GetPayloadList().Append(pPayload);
-        }
-    }
-
-    // direction
-    pProfile->SetDirection((MEDIA_DIRECTION)pDescriptor->GetDirection());
-
-    if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_D("Extract() - Audio Direction does not exist", 0, 0, 0);
-        // check session level attribute Direction
-        pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
-
-        if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
-        {
-            pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
         }
     }
 

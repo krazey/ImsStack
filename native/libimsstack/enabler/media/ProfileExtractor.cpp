@@ -14,7 +14,63 @@ PUBLIC ProfileExtractor::ProfileExtractor(IN const MEDIA_CONTENT_TYPE eType)
 
 PUBLIC VIRTUAL ProfileExtractor::~ProfileExtractor()
 {
-    IMS_TRACE_I("~ProfileExtractor()", 0, 0, 0);
+    IMS_TRACE_I("~ProfileExtractor() media type[%d]", m_eType, 0, 0);
+}
+
+PROTECTED
+void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
+        IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile* pProfile)
+{
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "Extract() - media type[%d], invalid argument", m_eType, 0, 0);
+        return;
+    }
+
+    IMS_TRACE_I("Extract(), media type[%d]", m_eType, 0, 0);
+
+    // IP
+    pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
+
+    // data port
+    pProfile->SetDataPort(pDescriptor->GetRemotePort());
+
+    // control port
+    IMS_SINT32 nControlPortFromSdp = pDescriptor->GetAttributeInt(SdpAttribute::RTCP);
+    IMS_BOOL bControlPortExistedinSdp = (nControlPortFromSdp != IMediaDescriptor::INVALID_VALUE);
+    IMS_SINT32 nControlPort =
+            (bControlPortExistedinSdp) ? nControlPortFromSdp : pProfile->GetDataPort() + 1;
+
+    pProfile->SetControlPort(nControlPort);
+
+    IMS_TRACE_I("Extract() - Ip[%s], Data Port[%d], Control Port[%d]",
+            pProfile->GetIpAddress().ToCharString(), pProfile->GetDataPort(),
+            pProfile->GetControlPort());
+
+    // bandwidth as, rs, rr
+    pProfile->SetBandwidthAs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS));
+    pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
+    pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
+
+    IMS_TRACE_I("Extract() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
+            pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
+
+    // direction
+    pProfile->SetDirection((MEDIA_DIRECTION)pDescriptor->GetDirection());
+
+    if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
+    {
+        IMS_TRACE_D("Extract() -  media type[%d], invalid direction", m_eType, 0, 0);
+        // check session level attribute Direction
+        pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
+
+        if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
+        {
+            pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+        }
+    }
+
+    IMS_TRACE_I("Extract() - direction[%d]", pProfile->GetDirection(), 0, 0);
 }
 
 PROTECTED
