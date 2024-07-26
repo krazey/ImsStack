@@ -19,7 +19,6 @@ package com.android.imsstack.imsservice.mmtel;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
-import android.telephony.DataFailCause;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
@@ -131,11 +130,7 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     private ImsReasonInfo getReasonInfo(int reason, String message) {
-        if (reason == DataFailCause.IWLAN_IKEV2_AUTH_FAILURE) {
-            return new ImsReasonInfo(
-                    ImsReasonInfo.CODE_EPDG_TUNNEL_ESTABLISH_FAILURE,
-                    ImsReasonInfo.CODE_IKEV2_AUTH_FAILURE, null);
-        } else if (reason == IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT) {
+        if (reason == IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT) {
             return new ImsReasonInfo(
                 ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT, null);

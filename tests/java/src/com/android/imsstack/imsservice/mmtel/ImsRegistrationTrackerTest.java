@@ -34,7 +34,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
-import android.telephony.DataFailCause;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -308,17 +307,36 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testnotifyDeRegistered_WithTimeoutError() {
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT, null);
+        assertEquals(false, mRegTracker.isRegistered());
+        assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
+                mRegTracker.getRegisteredFeatures());
+        assertEquals(false, mRegTracker.isCallRegistered());
+        assertEquals(false, mRegTracker.isCallVideoRegistered());
+        assertEquals(false, mRegTracker.isSmsRegistered());
+        assertEquals(false, mRegTracker.isCallVoiceAndVideoRegistered());
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+
+        mMmTelCapabilities.addCapabilities(capabilities);
+        mMmTelCapabilities.removeCapabilities(removeCapabilities);
+        verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
+                eq(mMmTelCapabilities));
+    }
+
+    @Test
     public void testnotifyTechnologyChangeFailed() {
         assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyTechnologyChangeFailed(
                 IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.NONE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
-        assertNotNull(mRegTracker.getRegistration());
-        mAosRegListener.notifyTechnologyChangeFailed(
-                IAosRegistrationListener.RegistrationType.NORMAL,
-                IAosRegistrationListener.NetworkType.LTE,
-                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE, null);
     }
 
     @Test
