@@ -27,11 +27,13 @@ class ITimer;
 class MockUdpKeepAliveSender : public UdpKeepAliveSender
 {
 public:
-    explicit MockUdpKeepAliveSender(IN IMtcCallContext& objContext) :
-            UdpKeepAliveSender(objContext)
+    explicit MockUdpKeepAliveSender(
+            IN ISipKeepAliveHelper* pKeepAliveHelper, IN IMtcCallContext& objContext) :
+            UdpKeepAliveSender(pKeepAliveHelper, objContext)
     {
     }
-    ~MockUdpKeepAliveSender() {}
+    virtual ~MockUdpKeepAliveSender() {}
+
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
     MOCK_METHOD(void, Start, (), (override));
     MOCK_METHOD(void, Stop, (), (override));
