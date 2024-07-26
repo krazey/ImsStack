@@ -67,9 +67,9 @@ PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 PUBLIC VIRTUAL void OutgoingState::OnExit()
 {
     m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
 }
 
@@ -438,7 +438,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     // by receiving any first provisional response.
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()) && nIndex == 0)
     {
-        m_objContext.GetUdpKeepAliveSender().Start();
+        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
+        m_pUdpKeepAliveSender->Start();
     }
 
     IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
@@ -585,9 +586,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
         IN IMS_UINT32 /*eMediaType*/, IN IMS_UINT32 /*eProtocolType*/)
 {
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
     return GetStateName();
 }

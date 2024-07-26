@@ -53,16 +53,17 @@ PUBLIC VIRTUAL void AlertingState::OnEnter()
 {
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
     {
-        m_objContext.GetUdpKeepAliveSender().Start();
+        m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
+        m_pUdpKeepAliveSender->Start();
     }
 }
 
 PUBLIC VIRTUAL void AlertingState::OnExit()
 {
     m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (m_pUdpKeepAliveSender != IMS_NULL)
     {
-        m_objContext.GetUdpKeepAliveSender().Stop();
+        m_pUdpKeepAliveSender->Stop();
     }
 }
 

@@ -107,8 +107,8 @@ protected:
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pUdpKeepAliveSender = new MockUdpKeepAliveSender(objCallContext);
-        ON_CALL(objCallContext, GetUdpKeepAliveSender)
-                .WillByDefault(ReturnRef(*pUdpKeepAliveSender));
+        ON_CALL(objCallContext, CreateUdpKeepAliveSender)
+                .WillByDefault(Return(pUdpKeepAliveSender));
 
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
 
