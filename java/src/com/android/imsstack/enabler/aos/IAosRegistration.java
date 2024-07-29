@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -158,38 +159,35 @@ public interface IAosRegistration {
      * Defines possible causes for a specific event or failure.
      */
     enum Cause {
-        UNKNOWN(0, "UNKNOWN"),
-        DATA(1, "DATA"),
-        RADIO(2, "RADIO"),
-        IMS_SERVICE(3, "IMS_SERVICE"),
-        IMS_SUBSCRIBER(4, "IMS_SUBSCRIBER"),
-        DATA_CONNECTING(5, "DATA_CONNECTING"),
+        UNKNOWN(0),
+        DATA(1),
+        RADIO(2),
+        IMS_SERVICE(3),
+        IMS_SUBSCRIBER(4),
+        DATA_CONNECTING(5),
 
         // From modem
-        RADIO_SIM_REMOVED(11, "RADIO_SIM_REMOVED"),
-        RADIO_SIM_REFRESH(12, "RADIO_SIM_REFRESH"),
-        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13, "RADIO_ALLOWED_NETWORK_TYPES_CHANGED"),
+        RADIO_SIM_REMOVED(11),
+        RADIO_SIM_REFRESH(12),
+        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13),
 
         // From framework
-        RADIO_POWER_OFF(21, "RADIO_POWER_OFF"),
-        NON_IMS_CAPABLE_NETWORK(22, "NON_IMS_CAPABLE_NETWORK"),
-        DATA_STALL(23, "DATA_STALL"),
-        HANDOVER_FAILED(24, "HANDOVER_FAILED"),
-        VOPS_NOT_SUPPORTED(25, "VOPS_NOT_SUPPORTED"),
-        WIFI_OFF(26, "WIFI_OFF");
+        RADIO_POWER_OFF(21),
+        NON_IMS_CAPABLE_NETWORK(22),
+        DATA_STALL(23),
+        HANDOVER_FAILED(24),
+        VOPS_NOT_SUPPORTED(25),
+        WIFI_OFF(26);
 
         private final int mValue;
-        private final String mLabel;
 
         /**
-         * Constructs a Cause with the given value and label.
+         * Constructs a Cause with the given value.
          *
          * @param value The integer value of the cause.
-         * @param label The label of the cause.
          */
-        Cause(int value, String label) {
+        Cause(int value) {
             mValue = value;
-            mLabel = label;
         }
 
         /**
@@ -201,13 +199,9 @@ public interface IAosRegistration {
             return mValue;
         }
 
-        /**
-         * Returns the label of the cause.
-         *
-         * @return The label of the cause.
-         */
-        public String getLabel() {
-            return mLabel;
+        @Override
+        public String toString() {
+            return name();
         }
 
         /**
@@ -226,7 +220,7 @@ public interface IAosRegistration {
     }
 
     /**
-     * CapabilityPairs
+     * Represents a set of capability pairs associated with different network types.
      */
     final class CapabilityPairs {
 
@@ -239,20 +233,47 @@ public interface IAosRegistration {
          */
         private final Map<Integer, Integer> mCapabilities;
 
+        /**
+         * Constructs an empty CapabilityPairs object.
+         */
         public CapabilityPairs() {
-            mCapabilities = new LinkedHashMap<Integer, Integer>();
+            this(null, null);
         }
 
+        /**
+         * Constructs a CapabilityPairs object with an initial capability for the given network
+         * type.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be added.
+         */
         public CapabilityPairs(Integer networkType, Integer capability) {
-            mCapabilities = new LinkedHashMap<Integer, Integer>();
-            addCapability(networkType, capability);
+            mCapabilities = new LinkedHashMap<>();
+            if (networkType != null && capability != null) {
+                addCapability(networkType, capability);
+            }
         }
 
+        /**
+         * Adds a capability to the specified network type.
+         * If the network type already exists, the capability is bitwise ORed with the existing
+         * value.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be added.
+         */
         public void addCapability(Integer networkType, Integer capability) {
             mCapabilities.put(networkType,
                     mCapabilities.getOrDefault(networkType, 0) | capability);
         }
 
+        /**
+         * Checks if the specified capability is present for the given network type.
+         *
+         * @param networkType The network type.
+         * @param capability The capability to be checked.
+         * @return {@code true} if the capability is present, {@code false} otherwise.
+         */
         public boolean hasCapability(Integer networkType, Integer capability) {
             return (mCapabilities.getOrDefault(networkType, 0) & capability) > 0;
         }
@@ -272,11 +293,9 @@ public interface IAosRegistration {
                 return true;
             }
 
-            if (!(o instanceof CapabilityPairs)) {
+            if (!(o instanceof CapabilityPairs that) || that.getCapabilities() == null) {
                 return false;
             }
-
-            CapabilityPairs that = (CapabilityPairs)o;
 
             if (this.getCapabilities().size() != that.getCapabilities().size()) {
                 return false;
@@ -288,25 +307,17 @@ public interface IAosRegistration {
 
         @Override
         public int hashCode() {
-            int code = 0;
-            for (Map.Entry<Integer, Integer> entry : this.getCapabilities().entrySet()) {
-                code += Objects.hash(entry.getKey(), entry.getValue());
-            }
-
-            return code;
+            return getCapabilities().entrySet().stream()
+                .mapToInt(entry -> Objects.hash(entry.getKey(), entry.getValue()))
+                .sum();
         }
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("{ Size=").append(getCapabilities().size()).append(", ");
-            for (Map.Entry<Integer, Integer> entry : getCapabilities().entrySet()) {
-                sb.append("( Network=").append(entry.getKey()).append(", Capabilities=")
-                        .append(entry.getValue()).append(" )");
-            }
-            sb.append(" }");
-
-            return sb.toString();
+            return getCapabilities().entrySet().stream().map(
+                entry -> "(Network=" + entry.getKey() + ", Capabilities=" + entry.getValue() + ")")
+                .collect(Collectors.joining(
+                        ", ", "{ Size=" + getCapabilities().size() + ", ", " }"));
         }
     }
 }
