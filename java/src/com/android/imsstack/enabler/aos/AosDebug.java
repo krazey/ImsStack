@@ -76,6 +76,7 @@ import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.test.DebugScreen;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -508,9 +509,8 @@ public class AosDebug implements IAosDebug {
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Integer, Integer> entry : pairs.getCapabilities().entrySet()) {
-            sb.append("  -")
-                    .append(IAosRegistrationListener.NetworkType.toString(entry.getKey()));
+        for (Map.Entry<NetworkType, Integer> entry : pairs.getCapabilities().entrySet()) {
+            sb.append("  -").append(entry.getKey().toString());
             sb.append(": ")
                     .append(IAosRegistrationListener.Capability.toString(entry.getValue()))
                     .append("\n");
@@ -518,13 +518,12 @@ public class AosDebug implements IAosDebug {
         return sb.toString();
     }
 
-    private void updateNetworkType(int networkType) {
-        mDebugData.put(DebugKey.REGISTERED_NETWORK_TYPE,
-                IAosRegistrationListener.NetworkType.toString(networkType));
+    private void updateNetworkType(NetworkType networkType) {
+        mDebugData.put(DebugKey.REGISTERED_NETWORK_TYPE, networkType.toString());
     }
 
     @VisibleForTesting
-    void updateRegisteredData(int networkType, int featureTagBits) {
+    void updateRegisteredData(NetworkType networkType, int featureTagBits) {
         mDebugData.put(DebugKey.REGISTER, DebugData.STR_IMS_REGISTERED);
         mDebugData.put(DebugKey.REGISTER_TIME, getCurrentTime());
         updateNetworkType(networkType);
@@ -534,7 +533,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    void updateDeregisterData(int networkType, int reason) {
+    void updateDeregisterData(NetworkType networkType, int reason) {
         mDebugData.put(DebugKey.REGISTER, DebugData.STR_IMS_DEREGISTERED);
         mDebugData.put(DebugKey.DEREGISTER_TIME, getCurrentTime());
         updateNetworkType(networkType);
@@ -1135,33 +1134,34 @@ public class AosDebug implements IAosDebug {
     class RegistrationListener implements IAosRegistrationListener {
 
         @Override
-        public void notifyRegistered(int regType, int networkType, int featureTagBits,
+        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
             logi(mSlotId, "notifyRegistered - regType:" + regType
                     + ", networkType:" + networkType
                     + ", featureTagBits:" + featureTagBits + ", featureTags:" + featureTags);
             Message.obtain(mHandler,
-                    DEBUG_NOTIFY_REGISTERED, networkType, featureTagBits).sendToTarget();
+                    DEBUG_NOTIFY_REGISTERED, networkType.getValue(), featureTagBits).sendToTarget();
         }
 
         @Override
-        public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+        public void notifyDeregistered(
+                int regType, NetworkType networkType, int reason, String message) {
             logi(mSlotId, "notifyDeregistered - regType:" + regType
                     + ", networkType:" + networkType
                     + ", reason:" + reason + "message:" + message);
             Message.obtain(mHandler,
-                    DEBUG_NOTIFY_DEREGISTERED, networkType, reason).sendToTarget();
+                    DEBUG_NOTIFY_DEREGISTERED, networkType.getValue(), reason).sendToTarget();
         }
 
         @Override
-        public void notifyRegistering(int regType, int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
             // Do nothing.
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int regType, int networkType, int causeCode,
-                String message) {
+        public void notifyTechnologyChangeFailed(
+                int regType, NetworkType networkType, int causeCode, String message) {
             // Do nothing.
         }
 
@@ -1171,7 +1171,8 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(
+                int capabilities, NetworkType networkType, int reason) {
             // Do nothing.
         }
 
@@ -1299,11 +1300,11 @@ public class AosDebug implements IAosDebug {
         }
 
         private void handleNotifyRegistered(Message msg) {
-            updateRegisteredData(msg.arg1, msg.arg2);
+            updateRegisteredData(NetworkType.of(msg.arg1), msg.arg2);
         }
 
         private void handleNotifyDeregistered(Message msg) {
-            updateDeregisterData(msg.arg1, msg.arg2);
+            updateDeregisterData(NetworkType.of(msg.arg1), msg.arg2);
         }
 
         private void handleNotifyCapabilitiesUpdated(Message msg) {

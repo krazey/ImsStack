@@ -1357,7 +1357,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredLte() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1372,7 +1372,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1381,7 +1381,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredIwlan() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.IWLAN;
+        int networkType = IAosRegistrationListener.NetworkType.IWLAN.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1396,7 +1396,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1405,7 +1405,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredCrossSim() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.CROSS_SIM;
+        int networkType = IAosRegistrationListener.NetworkType.CROSS_SIM.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1420,7 +1420,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1429,7 +1429,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredNr() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.NR;
+        int networkType = IAosRegistrationListener.NetworkType.NR.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1444,7 +1444,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1453,7 +1453,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredCrossUtran() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.UTRAN;
+        int networkType = IAosRegistrationListener.NetworkType.UTRAN.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1468,7 +1468,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1477,7 +1477,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredCrossNone() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.NONE;
+        int networkType = IAosRegistrationListener.NetworkType.NONE.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL;
 
         // WHEN
@@ -1492,7 +1492,7 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER));
         assertEquals(FakeAosDebug.sTestCurrentTime,
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTER_TIME));
-        assertEquals(IAosRegistrationListener.NetworkType.toString(networkType),
+        assertEquals(IAosRegistrationListener.NetworkType.of(networkType).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.REGISTERED_NETWORK_TYPE));
         assertEquals(IAosRegistrationListener.FeatureTagMask.toString(featureTagBits),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
@@ -1501,7 +1501,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyRegisteredMultipleFeatureTags() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int featureTagBits = IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.TEXT
@@ -1544,7 +1544,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredUnspecified() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED;
 
         // WHEN
@@ -1569,7 +1569,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredPlmnBlock() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK;
 
         // WHEN
@@ -1594,7 +1594,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredPlmnBlockWithTimeout() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT;
 
         // WHEN
@@ -1619,7 +1619,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationError() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR;
 
         // WHEN
@@ -1644,7 +1644,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationErrorWfcReg403() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403;
 
         // WHEN
@@ -1669,7 +1669,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationWfcReg500() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500;
 
         // WHEN
@@ -1694,7 +1694,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationErrorWfcNotSupportedCountry() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode
                 .CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
 
@@ -1720,7 +1720,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationErrorWfcSub403() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403;
 
         // WHEN
@@ -1745,7 +1745,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationErrorWfcNotifyTerminated() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode
                 .CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED;
 
@@ -1771,7 +1771,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredRegistrationErrorWfcOtherFailures() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode
                 .CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES;
 
@@ -1797,7 +1797,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalPowerOff() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_POWER_OFF;
 
         // WHEN
@@ -1822,7 +1822,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalLowBattery() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_LOW_BATTERY;
 
         // WHEN
@@ -1847,7 +1847,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalNetworkNoService() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_NO_SERVICE;
 
         // WHEN
@@ -1872,7 +1872,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalNetworkNoLteCoverage() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
 
         // WHEN
@@ -1897,7 +1897,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalNetworkRoaming() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_ROAMING;
 
         // WHEN
@@ -1922,7 +1922,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalNetworkIpChanged() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_IP_CHANGED;
 
         // WHEN
@@ -1947,7 +1947,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalServiceUnavailable() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_SERVICE_UNAVAILABLE;
 
         // WHEN
@@ -1972,7 +1972,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredLocalNotRegistered() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NOT_REGISTERED;
 
         // WHEN
@@ -1997,7 +1997,7 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testHandleNotifyDeregisteredUnknown() {
         // GIVEN
-        int networkType = IAosRegistrationListener.NetworkType.LTE;
+        int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = -1;
 
         // WHEN

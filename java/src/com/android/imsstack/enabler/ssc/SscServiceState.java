@@ -753,13 +753,13 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistered(int regType, int networkType, int featureTagBits,
+        public void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
 
-            ImsLog.d(mSlotId, "Registered : network = " + networkType);
+            ImsLog.d(mSlotId, "Registered : network = " + networkType.toString());
 
             if (!mImsRegistrationState) {
                 mImsRegistrationState = true;
@@ -768,7 +768,7 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistering(int regType, int networkType, int featureTagBits,
+        public void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
                 java.util.Set<String> featureTags) {
             if (regType != RegistrationType.NORMAL) {
                 return;
@@ -778,7 +778,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+        public void notifyDeregistered(
+                int regType, NetworkType networkType, int reason, String message) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
@@ -792,8 +793,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int regType, int networkType, int causeCode,
-                String message) {
+        public void notifyTechnologyChangeFailed(
+                int regType, NetworkType networkType, int causeCode, String message) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
@@ -807,7 +808,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(
+                int capabilities, NetworkType networkType, int reason) {
             // do nothing
         }
 

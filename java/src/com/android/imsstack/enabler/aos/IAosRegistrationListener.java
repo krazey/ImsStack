@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.aos;
 import android.annotation.NonNull;
 import android.net.Uri;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistered(int regType, int networkType, int featureTagBits,
+    void notifyRegistered(int regType, NetworkType networkType, int featureTagBits,
             Set<String> featureTags);
 
     /**
@@ -42,7 +43,7 @@ public interface IAosRegistrationListener {
      * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}.
      * @param featureTags Type of {@code Set<String>}.
      */
-    void notifyRegistering(int regType, int networkType, int featureTagBits,
+    void notifyRegistering(int regType, NetworkType networkType, int featureTagBits,
             Set<String> featureTags);
 
     /**
@@ -53,7 +54,7 @@ public interface IAosRegistrationListener {
      * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
      * @param message associated with why registration was disconnected.
      */
-    void notifyDeregistered(int regType, int networkType, int reason, String message);
+    void notifyDeregistered(int regType, NetworkType networkType, int reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
@@ -64,7 +65,8 @@ public interface IAosRegistrationListener {
      * @param causeCode The handover failure cause. See {@link android.telephony.DataFailCause}.
      * @param message The handover failure message.
      */
-    void notifyTechnologyChangeFailed(int regType, int networkType, int causeCode, String message);
+    void notifyTechnologyChangeFailed(
+            int regType, NetworkType networkType, int causeCode, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -82,7 +84,7 @@ public interface IAosRegistrationListener {
      * @param networkType The radio access technology. See {@link NetworkType}.
      * @param reason Reason for update failure. See {@link CapabilityReason}.
      */
-    void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
+    void notifyCapabilitiesUpdateFailed(int capabilities, NetworkType networkType, int reason);
 
     /**
      * This method is called when capabilities are changed from
@@ -179,23 +181,46 @@ public interface IAosRegistrationListener {
     /**
      * NETWORK_TYPE
      */
-    class NetworkType {
-        public static final int NONE = -1;
-        public static final int LTE = 0;
-        public static final int IWLAN = 1;
-        public static final int CROSS_SIM = 2;
-        public static final int NR = 3;
-        public static final int UTRAN = 4;
+    enum NetworkType {
+        NONE(-1),
+        LTE(0),
+        IWLAN(1),
+        CROSS_SIM(2),
+        NR(3),
+        UTRAN(4);
 
-        public static String toString(int networkType) {
-            return switch (networkType) {
-                case LTE -> "LTE";
-                case IWLAN -> "IWLAN";
-                case CROSS_SIM -> "CROSS_SIM";
-                case NR -> "NR";
-                case UTRAN -> "UTRAN";
-                default -> "NONE";
-            };
+        private final int mValue;
+
+        NetworkType(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value of the NetworkType.
+         *
+         * @return The integer value of the NetworkType.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        @Override
+        public String toString() {
+            return name();
+        }
+
+        /**
+         * Returns the NetworkType enum constant corresponding to the given integer value.
+         *
+         * @param value The integer value to look up.
+         * @return The NetworkType enum constant with the given value, or
+         *         {@code NetworkType.NONE} if no such constant exists.
+         */
+        public static NetworkType of(int value) {
+            return Arrays.stream(values())
+                .filter(type -> type.mValue == value)
+                .findFirst()
+                .orElse(NONE);
         }
     }
 

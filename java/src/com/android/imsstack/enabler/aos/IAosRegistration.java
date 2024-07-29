@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 
 import androidx.annotation.NonNull;
 
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 
 import java.util.Arrays;
@@ -101,11 +102,11 @@ public interface IAosRegistration {
     /**
      * This method is returns the network type in which the IMS registered.
      *
-     * @return int returns NetworkType {@link IAosRegistrationListener.NetworkType}
+     * @return NetworkType {@link IAosRegistrationListener.NetworkType}
      *    {@code IAosRegistrationListener.NetworkType.NONE} if IMS is not registered,
      *    The NetworkType is returns, if IMS is registered.
      */
-    int getRegisteredNetworkType();
+    NetworkType getRegisteredNetworkType();
 
     /**
      * Retrieves the current IMS registration state.
@@ -225,13 +226,13 @@ public interface IAosRegistration {
     final class CapabilityPairs {
 
         /**
-         * The key of {@code Map<Integer, Integer>} is networkType.
+         * The key of {@code Map<NetworkType, Integer>} is networkType.
          * {@link IAosRegistrationListener.NetworkType}
          *
-         * The value of {@code Map<Integer, Integer>} is Capability.
+         * The value of {@code Map<NetworkType, Integer>} is Capability.
          * {@link IAosRegistrationListener.Capability}
          */
-        private final Map<Integer, Integer> mCapabilities;
+        private final Map<NetworkType, Integer> mCapabilities;
 
         /**
          * Constructs an empty CapabilityPairs object.
@@ -247,7 +248,7 @@ public interface IAosRegistration {
          * @param networkType The network type.
          * @param capability The capability to be added.
          */
-        public CapabilityPairs(Integer networkType, Integer capability) {
+        public CapabilityPairs(NetworkType networkType, Integer capability) {
             mCapabilities = new LinkedHashMap<>();
             if (networkType != null && capability != null) {
                 addCapability(networkType, capability);
@@ -262,7 +263,7 @@ public interface IAosRegistration {
          * @param networkType The network type.
          * @param capability The capability to be added.
          */
-        public void addCapability(Integer networkType, Integer capability) {
+        public void addCapability(NetworkType networkType, Integer capability) {
             mCapabilities.put(networkType,
                     mCapabilities.getOrDefault(networkType, 0) | capability);
         }
@@ -274,7 +275,7 @@ public interface IAosRegistration {
          * @param capability The capability to be checked.
          * @return {@code true} if the capability is present, {@code false} otherwise.
          */
-        public boolean hasCapability(Integer networkType, Integer capability) {
+        public boolean hasCapability(NetworkType networkType, Integer capability) {
             return (mCapabilities.getOrDefault(networkType, 0) & capability) > 0;
         }
 
@@ -283,7 +284,7 @@ public interface IAosRegistration {
          *
          * @return mCapabilities is type of {@code Map<Integer, Integer>}.
          */
-        public Map<Integer, Integer> getCapabilities() {
+        public Map<NetworkType, Integer> getCapabilities() {
             return mCapabilities;
         }
 

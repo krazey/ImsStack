@@ -28,6 +28,7 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.IncomingMtcCall;
@@ -169,7 +170,7 @@ public final class ImsTestHelper {
 
             for (int i = 0; i < strNetworks.length; i++)
             {
-                int nNetwork = -1;
+                NetworkType nNetwork = NetworkType.NONE;
                 if (strNetworks[i].equalsIgnoreCase("LTE")) {
                     nNetwork = IAosRegistrationListener.NetworkType.LTE;
                 } else if (strNetworks[i].equalsIgnoreCase("NR")) {

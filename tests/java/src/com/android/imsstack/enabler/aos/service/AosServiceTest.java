@@ -262,8 +262,9 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void changeCapabilities_lteVideo() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.NetworkType.LTE.getValue(),
+                IAosRegistrationListener.Capability.VIDEO,
+                IAosRegistrationListener.NetworkType.IWLAN.getValue(),
                 IAosRegistrationListener.Capability.VIDEO);
         CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.VIDEO);
@@ -282,8 +283,9 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void changeCapabilities_nrVideo() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.NR, IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.NetworkType.NR.getValue(),
+                IAosRegistrationListener.Capability.VIDEO,
+                IAosRegistrationListener.NetworkType.IWLAN.getValue(),
                 IAosRegistrationListener.Capability.VIDEO);
         CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.NR,
                 IAosRegistrationListener.Capability.VIDEO);
@@ -317,7 +319,7 @@ public class AosServiceTest extends ImsStackTest {
     public void getRegisteredNetworkType() {
         mAosService.setRegisteredNetworkType(NetworkType.UTRAN);
 
-        int registeredNetworkType = mAosService.getRegisteredNetworkType();
+        NetworkType registeredNetworkType = mAosService.getRegisteredNetworkType();
 
         assertEquals(NetworkType.UTRAN, registeredNetworkType);
     }
@@ -900,7 +902,8 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimLoaded() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
+                IAosRegistrationListener.NetworkType.LTE.getValue(),
+                IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START.getValue(),
                 IAosRegistration.Pcscf.CURRENT.getValue(),
@@ -933,7 +936,8 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenRefreshStarted() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
+                IAosRegistrationListener.NetworkType.LTE.getValue(),
+                IAosRegistrationListener.Capability.UT);
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
                 IAosRegistration.RequestType.START.getValue(),
                 IAosRegistration.Pcscf.CURRENT.getValue(),
@@ -983,7 +987,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
         parcel.writeString(featureTags.valueAt(0));
@@ -1007,7 +1011,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERING);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
         parcel.writeString(featureTags.valueAt(0));
@@ -1030,7 +1034,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
@@ -1053,7 +1057,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.NONE);
+        parcel.writeInt(NetworkType.NONE.getValue());
         parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
@@ -1076,7 +1080,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.NONE);
+        parcel.writeInt(NetworkType.NONE.getValue());
         parcel.writeInt(ReasonCode.CODE_PLMN_BLOCK);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
@@ -1098,7 +1102,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED);
         parcel.writeInt(RegistrationType.NORMAL);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(reason);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
@@ -1149,7 +1153,7 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED);
         parcel.writeInt(Capability.VOICE);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(CapabilityReason.ERROR_GENERIC);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
@@ -1293,7 +1297,7 @@ public class AosServiceTest extends ImsStackTest {
             super();
         }
 
-        public void setRegisteredNetworkType(int networkType) {
+        public void setRegisteredNetworkType(NetworkType networkType) {
             mRegisteredNetworkType = networkType;
         }
 
