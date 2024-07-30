@@ -48,8 +48,11 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.Capability;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.ImsLog;
@@ -127,9 +130,8 @@ public class ImsRegistrationTracker {
     }
 
     public void dispose() {
-        mRegTracker.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
-                mRegTracker.getNetworkType(), IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED,
-                null);
+        mRegTracker.notifyDeregistered(RegistrationType.NORMAL, mRegTracker.getNetworkType(),
+                ReasonCode.CODE_UNSPECIFIED, null);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -163,7 +165,7 @@ public class ImsRegistrationTracker {
         if (mRegTracker != null) {
             return mRegTracker.getNetworkType();
         } else {
-            return IAosRegistrationListener.NetworkType.NONE;
+            return NetworkType.NONE;
         }
     }
 
@@ -321,8 +323,7 @@ public class ImsRegistrationTracker {
             int capability = convertToAosCapability(finalcapability.second);
 
             if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
-                if ((networkType == IAosRegistrationListener.NetworkType.IWLAN)
-                        && (capability == IAosRegistrationListener.Capability.VOICE)) {
+                if ((networkType == NetworkType.IWLAN) && (capability == Capability.VOICE)) {
                     if (isVoiceRoaming() && isCellularPreferredMode()) {
                         continue;
                     }
@@ -331,7 +332,7 @@ public class ImsRegistrationTracker {
 
             if (!isIgnoreDataEnabledChangedForVideoCalls()) {
                 if (!isMobileDataEnabled()) {
-                    if (capability == IAosRegistrationListener.Capability.VIDEO) {
+                    if (capability == Capability.VIDEO) {
                         logi("Mobile data is off :: ignoring video capability");
                         continue;
                     }
@@ -340,20 +341,15 @@ public class ImsRegistrationTracker {
 
             capabilityPairs.addCapability(networkType, capability);
 
-            if ((capability == IAosRegistrationListener.Capability.VOICE)
-                    && isRttSupported()) {
+            if ((capability == Capability.VOICE) && isRttSupported()) {
                 ImsLog.d("Add text Capability");
-                capabilityPairs.addCapability(networkType,
-                        IAosRegistrationListener.Capability.TEXT);
+                capabilityPairs.addCapability(networkType, Capability.TEXT);
             }
 
-            if (((networkType == IAosRegistrationListener.NetworkType.LTE)
-                    && (capability == IAosRegistrationListener.Capability.VIDEO))
-                    || ((networkType == IAosRegistrationListener.NetworkType.NR)
-                    && (capability == IAosRegistrationListener.Capability.VIDEO))) {
+            if (((networkType == NetworkType.LTE) && (capability == Capability.VIDEO))
+                    || ((networkType == NetworkType.NR) && (capability == Capability.VIDEO))) {
                 ImsLog.d("Add Capability - IWLAN-VIDEO");
-                capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
-                        IAosRegistrationListener.Capability.VIDEO);
+                capabilityPairs.addCapability(NetworkType.IWLAN, Capability.VIDEO);
             }
         }
         logi("Final Capabilities" + capabilityPairs);
@@ -369,17 +365,13 @@ public class ImsRegistrationTracker {
 
                 for (int i = 0; i < supportedRats.length; i++) {
                     if (supportedRats[i] == AccessNetworkType.EUTRAN) {
-                        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
-                                IAosRegistrationListener.Capability.SMS);
+                        capabilityPairs.addCapability(NetworkType.LTE, Capability.SMS);
                     } else if (supportedRats[i] == AccessNetworkType.UTRAN) {
-                        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.UTRAN,
-                                IAosRegistrationListener.Capability.SMS);
+                        capabilityPairs.addCapability(NetworkType.UTRAN, Capability.SMS);
                     } else if (supportedRats[i] == AccessNetworkType.NGRAN) {
-                        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
-                                IAosRegistrationListener.Capability.SMS);
+                        capabilityPairs.addCapability(NetworkType.NR, Capability.SMS);
                     } else if (supportedRats[i] == AccessNetworkType.IWLAN) {
-                        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
-                                IAosRegistrationListener.Capability.SMS);
+                        capabilityPairs.addCapability(NetworkType.IWLAN, Capability.SMS);
                     }
                 }
                 logi("createSmsCapabilityPairs" + capabilityPairs);
@@ -508,36 +500,36 @@ public class ImsRegistrationTracker {
     private NetworkType convertToAosNetworkType(int radioTech) {
         switch (radioTech) {
             case ImsRegistrationImpl.REGISTRATION_TECH_LTE:
-                return IAosRegistrationListener.NetworkType.LTE;
+                return NetworkType.LTE;
             case ImsRegistrationImpl.REGISTRATION_TECH_IWLAN:
-                return IAosRegistrationListener.NetworkType.IWLAN;
+                return NetworkType.IWLAN;
             case ImsRegistrationImpl.REGISTRATION_TECH_CROSS_SIM:
-                return IAosRegistrationListener.NetworkType.CROSS_SIM;
+                return NetworkType.CROSS_SIM;
             case ImsRegistrationImpl.REGISTRATION_TECH_NR:
-                return IAosRegistrationListener.NetworkType.NR;
+                return NetworkType.NR;
             case ImsRegistrationImpl.REGISTRATION_TECH_NONE: // FALL-THROUGH
             default:
-                return IAosRegistrationListener.NetworkType.NONE;
+                return NetworkType.NONE;
         }
     }
 
     private int convertToAosCapability(int capability) {
         switch (capability) {
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE:
-                return IAosRegistrationListener.Capability.VOICE;
+                return Capability.VOICE;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO:
-                return IAosRegistrationListener.Capability.VIDEO;
+                return Capability.VIDEO;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT:
-                return IAosRegistrationListener.Capability.UT;
+                return Capability.UT;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS:
-                return IAosRegistrationListener.Capability.SMS;
+                return Capability.SMS;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER:
-                return IAosRegistrationListener.Capability.CALL_COMPOSER;
+                return Capability.CALL_COMPOSER;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY:
-                return IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY;
+                return Capability.CALL_COMPOSER_BUSINESS_ONLY;
             case MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE: // FALL-THROUGH
             default:
-                return IAosRegistrationListener.Capability.NONE;
+                return Capability.NONE;
         }
     }
 
@@ -589,7 +581,7 @@ public class ImsRegistrationTracker {
         }
 
         public void clear() {
-            mNetworkType = IAosRegistrationListener.NetworkType.LTE;
+            mNetworkType = NetworkType.LTE;
 
             if (mAosReg != null) {
                 mAosReg.removeListener(this);
@@ -598,7 +590,7 @@ public class ImsRegistrationTracker {
         }
 
         public void init() {
-            mNetworkType = IAosRegistrationListener.NetworkType.LTE;
+            mNetworkType = NetworkType.LTE;
             mAosReg = getIAosRegistration(mContext.getSlotId());
             ImsStackRegistry.addImsServiceListener(this);
 
@@ -717,8 +709,7 @@ public class ImsRegistrationTracker {
             mRegImpl.notifyDeregistered(regType, radioTech, reason, message);
 
             if (regType == RegistrationType.NORMAL) {
-                boolean networkTypeChanged = updateNetworkType(
-                        IAosRegistrationListener.NetworkType.NONE);
+                boolean networkTypeChanged = updateNetworkType(NetworkType.NONE);
                 boolean featureChanged = updateFeatures(FeatureTagMask.NONE);
 
                 if (networkTypeChanged || featureChanged) {
@@ -827,20 +818,20 @@ public class ImsRegistrationTracker {
 
         private int convertToTelephonyCapability(int capability) {
             switch (capability) {
-                case IAosRegistrationListener.Capability.VOICE:
+                case Capability.VOICE:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
-                case IAosRegistrationListener.Capability.VIDEO:
+                case Capability.VIDEO:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
-                case IAosRegistrationListener.Capability.UT:
+                case Capability.UT:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT;
-                case IAosRegistrationListener.Capability.SMS:
+                case Capability.SMS:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
-                case IAosRegistrationListener.Capability.CALL_COMPOSER:
+                case Capability.CALL_COMPOSER:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER;
-                case IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY:
+                case Capability.CALL_COMPOSER_BUSINESS_ONLY:
                     return MmTelFeature.MmTelCapabilities
                             .CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY;
-                case IAosRegistrationListener.Capability.NONE: // FALL-THROUGH
+                case Capability.NONE: // FALL-THROUGH
                 default:
                     return MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
             }
