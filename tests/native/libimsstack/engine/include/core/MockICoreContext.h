@@ -27,6 +27,7 @@ public:
     ~MockICoreContext() override = default;
 
     MOCK_METHOD(ServiceProtocol*, GetImsCoreProtocol, (), (const, override));
+    MOCK_METHOD(CallControlHelper*, GetCallControlHelper, (), (override));
 };
 
 #endif

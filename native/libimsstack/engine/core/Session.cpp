@@ -24,6 +24,7 @@
 
 #include "CallControlHelper.h"
 #include "Capabilities.h"
+#include "CoreContext.h"
 #include "IOnSessionListener.h"
 #include "IReasonHeaderSetter.h"
 #include "ISipAckPackage.h"
@@ -756,7 +757,8 @@ const Replaces* Session::GetReplaces() const
         return IMS_NULL;
     }
 
-    return CallControlHelper::GetInstance()->GetReplacesFromSessionId(GetSessionId());
+    return CoreContext::GetInstance()->GetCallControlHelper()->GetReplacesFromSessionId(
+            GetSessionId());
 }
 
 PUBLIC
@@ -5115,15 +5117,16 @@ void Session::AddSessionToCallControlHelper()
         RemoveSessionFromCallControlHelper();
     }
 
-    m_strSessionIdForCallControl = CallControlHelper::CreateSessionId();
+    CallControlHelper* pCallControlHelper = CoreContext::GetInstance()->GetCallControlHelper();
+
+    m_strSessionIdForCallControl = pCallControlHelper->CreateSessionId();
 
     // Create a Replaces header info...
-    Replaces* pReplaces = CallControlHelper::CreateReplaces(IsMobileOriginated(), GetDialog());
+    Replaces* pReplaces = CallControlHelper::CreateReplaces(GetDialog(), IsMobileOriginated());
 
-    CallControlHelper::GetInstance()->AddSession(m_strSessionIdForCallControl, pReplaces);
+    pCallControlHelper->AddSession(m_strSessionIdForCallControl, pReplaces);
 
-    IMS_TRACE_D(
-            "CallControlHelper :: AddSession (%s)", m_strSessionIdForCallControl.GetStr(), 0, 0);
+    IMS_TRACE_D("CallControlHelper: AddSession (%s)", m_strSessionIdForCallControl.GetStr(), 0, 0);
 }
 
 PRIVATE
@@ -5135,11 +5138,11 @@ void Session::RemoveSessionFromCallControlHelper()
         return;
     }
 
-    CallControlHelper::GetInstance()->RemoveSession(m_strSessionIdForCallControl);
+    CallControlHelper* pCallControlHelper = CoreContext::GetInstance()->GetCallControlHelper();
+    pCallControlHelper->RemoveSession(m_strSessionIdForCallControl);
 
-    IMS_TRACE_D("CallControlHelper :: RemoveSession (%s), Count (%d)",
-            m_strSessionIdForCallControl.GetStr(),
-            CallControlHelper::GetInstance()->GetSessionCount(), 0);
+    IMS_TRACE_D("CallControlHelper: RemoveSession (%s), Count (%d)",
+            m_strSessionIdForCallControl.GetStr(), pCallControlHelper->GetSessionCount(), 0);
 
     m_strSessionIdForCallControl = AString::ConstNull();
 }

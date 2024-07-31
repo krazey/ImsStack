@@ -16,6 +16,7 @@
 #ifndef INTERFACE_CORE_CONTEXT_H_
 #define INTERFACE_CORE_CONTEXT_H_
 
+class CallControlHelper;
 class ServiceProtocol;
 
 /**
@@ -31,6 +32,11 @@ public:
      * @brief Returns the ImsCoreProtocol instance.
      */
     virtual ServiceProtocol* GetImsCoreProtocol() const = 0;
+
+    /**
+     * @brief Returns the CallControlHelper instance.
+     */
+    virtual CallControlHelper* GetCallControlHelper() = 0;
 };
 
 #endif
