@@ -16,7 +16,14 @@ public:
             OUT TextProfile* pProfile);
 
 private:
-    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
+    void ExtractPayloads(IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
+    void ExtractRtpMap(IN const SdpAvCodec* pSdpCodec, OUT TextProfile::Payload* pPayload,
+            OUT AString& strCodecName);
+    IMS_BOOL ExtractFmtp(IN const AString& strFmtp, OUT TextProfile::Payload* pPayload,
+            IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
+    IMS_BOOL ExtractRedFmtp(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
+    IMS_BOOL ExtractRedSubPtExist(
+            IN const IMS_SINT32 nRedPayload, IN const ImsList<SdpMediaFormat*>& lstMediaFormat);
 };
 
 #endif
