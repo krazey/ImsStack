@@ -30,7 +30,7 @@ IMS_BOOL AudioProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescripto
 
     ProfileExtractor::Extract(pSessionDescriptor, pDescriptor, pProfile);
 
-    MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->GetCapaNego()));
+    ExtractCapaNego(pDescriptor, &(pProfile->GetCapaNego()));
     ExtractPayloads(pDescriptor, pProfile);
     ExtractPtime(pDescriptor, pProfile);
     ExtractMaxPtime(pDescriptor, pProfile);
