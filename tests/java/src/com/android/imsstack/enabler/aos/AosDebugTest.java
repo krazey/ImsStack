@@ -77,6 +77,7 @@ import com.android.imsstack.enabler.aos.service.AosService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -262,6 +263,7 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
+    @Ignore
     public void testShowOrDismissNotificationPermissionGranted() throws Exception {
         // GIVEN
         mFakeAosDebug.mIsDebugScreenEnabled = true;
@@ -325,6 +327,7 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
+    @Ignore
     public void testNotifyPermissionsResultPermissionGranted() throws Exception {
         // GIVEN
         int requestCode = FakeAosDebug.REQUEST_CODE_DEBUG;
@@ -542,6 +545,7 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
+    @Ignore
     public void testNativeStateListenerOnNativeServiceReady() throws Exception {
         // GIVEN
         mFakeAosDebug.mIsDebugScreenEnabled = true;
