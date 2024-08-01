@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "CallControlHelper.h"
 #include "CoreContext.h"
 #include "ImsCoreProtocol.h"
 
@@ -20,12 +21,18 @@ PUBLIC GLOBAL CoreContext* CoreContext::s_pContext = IMS_NULL;
 
 PRIVATE CoreContext::CoreContext() :
         m_pImsCoreProtocol(new ImsCoreProtocol()),
+        m_pCallControlHelper(IMS_NULL),
         m_piCoreContext(IMS_NULL)
 {
 }
 
 PRIVATE VIRTUAL CoreContext::~CoreContext()
 {
+    if (m_pCallControlHelper != IMS_NULL)
+    {
+        delete m_pCallControlHelper;
+    }
+
     delete m_pImsCoreProtocol;
 }
 
@@ -37,6 +44,21 @@ PUBLIC ServiceProtocol* CoreContext::GetImsCoreProtocol() const
     }
 
     return m_pImsCoreProtocol;
+}
+
+PUBLIC CallControlHelper* CoreContext::GetCallControlHelper()
+{
+    if (m_piCoreContext != IMS_NULL)
+    {
+        return m_piCoreContext->GetCallControlHelper();
+    }
+
+    if (m_pCallControlHelper == IMS_NULL)
+    {
+        m_pCallControlHelper = new CallControlHelper();
+    }
+
+    return m_pCallControlHelper;
 }
 
 PUBLIC GLOBAL CoreContext* CoreContext::GetInstance()

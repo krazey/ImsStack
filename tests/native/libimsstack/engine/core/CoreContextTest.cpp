@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "CallControlHelper.h"
 #include "CoreContext.h"
 
 #include "MockICoreContext.h"
@@ -45,18 +46,25 @@ protected:
 TEST_F(CoreContextTest, Accessors)
 {
     EXPECT_NE(m_pCoreContext->GetImsCoreProtocol(), nullptr);
+    EXPECT_NE(m_pCoreContext->GetCallControlHelper(), nullptr);
 }
 
 TEST_F(CoreContextTest, AccessorsWithExternalCoreContext)
 {
     TestImsCoreProtocol objImsCoreProtocol;
+    CallControlHelper objCallControlHelper;
     MockICoreContext objCoreContext;
+
     EXPECT_CALL(objCoreContext, GetImsCoreProtocol())
             .Times(1)
             .WillOnce(Return(&objImsCoreProtocol));
+    EXPECT_CALL(objCoreContext, GetCallControlHelper())
+            .Times(1)
+            .WillOnce(Return(&objCallControlHelper));
     m_pCoreContext->SetCoreContext(&objCoreContext);
 
     EXPECT_EQ(m_pCoreContext->GetImsCoreProtocol(), &objImsCoreProtocol);
+    EXPECT_EQ(m_pCoreContext->GetCallControlHelper(), &objCallControlHelper);
 }
 
 }  // namespace android
