@@ -5000,9 +5000,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         peerCallL.getConferenceUserId(),
                         peerCallL.getCallExtraInt(Call.EXTRA_CALL_CONNECTION_ID, 0));
             } else {
-                // FIXME: After removing one participant and if this user is re-joined,
-                // then we need to remove the existing user before adding this user.
-                // It's to avoid the duplicated users even though the callId is different.
+                // If a participant rejoins after being removed, ensures data associated with
+                // previous presence is deleted before re-adding the participant.
+                // This prevents duplicate user entries, even if the participant's callId changes.
                 if (ConferenceInfoHelper.isConferenceUserRemovable(
                         peerCallL.getConferenceUserId())) {
                     ConferenceInfoHelper.removeConferenceUser(
