@@ -112,7 +112,6 @@ public final class ConferenceInfoHelper {
      * This method will be invoked in the scenario; drop and add a user.
      */
     public static boolean isConferenceUserRemovable(String confUserId) {
-        // FIXME: multi-device requirement
         ConferenceInfoManager cim = ConferenceInfoManager.getInstance();
         ConferenceInfo ci = cim.getConferenceInfoByUser(null, confUserId);
 
@@ -126,7 +125,6 @@ public final class ConferenceInfoHelper {
     }
 
     public static void removeConferenceUser(String callId, String confUserId) {
-        // FIXME: If callId is null, removes all the users if confUserId is matched
         ConferenceInfoManager cim = ConferenceInfoManager.getInstance();
         ConferenceInfo ci = cim.getConferenceInfoByUser(callId, confUserId);
 
