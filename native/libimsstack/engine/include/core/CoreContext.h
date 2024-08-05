@@ -38,6 +38,7 @@ public:
 public:
     ServiceProtocol* GetImsCoreProtocol() const override;
     CallControlHelper* GetCallControlHelper() override;
+    CallerPreferenceManager* GetCallerPreferenceManager() override;
 
     /**
      * @brief Sets the specific core context to return their own instances.
@@ -56,6 +57,7 @@ public:
 private:
     ImsCoreProtocol* m_pImsCoreProtocol;
     CallControlHelper* m_pCallControlHelper;
+    CallerPreferenceManager* m_pCallerPreferenceManager;
     ICoreContext* m_piCoreContext;
 
     static CoreContext* s_pContext;

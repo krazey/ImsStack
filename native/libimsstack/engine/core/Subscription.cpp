@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "Capabilities.h"
+#include "CoreContext.h"
 #include "IOnSubscriptionListener.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
@@ -586,7 +587,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::InitInstance()
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     ForkedDialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->CreatePreferenceWrapper(
+    CoreContext::GetInstance()->GetCallerPreferenceManager()->CreatePreferenceWrapper(
             GetName(), AString::ConstNull());
     GetService()->RegisterMethod(this);
 
@@ -681,7 +682,7 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
 
                 if ((piDialog != IMS_NULL) && (piDialog->GetState() == ISipDialog::STATE_CONFIRMED))
                 {
-                    CallerPreferenceManager::GetInstance()->UpdateDialogId(
+                    CoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateDialogId(
                             GetName(), piDialog->GetDialogId());
                 }
             }
@@ -694,7 +695,7 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
 
                 if (piPreviousSIPMsg != IMS_NULL)
                 {
-                    CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+                    CoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateAcceptContacts(
                             GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
                 }
             }
@@ -1198,7 +1199,7 @@ void Subscription::CleanupOnDestroy()
     ForkedDialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->DestroyPreferenceWrapper(GetName());
+    CoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(GetName());
 
     // Clean up the resources
     GetService()->DeregisterMethod(this);

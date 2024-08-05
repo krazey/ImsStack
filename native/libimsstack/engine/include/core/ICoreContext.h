@@ -17,6 +17,7 @@
 #define INTERFACE_CORE_CONTEXT_H_
 
 class CallControlHelper;
+class CallerPreferenceManager;
 class ServiceProtocol;
 
 /**
@@ -37,6 +38,11 @@ public:
      * @brief Returns the CallControlHelper instance.
      */
     virtual CallControlHelper* GetCallControlHelper() = 0;
+
+    /**
+     * @brief Returns the CallerPreferenceManager instance.
+     */
+    virtual CallerPreferenceManager* GetCallerPreferenceManager() = 0;
 };
 
 #endif

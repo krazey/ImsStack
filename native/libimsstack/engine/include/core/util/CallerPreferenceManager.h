@@ -21,11 +21,10 @@
 
 class CallerPreferenceManager
 {
-private:
-    CallerPreferenceManager();
-    inline ~CallerPreferenceManager() {}
-
 public:
+    CallerPreferenceManager();
+    virtual ~CallerPreferenceManager() = default;
+
     CallerPreferenceManager(IN const CallerPreferenceManager&) = delete;
     CallerPreferenceManager& operator=(IN const CallerPreferenceManager&) = delete;
 
@@ -37,8 +36,6 @@ public:
     void UpdateAcceptContacts(
             IN const AString& strName, IN const ImsList<AString>& objAcceptContacts);
     void UpdateDialogId(IN const AString& strName, IN const AString& strDialogId);
-
-    static CallerPreferenceManager* GetInstance();
 
 private:
     class PreferenceWrapper
@@ -56,7 +53,7 @@ private:
         {
         }
 
-        inline ~PreferenceWrapper() {}
+        inline ~PreferenceWrapper() = default;
 
     public:
         inline PreferenceWrapper& operator=(IN const PreferenceWrapper& other)

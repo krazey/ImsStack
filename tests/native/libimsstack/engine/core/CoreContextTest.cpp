@@ -17,6 +17,7 @@
 
 #include "CallControlHelper.h"
 #include "CoreContext.h"
+#include "util/CallerPreferenceManager.h"
 
 #include "MockICoreContext.h"
 #include "TestImsCoreProtocol.h"
@@ -47,12 +48,14 @@ TEST_F(CoreContextTest, Accessors)
 {
     EXPECT_NE(m_pCoreContext->GetImsCoreProtocol(), nullptr);
     EXPECT_NE(m_pCoreContext->GetCallControlHelper(), nullptr);
+    EXPECT_NE(m_pCoreContext->GetCallerPreferenceManager(), nullptr);
 }
 
 TEST_F(CoreContextTest, AccessorsWithExternalCoreContext)
 {
     TestImsCoreProtocol objImsCoreProtocol;
     CallControlHelper objCallControlHelper;
+    CallerPreferenceManager objCallerPreferenceManager;
     MockICoreContext objCoreContext;
 
     EXPECT_CALL(objCoreContext, GetImsCoreProtocol())
@@ -61,10 +64,14 @@ TEST_F(CoreContextTest, AccessorsWithExternalCoreContext)
     EXPECT_CALL(objCoreContext, GetCallControlHelper())
             .Times(1)
             .WillOnce(Return(&objCallControlHelper));
+    EXPECT_CALL(objCoreContext, GetCallerPreferenceManager())
+            .Times(1)
+            .WillOnce(Return(&objCallerPreferenceManager));
     m_pCoreContext->SetCoreContext(&objCoreContext);
 
     EXPECT_EQ(m_pCoreContext->GetImsCoreProtocol(), &objImsCoreProtocol);
     EXPECT_EQ(m_pCoreContext->GetCallControlHelper(), &objCallControlHelper);
+    EXPECT_EQ(m_pCoreContext->GetCallerPreferenceManager(), &objCallerPreferenceManager);
 }
 
 }  // namespace android

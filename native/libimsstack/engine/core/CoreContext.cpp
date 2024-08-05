@@ -16,18 +16,25 @@
 #include "CallControlHelper.h"
 #include "CoreContext.h"
 #include "ImsCoreProtocol.h"
+#include "util/CallerPreferenceManager.h"
 
 PUBLIC GLOBAL CoreContext* CoreContext::s_pContext = IMS_NULL;
 
 PRIVATE CoreContext::CoreContext() :
         m_pImsCoreProtocol(new ImsCoreProtocol()),
         m_pCallControlHelper(IMS_NULL),
+        m_pCallerPreferenceManager(IMS_NULL),
         m_piCoreContext(IMS_NULL)
 {
 }
 
 PRIVATE VIRTUAL CoreContext::~CoreContext()
 {
+    if (m_pCallerPreferenceManager != IMS_NULL)
+    {
+        delete m_pCallerPreferenceManager;
+    }
+
     if (m_pCallControlHelper != IMS_NULL)
     {
         delete m_pCallControlHelper;
@@ -59,6 +66,21 @@ PUBLIC CallControlHelper* CoreContext::GetCallControlHelper()
     }
 
     return m_pCallControlHelper;
+}
+
+PUBLIC CallerPreferenceManager* CoreContext::GetCallerPreferenceManager()
+{
+    if (m_piCoreContext != IMS_NULL)
+    {
+        return m_piCoreContext->GetCallerPreferenceManager();
+    }
+
+    if (m_pCallerPreferenceManager == IMS_NULL)
+    {
+        m_pCallerPreferenceManager = new CallerPreferenceManager();
+    }
+
+    return m_pCallerPreferenceManager;
 }
 
 PUBLIC GLOBAL CoreContext* CoreContext::GetInstance()

@@ -28,6 +28,7 @@ public:
 
     MOCK_METHOD(ServiceProtocol*, GetImsCoreProtocol, (), (const, override));
     MOCK_METHOD(CallControlHelper*, GetCallControlHelper, (), (override));
+    MOCK_METHOD(CallerPreferenceManager*, GetCallerPreferenceManager, (), (override));
 };
 
 #endif
