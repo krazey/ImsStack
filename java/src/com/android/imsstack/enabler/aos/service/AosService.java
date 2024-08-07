@@ -734,9 +734,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void onDeregistered(NetworkType networkType, int reason) {
+    private void onDeregistered(NetworkType networkType, ReasonCode reason) {
         if (mRegState == IAosRegistrationListener.RegistrationState.DEREGISTERED
-                && reason == ReasonCode.CODE_UNSPECIFIED) {
+                && reason == ReasonCode.UNSPECIFIED) {
             return;
         }
 
@@ -746,8 +746,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         mFeatureTags.clear();
 
         if (networkType == NetworkType.NONE) {
-            if (reason == ReasonCode.CODE_PLMN_BLOCK
-                    || reason == ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT) {
+            if (reason == ReasonCode.PLMN_BLOCK
+                    || reason == ReasonCode.PLMN_BLOCK_WITH_TIMEOUT) {
                 IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
                 if (dnw != null) {
                     networkType = getRegistrationNetworkType(dnw.getNetworkType());
@@ -762,15 +762,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void onDeregisteredForEmergency(int regType, NetworkType networkType, int reason) {
+    private void onDeregisteredForEmergency(
+            int regType, NetworkType networkType, ReasonCode reason) {
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyDeregistered(regType, networkType, reason, getErrorMessage(reason));
         }
     }
 
-    private void onTechnologyChangeFailed(int regType, NetworkType networkType, int causeCode) {
+    private void onTechnologyChangeFailed(
+            int regType, NetworkType networkType, ReasonCode reason) {
         for (IAosRegistrationListener l : mAosRegistrationListeners) {
-            l.notifyTechnologyChangeFailed(regType, networkType, causeCode, null);
+            l.notifyTechnologyChangeFailed(regType, networkType, reason, null);
         }
     }
 
@@ -842,9 +844,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void updateDeregistered(int regType, NetworkType networkType, int reason) {
+    private void updateDeregistered(int regType, NetworkType networkType, ReasonCode reason) {
         ImsLog.d(mSlotId, "updateDeregistered :: regType(" + regType + "), networkType("
-                + networkType.toString() + "), reason(" + reason + ")");
+                + networkType.toString() + "), reason(" + reason.toString() + ")");
 
         if (regType == RegistrationType.EMERGENCY || regType == RegistrationType.FAKE) {
             mHandler.post(() -> onDeregisteredForEmergency(regType, networkType, reason));
@@ -853,9 +855,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void updateTechnologyChangeFailed(int regType, NetworkType networkType, int reason) {
+    private void updateTechnologyChangeFailed(
+            int regType, NetworkType networkType, ReasonCode reason) {
         ImsLog.d(mSlotId, "updateTechnologyChangeFailed :: regType(" + regType + "), networkType("
-                + networkType + "), reason(" + reason + ")");
+                + networkType.toString() + "), reason(" + reason.toString() + ")");
 
         mHandler.post(() -> onTechnologyChangeFailed(regType, networkType, reason));
     }
@@ -900,7 +903,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         mHandler.post(() -> onWifiServiceRequest(command));
     }
 
-    private String getErrorMessage(int reason) {
+    private String getErrorMessage(ReasonCode reason) {
         String key = convertReasonToKey(reason);
         return (key == null) ? null :
                 getStringFromBundle(CarrierConfig.Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, key);
@@ -921,20 +924,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         };
     }
 
-    private static String convertReasonToKey(int reason) {
+    private static String convertReasonToKey(ReasonCode reason) {
         return switch (reason) {
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403 ->
+            case WFC_REG_RESP_403 ->
                     CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500 ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY ->
+            case WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY ->
                     CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403 ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED ->
-                    CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
+            case WFC_REG_RESP_500 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
+            case WFC_REG_RESP_OTHER_FAILURES ->
                     CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
+            case WFC_SUB_RESP_403 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
+            case WFC_SUB_NOTIFY_TERMINATED ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
             default -> null;
         };
     }
@@ -1028,14 +1031,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
-                    updateDeregistered(regType, NetworkType.of(networkType), reason);
+                    updateDeregistered(regType, NetworkType.of(networkType), ReasonCode.of(reason));
                 }
                 case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
                     int regType = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
-                    updateTechnologyChangeFailed(regType, NetworkType.of(networkType), reason);
+                    updateTechnologyChangeFailed(
+                            regType, NetworkType.of(networkType), ReasonCode.of(reason));
                 }
                 case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED -> {
                     int count = parcel.readInt();

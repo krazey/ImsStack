@@ -33,7 +33,7 @@ public:
     virtual IMS_BOOL NotifyDeregistered(
             IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) = 0;
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
-            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode) = 0;
+            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) = 0;
     virtual IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) = 0;
     virtual IMS_BOOL NotifyCapabilitiesUpdateFailed(
             IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) = 0;

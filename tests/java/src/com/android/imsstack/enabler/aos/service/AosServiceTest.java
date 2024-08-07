@@ -1035,7 +1035,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.LTE.getValue());
-        parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
@@ -1045,7 +1045,7 @@ public class AosServiceTest extends ImsStackTest {
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
         verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
-                NetworkType.LTE, ReasonCode.CODE_REGISTRATION_ERROR, null);
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null);
     }
 
     @Test
@@ -1058,7 +1058,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.NONE.getValue());
-        parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
@@ -1068,7 +1068,7 @@ public class AosServiceTest extends ImsStackTest {
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
         verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
-                NetworkType.NONE, ReasonCode.CODE_REGISTRATION_ERROR, null);
+                NetworkType.NONE, ReasonCode.REGISTRATION_ERROR, null);
     }
 
     @Test
@@ -1081,7 +1081,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
         parcel.writeInt(RegistrationType.NORMAL);
         parcel.writeInt(NetworkType.NONE.getValue());
-        parcel.writeInt(ReasonCode.CODE_PLMN_BLOCK);
+        parcel.writeInt(ReasonCode.PLMN_BLOCK.getValue());
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
@@ -1091,12 +1091,12 @@ public class AosServiceTest extends ImsStackTest {
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
         verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
-                NetworkType.UTRAN, ReasonCode.CODE_PLMN_BLOCK, null);
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK, null);
     }
 
     @Test
     public void jniImsListenerProxy_notifyTechnologyChangeFailed() {
-        int reason = android.telephony.DataFailCause.OPERATOR_BARRED;
+        int reason = ReasonCode.REGISTRATION_ERROR.getValue();
         mAosService.addListener(mMockAosRegistrationListener);
 
         Parcel parcel = Parcel.obtain();
@@ -1110,7 +1110,7 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(RegistrationType.NORMAL,
-                NetworkType.LTE, reason, null);
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null);
     }
 
     @Test

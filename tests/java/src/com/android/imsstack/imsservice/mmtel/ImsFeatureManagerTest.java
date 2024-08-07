@@ -148,7 +148,7 @@ public class ImsFeatureManagerTest {
     public void testupdateFeatureCapabilities_deReg() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
+                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null);
         when(mMockUt.isUtAvailable()).thenReturn(true);
 
         int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT

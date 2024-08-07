@@ -85,8 +85,8 @@ public:
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
     IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
             IN AosReasonCode eReason) override;
-    IMS_BOOL NotifyTechnologyChangeFailed(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
-            IN IMS_SINT32 nCauseCode) override;
+    IMS_BOOL NotifyTechnologyChangeFailed(
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, AosReasonCode eReason) override;
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;

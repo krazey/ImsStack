@@ -18,6 +18,8 @@ package com.android.imsstack.enabler.aos;
 import android.annotation.NonNull;
 import android.net.Uri;
 
+import com.android.internal.annotations.Keep;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
@@ -54,7 +56,8 @@ public interface IAosRegistrationListener {
      * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
      * @param message associated with why registration was disconnected.
      */
-    void notifyDeregistered(int regType, NetworkType networkType, int reason, String message);
+    void notifyDeregistered(
+            int regType, NetworkType networkType, ReasonCode reason, String message);
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
@@ -62,11 +65,11 @@ public interface IAosRegistrationListener {
      *
      * @param regType Type of the registration. See {@link RegistrationType}.
      * @param networkType The technology that has failed to be changed to. See {@link NetworkType}.
-     * @param causeCode The handover failure cause. See {@link android.telephony.DataFailCause}.
+     * @param reason The handover failure reason. See {@link ReasonCode}.
      * @param message The handover failure message.
      */
     void notifyTechnologyChangeFailed(
-            int regType, NetworkType networkType, int causeCode, String message);
+            int regType, NetworkType networkType, ReasonCode reason, String message);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -352,140 +355,179 @@ public interface IAosRegistrationListener {
         }
     }
 
-    // TODO : need to check this class.
-
     /**
-     * ReasonCode
+     * Enum class representing the reasons for registration disconnection.
+     * Each reason belongs to a specific category, indicated by its base value.
      */
-    class ReasonCode {
+    enum ReasonCode {
 
         /**
-         * The Reason is unspecified.
+         * BASE : 0 (General Errors)
          */
-        public static final int CODE_UNSPECIFIED = 0;
-        /**
-         * Indicates that the IMS registration is failed with fatal error such as 403 or 404
-         * on all P-CSCF addresses. The radio shall block the current PLMN or disable
-         * the RAT
-         */
-        public static final int CODE_PLMN_BLOCK = 1;
-        /**
-         * Indicates that the IMS registration on current PLMN failed multiple times.
-         * The radio shall block the current PLMN or disable the RAT during the time
-         * based on carrier requirement
-         */
-        public static final int CODE_PLMN_BLOCK_WITH_TIMEOUT = 2;
-        /**
-         * IMS Registration error code
-         */
-        public static final int CODE_REGISTRATION_ERROR = 3;
-        /**
-         * WFC Registration error code if the network returns 403 Forbidden for Register.
-         * The 403 Forbidden case due to non-support for other countries are not included.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_REG_403 = 4;
-        /**
-         * WFC Registration error code if the network returns 500 error for Register.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_REG_500 = 5;
-        /**
-         * WFC Registration error code if the network returns 403 error
-         *  with a different country for register.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY = 6;
-        /**
-         * WFC Registration error code if the network returns 403 response for Subscribe.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_SUB_403 = 7;
-        /**
-         * WFC Registration error code if the network returns Notify Terminate message.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED = 8;
-        /**
-         * WFC Registration error code for all other failures.
-         */
-        public static final int CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9;
-        /**
-         * Registration error code for USIM authentication failures.
-         */
-        public static final int CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES = 10;
-        /**
-         * Service unavailable; radio power off
-         */
-        public static final int CODE_LOCAL_POWER_OFF = 11;
-        /**
-         * Service unavailable; low battery
-         */
-        public static final int CODE_LOCAL_LOW_BATTERY = 12;
-        /**
-         * Service unavailable; out of service (data service state)
-         */
-        public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 13;
-        /**
-         * Service unavailable; no LTE coverage
-         * (VoLTE is not supported even though IMS is registered)
-         */
-        public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 14;
-        /**
-         * Service unavailable; located in roaming area
-         */
-        public static final int CODE_LOCAL_NETWORK_ROAMING = 15;
-        /**
-         * Service unavailable; IP changed
-         */
-        public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 16;
-        /**
-         * Service unavailable; for an unspecified reason
-         */
-        public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 17;
-        /**
-         * Service unavailable; IMS is not registered
-         */
-        public static final int CODE_LOCAL_NOT_REGISTERED = 18;
-        /**
-         * The current RAT was blocked because registration failed for all P-CSCFs.
-         */
-        public static final int CODE_RAT_BLOCK = 19;
-        /**
-         * Clears blocks for all RATs.
-         */
-        public static final int CODE_CLEAR_RAT_BLOCKS = 20;
-        /**
-         * No response to REGISTER.
-         * TCP connection setup fails/timeout.
-         */
-        public static final int CODE_NETWORK_RESP_TIMEOUT = 21;
+        UNSPECIFIED(ReasonCode.BASE, 0),
+        REGISTRATION_ERROR(ReasonCode.BASE, 1),
+        POWER_OFF(ReasonCode.BASE, 2),
+        LOW_BATTERY(ReasonCode.BASE, 3),
+        NETWORK_NO_SERVICE(ReasonCode.BASE, 4),
+        NETWORK_NO_LTE_COVERAGE(ReasonCode.BASE, 5),
+        NETWORK_ROAMING(ReasonCode.BASE, 6),
+        NETWORK_IP_CHANGED(ReasonCode.BASE, 7),
+        SERVICE_UNAVAILABLE(ReasonCode.BASE, 8),
+        NOT_REGISTERED(ReasonCode.BASE, 9),
+        USIM_AUTHENTICATION_FAILURES(ReasonCode.BASE, 10),
 
-        public static String toString(int reasonCode) {
-            return switch (reasonCode) {
-                case CODE_UNSPECIFIED -> "CODE_UNSPECIFIED";
-                case CODE_PLMN_BLOCK -> "CODE_PLMN_BLOCK";
-                case CODE_PLMN_BLOCK_WITH_TIMEOUT -> "CODE_PLMN_BLOCK_WITH_TIMEOUT";
-                case CODE_REGISTRATION_ERROR -> "CODE_REGISTRATION_ERROR";
-                case CODE_REGISTRATION_ERROR_WFC_REG_403 -> "CODE_REGISTRATION_ERROR_WFC_REG_403";
-                case CODE_REGISTRATION_ERROR_WFC_REG_500 -> "CODE_REGISTRATION_ERROR_WFC_REG_500";
-                case CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY ->
-                        "CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY";
-                case CODE_REGISTRATION_ERROR_WFC_SUB_403 -> "CODE_REGISTRATION_ERROR_WFC_SUB_403";
-                case CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED ->
-                        "CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED";
-                case CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
-                        "CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES";
-                case CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES ->
-                        "CODE_REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES";
-                case CODE_LOCAL_POWER_OFF -> "CODE_LOCAL_POWER_OFF";
-                case CODE_LOCAL_LOW_BATTERY -> "CODE_LOCAL_LOW_BATTERY";
-                case CODE_LOCAL_NETWORK_NO_SERVICE -> "CODE_LOCAL_NETWORK_NO_SERVICE";
-                case CODE_LOCAL_NETWORK_NO_LTE_COVERAGE -> "CODE_LOCAL_NETWORK_NO_LTE_COVERAGE";
-                case CODE_LOCAL_NETWORK_ROAMING -> "CODE_LOCAL_NETWORK_ROAMING";
-                case CODE_LOCAL_NETWORK_IP_CHANGED -> "CODE_LOCAL_NETWORK_IP_CHANGED";
-                case CODE_LOCAL_SERVICE_UNAVAILABLE -> "CODE_LOCAL_SERVICE_UNAVAILABLE";
-                case CODE_LOCAL_NOT_REGISTERED -> "CODE_LOCAL_NOT_REGISTERED";
-                case CODE_RAT_BLOCK -> "CODE_RAT_BLOCK";
-                case CODE_CLEAR_RAT_BLOCKS -> "CODE_CLEAR_RAT_BLOCKS";
-                case CODE_NETWORK_RESP_TIMEOUT -> "CODE_NETWORK_RESP_TIMEOUT";
-                default -> "Unknown";
-            };
+        /**
+         * BASE_MODEM : 2000 (Errors requiring special action from the modem.)
+         */
+        PLMN_BLOCK(ReasonCode.BASE_MODEM, 0),
+        PLMN_BLOCK_WITH_TIMEOUT(ReasonCode.BASE_MODEM, 1),
+        RAT_BLOCK(ReasonCode.BASE_MODEM, 2),
+        CLEAR_RAT_BLOCKS(ReasonCode.BASE_MODEM, 3),
+
+        /**
+         * BASE_RESP_4XX : 14000 (Errors due to registration response 4XX.)
+         */
+        REG_RESP_403(ReasonCode.BASE_RESP_4XX, 403),
+
+        /**
+         * BASE_RESP_OTHER : 17000 (Errors due to registration other response.)
+         */
+        REG_RESP_NETWORK_TIMEOUT(ReasonCode.BASE_RESP_OTHER, 0),
+
+        /**
+         * BASE_RESP_WFC_4XX : 24000 (Errors due to WFC registration response 4XX.)
+         */
+        WFC_REG_RESP_403(ReasonCode.BASE_RESP_WFC_4XX, 403),
+
+        /**
+         * BASE_RESP_WFC_5XX : 25000 (Errors due to WFC registration response 5XX)
+         */
+        WFC_REG_RESP_500(ReasonCode.BASE_RESP_WFC_5XX, 500),
+
+        /**
+         * BASE_RESP_WFC_OTHER : 27000 (Errors due to WFC registration other response.)
+         */
+        WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY(ReasonCode.BASE_RESP_WFC_OTHER, 0),
+        WFC_REG_RESP_OTHER_FAILURES(ReasonCode.BASE_RESP_WFC_OTHER, 1),
+        WFC_SUB_RESP_403(ReasonCode.BASE_RESP_WFC_OTHER, 2),
+        WFC_SUB_NOTIFY_TERMINATED(ReasonCode.BASE_RESP_WFC_OTHER, 3);
+
+
+        /**
+         * General Errors.
+         */
+        private static final int BASE = 0;
+
+        /**
+         * Errors requiring special action from the modem.
+         */
+        private static final int BASE_MODEM = 2000;
+
+        /**
+         * Errors due to registration common failures.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_COMMON_OTHER = 4000;
+
+        /**
+         * Errors due to registration response 3XX.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_RESP_3XX = 13000;
+
+        /**
+         * Errors due to registration response 4XX.
+         */
+        private static final int BASE_RESP_4XX = 14000;
+
+        /**
+         * Errors due to registration response 5XX.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_RESP_5XX = 15000;
+
+        /**
+         * Errors due to registration response 6XX.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_RESP_6XX = 16000;
+
+        /**
+         * Errors due to registration other response.
+         */
+        private static final int BASE_RESP_OTHER = 17000;
+
+        /**
+         * Errors due to WFC registration response 3XX.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_RESP_WFC_3XX = 23000;
+
+        /**
+         * Errors due to WFC registration response 4XX.
+         */
+        private static final int BASE_RESP_WFC_4XX = 24000;
+
+        /**
+         * Errors due to WFC registration response 5XX.
+         */
+        private static final int BASE_RESP_WFC_5XX = 25000;
+
+        /**
+         * Errors due to WFC registration response 6XX.
+         */
+        @Keep // Reserved for future use.
+        private static final int BASE_RESP_WFC_6XX = 26000;
+
+        /**
+         * Errors due to WFC registration other response.
+         */
+        private static final int BASE_RESP_WFC_OTHER = 27000;
+
+        private final int mValue;
+
+        /**
+         * Constructs a {@code ReasonCode} enum value with the specified base value and offset.
+         *
+         * @param base   The base value representing the category of the reason code.
+         * @param offset The offset within the category.
+         */
+        ReasonCode(int base, int offset) {
+            mValue = base + offset;
+        }
+
+        /**
+         * Retrieves the integer value associated with this reason code.
+         *
+         * @return The integer value of the reason code.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        /**
+         * Returns the name of this enum constant, as contained in the declaration.
+         *
+         * @return the name of this enum constant
+         */
+        @Override
+        public String toString() {
+            return name();
+        }
+
+        /**
+         * Returns the enum constant of this type with the specified integer value.
+         * If no matching constant is found, {@code UNSPECIFIED} is returned.
+         *
+         * @param value The integer value of the reason code.
+         * @return The corresponding {@code ReasonCode} enum constant or
+         *         {@code UNSPECIFIED} if not found
+         */
+        public static ReasonCode of(int value) {
+            return Arrays.stream(values())
+                .filter(cause -> cause.mValue == value)
+                .findFirst()
+                .orElse(UNSPECIFIED);
         }
     }
 

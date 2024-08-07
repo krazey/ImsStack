@@ -20,6 +20,8 @@
 #include "ImsMap.h"
 #include "INativeEnabler.h"
 
+#define TO_UINT32(e) (static_cast<IMS_UINT32>(e))
+
 class IAosRegistrationControlListener;
 class IAosServicePhoneListener;
 class IAosServiceSettingListener;
@@ -152,13 +154,13 @@ public:
      *
      * @param nRegType Type of the registration.
      * @param eNetworkType The technology that has failed to be changed to.
-     * @param nCauseCode Handover failure cause.
+     * @param eReason Handover failure reason.
      * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
-     * @see class android.telephony.DataFailCause
+     * @see class AosReasonCode
      */
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
-            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -248,106 +250,157 @@ public:
 };
 
 /**
- * reasons associated with why registration was disconnected
+ * @brief Enum class defining base values for categorizing AosReasonCode.
+ *        Each base value represents a distinct category of errors or conditions that can lead to
+ *        registration failures.
+ */
+enum class AosReasonCodeBase
+{
+    /// General Errors.
+    BASE = 0,
+
+    /// Errors requiring special action from the modem.
+    BASE_MODEM = 2000,
+
+    /// Errors due to registration common failures.
+    BASE_COMMON_OTHER = 4000,
+
+    /// Errors due to registration response 3XX.
+    BASE_RESP_3XX = 13000,
+
+    /// Errors due to registration response 4XX.
+    BASE_RESP_4XX = 14000,
+
+    /// Errors due to registration response 5XX.
+    BASE_RESP_5XX = 15000,
+
+    /// Errors due to registration response 6XX.
+    BASE_RESP_6XX = 16000,
+
+    /// Errors due to registration other response.
+    BASE_RESP_OTHER = 17000,
+
+    /// Errors due to WFC registration response 3XX.
+    BASE_RESP_WFC_3XX = 23000,
+
+    /// Errors due to WFC registration response 4XX.
+    BASE_RESP_WFC_4XX = 24000,
+
+    /// Errors due to WFC registration response 5XX.
+    BASE_RESP_WFC_5XX = 25000,
+
+    /// Errors due to WFC registration response 6XX.
+    BASE_RESP_WFC_6XX = 26000,
+
+    /// Errors due to WFC registration other response.
+    BASE_RESP_WFC_OTHER = 27000
+};
+
+/**
+ * @brief Enum class representing the reasons for registration disconnection.
+ *        Each reason belongs to a specific category, indicated by its base value.
  */
 enum class AosReasonCode
 {
+
     /**
-     * The Reason is unspecified.
+     * @brief : BASE(0) - General Errors.
      */
-    UNSPECIFIED = 0,
+
+    /// The reason for disconnection is unknown or unspecified.
+    UNSPECIFIED = TO_UINT32(AosReasonCodeBase::BASE),
+
+    /// A general error occurred during IMS registration.
+    REGISTRATION_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 1,
+
+    /// Service is unavailable because the radio is powered off.
+    POWER_OFF = TO_UINT32(AosReasonCodeBase::BASE) + 2,
+
+    /// Service is unavailable due to low battery.
+    LOW_BATTERY = TO_UINT32(AosReasonCodeBase::BASE) + 3,
+
+    /// Service is unavailable due to out of service(data service state).
+    NETWORK_NO_SERVICE = TO_UINT32(AosReasonCodeBase::BASE) + 4,
+
+    /// Service is unavailable due to no LTE coverage.
+    NETWORK_NO_LTE_COVERAGE = TO_UINT32(AosReasonCodeBase::BASE) + 5,
+
+    /// Service is unavailable due to roaming.
+    NETWORK_ROAMING = TO_UINT32(AosReasonCodeBase::BASE) + 6,
+
+    /// Service is unavailable because the IP address changed.
+    NETWORK_IP_CHANGED = TO_UINT32(AosReasonCodeBase::BASE) + 7,
+
+    /// Service is unavailable for an unspecified reason.
+    SERVICE_UNAVAILABLE = TO_UINT32(AosReasonCodeBase::BASE) + 8,
+
+    /// Service is unavailable because IMS is not registered.
+    NOT_REGISTERED = TO_UINT32(AosReasonCodeBase::BASE) + 9,
+
+    /// Registration failed due to USIM authentication failure.
+    USIM_AUTHENTICATION_FAILURES = TO_UINT32(AosReasonCodeBase::BASE) + 10,
+
     /**
-     * Indicates that the IMS registration is failed with fatal error such as 403 or 404
-     * on all P-CSCF addresses. The radio shall block the current PLMN or disable
-     * the RAT
+     * @brief : BASE_MODEM(2000) - Errors requiring special action from the modem.
      */
-    PLMN_BLOCK = 1,
+
+    /// Indicates that the IMS registration is failed with fatal error such as 403 or 404 on all
+    /// P-CSCF addresses. The radio shall block the current PLMN or disable the RAT.
+    PLMN_BLOCK = TO_UINT32(AosReasonCodeBase::BASE_MODEM),
+
+    /// Indicates that the IMS registration on current PLMN failed multiple times. The radio shall
+    /// block the current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 1,
+
+    /// The current RAT was blocked because registration failed for all P-CSCFs.
+    RAT_BLOCK = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 2,
+
+    /// Clears blocks for all RATs.
+    CLEAR_RAT_BLOCKS = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 3,
+
     /**
-     * Indicates that the IMS registration on current PLMN failed multiple times.
-     * The radio shall block the current PLMN or disable the RAT during the time
-     * based on carrier requirement
+     * @brief : BASE_RESP_4XX(14000) - Errors due to registration response 4XX.
      */
-    PLMN_BLOCK_WITH_TIMEOUT = 2,
+
+    /// Registration failed due to a 403 Forbidden response from the network.
+    REG_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_4XX) + 403,
+
     /**
-     * IMS Registration error code
+     * @brief : BASE_RESP_OTHER(17000) - Errors due to registration other response.
      */
-    REGISTRATION_ERROR = 3,
+
+    /// No response received for the registration request, TCP connection failure or timeout.
+    REG_RESP_NETWORK_TIMEOUT = TO_UINT32(AosReasonCodeBase::BASE_RESP_OTHER),
+
     /**
-     * WFC Registration error code if the network returns 403 Forbidden for Register.
-     * The 403 Forbidden case due to non-support for other countries are not included.
+     * @brief : BASE_RESP_WFC_4XX(24000) - Errors due to WFC registration response 4XX.
      */
-    REGISTRATION_ERROR_WFC_REG_403 = 4,
+
+    /// WFC registration failed due to a 403 Forbidden response (excluding unsupported country).
+    WFC_REG_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_4XX) + 403,
+
     /**
-     * WFC Registration error code if the network returns 500 Internal server error for Register.
+     * @brief : BASE_RESP_WFC_5XX(25000) - Errors due to WFC registration response 5XX.
      */
-    REGISTRATION_ERROR_WFC_REG_500 = 5,
+
+    /// WFC registration failed due to a 500 Internal Server Error response.
+    WFC_REG_RESP_500 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_5XX) + 500,
+
     /**
-     * WFC Registration error code if the network returns 403 Forbidden with a different country for
-     * register.
+     * @brief : BASE_RESP_WFC_OTHER(27000) - Errors due to WFC registration other response.
      */
-    REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY = 6,
-    /**
-     * WFC Registration error code if the network returns 403 response for Subscribe.
-     */
-    REGISTRATION_ERROR_WFC_SUB_403 = 7,
-    /**
-     * WFC Registration error code if the network returns Notify Terminate message.
-     */
-    REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED = 8,
-    /**
-     * WFC Registration error code for all other failures.
-     */
-    REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9,
-    /**
-     * Registration error code for USIM authentication failures.
-     */
-    REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES = 10,
-    /**
-     * Service unavailable; radio power off
-     */
-    LOCAL_POWER_OFF = 11,
-    /**
-     * Service unavailable; low battery
-     */
-    LOCAL_LOW_BATTERY = 12,
-    /**
-     * Service unavailable; out of service (data service state)
-     */
-    LOCAL_NETWORK_NO_SERVICE = 13,
-    /**
-     * Service unavailable; no LTE coverage
-     * (VoLTE is not supported even though IMS is registered)
-     */
-    LOCAL_NETWORK_NO_LTE_COVERAGE = 14,
-    /**
-     * Service unavailable; located in roaming area
-     */
-    LOCAL_NETWORK_ROAMING = 15,
-    /**
-     * Service unavailable; IP changed
-     */
-    NETWORK_IP_CHANGED = 16,
-    /**
-     * Service unavailable; for an unspecified reason
-     */
-    LOCAL_SERVICE_UNAVAILABLE = 17,
-    /**
-     * Service unavailable; IMS is not registered
-     */
-    LOCAL_NOT_REGISTERED = 18,
-    /**
-     * The current RAT was blocked because registration failed for all P-CSCFs.
-     */
-    RAT_BLOCK = 19,
-    /**
-     * Clears blocks for all RATs.
-     */
-    CLEAR_RAT_BLOCKS = 20,
-    /**
-     * No response to REGISTER.
-     * TCP connection setup fails/timeout.
-     */
-    CODE_NETWORK_RESP_TIMEOUT = 21
+
+    /// WFC registration failed due to a 403 Forbidden response with unsupported country.
+    WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER),
+
+    /// WFC registration failed due to other unspecified reasons.
+    WFC_REG_RESP_OTHER_FAILURES = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 1,
+
+    /// WFC registration failed due to a 403 Forbidden response during subscription.
+    WFC_SUB_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 2,
+
+    /// WFC registration terminated due to a Notify Terminate message.
+    WFC_SUB_NOTIFY_TERMINATED = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 3
 };
 
 /**

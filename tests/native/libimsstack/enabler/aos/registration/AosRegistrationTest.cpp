@@ -1423,18 +1423,40 @@ TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenNotifyFailureWithImsReasonForN
 {
     m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
 
-    m_pAosRegistration->NotifyFailureWithImsReason(IRegistration::REASON_TRANSACTION_TIMEOUT);
+    m_pAosRegistration->NotifyFailureWithImsReason(
+            IRegistration::REASON_TRANSACTION_TIMEOUT, SipStatusCode::SC_INVALID);
 
-    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, DoNotSetReasonToTimeoutWhenNotifyFailureWithImsReasonForEmergencyType)
 {
     m_pAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
-    m_pAosRegistration->NotifyFailureWithImsReason(IRegistration::REASON_TRANSACTION_TIMEOUT);
+    m_pAosRegistration->NotifyFailureWithImsReason(
+            IRegistration::REASON_TRANSACTION_TIMEOUT, SipStatusCode::SC_INVALID);
 
-    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
+}
+
+TEST_F(AosRegistrationTest, SetReasonToRegResp403WhenStatusCodeIs403)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->NotifyFailureWithImsReason(
+            IRegistration::REASON_STATUS_CODE, SipStatusCode::SC_403);
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
+}
+
+TEST_F(AosRegistrationTest, DoNotSetReasonToRegResp403WhenStatusCodeIsNot403)
+{
+    m_pAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+
+    m_pAosRegistration->NotifyFailureWithImsReason(
+            IRegistration::REASON_STATUS_CODE, SipStatusCode::SC_500);
+
+    EXPECT_NE(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_403);
 }
 
 TEST_F(AosRegistrationTest, UpdatePreloadedRouteFailIfRegParameterIsNull)
@@ -3326,83 +3348,54 @@ TEST_F(AosRegistrationTest, DoNothingIfPolicyIsDefaultWhenStartFailedWith305)
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosRegistrationTest,
-        NotifyDeregisteredWithNotSupportedCountryWhenWfcErrMessageRequiredFor403)
+TEST_F(AosRegistrationTest, ShouldSetReasonCodeToNotSupportedCountryWhen403WithNotSupportedCountry)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
             .WillByDefault(Return(AString("NotSupportedCountry")));
 
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, _, AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY));
-
     m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(),
+            AosReasonCode::WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY);
 }
 
-TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg403WhenWfcErrMessageRequiredFor403)
+TEST_F(AosRegistrationTest, ShouldSetReasonCodeTo403WhenSupportedCountry)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
             .WillByDefault(Return(m_strLocationProperties));
 
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, _, AosReasonCode::REGISTRATION_ERROR_WFC_REG_403));
-
     m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::WFC_REG_RESP_403);
 }
 
-TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor403)
-{
-    m_pAosRegistration->SetImsReasonCode(
-            AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY);
-    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objUtilService.GetMockPrivateProperty(), GetPersistent(_, _))
-            .WillByDefault(Return(AString("NotSupportedCountry")));
-
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
-
-    m_pAosRegistration->ProcessRequiredWfcErrMessage_403();
-}
-
-TEST_F(AosRegistrationTest, NotifyDeregisteredWithReg500WhenWfcErrMessageRequiredFor500)
+TEST_F(AosRegistrationTest, ShouldSetReasonCodeTo500WhenWfcErrorMessageSupported)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, _, AosReasonCode::REGISTRATION_ERROR_WFC_REG_500));
 
     m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::WFC_REG_RESP_500);
 }
 
-TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredFor500)
-{
-    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_REG_500);
-    ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
-            .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, _, _)).Times(0);
-
-    m_pAosRegistration->ProcessRequiredWfcErrMessage_500();
-}
-
-TEST_F(AosRegistrationTest, NotifyDeregisteredWithOtherFailuresWhenWfcErrMessageRequiredForOthers)
+TEST_F(AosRegistrationTest, ShouldSetReasonCodeToOtherFailuresWhenWfcErrorMessageSupported)
 {
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosService,
-            NotifyDeregistered(_, _, AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES));
 
     m_pAosRegistration->ProcessRequiredWfcErrMessage_Others();
+
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::WFC_REG_RESP_OTHER_FAILURES);
 }
 
 TEST_F(AosRegistrationTest, DoNotNotifySameReasonCodeWhenWfcErrMessageRequiredForOthers)
 {
-    m_pAosRegistration->SetImsReasonCode(AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES);
+    m_pAosRegistration->SetImsReasonCode(AosReasonCode::WFC_REG_RESP_OTHER_FAILURES);
     ON_CALL(m_objMockIAosNConfiguration, IsWfcErrorMessageSupported(_))
             .WillByDefault(Return(IMS_TRUE));
 
@@ -4630,7 +4623,7 @@ TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithTransactionTime
 {
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_TRANSACTION_TIMEOUT);
 
-    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, TriggerFlowRecoveryIfErrorCodeOtherConfiguredWhenStartFailedWithOthers)
@@ -4679,14 +4672,14 @@ TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithClientSocketErr
 {
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_CLIENT_SOCKET_ERROR);
 
-    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, SetReasonToTimeoutWhenStartFailedWithServerSocketError)
 {
     m_pAosRegistration->Registration_StartFailed(IRegistration::REASON_SERVER_SOCKET_ERROR);
 
-    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::CODE_NETWORK_RESP_TIMEOUT);
+    EXPECT_EQ(m_pAosRegistration->GetReasonCode(), AosReasonCode::REG_RESP_NETWORK_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, StartRetryTimerIfAwtRecoveryRequiredWhenStartFailedWithOthers)

@@ -540,7 +540,7 @@ public class AosDebug implements IAosDebug {
         mDebugData.put(DebugKey.FEATURES, IAosRegistrationListener.FeatureTagMask.toString(
                 IAosRegistrationListener.FeatureTagMask.NONE));
         mDebugData.put(DebugKey.DEREGISTER_REASON,
-                IAosRegistrationListener.ReasonCode.toString(reason));
+                IAosRegistrationListener.ReasonCode.of(reason).toString());
 
         showOrDismissNotification(null);
     }
@@ -1145,12 +1145,12 @@ public class AosDebug implements IAosDebug {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, int reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             logi(mSlotId, "notifyDeregistered - regType:" + regType
                     + ", networkType:" + networkType
-                    + ", reason:" + reason + "message:" + message);
-            Message.obtain(mHandler,
-                    DEBUG_NOTIFY_DEREGISTERED, networkType.getValue(), reason).sendToTarget();
+                    + ", reason:" + reason.toString() + "message:" + message);
+            Message.obtain(mHandler, DEBUG_NOTIFY_DEREGISTERED,
+                    networkType.getValue(), reason.getValue()).sendToTarget();
         }
 
         @Override
@@ -1161,7 +1161,7 @@ public class AosDebug implements IAosDebug {
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, int causeCode, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             // Do nothing.
         }
 

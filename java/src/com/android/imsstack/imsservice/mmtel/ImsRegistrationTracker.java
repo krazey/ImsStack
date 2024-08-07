@@ -131,7 +131,7 @@ public class ImsRegistrationTracker {
 
     public void dispose() {
         mRegTracker.notifyDeregistered(RegistrationType.NORMAL, mRegTracker.getNetworkType(),
-                ReasonCode.CODE_UNSPECIFIED, null);
+                ReasonCode.UNSPECIFIED, null);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -702,9 +702,10 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, int reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             logi("ImsRegistrationTracker notifyDeregistered - type=" + regType + ", network="
-                    + networkType.toString() + ", reason =" + reason + ", message =" + message);
+                    + networkType.toString() + ", reason =" + reason.toString()
+                    + ", message =" + message);
             int radioTech = convertToTelephonyNetworkType(networkType);
             mRegImpl.notifyDeregistered(regType, radioTech, reason, message);
 
@@ -720,7 +721,7 @@ public class ImsRegistrationTracker {
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, int reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             int radioTech = convertToTelephonyNetworkType(networkType);
 
             mRegImpl.notifyTechnologyChangeFailed(regType, radioTech, reason, message);

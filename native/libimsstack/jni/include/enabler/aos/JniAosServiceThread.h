@@ -35,7 +35,7 @@ public:
             IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyTechnologyChangeFailed(
-            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode) override;
+            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
 

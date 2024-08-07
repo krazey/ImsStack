@@ -99,7 +99,7 @@ IMS_BOOL JniAosServiceThread::NotifyDeregistered(
 
 PUBLIC
 IMS_BOOL JniAosServiceThread::NotifyTechnologyChangeFailed(
-        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode)
+        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
 {
     IMS_TRACE_D("NotifyTechnologyChangeFailed", 0, 0, 0);
 
@@ -107,7 +107,7 @@ IMS_BOOL JniAosServiceThread::NotifyTechnologyChangeFailed(
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED);
     objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
-    objParcel.writeInt32(nCauseCode);
+    objParcel.writeInt32(nReason);
 
     return SendData2Java(objParcel);
 }

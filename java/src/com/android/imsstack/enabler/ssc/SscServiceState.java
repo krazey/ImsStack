@@ -779,12 +779,12 @@ public class SscServiceState {
 
         @Override
         public void notifyDeregistered(
-                int regType, NetworkType networkType, int reason, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }
 
-            ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
+            ImsLog.d(mSlotId, "Deregistered : reason = " + reason.toString());
 
             if (mImsRegistrationState) {
                 mImsRegistrationState = false;
@@ -794,7 +794,7 @@ public class SscServiceState {
 
         @Override
         public void notifyTechnologyChangeFailed(
-                int regType, NetworkType networkType, int causeCode, String message) {
+                int regType, NetworkType networkType, ReasonCode reason, String message) {
             if (regType != RegistrationType.NORMAL) {
                 return;
             }

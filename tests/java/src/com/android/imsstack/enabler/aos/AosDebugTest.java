@@ -1549,7 +1549,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredUnspecified() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED;
+        int reason = IAosRegistrationListener.ReasonCode.UNSPECIFIED.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1566,7 +1566,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1574,7 +1574,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredPlmnBlock() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK;
+        int reason = IAosRegistrationListener.ReasonCode.PLMN_BLOCK.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1591,7 +1591,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1599,7 +1599,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredPlmnBlockWithTimeout() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT;
+        int reason = IAosRegistrationListener.ReasonCode.PLMN_BLOCK_WITH_TIMEOUT.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1616,7 +1616,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1624,7 +1624,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationError() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR;
+        int reason = IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1641,7 +1641,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1649,7 +1649,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationErrorWfcReg403() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403;
+        int reason = IAosRegistrationListener.ReasonCode.WFC_REG_RESP_403.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1666,7 +1666,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1674,7 +1674,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationWfcReg500() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500;
+        int reason = IAosRegistrationListener.ReasonCode.WFC_REG_RESP_500.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1691,7 +1691,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1700,7 +1700,7 @@ public class AosDebugTest extends ImsStackTest {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
         int reason = IAosRegistrationListener.ReasonCode
-                .CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
+                .WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1717,7 +1717,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1725,7 +1725,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationErrorWfcSub403() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403;
+        int reason = IAosRegistrationListener.ReasonCode.WFC_SUB_RESP_403.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1742,7 +1742,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1750,8 +1750,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationErrorWfcNotifyTerminated() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode
-                .CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED;
+        int reason = IAosRegistrationListener.ReasonCode.WFC_SUB_NOTIFY_TERMINATED.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1768,7 +1767,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1776,8 +1775,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredRegistrationErrorWfcOtherFailures() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode
-                .CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES;
+        int reason = IAosRegistrationListener.ReasonCode.WFC_REG_RESP_OTHER_FAILURES.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1794,7 +1792,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1802,7 +1800,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalPowerOff() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_POWER_OFF;
+        int reason = IAosRegistrationListener.ReasonCode.POWER_OFF.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1819,7 +1817,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1827,7 +1825,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalLowBattery() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_LOW_BATTERY;
+        int reason = IAosRegistrationListener.ReasonCode.LOW_BATTERY.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1844,7 +1842,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1852,7 +1850,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalNetworkNoService() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_NO_SERVICE;
+        int reason = IAosRegistrationListener.ReasonCode.NETWORK_NO_SERVICE.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1869,7 +1867,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1877,7 +1875,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalNetworkNoLteCoverage() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+        int reason = IAosRegistrationListener.ReasonCode.NETWORK_NO_LTE_COVERAGE.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1894,7 +1892,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1902,7 +1900,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalNetworkRoaming() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_ROAMING;
+        int reason = IAosRegistrationListener.ReasonCode.NETWORK_ROAMING.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1919,7 +1917,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1927,7 +1925,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalNetworkIpChanged() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NETWORK_IP_CHANGED;
+        int reason = IAosRegistrationListener.ReasonCode.NETWORK_IP_CHANGED.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1944,7 +1942,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1952,7 +1950,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalServiceUnavailable() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_SERVICE_UNAVAILABLE;
+        int reason = IAosRegistrationListener.ReasonCode.SERVICE_UNAVAILABLE.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1969,7 +1967,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -1977,7 +1975,7 @@ public class AosDebugTest extends ImsStackTest {
     public void testHandleNotifyDeregisteredLocalNotRegistered() {
         // GIVEN
         int networkType = IAosRegistrationListener.NetworkType.LTE.getValue();
-        int reason = IAosRegistrationListener.ReasonCode.CODE_LOCAL_NOT_REGISTERED;
+        int reason = IAosRegistrationListener.ReasonCode.NOT_REGISTERED.getValue();
 
         // WHEN
         Message msg = Message.obtain();
@@ -1994,7 +1992,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 
@@ -2019,7 +2017,7 @@ public class AosDebugTest extends ImsStackTest {
         assertEquals(IAosRegistrationListener.FeatureTagMask
                         .toString(IAosRegistrationListener.FeatureTagMask.NONE),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.FEATURES));
-        assertEquals(IAosRegistrationListener.ReasonCode.toString(reason),
+        assertEquals(IAosRegistrationListener.ReasonCode.of(reason).toString(),
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugKey.DEREGISTER_REASON));
     }
 

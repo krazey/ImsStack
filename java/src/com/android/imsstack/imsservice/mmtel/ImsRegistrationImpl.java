@@ -23,14 +23,16 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.util.Pair;
 
 import com.android.imsstack.enabler.aos.IAosRegistration;
-import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
 import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
 import com.android.imsstack.util.ImsLog;
 
+import java.util.Map;
 import java.util.Set;
 
 public final class ImsRegistrationImpl extends ImsRegistrationImplBase
@@ -39,6 +41,18 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     ImsRegistrationTracker mRegTracker;
 
     private ISipTransportBaseRegistrationListener mSipTransportBaseRegListener;
+
+    private static final Map<ReasonCode, Pair<Integer, Integer>> REASON_CODE_MAP = Map.ofEntries(
+            Map.entry(ReasonCode.REG_RESP_403, Pair.create(
+                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+            Map.entry(ReasonCode.WFC_REG_RESP_403, Pair.create(
+                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+            Map.entry(ReasonCode.WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY, Pair.create(
+                    ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_SIP_FORBIDDEN)),
+            Map.entry(ReasonCode.REG_RESP_NETWORK_TIMEOUT, Pair.create(
+                    ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
+                            ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT))
+    );
 
     public ImsRegistrationImpl() {
     }
@@ -84,7 +98,8 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyDeregistered(int regType, int networkType, int reason, String message) {
+    public void notifyDeregistered(
+            int regType, int networkType, ReasonCode reason, String message) {
         logi("notifyDeregistered: [" + RegistrationType.toString(regType) + "]");
 
         if (regType == RegistrationType.NORMAL) {
@@ -106,8 +121,8 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyTechnologyChangeFailed(int regType, int networkType, int reason,
-            String message) {
+    public void notifyTechnologyChangeFailed(
+            int regType, int networkType, ReasonCode reason, String message) {
         logi("notifyTechnologyChangeFailed: [" + RegistrationType.toString(regType) + "]");
 
         if (regType == RegistrationType.NORMAL) {
@@ -129,36 +144,24 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
         onSubscriberAssociatedUriChanged(uris);
     }
 
-    private ImsReasonInfo getReasonInfo(int reason, String message) {
-        if (reason == IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT) {
-            return new ImsReasonInfo(
-                ImsReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT, null);
-        } else if (message != null && !message.trim().equals("")) {
-            return new ImsReasonInfo(
-                    ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                    ImsReasonInfo.CODE_UNSPECIFIED, message);
-        } else {
-            return new ImsReasonInfo(
-                    ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                    ImsReasonInfo.CODE_UNSPECIFIED, null);
-        }
+    private ImsReasonInfo getReasonInfo(ReasonCode reason, String message) {
+        Pair<Integer, Integer> pair = REASON_CODE_MAP.getOrDefault(reason,
+                Pair.create(ImsReasonInfo.CODE_REGISTRATION_ERROR, ImsReasonInfo.CODE_UNSPECIFIED));
+
+        return new ImsReasonInfo(pair.first, pair.second,
+                (message != null && !message.trim().isEmpty()) ? message : null);
     }
 
-    private int getSuggestedAction(int reason) {
-        logi("getSuggestedAction for reason:" + reason);
-        switch (reason) {
-            case IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK:
-                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
-            case IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT:
-                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
-            case IAosRegistrationListener.ReasonCode.CODE_RAT_BLOCK:
-                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_RAT_BLOCK;
-            case IAosRegistrationListener.ReasonCode.CODE_CLEAR_RAT_BLOCKS:
-                return RegistrationManager.SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS;
-            default:
-                return RegistrationManager.SUGGESTED_ACTION_NONE;
-        }
+    private int getSuggestedAction(ReasonCode reason) {
+        logi("getSuggestedAction for reason:" + reason.toString());
+        return switch (reason) {
+            case PLMN_BLOCK -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
+            case PLMN_BLOCK_WITH_TIMEOUT ->
+                    RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
+            case RAT_BLOCK -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_RAT_BLOCK;
+            case CLEAR_RAT_BLOCKS -> RegistrationManager.SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS;
+            default -> RegistrationManager.SUGGESTED_ACTION_NONE;
+        };
     }
 
     /**
@@ -216,24 +219,18 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     private int convertToAosReasonCause(int reason) {
-        switch (reason) {
-            case REASON_SIM_REMOVED:
-                return IAosRegistration.Cause.RADIO_SIM_REMOVED.getValue();
-            case REASON_SIM_REFRESH:
-                return IAosRegistration.Cause.RADIO_SIM_REFRESH.getValue();
-            case REASON_ALLOWED_NETWORK_TYPES_CHANGED:
-                return IAosRegistration.Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED.getValue();
-            case REASON_NON_IMS_CAPABLE_NETWORK:
-                return IAosRegistration.Cause.NON_IMS_CAPABLE_NETWORK.getValue();
-            case REASON_RADIO_POWER_OFF:
-                return IAosRegistration.Cause.RADIO_POWER_OFF.getValue();
-            case REASON_HANDOVER_FAILED:
-                return IAosRegistration.Cause.HANDOVER_FAILED.getValue();
-            case REASON_VOPS_NOT_SUPPORTED:
-                return IAosRegistration.Cause.VOPS_NOT_SUPPORTED.getValue();
-            default:
-                return IAosRegistration.Cause.UNKNOWN.getValue();
-        }
+        return switch (reason) {
+            case REASON_SIM_REMOVED -> IAosRegistration.Cause.RADIO_SIM_REMOVED.getValue();
+            case REASON_SIM_REFRESH -> IAosRegistration.Cause.RADIO_SIM_REFRESH.getValue();
+            case REASON_ALLOWED_NETWORK_TYPES_CHANGED ->
+                    IAosRegistration.Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED.getValue();
+            case REASON_NON_IMS_CAPABLE_NETWORK ->
+                    IAosRegistration.Cause.NON_IMS_CAPABLE_NETWORK.getValue();
+            case REASON_RADIO_POWER_OFF -> IAosRegistration.Cause.RADIO_POWER_OFF.getValue();
+            case REASON_HANDOVER_FAILED -> IAosRegistration.Cause.HANDOVER_FAILED.getValue();
+            case REASON_VOPS_NOT_SUPPORTED -> IAosRegistration.Cause.VOPS_NOT_SUPPORTED.getValue();
+            default -> IAosRegistration.Cause.UNKNOWN.getValue();
+        };
     }
 
     private static void logi(String s) {

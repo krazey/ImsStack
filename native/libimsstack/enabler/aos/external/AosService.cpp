@@ -640,15 +640,15 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
-        IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode)
+        IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
-    A_IMS_TRACE_I(AOSTAG, "NotifyTechnologyChangeFailed - regType(%d), network(%d), cause code(%d)",
-            nRegType, static_cast<IMS_SINT32>(eNetworkType), nCauseCode);
+    A_IMS_TRACE_I(AOSTAG, "NotifyTechnologyChangeFailed - regType(%d), network(%d), reason(%d)",
+            nRegType, static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
         piJniThread->NotifyTechnologyChangeFailed(
-                nRegType, static_cast<IMS_SINT32>(eNetworkType), nCauseCode);
+                nRegType, static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;

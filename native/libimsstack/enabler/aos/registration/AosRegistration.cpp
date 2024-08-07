@@ -1026,18 +1026,28 @@ IMS_UINT32 AosRegistration::GetRegFeatures()
 }
 
 PROTECTED
-void AosRegistration::NotifyFailureWithImsReason(IN IMS_SINT32 nReason)
+void AosRegistration::NotifyFailureWithImsReason(IN IMS_SINT32 nReason, IN IMS_SINT32 nStatusCode)
 {
     if (GetImsRegType() != IMS_REG_TYPE_NORMAL)
     {
         return;
     }
 
-    if (nReason == IRegistration::REASON_TRANSACTION_TIMEOUT ||
-            nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR ||
-            nReason == IRegistration::REASON_SERVER_SOCKET_ERROR)
+    switch (nReason)
     {
-        m_eImsReasonCode = AosReasonCode::CODE_NETWORK_RESP_TIMEOUT;
+        case IRegistration::REASON_TRANSACTION_TIMEOUT:  // FALL-THROUGH
+        case IRegistration::REASON_CLIENT_SOCKET_ERROR:  // FALL-THROUGH
+        case IRegistration::REASON_SERVER_SOCKET_ERROR:
+            m_eImsReasonCode = AosReasonCode::REG_RESP_NETWORK_TIMEOUT;
+            break;
+        case IRegistration::REASON_STATUS_CODE:
+            if (nStatusCode == SipStatusCode::SC_403)
+            {
+                m_eImsReasonCode = AosReasonCode::REG_RESP_403;
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -3246,7 +3256,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
     if (IsUsimAuthFailureHandlingNeeded())
     {
-        m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_USIM_AUTHENTICATION_FAILURES;
+        m_eImsReasonCode = AosReasonCode::USIM_AUTHENTICATION_FAILURES;
     }
     else if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
@@ -4096,13 +4106,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_403()
         return;
     }
 
-    AosReasonCode eReason = AosReasonCode::REGISTRATION_ERROR_WFC_REG_403;
+    AosReasonCode eReason = AosReasonCode::WFC_REG_RESP_403;
     if (m_pUtil->IsDifferentCountry(
                 UtilService::GetUtilService()->GetPrivateProperty()->GetPersistent(
                         ImsPrivateProperties::Persistent::KEY_SIM_COUNTRY, m_nSlotId),
                 m_nSlotId))
     {
-        eReason = AosReasonCode::REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY;
+        eReason = AosReasonCode::WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY;
     }
 
     if (m_eImsReasonCode == eReason)
@@ -4111,12 +4121,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_403()
     }
 
     m_eImsReasonCode = eReason;
-    NotifyDeregistered();
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_500()
 {
-    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_REG_500)
+    if (m_eImsReasonCode == AosReasonCode::WFC_REG_RESP_500)
     {
         return;
     }
@@ -4127,13 +4136,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_500()
         return;
     }
 
-    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_REG_500;
-    NotifyDeregistered();
+    m_eImsReasonCode = AosReasonCode::WFC_REG_RESP_500;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_Others()
 {
-    if (m_eImsReasonCode == AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES)
+    if (m_eImsReasonCode == AosReasonCode::WFC_REG_RESP_OTHER_FAILURES)
     {
         return;
     }
@@ -4144,8 +4152,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRequiredWfcErrMessage_Others()
         return;
     }
 
-    m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_OTHER_FAILURES;
-    NotifyDeregistered();
+    m_eImsReasonCode = AosReasonCode::WFC_REG_RESP_OTHER_FAILURES;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
@@ -5003,8 +5010,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     ClearAuthIpsecCount();
 
     IMS_SINT32 nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
+    NotifyFailureWithImsReason(nReason, nStatusCode);
     ProcessRequiredWfcErrMessage(nStatusCode);
-    NotifyFailureWithImsReason(nReason);
     ProcessRegEventChange(nStatusCode);
 
     switch (nReason)
@@ -5705,7 +5712,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
             break;
         case AosSubscription::CMD_REG_REQUIRED_WITH_SUB_403_MSG:
         {
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_SUB_403;
+            m_eImsReasonCode = AosReasonCode::WFC_SUB_RESP_403;
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -5717,7 +5724,7 @@ PROTECTED VIRTUAL void AosRegistration::Subscription_Request(IN IMS_SINT32 nComm
         }
         case AosSubscription::CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG:
         {
-            m_eImsReasonCode = AosReasonCode::REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED;
+            m_eImsReasonCode = AosReasonCode::WFC_SUB_NOTIFY_TERMINATED;
             IMS_SINT32 nTime = nRetryAfter;
             if (bAwt)
             {
@@ -6216,8 +6223,8 @@ void AosRegistration::NotifyTechnologyChangeFailed()
     {
         A_IMS_TRACE_D(REGID, "NotifyTechnologyChangeFailed :: RegType(%d), ImsReasonCode(%d)",
                 nImsRegType, m_eImsReasonCode, 0);
-        piService->NotifyTechnologyChangeFailed(nImsRegType, GetNetworkTypeForImsRegState(),
-                static_cast<IMS_SINT32>(m_eImsReasonCode));
+        piService->NotifyTechnologyChangeFailed(
+                nImsRegType, GetNetworkTypeForImsRegState(), m_eImsReasonCode);
     }
 }
 

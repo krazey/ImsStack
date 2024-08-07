@@ -144,7 +144,7 @@ protected:
     IMS_SINT32 GetRegIpcanCategory() const;
     IMS_UINT32 GetRegFeatures();
 
-    void NotifyFailureWithImsReason(IN IMS_SINT32 nReason);
+    void NotifyFailureWithImsReason(IN IMS_SINT32 nReason, IN IMS_SINT32 nStatusCode);
     void NotifyDeregistered();
 
     /// Set Detail State

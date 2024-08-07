@@ -53,6 +53,7 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.util.MessageExecutor;
@@ -237,7 +238,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
+                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -262,7 +263,7 @@ public class ImsRegistrationTrackerTest {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode
-                        .CODE_REGISTRATION_ERROR_WFC_SUB_403, null);
+                        .WFC_SUB_RESP_403, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -286,7 +287,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered_WithPLMNError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK, null);
+                IAosRegistrationListener.ReasonCode.PLMN_BLOCK, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -310,7 +311,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyDeRegistered_WithTimeoutError() {
         mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_NETWORK_RESP_TIMEOUT, null);
+                IAosRegistrationListener.ReasonCode.REG_RESP_NETWORK_TIMEOUT, null);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
@@ -336,7 +337,7 @@ public class ImsRegistrationTrackerTest {
         mAosRegListener.notifyTechnologyChangeFailed(
                 IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.NONE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
+                ReasonCode.REGISTRATION_ERROR, null);
     }
 
     @Test
@@ -353,7 +354,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_CrossSim() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability
                 .CALL_COMPOSER, IAosRegistrationListener.NetworkType.CROSS_SIM,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER,
@@ -365,7 +366,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_Nr() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.SMS,
                 IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS,
@@ -376,7 +377,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_Lte() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.UT,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
@@ -387,7 +388,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_Voice() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.VOICE,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
@@ -398,7 +399,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_Video() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.VIDEO,
                 IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
@@ -409,7 +410,7 @@ public class ImsRegistrationTrackerTest {
     public void testnotifyCapabilitiesUpdateFailed_None() {
         mAosRegListener.notifyCapabilitiesUpdateFailed(IAosRegistrationListener.Capability.NONE,
                 IAosRegistrationListener.NetworkType.CROSS_SIM,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
+                IAosRegistrationListener.CapabilityReason.ERROR_GENERIC);
 
         verify(mMockCapabilityListener).onCapabilitiesUpdateFailed(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE,
