@@ -21,8 +21,8 @@
 
 #include "CoreServiceImpl.h"
 #include "IServiceManager.h"
+#include "ImsCoreContext.h"
 #include "ImsCoreProtocol.h"
-#include "ServiceContext.h"
 #include "SipDebug.h"
 #include "SipError.h"
 
@@ -82,7 +82,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     }
 
     // Check if the service is already created
-    IServiceManager* piServiceMngr = ServiceContext::GetInstance()->GetServiceManager();
+    IServiceManager* piServiceMngr = ImsCoreContext::GetInstance()->GetServiceManager();
     Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)

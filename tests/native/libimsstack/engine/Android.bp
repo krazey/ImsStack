@@ -22,6 +22,7 @@ cc_library_headers {
     name: "libimsstack_test_engine_headers",
     export_include_dirs: [
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
         "include/sipcore",
@@ -62,12 +63,12 @@ cc_library_static {
     srcs: [
         "TestConnector.cpp",
         "TestEngine.cpp",
-        "registration/TestRegistrationContext.cpp",
-        "service/TestServiceContext.cpp",
+        "internal/TestImsCoreContext.cpp",
         "sipcore/TestSipProtocol.cpp",
     ],
     local_include_dirs: [
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
         "include/sipcore",
@@ -90,6 +91,7 @@ cc_test {
     local_include_dirs: [
         "include",
         "include/core",
+        "include/internal",
         "include/registration",
         "include/service",
         "include/sipcore",

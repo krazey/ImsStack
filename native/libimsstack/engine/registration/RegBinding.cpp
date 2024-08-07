@@ -21,10 +21,10 @@
 #include "IRegParameter.h"
 #include "IRegistrationEx.h"
 #include "ISipConnectionNotifier.h"
+#include "ImsCoreContext.h"
 #include "RegBinding.h"
 #include "RegInfo.h"
 #include "RegStateTracker.h"
-#include "RegistrationContext.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
@@ -562,7 +562,7 @@ PRIVATE
 void RegBinding::CreateSipConnectionNotifier()
 {
     ISipConnectionNotifierManager* piScnManager =
-            RegistrationContext::GetInstance()->GetSipConnectionNotifierManager();
+            ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager();
 
     if (m_piRegEx == IMS_NULL)
     {
@@ -643,9 +643,8 @@ void RegBinding::DestroySipConnectionNotifier()
         m_piScn->RemoveErrorListener(m_piRegEx);
     }
 
-    RegistrationContext::GetInstance()
-            ->GetSipConnectionNotifierManager()
-            ->ReleaseConnectionNotifier(m_piScn);
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piScn);
     m_piScn = IMS_NULL;
 }
 

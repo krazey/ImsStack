@@ -17,12 +17,12 @@
 #include "ServiceTrace.h"
 
 #include "Capabilities.h"
-#include "CoreContext.h"
 #include "IOnSubscriptionListener.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "Message.h"
 #include "Service.h"
 #include "SipConfigProxy.h"
@@ -587,7 +587,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::InitInstance()
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     ForkedDialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     // CALLER_PREFERENCE_MANAGER
-    CoreContext::GetInstance()->GetCallerPreferenceManager()->CreatePreferenceWrapper(
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->CreatePreferenceWrapper(
             GetName(), AString::ConstNull());
     GetService()->RegisterMethod(this);
 
@@ -676,14 +676,16 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
         if ((nOperation == SubState::OPERATION_CREATE) ||
                 (nOperation == SubState::OPERATION_REFRESH))
         {
+            CallerPreferenceManager* pCallerPreferenceManager =
+                    ImsCoreContext::GetInstance()->GetCallerPreferenceManager();
+
             if (nOperation == SubState::OPERATION_CREATE)
             {
                 ISipDialog* piDialog = GetDialog();
 
                 if ((piDialog != IMS_NULL) && (piDialog->GetState() == ISipDialog::STATE_CONFIRMED))
                 {
-                    CoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateDialogId(
-                            GetName(), piDialog->GetDialogId());
+                    pCallerPreferenceManager->UpdateDialogId(GetName(), piDialog->GetDialogId());
                 }
             }
 
@@ -695,7 +697,7 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
 
                 if (piPreviousSIPMsg != IMS_NULL)
                 {
-                    CoreContext::GetInstance()->GetCallerPreferenceManager()->UpdateAcceptContacts(
+                    pCallerPreferenceManager->UpdateAcceptContacts(
                             GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
                 }
             }
@@ -1199,7 +1201,8 @@ void Subscription::CleanupOnDestroy()
     ForkedDialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // CALLER_PREFERENCE_MANAGER
-    CoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(GetName());
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(
+            GetName());
 
     // Clean up the resources
     GetService()->DeregisterMethod(this);

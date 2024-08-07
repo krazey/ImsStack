@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOCK_I_REGISTRATION_CONTEXT_H_
-#define MOCK_I_REGISTRATION_CONTEXT_H_
 
-#include <gmock/gmock.h>
+#include "ImsCoreContext.h"
 
-#include "IRegistrationContext.h"
+#include "TestImsCoreContext.h"
 
-class MockIRegistrationContext : public IRegistrationContext
+TestImsCoreContext::TestImsCoreContext()
 {
-public:
-    MockIRegistrationContext() = default;
-    virtual ~MockIRegistrationContext() = default;
+    ImsCoreContext::GetInstance()->SetImsCoreContext(this);
+}
 
-    MOCK_METHOD(IRegistrationManager*, GetRegistrationManager, (), (override));
-    MOCK_METHOD(IRegInfoManager*, GetRegInfoManager, (), (override));
-    MOCK_METHOD(ISipConnectionNotifierManager*, GetSipConnectionNotifierManager, (), (override));
-};
-
-#endif
+TestImsCoreContext::~TestImsCoreContext()
+{
+    ImsCoreContext::GetInstance()->SetImsCoreContext(IMS_NULL);
+}

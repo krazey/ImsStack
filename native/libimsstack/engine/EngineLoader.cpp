@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "EngineLoader.h"
-#include "RegistrationContext.h"
+#include "ImsCoreContext.h"
 #include "StaticSip.h"
 #include "base/Ims.h"
 #include "base/SubscriberTracker.h"
@@ -32,7 +32,7 @@ PUBLIC GLOBAL void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
 
     // core
     Ims::Init(nSlotId);
-    RegistrationContext::GetInstance()->GetSipConnectionNotifierManager()->Init(nSlotId);
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->Init(nSlotId);
 }
 
 PUBLIC GLOBAL void EngineLoader::Uninitialize(IN IMS_SINT32 nSlotId)

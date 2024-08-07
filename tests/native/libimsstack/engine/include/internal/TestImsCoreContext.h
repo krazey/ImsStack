@@ -13,44 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef TEST_REGISTRATION_CONTEXT_H_
-#define TEST_REGISTRATION_CONTEXT_H_
 
-#include "IRegistrationContext.h"
+#ifndef TEST_IMS_CORE_CONTEXT_H_
+#define TEST_IMS_CORE_CONTEXT_H_
 
+#include "IImsCoreContext.h"
+
+#include "MockIConfiguration.h"
 #include "MockIRegInfoManager.h"
 #include "MockIRegistrationManager.h"
+#include "MockIServiceManager.h"
 #include "util/MockISipConnectionNotifierManager.h"
 
-class TestRegistrationContext : public IRegistrationContext
+class TestImsCoreContext : public IImsCoreContext
 {
 public:
-    TestRegistrationContext();
-    ~TestRegistrationContext() override;
+    TestImsCoreContext();
+    ~TestImsCoreContext() override;
 
+    // service
+    inline IConfiguration* GetConfiguration() const override
+    {
+        return const_cast<MockIConfiguration*>(&m_objConfiguration);
+    }
+    inline IServiceManager* GetServiceManager() override { return &m_objServiceManager; }
+
+    inline MockIConfiguration& GetMockConfiguration() { return m_objConfiguration; }
+    inline MockIServiceManager& GetMockServiceManager() { return m_objServiceManager; }
+
+    // registration
     inline IRegistrationManager* GetRegistrationManager() override
     {
         return &m_objRegistrationManager;
     }
     inline IRegInfoManager* GetRegInfoManager() override { return &m_objRegInfoManager; };
-    inline ISipConnectionNotifierManager* GetSipConnectionNotifierManager() override
-    {
-        return &m_objScnManager;
-    }
 
     inline MockIRegistrationManager& GetMockRegistrationManager()
     {
         return m_objRegistrationManager;
     }
     inline MockIRegInfoManager& GetMockRegInfoManager() { return m_objRegInfoManager; }
+
+    // core
+    inline ServiceProtocol* GetImsCoreProtocol() const override { return IMS_NULL; }
+    inline CallControlHelper* GetCallControlHelper() override { return IMS_NULL; }
+    inline CallerPreferenceManager* GetCallerPreferenceManager() override { return IMS_NULL; }
+    inline ISipConnectionNotifierManager* GetSipConnectionNotifierManager() override
+    {
+        return &m_objScnManager;
+    }
+
     inline MockISipConnectionNotifierManager& GetMockSipConnectionNotifierManager()
     {
         return m_objScnManager;
     }
 
 private:
+    MockIConfiguration m_objConfiguration;
+    MockIServiceManager m_objServiceManager;
+
     MockIRegistrationManager m_objRegistrationManager;
     MockIRegInfoManager m_objRegInfoManager;
+
     MockISipConnectionNotifierManager m_objScnManager;
 };
 

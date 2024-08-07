@@ -38,6 +38,7 @@
 #include "ISipGenericChallenge.h"
 #include "ISipMessage.h"
 #include "ISipTransportHelper.h"
+#include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "RegBindingProxy.h"
 #include "RegFlow.h"
@@ -46,7 +47,6 @@
 #include "RegRefreshHelper.h"
 #include "RegSubscription.h"
 #include "Registration.h"
-#include "RegistrationContext.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
@@ -157,8 +157,7 @@ PUBLIC VIRTUAL const RegInfo* Registration::GetRegInfo() const
         return IMS_NULL;
     }
 
-    return RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(
-            m_pRegFlow->GetRegKey());
+    return ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
 }
 
 PUBLIC
@@ -211,8 +210,8 @@ void Registration::Destroy()
 
     IMS_TRACE_D("Registration :: Destroy() - SCNEL=%d", m_nRefCountForScnErrorListener, 0, 0);
 
-    RegInfo* pRegInfo = RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(
-            m_pRegFlow->GetRegKey());
+    RegInfo* pRegInfo =
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
 
     if (pRegInfo != IMS_NULL)
     {
@@ -1295,8 +1294,8 @@ PRIVATE VIRTUAL IRegSubscription* Registration::CreateSubscription(
     }
 
     //// Register the listener to obtain the reginfo ...
-    RegInfo* pRegInfo = RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(
-            m_pRegFlow->GetRegKey());
+    RegInfo* pRegInfo =
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
 
     if (pRegInfo != IMS_NULL)
     {
@@ -1662,8 +1661,8 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
     }
 
     // Check the 'state' & 'event' reg info.
-    RegInfo* pRegInfo = RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(
-            m_pRegFlow->GetRegKey());
+    RegInfo* pRegInfo =
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
     IRegInfoRegistration* piRegInfoReg = IMS_NULL;
 
     if (pRegInfo == IMS_NULL)

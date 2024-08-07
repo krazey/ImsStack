@@ -13,24 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_REGISTRATION_CONTEXT_H_
-#define INTERFACE_REGISTRATION_CONTEXT_H_
+#ifndef INTERFACE_IMS_CORE_CONTEXT_H_
+#define INTERFACE_IMS_CORE_CONTEXT_H_
 
-#include "ImsTypeDef.h"
-
+class CallControlHelper;
+class CallerPreferenceManager;
+class IConfiguration;
 class IRegInfoManager;
 class IRegistrationManager;
+class IServiceManager;
 class ISipConnectionNotifierManager;
+class ServiceProtocol;
 
 /**
- * A context interface for providing the singleton instances for registration layer.
+ * A context interface for providing the singleton instances for
+ * imscore (core/registration/service) layer.
  */
-class IRegistrationContext
+class IImsCoreContext
 {
 protected:
-    virtual ~IRegistrationContext() = default;
+    virtual ~IImsCoreContext() = default;
 
 public:
+    /**
+     * @brief Returns the IConfiguration instance.
+     */
+    virtual IConfiguration* GetConfiguration() const = 0;
+
+    /**
+     * @brief Returns the IServiceManager instance.
+     *        Creates a new instance if it does not exist.
+     */
+    virtual IServiceManager* GetServiceManager() = 0;
+
     /**
      * @brief Returns the IRegistrationManager instance.
      *        Creates a new instance if it does not exist.
@@ -42,6 +57,21 @@ public:
      *        Creates a new instance if it does not exist.
      */
     virtual IRegInfoManager* GetRegInfoManager() = 0;
+
+    /**
+     * @brief Returns the ImsCoreProtocol instance.
+     */
+    virtual ServiceProtocol* GetImsCoreProtocol() const = 0;
+
+    /**
+     * @brief Returns the CallControlHelper instance.
+     */
+    virtual CallControlHelper* GetCallControlHelper() = 0;
+
+    /**
+     * @brief Returns the CallerPreferenceManager instance.
+     */
+    virtual CallerPreferenceManager* GetCallerPreferenceManager() = 0;
 
     /**
      * @brief Returns the ISipConnectionNotifierManager instance.

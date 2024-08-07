@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOCK_I_CORE_CONTEXT_H_
-#define MOCK_I_CORE_CONTEXT_H_
+#ifndef MOCK_I_IMS_CORE_CONTEXT_H_
+#define MOCK_I_IMS_CORE_CONTEXT_H_
 
 #include <gmock/gmock.h>
 
-#include "ICoreContext.h"
+#include "IImsCoreContext.h"
 
-class MockICoreContext : public ICoreContext
+class MockIImsCoreContext : public IImsCoreContext
 {
 public:
-    MockICoreContext() = default;
-    ~MockICoreContext() override = default;
+    MockIImsCoreContext() = default;
+    ~MockIImsCoreContext() override = default;
+
+    MOCK_METHOD(IConfiguration*, GetConfiguration, (), (const, override));
+    MOCK_METHOD(IServiceManager*, GetServiceManager, (), (override));
+
+    MOCK_METHOD(IRegistrationManager*, GetRegistrationManager, (), (override));
+    MOCK_METHOD(IRegInfoManager*, GetRegInfoManager, (), (override));
 
     MOCK_METHOD(ServiceProtocol*, GetImsCoreProtocol, (), (const, override));
     MOCK_METHOD(CallControlHelper*, GetCallControlHelper, (), (override));
     MOCK_METHOD(CallerPreferenceManager*, GetCallerPreferenceManager, (), (override));
+    MOCK_METHOD(ISipConnectionNotifierManager*, GetSipConnectionNotifierManager, (), (override));
 };
 
 #endif

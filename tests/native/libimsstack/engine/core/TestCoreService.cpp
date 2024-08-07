@@ -16,7 +16,7 @@
 
 #include "ISipConfig.h"
 
-#include "ServiceContext.h"
+#include "ImsCoreContext.h"
 #include "ServiceManager.h"
 #include "ServiceResolver.h"
 #include "TestCoreService.h"
@@ -27,7 +27,7 @@ TestCoreService::TestCoreService() :
         m_piSccForMidDialog(&m_objSccForMidDialog),
         m_piSccForCancel(&m_objSccForCancel)
 {
-    ServiceContext::GetInstance()->GetServiceManager()->AttachService(this);
+    ImsCoreContext::GetInstance()->GetServiceManager()->AttachService(this);
     ServiceResolver::SetRegBinding(IMS_SLOT_0, TestAppConfig::TEST_APP_NAME,
             TestAppConfig::TEST_SERVICE_NAME_1, &m_objRegBinding);
 
@@ -43,5 +43,5 @@ TestCoreService::TestCoreService() :
 
 TestCoreService::~TestCoreService()
 {
-    ServiceContext::GetInstance()->GetServiceManager()->DetachService(this);
+    ImsCoreContext::GetInstance()->GetServiceManager()->DetachService(this);
 }

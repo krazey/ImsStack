@@ -26,11 +26,11 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "RegContact.h"
 #include "RegInfo.h"
 #include "RegSubscription.h"
-#include "RegistrationContext.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipParameter.h"
@@ -96,7 +96,7 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (!m_pRegStateTracker.IsNull())
     {
-        m_piReferredScn = RegistrationContext::GetInstance()
+        m_piReferredScn = ImsCoreContext::GetInstance()
                                   ->GetSipConnectionNotifierManager()
                                   ->GetConnectionNotifier(m_pRegStateTracker->GetIpAddress(),
                                           m_pRegStateTracker->GetPortUs());
@@ -105,7 +105,7 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
 
 PUBLIC VIRTUAL RegSubscription::~RegSubscription()
 {
-    RegistrationContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -139,9 +139,8 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     }
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    RegistrationContext::GetInstance()
-            ->GetSipConnectionNotifierManager()
-            ->ReleaseConnectionNotifier(m_piReferredScn);
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
 }
@@ -184,15 +183,14 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
         m_piOngoingScc = IMS_NULL;
     }
 
-    RegistrationContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    RegistrationContext::GetInstance()
-            ->GetSipConnectionNotifierManager()
-            ->ReleaseConnectionNotifier(m_piReferredScn);
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     // SIP_MESSAGE_MEDIATOR
     SetSipMessageMediator(IMS_NULL);
@@ -216,7 +214,7 @@ PUBLIC VIRTUAL IMS_SINT32 RegSubscription::EnableFeatures(IN IMS_SINT32 nFeature
 
 PUBLIC VIRTUAL const IRegInfo* RegSubscription::GetRegInfo() const
 {
-    return RegistrationContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_objRegKey);
+    return ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_objRegKey);
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegSubscription::SetContactParameter(
@@ -577,7 +575,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::InitInstance()
 
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
 
-    IRegInfoManager* piRegInfoManager = RegistrationContext::GetInstance()->GetRegInfoManager();
+    IRegInfoManager* piRegInfoManager = ImsCoreContext::GetInstance()->GetRegInfoManager();
     piRegInfoManager->CreateRegInfo(m_objRegKey);
 
     RegInfo* pRegInfo = piRegInfoManager->GetRegInfo(m_objRegKey);
@@ -949,8 +947,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
                 IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
             }
 
-            RegistrationContext::GetInstance()->GetRegInfoManager()->Update(
-                    m_objRegKey, strRegInfo);
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->Update(m_objRegKey, strRegInfo);
 
             nBodyParts = 1;
         }

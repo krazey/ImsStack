@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 #include "TestEngine.h"
-#include "TestRegistrationContext.h"
-#include "TestServiceContext.h"
+#include "TestImsCoreContext.h"
 
 class TestEnginePrivate
 {
@@ -24,12 +23,10 @@ public:
     ~TestEnginePrivate() = default;
 
 public:
-    inline TestServiceContext& GetServiceContext() { return m_objServiceContext; }
-    inline TestRegistrationContext& GetRegistrationContext() { return m_objRegistrationContext; }
+    inline TestImsCoreContext& GetImsCoreContext() { return m_objImsCoreContext; }
 
 private:
-    TestServiceContext m_objServiceContext;
-    TestRegistrationContext m_objRegistrationContext;
+    TestImsCoreContext m_objImsCoreContext;
 };
 
 TestEngine::TestEngine() :
@@ -44,10 +41,10 @@ TestEngine::~TestEngine()
 
 MockIConfiguration& TestEngine::GetMockConfiguration()
 {
-    return m_pPrivate->GetServiceContext().GetMockConfiguration();
+    return m_pPrivate->GetImsCoreContext().GetMockConfiguration();
 }
 
 MockIRegistrationManager& TestEngine::GetMockRegistrationManager()
 {
-    return m_pPrivate->GetRegistrationContext().GetMockRegistrationManager();
+    return m_pPrivate->GetImsCoreContext().GetMockRegistrationManager();
 }

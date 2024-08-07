@@ -15,9 +15,9 @@
  */
 #include "ServiceMemory.h"
 
-#include "CoreContext.h"
 #include "EngineState.h"
 #include "ImsCore.h"
+#include "ImsCoreContext.h"
 #include "ProtocolPermission.h"
 #include "ServiceProtocol.h"
 #include "Sip.h"
@@ -29,7 +29,7 @@
 PUBLIC GLOBAL IMS_BOOL EngineState::Initialize()
 {
     ProtocolPermission::RegisterProtocol(
-            ImsCore::CONNECTION_SCHEME, CoreContext::GetInstance()->GetImsCoreProtocol());
+            ImsCore::CONNECTION_SCHEME, ImsCoreContext::GetInstance()->GetImsCoreProtocol());
     ProtocolPermission::RegisterProtocol(
             Sip::CONNECTION_SCHEME_SIP, SipCoreContext::GetInstance()->GetSipProtocol());
 
