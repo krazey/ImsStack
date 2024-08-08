@@ -62,7 +62,7 @@ public:
         TERMINATING,
     };
 
-    static const CallKey CALL_KEY_INVALID = 0;
+    static inline const CallKey CALL_KEY_INVALID = 0;
 
     virtual ~IMtcCall(){};
 
