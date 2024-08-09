@@ -23,6 +23,7 @@
 #include "text/TextDef.h"
 #include "text/TextProfileUtil.h"
 #include "text/TextProfileExtractor.h"
+#include "text/TextSdpGenerator.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
@@ -81,8 +82,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
     MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
-    IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
     IMS_BOOL MakeNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,

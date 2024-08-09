@@ -22,6 +22,10 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 
+#include "audio/AudioSdpGenerator.h"
+#include "text/TextSdpGenerator.h"
+#include "video/VideoSdpGenerator.h"
+
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TYPE eType) :
@@ -30,7 +34,8 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_pBaseProfile(new MediaBaseProfile()),
         m_listOaModel(ImsList<OaModel*>()),
         m_pConfig(IMS_NULL),
-        m_pEnvironment(IMS_NULL)
+        m_pEnvironment(IMS_NULL),
+        m_pSdpGenerator(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -440,7 +445,8 @@ IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
 {
     // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pSdpGenerator == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -490,8 +496,9 @@ IMS_BOOL BaseNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    IMS_BOOL bSdpMade =
-            MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
+
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
+            pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 
     // Delete Session Level Direction Attribute
     if (m_eType == MEDIA_TYPE_AUDIO)

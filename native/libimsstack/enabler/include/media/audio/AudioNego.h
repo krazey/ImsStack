@@ -22,6 +22,7 @@
 #include "audio/AudioDef.h"
 #include "audio/AudioProfileExtractor.h"
 #include "audio/AudioProfileUtil.h"
+#include "audio/AudioSdpGenerator.h"
 #include "config/AudioConfiguration.h"
 
 /**
@@ -91,8 +92,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
     MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
-    IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
     IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
@@ -126,11 +125,6 @@ private:
             IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
-
-    void SetSdpSessionIpAddress(
-            OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile);
-    void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-    void SetSdpMediaBandwidth(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
 
 private:
     std::unique_ptr<AudioProfileExtractor> m_pProfileExtractor;

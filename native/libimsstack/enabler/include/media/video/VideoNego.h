@@ -22,6 +22,7 @@
 #include "video/VideoDef.h"
 #include "config/VideoConfiguration.h"
 #include "video/VideoProfileExtractor.h"
+#include "video/VideoSdpGenerator.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : public BaseNego
@@ -81,8 +82,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
     MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
-    IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
 
 private:
     IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pLocalPayload,
@@ -97,24 +96,10 @@ private:
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
     IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
-    IMS_BOOL MakeImageAttributeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
-            OUT AString& strImageAttr);
-    IMS_BOOL MakeFrameSizeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
-            OUT AString& strFrameSize);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
 
-    /**
-     * @brief Get the width and height from video resolution enum id
-     *
-     * @param eResolutionId The enum of video resolution set
-     * @param pnWidth The width of video resolution
-     * @param pnHeight The height of video resolution
-     * @return IMS_BOOL
-     */
-    IMS_BOOL GetWidthHeightFromResolutionId(
-            IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
 private:

@@ -25,6 +25,8 @@
 #include "MediaEnvironment.h"
 #include "config/MediaConfiguration.h"
 
+class SdpGenerator;
+
 class BaseNego : public ImsSlot
 {
 public:
@@ -210,8 +212,6 @@ protected:
     virtual MediaBaseProfile* GetNegotiatedProfile(IN OaModel* pOaModel);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
     void DestroyListOaModel();
-    virtual IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile) = 0;
     void Copy(IN const BaseNego* pNego);
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable);
@@ -231,6 +231,7 @@ protected:
     ImsList<OaModel*> m_listOaModel;
     MediaConfiguration* m_pConfig;
     MediaEnvironment* m_pEnvironment;
+    std::shared_ptr<SdpGenerator> m_pSdpGenerator;
 };
 
 #endif

@@ -33,6 +33,7 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         m_pProfileExtractor(std::make_unique<TextProfileExtractor>())
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
+    m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
 }
 
 PUBLIC
@@ -156,7 +157,7 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
 {
     // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpGenerator == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -245,7 +246,8 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
     }
 
     // Make the SDP from profile
-    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
+    return std::static_pointer_cast<TextSdpGenerator>(m_pSdpGenerator)
+            ->Generate(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
 }
 
 PROTECTED
@@ -260,7 +262,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             bDisable, bEnforceReofferMode);
 
     // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pSdpGenerator == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -382,7 +385,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return MakeSdpFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
+    return std::static_pointer_cast<TextSdpGenerator>(m_pSdpGenerator)
+            ->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
@@ -486,199 +490,6 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
 
     // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
-}
-
-PROTECTED
-IMS_BOOL TextNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)
-{
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    TextProfile* pProfile = ProfileCasting(pBaseProfile);
-
-    // clean attr & bandwidth line
-    pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    ImsList<AString> strEmptyList;
-    pDescriptor->SetBandwidthInfo(strEmptyList);
-
-    // Make "c" & "o" line of session level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
-    {
-        IMS_TRACE_D("MakeSdpFromProfile() - Ip is not matched, SessionIP[%s], ProfileIP[%s]",
-                pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->GetIpAddress().ToCharString(), 0);
-
-        pSessionDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->GetIpAddress().ToString());
-    }
-
-    // Check and delete "red" type which contains invalid sub payload type
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-        {
-            TextProfile::RedFmtp* pRedFmtp =
-                    static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp());
-
-            if (pRedFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            IMS_TRACE_I("MakeSdpFromProfile() - fmtp, Redundancy Level [%d], Red Payload[%d]",
-                    pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), 0);
-
-            IMS_BOOL bRedSubPTExist = IMS_FALSE;
-
-            for (IMS_UINT32 j = 0; j < pProfile->GetPayloadList().GetSize(); j++)
-            {
-                TextProfile::Payload* pTempPayload = pProfile->GetPayloadAt(j);
-
-                if (pTempPayload == IMS_NULL)
-                {
-                    continue;
-                }
-
-                IMS_TRACE_I("MakeSdpFromProfile() - RedSubPT, PT[%d] of PL(%d) / Red Payload "
-                            "[%d]",
-                        pTempPayload->GetRtpMap().GetPayloadNumber(), j, pRedFmtp->GetRedPayload());
-
-                if (pTempPayload->GetRtpMap().GetPayloadNumber() ==
-                        (IMS_UINT32)pRedFmtp->GetRedPayload())
-                {
-                    bRedSubPTExist = IMS_TRUE;
-                }
-            }
-
-            if (bRedSubPTExist == IMS_FALSE)
-            {
-                IMS_TRACE_E(0,
-                        "MakeSdpFromProfile() - SubPayloadtype for Redundancy isn't exist. skip "
-                        "Payload, Payload[%s], PT[%d]",
-                        pPayload->GetRtpMap().GetPayloadType().GetStr(),
-                        pPayload->GetRtpMap().GetPayloadNumber(), 0);
-                pProfile->GetPayloadList().RemoveAt(i);
-                delete pPayload;
-            }
-        }
-    }
-
-    IMS_TRACE_I("MakeSdpFromProfile() - After Check Validity, PayloadSize[%d]",
-            pProfile->GetPayloadList().GetSize(), 0, 0);
-
-    // Make "m" line
-    // ------ "m=text xxxx Rtp/AVP 100 98"
-    AStringArray objTextFormat;
-    AString strPayloadNum;
-
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        objTextFormat.AddElement(strPayloadNum);
-    }
-
-    pDescriptor->SetMediaDescription(SdpMedia::TYPE_TEXT, pProfile->GetDataPort(),
-            SdpMedia::TRANSPORT_RTP_AVP, objTextFormat);
-
-    // Make bandwidth
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    if (pProfile->GetBandwidthAs() > 0)
-    {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
-
-        if (pProfile->GetBandwidthRs() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
-        }
-
-        if (pProfile->GetBandwidthRr() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
-        }
-    }
-
-    // Make each payload
-    // ------ "a=rtpmap:98 t140/1000"
-    // ------ "a=rtpmap:112 red/1000
-    // ------ "a=fmtp:112 111/111/111"
-    // ------ "a=rtpmap:111 t140/1000
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        AString strRtpmap, strFmtp;
-        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        // make "rtpmap"
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        strRtpmap.Sprintf("%s/%d", pPayload->GetRtpMap().GetPayloadType().GetStr(),
-                pPayload->GetRtpMap().GetSamplingRate());
-
-        // make "fmtp"
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-        {
-            TextProfile::RedFmtp* pRedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
-
-            if (pRedFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            IMS_UINT32 nCount = pRedFmtp->GetRedLevel();
-            AString TempSubPT;
-            TempSubPT.Sprintf("%d", pRedFmtp->GetRedPayload());
-
-            while (nCount-- > 0)
-            {
-                if (strFmtp.GetLength() > 0)
-                {
-                    strFmtp.Append("/");
-                }
-
-                strFmtp.Append(TempSubPT);
-            }
-
-            IMS_TRACE_I("MakeSdpFromProfile() - Add fmtp, nRedundancy[%d], Red Payload[%d], "
-                        "Fmtp[%s]",
-                    pRedFmtp->GetRedLevel(), pRedFmtp->GetRedPayload(), strFmtp.GetStr());
-        }
-
-        if (strFmtp.GetLength() == 0)
-        {
-            strFmtp = AString::ConstNull();
-        }
-
-        pDescriptor->SetMediaFormat(SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpmap, strFmtp);
-    }
-
-    // Make direction
-    pDescriptor->SetDirection(pProfile->GetDirection());
-    IMS_TRACE_I(
-            "MakeSdpFromProfile() - payloadSize[%d]", pProfile->GetPayloadList().GetSize(), 0, 0);
-
-    return IMS_TRUE;
 }
 
 IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
