@@ -27,23 +27,11 @@ IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
+    IMS_TRACE_I("Generate() - PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
+
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+
     TextProfile* pProfile = static_cast<TextProfile*>(pBaseProfile);
-
-    // clean attr & bandwidth line
-    pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    ImsList<AString> strEmptyList;
-    pDescriptor->SetBandwidthInfo(strEmptyList);
-
-    // Make "c" & "o" line of session level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
-    {
-        IMS_TRACE_D("Generate() - Ip is not matched, SessionIP[%s], ProfileIP[%s]",
-                pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->GetIpAddress().ToCharString(), 0);
-
-        pSessionDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->GetIpAddress().ToString());
-    }
 
     // Check and delete "red" type which contains invalid sub payload type
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
@@ -106,46 +94,6 @@ IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     IMS_TRACE_I("Generate() - After Check Validity, PayloadSize[%d]",
             pProfile->GetPayloadList().GetSize(), 0, 0);
 
-    // Make "m" line
-    // ------ "m=text xxxx Rtp/AVP 100 98"
-    AStringArray objTextFormat;
-    AString strPayloadNum;
-
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        objTextFormat.AddElement(strPayloadNum);
-    }
-
-    pDescriptor->SetMediaDescription(SdpMedia::TYPE_TEXT, pProfile->GetDataPort(),
-            SdpMedia::TRANSPORT_RTP_AVP, objTextFormat);
-
-    // Make bandwidth
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    if (pProfile->GetBandwidthAs() > 0)
-    {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
-
-        if (pProfile->GetBandwidthRs() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
-        }
-
-        if (pProfile->GetBandwidthRr() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
-        }
-    }
-
     // Make each payload
     // ------ "a=rtpmap:98 t140/1000"
     // ------ "a=rtpmap:112 red/1000
@@ -153,7 +101,7 @@ IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     // ------ "a=rtpmap:111 t140/1000
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
-        AString strRtpmap, strFmtp;
+        AString strRtpmap, strFmtp, strPayloadNum;
         TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)

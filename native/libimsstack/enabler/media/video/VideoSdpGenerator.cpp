@@ -32,53 +32,11 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
+    IMS_TRACE_I("Generate() - PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
+
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+
     VideoProfile* pProfile = static_cast<VideoProfile*>(pBaseProfile);
-
-    IMS_TRACE_I("Generate() - PayloadSize[%d], AS[%d]", pProfile->GetPayloadList().GetSize(),
-            pProfile->GetBandwidthAs(), 0);
-
-    pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    ImsList<AString> strEmptyList;
-    pDescriptor->SetBandwidthInfo(strEmptyList);
-
-    // make "c" line of media level if IP does not matched
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
-    {
-        IMS_TRACE_D("Generate() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
-                pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->GetIpAddress().ToCharString(), 0);
-
-        pDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
-    }
-
-    // make "m" line
-    // ------ "m=video xxxx RTP/AVP aaa bbb ccc ddd"
-    AStringArray objVideoFormat;
-    AString strPayloadNum;
-
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        objVideoFormat.AddElement(strPayloadNum);
-    }
-
-    // make SDPCapNeg attributes for initial SDP if AVPF is supported
-    if (pProfile->GetTransportType().EqualsIgnoreCase("RTP/AVPF"))
-    {
-        pDescriptor->SetMediaDescription(SdpMedia::TYPE_VIDEO, pProfile->GetDataPort(),
-                SdpMedia::TRANSPORT_RTP_AVPF, objVideoFormat);
-    }
-    else
-    {
-        pDescriptor->SetMediaDescription(SdpMedia::TYPE_VIDEO, pProfile->GetDataPort(),
-                SdpMedia::TRANSPORT_RTP_AVP, objVideoFormat);
-    }
 
     // Previously check all payload for RTCP-FB wildcard(*) attributes
     IMS_BOOL bTrrSupportedAll = IMS_TRUE;
@@ -124,25 +82,6 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
         bTmmbrSupportedAll = IMS_FALSE;
         bPliSupportedAll = IMS_FALSE;
         bFirSupportedAll = IMS_FALSE;
-    }
-
-    // make bandwidth
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    // ------ "b=AS:xx"
-    if (pProfile->GetBandwidthAs() > 0)
-    {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
-
-        if (pProfile->GetBandwidthRs() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
-        }
-
-        if (pProfile->GetBandwidthRr() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
-        }
     }
 
     // make each payload

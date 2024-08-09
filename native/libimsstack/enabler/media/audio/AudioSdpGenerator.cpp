@@ -29,29 +29,11 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
         return IMS_FALSE;
     }
 
+    IMS_TRACE_I("Generate() - PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
+
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+
     AudioProfile* pProfile = static_cast<AudioProfile*>(pBaseProfile);
-
-    IMS_TRACE_I("Generate() - PayloadSize[%d], AS[%d], port[%d]",
-            pProfile->GetPayloadList().GetSize(), pProfile->GetBandwidthAs(),
-            pProfile->GetDataPort());
-
-    // clean attr & bandwidth line
-    pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    ImsList<AString> strEmptyList;
-    pDescriptor->SetBandwidthInfo(strEmptyList);
-
-    // make"c" &"o" line of session level if IP does not matched
-    SetSdpSessionIpAddress(pSessionDescriptor, pProfile);
-
-    // make"m" line
-    // ------"m=audio xxxx RTP/AVP 104 110 105 102 108 100"
-    SetSdpMediaDescription(pDescriptor, pProfile);
-
-    // make bandwidth
-    // ------"b=AS:xx"
-    // ------"b=AS:xx"
-    // ------"b=AS:xx"
-    SetSdpMediaBandwidth(pDescriptor, pProfile);
 
     // make each payload
     // ------"a=rtpmap:104 AMR-WB/16000/1"
@@ -201,59 +183,4 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE void AudioSdpGenerator::SetSdpSessionIpAddress(
-        OUT ISessionDescriptor* pSessionDescriptor, IN AudioProfile* pProfile)
-{
-    if (!pSessionDescriptor->GetLocalAddress().Equals(pProfile->GetIpAddress()))
-    {
-        IMS_TRACE_D("SetSdpSessionIpAddress() - IP does not matched, SessionIP[%s], ProfileIP[%s]",
-                pSessionDescriptor->GetLocalAddress().ToCharString(),
-                pProfile->GetIpAddress().ToCharString(), 0);
-
-        pSessionDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
-        pSessionDescriptor->SetOriginAddress(pProfile->GetIpAddress().ToString());
-    }
-}
-
-PRIVATE void AudioSdpGenerator::SetSdpMediaDescription(
-        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
-{
-    AStringArray objAudioFormat;
-    AString strPayloadNum;
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        objAudioFormat.AddElement(strPayloadNum);
-    }
-
-    // Set transport type and port number
-    pDescriptor->SetMediaDescription(SdpMedia::TYPE_AUDIO, pProfile->GetDataPort(),
-            SdpMedia::TRANSPORT_RTP_AVP, objAudioFormat);
-}
-
-PRIVATE void AudioSdpGenerator::SetSdpMediaBandwidth(
-        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
-{
-    if (pProfile->GetBandwidthAs() > 0)
-    {
-        pDescriptor->AddBandwidth(SdpBandwidth::TYPE_AS, pProfile->GetBandwidthAs());
-
-        if (pProfile->GetBandwidthRs() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RS, pProfile->GetBandwidthRs());
-        }
-
-        if (pProfile->GetBandwidthRr() >= 0)
-        {
-            pDescriptor->AddBandwidth(SdpBandwidth::TYPE_RR, pProfile->GetBandwidthRr());
-        }
-    }
 }
