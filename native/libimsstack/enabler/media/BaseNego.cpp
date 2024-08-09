@@ -35,7 +35,8 @@ PUBLIC BaseNego::BaseNego(IN const IMS_SINT32 nSlotId, IN const MEDIA_CONTENT_TY
         m_listOaModel(ImsList<OaModel*>()),
         m_pConfig(IMS_NULL),
         m_pEnvironment(IMS_NULL),
-        m_pSdpGenerator(IMS_NULL)
+        m_pSdpGenerator(IMS_NULL),
+        m_pSdpNegotiator(IMS_NULL)
 {
     IMS_TRACE_I("+BaseNego() - slot[%d]", nSlotId, 0, 0);
 }

@@ -34,6 +34,7 @@ PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
     m_pSdpGenerator = std::make_shared<TextSdpGenerator>();
+    m_pSdpNegotiator = std::make_shared<TextSdpNegotiator>();
 }
 
 PUBLIC
@@ -62,7 +63,8 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pSdpNegotiator == IMS_NULL)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -86,8 +88,9 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     objOaModel.pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (MakeNegotiatedProfile(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
-                GetNegotiatedProfile(&objOaModel)) != IMS_TRUE)
+    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+                    ->Negotiate(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
+                            GetNegotiatedProfile(&objOaModel), m_pConfig) != IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -392,9 +395,9 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
-    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL ||
+            m_pSdpNegotiator == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateOffer() - pSessionDescriptor or pDescriptor is NULL", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
@@ -418,10 +421,11 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
-                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
+    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
+                            GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {
-        IMS_TRACE_E(0, "NegotiateOffer() - MakeNegotiatedProfile failed", 0, 0, 0);
+        IMS_TRACE_E(0, "NegotiateOffer() - Negotiate failed", 0, 0, 0);
     }
 
     // add sessionDesciptorkey key in NewOaModel
@@ -437,9 +441,8 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_pSdpNegotiator == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NegotiateAnswer() - pSessionDescriptor or pDescriptor is NULL", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
     }
 
@@ -475,8 +478,9 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
     pNewOaModel->pNegotiatedProfile =
             MediaProfileFactory::GetInstance()->CreateProfile(MEDIA_TYPE_TEXT);
 
-    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_FALSE,
-                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
+    if (std::static_pointer_cast<TextSdpNegotiator>(m_pSdpNegotiator)
+                    ->Negotiate(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel),
+                            IMS_FALSE, GetNegotiatedProfile(pNewOaModel), m_pConfig) != IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -490,226 +494,4 @@ PROTECTED MEDIA_DIRECTION TextNego::NegotiateAnswer(
 
     // Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->GetDirection();
-}
-
-IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-        OUT TextProfile* pNegotiatedProfile)
-{
-    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "MakeNegotiatedProfile() invalid argument, %" PFLS_x " %" PFLS_x,
-                pLocalProfile, pPeerProfile, 0);
-        return IMS_FALSE;
-    }
-
-    // Setting IP of mine
-    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-
-    IMS_TRACE_D("MakeNegotiatedProfile() - local address[%s] PeerPayloadSize[%d]",
-            pLocalProfile->GetIpAddress().ToCharString(), pPeerProfile->GetPayloadList().GetSize(),
-            0);
-
-    // Setting Rtp/RTCP port of mine
-    pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
-    pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
-
-    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
-    {
-        *pNegotiatedProfile = (pPeerProfile->GetPayloadList().GetSize() > 0)
-                ? *ProfileCasting(pPeerProfile)
-                : *ProfileCasting(pLocalProfile);
-
-        pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-        pNegotiatedProfile->SetDataPort(0);
-
-        IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the text[%d][%d],\
-                But nego is successful",
-                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort(), 0);
-        return IMS_TRUE;
-    }
-
-    if (m_pConfig == IMS_NULL)
-    {
-        IMS_TRACE_D("MakeNegotiatedProfile() - no config, return true to reject", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    // Compare each payload based destination's profile
-    for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
-    {
-        TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
-
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140") ||
-                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-        {
-            if (FindT140InProfile(pLocalProfile, pPayload) == IMS_TRUE)
-            {
-                TextProfile::Payload* pT140 = new TextProfile::Payload();
-                pT140->SetRtpMap(pPayload->GetRtpMap());
-
-                if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-                {
-                    pT140->SetFmtp(new TextProfile::RedFmtp(
-                            *static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp())));
-                }
-
-                pNegotiatedProfile->GetPayloadList().Append(pT140);
-            }
-        }
-    }
-
-    IMS_BOOL bRet = IMS_FALSE;
-
-    if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
-    {
-        // Setting direction
-        if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
-        {
-            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
-                    pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
-        }
-        else
-        {
-            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-        }
-
-        TextProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
-                pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
-        bRet = IMS_TRUE;
-    }
-    else
-    {
-        if (pLocalProfile->GetPayloadList().GetSize() > 0)
-        {
-            IMS_TRACE_D("MakeNegotiatedProfile() - no negotiated payload. use the LocalProfile and "
-                        "make port 0 ",
-                    0, 0, 0);
-            *pNegotiatedProfile = *ProfileCasting(pLocalProfile);
-            bRet = IMS_TRUE;
-        }
-        else
-        {
-            IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
-        }
-
-        pNegotiatedProfile->SetDataPort(0);
-        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-    }
-
-    IMS_TRACE_D("MakeNegotiatedProfile() - Direction=%d, nego rs=%d, rr=%d",
-            pNegotiatedProfile->GetDirection(), pNegotiatedProfile->GetBandwidthRs(),
-            pNegotiatedProfile->GetBandwidthRr());
-
-    if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
-    {
-        pNegotiatedProfile->SetRtcpInterval(0);
-        IMS_TRACE_D("MakeNegotiatedProfile() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
-    }
-    else
-    {
-        pNegotiatedProfile->SetRtcpInterval(m_pConfig->GetRtcpInterval());
-    }
-
-    IMS_TRACE_D("MakeNegotiatedProfile() - negotiated payload size[%d], port[%d], direction[%d], ",
-            pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
-            pNegotiatedProfile->GetDirection());
-    return bRet;
-}
-
-PRIVATE IMS_BOOL TextNego::FindT140InProfile(
-        IN TextProfile* pProfile, IN TextProfile::Payload* pPayload)
-{
-    if (pProfile == IMS_NULL || pPayload == IMS_NULL)
-        return IMS_FALSE;
-
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
-    {
-        TextProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
-
-        if (comparedPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("t140"))
-        {
-            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
-                        pPayload->GetRtpMap().GetPayloadType()) &&
-                    comparedPayload->GetRtpMap().GetSamplingRate() ==
-                            pPayload->GetRtpMap().GetSamplingRate())
-            {
-                IMS_TRACE_D("FindT140InProfile() - Found T140 at [%d], Codec[%s]", i,
-                        comparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
-
-                return IMS_TRUE;
-            }
-        }
-        else if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-        {
-            if (comparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
-                        pPayload->GetRtpMap().GetPayloadType()) &&
-                    comparedPayload->GetRtpMap().GetSamplingRate() ==
-                            pPayload->GetRtpMap().GetSamplingRate())
-            {
-                TextProfile::RedFmtp* pComparedFmtp =
-                        (TextProfile::RedFmtp*)comparedPayload->GetFmtp();
-                TextProfile::RedFmtp* pReceivedFmtp = (TextProfile::RedFmtp*)pPayload->GetFmtp();
-
-                if (pReceivedFmtp == IMS_NULL)
-                {
-                    continue;
-                }
-
-                if (pReceivedFmtp->GetRedLevel() > pComparedFmtp->GetRedLevel() ||
-                        pReceivedFmtp->GetRedPayload() < 0)
-                {
-                    continue;
-                }
-
-                IMS_TRACE_D("FindT140InProfile() - Found RED at [%d], Codec[%s]", i,
-                        comparedPayload->GetRtpMap().GetPayloadType().GetStr(), 0);
-
-                return IMS_TRUE;
-            }
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE MEDIA_DIRECTION TextNego::UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-        IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase)
-{
-    if (ePeerDirection < MEDIA_DIRECTION_INACTIVE || ePeerDirection > MEDIA_DIRECTION_SEND_RECEIVE)
-    {
-        return MEDIA_DIRECTION_INVALID;
-    }
-
-    IMS_TRACE_D("UpdateDirectionToMine() - Entered. ePeerDirection[%d], eLocalDirection[%d], "
-                "bIsMtCase[%d]",
-            ePeerDirection, eLocalDirection, bIsMtCase);
-
-    if (bIsMtCase == IMS_FALSE)
-    {
-        return eLocalDirection;
-    }
-
-    switch (ePeerDirection)
-    {
-        case MEDIA_DIRECTION_INACTIVE:  // FALL_THROUGH
-        case MEDIA_DIRECTION_SEND_RECEIVE:
-            return ePeerDirection;
-        case MEDIA_DIRECTION_RECEIVE:
-            return MEDIA_DIRECTION_SEND;
-        case MEDIA_DIRECTION_SEND:
-            return MEDIA_DIRECTION_RECEIVE;
-        default:
-            return MEDIA_DIRECTION_INVALID;
-    }
 }

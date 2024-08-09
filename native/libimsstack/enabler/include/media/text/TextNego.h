@@ -24,6 +24,7 @@
 #include "text/TextProfileUtil.h"
 #include "text/TextProfileExtractor.h"
 #include "text/TextSdpGenerator.h"
+#include "text/TextSdpNegotiator.h"
 
 /**
  * @brief The class to negotiate and form the SDP attribute belong to the m=text line
@@ -82,13 +83,6 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
     MEDIA_DIRECTION NegotiateAnswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor) override;
-
-private:
-    IMS_BOOL MakeNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT TextProfile* pNegotiatedProfile);
-    IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
-    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
 
 private:
     std::unique_ptr<TextProfileExtractor> m_pProfileExtractor;
