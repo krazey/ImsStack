@@ -74,7 +74,7 @@ void ProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::MakeCapaNegoProfileFromSdp(
+IMS_BOOL ProfileExtractor::ExtractCapaNego(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     if (pDescriptor == IMS_NULL || pObjCapaNego == IMS_NULL)
@@ -82,23 +82,23 @@ IMS_BOOL ProfileExtractor::MakeCapaNegoProfileFromSdp(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("MakeCapaNegoProfileFromSdp() - media[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("ExtractCapaNego() - media[%d]", m_eType, 0, 0);
 
-    if (MakeAcfgProfileFromSdp(pDescriptor, pObjCapaNego) == IMS_TRUE)
+    if (ExtractAcfg(pDescriptor, pObjCapaNego) == IMS_TRUE)
     {
         return IMS_TRUE;
     }
 
     IMS_BOOL bRet = IMS_FALSE;
-    bRet = MakeTcapProfileFromSdp(pDescriptor, pObjCapaNego);
-    bRet |= MakeAcapProfileFromSdp(pDescriptor, pObjCapaNego);
-    bRet |= MakePcfgProfileFromSdp(pDescriptor, pObjCapaNego);
+    bRet = ExtractTcap(pDescriptor, pObjCapaNego);
+    bRet |= ExtractAcap(pDescriptor, pObjCapaNego);
+    bRet |= ExtractPcfg(pDescriptor, pObjCapaNego);
 
     return bRet;
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::MakeAcfgProfileFromSdp(
+IMS_BOOL ProfileExtractor::ExtractAcfg(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     ImsList<AString> lstAcfgAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
@@ -106,7 +106,7 @@ IMS_BOOL ProfileExtractor::MakeAcfgProfileFromSdp(
     if (lstAcfgAttr.GetSize() > 0)
     {
         pObjCapaNego->SetAcfg(lstAcfgAttr.GetAt(0));
-        IMS_TRACE_I("MakeAcfgProfileFromSdp() - Answer Case, media[%d], acfg[%s]", m_eType,
+        IMS_TRACE_I("ExtractAcfg() - Answer Case, media[%d], acfg[%s]", m_eType,
                 pObjCapaNego->GetAcfg().GetStr(), 0);
         return IMS_TRUE;
     }
@@ -115,7 +115,7 @@ IMS_BOOL ProfileExtractor::MakeAcfgProfileFromSdp(
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::MakeTcapProfileFromSdp(
+IMS_BOOL ProfileExtractor::ExtractTcap(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get transport capability(TCAP) list -"'number' SP 'Tcap'" pair
@@ -137,8 +137,8 @@ IMS_BOOL ProfileExtractor::MakeTcapProfileFromSdp(
             if (j == 0)
             {
                 nTcapInitNum = lstSplitSpace.GetAt(j).ToInt32();
-                IMS_TRACE_I("MakeTcapProfileFromSdp() - media[%d], nTcapInitNum[%d]", m_eType,
-                        nTcapInitNum, 0);
+                IMS_TRACE_I(
+                        "ExtractTcap() - media[%d], nTcapInitNum[%d]", m_eType, nTcapInitNum, 0);
             }
             else
             {
@@ -146,8 +146,8 @@ IMS_BOOL ProfileExtractor::MakeTcapProfileFromSdp(
                 // mapped - key : 'number' value:'Tcap'
                 strTcap.Sprintf("%s", lstSplitSpace.GetAt(j).GetStr());
                 pObjCapaNego->GetMapTcap().Add(nTcapInitNum, strTcap);
-                IMS_TRACE_I("MakeTcapProfileFromSdp() - media[%d], add map[%d - %s]", m_eType,
-                        nTcapInitNum, strTcap.GetStr());
+                IMS_TRACE_I("ExtractTcap() - media[%d], add map[%d - %s]", m_eType, nTcapInitNum,
+                        strTcap.GetStr());
                 nTcapInitNum++;
             }
         }
@@ -155,14 +155,14 @@ IMS_BOOL ProfileExtractor::MakeTcapProfileFromSdp(
 
     if (pObjCapaNego->GetMapTcap().GetSize() == 0)
     {
-        IMS_TRACE_I("MakeTcapProfileFromSdp() - media[%d], no tcap value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ExtractTcap() - media[%d], no tcap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
     return IMS_TRUE;
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::MakeAcapProfileFromSdp(
+IMS_BOOL ProfileExtractor::ExtractAcap(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get attribute capability(ACAP) list -"'number' SP 'Acap'" pair
@@ -201,7 +201,7 @@ IMS_BOOL ProfileExtractor::MakeAcapProfileFromSdp(
         // save Acap String...
         if (strAcap.GetLength() != 0)
         {
-            IMS_TRACE_I("MakeAcapProfileFromSdp() - media[%d], add map[%d - %s]", m_eType, nAcapNum,
+            IMS_TRACE_I("ExtractAcap() - media[%d], add map[%d - %s]", m_eType, nAcapNum,
                     strAcap.GetStr());
             pObjCapaNego->GetMapAcap().Add(nAcapNum, strAcap);
         }
@@ -209,7 +209,7 @@ IMS_BOOL ProfileExtractor::MakeAcapProfileFromSdp(
 
     if (pObjCapaNego->GetMapAcap().GetSize() == 0)
     {
-        IMS_TRACE_I("MakeAcapProfileFromSdp() - media[%d], no acap value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ExtractAcap() - media[%d], no acap value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
@@ -219,7 +219,7 @@ IMS_BOOL ProfileExtractor::MakeAcapProfileFromSdp(
 }
 
 PROTECTED
-IMS_BOOL ProfileExtractor::MakePcfgProfileFromSdp(
+IMS_BOOL ProfileExtractor::ExtractPcfg(
         IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego)
 {
     // Get Potential configuration list (pcfg) -"'prio #' SP"t=Tcap #' SP 'a=Acap #'" pair
@@ -227,10 +227,10 @@ IMS_BOOL ProfileExtractor::MakePcfgProfileFromSdp(
 
     if (pObjCapaNego->GetListPcfg().GetSize() == 0)
     {
-        IMS_TRACE_I("MakePcfgProfileFromSdp() - media[%d], no pcfg value in SDP", m_eType, 0, 0);
+        IMS_TRACE_I("ExtractPcfg() - media[%d], no pcfg value in SDP", m_eType, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("MakePcfgProfileFromSdp() - media[%d]", m_eType, 0, 0);
+    IMS_TRACE_I("ExtractPcfg() - media[%d]", m_eType, 0, 0);
     return IMS_TRUE;
 }

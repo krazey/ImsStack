@@ -18,15 +18,15 @@ public:
 protected:
     void Extract(IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MediaBaseProfile* pProfile);
-    IMS_BOOL MakeCapaNegoProfileFromSdp(
+    IMS_BOOL ExtractCapaNego(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeAcfgProfileFromSdp(
+    IMS_BOOL ExtractAcfg(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeTcapProfileFromSdp(
+    IMS_BOOL ExtractTcap(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeAcapProfileFromSdp(
+    IMS_BOOL ExtractAcap(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakePcfgProfileFromSdp(
+    IMS_BOOL ExtractPcfg(
             IN IMediaDescriptor* pDescriptor, OUT MediaBaseProfile::CapaNego* pObjCapaNego);
 
 private:

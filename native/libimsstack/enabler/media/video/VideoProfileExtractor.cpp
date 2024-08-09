@@ -53,7 +53,7 @@ IMS_BOOL VideoProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescripto
     }
 
     // read CapaNego profile From SDP
-    if (MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->GetCapaNego())) == IMS_TRUE)
+    if (ExtractCapaNego(pDescriptor, &(pProfile->GetCapaNego())) == IMS_TRUE)
     {
         // Get Capa nego value from the incoming SDP
         if (CheckAvpfFromProfile(pProfile) == IMS_TRUE)
