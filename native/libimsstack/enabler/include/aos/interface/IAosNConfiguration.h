@@ -283,6 +283,16 @@ public:
     virtual IMS_BOOL IsERegWithOnlyTcpInRoaming() const = 0;
 
     /**
+     * @brief Flag specifying if emergency re-registration is required after handover.
+     *
+     *        If this is set as TRUE, emergency re-registration will be conducted
+     *        when ipcan is changed
+     *
+     * @return IMS_BOOL Return whether emergency re-registration is required after handover.
+     */
+    virtual IMS_BOOL IsEmergencyReregSupportedOnIpcanChange() const = 0;
+
+    /**
      * @brief Flag specifying whether the re-registration is held when IPCAN is changed
      *        during IMS calls and performed immediately after they are released.
      *

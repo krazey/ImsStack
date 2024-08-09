@@ -743,6 +743,8 @@ public class CarrierConfig {
                 "sms_over_ims_available_without_voice_capa_bool";
         public static final String KEY_SUPPORT_CONTACT_USER_INFO_BOOL =
                 "support_contact_user_info_bool";
+        public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
+                "support_erereg_on_ipcan_change_bool";
         public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
                 "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =

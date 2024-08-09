@@ -105,6 +105,7 @@ protected:
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
+    void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired) final;
 
     void UpdateTransactionStarted() final;
 

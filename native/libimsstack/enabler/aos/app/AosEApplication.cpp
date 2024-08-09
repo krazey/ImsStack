@@ -139,6 +139,13 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
             ProcessRegRetryCount(objMsg);
             break;
 
+        case MSG_IPCAN_CHANGED:
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+            {
+                ProcessIpcanChanged(objMsg);
+            }
+            break;
+
         default:
             bHandled = IMS_FALSE;
             break;
@@ -296,6 +303,13 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     {
         case AosConnector::REASON_IP_CHANGED:
             ProcessCleanAll(AosReason::IP_CHANGED);
+            break;
+
+        case AosConnector::REASON_IPCAN_CAT_CHANGED:
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+            {
+                PostMessage(MSG_IPCAN_CHANGED, 0, 0);
+            }
             break;
 
         default:
