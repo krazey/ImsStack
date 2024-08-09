@@ -20,33 +20,15 @@ PUBLIC VIRTUAL TextProfileExtractor::~TextProfileExtractor()
 PUBLIC IMS_BOOL TextProfileExtractor::Extract(IN ISessionDescriptor* pSessionDescriptor,
         IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile)
 {
-    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Extract() - pDescriptor or pProfile is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Extract() - invalid argument", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    // IP
-    pProfile->SetIpAddress(pDescriptor->GetRemoteAddress());
+    IMS_TRACE_I("Extract()", 0, 0, 0);
 
-    // data & control port
-    pProfile->SetDataPort(pDescriptor->GetRemotePort());
-    if (pDescriptor->GetAttributeInt(SdpAttribute::RTCP) == IMediaDescriptor::INVALID_VALUE)
-    {
-        pProfile->SetControlPort(pProfile->GetDataPort() + 1);
-    }
-    else
-    {
-        pProfile->SetControlPort(pDescriptor->GetAttributeInt(SdpAttribute::RTCP));
-    }
-
-    // bandwidth
-    pProfile->SetBandwidthAs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_AS));
-    pProfile->SetBandwidthRs(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RS));
-    pProfile->SetBandwidthRr(pDescriptor->GetBandwidth(SdpBandwidth::TYPE_RR));
-
-    IMS_TRACE_I("Extract() - AS[%d], RS[%d], RR[%d]", pProfile->GetBandwidthAs(),
-            pProfile->GetBandwidthRs(), pProfile->GetBandwidthRr());
+    ProfileExtractor::Extract(pSessionDescriptor, pDescriptor, pProfile);
 
     // payload
     ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
@@ -110,28 +92,17 @@ PUBLIC IMS_BOOL TextProfileExtractor::Extract(IN ISessionDescriptor* pSessionDes
                 continue;
             }
 
-            IMS_TRACE_I("Extract() - Redundancy presented [%d]", pRedFmtp->GetRedLevel(), 0, 0);
+            IMS_TRACE_I("Extract() - Redundancy presented[%d]", pRedFmtp->GetRedLevel(), 0, 0);
             pPayload->SetFmtp(pRedFmtp);
         }
         else if (!strCodecName.EqualsIgnoreCase("t140"))
         {
-            IMS_TRACE_E(0, "Extract() - Invalid codec [%s]", strCodecName.GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Extract() - Invalid codec[%s]", strCodecName.GetStr(), 0, 0);
             delete pPayload;
             continue;
         }
 
         pProfile->GetPayloadList().Append(pPayload);
-    }
-
-    // direction
-    pProfile->SetDirection((MEDIA_DIRECTION)pDescriptor->GetDirection());
-    if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_D("Extract() - Text Media level Direction does not exist..", 0, 0, 0);
-        // check session level attribute Direction
-        pProfile->SetDirection((MEDIA_DIRECTION)pSessionDescriptor->GetDirection());
-        if (pProfile->GetDirection() == MEDIA_DIRECTION_INVALID)
-            pProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
     }
 
     IMS_TRACE_I("Extract() - Ended[%d]", 0, 0, 0);
