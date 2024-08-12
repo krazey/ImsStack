@@ -35,12 +35,31 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     AudioProfile* pProfile = static_cast<AudioProfile*>(pBaseProfile);
 
-    // make each payload
-    // ------"a=rtpmap:104 AMR-WB/16000/1"
-    // ------"a=fmtp:110 mode-set=2; octet-align=1"
+    GeneratePayload(pDescriptor, pProfile);
+    GenerateDirection(pSessionDescriptor, pDescriptor, pProfile);
+    GeneratePtime(pDescriptor, pProfile);
+    GenerateMaxPtime(pDescriptor, pProfile);
+    GenerateCandidateAttribute(pDescriptor, pProfile);
+    GenerateRtcpXr(pDescriptor, pProfile);
+    GenerateAnbr(pDescriptor, pProfile);
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+void AudioSdpGenerator::GeneratePayload(
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
     for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
     {
-        AString strRtpmap, strFmtp, strPayloadNum;
+        AString strRtpMap = AString::ConstNull();
+        AString strPayloadNum = AString::ConstNull();
+        AString strFmtp = AString::ConstNull();
 
         AudioProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
         if (pPayload == IMS_NULL)
@@ -48,97 +67,159 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
             continue;
         }
 
-        // set "rtpmap"
-        strPayloadNum.Sprintf("%d", pPayload->GetRtpMap().GetPayloadNumber());
-        strRtpmap.Sprintf("%s/%d", pPayload->GetRtpMap().GetPayloadType().GetStr(),
-                pPayload->GetRtpMap().GetSamplingRate());
+        GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap());
 
-        if (pPayload->GetRtpMap().GetChannel() > 0)
+        if (GenerateFmtp(strFmtp, pPayload))
         {
-            AString strChannel;
-            strChannel.Sprintf("/%d", pPayload->GetRtpMap().GetChannel());
-            strRtpmap.Append(strChannel);
-        }
-
-        // set "fmtp"
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
-                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
-        {
-            AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
-            if (pAmrFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(pAmrFmtp);
-        }
-        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
-        {
-            AudioProfile::TelephoneEventFmtp* pTEFmtp =
-                    (AudioProfile::TelephoneEventFmtp*)pPayload->GetFmtp();
-            if (pTEFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            strFmtp = pTEFmtp->GetEvents();
-        }
-        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
-        {
-            AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
-            if (pEvsFmtp == IMS_NULL)
-            {
-                continue;
-            }
-
-            strFmtp = AudioNegoEvs::SetSdpFmtpFromEvsFmtp(pEvsFmtp);
-        }
-        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcmu") ||
-                pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcma"))
-        {
-            // set rtpmap, not fmtp
-            strFmtp = AString::ConstNull();
             pDescriptor->SetMediaFormat(
-                    SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpmap, strFmtp);
-            continue;
+                    SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpMap, strFmtp);
         }
-        else
-        {
-            continue;
-        }
+    }
+}
 
-        if (strFmtp.GetLength() == 0)
-        {
-            // strFmtp = (m_pConfig != IMS_NULL) ? AString::ConstNull() : AString::ConstEmpty();
-            strFmtp = AString::ConstNull();
-        }
+PRIVATE
+void AudioSdpGenerator::GenerateRtpMap(
+        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
+{
+    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
+    AString strPayloadType = objRtpMap.GetPayloadType();
+    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
+    IMS_SINT32 nChannel = objRtpMap.GetChannel();
 
-        pDescriptor->SetMediaFormat(SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpmap, strFmtp);
+    strPayloadNum.Sprintf("%d", nPayloadNumber);
+
+    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
+
+    if (nChannel > 0)
+    {
+        AString strChannel;
+        strChannel.Sprintf("/%d", nChannel);
+        strRtpMap.Append(strChannel);
     }
 
-    // set make direction
-    pDescriptor->SetDirection(pProfile->GetDirection());
+    IMS_TRACE_D("GenerateRtpMap() - RtpMap [%d %s], ", nPayloadNumber, strRtpMap.GetStr(), 0);
+}
 
-    if (pProfile->GetDirection() > MEDIA_DIRECTION_INVALID &&
-            pProfile->GetDirection() <= MEDIA_DIRECTION_SEND_RECEIVE)
+PRIVATE
+IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::Payload* pPayload)
+{
+    if (pPayload == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    // set "fmtp"
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+            pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
+    {
+        AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pPayload->GetFmtp();
+        if (pAmrFmtp == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(pAmrFmtp);
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
+    {
+        AudioProfile::TelephoneEventFmtp* pTeFmtp =
+                (AudioProfile::TelephoneEventFmtp*)pPayload->GetFmtp();
+        if (pTeFmtp == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        strFmtp = pTeFmtp->GetEvents();
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pPayload->GetFmtp();
+        if (pEvsFmtp == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        strFmtp = AudioNegoEvs::SetSdpFmtpFromEvsFmtp(pEvsFmtp);
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcmu") ||
+            pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("pcma"))
+    {
+        // Generatrtpmap, not fmtp
+        return IMS_TRUE;
+    }
+    else
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+void AudioSdpGenerator::GenerateDirection(OUT ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
+
+    pDescriptor->SetDirection(nDirection);
+    IMS_TRACE_D("GenerateDirection() - direction[%d]", nDirection, 0, 0);
+
+    if (IS_VALID_MEDIA_DIRECTION(nDirection))
     {
         // Set Session Level Direction Attribute according to the media direction
-        // (avoid conflict between media and audio)
-        pSessionDescriptor->SetDirection(pProfile->GetDirection());
+        pSessionDescriptor->SetDirection(nDirection);
     }
+}
 
-    // set make ptime & maxptime
-    if (pProfile->GetPtime() != AudioProfile::AmrFmtp::DEFAULT_PTIME)
+PRIVATE
+void AudioSdpGenerator::GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        pDescriptor->AddAttributeInt(SdpAttribute::PTIME, pProfile->GetPtime());
+        return;
     }
 
-    if (pProfile->GetMaxPtime() != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME)
+    IMS_SINT32 nPtime = pProfile->GetPtime();
+
+    if (nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME)
     {
-        pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, pProfile->GetMaxPtime());
+        pDescriptor->AddAttributeInt(SdpAttribute::PTIME, nPtime);
+        IMS_TRACE_D("GeneratePtime() - ptime[%d]", nPtime, 0, 0);
+    }
+}
+
+PRIVATE
+void AudioSdpGenerator::GenerateMaxPtime(
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
     }
 
-    // set candidate
+    IMS_SINT32 nMaxPtime = pProfile->GetMaxPtime();
+
+    if (nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME)
+    {
+        pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, nMaxPtime);
+        IMS_TRACE_D("GenerateMaxPtime() - nMaxPtime[%d]", nMaxPtime, 0, 0);
+    }
+}
+
+PRIVATE
+void AudioSdpGenerator::GenerateCandidateAttribute(
+        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
     for (IMS_UINT32 nIndex = 0; nIndex < pProfile->GetCandidateAttr().GetSize(); nIndex++)
     {
         AString strCandidateAttr = pProfile->GetCandidateAttr().GetAt(nIndex);
@@ -146,10 +227,18 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
         {
             strCandidateAttr.Sprintf("%d, %s", nIndex + 1, strCandidateAttr.GetStr());
             pDescriptor->AddAttribute(SdpAttribute::CANDIDATE, strCandidateAttr);
+            IMS_TRACE_D("GenerateCandidateAttribute() - [%s]", strCandidateAttr.GetStr(), 0, 0);
         }
     }
+}
 
-    // set RTCP-XR -- RTCP-XR is for VZW, not a negotiation target by VZW requirement
+void AudioSdpGenerator::GenerateRtcpXr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
     if (pProfile->IsRtcpXrSupported() == IMS_TRUE &&
             pProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
     {
@@ -170,17 +259,21 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "pkt-dup-rle");
         }
 
-        IMS_TRACE_I("Generate() - SupportRtcpXr[%d]", pProfile->IsRtcpXrSupported(), 0, 0);
+        IMS_TRACE_D("GenerateRtcpXr() - Support RtcpXr", 0, 0, 0);
+    }
+}
+
+PRIVATE
+void AudioSdpGenerator::GenerateAnbr(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
     }
 
     if (pProfile->IsAnbrSupported())
     {
         pDescriptor->AddAttribute(SdpAttribute::ANBR, AString::ConstNull());
+        IMS_TRACE_D("GenerateAnbr() - Support Anbr", 0, 0, 0);
     }
-    else
-    {
-        IMS_TRACE_D("Generate() - anbr feature is not supported", 0, 0, 0);
-    }
-
-    return IMS_TRUE;
 }
