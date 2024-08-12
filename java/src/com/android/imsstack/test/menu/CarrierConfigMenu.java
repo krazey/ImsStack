@@ -26,6 +26,7 @@ import android.telephony.CarrierConfigManager.ImsRtt;
 import android.telephony.CarrierConfigManager.ImsVoice;
 import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.ims.ProvisioningManager;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
@@ -66,6 +67,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     protected static final String KEY_DUMP_CONFIG = "dump_config";
     protected static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
     protected static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+    protected static final String KEY_TEST_SPECIFIC_CARRIER_ID = "test_specific_carrier_id";
     protected static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
     protected static final String KEY_ASSETS_PREFIX = "assets_";
     protected static final String KEY_CONFIG_BOOLEAN_ITEMS = "config_boolean_items";
@@ -246,6 +248,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     private final List<String> mBundleKeys = new ArrayList<>();
     private ListPreference mClearTestConfig;
     private ListPreference mTestCarrierId;
+    private EditTextPreference mTestSpecificCarrierId;
     private ListPreference mVoLteProvisioning;
     private boolean mConfigChanged = false;
 
@@ -440,6 +443,21 @@ public class CarrierConfigMenu extends AppCompatActivity {
             mTestCarrierId.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
 
+        mTestSpecificCarrierId = (EditTextPreference) findPreference(KEY_TEST_SPECIFIC_CARRIER_ID);
+        if (mTestSpecificCarrierId != null) {
+            int specificCarrierId = ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, mSlotId);
+
+            if (specificCarrierId > 0) {
+                mTestSpecificCarrierId.setText(String.valueOf(specificCarrierId));
+                mTestSpecificCarrierId.setSummary(String.valueOf(specificCarrierId));
+            } else {
+                mTestSpecificCarrierId.setText("0");
+                mTestSpecificCarrierId.setSummary("0");
+            }
+            mTestSpecificCarrierId.setOnPreferenceChangeListener(new EditTextItemChangeListener());
+        }
+
         mVoLteProvisioning = (ListPreference) findPreference(KEY_VOLTE_PROVISIONING);
         if (mVoLteProvisioning != null) {
             mVoLteProvisioning.setValue("-1");
@@ -464,6 +482,35 @@ public class CarrierConfigMenu extends AppCompatActivity {
                                 + "=" + CarrierConfig.getValue(pb, key));
                     }
                     Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - ends");
+                }
+            }
+            return true;
+        }
+    }
+
+    private final class EditTextItemChangeListener
+            implements Preference.OnPreferenceChangeListener {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            String value = newValue.toString();
+
+            if (KEY_TEST_SPECIFIC_CARRIER_ID.equals(preference.getKey())) {
+                if (TextUtils.isEmpty(value)) {
+                    value = "0";
+                }
+                mTestSpecificCarrierId.setText(value);
+                mTestSpecificCarrierId.setSummary(value);
+
+                int oldSpecificCarrierId = ImsPrivateProperties.Persistent.getInt(
+                        ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, mSlotId);
+                int newSpecificCarrierId = parseInt(value, 0);
+
+                if (newSpecificCarrierId != oldSpecificCarrierId) {
+                    ImsLog.d(mSlotId, "TestSpecificCarrierId: " + oldSpecificCarrierId
+                            + " >> " + newSpecificCarrierId);
+                    ImsPrivateProperties.Persistent.setInt(
+                            ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID,
+                            newSpecificCarrierId, mSlotId);
                 }
             }
             return true;

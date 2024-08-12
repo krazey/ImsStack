@@ -375,6 +375,12 @@ public final class ImsPrivateProperties {
         public static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
 
         /**
+         * Keeps the test specific carrier id.
+         * Value : int
+         */
+        public static final String KEY_TEST_SPECIFIC_CARRIER_ID = "test_specific_carrier_id";
+
+        /**
          * Tracks the configuration items that need to be shared with the native layer.
          *  - ISIM/USIM enabled (that is currently used for IMS registration)
          *  - Primary public user identity (that will be used for IMS registration)
@@ -440,6 +446,7 @@ public final class ImsPrivateProperties {
             KEY_USE_PREDEFINED_UA_STRING,
             KEY_CONFIG_NR_DUPLEX_MODE,
             KEY_TEST_CARRIER_ID,
+            KEY_TEST_SPECIFIC_CARRIER_ID,
             KEY_TEST_LOG_OPTIONS
         };
 

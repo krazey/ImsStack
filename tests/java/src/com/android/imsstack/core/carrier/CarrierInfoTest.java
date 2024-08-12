@@ -174,6 +174,9 @@ public class CarrierInfoTest {
     public void testUpdateCarrierIdWhenSimLoaded() {
         when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID), anyString()))
                 .thenReturn("0");
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID),
+                anyString()))
+                .thenReturn("0");
 
         initCarrierIdsFor(TelephonyManager.SIM_STATE_LOADED);
 
@@ -188,6 +191,40 @@ public class CarrierInfoTest {
 
             assertEquals(SIM_CARRIER_ID, cid.getCarrierId());
             assertEquals(SIM_SPECIFIC_CARRIER_ID, cid.getSpecificCarrierId());
+
+            assertEquals(SIM_MCC, cid.getMcc());
+            assertEquals(SIM_MNC, cid.getMnc());
+            assertEquals(SIM_IMSI, cid.getImsi());
+            assertEquals(SIM_GID1, cid.getGid1());
+            assertEquals(SIM_OPERATOR_NAME, cid.getSpn());
+            assertEquals(SIM_ICCID, cid.getIccId());
+        }
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateCarrierIdWhenSimLoadedUsingTestCarrierIds() {
+        final int testCarrierId = SIM_CARRIER_ID + 1;
+        final int testSpecificCarrierId = SIM_SPECIFIC_CARRIER_ID + 1;
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID), anyString()))
+                .thenReturn(String.valueOf(testCarrierId));
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID),
+                anyString()))
+                .thenReturn(String.valueOf(testSpecificCarrierId));
+
+        initCarrierIdsFor(TelephonyManager.SIM_STATE_LOADED);
+
+        for (int i = 0; i < MAX_SIM_SLOT; ++i) {
+            assertTrue(mCi.updateCarrierId(i));
+        }
+
+        for (int i = 0; i < MAX_SIM_SLOT; ++i) {
+            SimCarrierId cid = mCi.getCarrierId(i);
+
+            assertTrue(cid.isSimLoaded());
+
+            assertEquals(testCarrierId, cid.getCarrierId());
+            assertEquals(testSpecificCarrierId, cid.getSpecificCarrierId());
 
             assertEquals(SIM_MCC, cid.getMcc());
             assertEquals(SIM_MNC, cid.getMnc());
