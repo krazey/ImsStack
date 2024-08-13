@@ -457,7 +457,7 @@ public class CarrierConfigMenuTest {
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(is, "utf-8");
             defaultConfig = readConfigFromXml(parser);
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
             defaultConfig = new PersistableBundle();
         }
 

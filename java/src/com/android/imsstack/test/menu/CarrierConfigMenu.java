@@ -1216,7 +1216,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     ConfigXmlUtils.readConfigKeys(parser, configKeys);
                 }
             }
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
             ImsLog.e("readConfigKeys: " + e.toString());
         }
     }

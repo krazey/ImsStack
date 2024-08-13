@@ -173,7 +173,7 @@ public final class SimCarrierId {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("[ SimCarrierId :: carrierId=");
+        sb.append("[ SimCarrierId: carrierId=");
         sb.append(mCarrierId);
         sb.append(", specificCarrierId=");
         sb.append(mSpecificCarrierId);

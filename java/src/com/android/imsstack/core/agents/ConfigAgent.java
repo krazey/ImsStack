@@ -188,9 +188,23 @@ public class ConfigAgent implements ConfigInterface {
         // Sets a default configuration from assets.
         config.putAll(mDefaultImsConfig);
 
-        // Loads IMS specific carrier configuration from asset.
-        PersistableBundle configFromAsset = loadCarrierConfig(subId, id);
+        // Loads IMS internal carrier configuration from asset.
+        // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
+        // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
+        PersistableBundle configFromAsset;
 
+        // Reads the parent carrier configuration first if present.
+        if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
+                && id.getCarrierId() != id.getSpecificCarrierId()) {
+            SimCarrierId parentId = new SimCarrierId.Builder()
+                    .setCarrierId(id.getCarrierId())
+                    .build();
+            configFromAsset = loadCarrierConfig(subId, parentId);
+            CarrierConfig.overrideNestedBundles(config, configFromAsset);
+            config.putAll(configFromAsset);
+        }
+
+        configFromAsset = loadCarrierConfig(subId, id);
         CarrierConfig.overrideNestedBundles(config, configFromAsset);
         config.putAll(configFromAsset);
 
@@ -288,11 +302,11 @@ public class ConfigAgent implements ConfigInterface {
         String fileName = getCarrierConfigFile(subId, id);
 
         if (TextUtils.isEmpty(fileName)) {
-            ImsLog.d(mSlotId, "loadCarrierConfig: No matched carrier configuration.");
+            ImsLog.d(mSlotId, "loadCarrierConfig: No matched carrier configuration - " + id);
             return new PersistableBundle();
         }
 
-        ImsLog.d(mSlotId, "loadCarrierConfigFromXml: " + fileName);
+        ImsLog.d(mSlotId, "loadCarrierConfig: " + fileName);
 
         return loadCarrierConfigFromXml(fileName, id);
     }
@@ -309,7 +323,7 @@ public class ConfigAgent implements ConfigInterface {
             parser.setInput(is, "utf-8");
 
             return readConfigFromXml(parser, id);
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
             ImsLog.e(mSlotId, "loadCarrierConfigFromXml: " + e.toString());
             return new PersistableBundle();
         }

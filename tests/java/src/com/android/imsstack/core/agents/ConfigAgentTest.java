@@ -27,9 +27,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
+import android.content.res.AssetManager;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
@@ -49,6 +52,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.IOException;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -143,6 +148,25 @@ public class ConfigAgentTest {
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
         verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateCarrierConfigWithCarrierIdAndSpecificCarrierId() throws IOException {
+        AssetManager am = mTestAppContext.getContext().getAssets();
+        mConfigAgent.init(mTestAppContext.getContext());
+
+        when(am.list(eq(CarrierConfig.CARRIER_CONFIG))).thenReturn(new String[0]);
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(1)
+                .setSpecificCarrierId(2)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        CarrierConfigManagerProxy ccmp =
+                mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        verify(ccmp).getConfigForSubId(eq(SUB_ID_1), any());
+        verify(am, times(2)).list(eq(CarrierConfig.CARRIER_CONFIG));
     }
 
     @Test
