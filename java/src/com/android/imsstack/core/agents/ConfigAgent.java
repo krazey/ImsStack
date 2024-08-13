@@ -336,21 +336,21 @@ public class ConfigAgent implements ConfigInterface {
             }
 
             TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
-            int mccMncCarrierId = tmp.getCarrierIdFromSimMccMnc();
-            int testCarrierId = ImsPrivateProperties.Persistent.getInt(
-                    ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
-            int specificCarrierId = (testCarrierId > 0) ? testCarrierId : id.getSpecificCarrierId();
+            String prefixForSpecificCarrierId = CARRIER_ID_PREFIX + id.getSpecificCarrierId() + "_";
+            String prefixForCarrierId = CARRIER_ID_PREFIX + id.getCarrierId() + "_";
+            String prefixForMccMncCarrierId =
+                    CARRIER_ID_PREFIX + tmp.getCarrierIdFromSimMccMnc() + "_";
             String fileNameForSpecificCarrierId = null;
             String fileNameForCarrierId = null;
             String fileNameForMccMncCarrierId = null;
 
             for (String file : files) {
-                if (file.startsWith(CARRIER_ID_PREFIX + specificCarrierId + "_")) {
+                if (file.startsWith(prefixForSpecificCarrierId)) {
                     fileNameForSpecificCarrierId = file;
                     break;
-                } else if (file.startsWith(CARRIER_ID_PREFIX + id.getCarrierId() + "_")) {
+                } else if (file.startsWith(prefixForCarrierId)) {
                     fileNameForCarrierId = file;
-                } else if (file.startsWith(CARRIER_ID_PREFIX + mccMncCarrierId + "_")) {
+                } else if (file.startsWith(prefixForMccMncCarrierId)) {
                     fileNameForMccMncCarrierId = file;
                 }
             }
