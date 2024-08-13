@@ -33,14 +33,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
+import android.content.res.XmlResourceParser;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.R;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.carrier.SimCarrierId;
@@ -60,7 +63,7 @@ import java.io.IOException;
 public class ConfigAgentTest {
     @Mock private ConfigInterface.Listener mListener;
 
-    private ContextFixture mContextFixture;
+    private XmlResourceParser mCarrierConfigOverrideParser;
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
     private ConfigAgent mConfigAgent;
@@ -69,22 +72,29 @@ public class ConfigAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
         mTestableLooper = TestableLooper.get(this);
-        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
         mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+
+        mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
+                .getResources().getXml(R.xml.carrier_config_override);
+        when(mTestAppContext.getContext().getResources().getXml(eq(R.xml.carrier_config_override)))
+                .thenReturn(mCarrierConfigOverrideParser);
 
         mConfigAgent = new ConfigAgent(SLOT0);
     }
 
     @After
     public void tearDown() throws Exception {
-        mConfigAgent.cleanup();
-        mConfigAgent = null;
+        mCarrierConfigOverrideParser = null;
+
+        if (mConfigAgent != null) {
+            mConfigAgent.cleanup();
+            mConfigAgent = null;
+        }
 
         mTestAppContext.tearDown();
         mTestAppContext = null;
-        mContextFixture = null;
         mTestableLooper = null;
     }
 
@@ -227,7 +237,7 @@ public class ConfigAgentTest {
 
         // Asset has private keys
         ConfigAgent spyConfigAgent = spy(mConfigAgent);
-        doReturn(buildAssetConfigBundle()).when(spyConfigAgent).loadCarrierConfig(anyInt(), any());
+        doReturn(buildAssetConfigBundle()).when(spyConfigAgent).readCarrierConfig(anyInt(), any());
 
         // Test updateCarrierConfig()
         spyConfigAgent.init(mTestAppContext.getContext());

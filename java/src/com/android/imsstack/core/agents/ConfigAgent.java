@@ -16,14 +16,17 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
+import android.annotation.XmlRes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.XmlResourceParser;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.R;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
@@ -80,7 +83,7 @@ public class ConfigAgent implements ConfigInterface {
 
     @Override
     public void init(Context context) {
-        mDefaultImsConfig = loadCarrierConfigFromXml(
+        mDefaultImsConfig = readCarrierConfigFromAsset(
                 CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null);
         mIntentReceiver.register();
     }
@@ -191,7 +194,7 @@ public class ConfigAgent implements ConfigInterface {
         // Loads IMS internal carrier configuration from asset.
         // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
-        PersistableBundle configFromAsset;
+        PersistableBundle internalConfig;
 
         // Reads the parent carrier configuration first if present.
         if (id.getSpecificCarrierId() != SimCarrierId.UNKNOWN_ID
@@ -199,14 +202,19 @@ public class ConfigAgent implements ConfigInterface {
             SimCarrierId parentId = new SimCarrierId.Builder()
                     .setCarrierId(id.getCarrierId())
                     .build();
-            configFromAsset = loadCarrierConfig(subId, parentId);
-            CarrierConfig.overrideNestedBundles(config, configFromAsset);
-            config.putAll(configFromAsset);
+            internalConfig = readCarrierConfig(subId, parentId);
+            CarrierConfig.overrideNestedBundles(config, internalConfig);
+            config.putAll(internalConfig);
         }
 
-        configFromAsset = loadCarrierConfig(subId, id);
-        CarrierConfig.overrideNestedBundles(config, configFromAsset);
-        config.putAll(configFromAsset);
+        internalConfig = readCarrierConfig(subId, id);
+        CarrierConfig.overrideNestedBundles(config, internalConfig);
+        config.putAll(internalConfig);
+
+        // Overrides the specific carrier configuration values if present.
+        internalConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
+        CarrierConfig.overrideNestedBundles(config, internalConfig);
+        config.putAll(internalConfig);
 
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
@@ -298,20 +306,20 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     @VisibleForTesting
-    protected PersistableBundle loadCarrierConfig(int subId, SimCarrierId id) {
+    protected PersistableBundle readCarrierConfig(int subId, SimCarrierId id) {
         String fileName = getCarrierConfigFile(subId, id);
 
         if (TextUtils.isEmpty(fileName)) {
-            ImsLog.d(mSlotId, "loadCarrierConfig: No matched carrier configuration - " + id);
+            ImsLog.d(mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
             return new PersistableBundle();
         }
 
-        ImsLog.d(mSlotId, "loadCarrierConfig: " + fileName);
+        ImsLog.d(mSlotId, "readCarrierConfig: " + fileName);
 
-        return loadCarrierConfigFromXml(fileName, id);
+        return readCarrierConfigFromAsset(fileName, id);
     }
 
-    private PersistableBundle loadCarrierConfigFromXml(String fileName, SimCarrierId id) {
+    private PersistableBundle readCarrierConfigFromAsset(String fileName, SimCarrierId id) {
         try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             synchronized (this) {
                 if (mFactory == null) {
@@ -324,7 +332,16 @@ public class ConfigAgent implements ConfigInterface {
 
             return readConfigFromXml(parser, id);
         } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
-            ImsLog.e(mSlotId, "loadCarrierConfigFromXml: " + e.toString());
+            ImsLog.e(mSlotId, "readCarrierConfigFromAsset: " + e.toString());
+            return new PersistableBundle();
+        }
+    }
+
+    private PersistableBundle readCarrierConfigFromRes(@XmlRes int resId, SimCarrierId id) {
+        try (XmlResourceParser parser = AppContext.getInstance().getResources().getXml(resId)) {
+            return readConfigFromXml(parser, id);
+        } catch (IOException | XmlPullParserException e) {
+            ImsLog.e(mSlotId, "readCarrierConfigFromRes: " + e.toString());
             return new PersistableBundle();
         }
     }
