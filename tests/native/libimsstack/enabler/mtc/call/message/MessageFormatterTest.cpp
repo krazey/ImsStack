@@ -35,12 +35,12 @@
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipHeaderName.h"
 #include "utility/MessageUtil.h"
-#include "utility/MessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 #include <vector>
 
 using ::testing::_;
+using ::testing::AnyNumber;
 using ::testing::AnyOf;
 using ::testing::Ref;
 using ::testing::Return;
@@ -73,7 +73,7 @@ public:
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -490,9 +490,7 @@ TEST_F(MessageFormatterTest, FormTerminateMessageAddCarrierSpecificHeaderByConfi
             .WillByDefault(Return(IMS_TRUE));
 
     const AString strByeCauseNormal("normal");
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-    EXPECT_CALL(objMockMessageUtils,
+    EXPECT_CALL(objMessageUtils,
             AddValueIfNotExists(
                     &objMessage, strByeCauseNormal, ISipHeader::UNKNOWN, strCarrierSpecificHeader));
 
@@ -535,10 +533,6 @@ TEST_F(MessageFormatterTest, AddSrvccFeatureByStartMessage)
 
 TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 {
-    // TODO: change all Tests in this file to use MockIMessageUtils.
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
     MockIFeatureCaps objFeatureCaps;
@@ -551,7 +545,7 @@ TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 
     // No FeatureCaps in INVITE case
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    ON_CALL(objMockMessageUtils,
+    ON_CALL(objMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
                     ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_FALSE));
@@ -561,14 +555,12 @@ TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
 
 TEST_F(MessageFormatterTest, AddSrvccFeatureByPrAnswerMessage)
 {
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
     MockIFeatureCaps objFeatureCaps;
     ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    ON_CALL(objMockMessageUtils,
+    ON_CALL(objMessageUtils,
             ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
                     ISipHeader::FEATURE_CAPS, AString::ConstNull()))
             .WillByDefault(Return(IMS_TRUE));
@@ -654,15 +646,13 @@ TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
 
 TEST_F(MessageFormatterTest, SetCarrierSpecificHeadersSetsTranscodingHeaderIfCallPull)
 {
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_FALSE));
     pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
     const AString strTranscodingHeader(MessageUtil::STR_P_COM_ENABLETRANSCODING);
 
-    // TODO: make this be checked isolated.
-    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
-    //        &objMessage, _, ISipHeader::UNKNOWN, strTranscodingHeader));
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, _, ISipHeader::UNKNOWN, strTranscodingHeader));
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
@@ -677,14 +667,11 @@ TEST_F(MessageFormatterTest, FormStartMessageSetsReplaceHeaderIfCallPull)
     ON_CALL(objMepManager, GetDialogInfo(_)).WillByDefault(Return(objDialogInfo));
     AString strReplaces("anyCallId;from-tag=anyLocalTag;to-tag=anyRemoteTag");
 
-    MockIMessageUtils objMockMessageUtils;
-    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
-
     pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
 
-    // TODO: make this be checked isolated.
-    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
-    //        &objMessage, strReplaces, ISipHeader::REPLACES, _));
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, strReplaces, ISipHeader::REPLACES, _));
     pFormatter->FormStartMessage(CallType::VOIP);
 }
 
