@@ -17,6 +17,7 @@ package com.android.imsstack.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 
 import java.util.Locale;
 
@@ -171,7 +172,8 @@ public final class ImsPrivateProperties {
          * @return An integer value.
          */
         public static int getInt(String key, int defValue, int slotId) {
-            return Integer.valueOf(get(key, String.valueOf(defValue), slotId));
+            String value = get(key, String.valueOf(defValue), slotId);
+            return TextUtils.isEmpty(value) ? defValue : Integer.valueOf(value);
         }
 
         /**
@@ -523,7 +525,8 @@ public final class ImsPrivateProperties {
          * @return An integer value.
          */
         public static int getInt(String key, int defValue, int slotId) {
-            return Integer.valueOf(get(key, String.valueOf(defValue), slotId));
+            String value = get(key, String.valueOf(defValue), slotId);
+            return TextUtils.isEmpty(value) ? defValue : Integer.valueOf(value);
         }
 
         /**
