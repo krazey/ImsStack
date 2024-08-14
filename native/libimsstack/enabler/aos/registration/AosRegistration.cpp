@@ -1485,6 +1485,10 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
     ClearNetworkBindingFeatures();
 
     SetRadioWaiting(IMS_FALSE);
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        UpdateTransactionStarted();
+    }
     SetTraffic(IMS_FALSE);
     SetReregFailureReportOnIpcanChangeRequired(IMS_FALSE);
 
