@@ -17,10 +17,7 @@ public:
 private:
     void CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile);
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN TextProfile* pProfile);
-    void GenerateRtpMap(OUT AString& strRtpmap, OUT AString& strPayloadNum,
-            IN MediaBaseProfile::RtpMap& objRtpMap);
     IMS_BOOL GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Payload* pPayload);
-    void GenerateDirection(OUT IMediaDescriptor* pDescriptor, IN TextProfile* pProfile);
 };
 
 #endif

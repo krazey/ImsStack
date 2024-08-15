@@ -36,7 +36,7 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     AudioProfile* pProfile = static_cast<AudioProfile*>(pBaseProfile);
 
     GeneratePayload(pDescriptor, pProfile);
-    GenerateDirection(pSessionDescriptor, pDescriptor, pProfile);
+    GenerateSessionLevelDirection(pSessionDescriptor, GenerateDirection(pDescriptor, pProfile));
     GeneratePtime(pDescriptor, pProfile);
     GenerateMaxPtime(pDescriptor, pProfile);
     GenerateCandidateAttribute(pDescriptor, pProfile);
@@ -75,29 +75,6 @@ void AudioSdpGenerator::GeneratePayload(
                     SdpMediaFormat::TYPE_RTP, strPayloadNum, strRtpMap, strFmtp);
         }
     }
-}
-
-PRIVATE
-void AudioSdpGenerator::GenerateRtpMap(
-        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
-{
-    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
-    AString strPayloadType = objRtpMap.GetPayloadType();
-    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
-    IMS_SINT32 nChannel = objRtpMap.GetChannel();
-
-    strPayloadNum.Sprintf("%d", nPayloadNumber);
-
-    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
-
-    if (nChannel > 0)
-    {
-        AString strChannel;
-        strChannel.Sprintf("/%d", nChannel);
-        strRtpMap.Append(strChannel);
-    }
-
-    IMS_TRACE_D("GenerateRtpMap() - RtpMap [%d %s], ", nPayloadNumber, strRtpMap.GetStr(), 0);
 }
 
 PRIVATE
@@ -153,27 +130,6 @@ IMS_BOOL AudioSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-void AudioSdpGenerator::GenerateDirection(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile)
-{
-    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
-
-    pDescriptor->SetDirection(nDirection);
-    IMS_TRACE_D("GenerateDirection() - direction[%d]", nDirection, 0, 0);
-
-    if (IS_VALID_MEDIA_DIRECTION(nDirection))
-    {
-        // Set Session Level Direction Attribute according to the media direction
-        pSessionDescriptor->SetDirection(nDirection);
-    }
 }
 
 PRIVATE

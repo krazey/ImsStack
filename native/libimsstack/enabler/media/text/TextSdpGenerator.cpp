@@ -142,21 +142,6 @@ void TextSdpGenerator::GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN Tex
 }
 
 PRIVATE
-void TextSdpGenerator::GenerateRtpMap(
-        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
-{
-    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
-    AString strPayloadType = objRtpMap.GetPayloadType();
-    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
-
-    strPayloadNum.Sprintf("%d", nPayloadNumber);
-
-    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
-
-    IMS_TRACE_D("GenerateRtpMap() - RtpMap [%d %s], ", nPayloadNumber, strRtpMap.GetStr(), 0);
-}
-
-PRIVATE
 IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Payload* pPayload)
 {
     if (pPayload == IMS_NULL)
@@ -192,19 +177,4 @@ IMS_BOOL TextSdpGenerator::GenerateFmtp(OUT AString& strFmtp, IN TextProfile::Pa
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-void TextSdpGenerator::GenerateDirection(
-        OUT IMediaDescriptor* pDescriptor, IN TextProfile* pProfile)
-{
-    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
-
-    pDescriptor->SetDirection(nDirection);
-    IMS_TRACE_D("GenerateDirection() - direction[%d]", nDirection, 0, 0);
 }

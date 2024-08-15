@@ -18,8 +18,6 @@ public:
 
 private:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
-    void GenerateRtpMap(OUT AString& strRtpMap, OUT AString& strPayloadNum,
-            IN MediaBaseProfile::RtpMap& objRtpMap);
     void CheckRtcpFbWildCard(IN VideoProfile* pProfile, OUT IMS_BOOL& bTrrSupportedAll,
             OUT IMS_BOOL& bNackSupportedAll, OUT IMS_BOOL& bPliSupportedAll,
             OUT IMS_BOOL& bFirSupportedAll, OUT IMS_BOOL& bTmmbrSupportedAll);
@@ -43,7 +41,6 @@ private:
             IN IMS_BOOL bSupportedInAllPayload, IN IMS_UINT32 nPayloadIndex);
     void GenerateRtcpFbTmmbr(OUT SdpAvCodec* pFormat, IN VideoProfile::Payload* pPayload,
             IN IMS_BOOL bSupportedInAllPayload, IN IMS_UINT32 nPayloadIndex);
-    void GenerateDirection(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     void GenerateFrameRate(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     void GenerateCvo(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     void GenerateCapaNegoAttribute(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
