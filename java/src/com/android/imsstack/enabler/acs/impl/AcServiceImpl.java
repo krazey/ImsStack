@@ -30,7 +30,7 @@ import com.android.imsstack.enabler.acs.AcServiceClientInfo;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main module for AC client. Caller can access this by AcService interface.
@@ -197,17 +197,14 @@ public class AcServiceImpl {
         }
     };
 
-    private final HashMap<Integer, MessageFunction> mMessageFunctionMap =
-            new HashMap<Integer, MessageFunction>() {
-            {
-                put(MSG_START, mMsgFuncStart);
-                put(MSG_STOP, mMsgFuncStop);
-                put(MSG_PROVISIONING_DATA_RECEIVED, mMsgFuncProvisioningDataReceived);
-                put(MSG_PROVISIONING_DATA_RESET, mMsgFuncProvisioningDataReset);
-                put(MSG_HTTP_RESPONSE, mMsgFuncHttpResponse);
-                put(MSG_HTTP_INTERNAL_ERROR, mMsgFuncHttpInternalError);
-            }
-    };
+    private final Map<Integer, MessageFunction> mMessageFunctionMap = Map.of(
+            MSG_START, mMsgFuncStart,
+            MSG_STOP, mMsgFuncStop,
+            MSG_PROVISIONING_DATA_RECEIVED, mMsgFuncProvisioningDataReceived,
+            MSG_PROVISIONING_DATA_RESET, mMsgFuncProvisioningDataReset,
+            MSG_HTTP_RESPONSE, mMsgFuncHttpResponse,
+            MSG_HTTP_INTERNAL_ERROR, mMsgFuncHttpInternalError
+    );
 
     private final CallbackManager mCallbackManager;
     private final Context mContext;
