@@ -162,29 +162,6 @@ void VideoSdpGenerator::CheckRtcpFbWildCard(IN VideoProfile* pProfile,
             bFirSupportedAll, bTmmbrSupportedAll);
 }
 
-PRIVATE
-void VideoSdpGenerator::GenerateRtpMap(
-        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
-{
-    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
-    AString strPayloadType = objRtpMap.GetPayloadType();
-    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
-    IMS_SINT32 nChannel = objRtpMap.GetChannel();
-
-    strPayloadNum.Sprintf("%d", nPayloadNumber);
-
-    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
-
-    if (nChannel > 0)
-    {
-        AString strChannel;
-        strChannel.Sprintf("/%d", nChannel);
-        strRtpMap.Append(strChannel);
-    }
-
-    IMS_TRACE_D("GenerateRtpMap() - RtpMap [%s], ", strRtpMap.GetStr(), 0, 0);
-}
-
 PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
         OUT AString& strFmtp, IN VideoProfile::Payload* pPayload)
 {
@@ -485,21 +462,6 @@ void VideoSdpGenerator::GenerateRtcpFbTmmbr(OUT SdpAvCodec* pFormat,
 
         IMS_TRACE_D("GenerateRtcpFbTmmbr() - [%d]", nPayloadNumForRtcpFb, 0, 0);
     }
-}
-
-PRIVATE
-void VideoSdpGenerator::GenerateDirection(
-        OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
-{
-    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
-
-    pDescriptor->SetDirection(nDirection);
-    IMS_TRACE_D("GenerateDirection() - direction[%d]", nDirection, 0, 0);
 }
 
 PRIVATE

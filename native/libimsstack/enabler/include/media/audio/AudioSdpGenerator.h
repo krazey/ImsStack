@@ -18,11 +18,7 @@ public:
 
 private:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
-    void GenerateRtpMap(OUT AString& strRtpmap, OUT AString& strPayloadNum,
-            IN MediaBaseProfile::RtpMap& objRtpMap);
     IMS_BOOL GenerateFmtp(OUT AString& strFmtp, IN AudioProfile::Payload* pPayload);
-    void GenerateDirection(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateMaxPtime(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
     void GenerateCandidateAttribute(OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);

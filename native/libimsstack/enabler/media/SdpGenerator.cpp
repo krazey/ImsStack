@@ -43,6 +43,62 @@ void SdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDesc
     SetSdpMediaBandwidth(pDescriptor, pProfile);
 }
 
+PROTECTED
+void SdpGenerator::GenerateRtpMap(
+        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
+{
+    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
+    AString strPayloadType = objRtpMap.GetPayloadType();
+    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
+    IMS_SINT32 nChannel = objRtpMap.GetChannel();
+
+    strPayloadNum.Sprintf("%d", nPayloadNumber);
+
+    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
+
+    if (nChannel > 0)
+    {
+        AString strChannel;
+        strChannel.Sprintf("/%d", nChannel);
+        strRtpMap.Append(strChannel);
+    }
+
+    IMS_TRACE_D("GenerateRtpMap() - media[%d], RtpMap[%d %s]", m_eType, nPayloadNumber,
+            strRtpMap.GetStr());
+}
+
+PROTECTED
+IMS_SINT32 SdpGenerator::GenerateDirection(
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return MEDIA_DIRECTION_INVALID;
+    }
+
+    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
+
+    pDescriptor->SetDirection(nDirection);
+    IMS_TRACE_D("GenerateDirection() - media[%d], direction[%d]", m_eType, nDirection, 0);
+
+    return nDirection;
+}
+
+PROTECTED
+void SdpGenerator::GenerateSessionLevelDirection(
+        OUT ISessionDescriptor* pSessionDescriptor, IN IMS_SINT32 nDirection)
+{
+    if (pSessionDescriptor == IMS_NULL)
+    {
+        return;
+    }
+
+    if (IS_VALID_MEDIA_DIRECTION(nDirection))
+    {
+        pSessionDescriptor->SetDirection(nDirection);
+    }
+}
+
 PRIVATE void SdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor)
 {
     if (pDescriptor == IMS_NULL)
