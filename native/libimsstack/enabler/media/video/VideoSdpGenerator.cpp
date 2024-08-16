@@ -38,13 +38,86 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     VideoProfile* pProfile = static_cast<VideoProfile*>(pBaseProfile);
 
-    // Previously check all payload for RTCP-FB wildcard(*) attributes
+    GeneratePayload(pDescriptor, pProfile);
+    GenerateDirection(pDescriptor, pProfile);
+    GenerateFrameRate(pDescriptor, pProfile);
+    GenerateCvo(pDescriptor, pProfile);
+    GenerateCapaNegoAttribute(pDescriptor, pProfile);
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+void VideoSdpGenerator::GeneratePayload(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
     IMS_BOOL bTrrSupportedAll = IMS_TRUE;
     IMS_BOOL bNackSupportedAll = IMS_TRUE;
-    IMS_BOOL bTmmbrSupportedAll = IMS_TRUE;
     IMS_BOOL bPliSupportedAll = IMS_TRUE;
     IMS_BOOL bFirSupportedAll = IMS_TRUE;
+    IMS_BOOL bTmmbrSupportedAll = IMS_TRUE;
 
+    CheckRtcpFbWildCard(pProfile, bTrrSupportedAll, bNackSupportedAll, bPliSupportedAll,
+            bFirSupportedAll, bTmmbrSupportedAll);
+
+    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
+    {
+        AString strRtpMap = AString::ConstNull();
+        AString strPayloadNum = AString::ConstNull();
+        AString strFmtp = AString::ConstNull();
+
+        VIDEO_RESOLUTION eResolution;
+
+        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
+
+        if (pPayload == IMS_NULL)
+        {
+            continue;
+        }
+
+        GenerateRtpMap(strRtpMap, strPayloadNum, pPayload->GetRtpMap());
+
+        SdpAvCodec* pFormat = new SdpAvCodec();
+
+        if (GenerateFmtp(strFmtp, pPayload) != IMS_TRUE)
+        {
+            IMS_TRACE_E(0, "GenerateFmtp() Fail.", 0, 0, 0);
+
+            delete pFormat;
+            continue;
+        }
+
+        if (GenerateCompletedFmtpRtpMap(strRtpMap, strPayloadNum, strFmtp, pFormat) != IMS_TRUE)
+        {
+            IMS_TRACE_E(0, "GenerateCompletedFmtpRtpMap() Fail", 0, 0, 0);
+
+            delete pFormat;
+            continue;
+        }
+
+        GenerateImageAttribute(pDescriptor, pPayload);
+        GenerateFrameSize(pDescriptor, pPayload);
+
+        GenerateRtcpFb(pProfile, bTrrSupportedAll, bNackSupportedAll, bPliSupportedAll,
+                bFirSupportedAll, bTmmbrSupportedAll, pFormat, i);
+
+        pDescriptor->SetMediaFormat(pFormat);
+
+        delete pFormat;
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::CheckRtcpFbWildCard(IN VideoProfile* pProfile,
+        OUT IMS_BOOL& bTrrSupportedAll, OUT IMS_BOOL& bNackSupportedAll,
+        OUT IMS_BOOL& bPliSupportedAll, OUT IMS_BOOL& bFirSupportedAll,
+        OUT IMS_BOOL& bTmmbrSupportedAll)
+{
     if (pProfile->IsAvpfSupported() == IMS_TRUE)
     {
         for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
@@ -60,10 +133,6 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
                 {
                     bNackSupportedAll = IMS_FALSE;
                 }
-                if (pPayload->GetRtcpFbAttr().IsTmmbrSupported() == IMS_FALSE)
-                {
-                    bTmmbrSupportedAll = IMS_FALSE;
-                }
                 if (pPayload->GetRtcpFbAttr().IsPliSupported() == IMS_FALSE)
                 {
                     bPliSupportedAll = IMS_FALSE;
@@ -72,6 +141,10 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
                 {
                     bFirSupportedAll = IMS_FALSE;
                 }
+                if (pPayload->GetRtcpFbAttr().IsTmmbrSupported() == IMS_FALSE)
+                {
+                    bTmmbrSupportedAll = IMS_FALSE;
+                }
             }
         }
     }
@@ -79,313 +152,514 @@ IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
     {
         bTrrSupportedAll = IMS_FALSE;
         bNackSupportedAll = IMS_FALSE;
-        bTmmbrSupportedAll = IMS_FALSE;
         bPliSupportedAll = IMS_FALSE;
         bFirSupportedAll = IMS_FALSE;
+        bTmmbrSupportedAll = IMS_FALSE;
     }
 
-    // make each payload
-    // ------ "a=rtpmap:104 H264/16000/1"
-    for (IMS_UINT32 i = 0; i < pProfile->GetPayloadList().GetSize(); i++)
+    IMS_TRACE_D("CheckRtcpFbWildCard() Trr[%d], Nack[%d]", bTrrSupportedAll, bNackSupportedAll, 0);
+    IMS_TRACE_D("CheckRtcpFbWildCard() Pli[%d], Fir[%d], Tmmbr[%d]", bPliSupportedAll,
+            bFirSupportedAll, bTmmbrSupportedAll);
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtpMap(
+        OUT AString& strRtpMap, OUT AString& strPayloadNum, IN MediaBaseProfile::RtpMap& objRtpMap)
+{
+    IMS_UINT32 nPayloadNumber = objRtpMap.GetPayloadNumber();
+    AString strPayloadType = objRtpMap.GetPayloadType();
+    IMS_UINT32 nSamplingRate = objRtpMap.GetSamplingRate();
+    IMS_SINT32 nChannel = objRtpMap.GetChannel();
+
+    strPayloadNum.Sprintf("%d", nPayloadNumber);
+
+    strRtpMap.Sprintf("%s/%d", strPayloadType.GetStr(), nSamplingRate);
+
+    if (nChannel > 0)
     {
-        AString strRtpmap, strFmtp;
-        AString strResolutionAttr;
-        VIDEO_RESOLUTION eResolution;
-
-        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
-        if (pPayload == IMS_NULL)
-        {
-            continue;
-        }
-
-        // make "rtpmap"
-        strRtpmap.Sprintf("%d %s/%d", pPayload->GetRtpMap().GetPayloadNumber(),
-                pPayload->GetRtpMap().GetPayloadType().GetStr(),
-                pPayload->GetRtpMap().GetSamplingRate());
-
-        if (pPayload->GetRtpMap().GetChannel() > 0)
-        {
-            AString strChannel;
-            strChannel.Sprintf("/%d", pPayload->GetRtpMap().GetChannel());
-            strRtpmap.Append(strChannel);
-        }
-
-        IMS_TRACE_I("Generate() - Payload[%d], strRtpmap[%s]", i, strRtpmap.GetStr(), 0);
-
-        // make "fmtp"
-        // ------ "a=fmtp:104 profile-level-id=42C016; packetization-mode=1;
-        // ----------  sprop-parameter-sets=Z0LAFukDwKMg,aM4G4g=="
-        SdpAvCodec* pFormat = new SdpAvCodec();
-
-        if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
-        {
-            VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pPayload->GetFmtp();
-
-            if (pAvcFmtp == IMS_NULL)
-            {
-                delete pFormat;
-                continue;
-            }
-
-            strFmtp = VideoNegoAvc::SetSdpFmtpFromAvcFmtp(pAvcFmtp);
-
-            eResolution = pAvcFmtp->GetResolution();
-        }
-        else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
-        {
-            VideoProfile::HevcFmtp* pHevcFmtp = (VideoProfile::HevcFmtp*)pPayload->GetFmtp();
-
-            if (pHevcFmtp == IMS_NULL)
-            {
-                delete pFormat;
-                continue;
-            }
-
-            strFmtp = VideoNegoHevc::SetSdpFmtpFromHevcFmtp(pHevcFmtp);
-
-            eResolution = pHevcFmtp->GetResolution();
-        }
-
-        else
-        {
-            delete pFormat;
-            continue;
-        }
-
-        if (strFmtp.GetLength() == 0)
-        {
-            strFmtp = AString::ConstNull();
-        }
-
-        AString strCompletedFmtp = AString::ConstNull();
-        if (!strFmtp.IsNULL())
-        {
-            strCompletedFmtp.Sprintf("%d ", pPayload->GetRtpMap().GetPayloadNumber());
-            strCompletedFmtp.Append(strFmtp);
-        }
-        if (pFormat == IMS_NULL)
-        {
-            continue;
-        }
-        if (pFormat->SetParameters(strRtpmap, strCompletedFmtp) == IMS_FALSE)
-        {
-            IMS_TRACE_E(0, "Generate() SetParameters() Fail. strRtpmap[%s], strFmtp[%s]",
-                    strRtpmap.GetStr(), strCompletedFmtp.GetStr(), 0);
-        }
-
-        // make "image attribute"
-        if (pPayload->IsImageAttrIncluded() == IMS_TRUE)
-        {
-            if (MakeImageAttributeLine(
-                        pPayload->GetRtpMap().GetPayloadNumber(), eResolution, strResolutionAttr))
-            {
-                pDescriptor->AddAttribute(SdpAttribute::IMAGEATTR, strResolutionAttr);
-            }
-        }
-
-        // make "framesize"
-        if (pPayload->IsFrameSizeIncluded() == IMS_TRUE)
-        {
-            if (MakeFrameSizeLine(
-                        pPayload->GetRtpMap().GetPayloadNumber(), eResolution, strResolutionAttr))
-            {
-                pDescriptor->AddAttribute(SdpAttribute::FRAMESIZE, strResolutionAttr);
-            }
-        }
-
-        // make "rtcp-fb"
-        if ((pProfile->IsAvpfSupported() == IMS_TRUE) &&
-                ((pProfile->IsCapaNegoForAvpfSupported() == IMS_FALSE) ||
-                        (pProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE &&
-                                pProfile->GetCapaNego().IsAttCapaInPcfg() == IMS_FALSE)))
-        {
-            IMS_SINT32 nPayloadNumForRtcpFb = -1;
-
-            // TRR-INT
-            if (bTrrSupportedAll == IMS_TRUE && i == 0)
-            {
-                nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
-            }
-            else if (bTrrSupportedAll == IMS_FALSE &&
-                    pPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE)
-            {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
-            }
-
-            if (nPayloadNumForRtcpFb != -1)
-            {
-                AString strTemp = "";
-                SdpRtcpFeedback* pTrr_IntAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
-
-                pTrr_IntAttr->SetType("trr-int");
-
-                strTemp.Sprintf("%d", pPayload->GetRtcpFbAttr().GetTrrInt());
-                pTrr_IntAttr->SetParameter(strTemp);
-
-                pFormat->AddExtraParameter(pTrr_IntAttr);
-            }
-
-            nPayloadNumForRtcpFb = -1;
-            // NACK
-            if (bNackSupportedAll == IMS_TRUE && i == 0)
-            {
-                nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
-            }
-            else if (bNackSupportedAll == IMS_FALSE &&
-                    pPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE)
-            {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
-            }
-
-            if (nPayloadNumForRtcpFb != -1)
-            {
-                SdpRtcpFeedback* pNackAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
-                pNackAttr->SetType("nack");
-                pFormat->AddExtraParameter(pNackAttr);
-            }
-
-            nPayloadNumForRtcpFb = -1;
-            // PLI
-            if (bPliSupportedAll == IMS_TRUE && i == 0)
-            {
-                nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
-            }
-            else if (bPliSupportedAll == IMS_FALSE &&
-                    pPayload->GetRtcpFbAttr().IsPliSupported() == IMS_TRUE)
-            {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
-            }
-
-            if (nPayloadNumForRtcpFb != -1)
-            {
-                SdpRtcpFeedback* pPliAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
-                pPliAttr->SetType("nack");
-                pPliAttr->SetParameter("pli");
-                pFormat->AddExtraParameter(pPliAttr);
-            }
-
-            nPayloadNumForRtcpFb = -1;
-            // FIR
-            if (bFirSupportedAll == IMS_TRUE && i == 0)
-            {
-                nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
-            }
-            else if (bFirSupportedAll == IMS_FALSE &&
-                    pPayload->GetRtcpFbAttr().IsFirSupported() == IMS_TRUE)
-            {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
-            }
-
-            if (nPayloadNumForRtcpFb != -1)
-            {
-                SdpRtcpFeedback* pFIRAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
-                pFIRAttr->SetType("ccm");
-                pFIRAttr->SetParameter("fir");
-                pFormat->AddExtraParameter(pFIRAttr);
-            }
-
-            nPayloadNumForRtcpFb = -1;
-            // TMMBR
-            if (bTmmbrSupportedAll == IMS_TRUE && i == 0)
-            {
-                nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
-            }
-            else if (bTmmbrSupportedAll == IMS_FALSE &&
-                    pPayload->GetRtcpFbAttr().IsTmmbrSupported() == IMS_TRUE)
-            {
-                nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
-            }
-
-            if (nPayloadNumForRtcpFb != -1)
-            {
-                SdpRtcpFeedback* pTmmbrAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
-                pTmmbrAttr->SetType("ccm");
-                pTmmbrAttr->SetParameter("tmmbr");
-                pFormat->AddExtraParameter(pTmmbrAttr);
-            }
-        }
-
-        pDescriptor->SetMediaFormat(pFormat);
-
-        delete pFormat;
+        AString strChannel;
+        strChannel.Sprintf("/%d", nChannel);
+        strRtpMap.Append(strChannel);
     }
 
-    // make direction
-    pDescriptor->SetDirection(pProfile->GetDirection());
+    IMS_TRACE_D("GenerateRtpMap() - RtpMap [%s], ", strRtpMap.GetStr(), 0, 0);
+}
 
-    // make framerate
-    pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, pProfile->GetFrameRate());
+PRIVATE IMS_BOOL VideoSdpGenerator::GenerateFmtp(
+        OUT AString& strFmtp, IN VideoProfile::Payload* pPayload)
+{
+    if (pPayload == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
 
-    // make CVO
-    if (pProfile->GetCvoId() > 0)
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H264"))
+    {
+        VideoProfile::AvcFmtp* pAvcFmtp = (VideoProfile::AvcFmtp*)pPayload->GetFmtp();
+
+        if (pAvcFmtp == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        strFmtp = VideoNegoAvc::SetSdpFmtpFromAvcFmtp(pAvcFmtp);
+    }
+    else if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("H265"))
+    {
+        VideoProfile::HevcFmtp* pHevcFmtp = (VideoProfile::HevcFmtp*)pPayload->GetFmtp();
+
+        if (pHevcFmtp == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
+        strFmtp = VideoNegoHevc::SetSdpFmtpFromHevcFmtp(pHevcFmtp);
+    }
+    else
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("GenerateFmtp() - fmtp[%s], ", strFmtp.GetStr(), 0, 0);
+    return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL VideoSdpGenerator::GenerateCompletedFmtpRtpMap(IN const AString& strRtpMap,
+        IN const AString& strPayloadNum, IN const AString& strFmtp, OUT SdpAvCodec* pFormat)
+{
+    if (strRtpMap.IsNULL() || strPayloadNum.IsNULL() || strFmtp.IsNULL())
+    {
+        return IMS_FALSE;
+    }
+
+    AString strCompletedRtpMap = AString::ConstNull();
+    AString strCompletedFmtp = AString::ConstNull();
+
+    strCompletedRtpMap.Sprintf("%s %s", strPayloadNum.GetStr(), strRtpMap.GetStr());
+    strCompletedFmtp.Sprintf("%s %s", strPayloadNum.GetStr(), strFmtp.GetStr());
+
+    return pFormat->SetParameters(strCompletedRtpMap, strCompletedFmtp);
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateImageAttribute(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile::Payload* pPayload)
+{
+    if (pDescriptor == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    AString strImageAttr = AString::ConstNull();
+    VIDEO_RESOLUTION eResolution =
+            static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetResolution();
+
+    if (pPayload->IsImageAttrIncluded() == IMS_TRUE)
+    {
+        if (MakeImageAttributeLine(
+                    pPayload->GetRtpMap().GetPayloadNumber(), eResolution, strImageAttr))
+        {
+            pDescriptor->AddAttribute(SdpAttribute::IMAGEATTR, strImageAttr);
+            IMS_TRACE_D("GenerateImageAttribute() - [%s], ", strImageAttr.GetStr(), 0, 0);
+        }
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateFrameSize(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile::Payload* pPayload)
+{
+    if (pDescriptor == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    AString strFrameSize = AString::ConstNull();
+    VIDEO_RESOLUTION eResolution =
+            static_cast<VideoProfile::VideoFmtp*>(pPayload->GetFmtp())->GetResolution();
+
+    if (pPayload->IsFrameSizeIncluded() == IMS_TRUE)
+    {
+        if (MakeFrameSizeLine(pPayload->GetRtpMap().GetPayloadNumber(), eResolution, strFrameSize))
+        {
+            pDescriptor->AddAttribute(SdpAttribute::FRAMESIZE, strFrameSize);
+            IMS_TRACE_D("GenerateFrameSize() - [%s], ", strFrameSize.GetStr(), 0, 0);
+        }
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFb(IN VideoProfile* pProfile, IN IMS_BOOL bTrrSupportedAll,
+        IN IMS_BOOL bNackSupportedAll, IN IMS_BOOL bPliSupportedAll, IN IMS_BOOL bFirSupportedAll,
+        IN IMS_BOOL bTmmbrSupportedAll, OUT SdpAvCodec* pFormat, IN IMS_UINT32 nPayloadIndex)
+{
+    if (pProfile == IMS_NULL || pFormat == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("GenerateRtcpFb() - Avpf Support[%d], CapaNego Support[%d], AttCapa in Pcfg[%d]",
+            pProfile->IsAvpfSupported(), pProfile->IsCapaNegoForAvpfSupported(),
+            pProfile->GetCapaNego().IsAttCapaInPcfg());
+
+    if ((pProfile->IsAvpfSupported() == IMS_TRUE) &&
+            ((pProfile->IsCapaNegoForAvpfSupported() == IMS_FALSE) ||
+                    (pProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE &&
+                            pProfile->GetCapaNego().IsAttCapaInPcfg() == IMS_FALSE)))
+    {
+        VideoProfile::Payload* pPayload = pProfile->GetPayloadAt(nPayloadIndex);
+
+        GenerateRtcpFbTrrInt(pFormat, pPayload, bTrrSupportedAll, nPayloadIndex);
+        GenerateRtcpFbNack(pFormat, pPayload, bNackSupportedAll, nPayloadIndex);
+        GenerateRtcpFbPli(pFormat, pPayload, bPliSupportedAll, nPayloadIndex);
+        GenerateRtcpFbFir(pFormat, pPayload, bFirSupportedAll, nPayloadIndex);
+        GenerateRtcpFbTmmbr(pFormat, pPayload, bTmmbrSupportedAll, nPayloadIndex);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFbTrrInt(OUT SdpAvCodec* pFormat,
+        IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
+        IN IMS_UINT32 nPayloadIndex)
+{
+    if (pFormat == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nPayloadNumForRtcpFb = -1;
+
+    if (bSupportedInAllPayload == IMS_TRUE && nPayloadIndex == 0)
+    {
+        nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
+    }
+    else if (bSupportedInAllPayload == IMS_FALSE &&
+            pPayload->GetRtcpFbAttr().IsTrrSupported() == IMS_TRUE)
+    {
+        nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
+    }
+
+    if (nPayloadNumForRtcpFb != -1)
+    {
+        AString strTemp = "";
+        SdpRtcpFeedback* pTrr_IntAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
+
+        pTrr_IntAttr->SetType("trr-int");
+
+        strTemp.Sprintf("%d", pPayload->GetRtcpFbAttr().GetTrrInt());
+        pTrr_IntAttr->SetParameter(strTemp);
+
+        pFormat->AddExtraParameter(pTrr_IntAttr);
+
+        IMS_TRACE_D("GenerateRtcpFbTrrInt() - [%s]", strTemp.GetStr(), 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFbNack(OUT SdpAvCodec* pFormat,
+        IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
+        IN IMS_UINT32 nPayloadIndex)
+{
+    if (pFormat == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nPayloadNumForRtcpFb = -1;
+
+    if (bSupportedInAllPayload == IMS_TRUE && nPayloadIndex == 0)
+    {
+        nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
+    }
+    else if (bSupportedInAllPayload == IMS_FALSE &&
+            pPayload->GetRtcpFbAttr().IsNackSupported() == IMS_TRUE)
+    {
+        nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
+    }
+
+    if (nPayloadNumForRtcpFb != -1)
+    {
+        SdpRtcpFeedback* pNackAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
+        pNackAttr->SetType("nack");
+        pFormat->AddExtraParameter(pNackAttr);
+
+        IMS_TRACE_D("GenerateRtcpFbNack() - [%d]", nPayloadNumForRtcpFb, 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFbPli(OUT SdpAvCodec* pFormat,
+        IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
+        IN IMS_UINT32 nPayloadIndex)
+{
+    if (pFormat == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nPayloadNumForRtcpFb = -1;
+
+    if (bSupportedInAllPayload == IMS_TRUE && nPayloadIndex == 0)
+    {
+        nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
+    }
+    else if (bSupportedInAllPayload == IMS_FALSE &&
+            pPayload->GetRtcpFbAttr().IsPliSupported() == IMS_TRUE)
+    {
+        nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
+    }
+
+    if (nPayloadNumForRtcpFb != -1)
+    {
+        SdpRtcpFeedback* pPliAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
+        pPliAttr->SetType("nack");
+        pPliAttr->SetParameter("pli");
+        pFormat->AddExtraParameter(pPliAttr);
+
+        IMS_TRACE_D("GenerateRtcpFbPli() - [%d]", nPayloadNumForRtcpFb, 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFbFir(OUT SdpAvCodec* pFormat,
+        IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
+        IN IMS_UINT32 nPayloadIndex)
+{
+    if (pFormat == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nPayloadNumForRtcpFb = -1;
+
+    if (bSupportedInAllPayload == IMS_TRUE && nPayloadIndex == 0)
+    {
+        nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
+    }
+    else if (bSupportedInAllPayload == IMS_FALSE &&
+            pPayload->GetRtcpFbAttr().IsFirSupported() == IMS_TRUE)
+    {
+        nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
+    }
+
+    if (nPayloadNumForRtcpFb != -1)
+    {
+        SdpRtcpFeedback* pFIRAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
+        pFIRAttr->SetType("ccm");
+        pFIRAttr->SetParameter("fir");
+        pFormat->AddExtraParameter(pFIRAttr);
+
+        IMS_TRACE_D("GenerateRtcpFbFir() - [%d]", nPayloadNumForRtcpFb, 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateRtcpFbTmmbr(OUT SdpAvCodec* pFormat,
+        IN VideoProfile::Payload* pPayload, IN IMS_BOOL bSupportedInAllPayload,
+        IN IMS_UINT32 nPayloadIndex)
+{
+    if (pFormat == IMS_NULL || pPayload == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nPayloadNumForRtcpFb = -1;
+
+    if (bSupportedInAllPayload == IMS_TRUE && nPayloadIndex == 0)
+    {
+        nPayloadNumForRtcpFb = SdpMediaFormatParameter::PT_WILDCARD;
+    }
+    else if (bSupportedInAllPayload == IMS_FALSE &&
+            pPayload->GetRtcpFbAttr().IsTmmbrSupported() == IMS_TRUE)
+    {
+        nPayloadNumForRtcpFb = (IMS_SINT32)pPayload->GetRtpMap().GetPayloadNumber();
+    }
+
+    if (nPayloadNumForRtcpFb != -1)
+    {
+        SdpRtcpFeedback* pTmmbrAttr = new SdpRtcpFeedback(nPayloadNumForRtcpFb);
+        pTmmbrAttr->SetType("ccm");
+        pTmmbrAttr->SetParameter("tmmbr");
+        pFormat->AddExtraParameter(pTmmbrAttr);
+
+        IMS_TRACE_D("GenerateRtcpFbTmmbr() - [%d]", nPayloadNumForRtcpFb, 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateDirection(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nDirection = (IMS_SINT32)pProfile->GetDirection();
+
+    pDescriptor->SetDirection(nDirection);
+    IMS_TRACE_D("GenerateDirection() - direction[%d]", nDirection, 0, 0);
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateFrameRate(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nFrameRate = (IMS_SINT32)pProfile->GetFrameRate();
+
+    pDescriptor->AddAttributeInt(SdpAttribute::FRAMERATE, nFrameRate);
+    IMS_TRACE_D("GenerateFrameRate() - framerate[%d]", nFrameRate, 0, 0);
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateCvo(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_SINT32 nCvoId = pProfile->GetCvoId();
+
+    if (nCvoId > 0)
     {
         AString strCvoAttribute;
-        strCvoAttribute.Sprintf("%d urn:3gpp:video-orientation", pProfile->GetCvoId());
+        strCvoAttribute.Sprintf("%d urn:3gpp:video-orientation", nCvoId);
         pDescriptor->AddAttribute(SdpAttribute::ATTRIBUTE_OTHER, strCvoAttribute, "extmap");
-    }
 
-    // make Capa Nego Attribute
-    if (pProfile->IsCapaNegoForAvpfSupported() == IMS_TRUE)
+        IMS_TRACE_D("GenerateCvo() - cvo id[%d]", nCvoId, 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateCapaNegoAttribute(
+        OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile)
+{
+    if (pDescriptor == IMS_NULL || pProfile == IMS_NULL)
     {
-        // add "ACFG" if it's a initial answer
-        if (pProfile->GetCapaNego().GetAcfg().GetLength() > 0)
-        {
-            AString strAcfg;
-            IMS_TRACE_D("Generate() - Negotiated Acfg [%s]",
-                    pProfile->GetCapaNego().GetAcfg().GetStr(), 0, 0);
-            strAcfg.Sprintf("%s", pProfile->GetCapaNego().GetAcfg().GetStr());
-            pDescriptor->AddAttribute(SdpAttribute::ACFG, strAcfg);
-        }
-
-        IMS_TRACE_D("Generate() Support Avpf[%d], Transport Type[%s]", pProfile->IsAvpfSupported(),
-                pProfile->GetTransportType().GetStr(), 0);
-
-        if (pProfile->IsAvpfSupported() == IMS_TRUE &&
-                pProfile->GetTransportType().Contains("AVPF") == IMS_FALSE)
-        {
-            // make tcap, acap, pcfg for capa nego offer...
-            IMS_UINT32 i = 0;
-            // AString strTcap = "1 RTP/AVPF";             // only support avpf profile
-            AString strTcap = "";
-            AString strAcap = "";
-            AString strPcfg = "";
-
-            IMS_TRACE_I("Generate() - Entered, PcfgSize[%d], TcapSize[%d], AcapSize[%d]",
-                    pProfile->GetCapaNego().GetListPcfg().GetSize(),
-                    pProfile->GetCapaNego().GetMapTcap().GetSize(),
-                    pProfile->GetCapaNego().GetMapAcap().GetSize());
-
-            for (i = 0; i < pProfile->GetCapaNego().GetMapTcap().GetSize(); i++)
-            {
-                strTcap = "";
-                strTcap.Sprintf("%d %s", i + 1,
-                        pProfile->GetCapaNego().GetMapTcap().GetValueAt(i).GetStr());
-                pDescriptor->AddAttribute(SdpAttribute::TCAP, strTcap);
-            }
-
-            if (pProfile->GetCapaNego().IsAttCapaInPcfg() == IMS_TRUE)
-            {
-                for (i = 0; i < pProfile->GetCapaNego().GetMapAcap().GetSize(); i++)
-                {
-                    strAcap = "";
-                    strAcap.Sprintf("%d %s", i + 1,
-                            pProfile->GetCapaNego().GetMapAcap().GetValueAt(i).GetStr());
-                    pDescriptor->AddAttribute(SdpAttribute::ACAP, strAcap);
-                    IMS_TRACE_I("Generate() - Add strAcap : %s", strAcap.GetStr(), 0, 0);
-                }
-            }
-
-            for (i = 0; i < pProfile->GetCapaNego().GetListPcfg().GetSize(); i++)
-            {
-                strPcfg = "";
-                strPcfg.Sprintf(
-                        "%d %s", i + 1, pProfile->GetCapaNego().GetListPcfg().GetAt(i).GetStr());
-                pDescriptor->AddAttribute(SdpAttribute::PCFG, strPcfg);
-            }
-        }
+        return;
     }
 
-    return IMS_TRUE;
+    if (pProfile->IsCapaNegoForAvpfSupported() != IMS_TRUE)
+    {
+        return;
+    }
+
+    MediaBaseProfile::CapaNego objCapaNego = pProfile->GetCapaNego();
+    IMS_BOOL bAvpfSupport = pProfile->IsAvpfSupported();
+    AString strTransportType = pProfile->GetTransportType();
+
+    IMS_TRACE_D("GenerateCapaNegoAttribute() Support Avpf[%d], Transport Type[%s]", bAvpfSupport,
+            strTransportType.GetStr(), 0);
+
+    GenerateAcfg(pDescriptor, objCapaNego);
+
+    if (bAvpfSupport == IMS_TRUE && strTransportType.Contains("AVPF") == IMS_FALSE)
+    {
+        IMS_TRACE_I("Generate() - Entered, Pcfg size[%d], Tcap size[%d], Acap size[%d]",
+                objCapaNego.GetListPcfg().GetSize(), objCapaNego.GetMapTcap().GetSize(),
+                objCapaNego.GetMapAcap().GetSize());
+
+        GenerateTcap(pDescriptor, objCapaNego);
+        GenerateAcap(pDescriptor, objCapaNego);
+        GeneratePcfg(pDescriptor, objCapaNego);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateAcfg(
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
+{
+    if (pDescriptor == IMS_NULL)
+    {
+        return;
+    }
+
+    AString strAcfg = objCapaNego.GetAcfg();
+
+    if (strAcfg.GetLength() > 0)
+    {
+        AString strTemp;
+        strTemp.Sprintf("%s", strAcfg.GetStr());
+        pDescriptor->AddAttribute(SdpAttribute::ACFG, strTemp);
+
+        IMS_TRACE_D("GenerateAcfg() - Add acfg[%s]", strTemp.GetStr(), 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateTcap(
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
+{
+    if (pDescriptor == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsMap<IMS_SINT32, AString> objTcap = objCapaNego.GetMapTcap();
+
+    for (IMS_UINT32 i = 0; i < objTcap.GetSize(); i++)
+    {
+        AString strTemp = "";
+        strTemp.Sprintf("%d %s", i + 1, objTcap.GetValueAt(i).GetStr());
+
+        pDescriptor->AddAttribute(SdpAttribute::TCAP, strTemp);
+
+        IMS_TRACE_I("GenerateTcap() - Add tcap[%s]", strTemp.GetStr(), 0, 0);
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GenerateAcap(
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
+{
+    if (pDescriptor == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsMap<IMS_SINT32, AString> objAcap = objCapaNego.GetMapAcap();
+
+    if (objCapaNego.IsAttCapaInPcfg() == IMS_TRUE)
+    {
+        for (IMS_UINT32 i = 0; i < objAcap.GetSize(); i++)
+        {
+            AString strTemp = "";
+            strTemp.Sprintf("%d %s", i + 1, objAcap.GetValueAt(i).GetStr());
+
+            pDescriptor->AddAttribute(SdpAttribute::ACAP, strTemp);
+
+            IMS_TRACE_I("GenerateAcap() - Add acap[%s]", strTemp.GetStr(), 0, 0);
+        }
+    }
+}
+
+PRIVATE
+void VideoSdpGenerator::GeneratePcfg(
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile::CapaNego& objCapaNego)
+{
+    if (pDescriptor == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsList<AString> lstPcfg = objCapaNego.GetListPcfg();
+
+    for (IMS_UINT32 i = 0; i < lstPcfg.GetSize(); i++)
+    {
+        AString strTemp = "";
+        strTemp.Sprintf("%d %s", i + 1, lstPcfg.GetAt(i).GetStr());
+
+        pDescriptor->AddAttribute(SdpAttribute::PCFG, strTemp);
+
+        IMS_TRACE_I("GeneratePcfg() - Add pcfg[%s]", strTemp.GetStr(), 0, 0);
+    }
 }
 
 PRIVATE IMS_BOOL VideoSdpGenerator::MakeImageAttributeLine(
