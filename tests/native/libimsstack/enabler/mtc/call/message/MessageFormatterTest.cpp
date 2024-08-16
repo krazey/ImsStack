@@ -741,18 +741,30 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
 
 TEST_F(MessageFormatterTest, GetRejectPhrase)
 {
-    const AString strTestPhrase = "TEST_PHRASE";
-    ON_CALL(*pConfigurationManager, GetCallRejectReasonPhrase).WillByDefault(Return(strTestPhrase));
+    const IMS_CHAR pszTestPhrase[] = "TEST_PHRASE";
+    ON_CALL(*pConfigurationManager, GetCallRejectReasonPhrase)
+            .WillByDefault(Return(AString(pszTestPhrase)));
 
     EXPECT_TRUE(GetRejectPhrase(CODE_NONE).GetLength() < 1);
-    EXPECT_EQ(GetRejectPhrase(CODE_USER_DECLINE), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CS_CALL), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_LOCAL_CALL_BUSY), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_SETUP), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_MAX_CALL_LIMIT_REACHED), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE), strTestPhrase);
-    EXPECT_EQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE), strTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_USER_DECLINE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CS_CALL).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_LOCAL_CALL_BUSY).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_SETUP).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_MAX_CALL_LIMIT_REACHED).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_TIMEOUT_NO_ANSWER).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_REJECT_ONGOING_CALL_UPGRADE).GetStr(), pszTestPhrase);
+    EXPECT_STREQ(GetRejectPhrase(CODE_MEDIA_NOT_ACCEPTABLE).GetStr(), pszTestPhrase);
+}
+
+TEST_F(MessageFormatterTest, GetRejectPhraseForBusySpecialCase)
+{
+    CallReasonInfo objReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON);
+
+    IMS_SINT32 eStatusCode;
+    AString strPhrase;
+    pFormatter->FormRejectMessage(objReasonInfo, eStatusCode, strPhrase);
+
+    EXPECT_STREQ("RTT on", strPhrase.GetStr());
 }
 
 TEST_F(MessageFormatterTest, SetUpdateReason)

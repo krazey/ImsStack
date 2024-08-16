@@ -18,6 +18,7 @@
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
@@ -40,6 +41,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
+    ImsList<IMtcCall*> lstCalls;
     ImsList<IMtcCall*> lstOtherCalls;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
@@ -48,6 +50,7 @@ public:
     UpdatingInfo* pUpdatingInfo;
     MockISession objSession;
     MockIMtcCall objMtcCall;
+    MockIMtcCallManager objCallManager;
 
 protected:
     virtual void SetUp() override
@@ -62,6 +65,8 @@ protected:
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
         ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objMtcCall));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+
         ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
     }
 
@@ -75,6 +80,12 @@ protected:
             delete lstOtherCalls.GetAt(nIndex);
         }
         lstOtherCalls.Clear();
+
+        for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+        {
+            delete lstCalls.GetAt(nIndex);
+        }
+        lstCalls.Clear();
     }
 
     MockIMtcCall* CreateMockIMtcCall(CallType eCallType)
@@ -320,4 +331,18 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVideoRttExists)
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResultForVt.objReason);
     }
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForConferenceDuringRtt)
+{
+    lstCalls.Append(CreateMockIMtcCall(CallType::RTT));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
+
+    ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::IDLE));
+    objCallInfo.bConference = IMS_TRUE;
+
+    CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VOIP));
+    Result objResult = objBlockRule.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON), objResult.objReason);
 }
