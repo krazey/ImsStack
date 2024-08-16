@@ -186,12 +186,12 @@ protected:
         ON_CALL(objSipMessage, IsMessageRpr).WillByDefault(Return(IMS_FALSE));
     }
 
-    void SetUpStartErrorHandler(IN MockIMessage& objMessage, IN IMS_SINT32 nStatusCode,
+    void SetUpStartErrorHandler(IN MockIMessage& objMessage, IN IMS_SINT32 eStatusCode,
             IN IMS_BOOL bCsfb, IN IMS_SINT32 nPolicyOfTimerB, IN IMS_BOOL bEpsFallbackRequired,
             IN IMS_BOOL bWiFi)
     {
-        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
-        ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(nStatusCode))
+        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(eStatusCode));
+        ON_CALL(*pConfigurationManager, IsRejectCodeForCsfb(eStatusCode))
                 .WillByDefault(Return(bCsfb));
         ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(bWiFi));
         ON_CALL(objService, IsEpsCombinedAttach).WillByDefault(Return(bCsfb));
@@ -1611,7 +1611,82 @@ TEST_F(OutgoingStateTest, SessionRprReceivedInvokesSendProgressing)
     EXPECT_TRUE(pSupplementaryService->Get(SuppType::SESSION_ID));
 }
 
-TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogIfSupportedAndSdpAnswerIncluded)
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor180WithSdpAnswer)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor181WithSdpAnswer)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_181));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor182WithSdpAnswer)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_182));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMtcSession, SendPrack(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    SetSdpOaSuccessWithSdp(objMessage, objSipMessage);  // to cover StartEpsFallbackWatchdogIfNeeded
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(2000));
+    ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pEpsFbTrigger, StartWatchdog);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRprReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedInvokesStartWatchdogFor183WithSdpAnswer)
 {
     const AString strSupportedOptionTag("supportedExtension");
     ON_CALL(objMtcSession, GetExtensionSet)
