@@ -27,6 +27,8 @@ public:
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
 
 private:
+    void ResetNegotiatedProfile(
+            IN const VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile);
     IMS_SINT32 FindPayloadIndexFromProfile(
             IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload);
     IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,

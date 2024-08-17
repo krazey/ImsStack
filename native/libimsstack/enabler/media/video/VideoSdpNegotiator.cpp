@@ -38,25 +38,9 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
 
     IMS_BOOL ret = IMS_FALSE;
 
-    // Setting IP of mine
-    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-
-    IMS_TRACE_D("Negotiate() - IPAddr nego[%s] src[%s] DestPayloadSize[%d]",
-            pNegotiatedProfile->GetIpAddress().ToCharString(),
-            pLocalProfile->GetIpAddress().ToCharString(), pPeerProfile->GetPayloadList().GetSize());
-
-    // Setting RTP/RTCP port of mine
-    pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
-    pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
-
-    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
+    if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        *pNegotiatedProfile = *pLocalProfile;
-        pNegotiatedProfile->SetDataPort(0);
-        pNegotiatedProfile->SetNegotiatedPayloadIndex(-1);
-
-        IMS_TRACE_D("Negotiate() - ZERO Port. DO NOT Use the video[%d][%d]",
-                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort(), 0);
+        ResetNegotiatedProfile(pLocalProfile, pNegotiatedProfile);
         return IMS_TRUE;
     }
 
@@ -887,6 +871,20 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
             0);
 
     return ret;
+}
+
+PRIVATE
+void VideoSdpNegotiator::ResetNegotiatedProfile(
+        IN const VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile)
+{
+    if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    *pNegotiatedProfile = *pLocalProfile;
+    pNegotiatedProfile->SetDataPort(0);
+    pNegotiatedProfile->SetNegotiatedPayloadIndex(-1);
 }
 
 PRIVATE

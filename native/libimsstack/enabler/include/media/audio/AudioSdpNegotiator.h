@@ -19,6 +19,8 @@ public:
             IN MediaConfiguration* pConfig);
 
 private:
+    void ResetNegotiatedProfile(
+            IN const AudioProfile* pLocalProfile, OUT AudioProfile* AudioProfile);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
             OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);

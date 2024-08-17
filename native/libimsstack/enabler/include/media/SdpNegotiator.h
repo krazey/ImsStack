@@ -15,6 +15,9 @@ public:
     virtual ~SdpNegotiator();
 
 protected:
+    IMS_BOOL NegotiateIpPort(IN MediaBaseProfile* pLocalProfile, IN MediaBaseProfile* pPeerProfile,
+            OUT MediaBaseProfile* pNegotiatedProfile);
+
     MEDIA_CONTENT_TYPE m_eType;
 };
 
