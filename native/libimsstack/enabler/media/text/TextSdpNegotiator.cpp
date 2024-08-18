@@ -33,11 +33,90 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        ResetNegotiatedProfile(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, pNegotiatedProfile);
         return IMS_TRUE;
     }
 
-    // Compare each payload based destination's profile
+    IMS_BOOL bPayloadNegotiated = NegotiatePayload(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+
+    IMS_BOOL bRet = IMS_FALSE;
+
+    if (bPayloadNegotiated)
+    {
+        NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile, bIsOfferReceived);
+        NegotiateBandwidth(pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
+
+        bRet = IMS_TRUE;
+    }
+    else
+    {
+        IMS_TRACE_D("Negotiate() - no negotiated payload. use the LocalProfile and make port 0", 0,
+                0, 0);
+
+        bRet = ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile, pNegotiatedProfile);
+    }
+
+    NegotiateRtcpInterval(pNegotiatedProfile, pConfig);
+
+    IMS_TRACE_D("Negotiate() - negotiated payload size[%d], port[%d], direction[%d], ",
+            pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
+            pNegotiatedProfile->GetDirection());
+
+    return bRet;
+}
+
+PRIVATE
+IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
+        IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
+        OUT TextProfile* pNegotiatedProfile)
+{
+    IMS_BOOL bRet = IMS_FALSE;
+
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return bRet;
+    }
+
+    if (bPeerPreferred)
+    {
+        IMS_TRACE_D("ResetNegotiatedProfile() - by Peer Profile payload size[%d]",
+                pPeerProfile->GetPayloadList().GetSize(), 0, 0);
+
+        *pNegotiatedProfile =
+                (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
+
+        pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
+        pNegotiatedProfile->SetDataPort(0);
+    }
+    else
+    {
+        IMS_TRACE_D("ResetNegotiatedProfile() - by Local Profile payload size[%d]",
+                pLocalProfile->GetPayloadList().GetSize(), 0, 0);
+
+        if (pLocalProfile->GetPayloadList().GetSize() > 0)
+        {
+            *pNegotiatedProfile = *pLocalProfile;
+            bRet = IMS_TRUE;
+        }
+
+        pNegotiatedProfile->SetDataPort(0);
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
+    }
+
+    return bRet;
+}
+
+PRIVATE
+IMS_BOOL TextSdpNegotiator::NegotiatePayload(IN TextProfile* pLocalProfile,
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
+{
+    IMS_BOOL bRet = IMS_FALSE;
+
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return bRet;
+    }
+
     for (IMS_UINT32 i = 0; i < pPeerProfile->GetPayloadList().GetSize(); i++)
     {
         TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
@@ -52,91 +131,160 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
         {
             if (FindT140InProfile(pLocalProfile, pPayload) == IMS_TRUE)
             {
-                TextProfile::Payload* pT140 = new TextProfile::Payload();
-                pT140->SetRtpMap(pPayload->GetRtpMap());
-
-                if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
-                {
-                    pT140->SetFmtp(new TextProfile::RedFmtp(
-                            *static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp())));
-                }
-
-                pNegotiatedProfile->GetPayloadList().Append(pT140);
+                AppendT140Payload(pPayload, pNegotiatedProfile);
+                bRet = IMS_TRUE;
             }
         }
     }
 
-    IMS_BOOL bRet = IMS_FALSE;
-
-    if (pNegotiatedProfile->GetPayloadList().GetSize() > 0)
-    {
-        // Setting direction
-        if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
-        {
-            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
-                    pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
-        }
-        else
-        {
-            pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-        }
-
-        TextProfileUtil::MakeNegotiatedBandwidth(static_cast<TextConfiguration*>(pConfig),
-                pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
-        bRet = IMS_TRUE;
-    }
-    else
-    {
-        if (pLocalProfile->GetPayloadList().GetSize() > 0)
-        {
-            IMS_TRACE_D("Negotiate() - no negotiated payload. use the LocalProfile and "
-                        "make port 0 ",
-                    0, 0, 0);
-            *pNegotiatedProfile = *pLocalProfile;
-            bRet = IMS_TRUE;
-        }
-        else
-        {
-            IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
-        }
-
-        pNegotiatedProfile->SetDataPort(0);
-        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
-    }
-
-    IMS_TRACE_D("Negotiate() - Direction=%d, nego rs=%d, rr=%d", pNegotiatedProfile->GetDirection(),
-            pNegotiatedProfile->GetBandwidthRs(), pNegotiatedProfile->GetBandwidthRr());
-
-    if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
-    {
-        pNegotiatedProfile->SetRtcpInterval(0);
-        IMS_TRACE_D("Negotiate() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
-    }
-    else
-    {
-        pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
-    }
-
-    IMS_TRACE_D("Negotiate() - negotiated payload size[%d], port[%d], direction[%d], ",
-            pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
-            pNegotiatedProfile->GetDirection());
     return bRet;
+}
+PRIVATE
+void TextSdpNegotiator::AppendT140Payload(
+        IN TextProfile::Payload* pPayload, OUT TextProfile* pNegotiatedProfile)
+{
+    TextProfile::Payload* pT140 = new TextProfile::Payload();
+
+    if (pT140 == IMS_NULL)
+    {
+        return;
+    }
+
+    pT140->SetRtpMap(pPayload->GetRtpMap());
+
+    if (pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("red"))
+    {
+        pT140->SetFmtp(
+                new TextProfile::RedFmtp(*static_cast<TextProfile::RedFmtp*>(pPayload->GetFmtp())));
+    }
+
+    pNegotiatedProfile->GetPayloadList().Append(pT140);
 }
 
 PRIVATE
-void TextSdpNegotiator::ResetNegotiatedProfile(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
+void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile,
+        IN IMS_BOOL bIsOfferReceived)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
         return;
     }
 
-    *pNegotiatedProfile =
-            (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
+    if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
+    {
+        pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
+                pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
+    }
+    else
+    {
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
+    }
 
-    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-    pNegotiatedProfile->SetDataPort(0);
+    IMS_TRACE_D("NegotiateDirection() - direction[%d]", pNegotiatedProfile->GetDirection(), 0, 0);
+}
+
+PRIVATE
+void TextSdpNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
+        IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
+        IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT TextProfile* pNegotiatedProfile)
+{
+    IMS_TRACE_D("NegotiateBandwidth() - bIsOfferReceived[%d]", bIsOfferReceived, 0, 0);
+
+    if (bIsOfferReceived == IMS_FALSE)
+    {
+        if (pPeerProfile->GetBandwidthAs() > 0)
+        {
+            pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
+        }
+        else
+        {
+            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
+        }
+
+        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
+        {
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
+
+            IMS_TRACE_D("NegotiateBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+                    pLocalProfile->GetBandwidthRr());
+        }
+
+        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
+    }
+    else
+    {
+        if (nAsValueOfNegoticatedCodec > 0)
+        {
+            pNegotiatedProfile->SetBandwidthAs(nAsValueOfNegoticatedCodec);
+
+            if (nAsValueOfNegoticatedCodec > pPeerProfile->GetBandwidthAs() &&
+                    pPeerProfile->GetBandwidthAs() > 0)
+            {
+                pNegotiatedProfile->SetBandwidthAs(pPeerProfile->GetBandwidthAs());
+            }
+        }
+        else
+        {
+            pNegotiatedProfile->SetBandwidthAs(pLocalProfile->GetBandwidthAs());
+        }
+
+        // Exception Handling (b=RS/RR line is not included in Answer SDP)
+        if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)
+        {
+            pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
+
+            IMS_TRACE_D("NegotiateBandwidth() - AS[%d] RS[%d] RR[%d]",
+                    pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+                    pLocalProfile->GetBandwidthRr());
+            return;
+        }
+
+        // Dest RS & RR == Zero case, rtcp should be disable and RS & RR == Zero in IR.92
+        // release 12.
+        if (pPeerProfile->GetBandwidthRs() == 0 && pPeerProfile->GetBandwidthRr() == 0)
+        {
+            pNegotiatedProfile->SetBandwidthRs(pPeerProfile->GetBandwidthRs());
+            pNegotiatedProfile->SetBandwidthRr(pPeerProfile->GetBandwidthRr());
+
+            IMS_TRACE_D("NegotiateBandwidth() - AS[%d], RTCP disable & use dest RS[%d] RR[%d]",
+                    pNegotiatedProfile->GetBandwidthAs(), pNegotiatedProfile->GetBandwidthRs(),
+                    pNegotiatedProfile->GetBandwidthRr());
+
+            return;
+        }
+
+        pNegotiatedProfile->SetBandwidthRs(pLocalProfile->GetBandwidthRs());
+        pNegotiatedProfile->SetBandwidthRr(pLocalProfile->GetBandwidthRr());
+    }
+
+    IMS_TRACE_D("MakeNegotiatedBandwidth() - Negotiated Profile AS[%d] RS[%d] RR[%d]",
+            pLocalProfile->GetBandwidthAs(), pLocalProfile->GetBandwidthRs(),
+            pLocalProfile->GetBandwidthRr());
+}
+
+PRIVATE
+void TextSdpNegotiator::NegotiateRtcpInterval(
+        OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig)
+{
+    if (pNegotiatedProfile == IMS_NULL || pConfig == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pNegotiatedProfile->GetBandwidthRs() == 0 && pNegotiatedProfile->GetBandwidthRr() == 0)
+    {
+        pNegotiatedProfile->SetRtcpInterval(0);
+        IMS_TRACE_D("NegotiateRtcpInterval() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
+    }
+    else
+    {
+        pNegotiatedProfile->SetRtcpInterval(pConfig->GetRtcpInterval());
+    }
 }
 
 PRIVATE IMS_BOOL TextSdpNegotiator::FindT140InProfile(
