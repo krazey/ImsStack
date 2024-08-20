@@ -22,6 +22,7 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -216,6 +217,11 @@ protected:
     IMtcCallContext& m_objContext;
 
 private:
+    inline IMS_BOOL Is18x(IN IMS_SINT32 eStatusCode) const
+    {
+        return SipStatusCode::SC_180 <= eStatusCode && eStatusCode <= SipStatusCode::SC_183;
+    }
+
     const CallStateName m_eStateName;
 };
 

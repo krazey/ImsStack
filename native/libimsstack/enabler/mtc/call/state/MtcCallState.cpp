@@ -1025,8 +1025,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
 PROTECTED
 void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
 {
-    if (objMessage.GetStatusCode() != SipStatusCode::SC_183 &&
-            objMessage.GetStatusCode() != SipStatusCode::SC_200)
+    if (!Is18x(objMessage.GetStatusCode()) && objMessage.GetStatusCode() != SipStatusCode::SC_200)
     {
         return;
     }
