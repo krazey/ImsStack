@@ -21,6 +21,36 @@ public:
 private:
     void ResetNegotiatedProfile(
             IN const AudioProfile* pLocalProfile, OUT AudioProfile* AudioProfile);
+    void ReserveNegotiatedCodec(OUT ImsList<AudioProfile::Payload*>& templstNegotiatedPayloads,
+            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* nNegoModeSetList,
+            OUT IMS_UINT32* nNegoDefaultRtpModeSet, OUT IMS_UINT32* BandwidthNegoList,
+            OUT IMS_UINT32* BitrateNegoList, OUT IMS_UINT32* ModeSetNegoList);
+    void NegotiatePayload(OUT ImsList<AudioProfile::Payload*>& lstNegotiatedPayloads,
+            IN ImsList<AudioProfile::Payload*> templstNegotiatedPayloads,
+            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+            OUT AudioProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived,
+            OUT IMS_UINT32* nNegoModeSetList, OUT IMS_UINT32* nNegoDefaultRtpModeSet,
+            OUT IMS_BOOL* bProperNegotiatedTe);
+    void ClearTempPayloadList(IN ImsList<AudioProfile::Payload*>& templstNegotiatedPayloads);
+    void NegotiatePayloadTelephonEvent8000(IN AudioProfile* pPeerProfile,
+            IN AudioProfile::Payload* pNegotiatedPayload, OUT AudioProfile* pNegotiatedProfile);
+    IMS_BOOL NegotiateDirection(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+            OUT AudioProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived);
+    void NegotiateRtcpXr(IN AudioProfile* pLocalProfile, OUT AudioProfile* pNegotiatedProfile);
+    void NegotiatePtime(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalPtime);
+    void NegotiateMaxPtime(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalMaxPtime);
+    void NegotiateAnbr(IN IMS_BOOL nSupportAnbrLocal, IN IMS_BOOL nSupportAnbrPeer,
+            OUT AudioProfile* pNegotiatedProfile);
+    void NegotiateBandwidth(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
+            OUT AudioProfile* pNegotiatedProfile, IN AudioProfile::Payload* pNegotiatedPayload,
+            IN MediaConfiguration* pConfig, IN IMS_BOOL bIsOfferReceived);
+    IMS_SINT32 NegotiateAs(IN AudioProfile::Payload* pNegotiatedPayload, IN IMS_BOOL bIpv6);
+    IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig, IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
+            IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT AudioProfile* pNegotiatedProfile);
+    void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nRtcpInterval,
+            IN IMS_SINT32 nRtcpLiveInterval);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
             OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
