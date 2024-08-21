@@ -21,20 +21,16 @@ public:
 private:
     void ResetNegotiatedProfile(
             IN const AudioProfile* pLocalProfile, OUT AudioProfile* AudioProfile);
-    void ReserveNegotiatedCodec(OUT ImsList<AudioProfile::Payload*>& templstNegotiatedPayloads,
-            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* nNegoModeSetList,
-            OUT IMS_UINT32* nNegoDefaultRtpModeSet, OUT IMS_UINT32* BandwidthNegoList,
-            OUT IMS_UINT32* BitrateNegoList, OUT IMS_UINT32* ModeSetNegoList);
-    void NegotiatePayload(OUT ImsList<AudioProfile::Payload*>& lstNegotiatedPayloads,
-            IN ImsList<AudioProfile::Payload*> templstNegotiatedPayloads,
-            IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            OUT AudioProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoModeSetList, OUT IMS_UINT32* nNegoDefaultRtpModeSet,
-            OUT IMS_BOOL* bProperNegotiatedTe);
-    void ClearTempPayloadList(IN ImsList<AudioProfile::Payload*>& templstNegotiatedPayloads);
-    void NegotiatePayloadTelephonEvent8000(IN AudioProfile* pPeerProfile,
-            IN AudioProfile::Payload* pNegotiatedPayload, OUT AudioProfile* pNegotiatedProfile);
+    AudioProfile::Payload* NegotiatePayload(IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile,
+            IN IMS_BOOL bIsOfferReceived);
+    AudioProfile::Payload* NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+            IN IMS_BOOL bIsOfferReceived);
+    IMS_BOOL NegotiateTelephoneEventPayload(IN IMS_SINT32 nNegotiatedSamplingRate,
+            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
+    void NegotiateTelephoneEvent8000Payload(IN IMS_SINT32 nNegotiatedSamplingRate,
+            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     IMS_BOOL NegotiateDirection(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             OUT AudioProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived);
     void NegotiateRtcpXr(IN AudioProfile* pLocalProfile, OUT AudioProfile* pNegotiatedProfile);
