@@ -36,9 +36,10 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    Result CheckSupportTextVideo();
-    Result CheckSupportVideoMultipleCall();
+    IMS_BOOL IsBlockedByTextVideoCall();
+    IMS_BOOL IsBlockedByVideoMultipleCall();
     static IMS_BOOL HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL HasRttCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL IsVideoCall(IN CallType eCallType);
 
     IMtcCallContext& m_objContext;

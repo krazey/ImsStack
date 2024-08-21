@@ -46,6 +46,9 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+// VZ_REQ_5GNRSAVOICEVIDEO_4105999311953274 - 11
+LOCAL const AString REASON_PHRASE_RTT_ON = "RTT on";
+
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
@@ -859,6 +862,10 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
             strPhrase = GetRejectPhrase(RejectType::ON_CS_CALL);
             break;
         case CODE_LOCAL_CALL_BUSY:
+            strPhrase = objReason.nExtraCode == EXTRA_CODE_RTT_ON
+                    ? REASON_PHRASE_RTT_ON
+                    : GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
+            break;
         case CODE_REJECT_ONGOING_CALL_SETUP:
             strPhrase = GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
             break;
