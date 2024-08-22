@@ -216,6 +216,9 @@ protected:
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
 
+    void NotifyEmergencyInitiated();
+    void NotifyEmergencyInitiationDone();
+
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
     IMS_BOOL IsHandleBlocked(IN const IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const;
 
@@ -333,6 +336,8 @@ protected:
 
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;
+
+    IMS_BOOL m_bEmergencyInitiated;
 
     IMS_UINT32 m_nAppState;
 

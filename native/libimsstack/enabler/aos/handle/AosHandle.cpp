@@ -108,6 +108,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_bDataConnected(IMS_FALSE),
         m_bNetSrvIn(IMS_FALSE),
         m_nNetworkType(NW_REPORT_RADIO_INVALID),
+        m_bEmergencyInitiated(IMS_FALSE),
         m_nAppState(APP_STATE_DISCONNECTED)
 {
     IMS_CHAR acLog[256 + 1] = {
@@ -318,6 +319,11 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
             return IMS_FALSE;
     }
 
+    if (m_bEmergencyInitiated && GetState() != STATE_CONNECTING)
+    {
+        NotifyEmergencyInitiationDone();
+    }
+
     ReportRegState();
 
     return IMS_TRUE;
@@ -332,6 +338,14 @@ PUBLIC VIRTUAL void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bB
 PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_I(APPPROFILE, "Control :: Type[%d]", nType, 0, 0);
+
+    if (nType == ImsAosControl::REGISTER_START || nType == ImsAosControl::REGISTER_START_WITH_WLAN)
+    {
+        if (IsEmergencyService() && GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
+        {
+            NotifyEmergencyInitiated();
+        }
+    }
 
     return m_piAppContext->GetApp()->RequestCmd(nType);
 }
@@ -1126,6 +1140,36 @@ IMS_BOOL AosHandle::UpdateIpcan()
     }
 
     return IMS_FALSE;
+}
+
+PROTECTED
+void AosHandle::NotifyEmergencyInitiated()
+{
+    if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
+    {
+        m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+    }
+    else if (m_nServiceType == ImsAosService::EMERGENCY_MTS)
+    {
+        m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
+    }
+
+    m_bEmergencyInitiated = IMS_TRUE;
+}
+
+PROTECTED
+void AosHandle::NotifyEmergencyInitiationDone()
+{
+    if (m_nServiceType == ImsAosService::EMERGENCY_MTC)
+    {
+        m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_DONE);
+    }
+    else if (m_nServiceType == ImsAosService::EMERGENCY_MTS)
+    {
+        m_piAppContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_DONE);
+    }
+
+    m_bEmergencyInitiated = IMS_FALSE;
 }
 
 PROTECTED
