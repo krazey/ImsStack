@@ -1194,8 +1194,8 @@ public class CarrierConfig {
         public static final String KEY_UT_OMIT_NAMESPACE_SS_BOOL = "ut_omit_namespace_ss_bool";
         public static final String KEY_UT_OMIT_NAMESPACE_CP_BOOL = "ut_omit_namespace_cp_bool";
         public static final String KEY_UT_INSERT_NEW_RULE_BOOL = "ut_insert_new_rule_bool";
-        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER =
-                "ut_uri_type_for_cf_target_number";
+        public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
+                "ut_uri_type_for_cf_target_number_int";
         // Uce
         public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
                 "add_video_tag_contact_header_in_publish_bool";

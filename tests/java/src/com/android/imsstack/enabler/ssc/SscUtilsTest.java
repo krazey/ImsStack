@@ -393,7 +393,7 @@ public class SscUtilsTest {
     public void getUriFromNumer_invalidCfTargetUriType() {
         final int invalidUriType = -1;
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(invalidUriType);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -406,7 +406,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_telWithLocalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -419,7 +419,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_sipWithLocalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_SIP);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -432,7 +432,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_telWithInternationalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -445,7 +445,7 @@ public class SscUtilsTest {
     @Test
     public void getUriFromNumer_sipWithInternationalNumber() {
         when(mMockCarrierConfig
-                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER))
+                .getInt(CarrierConfig.Assets.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
                 .thenReturn(SscConfig.URI_TYPE_SIP);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
