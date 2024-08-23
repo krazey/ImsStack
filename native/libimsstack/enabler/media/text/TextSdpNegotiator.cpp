@@ -31,34 +31,9 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 
     IMS_TRACE_I("Negotiate()", 0, 0, 0);
 
-    // Setting IP of mine
-    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-
-    IMS_TRACE_D("Negotiate() - local address[%s] PeerPayloadSize[%d]",
-            pLocalProfile->GetIpAddress().ToCharString(), pPeerProfile->GetPayloadList().GetSize(),
-            0);
-
-    // Setting Rtp/RTCP port of mine
-    pNegotiatedProfile->SetDataPort(pLocalProfile->GetDataPort());
-    pNegotiatedProfile->SetControlPort(pLocalProfile->GetControlPort());
-
-    if (pNegotiatedProfile->GetDataPort() == 0 || pPeerProfile->GetDataPort() == 0)
+    if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        *pNegotiatedProfile =
-                (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
-
-        pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-        pNegotiatedProfile->SetDataPort(0);
-
-        IMS_TRACE_D("Negotiate() - ZERO Port. DO NOT Use the text[%d][%d],\
-                But nego is successful",
-                pNegotiatedProfile->GetDataPort(), pPeerProfile->GetDataPort(), 0);
-        return IMS_TRUE;
-    }
-
-    if (pConfig == IMS_NULL)
-    {
-        IMS_TRACE_D("Negotiate() - no config, return true to reject", 0, 0, 0);
+        ResetNegotiatedProfile(pLocalProfile, pPeerProfile, pNegotiatedProfile);
         return IMS_TRUE;
     }
 
@@ -146,6 +121,22 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
             pNegotiatedProfile->GetPayloadList().GetSize(), pNegotiatedProfile->GetDataPort(),
             pNegotiatedProfile->GetDirection());
     return bRet;
+}
+
+PRIVATE
+void TextSdpNegotiator::ResetNegotiatedProfile(IN TextProfile* pLocalProfile,
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
+{
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    {
+        return;
+    }
+
+    *pNegotiatedProfile =
+            (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
+
+    pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
+    pNegotiatedProfile->SetDataPort(0);
 }
 
 PRIVATE IMS_BOOL TextSdpNegotiator::FindT140InProfile(

@@ -19,6 +19,8 @@ public:
             IN MediaConfiguration* pConfig);
 
 private:
+    void ResetNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
+            OUT TextProfile* pNegotiatedProfile);
     IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
