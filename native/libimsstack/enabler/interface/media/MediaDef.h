@@ -95,6 +95,8 @@ typedef enum
     MEDIA_PROTOCOL_RTCP = 3,
     /** Maintain Previous Setting */
     MEDIA_PROTOCOL_NO_CHANGE = 4,
+    // RTP and RTCP both
+    MEDIA_PROTOCOL_BOTH = 5,
 } MEDIA_TRANSPORT_PROTOCOL;
 
 /** Media Inactivity Call End Reason for checking RTP-RTCP Timeout */

@@ -125,6 +125,8 @@ protected:
 
 private:
     IpAddress GetAndroidIP();
+    IMS_BOOL HandleNotifyMediaInactivity(IN IMS_UINTP nParam);
+    IMS_BOOL IsInactivityTimerExpired(IN IMS_SINT32 nRunningTimerValue, IN IMS_SINT32 nTimerValue);
 
 protected:
     IMS_UINT32 m_nSlotId;
