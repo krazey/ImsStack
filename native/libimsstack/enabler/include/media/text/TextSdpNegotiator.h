@@ -19,8 +19,17 @@ public:
             IN MediaConfiguration* pConfig);
 
 private:
-    void ResetNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
+    IMS_BOOL ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN TextProfile* pLocalProfile,
+            IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile);
+    IMS_BOOL NegotiatePayload(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
+    void AppendT140Payload(IN TextProfile::Payload* pPayload, OUT TextProfile* pNegotiatedProfile);
+    void NegotiateDirection(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
+            OUT TextProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived);
+    void NegotiateBandwidth(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
+            IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
+            OUT TextProfile* pNegotiatedProfile);
+    void NegotiateRtcpInterval(OUT TextProfile* pNegotiatedProfile, IN MediaConfiguration* pConfig);
     IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
