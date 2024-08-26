@@ -22,17 +22,15 @@ private:
     void ResetNegotiatedProfile(
             IN const AudioProfile* pLocalProfile, OUT AudioProfile* AudioProfile);
     AudioProfile::Payload* NegotiatePayload(IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile,
-            IN IMS_BOOL bIsOfferReceived);
+            IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     AudioProfile::Payload* NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
-            IN IMS_BOOL bIsOfferReceived);
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile);
     IMS_BOOL NegotiateTelephoneEventPayload(IN IMS_SINT32 nNegotiatedSamplingRate,
             IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     void NegotiateTelephoneEvent8000Payload(IN IMS_SINT32 nNegotiatedSamplingRate,
             IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     IMS_BOOL NegotiateDirection(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            OUT AudioProfile* pNegotiatedProfile, IN IMS_BOOL bIsOfferReceived);
+            OUT AudioProfile* pNegotiatedProfile);
     void NegotiateRtcpXr(IN AudioProfile* pLocalProfile, OUT AudioProfile* pNegotiatedProfile);
     void NegotiatePtime(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalPtime);
     void NegotiateMaxPtime(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nLocalMaxPtime);
@@ -40,42 +38,37 @@ private:
             OUT AudioProfile* pNegotiatedProfile);
     void NegotiateBandwidth(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             OUT AudioProfile* pNegotiatedProfile, IN AudioProfile::Payload* pNegotiatedPayload,
-            IN MediaConfiguration* pConfig, IN IMS_BOOL bIsOfferReceived);
+            IN MediaConfiguration* pConfig);
     IMS_SINT32 NegotiateAs(IN AudioProfile::Payload* pNegotiatedPayload, IN IMS_BOOL bIpv6);
     IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig, IN AudioProfile* pLocalProfile,
-            IN AudioProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-            IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT AudioProfile* pNegotiatedProfile);
+            IN AudioProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
+            OUT AudioProfile* pNegotiatedProfile);
     void NegotiateRtcpInterval(OUT AudioProfile* pNegotiatedProfile, IN IMS_SINT32 nRtcpInterval,
             IN IMS_SINT32 nRtcpLiveInterval);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
-            OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
+            OUT IMS_UINT32* pBandwidthNegoList, OUT IMS_UINT32* pBitrateNegoList,
+            OUT IMS_UINT32* pModeSetNegoList);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
-            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
-    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
             OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
+    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
+            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* pnNegoModeSetList,
+            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
     IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
-            IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
-            OUT IMS_UINT32* nNegoDefaultRtpModeSet);
+            IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bReturnMode,
+            OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet);
     IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
-            OUT IMS_UINT32* nNegoModeList);
+            IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
+            OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
     IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
             IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
             OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
     IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase);
+            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
-    MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-            IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
+            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload, IN IMS_BOOL bReturnMode);
+    MEDIA_DIRECTION UpdateDirectionToMine(
+            IN MEDIA_DIRECTION ePeerDirection, IN MEDIA_DIRECTION eLocalDirection);
 };
 
 #endif

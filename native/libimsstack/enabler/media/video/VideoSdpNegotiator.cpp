@@ -34,7 +34,9 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Negotiate()", 0, 0, 0);
+    m_bIsOfferReceived = bIsOfferReceived;
+
+    IMS_TRACE_I("Negotiate() - IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
 
     IMS_BOOL ret = IMS_FALSE;
 
@@ -351,7 +353,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
                         pLocalProfile->SetNegotiatedPayloadIndex(nLocalIndex);
 
                         // MT case : change src PT# to dest PT#
-                        if (bIsOfferReceived == IMS_TRUE &&
+                        if (m_bIsOfferReceived == IMS_TRUE &&
                                 pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                         {
                             VideoProfile::Payload* pTempNegoLocalPayload =
@@ -542,7 +544,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
                         pLocalProfile->SetNegotiatedPayloadIndex(nLocalIndex);
 
                         // MT case : change src PT# to dest PT#
-                        if (bIsOfferReceived == IMS_TRUE &&
+                        if (m_bIsOfferReceived == IMS_TRUE &&
                                 pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                         {
                             VideoProfile::Payload* pTempNegoLocalPayload =
@@ -678,7 +680,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
                             FindPayloadIndexFromProfile(pLocalProfile, pTmpPayload));
 
                     // MT case : change src PT# to dest PT#
-                    if (bIsOfferReceived == IMS_TRUE &&
+                    if (m_bIsOfferReceived == IMS_TRUE &&
                             pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                     {
                         VideoProfile::Payload* pTempNegoLocalPayload = pLocalProfile->GetPayloadAt(
@@ -756,7 +758,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
                             FindPayloadIndexFromProfile(pLocalProfile, pTmpPayload));
 
                     // MT case : change src PT# to dest PT#
-                    if (bIsOfferReceived == IMS_TRUE &&
+                    if (m_bIsOfferReceived == IMS_TRUE &&
                             pLocalProfile->GetNegotiatedPayloadIndex() != -1)
                     {
                         VideoProfile::Payload* pTempNegoLocalPayload = pLocalProfile->GetPayloadAt(
@@ -792,8 +794,8 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
         }
         else
         {
-            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
-                    pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
+            pNegotiatedProfile->SetDirection(UpdateDirectionToMine(pPeerProfile->GetDirection(),
+                    pLocalProfile->GetDirection(), m_bIsOfferReceived));
         }
 
         // if the case using different interval in live and hold, set here.
@@ -818,7 +820,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
 
         // Setting bandwidth AS/RS/RR
         VideoProfileUtil::MakeNegotiatedBandwidth(static_cast<VideoConfiguration*>(pConfig),
-                pLocalProfile, pPeerProfile, bIsOfferReceived, nNegotiatedMaxAs,
+                pLocalProfile, pPeerProfile, m_bIsOfferReceived, nNegotiatedMaxAs,
                 pNegotiatedProfile);
 
         // Setting framerate

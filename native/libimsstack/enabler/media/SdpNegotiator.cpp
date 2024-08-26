@@ -6,16 +6,13 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
-PUBLIC SdpNegotiator::SdpNegotiator(IN const MEDIA_CONTENT_TYPE eType)
+PUBLIC SdpNegotiator::SdpNegotiator(IN const MEDIA_CONTENT_TYPE eType) :
+        m_eType(eType),
+        m_bIsOfferReceived(IMS_FALSE)
 {
-    IMS_TRACE_I("+SdpNegotiator() media type[%d]", eType, 0, 0);
-    m_eType = eType;
 }
 
-PUBLIC VIRTUAL SdpNegotiator::~SdpNegotiator()
-{
-    IMS_TRACE_I("~SdpNegotiator()", 0, 0, 0);
-}
+PUBLIC VIRTUAL SdpNegotiator::~SdpNegotiator() {}
 
 PROTECTED
 IMS_BOOL SdpNegotiator::NegotiateIpPort(IN MediaBaseProfile* pLocalProfile,

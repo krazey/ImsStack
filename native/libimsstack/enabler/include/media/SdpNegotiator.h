@@ -19,6 +19,7 @@ protected:
             OUT MediaBaseProfile* pNegotiatedProfile);
 
     MEDIA_CONTENT_TYPE m_eType;
+    IMS_BOOL m_bIsOfferReceived;
 };
 
 #endif

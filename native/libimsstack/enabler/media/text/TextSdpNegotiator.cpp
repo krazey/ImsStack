@@ -29,7 +29,9 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Negotiate()", 0, 0, 0);
+    m_bIsOfferReceived = bIsOfferReceived;
+
+    IMS_TRACE_I("Negotiate() - IsOfferReceived[%d]", m_bIsOfferReceived, 0, 0);
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
@@ -43,8 +45,8 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 
     if (bPayloadNegotiated)
     {
-        NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile, bIsOfferReceived);
-        NegotiateBandwidth(pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
+        NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        NegotiateBandwidth(pLocalProfile, pPeerProfile, -1, pNegotiatedProfile);
 
         bRet = IMS_TRUE;
     }
@@ -163,8 +165,7 @@ void TextSdpNegotiator::AppendT140Payload(
 
 PRIVATE
 void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile,
-        IN IMS_BOOL bIsOfferReceived)
+        IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
     if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
     {
@@ -173,8 +174,8 @@ void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
 
     if (pNegotiatedProfile->GetDataPort() != 0 && pPeerProfile->GetDataPort() != 0)
     {
-        pNegotiatedProfile->SetDirection(UpdateDirectionToMine(
-                pPeerProfile->GetDirection(), pLocalProfile->GetDirection(), bIsOfferReceived));
+        pNegotiatedProfile->SetDirection(
+                UpdateDirectionToMine(pPeerProfile->GetDirection(), pLocalProfile->GetDirection()));
     }
     else
     {
@@ -186,12 +187,12 @@ void TextSdpNegotiator::NegotiateDirection(IN TextProfile* pLocalProfile,
 
 PRIVATE
 void TextSdpNegotiator::NegotiateBandwidth(IN TextProfile* pLocalProfile,
-        IN TextProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
-        IN IMS_SINT32 nAsValueOfNegoticatedCodec, OUT TextProfile* pNegotiatedProfile)
+        IN TextProfile* pPeerProfile, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
+        OUT TextProfile* pNegotiatedProfile)
 {
-    IMS_TRACE_D("NegotiateBandwidth() - bIsOfferReceived[%d]", bIsOfferReceived, 0, 0);
+    IMS_TRACE_D("NegotiateBandwidth()", 0, 0, 0);
 
-    if (bIsOfferReceived == IMS_FALSE)
+    if (m_bIsOfferReceived == IMS_FALSE)
     {
         if (pPeerProfile->GetBandwidthAs() > 0)
         {
@@ -348,19 +349,18 @@ PRIVATE IMS_BOOL TextSdpNegotiator::FindT140InProfile(
     return IMS_FALSE;
 }
 
-PRIVATE MEDIA_DIRECTION TextSdpNegotiator::UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
-        IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase)
+PRIVATE MEDIA_DIRECTION TextSdpNegotiator::UpdateDirectionToMine(
+        IN MEDIA_DIRECTION ePeerDirection, IN MEDIA_DIRECTION eLocalDirection)
 {
     if (ePeerDirection < MEDIA_DIRECTION_INACTIVE || ePeerDirection > MEDIA_DIRECTION_SEND_RECEIVE)
     {
         return MEDIA_DIRECTION_INVALID;
     }
 
-    IMS_TRACE_D("UpdateDirectionToMine() - Entered. ePeerDirection[%d], eLocalDirection[%d], "
-                "bIsMtCase[%d]",
-            ePeerDirection, eLocalDirection, bIsMtCase);
+    IMS_TRACE_D("UpdateDirectionToMine() - Entered. ePeerDirection[%d], eLocalDirection[%d]",
+            ePeerDirection, eLocalDirection, 0);
 
-    if (bIsMtCase == IMS_FALSE)
+    if (m_bIsOfferReceived == IMS_FALSE)
     {
         return eLocalDirection;
     }
