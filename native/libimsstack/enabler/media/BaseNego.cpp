@@ -311,7 +311,7 @@ PUBLIC MediaBaseProfile::BasePayload* BaseNego::GetNegotiatedPayload()
 
         MediaBaseProfile* pProfile = GetNegotiatedProfile(pLatestOaModel);
 
-        if (pProfile->GetDataPort() == 0 || pProfile->GetPayloadList().GetSize() == 0)
+        if (pProfile->GetPayloadList().GetSize() == 0)
         {
             return IMS_NULL;
         }
