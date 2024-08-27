@@ -17,8 +17,6 @@
 #include <gtest/gtest.h>
 #include "audio/AudioNegoEvs.h"
 
-const int PTIME = 20;
-const int MAXPTIME = 240;
 const int DTX = 1;
 const int HFONLY = 1;
 const int EVS_MODE_SWITCH = 1;
@@ -40,8 +38,6 @@ const AString STR_MODE_CHANGE_CAPABILITY = "mode-change-capability=2";
 const AString STR_MODE_CHANGE_PERIOD = "mode-change-period=1";
 const AString STR_MODE_CHANGE_NEIGHBOR = "mode-change-neighbor=1";
 const AString STR_MAXRED = "max-red=220";
-const AString STR_PTIME = "ptime=20";
-const AString STR_MAXPTIME = "maxptime=240";
 const AString STR_DTX = "dtx=1";
 const AString STR_HFONLY = "hf-only=1";
 const AString STR_EVS_MODE_SWITCH = "evs-mode-switch=1";
@@ -71,8 +67,6 @@ protected:
         m_pEvsFmtpEmpty->SetShowBrList(IMS_FALSE);
         m_pEvsFmtpEmpty->SetShowBwList(IMS_FALSE);
 
-        m_pEvsFmtpFull->SetPtime(PTIME);
-        m_pEvsFmtpFull->SetMaxPtime(MAXPTIME);
         m_pEvsFmtpFull->SetDtx(DTX);
         m_pEvsFmtpFull->SetHfOnly(HFONLY);
         m_pEvsFmtpFull->SetEvsModeSwitch(EVS_MODE_SWITCH);
@@ -91,8 +85,6 @@ protected:
         m_pEvsFmtpFull->SetModeChangeCapability(MODE_CHANGE_CAPABILITY);
         m_pEvsFmtpFull->SetModeChangePeriod(MODE_CHANGE_PERIOD);
         m_pEvsFmtpFull->SetModeChangeNeighbor(MODE_CHANGE_NEIGHBOR);
-        m_pEvsFmtpFull->SetShowPtime(IMS_TRUE);
-        m_pEvsFmtpFull->SetShowMaxPtime(IMS_TRUE);
         m_pEvsFmtpFull->SetShowDtx(IMS_TRUE);
         m_pEvsFmtpFull->SetShowHfOnly(IMS_TRUE);
         m_pEvsFmtpFull->SetShowEvsModeSwitch(IMS_TRUE);
@@ -130,8 +122,6 @@ TEST_F(AudioNegoEvsTest, TestSetSdpFmtpFromEvsFmtp)
     EXPECT_TRUE(strFmtp.Contains(STR_MODE_CHANGE_PERIOD));
     EXPECT_TRUE(strFmtp.Contains(STR_MODE_CHANGE_NEIGHBOR));
     EXPECT_TRUE(strFmtp.Contains(STR_MAXRED));
-    EXPECT_TRUE(strFmtp.Contains(STR_PTIME));
-    EXPECT_TRUE(strFmtp.Contains(STR_PTIME));
     EXPECT_TRUE(strFmtp.Contains(STR_HFONLY));
     EXPECT_TRUE(strFmtp.Contains(STR_EVS_MODE_SWITCH));
     EXPECT_TRUE(strFmtp.Contains(STR_BW_LIST));
@@ -173,34 +163,6 @@ TEST_F(AudioNegoEvsTest, TestAppendSeparatorIfNotEmpty)
 
     AudioNegoEvs::AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
     EXPECT_EQ(strFmtp, "test,;");
-}
-
-TEST_F(AudioNegoEvsTest, TestAddPtimeToFmtp)
-{
-    AString strFmtp = AString::ConstNull();
-
-    AudioNegoEvs::AddPtimeToFmtp(m_pEvsFmtpNull, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoEvs::AddPtimeToFmtp(m_pEvsFmtpEmpty, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoEvs::AddPtimeToFmtp(m_pEvsFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, STR_PTIME);
-}
-
-TEST_F(AudioNegoEvsTest, TestAddMaxPtimeToFmtp)
-{
-    AString strFmtp = AString::ConstNull();
-
-    AudioNegoEvs::AddMaxPtimeToFmtp(m_pEvsFmtpNull, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoEvs::AddMaxPtimeToFmtp(m_pEvsFmtpEmpty, strFmtp);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
-
-    AudioNegoEvs::AddMaxPtimeToFmtp(m_pEvsFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, STR_MAXPTIME);
 }
 
 TEST_F(AudioNegoEvsTest, TestAddDtxToFmtp)

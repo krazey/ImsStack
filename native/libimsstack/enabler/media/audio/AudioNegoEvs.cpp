@@ -37,8 +37,6 @@ PUBLIC AString AudioNegoEvs::SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* pEv
         return strFmtp;
     }
 
-    AddPtimeToFmtp(pEvsFmtp, strFmtp);
-    AddMaxPtimeToFmtp(pEvsFmtp, strFmtp);
     AddDtxToFmtp(pEvsFmtp, strFmtp);
     AddHfOnlyToFmtp(pEvsFmtp, strFmtp);
     AddEvsModeSwitchToFmtp(pEvsFmtp, strFmtp);
@@ -64,49 +62,6 @@ PUBLIC void AudioNegoEvs::AppendSeparatorIfNotEmpty(OUT AString& str, IN AString
     if (str.GetLength() > 0)
     {
         str.Append(separator);
-    }
-}
-
-PUBLIC void AudioNegoEvs::AddPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
-{
-    if (pEvsFmtp == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, visible=%d", pEvsFmtp->GetPtime(),
-            pEvsFmtp->IsMaxPtimeVisible(), 0);
-
-    if (pEvsFmtp->GetPtime() != AudioProfile::EvsFmtp::DEFAULT_PTIME &&
-            pEvsFmtp->IsPtimeVisible() == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("ptime=%d", pEvsFmtp->GetPtime());
-        strFmtp.Append(strTemp);
-    }
-}
-
-PUBLIC void AudioNegoEvs::AddMaxPtimeToFmtp(
-        IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp)
-{
-    if (pEvsFmtp == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("AddMaxPtimeToFmtp() ptime=%d, visible=%d", pEvsFmtp->GetMaxPtime(),
-            pEvsFmtp->IsMaxPtimeVisible(), 0);
-
-    if (pEvsFmtp->GetMaxPtime() != AudioProfile::EvsFmtp::DEFAULT_MAXPTIME &&
-            pEvsFmtp->IsMaxPtimeVisible() == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("maxptime=%d", pEvsFmtp->GetMaxPtime());
-        strFmtp.Append(strTemp);
     }
 }
 
