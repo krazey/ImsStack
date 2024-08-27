@@ -728,7 +728,7 @@ protected:
 
 TEST_F(AosRegistrationTest, DeferStartIfTransactionNotStarted)
 {
-    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
     m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
 
     m_pAosRegistration->Start();
@@ -1771,6 +1771,16 @@ TEST_F(AosRegistrationTest, UpdateTransactionStartedSucceed)
             .WillOnce(Return(IMS_TRUE));
 
     m_pAosRegistration->UpdateTransactionStarted();
+
+    EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
+}
+
+TEST_F(AosRegistrationTest, UpdateTransactionStatusWhenDestroyRegistrationWithNormalType)
+{
+    m_pAosRegistration->SetTransactionStarted(IMS_FALSE);
+    m_pAosRegistration->SetRadioWaiting(IMS_TRUE);
+
+    m_pAosRegistration->DestroyRegistration();
 
     EXPECT_TRUE(m_pAosRegistration->IsTransactionStarted());
 }
