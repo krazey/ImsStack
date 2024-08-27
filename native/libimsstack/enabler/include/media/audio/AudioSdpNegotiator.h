@@ -25,6 +25,28 @@ private:
             IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     AudioProfile::Payload* NegotiateAudioPayload(IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile);
+    AudioProfile::Payload* NegotiateAmr(IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+            IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nNegoModeSetList,
+            IN IMS_UINT32 nNegoDefaultRtpModeSet);
+    AudioProfile::AmrFmtp* NegotiateAmrFmtp(IN AudioProfile* pLocalProfile,
+            IN AudioProfile::Payload* pDestPayload, IN IMS_UINT32 nNegoModeSetList,
+            IN IMS_UINT32 nNegoDefaultRtpModeSet, OUT IMS_SINT32& nSrcPayloadIndex);
+    AudioProfile::Payload* NegotiateEvs(IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+            IN IMS_UINT32 nPayloadIndex, IN IMS_UINT32 nBandwidthNegoList,
+            IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList);
+    AudioProfile::EvsFmtp* NegotiateEvsFmtp(IN AudioProfile* pLocalProfile,
+            IN AudioProfile::Payload* pDestPayload, IN IMS_UINT32 nBandwidthNegoList,
+            IN IMS_UINT32 nBitrateNegoList, IN IMS_UINT32 nModeSetNegoList,
+            OUT IMS_SINT32& nSrcPayloadIndex);
+    void NegotiateUniDirectionBrBw(OUT AudioProfile::EvsFmtp* pEvsFmtp,
+            IN IMS_UINT32 nBandwidthNegoList, IN IMS_UINT32 nBitrateNegoList);
+    void NegotiateCmr(IN AudioProfile::EvsFmtp* pSrcFmtp, OUT AudioProfile::EvsFmtp* pEvsFmtp);
+    void NegotiateModeSet(OUT AudioProfile::EvsFmtp* pEvsFmtp);
+    AudioProfile::Payload* NegotiatePcm(IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegotiatedProfile,
+            IN IMS_UINT32 nPayloadIndex);
     IMS_BOOL NegotiateTelephoneEventPayload(IN IMS_SINT32 nNegotiatedSamplingRate,
             IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     void NegotiateTelephoneEvent8000Payload(IN IMS_SINT32 nNegotiatedSamplingRate,
