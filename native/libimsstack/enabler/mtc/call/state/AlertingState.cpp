@@ -43,7 +43,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 AlertingState::AlertingState(IN IMtcCallContext& objContext) :
-        MtcCallState(CallStateName::ALERTING, objContext)
+        MtcCallState(CallStateName::ALERTING, objContext),
+        m_pUdpKeepAliveSender(IMS_NULL)
 {
 }
 
@@ -91,6 +92,11 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
+    if (m_pUdpKeepAliveSender != IMS_NULL)
+    {
+        m_pUdpKeepAliveSender->Stop();
+    }
+
     if (bCallTypeChanged)
     {
         if (SendEarlyUpdate(UpdateType::NORMAL, pSession) == IMS_FAILURE)
