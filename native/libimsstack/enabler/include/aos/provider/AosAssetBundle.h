@@ -74,6 +74,28 @@ public:
     ImsVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
 };
 
+struct AosPcscfRecoveryConditionsBundle
+{
+public:
+    AosPcscfRecoveryConditionsBundle() :
+            nMaxRetryCnt(3),
+            nWaitTime(20),
+            nBaseTime(20),
+            nMaxTime(1800)
+    {
+    }
+
+    AosPcscfRecoveryConditionsBundle(IN const AosPcscfRecoveryConditionsBundle&) = delete;
+    AosPcscfRecoveryConditionsBundle& operator=(
+            IN const AosPcscfRecoveryConditionsBundle&) = delete;
+
+public:
+    IMS_SINT32 nMaxRetryCnt;
+    IMS_SINT32 nWaitTime;
+    IMS_SINT32 nBaseTime;
+    IMS_SINT32 nMaxTime;
+};
+
 struct AosRegErrCodeWithRaTimeBundle
 {
 public:

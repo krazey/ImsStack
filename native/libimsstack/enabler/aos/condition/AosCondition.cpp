@@ -747,6 +747,9 @@ void AosCondition::ProcessPhoneNumberAvailableEvent(
     }
 
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_INVALID_CONNECTION);
+
+    RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY);
 }
 
 PROTECTED
@@ -827,6 +830,9 @@ void AosCondition::ClearRegistrationAndDataFailureBlocks()
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_REG_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
+    ProcessBlockReason(IMS_FALSE, BLOCK_INVALID_CONNECTION);
+
+    RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY);
 }
 
 PROTECTED

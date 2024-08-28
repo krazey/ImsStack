@@ -885,6 +885,13 @@ public:
                 KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY[];
         // }
         // Bundle {
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_CNT_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT[];
+        static const IMS_CHAR KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT[];
+        // }
+        // Bundle {
         static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE[];
         static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL[];
         static const IMS_CHAR KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY[];

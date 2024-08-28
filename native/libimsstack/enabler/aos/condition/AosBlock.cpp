@@ -368,6 +368,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_EPS_FALLBACK_STARTED:
             return "EPS_FALLBACK_STARTED";
 
+        case BLOCK_INVALID_CONNECTION:
+            return "INVALID_CONNECTION";
+
         case BLOCK_CELLULAR_AIRPLANE_MODE_ON:
             return "CELLULAR_AIRPLANE_MODE_ON";
 

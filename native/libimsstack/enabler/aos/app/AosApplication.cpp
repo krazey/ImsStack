@@ -1205,7 +1205,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG&
                 m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
         {
             return;
         }
@@ -1453,6 +1454,11 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objM
 
                     m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
                     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
+                }
+                else if (nReason == AosConnector::REASON_PCSCF_DISCOVERY_FAILED)
+                {
+                    m_pCondition->SetBlock(BLOCK_INVALID_CONNECTION);
+                    m_pConnector->Stop();
                 }
                 else
                 {
@@ -2450,7 +2456,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
                 m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
                 m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
         {
             StopTimer(TIMER_IMS_ESTABLISHMENT);
             return;
@@ -3006,20 +3013,12 @@ PROTECTED VIRTUAL void AosApplication::Condition_RequestCommand(
         case AosCondition::REQUEST_STOP:  // FALL-THROUGH
         case AosCondition::REQUEST_DESTROY:
             ProcessDisconnectingState(nReason);
+            PostMessage(nCommand == AosCondition::REQUEST_STOP ? MSG_REG_STOP : MSG_DESTROY,
+                    nReason, 0);
             break;
 
-        default:
-            break;
-    }
-
-    switch (nCommand)
-    {
-        case AosCondition::REQUEST_STOP:
-            PostMessage(MSG_REG_STOP, nReason, 0);
-            break;
-
-        case AosCondition::REQUEST_DESTROY:
-            PostMessage(MSG_DESTROY, nReason, 0);
+        case AosCondition::REQUEST_RESET_CONNECTION_RECOVERY:
+            m_pConnector->ResetReadyRecovery();
             break;
 
         case AosCondition::REQUEST_RECOVER:
@@ -3155,6 +3154,16 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
                 PostMessage(MSG_REG_UPDATE, 0, 0);
             }
         }
+    }
+
+    if (!m_pConnector->IsReady())
+    {
+        m_pConnector->ResetReadyRecovery();
+    }
+
+    if (m_pCondition->IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+    {
+        m_pCondition->ResetBlock(BLOCK_INVALID_CONNECTION);
     }
 
     if (IsBlockRat(nNewRat))

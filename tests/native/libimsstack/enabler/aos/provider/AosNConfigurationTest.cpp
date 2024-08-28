@@ -988,6 +988,24 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
 
     EXPECT_CALL(objNotifyTerminated, ReleaseBundle()).Times(1);
 
+    MockICarrierConfig objPcscfRecoveryConditionsBundle;
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE))
+            .WillRepeatedly(
+                    Return(static_cast<ICarrierConfig*>(&objPcscfRecoveryConditionsBundle)));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_CNT_INT, -1))
+            .WillOnce(Return(3));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT, -1))
+            .WillOnce(Return(20));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT, -1))
+            .WillOnce(Return(20));
+    EXPECT_CALL(objPcscfRecoveryConditionsBundle,
+            GetInt(CarrierConfig::Assets::KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT, -1))
+            .WillOnce(Return(1800));
+
     MockICarrierConfig objRegErrCodeWithRaTimeBundle;
 
     EXPECT_CALL(objCarrierConfig,

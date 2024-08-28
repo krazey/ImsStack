@@ -134,6 +134,7 @@ public class CarrierConfigMenu extends AppCompatActivity {
     private static final List<String> ASSETS_BUNDLE_KEYS = Arrays.asList(
             Assets.KEY_EXTRA_REG_ERR_BUNDLE,
             Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+            Assets.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE,
             Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
             Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
             Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
@@ -204,6 +205,11 @@ public class CarrierConfigMenu extends AppCompatActivity {
                     Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
                     Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
                     Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
+            Map.entry(Assets.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE, Arrays.asList(
+                    Assets.KEY_PCSCF_RECOVERY_MAX_CNT_INT,
+                    Assets.KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT,
+                    Assets.KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT,
+                    Assets.KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT)),
             Map.entry(Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
                     Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
                     Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,

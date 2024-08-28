@@ -46,6 +46,7 @@ public:
 
     virtual void SetListener(IN IAosConnectorListener* piListener);
     virtual IMS_BOOL IsReady() const;
+    virtual void ResetReadyRecovery();
 
     // GetState
     enum
@@ -97,10 +98,6 @@ public:
     };
 
     static const IMS_SINT32 PCO_INVALID_VALUE = -1;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME_SEC = 20;
-    static const IMS_UINT32 READY_RECOVERY_BASE_TIME_SEC = 20;
-    static const IMS_UINT32 READY_RECOVERY_MAX_TIME_SEC = 1800;
     static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;
     static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;
 
@@ -126,7 +123,7 @@ protected:
     void CheckReadyRecoveryAndSetTimer();
     IMS_BOOL CheckIpChangedForEmergency();
     IMS_BOOL CheckIpaAndProcessReadyRecovery();
-    IMS_UINT32 GetActualRecoveryWaitingTime();
+    void HandleInvalidPcscfAddress();
     IMS_BOOL SelectIpVersion();
 
     void Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nReason = REASON_NONE);

@@ -73,7 +73,8 @@ public:
         REQUEST_STOP,
         REQUEST_DESTROY,
         REQUEST_RECOVER,
-        REQUEST_PDN_DISCONNECT
+        REQUEST_PDN_DISCONNECT,
+        REQUEST_RESET_CONNECTION_RECOVERY
     };
     // eReason : AosReason
 

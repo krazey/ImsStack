@@ -1112,6 +1112,45 @@ public:
     virtual IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const = 0;
 
     /**
+     * @brief Returns max count to retry with fixed wait time.
+     *        When the fail count does not reach this value yet, it waits during fixed time before
+     *        retrying PCSCF recovery.
+     *
+     * @return IMS_SINT32 Return max count to retry with fixed wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryMaxRetryCnt() const = 0;
+
+    /**
+     * @brief Returns wait time in seconds before retrying PCSCF recovery.
+     *        This is used as waiting time for PCSCF recovery during fail count is unter max count.
+     *        If valid PCSCF acquisition fails during this time, IMS PDN reestablishment will be
+     *        requested for PCSCF recovery.
+     *
+     * @return IMS_SINT32 Return wait time before retrying PCSCF recovery.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryWaitTime() const = 0;
+
+    /**
+     * @brief Returns base time in seconds that is used to calculate upper-bound wait time
+     *        described in RFC5626. When the fail count reaches max count, waiting time for
+     *        PCSCF recovery is determined as a random value between the upper-bound wait time
+     *        and half of it.
+     *
+     * @return IMS_SINT32 Return base time value of upper-bound wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryBaseTime() const = 0;
+
+    /**
+     * @brief Returns max time in seconds that is used to calculate upper-bound wait time
+     *        described in RFC5626. When the fail count reaches max count, waiting time for
+     *        PCSCF recovery is determined as a random value between the upper-bound wait time
+     *        and half of it.
+     *
+     * @return IMS_SINT32 Return max time value of upper-bound wait time.
+     */
+    virtual IMS_SINT32 GetPcscfRecoveryMaxTime() const = 0;
+
+    /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform
      *        initial registration.
      *

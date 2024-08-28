@@ -141,7 +141,8 @@ enum
     REQUEST_STOP,
     REQUEST_DESTROY,
     REQUEST_RECOVER,
-    REQUEST_PDN_DISCONNECT
+    REQUEST_PDN_DISCONNECT,
+    REQUEST_RESET_CONNECTION_RECOVERY
 };
 
 enum
@@ -2120,6 +2121,36 @@ TEST_F(AosApplicationTest, SetBlockPermanentDataFailedWhenStateConnectingConnect
     // THEN: The GIVEN condition should be met.
 }
 
+TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+
+    EXPECT_CALL(m_objMockAosCondition, SetBlock(BLOCK_INVALID_CONNECTION, IMS_TRUE));
+    EXPECT_CALL(m_objMockAosConnector, Stop());
+
+    ImsMessage objMessage(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_PCSCF_DISCOVERY_FAILED);
+    m_pAosApplication->StateReady_Connection(objMessage);
+}
+
+TEST_F(AosApplicationTest, ResetBlockInvalidPcscfWhenNetStatusChanged)
+{
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
+    ON_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_CELLULAR_RAT_BLOCK))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockAosCondition, IsReasonBlocked(BLOCK_INVALID_CONNECTION))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockAosCondition, ResetBlock(BLOCK_INVALID_CONNECTION, _));
+
+    m_pAosApplication->NetTracker_StatusChanged();
+}
+
 TEST_F(AosApplicationTest, Process)
 {
     // TEST_F : ProcessDisconnectingState
@@ -2914,6 +2945,13 @@ TEST_F(AosApplicationTest, Callback)
     m_pAosApplication->ServicePhone_LocationInfoChanged(LocationInfo::COUNTRY_CHANGED);
     // IsReregRetryWithChangedCountryOnWifi return true - eState is AVAILABLE
     m_pAosApplication->ServicePhone_LocationInfoChanged(LocationInfo::AVAILABLE);
+}
+
+TEST_F(AosApplicationTest, InvokeResetReadyRecoveryWhenReceiveResetPcscfRecoveryRequest)
+{
+    EXPECT_CALL(m_objMockAosConnector, ResetReadyRecovery());
+
+    m_pAosApplication->Condition_RequestCommand(REQUEST_RESET_CONNECTION_RECOVERY, AosReason::NONE);
 }
 
 TEST_F(AosApplicationTest, UpdateConnectedServices)

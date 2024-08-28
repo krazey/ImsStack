@@ -152,6 +152,11 @@ public:
     IMS_SINT32 GetNotifyWaitTime() const override;
     IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const override;
 
+    IMS_SINT32 GetPcscfRecoveryMaxRetryCnt() const override;
+    IMS_SINT32 GetPcscfRecoveryWaitTime() const override;
+    IMS_SINT32 GetPcscfRecoveryBaseTime() const override;
+    IMS_SINT32 GetPcscfRecoveryMaxTime() const override;
+
     ImsVector<IMS_SINT32>& GetSubErrorRegRequired() override;
     IMS_SINT32 GetRetryCountSubErrorRegRequired() const override;
     ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() override;
@@ -201,6 +206,7 @@ private:
 
     AosExtraRegErrBundle m_objExtraRegErr;
     AosNotifyTerminatedForInitRegBundle m_objNotifyTerminated;
+    AosPcscfRecoveryConditionsBundle m_objPcscfRecoveryConditions;
     AosRegErrCodeWithRaTimeBundle m_objRegErrCodeWithRaTime;
     AosRegRetryIntervalBundle m_objRegRetryInterval;
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;

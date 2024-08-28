@@ -425,6 +425,13 @@
         <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="0">
         </int-array>
     </pbundle>
+    <!-- KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE -->
+    <pbundle name="pcscf_recovery_conditions_bundle">
+        <int name="pcscf_recovery_max_cnt_int" value="3"/>
+        <int name="pcscf_recovery_wait_time_sec_int" value="20"/>
+        <int name="pcscf_recovery_base_time_sec_int" value="20"/>
+        <int name="pcscf_recovery_max_time_sec_int" value="1800"/>
+    </pbundle>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
     <pbundle name="reg_err_code_with_ra_time_bundle">
         <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="false"/>

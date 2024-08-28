@@ -159,6 +159,15 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::IsReady() const
     return (m_nState == STATE_READY);
 }
 
+PUBLIC VIRTUAL void AosConnector::ResetReadyRecovery()
+{
+    m_nReadyRecoveryCount = 0;
+    if (IsTimerRunning(TIMER_READY_RECOVERY))
+    {
+        ProcessReadyRecoveryTimerExpired();
+    }
+}
+
 PROTECTED
 void AosConnector::ClearPending()
 {
@@ -331,8 +340,7 @@ void AosConnector::CheckReadyRecoveryAndSetTimer()
     {
         if (m_piPcscf->IsSinglePcoScheme() && !m_piPcscf->IsAsyncDnsDiscovery())
         {
-            m_nReadyRecoveryCount++;
-            StartTimer(TIMER_READY_RECOVERY, GetActualRecoveryWaitingTime() * 1000);
+            HandleInvalidPcscfAddress();
         }
     }
 }
@@ -399,9 +407,7 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 
         if (!bIsReady)
         {
-            m_nReadyRecoveryCount++;
-
-            StartTimer(TIMER_READY_RECOVERY, GetActualRecoveryWaitingTime() * 1000);
+            HandleInvalidPcscfAddress();
             return IMS_FALSE;
         }
     }
@@ -410,18 +416,36 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 }
 
 PROTECTED
-IMS_UINT32 AosConnector::GetActualRecoveryWaitingTime()
+void AosConnector::HandleInvalidPcscfAddress()
 {
     A_IMS_TRACE_D(
-            APPPROFILE, "GetActualRecoveryWaitingTime :: count (%d)", m_nReadyRecoveryCount, 0, 0);
-
-    if (m_nReadyRecoveryCount <= READY_RECOVERY_DEFAULT_COUNT)
+            APPPROFILE, "HandleInvalidPcscfAddress::fail count (%d)", m_nReadyRecoveryCount, 0, 0);
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
+    if (GET_N_CONFIG(nSlotId) == IMS_NULL)
     {
-        return READY_RECOVERY_DEFAULT_TIME_SEC;
+        A_IMS_TRACE_D(APPPROFILE, "Can not get configurations for PCSCF recovery", 0, 0, 0);
+        return;
     }
 
-    return m_pUtil->WaitTimeForFlowRecovery(READY_RECOVERY_BASE_TIME_SEC,
-            READY_RECOVERY_MAX_TIME_SEC, m_nReadyRecoveryCount - READY_RECOVERY_DEFAULT_COUNT);
+    m_nReadyRecoveryCount++;
+    IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryMaxRetryCnt();
+    if (m_nReadyRecoveryCount <= nMaxRetryCnt)
+    {
+        StartTimer(TIMER_READY_RECOVERY, GET_N_CONFIG(nSlotId)->GetPcscfRecoveryWaitTime() * 1000);
+        return;
+    }
+
+    IMS_SINT32 nBaseTime = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryBaseTime();
+    IMS_SINT32 nMaxTime = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryMaxTime();
+    if (nBaseTime == 0 || nMaxTime == 0)
+    {
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_PCSCF_DISCOVERY_FAILED);
+        return;
+    }
+
+    IMS_SINT32 nDeterminedWaitTime = m_pUtil->WaitTimeForFlowRecovery(
+            nBaseTime, nMaxTime, m_nReadyRecoveryCount - nMaxRetryCnt);
+    StartTimer(TIMER_READY_RECOVERY, nDeterminedWaitTime * 1000);
 }
 
 PROTECTED

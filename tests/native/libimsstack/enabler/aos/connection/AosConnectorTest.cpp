@@ -51,6 +51,7 @@ using ::testing::SetArgPointee;
     using Base::IsTimerRunning;                  \
     using Base::CheckIpChangedForEmergency;      \
     using Base::CheckIpaAndProcessReadyRecovery; \
+    using Base::HandleInvalidPcscfAddress;       \
     using Base::SelectIpVersion;                 \
     using Base::Notify;                          \
     using Base::ProcessCheckingPcscfAndIpa;      \
@@ -83,6 +84,7 @@ public:
     inline IMS_UINT32 GetState() { return m_nState; }
     inline void SetPendingFeature(IN IMS_UINT32 nFeature) { m_nPendingFeature = nFeature; }
     inline IMS_UINT32 GetPendingFeature() { return m_nPendingFeature; }
+    inline IMS_UINT32 GetReadyRecoveryCount() { return m_nReadyRecoveryCount; }
     inline void SetReadyRecoveryCount(IN IMS_UINT32 nCount) { m_nReadyRecoveryCount = nCount; }
     inline void SetPcscfChangeIgnored(IN IMS_BOOL bIsIgnored)
     {
@@ -312,6 +314,17 @@ TEST_F(AosConnectorTest, CheckWhetherIsReady)
     EXPECT_FALSE(m_pAosConnector->IsReady());
 }
 
+TEST_F(AosConnectorTest, ClearCountAndTimerWhenResettingReadyRecovery)
+{
+    m_pAosConnector->SetReadyRecoveryCount(3);
+    m_pAosConnector->StartTimer(AosConnector::TIMER_READY_RECOVERY, TIMER_DURATION_MILLIS);
+
+    m_pAosConnector->ResetReadyRecovery();
+
+    EXPECT_EQ(m_pAosConnector->GetReadyRecoveryCount(), 0);
+    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
 TEST_F(AosConnectorTest, DoNothingIfAlreadyInReadyStateWhenStateChangedToActive)
 {
     m_pAosConnector->SetState(AosConnector::STATE_READY);
@@ -380,6 +393,8 @@ TEST_F(AosConnectorTest, WaitForPcscfConfigureIfPcscfConfigureFailWhenStateChang
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, IsAsyncDnsDiscovery()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxRetryCnt()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryWaitTime()).WillByDefault(Return(20));
 
     // trying configure PCSCF but fails
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_));
@@ -513,6 +528,8 @@ TEST_F(AosConnectorTest, WaitForPcscfConfigureIfPcscfConfigureFailWhenIpChangedI
     ON_CALL(m_objMockIAosPcscf, IsConfigured()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosPcscf, IsSinglePcoScheme()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(m_objMockIAosPcscf, IsAsyncDnsDiscovery()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxRetryCnt()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryWaitTime()).WillByDefault(Return(20));
 
     m_pAosConnector->AosConnection_IpChanged();
 
@@ -840,6 +857,58 @@ TEST_F(AosConnectorTest, NotifyActivatedIfPcscfAndLocalAddressIsAvailableWhenPco
     EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
 }
 
+TEST_F(AosConnectorTest, DoNotHandleInvalidPcscfWhenFailToGetConfiguration)
+{
+    AosProvider::GetInstance()->SetNConfiguration(IMS_NULL, SLOT_ID);
+
+    EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Deactivated(_)).Times(0);
+
+    m_pAosConnector->HandleInvalidPcscfAddress();
+
+    EXPECT_FALSE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
+TEST_F(AosConnectorTest, StartTimerWithConfiguredValueWhenHandlesInvalidPcscfUnderMaxCount)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxRetryCnt()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryWaitTime()).WillByDefault(Return(20));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryBaseTime()).Times(0);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxTime()).Times(0);
+
+    m_pAosConnector->HandleInvalidPcscfAddress();
+
+    EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
+TEST_F(AosConnectorTest, NotifyAsDeactivatedIfBaseTimeConfiguredZeroWhenHandlesInvalidPcscf)
+{
+    m_pAosConnector->SetReadyRecoveryCount(3);
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxRetryCnt()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryWaitTime()).WillByDefault(Return(20));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryBaseTime()).WillByDefault(Return(0));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxTime()).WillByDefault(Return(0));
+
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_PCSCF_DISCOVERY_FAILED));
+
+    m_pAosConnector->HandleInvalidPcscfAddress();
+}
+
+TEST_F(AosConnectorTest, StartTimerWithCalculatedValueWhenHandlesInvalidPcscfOverMaxCount)
+{
+    m_pAosConnector->SetReadyRecoveryCount(3);
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxRetryCnt()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryWaitTime()).WillByDefault(Return(20));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryBaseTime()).WillOnce(Return(20));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPcscfRecoveryMaxTime()).WillOnce(Return(1800));
+
+    m_pAosConnector->HandleInvalidPcscfAddress();
+
+    EXPECT_TRUE(m_pAosConnector->IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
 TEST_F(AosConnectorTest, NotifyDeactivatedForEmergencyTypeWhenPcscfConfigureFail)
 {
     m_pAosConnector->SetEmergencyType(IMS_TRUE);
@@ -881,7 +950,7 @@ TEST_F(AosConnectorTest, ReturnFalseIfUnknownIpAddressWhenCheckIpChangedForEmerg
 TEST_F(AosConnectorTest, ReturnFalseIfFailToParsePcscfWhenCheckIpaAndProcessReadyRecovery)
 {
     // calculate waiting time through the WaitTimeForFlowRecovery()
-    m_pAosConnector->SetReadyRecoveryCount(AosConnector::READY_RECOVERY_DEFAULT_COUNT);
+    m_pAosConnector->SetReadyRecoveryCount(3);
     m_objPcscfs.AddElement(AString("PcscfAddress"));
     ON_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .WillByDefault(ReturnRef(IpAddress::LOOPBACK));

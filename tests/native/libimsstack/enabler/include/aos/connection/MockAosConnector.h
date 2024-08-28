@@ -44,6 +44,7 @@ public:
     MOCK_METHOD(void, Stop, (IN IMS_SINT32 nDelayTimeSec), (override));
     MOCK_METHOD(void, SetListener, (IN IAosConnectorListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, IsReady, (), (const, override));
+    MOCK_METHOD(void, ResetReadyRecovery, (), (override));
     MOCK_METHOD(void, CleanAll, (), (override));
     MOCK_METHOD(IMS_BOOL, ConfigurePcscf, (), (override));
     MOCK_METHOD(void, ProcessIpv6TimerExpired, (), (override));

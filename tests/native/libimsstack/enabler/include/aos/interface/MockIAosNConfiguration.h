@@ -139,6 +139,10 @@ public:
     MOCK_METHOD(IMS_UINT32, GetNotifyEventForInitialRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetNotifyWaitTime, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetNotifyEventForInitialRegWithWaitTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryMaxRetryCnt, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryWaitTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryBaseTime, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPcscfRecoveryMaxTime, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequired, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorRegRequired, (), (const, override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSubErrorRegRequiredWithNextPcscf, (), (override));

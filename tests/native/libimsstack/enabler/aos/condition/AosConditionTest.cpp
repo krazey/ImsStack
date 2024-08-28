@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "AosReason.h"
 #include "ImsEventDef.h"
 #include "ServiceNetworkPolicy.h"
 #include "interface/IAosAppContext.h"
@@ -891,6 +892,7 @@ TEST_F(AosConditionTest, ShouldResetBlocksWhenReceiveRefreshCompletedAfterRefres
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AUTHENTICATION_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_INVALID_CONNECTION, _));
 
     m_pAosCondition->SetRefreshStarted(IMS_TRUE);
 
@@ -907,6 +909,7 @@ TEST_F(AosConditionTest, ShouldResetBlocksWhenReceiveReadyAfterRefreshStarted)
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_REG_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AUTHENTICATION_FAILED, _));
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_INVALID_CONNECTION, _));
 
     m_pAosCondition->SetRefreshStarted(IMS_TRUE);
 
@@ -1092,7 +1095,8 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_RetryFailure)
 TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimState)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_PERMANENT_DATA_FAILED, _));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_INVALID_CONNECTION, _));
 
     m_pAosCondition->ServicePhone_PhoneNumberStateChanged(
             IMS_FALSE, PhoneNumberState::RETRY_SUCCESS);
@@ -1132,12 +1136,16 @@ TEST_F(AosConditionTest, ServicePhone_PowerOff_ListenerIsNotNull)
 TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)
 {
     MockIAosConditionListener objMockIAosConditionListener;
-    EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _));
+    EXPECT_CALL(objMockIAosConditionListener,
+            Condition_RequestCommand(AosCondition::REQUEST_STOP, AosReason::AIRPLANE_MODE));
+    EXPECT_CALL(objMockIAosConditionListener,
+            Condition_RequestCommand(
+                    AosCondition::REQUEST_RESET_CONNECTION_RECOVERY, AosReason::NONE));
 
     m_pAosCondition->SetListener(&objMockIAosConditionListener);
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(3);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(4);
 
     m_pAosCondition->ServiceSetting_AirplaneChanged(IMS_TRUE);
 }
@@ -1170,7 +1178,7 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_HoldEvent)
 TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_On)
 {
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(4);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(5);
 
     m_pAosCondition->RemoveHold(TestAosCondition::HOLD_EVENT_IMS_SERVICE, IMS_FALSE);
     EXPECT_FALSE(m_pAosCondition->IsHeld(TestAosCondition::HOLD_EVENT_IMS_SERVICE));
