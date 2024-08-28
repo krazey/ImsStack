@@ -24,8 +24,6 @@ class AudioNegoEvs
 public:
     static AString SetSdpFmtpFromEvsFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp);
     static void AppendSeparatorIfNotEmpty(OUT AString& str, IN AString separator);
-    static void AddPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
-    static void AddMaxPtimeToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
     static void AddDtxToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
     static void AddHfOnlyToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);
     static void AddEvsModeSwitchToFmtp(IN AudioProfile::EvsFmtp* pEvsFmtp, OUT AString& strFmtp);

@@ -34,7 +34,5 @@ public:
     static void AddModeChangeNeighborToFmtp(
             IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
     static void AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
-    static void AddPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
-    static void AddMaxPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp);
 };
 #endif

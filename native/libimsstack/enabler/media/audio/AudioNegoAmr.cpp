@@ -42,8 +42,6 @@ PUBLIC AString AudioNegoAmr::SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* pAm
     AddModeChangePeriodToFmtp(pAmrFmtp, strFmtp);
     AddModeChangeNeighborToFmtp(pAmrFmtp, strFmtp);
     AddMaxRedToFmtp(pAmrFmtp, strFmtp);
-    AddPtimeToFmtp(pAmrFmtp, strFmtp);
-    AddMaxPtimeToFmtp(pAmrFmtp, strFmtp);
 
     return strFmtp;
 }
@@ -189,49 +187,6 @@ PUBLIC void AudioNegoAmr::AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OU
 
         AString strTemp;
         strTemp.Sprintf("max-red=%d", pAmrFmtp->GetMaxRed());
-        strFmtp.Append(strTemp);
-    }
-}
-
-PUBLIC void AudioNegoAmr::AddPtimeToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp)
-{
-    if (pAmrFmtp == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("AddPtimeToFmtp() ptime=%d, visible=%d", pAmrFmtp->GetPtime(),
-            pAmrFmtp->IsPtimeVisible(), 0);
-
-    if (pAmrFmtp->GetPtime() != AudioProfile::AmrFmtp::DEFAULT_PTIME &&
-            pAmrFmtp->IsPtimeVisible() == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("ptime=%d", pAmrFmtp->GetPtime());
-        strFmtp.Append(strTemp);
-    }
-}
-
-PUBLIC void AudioNegoAmr::AddMaxPtimeToFmtp(
-        IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp)
-{
-    if (pAmrFmtp == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_TRACE_I("AddMaxPtimeToFmtp() maxptime=%d, visible=%d", pAmrFmtp->GetMaxPtime(),
-            pAmrFmtp->IsMaxPtimeVisible(), 0);
-
-    if (pAmrFmtp->GetMaxPtime() != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME &&
-            pAmrFmtp->IsMaxPtimeVisible() == IMS_TRUE)
-    {
-        AppendSeparatorIfNotEmpty(strFmtp, SEMICOLON);
-
-        AString strTemp;
-        strTemp.Sprintf("maxptime=%d", pAmrFmtp->GetMaxPtime());
         strFmtp.Append(strTemp);
     }
 }
