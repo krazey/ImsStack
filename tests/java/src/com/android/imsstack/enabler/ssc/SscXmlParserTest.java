@@ -208,7 +208,7 @@ public class SscXmlParserTest {
     @Test
     public void getSscServiceFromDoc_oirNotProvisioned() {
         String xml = "<ss:originating-identity-presentation-restriction active=\"false\">"
-                + "<ss:default-behaviour>presentation-not-restricted</ss:default-behaviour>"
+                + "<ss:default-behaviour>PRESENTATION-NOT-RESTRICTED</ss:default-behaviour>"
                 + "</ss:originating-identity-presentation-restriction>";
 
         processEntireDocumentQuery();
@@ -708,7 +708,7 @@ public class SscXmlParserTest {
                 + "<cp:ruleset>"
                 + "<cp:rule id=\"call-diversion-unconditional-video\">"
                 + "<cp:conditions>"
-                + "<ss:media>video</ss:media>"
+                + "<ss:media>VIDEO</ss:media>"
                 + "</cp:conditions>"
                 + "<cp:actions>"
                 + "<ss:forward-to>"

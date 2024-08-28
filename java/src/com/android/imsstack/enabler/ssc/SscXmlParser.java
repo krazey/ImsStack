@@ -305,7 +305,7 @@ public class SscXmlParser {
             if (dbNodeList.getLength() > 0) {
                 Element dbElement = (Element) dbNodeList.item(0);
                 String defaultBehaviour = dbElement.getTextContent().trim();
-                if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equals(defaultBehaviour)) {
+                if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equalsIgnoreCase(defaultBehaviour)) {
                     provisionStatus = SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
                     outgoingState = SscConstant.OIR_SUPPRESSION;
                 }
@@ -364,7 +364,7 @@ public class SscXmlParser {
             if (dbNodeList.getLength() > 0) {
                 Element dbElement = (Element) dbNodeList.item(0);
                 String defaultBehaviour = dbElement.getTextContent().trim();
-                if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equals(defaultBehaviour)) {
+                if (SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equalsIgnoreCase(defaultBehaviour)) {
                     provisionStatus = SscConstant.TIR_NOT_PROVISIONED;
                 }
             }
@@ -467,10 +467,10 @@ public class SscXmlParser {
                     SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
-                if (SscXmlFormat.AUDIO.equals(mediaValue)) {
+                if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
                     SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD,
                             SscXmlFormat.MEDIA_TYPE_AUDIO, true);
-                } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
+                } else if (SscXmlFormat.VIDEO.equalsIgnoreCase(mediaValue)) {
                     SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CD,
                             SscXmlFormat.MEDIA_TYPE_VIDEO, true);
                 }
@@ -574,10 +574,10 @@ public class SscXmlParser {
                     SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA));
             for (int i = 0; i < mediaNodeList.getLength(); i++) {
                 String mediaValue = mediaNodeList.item(i).getTextContent().trim();
-                if (SscXmlFormat.AUDIO.equals(mediaValue)) {
+                if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
                     SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB,
                             SscXmlFormat.MEDIA_TYPE_AUDIO, true);
-                } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
+                } else if (SscXmlFormat.VIDEO.equalsIgnoreCase(mediaValue)) {
                     SscXmlFormat.setMediaCapability(slotId, SscXmlFormat.SC_CB,
                             SscXmlFormat.MEDIA_TYPE_VIDEO, true);
                 }
@@ -723,9 +723,9 @@ public class SscXmlParser {
                 } else if (SscXmlFormat.getSsElement(slotId, SscXmlFormat.MEDIA).equals(nodeName)) {
                     String mediaValue = childNode.getTextContent();
                     ImsLog.d(slotId, "Media Tag : " + mediaValue);
-                    if (SscXmlFormat.AUDIO.equals(mediaValue)) {
+                    if (SscXmlFormat.AUDIO.equalsIgnoreCase(mediaValue)) {
                         ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_VOICE);
-                    } else if (SscXmlFormat.VIDEO.equals(mediaValue)) {
+                    } else if (SscXmlFormat.VIDEO.equalsIgnoreCase(mediaValue)) {
                         ruleData.addServiceClass(SscServiceClassUtil.SERVICE_CLASS_VIDEO);
                     }
                 }
