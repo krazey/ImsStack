@@ -758,11 +758,28 @@ TEST_F(MtcSessionTest, IncomingRttRequestIsRestrictedByRegisteredFeatureIfTextNo
     EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
 }
 
+TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVoipIfConfigSet)
+{
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::START;
+
+    ON_CALL(*pConfigurationManager, GetMediaTypeForOfferlessInvite)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
+}
+
 TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVoipIfVoiceOnlyRegistered)
 {
     CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_FALSE, IMS_FALSE);
     RequestType eType = RequestType::START;
 
+    ON_CALL(*pConfigurationManager, GetMediaTypeForOfferlessInvite)
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     pMtcSession->HandleRequest(eType, objMessage);
@@ -775,6 +792,9 @@ TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVtIfVideoRegister
     CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_FALSE);
     RequestType eType = RequestType::START;
 
+    ON_CALL(*pConfigurationManager, GetMediaTypeForOfferlessInvite)
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     pMtcSession->HandleRequest(eType, objMessage);
@@ -787,6 +807,9 @@ TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeRttIfTextRegister
     CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_FALSE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
+    ON_CALL(*pConfigurationManager, GetMediaTypeForOfferlessInvite)
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     pMtcSession->HandleRequest(eType, objMessage);

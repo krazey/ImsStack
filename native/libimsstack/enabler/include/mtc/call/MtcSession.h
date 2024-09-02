@@ -87,11 +87,11 @@ private:
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
-    void UpdateCallTypeFromCurrentCapability();
     IMS_RESULT UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
     CallType RestrictCallTypeByRegisteredFeature(IN CallType& eCallType);
+    CallType GetCallTypeForOfferlessInvite();
     CallType GetCallTypeByRegisteredFeature();
     CallType GetCallTypeByHistory();
     ResultSetSdp SetSdpToSend(

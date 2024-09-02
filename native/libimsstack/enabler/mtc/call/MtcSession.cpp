@@ -280,25 +280,44 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 {
     m_objExtensionSet.HandleRequest(eType, objRequest);
 
-    if (eType == RequestType::START || eType == RequestType::UPDATE)
+    switch (eType)
     {
-        if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
-        {
-            UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
-        }
-        else
-        {
-            UpdateCallTypeFromCurrentCapability();
-        }
+        case RequestType::START:
+            if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
+            {
+                UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
+            }
+            else
+            {
+                SetCallType(GetCallTypeForOfferlessInvite());
+            }
 
-        UpdateCapabilityFromMessage(objRequest);
-        SetInConference(objRequest);
+            SetInConference(objRequest);
+            break;
+
+        case RequestType::EARLY_UPDATE:
+            UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
+            break;
+
+        case RequestType::UPDATE:
+            if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
+            {
+                UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
+            }
+            else
+            {
+                // TODO: b/363128073 - Revisit when supporting HK operators
+                SetCallType(GetCallTypeByHistory());
+            }
+
+            SetInConference(objRequest);
+            break;
+
+        default:
+            break;
     }
-    else if (eType == RequestType::EARLY_UPDATE)
-    {
-        UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
-        UpdateCapabilityFromMessage(objRequest);
-    }
+
+    UpdateCapabilityFromMessage(objRequest);
 }
 
 PUBLIC VIRTUAL void MtcSession::HandleResponse(
@@ -384,19 +403,6 @@ void MtcSession::UpdateSessionProperty()
 }
 
 PRIVATE
-void MtcSession::UpdateCallTypeFromCurrentCapability()
-{
-    if (!m_objCallTypeHistory.empty())
-    {
-        SetCallType(GetCallTypeByHistory());
-    }
-    else
-    {
-        SetCallType(GetCallTypeByRegisteredFeature());
-    }
-}
-
-PRIVATE
 IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
         IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType)
 {
@@ -468,6 +474,21 @@ CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
     }
 
     return eCallType;
+}
+
+PRIVATE
+CallType MtcSession::GetCallTypeForOfferlessInvite()
+{
+    IMS_SINT32 eMediaType =
+            m_objContext.GetConfigurationProxy().GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE);
+    if (eMediaType == CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY)
+    {
+        return GetCallTypeByRegisteredFeature();
+    }
+    else  // CarrierConfig::ImsVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO
+    {
+        return CallType::VOIP;
+    }
 }
 
 PRIVATE
