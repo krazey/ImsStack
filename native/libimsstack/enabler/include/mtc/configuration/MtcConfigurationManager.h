@@ -122,6 +122,7 @@ public:
     IMS_BOOL IsConferenceReferToUriSourcePaid() const override;
     IMS_SINT32 GetConferenceDropReferToUriSourceType() const override;
     IMS_BOOL IsEnableFakeQosCallFlowOnWifi() const override;
+    IMS_SINT32 GetMediaTypeForOfferlessInvite() const override;
     IMS_SINT32 GetMediaTypeForOfferlessReinvite() const override;
     IMS_BOOL IsSupportVideoCallUpgradeRegardlessOfFeatureTags() const override;
     IMS_SINT32 GetOipTypeForUnavailable() const override;

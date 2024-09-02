@@ -429,6 +429,9 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetConferenceDropReferToUriSourceType).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE));
 
+    EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessInvite).WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE));
+
     EXPECT_CALL(*pConfigManager, GetMediaTypeForOfferlessReinvite).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::MEDIA_TYPE_FOR_OFFERLESS_REINVITE));
 

@@ -632,6 +632,13 @@ public:
      *
      * @return
      */
+    virtual IMS_SINT32 GetMediaTypeForOfferlessInvite() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_SINT32 GetMediaTypeForOfferlessReinvite() const = 0;
 
     /**

@@ -535,6 +535,12 @@ IMS_BOOL MtcConfigurationManager::IsEnableFakeQosCallFlowOnWifi() const
 }
 
 PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetMediaTypeForOfferlessInvite() const
+{
+    return m_objCarrierConfig.nMediaTypeForOfferlessInvite;
+}
+
+PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetMediaTypeForOfferlessReinvite() const
 {
     return m_objCarrierConfig.nMediaTypeForOfferlessReinvite;

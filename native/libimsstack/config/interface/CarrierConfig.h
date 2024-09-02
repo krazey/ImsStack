@@ -634,6 +634,13 @@ public:
             CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE = 1
         };
 
+        // Media type for an incoming INVITE without SDP
+        enum
+        {
+            OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY = 0,
+            OFFERLESS_INVITE_MEDIA_TYPE_AUDIO = 1
+        };
+
         // Media type for an incoming re-INVITE without SDP
         enum
         {
@@ -927,6 +934,7 @@ public:
         static const IMS_CHAR KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL[];
         static const IMS_CHAR KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT[];
         static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
+        static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT[];
         static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[];
         static const IMS_CHAR KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[];
         static const IMS_CHAR KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[];

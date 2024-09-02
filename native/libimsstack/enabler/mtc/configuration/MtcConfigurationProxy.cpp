@@ -308,6 +308,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetPolicyForEmergencyUrnEscvMapping();
         case Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE:
             return m_pManager->GetConferenceDropReferToUriSourceType();
+        case Feature::MEDIA_TYPE_FOR_OFFERLESS_INVITE:
+            return m_pManager->GetMediaTypeForOfferlessInvite();
         case Feature::MEDIA_TYPE_FOR_OFFERLESS_REINVITE:
             return m_pManager->GetMediaTypeForOfferlessReinvite();
         case Feature::OIP_TYPE_FOR_UNAVAILABLE:

@@ -61,6 +61,7 @@ public:
             nIncomingCallRejectCodeForNoAnswer(486),
             nIncomingCallRejectCodeForUserDecline(486),
             nMaximumWaitTimerForGeolocationPidfInfo(0),
+            nMediaTypeForOfferlessInvite(0),
             nMediaTypeForOfferlessReinvite(0),
             nMinimumBatteryLevelForLimitVideoCall(0),
             nMoCallRequestTimeout(5000),
@@ -214,6 +215,7 @@ public:
     IMS_SINT32 nIncomingCallRejectCodeForNoAnswer;
     IMS_SINT32 nIncomingCallRejectCodeForUserDecline;
     IMS_SINT32 nMaximumWaitTimerForGeolocationPidfInfo;
+    IMS_SINT32 nMediaTypeForOfferlessInvite;
     IMS_SINT32 nMediaTypeForOfferlessReinvite;
     IMS_SINT32 nMinimumBatteryLevelForLimitVideoCall;
     IMS_SINT32 nMoCallRequestTimeout;

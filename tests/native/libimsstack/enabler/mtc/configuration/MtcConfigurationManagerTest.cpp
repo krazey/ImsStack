@@ -794,6 +794,12 @@ TEST_F(MtcConfigurationManagerTest, IsEnableFakeQosCallFlowOnWifiReturnsValueInC
             GetBool(CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessInviteReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetMediaTypeForOfferlessInvite(),
+            GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT));
+}
+
 TEST_F(MtcConfigurationManagerTest, GetMediaTypeForOfferlessReinviteReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetMediaTypeForOfferlessReinvite(),
