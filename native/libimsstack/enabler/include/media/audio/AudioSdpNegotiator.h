@@ -20,7 +20,7 @@ public:
 
 private:
     void ResetNegotiatedProfile(
-            IN const AudioProfile* pLocalProfile, OUT AudioProfile* AudioProfile);
+            IN const AudioProfile* pLocalProfile, OUT AudioProfile** AudioProfile);
     AudioProfile::Payload* NegotiatePayload(IN AudioProfile* pLocalProfile,
             IN AudioProfile* pPeerProfile, OUT AudioProfile* pNegotiatedProfile);
     AudioProfile::Payload* NegotiateAudioPayload(IN AudioProfile* pLocalProfile,

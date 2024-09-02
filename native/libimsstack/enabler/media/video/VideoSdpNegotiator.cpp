@@ -42,7 +42,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        ResetNegotiatedProfile(pLocalProfile, pNegotiatedProfile);
+        ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
         return IMS_TRUE;
     }
 
@@ -131,7 +131,7 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
             IMS_TRACE_D("Negotiate() - No negotiated payload. copy LocalProfile and make port 0", 0,
                     0, 0);
 
-            ResetNegotiatedProfile(pLocalProfile, pNegotiatedProfile);
+            ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
             ret = IMS_TRUE;
         }
         else
@@ -149,16 +149,17 @@ PUBLIC IMS_BOOL VideoSdpNegotiator::Negotiate(IN VideoProfile* pLocalProfile,
 
 PRIVATE
 void VideoSdpNegotiator::ResetNegotiatedProfile(
-        IN const VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile)
+        IN const VideoProfile* pLocalProfile, OUT VideoProfile** pNegotiatedProfile)
 {
-    if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    if (pLocalProfile == IMS_NULL)
     {
         return;
     }
 
-    *pNegotiatedProfile = *pLocalProfile;
-    pNegotiatedProfile->SetDataPort(0);
-    pNegotiatedProfile->SetNegotiatedPayloadIndex(MEDIA_DIRECTION_INVALID);
+    **pNegotiatedProfile = *pLocalProfile;
+
+    (*pNegotiatedProfile)->SetDataPort(0);
+    (*pNegotiatedProfile)->SetNegotiatedPayloadIndex(MEDIA_DIRECTION_INVALID);
 }
 
 PRIVATE

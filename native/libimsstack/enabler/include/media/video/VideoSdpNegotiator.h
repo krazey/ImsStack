@@ -28,7 +28,7 @@ public:
 
 private:
     void ResetNegotiatedProfile(
-            IN const VideoProfile* pLocalProfile, OUT VideoProfile* pNegotiatedProfile);
+            IN const VideoProfile* pLocalProfile, OUT VideoProfile** pNegotiatedProfile);
     void NegotiateAvpf(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             OUT VideoProfile* pNegotiatedProfile);
     void NegotiateTransportType(OUT VideoProfile* pNegotiatedProfile);

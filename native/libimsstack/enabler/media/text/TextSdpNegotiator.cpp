@@ -35,7 +35,7 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
         return IMS_TRUE;
     }
 
@@ -55,7 +55,7 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
         IMS_TRACE_D("Negotiate() - no negotiated payload. use the LocalProfile and make port 0", 0,
                 0, 0);
 
-        bRet = ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile, pNegotiatedProfile);
+        bRet = ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile, &pNegotiatedProfile);
     }
 
     NegotiateRtcpInterval(pNegotiatedProfile, pConfig);
@@ -70,11 +70,11 @@ PUBLIC IMS_BOOL TextSdpNegotiator::Negotiate(IN TextProfile* pLocalProfile,
 PRIVATE
 IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
         IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
-        OUT TextProfile* pNegotiatedProfile)
+        OUT TextProfile** pNegotiatedProfile)
 {
     IMS_BOOL bRet = IMS_FALSE;
 
-    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    if (pLocalProfile == IMS_NULL || pPeerProfile == IMS_NULL)
     {
         return bRet;
     }
@@ -84,11 +84,11 @@ IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
         IMS_TRACE_D("ResetNegotiatedProfile() - by Peer Profile payload size[%d]",
                 pPeerProfile->GetPayloadList().GetSize(), 0, 0);
 
-        *pNegotiatedProfile =
+        **pNegotiatedProfile =
                 (pPeerProfile->GetPayloadList().GetSize() > 0) ? *pPeerProfile : *pLocalProfile;
 
-        pNegotiatedProfile->SetIpAddress(pLocalProfile->GetIpAddress());
-        pNegotiatedProfile->SetDataPort(0);
+        (*pNegotiatedProfile)->SetIpAddress(pLocalProfile->GetIpAddress());
+        (*pNegotiatedProfile)->SetDataPort(0);
     }
     else
     {
@@ -97,12 +97,12 @@ IMS_BOOL TextSdpNegotiator::ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred,
 
         if (pLocalProfile->GetPayloadList().GetSize() > 0)
         {
-            *pNegotiatedProfile = *pLocalProfile;
+            **pNegotiatedProfile = *pLocalProfile;
             bRet = IMS_TRUE;
         }
 
-        pNegotiatedProfile->SetDataPort(0);
-        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INVALID);
+        (*pNegotiatedProfile)->SetDataPort(0);
+        (*pNegotiatedProfile)->SetDirection(MEDIA_DIRECTION_INVALID);
     }
 
     return bRet;
