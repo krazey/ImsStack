@@ -944,6 +944,8 @@ public class CarrierConfig {
                 "conference_drop_refer_to_uri_source_type_int";
         public static final String KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL =
                 "enable_fake_qos_call_flow_on_wifi_bool";
+        public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT =
+                "media_type_for_offerless_invite_int";
         public static final String KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT =
                 "media_type_for_offerless_reinvite_int";
         public static final String KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL =

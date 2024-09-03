@@ -194,6 +194,7 @@
     <boolean name="support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
     <int name="oip_type_for_unavailable_int" value="1"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
+    <int name="media_type_for_offerless_invite_int" value="1"/>
     <int name="media_type_for_offerless_reinvite_int" value="1"/>
     <boolean name="support_video_call_only_in_vops_off_status_bool" value="true"/>
     <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>

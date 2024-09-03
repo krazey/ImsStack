@@ -475,6 +475,7 @@
     <boolean name="conference_refer_to_uri_source_paid_bool" value="true"/>
     <int name="conference_drop_refer_to_uri_source_type_int" value="0"/>
     <boolean name="enable_fake_qos_call_flow_on_wifi_bool" value="false"/>
+    <int name="media_type_for_offerless_invite_int" value="0"/>
     <int name="media_type_for_offerless_reinvite_int" value="0"/>
     <boolean name="support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="oip_type_for_unavailable_int" value="1"/>

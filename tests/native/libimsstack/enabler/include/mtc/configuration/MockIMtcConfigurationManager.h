@@ -110,6 +110,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsConferenceReferToUriSourcePaid, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetConferenceDropReferToUriSourceType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEnableFakeQosCallFlowOnWifi, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetMediaTypeForOfferlessInvite, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMediaTypeForOfferlessReinvite, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportVideoCallUpgradeRegardlessOfFeatureTags, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetOipTypeForUnavailable, (), (const, override));

@@ -239,6 +239,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetInt(CarrierConfig::Assets::KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT);
     objItems.bEnableFakeQosCallFlowOnWifi =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL);
+    objItems.nMediaTypeForOfferlessInvite =
+            piCc->GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT);
     objItems.nMediaTypeForOfferlessReinvite =
             piCc->GetInt(CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT);
     objItems.bSupportVideoCallUpgradeRegardlessOfFeatureTags = piCc->GetBoolean(
