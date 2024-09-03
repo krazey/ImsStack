@@ -43,6 +43,16 @@ PUBLIC AString AudioNegoAmr::SetSdpFmtpFromAmrFmtp(IN AudioProfile::AmrFmtp* pAm
     AddModeChangeNeighborToFmtp(pAmrFmtp, strFmtp);
     AddMaxRedToFmtp(pAmrFmtp, strFmtp);
 
+    if (strFmtp.IsNull())
+    {
+        ForceToAddModeSetList(pAmrFmtp, strFmtp);
+
+        if (strFmtp.IsNull())
+        {
+            ForceToAddOctetAlign(pAmrFmtp, strFmtp);
+        }
+    }
+
     return strFmtp;
 }
 
@@ -189,4 +199,36 @@ PUBLIC void AudioNegoAmr::AddMaxRedToFmtp(IN AudioProfile::AmrFmtp* pAmrFmtp, OU
         strTemp.Sprintf("max-red=%d", pAmrFmtp->GetMaxRed());
         strFmtp.Append(strTemp);
     }
+}
+
+PUBLIC void AudioNegoAmr::ForceToAddModeSetList(
+        IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp)
+{
+    if (pAmrFmtp == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("ForceToAddModeSetList()", 0, 0, 0);
+
+    IMS_BOOL pTempShowModeSet = pAmrFmtp->IsModeSetVisible();
+    pAmrFmtp->SetShowModeSet(IMS_TRUE);
+    AddModeSetListToFmtp(pAmrFmtp, strFmtp);
+    pAmrFmtp->SetShowModeSet(pTempShowModeSet);
+}
+
+PUBLIC void AudioNegoAmr::ForceToAddOctetAlign(
+        IN AudioProfile::AmrFmtp* pAmrFmtp, OUT AString& strFmtp)
+{
+    if (pAmrFmtp == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("ForceToAddOctetAlign()", 0, 0, 0);
+
+    IMS_BOOL pTempShowOctetAlign = pAmrFmtp->IsOctetAlignVisible();
+    pAmrFmtp->SetShowOctetAlign(IMS_TRUE);
+    AddOctetAlignToFmtp(pAmrFmtp, strFmtp);
+    pAmrFmtp->SetShowOctetAlign(pTempShowOctetAlign);
 }
