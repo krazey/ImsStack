@@ -17,7 +17,6 @@
 #include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "MockIMtcContext.h"
-#include "TextParser.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -482,6 +481,17 @@ TEST_F(MessageUtilsTest, GetDisplayName)
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
     EXPECT_STREQ(strDisplayName.GetStr(), "");
+}
+
+TEST_F(MessageUtilsTest, GetDisplayNameWithPercentEncodedValueReturnsDecodedValue)
+{
+    AString strDisplayName;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("\"Alphanumeric%2001\" <sip:anyname1@ims.google.com>");
+    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
+
+    strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
+    EXPECT_STREQ(strDisplayName.GetStr(), "Alphanumeric 01");
 }
 
 TEST_F(MessageUtilsTest, GetHosts)
