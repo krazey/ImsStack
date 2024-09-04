@@ -171,21 +171,22 @@ TEST_F(MtcSessionTest, StartFailsIfSetSdpFails)
     EXPECT_EQ(pMtcSession->Start(), IMS_FAILURE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183ReliablyWithoutSdpIfNoSdpIsNeeded)
 {
     CreateMtcSession();
+
     SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_FALSE, IMS_FALSE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183ReliablyWithSdp)
 {
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
@@ -193,10 +194,10 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_FALSE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithAlertInfoIfUpdatingSessionExists)
@@ -213,10 +214,10 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithAlertInfoIfUpdatingSes
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_TRUE))
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithoutAlertInfoIfItIsConfirmedDialog)
@@ -232,10 +233,10 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithoutAlertInfoIfItIsConf
     ON_CALL(objThisCall, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
 
     EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_FALSE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
 TEST_F(MtcSessionTest, SendProvisionalResponseFailsIfResultSetSdpIsFailure)
@@ -245,103 +246,52 @@ TEST_F(MtcSessionTest, SendProvisionalResponseFailsIfResultSetSdpIsFailure)
 
     EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, _, _, _)).Times(0);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_FALSE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends180IfUserAlert)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180WithOutSdpIfUserAlertAndRprNotSupported)
 {
     CreateMtcSession();
     SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
             .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_TRUE);
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSendsResponseReliablyIfRprIsRequired)
+TEST_F(MtcSessionTest,
+        SendProvisionalResponseSends180WithOutSdpIfUserAlertAndRprSupportedAndNoSdpIsNeeded)
 {
     CreateMtcSession();
-
-    // Sets the remote to require RPR
-    ON_CALL(objMessageUtils,
-            HasValue(&objMessage, MtcExtensionSet::OPTION_TAG_RPR, ISipHeader::REQUIRE,
-                    AString::ConstNull()))
-            .WillByDefault(Return(IMS_TRUE));
-    pMtcSession->HandleRequest(RequestType::START, objMessage);
-
     SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
-    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, IMS_TRUE, _, _));
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(0);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_TRUE, IMS_FALSE, IMS_FALSE))
+            .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSendsResponseUnReliablyIfRprSupportedOnly)
+TEST_F(MtcSessionTest, SendProvisionalResponseSends180WithSdpIfUserAlertAndRprSupported)
 {
     CreateMtcSession();
-
-    // Sets the remote to support RPR
-    ON_CALL(objMessageUtils,
-            HasValue(&objMessage, MtcExtensionSet::OPTION_TAG_RPR, ISipHeader::SUPPORTED,
-                    AString::ConstNull()))
-            .WillByDefault(Return(IMS_TRUE));
-    pMtcSession->HandleRequest(RequestType::START, objMessage);
-
-    SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);  // Not to include SDP
+    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
-    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, IMS_FALSE, _, _));
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_TRUE, IMS_TRUE, IMS_FALSE))
+            .Times(1);
 
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
-}
-
-TEST_F(MtcSessionTest, SendProvisionalResponseSendsResponseReliablyIfRprSupportedAndSdpIncluded)
-{
-    CreateMtcSession();
-
-    // Sets the remote to support RPR
-    ON_CALL(objMessageUtils,
-            HasValue(&objMessage, MtcExtensionSet::OPTION_TAG_RPR, ISipHeader::SUPPORTED,
-                    AString::ConstNull()))
-            .WillByDefault(Return(IMS_TRUE));
-    pMtcSession->HandleRequest(RequestType::START, objMessage);
-
-    SetUpForSetSdp(NegotiationState::STATE_OFFER_RECEIVED, IMS_SUCCESS);  // To include SDP
-    ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
-
-    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, IMS_TRUE, _, _));
-
-    pMtcSession->SendProvisionalResponse(IMS_FALSE);
-}
-
-TEST_F(MtcSessionTest, SendProvisionalResponseSendsResponseReliablyIfRprSupportedAndConfigurationOn)
-{
-    ON_CALL(*pConfigurationManager, IsPrackSupportedFor18x).WillByDefault(Return(IMS_TRUE));
-
-    CreateMtcSession();
-
-    // Sets the remote to support RPR
-    ON_CALL(objMessageUtils,
-            HasValue(&objMessage, MtcExtensionSet::OPTION_TAG_RPR, ISipHeader::SUPPORTED,
-                    AString::ConstNull()))
-            .WillByDefault(Return(IMS_TRUE));
-    pMtcSession->HandleRequest(RequestType::START, objMessage);
-
-    SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
-    ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
-
-    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, IMS_TRUE, _, _));
-
-    pMtcSession->SendProvisionalResponse(IMS_TRUE);
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_TRUE);
 }
 
 TEST_F(MtcSessionTest, SendPrackSendsPrack)

@@ -101,20 +101,24 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
     return m_pMessageSender->Start(GetCallType());
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
+        IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable)
 {
     IMS_TRACE_D("SendProvisionalResponse", 0, 0, 0);
 
-    IMS_BOOL bIncludeSdp = true;
-    switch (SetSdpToSend(IMS_FALSE))
+    IMS_BOOL bIncludeSdp = bReliable;
+    if (bReliable)
     {
-        case ResultSetSdp::NO_SDP:
-            bIncludeSdp = IMS_FALSE;
-            break;
-        case ResultSetSdp::FAILURE:
-            return IMS_FAILURE;
-        case ResultSetSdp::SUCCESS:
-            break;
+        switch (SetSdpToSend(IMS_FALSE))
+        {
+            case ResultSetSdp::NO_SDP:
+                bIncludeSdp = IMS_FALSE;
+                break;
+            case ResultSetSdp::FAILURE:
+                return IMS_FAILURE;
+            case ResultSetSdp::SUCCESS:
+                break;
+        }
     }
 
     // TODO: determine the response code based on the configuration for KR carriers?
@@ -123,7 +127,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserA
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
     return m_pMessageSender->SendProvisionalResponse(
-            nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
+            nStatusCode, bReliable, bIncludeSdp, IsCallWaiting());
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bAllowReOffer)
@@ -577,7 +581,7 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
+IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature) const
 {
     IMtcAosConnector* pAosConnector =
             m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType());
@@ -613,33 +617,7 @@ IMS_BOOL MtcSession::IsCallWaiting() const
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
-{
-    if (!m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objExtensionSet.IsRequiredOnRemote(MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return IMS_TRUE;
-    }
-
-    if (bIncludeSdp)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL MtcSession::IsInHistory(IN CallType eCallType)
+IMS_BOOL MtcSession::IsInHistory(IN CallType eCallType) const
 {
     return std::find(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(), eCallType) !=
             m_objCallTypeHistory.end();
