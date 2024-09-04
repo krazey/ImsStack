@@ -57,6 +57,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
+        m_pUdpKeepAliveSender(IMS_NULL),
         m_bTimer100WaitExpired(IMS_FALSE),
         m_bWaitingRedial(IMS_FALSE)
 {

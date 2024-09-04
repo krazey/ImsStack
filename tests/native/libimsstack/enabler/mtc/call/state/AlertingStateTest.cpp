@@ -145,7 +145,7 @@ protected:
     }
 };
 
-TEST_F(AlertingStateTest, OnEnterInvokesKeepAliveSenderStart)
+TEST_F(AlertingStateTest, OnEnterStartsKeepAlive)
 {
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
     EXPECT_CALL(*pUdpKeepAliveSender, Start);
@@ -153,7 +153,7 @@ TEST_F(AlertingStateTest, OnEnterInvokesKeepAliveSenderStart)
     pAlertingState->OnEnter();
 }
 
-TEST_F(AlertingStateTest, OnExitInvokesKeepAliveSenderStop)
+TEST_F(AlertingStateTest, OnExitStopsKeepAlive)
 {
     ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
     EXPECT_CALL(*pUdpKeepAliveSender, Stop);
@@ -224,6 +224,18 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
+}
+
+TEST_F(AlertingStateTest, AcceptStopsKeepAlive)
+{
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(1));
+    pAlertingState->OnEnter();
+    CallType eAcceptCallType = CallType::VOIP;
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
+
+    EXPECT_CALL(*pUdpKeepAliveSender, Stop);
+
+    pAlertingState->Accept(eAcceptCallType, objMediaInfo);
 }
 
 TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)
