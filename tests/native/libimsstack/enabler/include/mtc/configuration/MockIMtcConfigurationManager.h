@@ -113,6 +113,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSupportVideoCallUpgradeRegardlessOfFeatureTags, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetOipTypeForUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEnableOipHeaderPolicyFallBack, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetDelayUpdateAfterConnectedTimer, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRttGuardTimer, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreAlertingTimer, (), (const, override));

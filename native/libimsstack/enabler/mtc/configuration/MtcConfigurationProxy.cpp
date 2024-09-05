@@ -310,6 +310,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetMediaTypeForOfferlessReinvite();
         case Feature::OIP_TYPE_FOR_UNAVAILABLE:
             return m_pManager->GetOipTypeForUnavailable();
+        case Feature::DELAY_UPDATE_AFTER_CONNECTED_TIMER:
+            return m_pManager->GetDelayUpdateAfterConnectedTimer();
         case Feature::EMERGENCY_RTT_GUARD_TIMER:
             return m_pManager->GetEmergencyRttGuardTimer();
         case Feature::PRE_ALERTING_TIMER:

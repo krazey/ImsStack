@@ -398,8 +398,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_18x_timer_millis_int";
         public static final String KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT =
                 KEY_PREFIX + "policy_for_emergency_urn_escv_mapping_int";
-        public static final String KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL =
-                KEY_PREFIX + "enable_oip_header_policy_fallback_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
                 KEY_PREFIX + "support_ecbm_for_volte_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
@@ -624,6 +622,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "media_type_for_offerless_reinvite_int";
         public static final String KEY_OIP_TYPE_FOR_UNAVAILABLE_INT =
                 KEY_PREFIX + "oip_type_for_unavailable_int";
+        public static final String KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL =
+                KEY_PREFIX + "enable_oip_header_policy_fallback_bool";
+        public static final String KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT  =
+                KEY_PREFIX + "delay_update_after_connected_timer_millis_int";
         public static final String KEY_PREALERTING_TIMER_MILLIS_INT =
                 KEY_PREFIX + "prealerting_timer_millis_int";
         public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT =

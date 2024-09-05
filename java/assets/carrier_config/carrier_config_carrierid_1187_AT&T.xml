@@ -236,6 +236,7 @@
     <boolean name="imsvt.support_video_call_upgrade_regardless_of_feature_tags_bool" value="false"/>
     <int name="imsvoice.oip_type_for_unavailable_int" value="1"/>
     <boolean name="imsvoice.enable_oip_header_policy_fallback_bool" value="true"/>
+    <int name="imsvoice.delay_update_after_connected_timer_millis_int" value="200"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="-1"/>
     <boolean name="imsemergency.retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="false"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="-1"/>

@@ -126,6 +126,7 @@ public:
     IMS_BOOL IsSupportVideoCallUpgradeRegardlessOfFeatureTags() const override;
     IMS_SINT32 GetOipTypeForUnavailable() const override;
     IMS_BOOL IsEnableOipHeaderPolicyFallBack() const override;
+    IMS_SINT32 GetDelayUpdateAfterConnectedTimer() const override;
     IMS_SINT32 GetEmergencyRttGuardTimer() const override;
     IMS_BOOL IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf() const override;
     IMS_SINT32 GetPreAlertingTimer() const override;

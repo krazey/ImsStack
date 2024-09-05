@@ -430,6 +430,9 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetOipTypeForUnavailable).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE));
 
+    EXPECT_CALL(*pConfigManager, GetDelayUpdateAfterConnectedTimer).WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::DELAY_UPDATE_AFTER_CONNECTED_TIMER));
+
     EXPECT_CALL(*pConfigManager, GetEmergencyRttGuardTimer).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::EMERGENCY_RTT_GUARD_TIMER));
 

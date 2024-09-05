@@ -109,6 +109,7 @@ public:
             bEnableConferenceSubscribeByParticipant(IMS_FALSE),
             bEnableFakeQosCallFlowOnWifi(IMS_FALSE),
             bEnableOipHeaderPolicyFallBack(IMS_FALSE),
+            nDelayUpdateAfterConnectedTimer(0),
             bEnableRegistrationRecoveryWhenCallRejectedByServerError(IMS_FALSE),
             bEnableRegistrationRecoveryWhenCallRetryUnavailable(IMS_FALSE),
             bEnableSendReinviteOnRatChange(IMS_FALSE),
@@ -262,6 +263,7 @@ public:
     IMS_BOOL bEnableConferenceSubscribeByParticipant;
     IMS_BOOL bEnableFakeQosCallFlowOnWifi;
     IMS_BOOL bEnableOipHeaderPolicyFallBack;
+    IMS_SINT32 nDelayUpdateAfterConnectedTimer;
     IMS_BOOL bEnableRegistrationRecoveryWhenCallRejectedByServerError;
     IMS_BOOL bEnableRegistrationRecoveryWhenCallRetryUnavailable;
     IMS_BOOL bEnableSendReinviteOnRatChange;
