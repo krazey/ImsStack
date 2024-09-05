@@ -448,7 +448,7 @@ PUBLIC AString MessageUtils::GetDisplayName(IN IMessage* piMessage, IN IMS_SINT3
         AString strDisplayName = lstDisplayNames.GetAt(i);
         if (strDisplayName.GetLength() > 0)
         {
-            return strDisplayName;
+            return TextParser::DoPercentDecoding(strDisplayName);
         }
     }
 
