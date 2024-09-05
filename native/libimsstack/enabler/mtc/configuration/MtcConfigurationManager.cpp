@@ -280,12 +280,6 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyOfLocalNumbers() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsDefaultEpsBearerContextUsageRestrictionOnCellular() const
-{
-    return m_objCarrierConfig.bDefaultEpsBearerContextUsageRestrictionOnCellular;
-}
-
-PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetSilentRedialInterval() const
 {
     return m_objCarrierConfig.nSilentRedialInterval;
@@ -849,12 +843,6 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsReleaseEmergencyPdnWithEmergencyCallFail() const
 {
     return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallFail;
-}
-
-PUBLIC
-IMS_SINT32 MtcConfigurationManager::GetPolicyForAlertNotUsingPreconditionMechanism() const
-{
-    return m_objCarrierConfig.nPolicyForAlertNotUsingPreconditionMechanism;
 }
 
 PUBLIC

@@ -67,7 +67,6 @@ public:
             nMoCallRequestTimeout(5000),
             nOipTypeForUnavailable(1),
             nPolicyFor403ResponseForInvite(1),
-            nPolicyForAlertNotUsingPreconditionMechanism(0),
             nPolicyForCheckingQosWhileCallUpgrading(0),
             nPolicyForEmergencyUrnEscvMapping(0),
             nPolicyForLocalRingbackToneWith180Response(0),
@@ -102,7 +101,6 @@ public:
             bCheckConferenceEventPackageVersion(IMS_TRUE),
             bCheckServerOutageReasonForVxlteCall(IMS_FALSE),
             bConferenceReferToUriSourcePaid(IMS_TRUE),
-            bDefaultEpsBearerContextUsageRestrictionOnCellular(IMS_TRUE),
             bEmergencyCallOverEmergencyPdn(IMS_FALSE),  // wifi
             bEmergencyCallOverEmergencyPdnOnCellular(IMS_TRUE),
             bEmergencyQosPreconditionSupported(IMS_TRUE),
@@ -221,7 +219,6 @@ public:
     IMS_SINT32 nMoCallRequestTimeout;
     IMS_SINT32 nOipTypeForUnavailable;
     IMS_SINT32 nPolicyFor403ResponseForInvite;
-    IMS_SINT32 nPolicyForAlertNotUsingPreconditionMechanism;
     IMS_SINT32 nPolicyForCheckingQosWhileCallUpgrading;
     IMS_SINT32 nPolicyForEmergencyUrnEscvMapping;
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
@@ -257,7 +254,6 @@ public:
     IMS_BOOL bCheckConferenceEventPackageVersion;
     IMS_BOOL bCheckServerOutageReasonForVxlteCall;
     IMS_BOOL bConferenceReferToUriSourcePaid;
-    IMS_BOOL bDefaultEpsBearerContextUsageRestrictionOnCellular;
     IMS_BOOL bEmergencyCallOverEmergencyPdn;
     IMS_BOOL bEmergencyCallOverEmergencyPdnOnCellular;
     IMS_BOOL bEmergencyQosPreconditionSupported;

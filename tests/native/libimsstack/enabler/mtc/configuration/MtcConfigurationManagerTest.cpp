@@ -339,14 +339,6 @@ TEST_F(MtcConfigurationManagerTest, GetPolicyOfLocalNumbersReturnsValueInCarrier
             GetInt(CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest,
-        IsDefaultEpsBearerContextUsageRestrictionOnCellularReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsDefaultEpsBearerContextUsageRestrictionOnCellular(),
-            GetBool(CarrierConfig::ImsVoice::
-                            KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL));
-}
-
 TEST_F(MtcConfigurationManagerTest, GetSilentRedialIntervalReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetSilentRedialInterval(),
@@ -1233,14 +1225,6 @@ TEST_F(MtcConfigurationManagerTest,
     EXPECT_EQ(pManager->IsReleaseEmergencyPdnWithEmergencyCallFail(),
             GetBool(CarrierConfig::Assets::
                             KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL));
-}
-
-TEST_F(MtcConfigurationManagerTest,
-        GetPolicyForAlertNotUsingPreconditionMechanismReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->GetPolicyForAlertNotUsingPreconditionMechanism(),
-            GetInt(CarrierConfig::Assets::
-                            KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest, IsRequiredCdmalessFeatureTag)

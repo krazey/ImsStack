@@ -227,6 +227,10 @@
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="4"/>
     <int name="prealerting_timer_millis_int" value="7000"/>
     <int name="media_type_for_offerless_invite_int" value="1"/>
+    <boolean name="imsvoice.voice_on_default_bearer_supported_bool" value="false"/>
+    <boolean name="imsvt.video_on_default_bearer_supported_bool" value="false"/>
+    <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="false"/>
+
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>

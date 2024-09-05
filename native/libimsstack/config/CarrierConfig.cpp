@@ -476,9 +476,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::
                 KEY_IMS_VOICE_PREFIX "policy_for_media_type_restriction_on_cellular_in_roaming_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_of_local_numbers_int";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL[] = KEY_IMS_VOICE_PREFIX
-        "default_eps_bearer_context_usage_restriction_on_cellular_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "silent_redial_interval_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[] =
@@ -1028,8 +1025,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CA
         "call_reject_code_for_not_acceptable_call_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
         "release_emergency_pdn_with_emergency_call_fail_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT[] =
-        "policy_for_alert_not_using_precondition_mechanism_int";
 const IMS_CHAR
         CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
                 "emergency_call_current_location_discovery_supported_bool";

@@ -17,8 +17,10 @@
 #include "CarrierConfig.h"
 #include "Configuration.h"
 #include "IMessage.h"
+#include "IMtcImsEventReceiver.h"
 #include "ISipHeader.h"
 #include "ISubscriberConfig.h"
+#include "ImsEventDef.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -142,13 +144,13 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
     QosStatus eStatus = GetQosStatus(piSession, eMediaType);
     IMS_TRACE_D("IsDedicatedBearerAllocated [%d][%s]", eMediaType, PS_QosStatus(eStatus), 0);
 
-    return IsStatusAvailable(eStatus);
+    return eStatus == QosStatus::AVAILABLE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser() const
 {
     IMS_TRACE_D("IsCheckingResourcesRequiredToAlertUser", 0, 0, 0);
-    return IsPreconditionSupportedInLocal() || IsDedicatedBearerAllocationRequiredToAlertUser();
+    return !IsDefaultBearerAllowed(MEDIATYPE_AUDIO);
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISession* piSession) const
@@ -157,11 +159,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
     if (piSession == IMS_NULL)
     {
         return IMS_FALSE;
-    }
-
-    if (!IsPreconditionSupportedInLocal() && IsDedicatedBearerAllocationRequiredToAlertUser())
-    {
-        return IsDedicatedBearerAllocated(piSession, MEDIA_TYPE_AUDIO);
     }
 
     if (GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
@@ -174,7 +171,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
     {
         return bLocalReserved;
     }
-
     return bLocalReserved && IsRemoteResourceReserved(piSession);
 }
 
@@ -201,7 +197,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequi
         }
     }
 
-    // TODO: This log trace will be removed after verification.
     IMS_TRACE_D("IsLocalResourceConfirmationRequired (%s)", _TRACE_B_(bResult), 0, 0);
     return bResult;
 }
@@ -626,7 +621,7 @@ void MtcPreconditionManager::OnGuardAvailableTimerExpired(IN QosTimer* pTimer)
     CallType eCallType = m_objContext.GetSession()->GetCallType();
     for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
-        if (IsStatusAvailable(GetQosStatus(piSession, eMediaType)))
+        if (GetQosStatus(piSession, eMediaType) == QosStatus::AVAILABLE)
         {
             eReservedMediaTypes |= eMediaType;
         }
@@ -744,7 +739,7 @@ void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus
             StartQosTimer(piSession, QosTimerType::GUARD_AFTER_LOST);
         }
 
-        if (IsStatusAvailable(eNewStatus) && eMediaType == MEDIATYPE_AUDIO)
+        if (eNewStatus == QosStatus::AVAILABLE && eMediaType == MEDIATYPE_AUDIO)
         {
             StopQosTimer(piSession, QosTimerType::WAIT_AUDIO_AVAILABLE);
         }
@@ -862,12 +857,6 @@ void MtcPreconditionManager::UpdateQosAttributesFromRemoteSdp(IN ISession* piSes
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsStatusAvailable(IN QosStatus eStatus)
-{
-    return (eStatus == QosStatus::AVAILABLE) ? IMS_TRUE : IMS_FALSE;
-}
-
-PRIVATE
 IMS_BOOL MtcPreconditionManager::IsNeedToUpdateQosStatus(
         IN QosStatus eCurrentStatus, IN QosStatus eNewStatus)
 {
@@ -877,12 +866,12 @@ IMS_BOOL MtcPreconditionManager::IsNeedToUpdateQosStatus(
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const
+IMS_BOOL MtcPreconditionManager::IsDefaultBearerAllowed(IN IMS_UINT32 eMediaType) const
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        return !m_objContext.GetConfigurationProxy().Is(
-                       Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR) ||
+        // IR.92 2.4.3.1: A roaming UE is disallowed from sending media over the default bearer.
+        return !IsRoaming() &&
                 m_objContext.GetConfigurationProxy().Is(Feature::VOICE_ON_DEFAULT_BEARER_SUPPORTED);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
@@ -966,12 +955,12 @@ IMS_BOOL MtcPreconditionManager::IsLocalResourceReservedByMediaType(
     }
 
     QosStatus eStatus = GetQosStatus(piSession, eMediaType);
-    IMS_BOOL bDefaultBearerUsed = IsDefaultBearerUsed(eMediaType);
+    IMS_BOOL bDefaultBearerAllowed = IsDefaultBearerAllowed(eMediaType);
 
     IMS_TRACE_D("IsLocalResourceReservedByMediaType [%d] status[%s] use default bearer[%s]",
-            eMediaType, PS_QosStatus(eStatus), _TRACE_B_(bDefaultBearerUsed));
+            eMediaType, PS_QosStatus(eStatus), _TRACE_B_(bDefaultBearerAllowed));
 
-    return (bDefaultBearerUsed || IsStatusAvailable(eStatus));
+    return (bDefaultBearerAllowed || eStatus == QosStatus::AVAILABLE);
 }
 
 PRIVATE
@@ -1061,7 +1050,7 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
     CallType eCallType = m_objContext.GetSession()->GetCallType();
     for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
     {
-        if (!IsStatusAvailable(GetQosStatus(piSession, eMediaType)))
+        if (GetQosStatus(piSession, eMediaType) != QosStatus::AVAILABLE)
         {
             SetQosStatus(piSession, QosStatus::AVAILABLE, eMediaType);
             GetQosStatusTable(piSession)->UpdateLocalCurrentStatus(
@@ -1237,20 +1226,6 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocationRequiredToAlertUser() const
-{
-    if (m_objContext.GetService().IsWlanIpCanType())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM);
-
-    return nPolicy == CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER;
-}
-
-PRIVATE
 IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objISession) const
 {
     if (IsConfirmedDialog(&objISession))
@@ -1269,4 +1244,11 @@ IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objIS
     }
 
     return (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsRoaming() const
+{
+    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
+            IMS_ROAMING_STATE_ON;
 }
