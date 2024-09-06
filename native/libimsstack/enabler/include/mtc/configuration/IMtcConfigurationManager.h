@@ -823,7 +823,7 @@ public:
      * @param AoS
      * @return
      */
-    virtual IMS_BOOL IsRegistrationDisconnectReasonToTerminateOngoingCall(
+    virtual IMS_BOOL IsRegistrationDisconnectReasonToIgnore(
             IN IMS_SINT32 nReason) const = 0;  // AoS
 
     /**

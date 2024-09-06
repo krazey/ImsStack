@@ -92,16 +92,7 @@ SIP_BOOL SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubtype)
 
 SIP_CHAR* SipContentTypeHeader::GetBoundary()
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    SIP_CHAR* pszVal = objParameterList.GetParamValue("boundary");
+    SIP_CHAR* pszVal = GetParamValue("boundary");
     SIP_CHAR* pszStripDquoteVal = StripDQUOTE(pszVal);
 
     if (pszStripDquoteVal == SIP_NULL)
@@ -113,7 +104,7 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
     return pszStripDquoteVal;
 }
 
-SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipContentTypeHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -121,9 +112,9 @@ SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
     /*Find the SLASH*/
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {

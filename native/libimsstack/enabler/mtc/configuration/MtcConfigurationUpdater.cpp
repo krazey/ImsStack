@@ -293,9 +293,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL);
     objItems.bBlockWifiEmergencyCallIfNotProvisioned = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL);
-    objItems.objRegistrationDisconnectReasonToTerminateOngoingCalls =
-            piCc->GetIntArray(CarrierConfig::Assets::
-                            KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY);
+    objItems.objRegistrationDisconnectReasonToIgnore = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY);
     objItems.nWifiEmergency18xTimer =
             piCc->GetInt(CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT);
     objItems.bSupportCanidInfo =

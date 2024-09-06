@@ -87,7 +87,7 @@ protected:
     void CreateNegoProfile()
     {
         m_pVideoNego = new FakeVideoNego(DEFAULT_SLOT_ID);
-        m_pVideoNego->CreateProfiles(m_pEnvironment, m_pConfig);
+        m_pVideoNego->CreateProfiles(m_pEnvironment, MEDIA_TYPE_VIDEO, m_pConfig);
     }
 
     void CreateEnvironment()
@@ -159,11 +159,11 @@ protected:
         delete m_pICoreService;
         delete m_pMockICarrierConfig;
         delete m_pVideoBundle;
-        delete m_pHevcBundle;
-        delete m_pAvcBundle;
-        delete m_pHevcSubBundle;
-        delete m_pAvcSubBundle;
         delete m_pConfig;
+        delete m_pHevcBundle;
+        delete m_pHevcSubBundle;
+        delete m_pAvcBundle;
+        delete m_pAvcSubBundle;
 
         m_objHevcPayloadType.Clear();
         m_objAvcPayloadType.Clear();

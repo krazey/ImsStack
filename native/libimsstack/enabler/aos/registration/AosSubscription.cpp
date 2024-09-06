@@ -21,7 +21,8 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsRadio.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
@@ -290,11 +291,10 @@ void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRet
         return;
     }
 
-    IMS_BOOL bRegRequired = IMS_FALSE;
+    IMS_BOOL bRegRequired = IMS_TRUE;
 
     if (IsRegAfterWaitRequiredByNotify(nFeature))
     {
-        bRegRequired = IMS_TRUE;
         nRetryAfter = GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyWaitTime();
     }
     else
@@ -432,7 +432,7 @@ void AosSubscription::PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo)
     AString strLog;
     for (IMS_UINT32 i = 0; i < objRegInfo.GetSize(); i++)
     {
-        IRegInfoContact* piCurr = objRegInfo.GetAt(i);
+        const IRegInfoContact* piCurr = objRegInfo.GetAt(i);
 
         strLog.Append("[state/");
         strLog.Append(RegInfoStateToString(piCurr->GetState()));
@@ -506,7 +506,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_503(IN IMS_BO
             AosUtil::GetInstance()->GetRetryAfterValue(m_piRegSubscription->GetPreviousResponse());
 
     IMS_SINT32 nTimerF = SipConfigProxy::GetTimerValueF(m_piContext->GetSlotId(), IMS_NULL,
-            Configuration::GetInstance()->GetSipConfig(m_piContext->GetSlotId())->GetSipConfigV(),
+            Engine::GetConfiguration()->GetSipConfig(m_piContext->GetSlotId())->GetSipConfigV(),
             IMS_TRUE);
 
     A_IMS_TRACE_I(
@@ -527,8 +527,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
 {
     A_IMS_TRACE_I(AOSTAG, "ProcessFailureResponse_504", 0, 0, 0);
 
-    ISipMessage* piMsg = IMS_NULL;
-    piMsg = m_piRegSubscription->GetPreviousResponse();
+    const ISipMessage* piMsg = m_piRegSubscription->GetPreviousResponse();
 
     if (piMsg == IMS_NULL)
         return IMS_FALSE;
@@ -543,7 +542,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed)
 {
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
                                   ->IsExtraRegErrRetryCntSharedForRegAndSubRequired();
@@ -564,7 +563,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetryCounter(IN IMS_B
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode)
 {
     IMS_SINT32 nRetryInfoSubTerminated =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRetryCountSubErrorSubTerminated();
@@ -602,7 +601,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     IMS_SINT32 nRetryInfoRegRequired =
@@ -639,7 +638,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     ImsVector<IMS_SINT32>& objErrRegRequiredWithNextPcscf =
@@ -663,7 +662,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
@@ -701,7 +700,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
 {
     ImsVector<IMS_SINT32>& objErrResubStopped =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorStoppingResub();
@@ -723,7 +722,35 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 n
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotify(IN IMS_UINT32 nFeature)
+{
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration());
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
+{
+    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime());
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChecked(
+        IN IMS_SINT32 nError)
+{
+    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GetState() == STATE_UNSUBSCRIBING || GetState() == STATE_OFFLINE)
+    {
+        return IMS_FALSE;
+    }
+
+    return GET_N_CONFIG(m_piContext->GetSlotId())->IsWfcErrorMessageSupported(nError);
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
     m_bIsErrChecked = IMS_FALSE;
@@ -776,34 +803,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
     }
     m_bIsErrChecked = IMS_FALSE;
     return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegRequiredByNotify(IN IMS_UINT32 nFeature)
-{
-    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegistration());
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature)
-{
-    return AosUtil::GetInstance()->IsFeatureOn(nFeature,
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetNotifyEventForInitialRegWithWaitTime());
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorMessageSupportedWithStateChecked(
-        IN IMS_SINT32 nError)
-{
-    if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (GetState() == STATE_UNSUBSCRIBING || GetState() == STATE_OFFLINE)
-    {
-        return IMS_FALSE;
-    }
-
-    return GET_N_CONFIG(m_piContext->GetSlotId())->IsWfcErrorMessageSupported(nError);
 }
 
 PROTECTED VIRTUAL void AosSubscription::SetRequestCommand(
@@ -1079,7 +1078,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessRegEventChange(IN IMS_UINT32 nSta
 
     for (IMS_UINT32 i = 0; i < objRegInfoRegistrations.GetSize(); ++i)
     {
-        IRegInfoRegistration* piRegInfo = objRegInfoRegistrations.GetAt(i);
+        const IRegInfoRegistration* piRegInfo = objRegInfoRegistrations.GetAt(i);
         if (piRegInfo != IMS_NULL)
         {
             objImpus.Append(piRegInfo->GetAor().ToString());
@@ -1104,13 +1103,10 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
 
     if (bHasBody == IMS_TRUE)
     {
-        IRegInfoRegistration* piRegInfo = IMS_NULL;
-        IRegInfoContact* piRegInfoContact = IMS_NULL;
-        ImsList<IRegInfoContact*> objContact;
-
         m_nAorState = IRegInfoContact::STATE_TERMINATED;
 
-        piRegInfo = m_piRegSubscription->GetRegInfo()->GetRegistration(m_strAor);
+        const IRegInfoRegistration* piRegInfo =
+                m_piRegSubscription->GetRegInfo()->GetRegistration(m_strAor);
         if (piRegInfo == IMS_NULL)
         {
             A_IMS_TRACE_I(AOSTAG, "RegInfo (%s) is not found", m_strAor.GetStr(), 0, 0);
@@ -1118,7 +1114,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
             return;
         }
 
-        objContact = piRegInfo->GetContacts();
+        ImsList<IRegInfoContact*> objContact = piRegInfo->GetContacts();
         if (objContact.GetSize() == 0)
         {
             A_IMS_TRACE_I(AOSTAG, "no contact of reg info", 0, 0, 0);
@@ -1127,7 +1123,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
 
         PrintRegInfo(objContact);
 
-        piRegInfoContact = GetRegInfoContact(objContact);
+        const IRegInfoContact* piRegInfoContact = GetRegInfoContact(objContact);
         if (piRegInfoContact == IMS_NULL)
         {
             A_IMS_TRACE_I(

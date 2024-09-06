@@ -18,7 +18,7 @@
 #include "ServiceTrace.h"
 #include "video/VideoProfile.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 VideoController::VideoController() :
@@ -175,6 +175,17 @@ void VideoController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
+void VideoController::SetMtu(IN IMS_SINT32 nMtu)
+{
+    IMS_TRACE_I("SetMtu() - mtu[%d]", nMtu, 0, 0);
+
+    if (m_pSession != IMS_NULL)
+    {
+        m_pSession->SetMtu(nMtu);
+    }
+}
+
+PUBLIC
 IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
 {
     IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
@@ -185,16 +196,18 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
     }
 
     VideoProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
-    IMS_BOOL bEnableRtcp = IMS_TRUE;
-
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+    if (pPeerProfile == IMS_NULL)
     {
-        bEnableRtcp = IMS_FALSE;
+        return IMS_FALSE;
     }
 
-    return m_pSession->UpdateMediaQualityThreshold(
-            MEDIA_DIRECTION_INVOLVED_RECV(m_pSession->GetDirection()), bEnableRtcp);
+    IMS_BOOL bEnableRtcp = (pPeerProfile->nBandwidthRs == 0 && pPeerProfile->nBandwidthRr == 0)
+            ? IMS_FALSE
+            : IMS_TRUE;
+    IMS_BOOL bActiveSession =
+            (m_pSession->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE : IMS_FALSE;
+
+    return m_pSession->UpdateMediaQualityThreshold(bActiveSession, bEnableRtcp);
 }
 
 PUBLIC

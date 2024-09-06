@@ -417,11 +417,11 @@ IMS_UINT32 AosConnector::GetActualRecoveryWaitingTime()
 
     if (m_nReadyRecoveryCount <= READY_RECOVERY_DEFAULT_COUNT)
     {
-        return READY_RECOVERY_DEFAULT_TIME;
+        return READY_RECOVERY_DEFAULT_TIME_SEC;
     }
 
-    return m_pUtil->WaitTimeForFlowRecovery(READY_RECOVERY_BASE_TIME, READY_RECOVERY_MAX_TIME,
-            m_nReadyRecoveryCount - READY_RECOVERY_DEFAULT_COUNT);
+    return m_pUtil->WaitTimeForFlowRecovery(READY_RECOVERY_BASE_TIME_SEC,
+            READY_RECOVERY_MAX_TIME_SEC, m_nReadyRecoveryCount - READY_RECOVERY_DEFAULT_COUNT);
 }
 
 PROTECTED

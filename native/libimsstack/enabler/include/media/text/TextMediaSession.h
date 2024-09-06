@@ -38,7 +38,7 @@ public:
         STATE_PAUSED,
     };
 
-    explicit TextMediaSession(IN IMS_SINT32 nSlodId = 0);
+    explicit TextMediaSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~TextMediaSession();
 
     /**

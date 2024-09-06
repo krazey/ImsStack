@@ -235,9 +235,9 @@
 
 SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
 
-SIP_INT32 SipGetMsgType(SIP_CHAR* pStartPoint);
+SIP_INT32 SipGetMsgType(const SIP_CHAR* pStartPoint);
 
-SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+SIP_INT32 SipGetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 SIP_INT32 SipGetHdrType(const SIP_CHAR* pszHdrName);
 
@@ -246,8 +246,8 @@ SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
 SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 #endif
 
-SIP_CHAR* SipFindBodyEnd(
-        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
+const SIP_CHAR* SipFindBodyEnd(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd);
 
 SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName);
 

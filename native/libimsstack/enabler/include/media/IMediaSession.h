@@ -100,7 +100,7 @@ public:
      * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
      */
-    virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
+    virtual IMS_BOOL FormSdp(IN IMS_UINTP nNegoId, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
             IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;
@@ -128,7 +128,7 @@ public:
      * @param errorReason The error reason when the negotiation is failed
      * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
      */
-    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
+    virtual IMS_BOOL NegotiateSdp(IN IMS_UINTP nNegoId, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
 
@@ -149,7 +149,7 @@ public:
      * @param nNegoId The negotiation id to clean the SDP set
      * @param pSession ISession instance to get the SDP descriptor
      */
-    virtual void FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
+    virtual void FinalizeSdp(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 
     /**
      * @brief Runs target dialog to operate open/update/close session

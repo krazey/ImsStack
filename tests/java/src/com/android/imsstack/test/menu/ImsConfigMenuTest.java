@@ -16,6 +16,9 @@
 
 package com.android.imsstack.test.menu;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -75,36 +78,36 @@ public class ImsConfigMenuTest {
 
         Preference menu;
         // SIM1
-        final int slot0 = 0;
+        final int positionSim1 = 1;
         mInstrumentation.runOnMainSync(() -> {
-            listener.onItemClick(listView, listView, slot0, 1L);
+            listener.onItemClick(listView, listView, positionSim1, 1L);
         });
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.CARRIER_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.TEST_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         // SIM2
-        final int slot1 = 1;
+        final int positionSim2 = 2;
         mInstrumentation.runOnMainSync(() -> {
-            listener.onItemClick(listView, listView, slot1, 1L);
+            listener.onItemClick(listView, listView, positionSim2, 1L);
         });
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.CARRIER_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.TEST_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
     }
 
     @Test

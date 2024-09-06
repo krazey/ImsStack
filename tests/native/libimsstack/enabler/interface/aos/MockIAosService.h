@@ -62,7 +62,7 @@ public:
     MOCK_METHOD(void, NotifyAosStart, (), (override));
     MOCK_METHOD(void, NotifyIpcanHandoverFailure,
             (IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode), (override));
-    MOCK_METHOD(void, NotifyIsimState, (IN IMS_UINT32 nState), (override));
+    MOCK_METHOD(void, NotifyIsimState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(void, NotifyLocationInfo, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, NotifyMobileDataLimit, (IN IMS_UINT32 nIsLimited), (override));
     MOCK_METHOD(void, NotifyNetworkVideoCapability, (IN IMS_UINT32 nIsOn), (override));

@@ -29,6 +29,9 @@ public:
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
 
+    // IAosNetTrackerListener
+    void NetTracker_StatusChanged() override;
+
 protected:
     void InitializeSupportedRats();
 
@@ -38,7 +41,9 @@ protected:
     void InitializeServiceFeature() override;
 
     void ProcessCapabilitiesChanged(
-            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
+
+    void ProcessNetworkChanged() override;
 
     IMS_BOOL IsHandleBlocked() const override;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;

@@ -140,6 +140,13 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithSdpChangeType)
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
 }
 
+TEST_F(SilentRedialHelperTest, CreateHelperWithRedialNormalType)
+{
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
+}
+
 TEST_F(SilentRedialHelperTest, CreateHelperWithRedialEmergencyType)
 {
     const CallReasonInfo objReason(
@@ -339,6 +346,25 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithAudioSdpChangeType)
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strMediaTypes);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     pRedialHelper->Redial();
+
+    ParticipantInfo objParticipantInfo(objContext);
+    ON_CALL(objContext, GetParticipantInfo)
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
+
+    AString strEmptyNumber;
+    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
+
+    pRedialHelper->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedialNormalWithNextPcscf)
+{
+    const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+    pRedialHelper->Redial();
+
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)

@@ -69,7 +69,7 @@ TEST_F(CodecConfigFactoryTest, CreateAudioPayloadConfigTest)
             .WillByDefault(Return(m_pMediaSubBundle));
 
     CodecConfig* pConfig = CodecConfigFactory::CreateAudioPayloadConfig(
-            m_pMockICarrierConfig, ImsCodec::AUDIO_AMR_WB, nPayloadNumber, 0);
+            m_pMockICarrierConfig, ImsCodec::AUDIO_AMR_WB, nPayloadNumber);
 
     EXPECT_TRUE(pConfig != nullptr);
     EXPECT_THAT(pConfig, TypedEq<CodecConfig*>(pConfig));
@@ -88,7 +88,7 @@ TEST_F(CodecConfigFactoryTest, CreateVideoPayloadConfigTest)
             .WillByDefault(Return(m_pMediaSubBundle));
 
     CodecConfig* pConfig = CodecConfigFactory::CreateVideoPayloadConfig(
-            m_pMockICarrierConfig, ImsCodec::VIDEO_AVC, nPayloadNumber, 0);
+            m_pMockICarrierConfig, ImsCodec::VIDEO_AVC, nPayloadNumber);
 
     EXPECT_TRUE(pConfig != nullptr);
     EXPECT_THAT(pConfig, TypedEq<CodecConfig*>(pConfig));
@@ -103,7 +103,7 @@ TEST_F(CodecConfigFactoryTest, CreateTextPayloadConfigTest)
             .WillByDefault(Return(m_pMediaBundle));
 
     CodecConfig* pConfig = CodecConfigFactory::CreateTextPayloadConfig(
-            m_pMockICarrierConfig, ImsCodec::TEXT_T140, nPayloadNumber, 0);
+            m_pMockICarrierConfig, ImsCodec::TEXT_T140, nPayloadNumber);
 
     EXPECT_TRUE(pConfig != nullptr);
     EXPECT_THAT(pConfig, TypedEq<CodecConfig*>(pConfig));

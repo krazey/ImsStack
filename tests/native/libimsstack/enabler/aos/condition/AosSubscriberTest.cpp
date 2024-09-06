@@ -117,6 +117,62 @@ TEST_F(AosSubscriberTest, IsReady_ManagerReturn)
     EXPECT_FALSE(m_pAosSubscriber->IsReady());
 }
 
+TEST_F(AosSubscriberTest, IsIsimReturnsTrueWhenIsimIsTrue)
+{
+    // GIVEN
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    ON_CALL(objMockIAosSubscriberManager, IsIsim()).WillByDefault(Return(IMS_TRUE));
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosSubscriber->IsIsim();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberTest, IsIsimReturnsFalseWhenIsimIsFalse)
+{
+    // GIVEN
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    ON_CALL(objMockIAosSubscriberManager, IsIsim()).WillByDefault(Return(IMS_FALSE));
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosSubscriber->IsIsim();
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosSubscriberTest, IsUsimReturnsTrueWhenUsimIsTrue)
+{
+    // GIVEN
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    ON_CALL(objMockIAosSubscriberManager, IsUsim()).WillByDefault(Return(IMS_TRUE));
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosSubscriber->IsUsim();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosSubscriberTest, IsUsimReturnsFalseWhenUsimIsFalse)
+{
+    // GIVEN
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    ON_CALL(objMockIAosSubscriberManager, IsUsim()).WillByDefault(Return(IMS_FALSE));
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosSubscriber->IsUsim();
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
 TEST_F(AosSubscriberTest, SetListener_IsReadyReturn)
 {
     MockIAosSubscriberManager objMockIAosSubscriberManager;

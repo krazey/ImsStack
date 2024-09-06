@@ -214,13 +214,13 @@ PUBLIC VIRTUAL IMS_UINT32 AosCondition::CheckServiceAvailable(IN SERVICE_TYPE eT
 
     if (m_pAvailableCellular != IMS_NULL && (eType == SERVICE_CELLULAR || eType == SERVICE_WHOLE))
     {
-        m_pAvailableCellular->RefreshServiceAvailablility();
+        m_pAvailableCellular->RefreshServiceAvailability();
         nCheck |= CHECK_CELLULAR;
     }
 
     if (m_pAvailableWifi != IMS_NULL && (eType == SERVICE_WIFI || eType == SERVICE_WHOLE))
     {
-        m_pAvailableWifi->RefreshServiceAvailablility();
+        m_pAvailableWifi->RefreshServiceAvailability();
         nCheck |= CHECK_WIFI;
     }
 
@@ -290,30 +290,24 @@ PROTECTED VIRTUAL void AosCondition::RemoveServiceAvailable()
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosCondition::AddAosServiceListener()
+PROTECTED VIRTUAL void AosCondition::AddAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         pService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
-        return IMS_TRUE;
     }
-
-    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosCondition::RemoveAosServiceListener()
+PROTECTED VIRTUAL void AosCondition::RemoveAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
         pService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
-        return IMS_TRUE;
     }
-
-    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosCondition::AddEventListener()

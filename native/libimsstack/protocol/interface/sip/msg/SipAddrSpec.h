@@ -48,9 +48,9 @@ private:
     // each node consists of a SipNameValue obj for one header
     SipParameterList* m_pUriHdrParamList;
 
-    SIP_BOOL DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-    SIP_BOOL DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     ~SipUri();
 
@@ -61,7 +61,7 @@ public:
 
     SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
 
-    SIP_BOOL DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     /*Set Methods*/
     SIP_BOOL SetUser(const SIP_CHAR* pszUser);
@@ -94,7 +94,7 @@ public:
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
 
-    SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
+    SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName);
 };
 
 class SipAddrSpec : public SipRefBase
@@ -127,7 +127,7 @@ public:
     SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
 
     /*Function for decoding*/
-    SIP_BOOL DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeAddrSpec(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     /*function for getting the header type*/
     inline SIP_INT32 GetUriScheme() const { return m_eUriType; }
 
@@ -162,7 +162,7 @@ public:
     SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
-    SIP_BOOL DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeNameAddr(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     SipAddrSpec* GetAddrSpec();
 

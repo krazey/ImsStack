@@ -103,7 +103,7 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipTriggerConsentHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -111,7 +111,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     if (*pStartPt == LEFT_ANGLE)
     {
@@ -123,8 +123,8 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
         pEndPt--;
     }
 
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
@@ -148,7 +148,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     }
 
     // skip "sip:" from the user name
-    SIP_CHAR* pszSIPScheme = SIP_NULL;
+    const SIP_CHAR* pszSIPScheme = SIP_NULL;
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
     {

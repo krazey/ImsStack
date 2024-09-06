@@ -56,6 +56,7 @@ protected:
         m_pLocalProfile->strTransportType = "RTP/AVP";
         VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
+        pAvcPayload->objRtpMap.strPayloadType = "H264";
         pAvcPayload->pFmtp = pAvcFmtp;
         m_pLocalProfile->lstPayload.Append(pAvcPayload);
         m_pLocalProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
@@ -74,6 +75,7 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
+        delete m_pConfig;
         delete m_pVideoNego;
         delete m_pLocalProfile;
         delete m_pPeerProfile;

@@ -122,8 +122,8 @@
     <int name="imsvt.convert_remote_response_timer_millis_int" value="30000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
-    <int-array name="registration_disconnect_reason_to_terminate_ongoing_call_int_array" num="1">
-        <item value="999"/> <!-- All cases -->
+    <int-array name="registration_disconnect_reason_to_ignore_int_array" num="1">
+        <item value="10007"/> <!-- REG_NEW_REQUIRED-->
     </int-array>
 
     <!-- Mts -->

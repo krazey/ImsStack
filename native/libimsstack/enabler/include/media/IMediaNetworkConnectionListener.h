@@ -29,12 +29,12 @@ public:
      *
      * @param nRatType The network connection type defined in MediaNetworkConnectionWatcher.h
      */
-    virtual void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType) = 0;
+    virtual void OnNetworkConnectionChanged(IN const IMS_SINT32 nRatType) = 0;
 
     /**
-     * @brief Called when the mtu size is changed
+     * @brief Called when the MTU (Maximum Transmission Unit) size is changed
      *
-     * @param nMtu The mtu size updated
+     * @param nMtu The new MTU size to be updated
      */
     virtual void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) = 0;
 };

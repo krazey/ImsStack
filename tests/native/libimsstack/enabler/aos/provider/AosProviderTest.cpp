@@ -62,7 +62,7 @@ TEST_F(AosProviderTest, SucceedsGetLog)
 {
     // GIVEN
     // WHEN
-    AosLog* pAosLog = m_pProvider->GetLog();
+    const AosLog* pAosLog = m_pProvider->GetLog();
 
     // THEN
     EXPECT_TRUE(pAosLog != nullptr);
@@ -72,7 +72,7 @@ TEST_F(AosProviderTest, SucceedsCreateDnsQuery)
 {
     // GIVEN
     // WHEN
-    AosDnsQuery* pAosDnsQuery = m_pProvider->CreateDnsQuery();
+    const AosDnsQuery* pAosDnsQuery = m_pProvider->CreateDnsQuery();
 
     // THEN
     EXPECT_TRUE(pAosDnsQuery != nullptr);
@@ -82,7 +82,7 @@ TEST_F(AosProviderTest, SucceedsCreateKeepAlive)
 {
     // GIVEN
     // WHEN
-    AosKeepAlive* pAosKeepAlive = m_pProvider->CreateKeepAlive();
+    const AosKeepAlive* pAosKeepAlive = m_pProvider->CreateKeepAlive();
 
     // THEN
     EXPECT_TRUE(pAosKeepAlive != nullptr);
@@ -95,7 +95,7 @@ TEST_F(AosProviderTest, SucceedsGetCallTracker)
     m_pProvider->SetCallTracker(&objMockIAosCallTracker);
 
     // WHEN
-    IAosCallTracker* piAosCallTracker = m_pProvider->GetCallTracker();
+    const IAosCallTracker* piAosCallTracker = m_pProvider->GetCallTracker();
 
     // THEN
     EXPECT_TRUE(piAosCallTracker != nullptr);
@@ -108,7 +108,7 @@ TEST_F(AosProviderTest, SucceedsGetLocationStarter)
     m_pProvider->SetLocationStarter(&objMockIAosLocationStarter);
 
     // WHEN
-    IAosLocationStarter* piAosLocationStarter = m_pProvider->GetLocationStarter();
+    const IAosLocationStarter* piAosLocationStarter = m_pProvider->GetLocationStarter();
 
     // THEN
     EXPECT_TRUE(piAosLocationStarter != nullptr);
@@ -121,7 +121,7 @@ TEST_F(AosProviderTest, SucceedsGetRegStateManager)
     m_pProvider->SetRegStateManager(&objMockIAosRegStateManager);
 
     // WHEN
-    IAosRegStateManager* piAosRegStateManager = m_pProvider->GetRegStateManager();
+    const IAosRegStateManager* piAosRegStateManager = m_pProvider->GetRegStateManager();
 
     // THEN
     EXPECT_TRUE(piAosRegStateManager != nullptr);
@@ -134,7 +134,7 @@ TEST_F(AosProviderTest, SucceedsGetService)
     m_pProvider->SetService(&objMockIAosService);
 
     // WHEN
-    IAosService* piAosService = m_pProvider->GetService();
+    const IAosService* piAosService = m_pProvider->GetService();
 
     // THEN
     EXPECT_TRUE(piAosService != nullptr);
@@ -147,7 +147,7 @@ TEST_F(AosProviderTest, SucceedsGetSubscriberManager)
     m_pProvider->SetSubscriberManager(&objMockIAosSubscriberManager);
 
     // WHEN
-    IAosSubscriberManager* piAosSubscriberManager = m_pProvider->GetSubscriberManager();
+    const IAosSubscriberManager* piAosSubscriberManager = m_pProvider->GetSubscriberManager();
 
     // THEN
     EXPECT_TRUE(piAosSubscriberManager != nullptr);
@@ -160,7 +160,7 @@ TEST_F(AosProviderTest, SucceedsGetRetryRepository)
     m_pProvider->SetRetryRepository(&objMockIAosRetryRepository);
 
     // WHEN
-    IAosRetryRepository* piAosRetryRepository = m_pProvider->GetRetryRepository();
+    const IAosRetryRepository* piAosRetryRepository = m_pProvider->GetRetryRepository();
 
     // THEN
     EXPECT_TRUE(piAosRetryRepository != nullptr);

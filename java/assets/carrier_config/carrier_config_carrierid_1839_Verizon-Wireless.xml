@@ -28,7 +28,9 @@
     <boolean name="support_ecbm_for_volte_bool" value="true"/>
     <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
     <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
-
+    <int name="location_policy_update_type_int" value="1"/>
+    <int name="location_acquisition_policy_int" value="131328"/>
+    <int name="location_validity_period_min_int" value="3"/>
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
@@ -57,14 +59,14 @@
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
-    <boolean name="emergency_registration_on_random_pcscf_bool" value="true"/>
+    <boolean name="ereg_on_random_pcscf_bool" value="true"/>
     <int name="ims_establishment_time_sec_int" value="120"/>
     <int name="reg_actual_wait_time_policy_int" value="3"/>
     <int name="reg_pcscf_update_policy_int" value="1"/>
     <int name="reg_retry_503_policy_int" value="0"/>
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="volte_hys_time_sec_int" value="60"/>
-    <int name="emergency_registration_retry_max_cnt_int" value="1"/>
+    <int name="ereg_retry_max_cnt_int" value="1"/>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="1">
         <item value="2"/>
     </int-array>
@@ -145,7 +147,7 @@
     </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <pbundle name="sub_err_code_for_terminated_bundle">
-        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="2"/>
+        <int name="sub_err_code_for_terminated_with_retry_max_cnt_int" value="2"/>
         <int-array name="sub_err_code_for_terminated_int_array" num="4">
             <item value="400"/>
             <item value="403"/>

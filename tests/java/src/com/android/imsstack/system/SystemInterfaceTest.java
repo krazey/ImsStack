@@ -455,24 +455,6 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testNotifyVoiceCallStateChanged() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        system.notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_VOICE_CALL_STATE_CHANGED, data.readInt());
-            assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, data.readInt());
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
     public void testNotifyConfigurationChanged() throws Exception {
         setUpSystemInterface();
         ISystem system = setUpSystemWithLooper();
@@ -537,58 +519,6 @@ public class SystemInterfaceTest {
             assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
             assertEquals(event, data.readInt());
             assertEquals(state, data.readString());
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
-    public void testNotifyIsimFileAttributesResponse() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        int event = 103;
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int size = 1;
-        String[] values = new String[] { "sip:1234@ims.com" };
-        system.notifyIsimFileAttributesResponse(event, fileId, size, values);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
-            assertEquals(event, data.readInt());
-            assertEquals(fileId, data.readInt());
-            assertEquals(size, data.readInt());
-            for (int i = 0; i < size; ++i) {
-                assertEquals(values[i], data.readString());
-            }
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
-    public void testNotifyIsimRecordResponse() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        int event = 104;
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int index = 0;
-        String value = "sip:1234@ims.com";
-        system.notifyIsimRecordResponse(event, fileId, index, value);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
-            assertEquals(event, data.readInt());
-            assertEquals(fileId, data.readInt());
-            assertEquals(index, data.readInt());
-            assertEquals(value, data.readString());
         } finally {
             data.recycle();
         }
@@ -2123,14 +2053,14 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallReadIsimFileAttributes() {
+    public void testSystemCallGetIsimRecord() {
         setUpSystemInterface();
         setUpSystem();
         int fileId = Sim.ISIM_FILE_ID_IMPU;
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.READ_ISIM_FILE_ATTR);
+            data.writeInt(SystemConstants.GET_ISIM_RECORD);
             data.writeInt(fileId);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
@@ -2138,29 +2068,7 @@ public class SystemInterfaceTest {
             data.recycle();
         }
 
-        verify(mSystemCall).readIsimFileAttributes(eq(fileId));
-    }
-
-    @Test
-    @SmallTest
-    public void testSystemCallReadIsimRecord() {
-        setUpSystemInterface();
-        setUpSystem();
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int index = 0;
-        Parcel data = Parcel.obtain();
-        try {
-            data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.READ_ISIM_RECORD);
-            data.writeInt(fileId);
-            data.writeInt(index);
-            data.setDataPosition(0);
-            mSystemInterface.onMessage(data, null);
-        } finally {
-            data.recycle();
-        }
-
-        verify(mSystemCall).readIsimRecord(eq(fileId), eq(index));
+        verify(mSystemCall).getIsimRecord(eq(fileId));
     }
 
     @Test

@@ -397,6 +397,7 @@ private:
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
     IMS_BOOL IsNeedToSetLimitedMode();
+    IMS_BOOL IsUsimAuthFailureHandlingNeeded();
 
 public:
     enum

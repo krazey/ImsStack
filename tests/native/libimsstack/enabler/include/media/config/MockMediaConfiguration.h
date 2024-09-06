@@ -49,7 +49,7 @@ public:
             (override));
     MOCK_METHOD(IMS_UINT32, MakeCodec,
             (IN ICarrierConfig * piCc, IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
-                    IN IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx),
+                    IN IMS_SINT32 nPayloadTypeNum),
             (override));
     MOCK_METHOD(void, ToDebugString, (), (const, override));
     MOCK_METHOD(void, ToDebugStringCodecs, (IN CodecConfig * pCodecConfig), (const, override));

@@ -108,16 +108,6 @@ public interface ISystem {
     void notifyServiceStateChanged(int serviceState);
 
     /**
-     * Notifies the voice call (CS / IMS) state.
-     *
-     * @param state the call state (TelephonyManager.CALL_STATE_*)
-     *            {@link TelephonyManager.CALL_STATE_IDLE} (0)
-     *            {@link TelephonyManager.CALL_STATE_RINGING} (1)
-     *            {@link TelephonyManager.CALL_STATE_OFFHOOK} (2)
-     */
-    void notifyVoiceCallStateChanged(int state);
-
-    /**
      * Notifies the changes of the IMS configuration.
      *
      * @param configs the configuration items to be updated
@@ -140,26 +130,6 @@ public interface ISystem {
      * @param state The current ISIM state.
      */
     void notifyIsimState(int event, String state);
-
-    /**
-     * Notifies the ISIM file attributes response to the native module.
-     *
-     * @param event The current event.
-     * @param fileId The file id to be responded.
-     * @param size The size of the specified file id.
-     * @param values The content of the specified file id.
-     */
-    void notifyIsimFileAttributesResponse(int event, int fileId, int size, String[] values);
-
-    /**
-     * Notifies the ISIM record response to the native module.
-     *
-     * @param event The current event.
-     * @param fileId The file id to be responded.
-     * @param index The index of the specified file id.
-     * @param value The content of the specified file id.
-     */
-    void notifyIsimRecordResponse(int event, int fileId, int index, String value);
 
     /**
      * Notifies the ISIM authentication response to the native module.
@@ -213,4 +183,12 @@ public interface ISystem {
      */
     void notifySsacInfo(int event, int voiceFactor, int voiceTimeSec, int videoFactor,
             int videoTimeSec);
+
+    /**
+     * Notifies modem's simultaneous calling support information.
+     *
+     * @param event The current event.
+     * @param isSupported The information whether modem supports simultaneous calling.
+     */
+    void notifySimultaneousCallingSupportChanged(int event, boolean isSupported);
 }

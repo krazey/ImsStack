@@ -45,9 +45,12 @@
                 <action android:name="android.telephony.ims.ImsService"/>
             </intent-filter>
         </service>
-        <activity android:name="com.android.imsstack.test.menu.ImsConfigMenu"/>
-        <activity android:name="com.android.imsstack.test.menu.CarrierConfigMenu"/>
-        <activity android:name="com.android.imsstack.test.menu.TestConfigMenu"/>
+        <activity android:name="com.android.imsstack.test.menu.ImsConfigMenu"
+            android:theme="@style/Theme.AppCompat"/>
+        <activity android:name="com.android.imsstack.test.menu.CarrierConfigMenu"
+            android:theme="@style/Theme.AppCompat"/>
+        <activity android:name="com.android.imsstack.test.menu.TestConfigMenu"
+            android:theme="@style/Theme.AppCompat"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

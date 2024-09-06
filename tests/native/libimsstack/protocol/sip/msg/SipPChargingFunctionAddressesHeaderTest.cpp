@@ -36,7 +36,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, CopyConstructor)
                     SipPChargingFunctionAddressesHeader::GetNewObj(
                             SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ccf=192.0.8.1"), 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("ccf=192.0.8.1", 13));
 
     SipPChargingFunctionAddressesHeader* pCopyHeader =
             reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
@@ -52,10 +52,10 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, CopyConstructor)
 TEST_F(SipPChargingFunctionAddressesHeaderTest, EncodeHdr_Null)
 {
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     SipPChargingFunctionAddressesHeader* pHeader =
             reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
@@ -87,7 +87,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode)
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Invalid value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=value"), strlen("=value")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("=value", strlen("=value")));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_TRUE));
     pHeader->SipDelete();
 
@@ -96,7 +96,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode)
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ccf=192.0.8.1"), 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("ccf=192.0.8.1", 13));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("ccf=192.0.8.1", objBuffer.GetCharString());
 
@@ -120,13 +120,13 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Invalid value*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=invalid"), strlen("=invalid")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("=invalid", strlen("=invalid")));
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
@@ -136,7 +136,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Decode invalid value */
-    SIP_CHAR* pValue = const_cast<char*>("ccf;");
+    const SIP_CHAR* pValue = "ccf;";
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pHeader->SipDelete();
 
@@ -145,7 +145,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Decode valid value */
-    pValue = const_cast<char*>("ccf=192.0.8.1;ecf=192.0.8.3");
+    pValue = "ccf=192.0.8.1;ecf=192.0.8.3";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     memset(pBuff, 0, BUFFER_SIZE);
@@ -157,7 +157,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Decode valid value */
-    pValue = const_cast<char*>("ccf-2=192.0.8.1;ecf-2=192.0.8.3");
+    pValue = "ccf-2=192.0.8.1;ecf-2=192.0.8.3";
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 

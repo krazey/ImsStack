@@ -54,7 +54,6 @@ import android.telephony.CellSignalStrengthGsm;
 import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
 import android.telephony.CellSignalStrengthWcdma;
-import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -85,7 +84,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -108,6 +106,7 @@ public class AosDebugTest extends ImsStackTest {
     @Mock ServiceState mMockServiceState;
     @Mock SimInterface mMockSimInterface;
     @Mock TelephonyInterface mMockTelephonyInterface;
+    @Mock ApnSetting mMockApnSetting;
 
     @Before
     public void setup() throws Exception {
@@ -479,8 +478,8 @@ public class AosDebugTest extends ImsStackTest {
         //GIVEN
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_DATA_CONNECTION_STATE, "CONNECTED");
 
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSRI, TEST_VALUE + 1);
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSCP, TEST_VALUE + 2);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, TEST_VALUE + 1);
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, TEST_VALUE + 2);
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, TEST_VALUE + 3);
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, TEST_VALUE + 4);
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, TEST_VALUE + 5);
@@ -733,7 +732,7 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
-    public void testHandleMessageHandleSignalStrengthsChangedValid() {
+    public void testHandleMessageHandleSignalStrengthsChanged() {
         // GIVEN
         SignalStrength mockSignalStrength = mock(SignalStrength.class);
         List<CellSignalStrength> spyCellSignalStrengths = spy(new ArrayList<>());
@@ -742,7 +741,6 @@ public class AosDebugTest extends ImsStackTest {
 
         doReturn(spyCellSignalStrengths).when(mockSignalStrength).getCellSignalStrengths();
         doReturn(mockCellSignalStrength).when(spyCellSignalStrengths).get(0);
-        doReturn(true).when(mockCellSignalStrength).isValid();
 
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_SIGNALSTRENGTHS_CHANGED;
@@ -752,41 +750,15 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        verify(mockCellSignalStrength, atLeastOnce()).isValid();
         assertEquals(0,
-                mFakeAosDebug.getLatch(LatchType.ON_UPDATE_SIGNAL_STRENGTH_DATA).getCount());
-    }
-
-    @Test
-    public void testHandleMessageHandleSignalStrengthsChangedNotValid() {
-        // GIVEN
-        SignalStrength mockSignalStrength = mock(SignalStrength.class);
-        List<CellSignalStrength> spyCellSignalStrengths = spy(new ArrayList<>());
-        CellSignalStrength mockCellSignalStrength = mock(CellSignalStrength.class);
-        spyCellSignalStrengths.add(mockCellSignalStrength);
-
-        doReturn(spyCellSignalStrengths).when(mockSignalStrength).getCellSignalStrengths();
-        doReturn(mockCellSignalStrength).when(spyCellSignalStrengths).get(0);
-        doReturn(false).when(mockCellSignalStrength).isValid();
-
-        Message msg = Message.obtain();
-        msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_SIGNALSTRENGTHS_CHANGED;
-        msg.obj = mockSignalStrength;
-
-        // WHEN
-        mFakeAosDebug.mHandler.handleMessage(msg);
-
-        // THEN
-        verify(mockCellSignalStrength, atLeastOnce()).isValid();
-        assertEquals(1,
                 mFakeAosDebug.getLatch(LatchType.ON_UPDATE_SIGNAL_STRENGTH_DATA).getCount());
     }
 
     @Test
     public void testUpdateSignalStrengthDataUtran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSRI, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSCP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
@@ -800,9 +772,9 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSRI));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
         assertNotEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSCP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
 
         assertEquals("TEST_VALUE",
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
@@ -818,8 +790,8 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdateSignalStrengthDataEutran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSRI, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSCP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
@@ -833,9 +805,9 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSRI));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSCP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
 
         assertNotEquals("TEST_VALUE",
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
@@ -851,8 +823,8 @@ public class AosDebugTest extends ImsStackTest {
     @Test
     public void testUpdateSignalStrengthDataNgran() {
         // GIVEN
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSRI, "TEST_VALUE");
-        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_RSCP, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_LEVEL, "TEST_VALUE");
+        mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_UTRAN_DBM, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRP, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_EUTRAN_RSRQ, "TEST_VALUE");
         mFakeAosDebug.mDebugData.put(IAosDebug.DebugData.KEY_NGRAN_SSRSRP, "TEST_VALUE");
@@ -866,9 +838,9 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSRI));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_LEVEL));
         assertEquals("TEST_VALUE",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_RSCP));
+                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_UTRAN_DBM));
 
         assertEquals("TEST_VALUE",
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_EUTRAN_RSRP));
@@ -1259,64 +1231,82 @@ public class AosDebugTest extends ImsStackTest {
                 mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_LTE_ATTACH_TYPE));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testUpdatePreciseDataConnectionStateDateWithApnSetting() {
+    public void testUpdatePreciseDataConnectionStateWithApnName() {
         // GIVEN
-        ApnSetting mockApnSetting = mock(ApnSetting.class);
-        List<Integer> apnTypes = Arrays.asList(1, 2);
-        when(mockApnSetting.getApnName()).thenReturn("TEST_APN_NAME");
-        when(mockApnSetting.getApnTypes()).thenReturn(apnTypes);
-        when(mockApnSetting.getEntryName()).thenReturn("TEST_ENTRY_NAME");
-        mFakeAosDebug.mApnSetting = mockApnSetting;
-
-        PreciseDataConnectionState state = new PreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_LTE,
-                ApnSetting.TYPE_DEFAULT, "TEST_APN_NAME", null, DataFailCause.UNKNOWN);
+        when(mMockApnSetting.getApnName()).thenReturn("TEST_APN_NAME");
 
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = state;
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals("TEST_APN_NAME",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME));
-        assertEquals(apnTypes.toString(),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES));
-        assertEquals("TEST_ENTRY_NAME",
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME));
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME),
+                "TEST_APN_NAME");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testUpdatePreciseDataConnectionStateDateWithoutApnSetting() {
+    public void testUpdatePreciseDataConnectionStateWithApnEntryName() {
         // GIVEN
-        mFakeAosDebug.mApnSetting = null;
-
-        PreciseDataConnectionState state = new PreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_LTE,
-                ApnSetting.TYPE_DEFAULT, "TEST_APN_NAME", null, DataFailCause.UNKNOWN);
+        when(mMockApnSetting.getEntryName()).thenReturn("TEST_APN_ENTRY_NAME");
 
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = state;
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME));
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES));
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME));
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME),
+                "TEST_APN_ENTRY_NAME");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testUpdatePreciseDataConnectionStateDateWithLinkProperties() {
+    public void testUpdatePreciseDataConnectionStateWithApnTypes() {
+        // GIVEN
+        int testApnTypeBitmask = ApnSetting.TYPE_IMS | ApnSetting.TYPE_EMERGENCY;
+        when(mMockApnSetting.getApnTypeBitmask()).thenReturn(testApnTypeBitmask);
+
+        // WHEN
+        Message msg = Message.obtain();
+        msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setApnSetting(mMockApnSetting)
+                .build();
+        mFakeAosDebug.mHandler.handleMessage(msg);
+
+        // THEN
+        String apnTypes = mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES);
+        assertTrue(apnTypes.contains("IMS"));
+        assertTrue(apnTypes.contains("EMERGENCY"));
+    }
+
+    @Test
+    public void testUpdatePreciseDataConnectionStateWithoutApnSetting() {
+        // GIVEN
+        // WHEN
+        Message msg = Message.obtain();
+        msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
+        msg.obj = new PreciseDataConnectionState.Builder().build();
+        mFakeAosDebug.mHandler.handleMessage(msg);
+
+        // THEN
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_NAME),
+                IAosDebug.DebugData.STR_EMPTY);
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_TYPES),
+                IAosDebug.DebugData.STR_EMPTY);
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_APN_ENTRY_NAME),
+                IAosDebug.DebugData.STR_EMPTY);
+    }
+
+    @Test
+    public void testUpdatePreciseDataConnectionStateWithLinkProperties() {
         // GIVEN
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(new LinkAddress("1.1.1.1/8"));
@@ -1324,50 +1314,39 @@ public class AosDebugTest extends ImsStackTest {
         lp.setInterfaceName("TEST_INTERFACE_NAME");
         lp.setMtu(1500);
 
-        mFakeAosDebug.mLinkProperties = lp;
-
-        PreciseDataConnectionState state = new PreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_LTE,
-                ApnSetting.TYPE_DEFAULT, "TEST_APN_NAME", null, DataFailCause.UNKNOWN);
-
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = state;
+        msg.obj = new PreciseDataConnectionState.Builder()
+                .setLinkProperties(lp)
+                .build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(lp.getAddresses().toString(),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES));
-        assertEquals(lp.getInterfaceName(),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME));
-        assertEquals(String.valueOf(lp.getMtu()),
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU));
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES),
+                lp.getAddresses().toString());
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME),
+                lp.getInterfaceName());
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU),
+                String.valueOf(lp.getMtu()));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testUpdatePreciseDataConnectionStateDateWithoutLinkProperties() {
+    public void testUpdatePreciseDataConnectionStateWithoutLinkProperties() {
         // GIVEN
-        mFakeAosDebug.mLinkProperties = null;
-
-        PreciseDataConnectionState state = new PreciseDataConnectionState(
-                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_LTE,
-                ApnSetting.TYPE_DEFAULT, "TEST_APN_NAME", null, DataFailCause.UNKNOWN);
-
         // WHEN
         Message msg = Message.obtain();
         msg.what = com.android.imsstack.enabler.aos.AosDebug.DEBUG_PRECISE_DATA_CONNECTION_CHANGED;
-        msg.obj = state;
+        msg.obj = new PreciseDataConnectionState.Builder().build();
         mFakeAosDebug.mHandler.handleMessage(msg);
 
         // THEN
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES));
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME));
-        assertEquals(IAosDebug.DebugData.STR_EMPTY,
-                mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU));
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_IP_ADDRESSES),
+                IAosDebug.DebugData.STR_EMPTY);
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_INTERFACE_NAME),
+                IAosDebug.DebugData.STR_EMPTY);
+        assertEquals(mFakeAosDebug.mDebugData.get(IAosDebug.DebugData.KEY_MTU),
+                IAosDebug.DebugData.STR_EMPTY);
     }
 
     @Test
@@ -2237,19 +2216,6 @@ public class AosDebugTest extends ImsStackTest {
         assertTrue(result.contains("eHRPD"));
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testGetNetworkTypeToStringIden() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_IDEN;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("iDEN"));
-    }
-
     @Test
     public void testGetNetworkTypeToStringHspap() {
         // GIVEN
@@ -2546,8 +2512,6 @@ public class AosDebugTest extends ImsStackTest {
         static String sTestCurrentTime = "9999-12-25 12:12:12";
         SimCarrierId mSimCarrierId;
         WifiInfo mWifiInfo;
-        ApnSetting mApnSetting;
-        LinkProperties mLinkProperties;
         CountDownLatch[] mCountDownLatches;
 
         public enum LatchType {
@@ -2713,16 +2677,6 @@ public class AosDebugTest extends ImsStackTest {
         @Override
         protected WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
             return mWifiInfo;
-        }
-
-        @Override
-        protected ApnSetting getApnSettingFromState(PreciseDataConnectionState state) {
-            return mApnSetting;
-        }
-
-        @Override
-        protected LinkProperties getLinkPropertiesFromState(PreciseDataConnectionState state) {
-            return mLinkProperties;
         }
 
         @Override

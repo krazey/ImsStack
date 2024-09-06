@@ -52,10 +52,10 @@ TEST_F(SipAuthBaseTest, IsValidHeader)
 TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
 {
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     AStringBuffer objBuffer(64);
 
     SipAuthBase* pHeader = reinterpret_cast<SipAuthBase*>(
@@ -83,12 +83,12 @@ TEST_F(SipAuthBaseTest, EncodeAndEncodeHdr)
     EXPECT_STREQ("Digest", pCopyHeader->GetValue());
     EXPECT_STREQ("Digest", pHeader->GetValue());
 
-    char* pRealm = pCopyHeader->GetAuthValue("realm");
+    SIP_CHAR* pRealm = pCopyHeader->GetAuthValue("realm");
     ASSERT_TRUE(pRealm != nullptr);
     EXPECT_STREQ("abcd.example.com", pRealm);
     delete[] pRealm;
 
-    char* pUri = pCopyHeader->GetAuthValue("uri");
+    SIP_CHAR* pUri = pCopyHeader->GetAuthValue("uri");
     ASSERT_TRUE(pUri != nullptr);
     EXPECT_STREQ("\"abc@xyz.com\"", pUri);
     delete[] pUri;
@@ -116,14 +116,14 @@ TEST_F(SipAuthBaseTest, DecodeHdr)
             SipAuthBase::GetNewObj(SipHeaderBase::AUTHORIZATION, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
     EXPECT_EQ(nullptr, pHeader->GetValue());
     EXPECT_EQ(nullptr, pHeader->GetAuthValue(nullptr));
     EXPECT_EQ(nullptr, pHeader->GetAuthValue("atlanta"));
 
     EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("Digest realm=\"atlanta.example.com\",\
-qop=\"auth\",nonce=\"f84f1cec41e6cbe5aea9c8e88d359\",opaque=\"\", stale=FALSE, algorithm=MD5"),
+            pHeader->DecodeHdr("Digest realm=\"atlanta.example.com\",\
+qop=\"auth\",nonce=\"f84f1cec41e6cbe5aea9c8e88d359\",opaque=\"\", stale=FALSE, algorithm=MD5",
                     121));
 
     EXPECT_STREQ("Digest", pHeader->GetValue());
@@ -151,7 +151,7 @@ qop=\"auth\",nonce=\"f84f1cec41e6cbe5aea9c8e88d359\",opaque=\"\", stale=FALSE, a
             SipAuthBase::GetNewObj(SipHeaderBase::AUTHORIZATION, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("InValidHeaderValue"), 18));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("InValidHeaderValue", 18));
 
     pHeader->SipDelete();
 }

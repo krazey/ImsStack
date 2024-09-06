@@ -27,6 +27,8 @@
 class MockIAosSubscriberManager : public IAosSubscriberManager {
 public:
     MOCK_METHOD(IMS_BOOL, IsReady, (IN IMS_BOOL bIsFake), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsIsim, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUsim, (), (const, override));
     MOCK_METHOD(void, AddListener, (IN IAosSubscriberManagerListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosSubscriberManagerListener* piListener), (override));
     MOCK_METHOD(void, AddListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),

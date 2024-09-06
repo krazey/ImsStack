@@ -30,7 +30,7 @@ const IMS_SINT32 SLOT_ID = 0;
 class TestAosRetryRepository : public AosRetryRepository
 {
 public:
-    inline TestAosRetryRepository(IN IMS_SINT32 nSlotId) :
+    inline explicit TestAosRetryRepository(IN IMS_SINT32 nSlotId) :
             AosRetryRepository(nSlotId)
     {
     }

@@ -15,6 +15,8 @@
  */
 
 #include "ISessionDescriptor.h"
+#include "ServiceTimer.h"
+
 #include "Configuration.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceNetworkPolicy.h"
@@ -31,7 +33,9 @@
 #include <AudioConfig.h>
 using namespace android::telephony::imsmedia;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.AS");
+static const IMS_UINT32 IMS_MEDIA_TIMER_MARGIN = 1000;
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
@@ -40,8 +44,10 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0),
-        m_nInactivityTimer(0),
-        m_bAnbrEnabled(IMS_FALSE)
+        m_nNetworkToneTimer(0),
+        m_nRtpInactivityTimer(0),
+        m_bAnbrEnabled(IMS_FALSE),
+        m_piNetworkToneWaitTimer(IMS_NULL)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
 
@@ -57,6 +63,70 @@ VIRTUAL AudioMediaSession::~AudioMediaSession()
     {
         delete m_pRtpConfig;
     }
+}
+
+PUBLIC VIRTUAL void AudioMediaSession::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if ((m_piNetworkToneWaitTimer != IMS_NULL) && (m_piNetworkToneWaitTimer == piTimer))
+    {
+        IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
+
+        NetworkToneTimerExpired();
+    }
+}
+
+PRIVATE void AudioMediaSession::NetworkToneTimerExpired()
+{
+    IMS_TRACE_D("NetworkToneTimerExpired : networktone time[%d]",
+            GetInactivityTimer(NETWORK_TONE_INACTIVITY), 0, 0);
+
+    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
+    {
+        SetNetworkToneTimer(0);
+
+        if (m_piMediaSessionListener != IMS_NULL)
+        {
+            m_piMediaSessionListener->MediaSession_NotifyToClient(
+                    REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
+            m_piMediaSessionListener->MediaSession_NotifyToClient(
+                    REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
+        }
+    }
+}
+
+PRIVATE
+IMS_RESULT AudioMediaSession::StartTimer(IN IMS_SINT32 nDuration)
+{
+    IMS_TRACE_D("StartTimer : duration[%d]", nDuration, 0, 0);
+
+    if (m_piNetworkToneWaitTimer == IMS_NULL)
+    {
+        m_piNetworkToneWaitTimer = TimerService::GetTimerService()->CreateTimer();
+
+        if (m_piNetworkToneWaitTimer == IMS_NULL)
+        {
+            return IMS_FAILURE;
+        }
+
+        m_piNetworkToneWaitTimer->SetTimer(nDuration + IMS_MEDIA_TIMER_MARGIN, this);
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+void AudioMediaSession::StopTimer()
+{
+    if (m_piNetworkToneWaitTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("StopTimer", 0, 0, 0);
+
+    m_piNetworkToneWaitTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piNetworkToneWaitTimer);
+    m_piNetworkToneWaitTimer = IMS_NULL;
 }
 
 PUBLIC
@@ -112,15 +182,15 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     IMS_TRACE_D("UpdateRtpConfig() - nNegotiated nDestPIndex[%d], nSrcIndex[%d]",
             pPeerProfile->nNegotiatedPayloadIndex, pLocalProfile->nNegotiatedPayloadIndex, 0);
 
-    pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
+    pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
     if (pPeerProfile->nNegotiatedPayloadIndex < 0)
     {
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(0);
+        pPeerPayload = pPeerProfile->GetPayloadAt(0);
     }
     else
     {
-        pPeerPayload = pPeerProfile->lstPayload.GetAt(pPeerProfile->nNegotiatedPayloadIndex);
+        pPeerPayload = pPeerProfile->GetPayloadAt(pPeerProfile->nNegotiatedPayloadIndex);
     }
 
     if (pNegoPayload == IMS_NULL || pPeerPayload == IMS_NULL)
@@ -131,12 +201,13 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     AudioConfig objAudioConfig;
 
     // Setting the network properties
-    SetLocalEndPoint(pNegoProfile->objIpAddr, pNegoProfile->nDataPort);
+    SetLocalEndPoint(pNegoProfile->objIpAddress, pNegoProfile->nDataPort);
     objAudioConfig.setAccessNetwork(nAccessNetwork);
     objAudioConfig.setTxPayloadTypeNumber(pNegoPayload->objRtpMap.nPayloadNum);
 
     // remote network parameters
-    objAudioConfig.setRemoteAddress(android::String8(pPeerProfile->objIpAddr.ToString().GetStr()));
+    objAudioConfig.setRemoteAddress(
+            android::String8(pPeerProfile->objIpAddress.ToString().GetStr()));
     objAudioConfig.setRemotePort(pPeerProfile->nDataPort);
     objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
 
@@ -240,13 +311,12 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         if (pLocalProfile->nNegotiatedPayloadIndex >= 0)
         {
             AudioProfile::Payload* pLocalPayload =
-                    pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
+                    pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
 
             if (pLocalPayload != IMS_NULL && pLocalPayload->pFmtp != IMS_NULL)
             {
                 objAudioConfig.setDtxEnabled(
-                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->pFmtp)
-                                        ->bSCREnable));
+                        (REINTERPRET_CAST(AudioProfile::AmrFmtp*, pLocalPayload->pFmtp)->bDtx));
             }
         }
 
@@ -280,10 +350,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
         objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
         // AMR DTX on/off by source codec
-        objAudioConfig.setDtxEnabled((IMS_BOOL)pFmtp->nDtx);
-
-        // TODO_MEDIA need to add DtxRecv
-        // objAudioConfig.setDtxRecvEnabled((IMS_BOOL)pFmtp->nDtxRecv);
+        objAudioConfig.setDtxEnabled(pFmtp->bDtx);
 
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
@@ -352,7 +419,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     // Setting the DTMF properties
     for (IMS_UINT32 i = 0; i < pNegoProfile->lstPayload.GetSize(); i++)
     {
-        AudioProfile::Payload* pPayload = pNegoProfile->lstPayload.GetAt(i);
+        AudioProfile::Payload* pPayload = pNegoProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -424,22 +491,21 @@ PUBLIC
 IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
         IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
 {
-    if (bActiveSession)
-    {
-        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
-                std::vector<int32_t>{GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0
-                                ? GetInactivityTimer(NETWORK_TONE_INACTIVITY)
-                                : m_pConfig->GetRtpInactivityTimerMillis()});
+    IMS_SINT32 nRtpInactivity = 0;
 
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
+    if (GetInactivityTimer(NETWORK_TONE_INACTIVITY) > 0)
+    {
+        nRtpInactivity = GetInactivityTimer(NETWORK_TONE_INACTIVITY);
     }
     else
     {
-        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{0});
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                m_pConfig->GetRtcpInactivityTimerMillis());
+        nRtpInactivity = (bActiveSession) ? m_pConfig->GetRtpInactivityTimerMillis() : 0;
+        m_nRtpInactivityTimer = nRtpInactivity;
     }
+
+    m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{nRtpInactivity});
+    m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+            (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
 
     IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
                 "RtcpInactivity[%d]",
@@ -790,9 +856,18 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
 }
 
 PUBLIC
-void AudioMediaSession::SetInactivityTimer(IN IMS_UINT32 nTimer)
+void AudioMediaSession::SetNetworkToneTimer(IN IMS_UINT32 nTimer)
 {
-    m_nInactivityTimer = nTimer;
+    m_nNetworkToneTimer = nTimer;
+
+    if (nTimer > 0)
+    {
+        StartTimer(nTimer);
+    }
+    else
+    {
+        StopTimer();
+    }
 }
 
 PUBLIC
@@ -801,13 +876,11 @@ IMS_SINT32 AudioMediaSession::GetInactivityTimer(IN InactivitytimerType eType)
     switch (eType)
     {
         case RTP_INACTIVITY:
-            return (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
-                    ? -1
-                    : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front();
+            return m_nRtpInactivityTimer;
         case RTCP_INACTIVITY:
             return m_objMediaQualityThreshold.getRtcpInactivityTimerMillis();
         case NETWORK_TONE_INACTIVITY:
-            return m_nInactivityTimer;
+            return m_nNetworkToneTimer;
         default:
             return -1;
     }

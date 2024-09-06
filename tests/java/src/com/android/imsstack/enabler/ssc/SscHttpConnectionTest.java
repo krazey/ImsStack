@@ -32,7 +32,9 @@ import static org.mockito.Mockito.when;
 import android.net.Network;
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -73,13 +75,14 @@ public class SscHttpConnectionTest {
     private FakeSscHttpConnection mSscHttpConnection;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private IDcApn mMockDcApn;
     @Mock private Network mMockNetwork;
     @Mock private SscAuthAgent mMockSscAuthAgent;
     @Mock private SscUrl mMockSscUrl;
     @Mock private HttpURLConnection mMockConnection;
     @Mock private OutputStream mMockOutputStream;
+    @Mock private WifiInterface mMockWifiInterface;
 
     @Before
     public void setup() throws MalformedURLException, IOException {
@@ -93,10 +96,11 @@ public class SscHttpConnectionTest {
         when(mMockNetwork.openConnection(mUrl)).thenReturn(mMockConnection);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(false);
 
+        AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
         DcFactory.setDcAgent(IDcApn.class, mMockDcApn, SLOT_0);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscHttpConnection = new FakeSscHttpConnection(SLOT_0, mApnType);
     }
@@ -154,6 +158,30 @@ public class SscHttpConnectionTest {
                 mRequestUri, mXui, "");
 
         verify(mMockDcApn).getNetworkByCapability(mApnType.getType());
+        assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
+    }
+
+    @Test
+    public void sendRequest_wifiInterfaceIsNullForWifi() {
+        mApnType = EApnType.WIFI;
+        mSscHttpConnection = new FakeSscHttpConnection(SLOT_0, mApnType);
+        AgentFactory.getInstance().setAgent(WifiInterface.class, null);
+
+        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
+                mRequestUri, mXui, "");
+
+        assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
+    }
+
+    @Test
+    public void sendRequest_networkIsNullForWifi() {
+        mApnType = EApnType.WIFI;
+        mSscHttpConnection = new FakeSscHttpConnection(SLOT_0, mApnType);
+        when(mMockWifiInterface.getNetwork()).thenReturn(null);
+
+        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
+                mRequestUri, mXui, "");
+
         assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_BY_NO_NETWORK, result);
     }
 

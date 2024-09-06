@@ -15,7 +15,7 @@
  */
 
 #include "AString.h"
-#include "Configuration.h"
+#include "Engine.h"
 #include "IMtcService.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
@@ -78,8 +78,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
     m_bWifiTestMode = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
                                ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
     MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
-    Configuration::GetInstance()->SetAppConfig(
-            ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
+    Engine::GetConfiguration()->SetAppConfig(ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
 }
 
 PUBLIC VIRTUAL MtcApp::~MtcApp()

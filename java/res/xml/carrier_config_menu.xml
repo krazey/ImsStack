@@ -17,8 +17,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="carrier_config_editor"
     android:title="CarrierConfig Editor">
+    <PreferenceScreen/> <!-- Empty row for title bar. -->
     <PreferenceScreen android:title="CarrierConfig - Public"
         android:key="screen_carrier_config">
+        <PreferenceScreen/> <!-- Empty for first row. -->
         <PreferenceCategory android:title="CarrierConfig: boolean"
             android:key="category_config_boolean">
             <ListPreference android:title="Item"
@@ -120,6 +122,7 @@
     </PreferenceScreen>
     <PreferenceScreen android:title="CarrierConfig - Assets"
         android:key="screen_carrier_config_assets">
+        <PreferenceScreen/> <!-- Empty for first row. -->
         <PreferenceCategory android:title="CarrierConfig(assets): boolean"
             android:key="category_assets_config_boolean">
             <ListPreference android:title="Item"

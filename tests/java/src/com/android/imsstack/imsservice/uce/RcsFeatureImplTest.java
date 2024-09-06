@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.uce;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -149,7 +150,7 @@ public class RcsFeatureImplTest {
         PersistableBundle bundle = new PersistableBundle();
         CarrierConfigManagerProxy ccmp =
                 mTestAppContext.getSystemServiceProxy(CarrierConfigManagerProxy.class);
-        when(ccmp.getConfigForSubId(anyInt())).thenReturn(bundle);
+        when(ccmp.getConfigForSubId(anyInt(), any())).thenReturn(bundle);
 
         // CapabilityChangeRequest can not be mocked It is a final class.
         CapabilityChangeRequest request =  new CapabilityChangeRequest();

@@ -37,8 +37,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * This class provides to send an HTTP GET request to the server and receives an HTTP response.
@@ -137,20 +137,6 @@ public class HttpTransaction {
             }
         }
     }
-
-    private final HashMap<Integer, MessageFunction> mMessageFunctionMap =
-            new HashMap<Integer, MessageFunction>() {
-                {
-                    put(REQUEST_START, mMsgFuncRequestStart);
-                    put(REQUEST_HTTP, mMsgFuncRequestHttp);
-                    put(REQUEST_HTTPS, mMsgFuncRequestHttps);
-                    put(REQUEST_NON_CELLULAR, mMsgFuncRequestNonCellular);
-                    put(REQUEST_GBA, mMsgFuncRequestAuthentication);
-                    put(REQUEST_EAP_AKA, mMsgFuncRequestAuthentication);
-                    put(REQUEST_AUTHENTICATION, mMsgFuncRequestAuthentication);
-                    put(REQUEST_DONE, mMsgFuncRequestDone);
-                }
-            };
 
     private final MessageFunction mMsgFuncRequestStart = new MessageFunction() {
         @Override
@@ -294,6 +280,17 @@ public class HttpTransaction {
             return 0;
         }
     };
+
+    private final Map<Integer, MessageFunction> mMessageFunctionMap = Map.of(
+            REQUEST_START, mMsgFuncRequestStart,
+            REQUEST_HTTP, mMsgFuncRequestHttp,
+            REQUEST_HTTPS, mMsgFuncRequestHttps,
+            REQUEST_NON_CELLULAR, mMsgFuncRequestNonCellular,
+            REQUEST_GBA, mMsgFuncRequestAuthentication,
+            REQUEST_EAP_AKA, mMsgFuncRequestAuthentication,
+            REQUEST_AUTHENTICATION, mMsgFuncRequestAuthentication,
+            REQUEST_DONE, mMsgFuncRequestDone
+    );
 
     private final Handler mHandler;
     private final int mSlotId;

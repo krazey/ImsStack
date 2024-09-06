@@ -608,6 +608,18 @@ public class SscServiceState {
         registerMobileDataStateListener(mSubId);
     }
 
+    private void handleAirplaneModeChanged() {
+        IDcNetWatcher dnw = getDcNetWatcher();
+        if (dnw != null && dnw.isAirplaneMode()) {
+            // Reset permanent block reasons and PDN dependent block reasons.
+            resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
+            resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
+            resetUtBlockReason(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
+
+            handleUtFeatureCapabilityChanged();
+        }
+    }
+
     /**
      * It informs of Ut capability has been changed after one second when the change occurs by
      * external conditions, such as data state, Wi-Fi connection state, and IMS registration state.
@@ -663,20 +675,6 @@ public class SscServiceState {
                 default:
                     ImsLog.e(mSlotId, "Invalid Message");
                     break;
-            }
-        }
-
-        private void handleAirplaneModeChanged() {
-            IDcNetWatcher dnw = getDcNetWatcher();
-            if (dnw != null) {
-                if (dnw.isAirplaneMode()) {
-                    // Reset permanent block reasons and PDN dependent block reasons.
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
-
-                    handleUtFeatureCapabilityChanged();
-                }
             }
         }
     }

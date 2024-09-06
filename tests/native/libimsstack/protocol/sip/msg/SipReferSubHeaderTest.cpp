@@ -54,26 +54,26 @@ TEST_F(SipReferSubHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* ; value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(";"), 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(";", 1));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipReferSubHeader*>(
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
 
     /* any value other than true/false*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("*"), 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("*", 1));
     pHeader->SipDelete();
 
     /* Decode true valid value */
     pHeader = reinterpret_cast<SipReferSubHeader*>(
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("true"), 4));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("true", 4));
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -84,7 +84,7 @@ TEST_F(SipReferSubHeaderTest, DecodeHdr)
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
 
     /* Decode false valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("false"), 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("false", 5));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));

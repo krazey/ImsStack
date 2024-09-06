@@ -39,7 +39,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.GbaInterface;
 import com.android.imsstack.core.agents.GbaInterface.GbaCredentials;
 import com.android.imsstack.core.agents.ImsRadioInterface;
@@ -90,7 +90,7 @@ public class SscTransactionTest {
     @Captor ArgumentCaptor<ImsRadioInterface.ConnectionListener> mConnectionListenerCaptor;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private GbaInterface mMockGbaAgent;
     @Mock private ImsRadioInterface mMockImsRadioInterface;
     @Mock private Handler mMockCallbackHandler;
@@ -112,7 +112,7 @@ public class SscTransactionTest {
         when(mMockSscXui.getXui(eq(SLOT_0), eq(null))).thenReturn(mDefaultXui);
         when(mMockSscUrl.getQueryUri(any(), eq(mDefaultXui))).thenReturn(mDefaultRequestUri);
         when(mMockSscUrl.getUpdateUri(any(), eq(mDefaultXui))).thenReturn(mDefaultRequestUri);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getInt(eq(CarrierConfigManager.KEY_GBA_MODE_INT)))
                 .thenReturn(mGbaMode);
         when(mMockSscConnection.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
@@ -130,7 +130,7 @@ public class SscTransactionTest {
         AgentFactory.getInstance()
                 .setAgent(ImsRadioInterface.class, mMockImsRadioInterface, SLOT_0);
 
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
         ((SscNetConnectionGov) SscNetConnectionGov.getInstance()).setSscNetConnection(SLOT_0,
                 mMockSscConnection);
 

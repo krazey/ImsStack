@@ -17,19 +17,19 @@
 #include "ServiceTrace.h"
 #include "config/CodecTelephoneEventConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 #define DEFAULT_EVENT "0-15"
 
 PUBLIC
 CodecTelephoneEventConfig::CodecTelephoneEventConfig(
-        IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecConfig(nType_, nPayloadTypeNum_),
+        IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecConfig(nType, nPayloadTypeNum),
         m_strEvents(DEFAULT_EVENT),
         m_nRedundancyCount(DEFAULT_REDUNDANT_COUNT),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_WB)
 {
-    IMS_TRACE_D("+CodecTelephoneEventConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecTelephoneEventConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
@@ -37,12 +37,8 @@ PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
     IMS_TRACE_D("~CodecTelephoneEventConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(
-        IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* /* piCc */)
 {
-    (void)piCc;
-    (void)nCodecIdx;
-
     m_strEvents = DEFAULT_EVENT;
     m_nRedundancyCount = DEFAULT_REDUNDANT_COUNT;
     m_nSamplingRate = (GetCodec() == ImsCodec::AUDIO_TELEPHONE_EVENT) ? DEFAULT_SAMPLING_RATE

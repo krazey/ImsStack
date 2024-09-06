@@ -43,35 +43,9 @@ TEST_F(SipHeaderBaseTest, CopyConstructor)
     pHeader = nullptr;
 
     EXPECT_STREQ("HeaderValue", pCopyHeader->GetValue());
-    EXPECT_TRUE(pCopyHeader->GetParameters() == nullptr);
+    EXPECT_EQ(0, pCopyHeader->GetParamCount());
 
-    pCopyHeader->InitParameters(SIP_NULL);
-    EXPECT_TRUE(pCopyHeader->GetParameters() != nullptr);
-
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, pCopyHeader);
     pCopyHeader->SipDelete();
-
-    EXPECT_STREQ("HeaderValue", pHeader->GetValue());
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-
-    pHeader->SipDelete();
-}
-
-TEST_F(SipHeaderBaseTest, InitParameters)
-{
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT, nullptr);
-    ASSERT_TRUE(pHeader != nullptr);
-
-    pHeader->InitParameters(SIP_NULL);
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-
-    SipParameters* pParameters = new SipParameters();
-    pHeader->InitParameters(pParameters);
-
-    delete pParameters;
-
-    EXPECT_TRUE(pHeader->GetParameters() != nullptr);
-    pHeader->SipDelete();
 }
 
 TEST_F(SipHeaderBaseTest, IsValidHeader)
@@ -162,10 +136,10 @@ TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
@@ -206,9 +180,7 @@ TEST_F(SipHeaderBaseTest, EncodeAndEncodeHdr)
     objBuffer = AString::ConstNull();
 
     /* Encode content-disposition with value and parameters */
-    pHeader->InitParameters(SIP_NULL);
-    SipParameters* pParameters = pHeader->GetParameters();
-    pParameters->AddParam("handling", "required");
+    pHeader->AddParam("handling", "required");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -227,7 +199,7 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode ALLOW with value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("UPDATE"), 6));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("UPDATE", 6));
     EXPECT_STREQ("UPDATE", pHeader->GetValue());
     pHeader->SipDelete();
 
@@ -238,20 +210,17 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode content-disposition with only value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("render"), 6));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("render", 6));
     EXPECT_STREQ("render", pHeader->GetValue());
     pHeader->SipDelete();
 
     /* Decode content-disposition with value and parameters */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("render;handling=optional"), 24));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("render;handling=optional", 24));
     EXPECT_STREQ("render", pHeader->GetValue());
-    SipParameters* pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList.GetCount());
-    SipNameValue* pNameVal = objParameterList.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    SipNameValue* pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("handling", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("optional", pNameVal->m_valueList.GetAt(0));
@@ -260,49 +229,126 @@ TEST_F(SipHeaderBaseTest, DecodeHdr)
     /* Decode with only value and empty parameters */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;"), 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;", 7));
     pHeader->SipDelete();
 
     /* Decode with only parameters and empty value */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_DISPOSITION, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(";handling=optional"), 18));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(";handling=optional", 18));
     pHeader->SipDelete();
 
     /* Decode feature-caps with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::FEATURE_CAPS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode reject-contact with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::REJECT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value not as '*', fail */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(
-            SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("render;param-name=param-value"), 29));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("render;param-name=param-value", 29));
     pHeader->SipDelete();
 
     /* Decode accept-contact with value as'*', success */
     pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("*;param-name=param-value"), 24));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("*;param-name=param-value", 24));
     EXPECT_STREQ("*", pHeader->GetValue());
-    pParameters = pHeader->GetParameters();
-    ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList& objParameterList1 = pParameters->GetParameterList();
-    EXPECT_EQ(1, objParameterList1.GetCount());
-    pNameVal = objParameterList1.GetNameValNode(0);
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    pNameVal = pHeader->GetParam(0);
     EXPECT_STREQ("param-name", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("param-value", pNameVal->m_valueList.GetAt(0));
+    pHeader->SipDelete();
+}
+
+TEST_F(SipHeaderBaseTest, DecodeParameter)
+{
+    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    /* Decode content-type with value and parameters */
+    const SIP_CHAR* pValue = "multipart/mixed;boundary=b_4043f-000a3b";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
+
+    EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("boundary"));
+    EXPECT_STREQ("b_4043f-000a3b", pHeader->GetParamValue("boundary", 0));
+
+    /* remove parameter and access parameter */
+    pHeader->RemoveParam("boundary");
+    EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(-1, pHeader->GetParamIndex("boundary"));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 0) == nullptr);
+    pHeader->SipDelete();
+
+    /* Decode with only value and empty parameters */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pValue = "multipart/mixed";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_STREQ("multipart/mixed", pHeader->GetValue());
+
+    EXPECT_FALSE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(-1, pHeader->GetParamIndex("boundary"));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 0) == nullptr);
+
+    /* set parameter and access parameter */
+    EXPECT_TRUE(pHeader->SetParam("boundary", "4043f-000a3b"));
+    EXPECT_TRUE(pHeader->IsParamPresent("boundary"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("boundary"));
+    EXPECT_STREQ("4043f-000a3b", pHeader->GetParamValue("boundary", 0));
+    ASSERT_TRUE(pHeader->GetParamValue("boundary", 1) == nullptr);
+    pHeader->SipDelete();
+
+    /* Decode with only parameters and empty value */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+    pValue = ";boundary=b_4043f-000a3b";
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    pHeader->SipDelete();
+
+    /* Decode accept-contact with value as'*' and multpile parameters */
+    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ACCEPT_CONTACT, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    pValue = "*;param1=value1;param2=value2,value3";
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
+    EXPECT_STREQ("*", pHeader->GetValue());
+    EXPECT_EQ(2, pHeader->GetParamCount());
+
+    EXPECT_TRUE(pHeader->IsParamPresent("param1"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("param1"));
+    EXPECT_STREQ("value1", pHeader->GetParamValue("param1", 0));
+
+    EXPECT_TRUE(pHeader->IsParamPresent("param2"));
+    EXPECT_EQ(1, pHeader->GetParamIndex("param2"));
+    EXPECT_STREQ("value3", pHeader->GetParamValue("param2", 1));
+
+    EXPECT_EQ(-1, pHeader->GetParamIndex("param3"));
+
+    pHeader->RemoveParam("param1");
+    EXPECT_EQ(1, pHeader->GetParamCount());
+    EXPECT_EQ(-1, pHeader->GetParamIndex("param1"));
+    EXPECT_EQ(0, pHeader->GetParamIndex("param2"));
+    EXPECT_STREQ("value2", pHeader->GetParamValue("param2"));
+
+    EXPECT_TRUE(pHeader->SetParam("param3", "value3"));
+    EXPECT_EQ(1, pHeader->GetParamIndex("param3"));
+    EXPECT_STREQ("value3", pHeader->GetParamValue("param3"));
+
+    EXPECT_TRUE(pHeader->SetParam("param4", SIP_NULL));
+    EXPECT_EQ(2, pHeader->GetParamIndex("param4"));
+    ASSERT_TRUE(pHeader->GetParamValue("param4", 0) == nullptr);
     pHeader->SipDelete();
 }
 }  // namespace android

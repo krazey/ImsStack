@@ -207,7 +207,7 @@ TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyDoesNothingIfBodyIsEmpty)
     EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::IDLE);
 }
 
-TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInkovesUpdateAndNotifiesResult)
+TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInvokesUpdateAndNotifiesResult)
 {
     SetConferenceSubscription(IMS_TRUE);
 
@@ -232,7 +232,7 @@ TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInkovesUpdateAndNotifiesRes
     EXPECT_EQ(pConferenceSubscription->GetState(), SubscriptionState::IDLE);
 }
 
-TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInkovesUpdateAndDoesNothingIfResultIsInvalid)
+TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInvokesUpdateAndDoesNothingIfResultIsInvalid)
 {
     SetConferenceSubscription(IMS_TRUE);
 
@@ -255,11 +255,13 @@ TEST_F(ConferenceSubscriptionTest, SubscriptionNotifyInkovesUpdateAndDoesNothing
     pConferenceSubscription->SubscriptionNotify(&objSubscription, &objNotifyMessage);
 
     pInfoUpdater = new MockConferenceInfoUpdater(objFactory, objConfigurationProxy);
+    ON_CALL(objFactory, CreateInfoUpdater).WillByDefault(Return(pInfoUpdater));
     EXPECT_CALL(*pInfoUpdater, Update(&objParticipantList, objValueValid.ToString()))
             .WillOnce(Return(ConferenceInfoUpdater::RESULT_INFO_DELETED));
     pConferenceSubscription->SubscriptionNotify(&objSubscription, &objNotifyMessage);
 
     pInfoUpdater = new MockConferenceInfoUpdater(objFactory, objConfigurationProxy);
+    ON_CALL(objFactory, CreateInfoUpdater).WillByDefault(Return(pInfoUpdater));
     EXPECT_CALL(*pInfoUpdater, Update(&objParticipantList, objValueValid.ToString()))
             .WillOnce(Return(ConferenceInfoUpdater::RESULT_AMBIGUOUS));
     pConferenceSubscription->SubscriptionNotify(&objSubscription, &objNotifyMessage);

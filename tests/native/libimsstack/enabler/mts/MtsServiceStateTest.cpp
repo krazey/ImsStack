@@ -17,7 +17,8 @@
 #include <gtest/gtest.h>
 
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IImsAosInfo.h"
 #include "ImsAosReason.h"
 #include "ImsServiceConfig.h"
@@ -50,14 +51,13 @@ protected:
     virtual void SetUp() override
     {
         pConfigService = new TestConfigService();
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_CONFIG, pConfigService);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, pConfigService);
 
         /*
          * To make Connector::Open() return valid IConnector even though
          * MtsApp is not created during the test.
          */
-        Configuration::GetInstance()->SetAppConfig(
+        Engine::GetConfiguration()->SetAppConfig(
                 ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
         pMtsServiceState = new MtsServiceState(SLOT_ID);
@@ -86,8 +86,7 @@ TEST_F(MtsServiceStateTest, BlockMoSmsByImsiBasedSipUri)
 
     MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
 
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
@@ -106,8 +105,7 @@ TEST_F(MtsServiceStateTest, AllowMoSmsByImsiBasedSipUri)
 
     MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
 
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
@@ -126,8 +124,7 @@ TEST_F(MtsServiceStateTest, CheckServiceStateByImsConnection)
 
     MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
 
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
@@ -157,8 +154,7 @@ TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
 
     MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
 
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))

@@ -27,33 +27,31 @@
 #include "ConfigLoader.h"
 #include "Configuration.h"
 
-PUBLIC
-AStringArray Configuration::GetLocalAppIds(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL AStringArray Configuration::GetLocalAppIds(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetAppIds(nSlotId);
 }
 
-PUBLIC
-const IAppConfig* Configuration::GetAppConfig(
+PUBLIC VIRTUAL const IAppConfig* Configuration::GetAppConfig(
         IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetAppConfig(strAppId, nSlotId);
 }
 
-PUBLIC
-IMS_BOOL Configuration::HasAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL IMS_BOOL Configuration::HasAppConfig(
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->IsAppConfigured(strAppId, nSlotId);
 }
 
-PUBLIC
-void Configuration::RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void Configuration::RemoveAppConfig(
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
     ConfigurationManager::GetInstance()->RemoveAppConfig(strAppId, nSlotId);
 }
 
-PUBLIC
-IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IMS_RESULT Configuration::SetAppConfig(
+        IN const AString& strAppId, IN IMS_SINT32 nSlotId)
 {
     if (strAppId.GetLength() == 0)
     {
@@ -90,9 +88,8 @@ IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN IMS_SINT32
     return IMS_SUCCESS;
 }
 
-PUBLIC
-IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN const AString& strClassName,
-        IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId,
+        IN const AString& strClassName, IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId)
 {
     if (strAppId.GetLength() == 0)
     {
@@ -132,32 +129,17 @@ IMS_RESULT Configuration::SetAppConfig(IN const AString& strAppId, IN const AStr
     return IMS_SUCCESS;
 }
 
-PUBLIC GLOBAL Configuration* Configuration::GetInstance()
-{
-    static Configuration* s_pConfiguration = IMS_NULL;
-
-    if (s_pConfiguration == IMS_NULL)
-    {
-        s_pConfiguration = new Configuration();
-    }
-
-    return s_pConfiguration;
-}
-
-PUBLIC
-const IMediaConfig* Configuration::GetMediaConfig(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL const IMediaConfig* Configuration::GetMediaConfig(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetMediaConfig(nSlotId);
 }
 
-PUBLIC
-const ISipConfig* Configuration::GetSipConfig(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL const ISipConfig* Configuration::GetSipConfig(IN IMS_SINT32 nSlotId) const
 {
     return ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 }
 
-PUBLIC
-const ISubscriberConfig* Configuration::GetSubscriberConfig(
+PUBLIC VIRTUAL const ISubscriberConfig* Configuration::GetSubscriberConfig(
         IN IMS_SINT32 nSlotId, IN const AString& strId /*= AString::ConstNull()*/) const
 {
     if (strId.IsNULL())
@@ -169,8 +151,7 @@ const ISubscriberConfig* Configuration::GetSubscriberConfig(
     return ConfigurationManager::GetInstance()->GetSubscriberConfig(strId, nSlotId);
 }
 
-PUBLIC
-IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId) const
 {
     const EngineConfig* pEngineConfig =
             ConfigurationManager::GetInstance()->GetEngineConfig(nSlotId);
@@ -183,8 +164,7 @@ IMS_UINT32 Configuration::GetTraceModule(IN IMS_SINT32 nSlotId) const
     return pEngineConfig->GetTraceModule();
 }
 
-PUBLIC
-IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId) const
 {
     const EngineConfig* pEngineConfig =
             ConfigurationManager::GetInstance()->GetEngineConfig(nSlotId);
@@ -197,8 +177,7 @@ IMS_UINT32 Configuration::GetTraceOption(IN IMS_SINT32 nSlotId) const
     return pEngineConfig->GetTraceOption();
 }
 
-PUBLIC
-IMS_BOOL Configuration::IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId) const
+PUBLIC VIRTUAL IMS_BOOL Configuration::IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId) const
 {
     const SubscriberConfig* pSubsConfig = ConfigurationManager::GetInstance()->GetSubscriberConfig(
             SubscriberConfig::GetDefaultId(), nSlotId);
@@ -211,14 +190,12 @@ IMS_BOOL Configuration::IsServerInfoHiddenInLog(IN IMS_SINT32 nSlotId) const
     return IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG();
 }
 
-PUBLIC
-void Configuration::InitConfigs(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void Configuration::InitConfigs(IN IMS_SINT32 nSlotId)
 {
     ConfigurationManager::GetInstance()->InitConfigs(nSlotId);
 }
 
-PUBLIC
-void Configuration::RefreshConfigs(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void Configuration::RefreshConfigs(IN IMS_SINT32 nSlotId)
 {
     ConfigurationManager::GetInstance()->RefreshConfigs(nSlotId);
 }

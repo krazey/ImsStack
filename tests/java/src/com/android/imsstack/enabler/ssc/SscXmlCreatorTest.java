@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 
@@ -44,7 +44,7 @@ public class SscXmlCreatorTest {
     private Document mCachedDoc;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscUtils mMockSscUtils;
 
     @Before
@@ -54,8 +54,8 @@ public class SscXmlCreatorTest {
         SscXmlFormat.init(SLOT_0);
         mSscXmlCreator = new FakeSscXmlCreator();
 
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
 
         mCachedDoc = getEntireXmlDoc();
         updateTagsAndRules(mCachedDoc);

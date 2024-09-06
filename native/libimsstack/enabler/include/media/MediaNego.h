@@ -77,7 +77,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the form SDP is done successfully and IMS_FALSE when
      * failed with invalid arguments
      */
-    IMS_BOOL FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+    IMS_BOOL FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
             IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
             IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode);
 
@@ -100,7 +100,7 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the negotiation succeed and IMS_FALSE when failed.
      * MediaNegoResult will be set when negotiation failed
      */
-    IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
+    IMS_BOOL NegotiateSdp(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
             OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
             OUT MediaNegoResult& errorReason);
 
@@ -109,7 +109,7 @@ public:
      *
      * @param pSession ISession instance to get the SDP descriptor
      */
-    void FinalizeSDP(IN ISession* pSession);
+    void FinalizeSdp(IN ISession* pSession);
 
     /**
      * @brief Set the negotiation state

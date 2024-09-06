@@ -64,6 +64,11 @@ MATCHER_P(IsEqualMessage, message, "")
     return &arg == message;
 }
 
+MATCHER_P(IsCopiedUser, originalUser, "")
+{
+    return arg.GetAt(0) != &originalUser && *arg.GetAt(0) == originalUser;
+}
+
 class IdleStateTest : public ::testing::Test
 {
 public:
@@ -612,6 +617,27 @@ TEST_F(IdleStateTest, StartConferenceSetsMoTimesAndTransitsOutgoingState)
     EXPECT_EQ(CallStateName::OUTGOING,
             pIdleState->StartConference(
                     eCallType, strTarget, objInputMediaInfo, objInputSuppServices, lstUsers));
+}
+
+TEST_F(IdleStateTest, StartConferenceUsesCopiedConfUsers)
+{
+    AString strTarget("some_target");
+    ImsList<ConfUser*> lstUsers;
+    ConfUser objOriginalUser;
+    objOriginalUser.nConnectionId = 12345;
+    lstUsers.Append(&objOriginalUser);
+
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objMessageUtils,
+            SetResourceList(&objMessage, _, _, IsCopiedUser(objOriginalUser), IMS_TRUE, IMS_TRUE));
+
+    pIdleState->StartConference(CallType::VOIP, strTarget, lstUsers);
 }
 
 TEST_F(IdleStateTest, HandleIncomingRejectsIfCreateSessionFailed)

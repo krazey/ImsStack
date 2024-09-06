@@ -297,10 +297,9 @@ TEST_F(MtcConfigurationProxyTest, IsWithIntArgReturnsFromConfigManager)
             .WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE, nArg));
 
-    EXPECT_CALL(*pConfigManager, IsRegistrationDisconnectReasonToTerminateOngoingCall(nArg))
+    EXPECT_CALL(*pConfigManager, IsRegistrationDisconnectReasonToIgnore(nArg))
             .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nArg));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::REGISTRATION_DISCONNECT_REASON_TO_IGNORE, nArg));
 
     EXPECT_CALL(*pConfigManager,
             IsMessageTypeSupportGeolocationPidf(static_cast<MessageTypeForGeolocationPidf>(nArg)))

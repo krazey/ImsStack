@@ -42,18 +42,6 @@ public class CarrierConfig {
     public static final String TEST_CARRIER_CONFIG_FILE =
             "test_carrier_config.xml";
 
-    /** Configuration prefixes for IMS. */
-    public static final String[] IMS_KEY_PREFIXES = {
-        CarrierConfigManager.Ims.KEY_PREFIX,
-        CarrierConfigManager.ImsEmergency.KEY_PREFIX,
-        CarrierConfigManager.ImsRtt.KEY_PREFIX,
-        CarrierConfigManager.ImsSms.KEY_PREFIX,
-        CarrierConfigManager.ImsSs.KEY_PREFIX,
-        CarrierConfigManager.ImsVoice.KEY_PREFIX,
-        CarrierConfigManager.ImsVt.KEY_PREFIX,
-        CarrierConfigManager.ImsWfc.KEY_PREFIX
-    };
-
     /** Configuration items for IMS common. */
     @SuppressWarnings("deprecation")
     public static final String[] IMS_COMMON_KEYS = {
@@ -97,6 +85,221 @@ public class CarrierConfig {
         CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL,
         CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT,
         CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL
+    };
+
+    public static final String[] IMS_PREFIX_KEYS = {
+        CarrierConfigManager.Ims.KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL,
+        CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_PUBLISH_BOOL,
+        CarrierConfigManager.Ims.KEY_PUBLISH_SERVICE_DESC_FEATURE_TAG_MAP_OVERRIDE_STRING_ARRAY,
+        CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL,
+        CarrierConfigManager.Ims.KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL,
+        CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL,
+        CarrierConfigManager.Ims.KEY_SUBSCRIBE_RETRY_DURATION_MILLIS_LONG,
+        CarrierConfigManager.Ims.KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL,
+        CarrierConfigManager.Ims.KEY_USE_TEL_URI_FOR_PIDF_XML_BOOL,
+        CarrierConfigManager.Ims.KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT,
+        CarrierConfigManager.Ims.KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY,
+        CarrierConfigManager.Ims.KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL,
+        CarrierConfigManager.Ims.KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_T1_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_T2_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_T4_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_B_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_C_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_D_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_F_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_H_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_TIMER_J_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_SIP_SERVER_PORT_NUMBER_INT,
+        CarrierConfigManager.Ims.KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING,
+        CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT,
+        CarrierConfigManager.Ims.KEY_GRUU_ENABLED_BOOL,
+        CarrierConfigManager.Ims.KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL,
+        CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
+        CarrierConfigManager.Ims.KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT,
+        CarrierConfigManager.Ims.KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT,
+        CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL,
+        CarrierConfigManager.Ims.KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT,
+        CarrierConfigManager.Ims.KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT,
+        CarrierConfigManager.Ims.KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL,
+        CarrierConfigManager.Ims.KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT,
+        CarrierConfigManager.Ims.KEY_GEOLOCATION_PIDF_IN_SIP_REGISTER_SUPPORT_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING,
+        CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_UT_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_SMS_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_RCS_REQUIRES_PROVISIONING_BUNDLE,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY,
+        CarrierConfigManager.Ims.KEY_NR_SA_DISABLE_POLICY_INT,
+        CarrierConfigManager.Ims.KEY_ALLOW_NON_GLOBAL_PHONE_NUMBER_FORMAT_BOOL
+    };
+
+    public static final String[] IMS_VOICE_PREFIX_KEYS = {
+        CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_MULTIENDPOINT_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_SESSION_TIMER_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_SESSION_EXPIRES_TIMER_SEC_INT,
+        CarrierConfigManager.ImsVoice.KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT,
+        CarrierConfigManager.ImsVoice.KEY_SESSION_REFRESHER_TYPE_INT,
+        CarrierConfigManager.ImsVoice.KEY_SESSION_PRIVACY_TYPE_INT,
+        CarrierConfigManager.ImsVoice.KEY_PRACK_SUPPORTED_FOR_18X_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+        CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_SRVCC_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_RINGING_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_RINGBACK_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_CONFERENCE_FACTORY_URI_STRING,
+        CarrierConfigManager.ImsVoice.KEY_SESSION_REFRESH_METHOD_INT,
+        CarrierConfigManager.ImsVoice.KEY_OIP_SOURCE_FROM_HEADER_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_AS_BANDWIDTH_KBPS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_RS_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_RR_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+        CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_VOICE_RTP_PACKET_LOSS_RATE_THRESHOLD_INT,
+        CarrierConfigManager.ImsVoice.KEY_VOICE_RTP_JITTER_THRESHOLD_MILLIS_INT,
+        CarrierConfigManager.ImsVoice.KEY_VOICE_RTP_INACTIVITY_TIME_THRESHOLD_MILLIS_LONG,
+        CarrierConfigManager.ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+        CarrierConfigManager.ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE,
+        CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CMR_INT,
+        CarrierConfigManager.ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+        CarrierConfigManager.ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+        CarrierConfigManager.ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT,
+        CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE
+    };
+
+    public static final String[] IMS_SMS_PREFIX_KEYS = {
+        CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsSms.KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL,
+        CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_FORMAT_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
+        CarrierConfigManager.ImsSms.KEY_SMS_MAX_RETRY_COUNT_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_TR1_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_TR2_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY,
+        CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY
+    };
+
+    public static final String[] IMS_RTT_PREFIX_KEYS = {
+        CarrierConfigManager.ImsRtt.KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsRtt.KEY_TEXT_AS_BANDWIDTH_KBPS_INT,
+        CarrierConfigManager.ImsRtt.KEY_TEXT_RS_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsRtt.KEY_TEXT_RR_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+        CarrierConfigManager.ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
+        CarrierConfigManager.ImsRtt.KEY_RED_PAYLOAD_TYPE_INT
+    };
+
+    public static final String[] IMS_EMERGENCY_PREFIX_KEYS = {
+        CarrierConfigManager.ImsEmergency.KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsEmergency.KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT,
+        CarrierConfigManager.ImsEmergency
+                .KEY_EMERGENCY_OVER_IMS_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency
+                .KEY_EMERGENCY_OVER_IMS_ROAMING_SUPPORTED_3GPP_NETWORK_TYPES_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency
+                .KEY_EMERGENCY_OVER_CS_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency
+                .KEY_EMERGENCY_OVER_CS_ROAMING_SUPPORTED_ACCESS_NETWORK_TYPES_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_DOMAIN_PREFERENCE_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_DOMAIN_PREFERENCE_ROAMING_INT_ARRAY,
+        CarrierConfigManager.ImsEmergency.KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT,
+        CarrierConfigManager.ImsEmergency.KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_SCAN_TIMER_SEC_INT,
+        CarrierConfigManager.ImsEmergency.KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_LTE_PREFERRED_AFTER_NR_FAILED_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY,
+        CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT,
+        CarrierConfigManager.ImsEmergency.KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT,
+        CarrierConfigManager.ImsEmergency
+                .KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL,
+        CarrierConfigManager.ImsEmergency.KEY_IMS_REASONINFO_CODE_TO_RETRY_EMERGENCY_INT_ARRAY
+    };
+
+    public static final String[] IMS_VT_PREFIX_KEYS = {
+        CarrierConfigManager.ImsVt.KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_AS_BANDWIDTH_KBPS_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_RS_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_RR_BANDWIDTH_BPS_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_RTP_DSCP_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+        CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY,
+        CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
+        CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY,
+        CarrierConfigManager.ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING
+    };
+
+    public static final String[] IMS_WFC_PREFIX_KEYS = {
+        CarrierConfigManager.ImsWfc.KEY_PIDF_SHORT_CODE_STRING_ARRAY,
+        CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL
+    };
+
+    public static final String[] IMS_SS_PREFIX_KEYS = {
+        CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL,
+        CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL,
+        CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL,
+        CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL,
+        CarrierConfigManager.ImsSs.KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL,
+        CarrierConfigManager.ImsSs.KEY_UT_IPTYPE_HOME_INT,
+        CarrierConfigManager.ImsSs.KEY_UT_IPTYPE_ROAMING_INT,
+        CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING,
+        CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_PORT_INT,
+        CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT,
+        CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY,
+        CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY,
+        CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY,
+        CarrierConfigManager.ImsSs.KEY_TERMINAL_BASED_CALL_WAITING_SYNC_TYPE_INT,
+        CarrierConfigManager.ImsSs.KEY_TERMINAL_BASED_CALL_WAITING_DEFAULT_ENABLED_BOOL
     };
 
     /** Configuration items for generic IMS. */
@@ -473,30 +676,51 @@ public class CarrierConfig {
                 "support_ecbm_for_volte_bool";
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
                 "support_ecbm_for_vowifi_bool";
+        public static final String KEY_LOCATION_POLICY_UPDATE_TYPE_INT =
+                "location_policy_update_type_int";
+        public static final String KEY_LOCATION_ALLOW_MOCK_LOCATION_UPDATE_BOOL =
+                "location_allow_mock_location_update_bool";
+        public static final String KEY_LOCATION_ACQUISITION_POLICY_INT =
+                "location_acquisition_policy_int";
+        public static final String KEY_LOCATION_ADDRESS_RESOLUTION_TIME_MILLIS_INT =
+                "location_address_resolution_time_millis_int";
+        public static final String KEY_LOCATION_VALIDITY_PERIOD_MIN_INT =
+                "location_validity_period_min_int";
+        public static final String KEY_LOCATION_ADDRESS_VALIDITY_PERIOD_MIN_INT =
+                "location_address_validity_period_min_int";
+        public static final String KEY_LOCATION_TOLERABLE_DISTANCE_INT =
+                "location_tolerable_distance_int";
+        public static final String KEY_LOCATION_GPS_SEARCHING_DURATION_SEC_INT =
+                "location_gps_searching_duration_sec_int";
+        public static final String KEY_LOCATION_GEODETIC_SHAPE_INT =
+                "location_geodetic_shape_int";
+        public static final String KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL =
+                "cellular_network_info_utc_offset_enabled_bool";
+
         // Aos
         public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
                 "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
-        public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
-                "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
-        public static final String KEY_EMC_REG_ON_RANDOM_PCSCF_BOOL =
-                "emc_reg_on_random_pcscf_bool";
+        public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
+                "ecall_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
+                "ereg_on_random_pcscf_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
                 "ignore_vops_for_volte_enable_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
                 "ims_dereg_on_3g_network_bool";
-        public static final String KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
-                "initialize_ipsec_setting_with_new_pcscf_bool";
+        public static final String KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL =
+                "init_ipsec_setting_with_new_pcscf_bool";
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
                 "no_init_reg_on_pcscf_change_bool";
         public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
                 "plmn_block_with_timeout_on_voice_call_unavailable_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
                 "reg_contact_validation_bool";
-        public static final String KEY_REG_RETRY_IP_VER_FALLBACK_BOOL =
+        public static final String KEY_REG_RETRY_WITH_IP_VER_FALLBACK_BOOL =
                 "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
@@ -523,6 +747,8 @@ public class CarrierConfig {
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
+        public static final String KEY_USE_AWT_WHEN_INIT_REG_WITH_NEXT_PCSCF_BOOL =
+                "use_awt_when_init_reg_with_next_pcscf_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                         "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
@@ -537,11 +763,11 @@ public class CarrierConfig {
 
         public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
                 "contact_user_info_policy_for_non_reg_message_int";
-        public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
-                "emc_preferred_iptype_int";
-        public static final String KEY_EMC_REG_RETRY_MAX_CNT_INT = "emc_reg_retry_max_cnt_int";
-        public static final String KEY_EMC_REG_RETRY_TIMER_MILLIS_INT =
-                "emc_reg_retry_timer_millis_int";
+        public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
+                "epdn_preferred_iptype_int";
+        public static final String KEY_EREG_RETRY_MAX_CNT_INT = "ereg_retry_max_cnt_int";
+        public static final String KEY_EREG_RETRY_TIMER_MILLIS_INT =
+                "ereg_retry_timer_millis_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
@@ -567,12 +793,11 @@ public class CarrierConfig {
                 "reg_retry_default_policy_int";
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
                 "reg_retry_timer_f_policy_int";
-        public static final String KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT =
-                "reg_timer_for_emc_call_millis_int";
+        public static final String KEY_REG_TIMER_FOR_ECALL_MILLIS_INT =
+                "reg_timer_for_ecall_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
                 "rereg_retry_305_policy_int";
-        public static final String KEY_ROAMING_PREFERRED_EMC_REG_INT =
-                "roaming_preferred_emc_reg_int";
+        public static final String KEY_ROAMING_PREFERRED_EREG_INT = "roaming_preferred_ereg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
         public static final String KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT =
@@ -603,7 +828,7 @@ public class CarrierConfig {
         public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
                 "supported_roaming_rats_int_array";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
-                "vowifi_sub_error_code_for_init_reg_int_array";
+                "vowifi_sub_err_code_for_init_reg_int_array";
         // Bundle {
         public static final String KEY_EXTRA_REG_ERR_BUNDLE =
                 "extra_reg_err_bundle";
@@ -615,8 +840,6 @@ public class CarrierConfig {
                 "extra_reg_err_final_type_int";
         public static final String KEY_EXTRA_REG_ERR_MAX_CNT_INT =
                 "extra_reg_err_max_cnt_int";
-        public static final String KEY_EXTRA_REG_ERR_MIN_CNT_INT =
-                "extra_reg_err_min_cnt_int";
         public static final String
                 KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT =
                         "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
@@ -674,8 +897,8 @@ public class CarrierConfig {
         // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE =
                 "sub_err_code_for_terminated_bundle";
-        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT =
-                "sub_err_code_for_terminated_with_retry_max_count_int";
+        public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT =
+                "sub_err_code_for_terminated_with_retry_max_cnt_int";
         public static final String KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY =
                 "sub_err_code_for_terminated_int_array";
         // }
@@ -756,8 +979,8 @@ public class CarrierConfig {
                 "support_video_call_only_in_vops_off_status_bool";
         public static final String KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL =
                 "block_wifi_emergency_call_if_not_provisioned_bool";
-        public static final String KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY =
-                "registration_disconnect_reason_to_terminate_ongoing_call_int_array";
+        public static final String KEY_REGISTRATION_DISCONNECT_REASON_TO_IGNORE_INT_ARRAY =
+                "registration_disconnect_reason_to_ignore_int_array";
         public static final String KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT =
                 "wifi_emergency_18x_timer_millis_int";
         public static final String KEY_SUPPORT_CANID_INFO_BOOL =
@@ -860,6 +1083,8 @@ public class CarrierConfig {
                 "audio_rtcpxr_packet_loss_rle_bool";
         public static final String KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL =
                 "audio_rtcpxr_packet_duplicate_rle_bool";
+        public static final String KEY_AVC_SPROP_PARAMETER_SETS_STRING =
+                "avc_sprop_parameter_sets_string";
         public static final String KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY =
                 "hevc_payload_type_int_array";
         public static final String KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE =
@@ -973,6 +1198,15 @@ public class CarrierConfig {
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;
         public static final int IPV6_PREFERRED = 1;
+
+        // Indicates whether location information policy need to be updated using carrier config.
+        public static final int LOCATION_UPDATE_POLICY_NONE = 0;
+        public static final int LOCATION_UPDATE_POLICY_ONLY_WHEN_WFC_ENABLED = 1;
+        public static final int LOCATION_UPDATE_POLICY_ALWAYS = 2;
+
+        // Indicates the type of PIDF-LO geodetic shape.
+        public static final int GEODETIC_SHAPE_CIRCLE = 0;
+        public static final int GEODETIC_SHAPE_ELLIPSOID = 1;
 
         private Assets() {}
     }

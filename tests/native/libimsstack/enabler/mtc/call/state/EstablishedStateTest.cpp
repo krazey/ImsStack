@@ -734,9 +734,8 @@ TEST_F(EstablishedStateTest,
     ON_CALL(objMockCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pMockConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAosReason))
+            .WillByDefault(Return(IMS_FALSE));
 
     const CallReasonInfo objReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE);
     EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, objReasonInfo)).Times(1);

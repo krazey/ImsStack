@@ -18,13 +18,13 @@
 #include "config/ImsCodec.h"
 #include "config/CodecConfigFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
-    IMS_TRACE_D("CreateAudioPayloadConfig nCodec[%d], nPayloadTypeNum[%d] nCodecIdx[%d]", nCodec,
-            nPayloadTypeNum, nCodecIdx);
+    IMS_TRACE_D(
+            "CreateAudioPayloadConfig nCodec[%d], nPayloadTypeNum[%d]", nCodec, nPayloadTypeNum, 0);
 
     if (nCodec == ImsCodec::AUDIO_NONE)
     {
@@ -40,7 +40,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         {
             CodecAmrConfig* pAMRConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
 
-            if (pAMRConfig == IMS_NULL || !pAMRConfig->Create(piCc, nCodecIdx))
+            if (pAMRConfig == IMS_NULL || !pAMRConfig->Create(piCc))
             {
                 IMS_TRACE_D("pAMRConfig Create failure", 0, 0, 0);
 
@@ -56,7 +56,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         {
             CodecPcmConfig* pPCMConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
 
-            if (pPCMConfig == IMS_NULL || !pPCMConfig->Create(piCc, nCodecIdx))
+            if (pPCMConfig == IMS_NULL || !pPCMConfig->Create(piCc))
             {
                 IMS_TRACE_D("pPCMConfig Create failure", 0, 0, 0);
 
@@ -73,8 +73,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
             CodecTelephoneEventConfig* pTelephoneEventConfig =
                     new CodecTelephoneEventConfig(nCodec, nPayloadTypeNum);
 
-            if (pTelephoneEventConfig == IMS_NULL ||
-                    !pTelephoneEventConfig->Create(piCc, nCodecIdx))
+            if (pTelephoneEventConfig == IMS_NULL || !pTelephoneEventConfig->Create(piCc))
             {
                 IMS_TRACE_D("pTelephoneEventConfig Create failure", 0, 0, 0);
 
@@ -89,7 +88,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         {
             CodecEvsConfig* pEVSConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
 
-            if (pEVSConfig == IMS_NULL || !pEVSConfig->Create(piCc, nCodecIdx))
+            if (pEVSConfig == IMS_NULL || !pEVSConfig->Create(piCc))
             {
                 IMS_TRACE_D("pEVSConfig Create failure", 0, 0, 0);
 
@@ -106,7 +105,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 }
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::VIDEO_NONE)
     {
@@ -121,7 +120,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
         {
             CodecAvcConfig* pAvcConfig = new CodecAvcConfig(nCodec, nPayloadTypeNum);
 
-            if (pAvcConfig == IMS_NULL || !pAvcConfig->Create(piCc, nCodecIdx))
+            if (pAvcConfig == IMS_NULL || !pAvcConfig->Create(piCc))
             {
                 IMS_TRACE_D("pAvcConfig Create failure", 0, 0, 0);
 
@@ -137,7 +136,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
         {
             CodecHevcConfig* pHevcConfig = new CodecHevcConfig(nCodec, nPayloadTypeNum);
 
-            if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc, nCodecIdx))
+            if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc))
             {
                 IMS_TRACE_D("pHevcConfig Create failure", 0, 0, 0);
 
@@ -153,7 +152,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
 }
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::TEXT_NONE)
     {
@@ -162,8 +161,8 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
 
     CodecConfig* pCodecConfig = IMS_NULL;
 
-    IMS_TRACE_D("pT140Config codec config: codectype: %d, nPayloadTypeNum: %d, nCodecIdx: %d",
-            nCodec, nPayloadTypeNum, nCodecIdx);
+    IMS_TRACE_D("pT140Config codec config: codectype: %d, nPayloadTypeNum: %d", nCodec,
+            nPayloadTypeNum, 0);
 
     switch (nCodec)
     {
@@ -172,7 +171,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
         {
             CodecT140Config* pT140Config = new CodecT140Config(nCodec, nPayloadTypeNum);
 
-            if (pT140Config == IMS_NULL || !pT140Config->Create(piCc, nCodecIdx))
+            if (pT140Config == IMS_NULL || !pT140Config->Create(piCc))
             {
                 IMS_TRACE_D("pT140Config Create failure", 0, 0, 0);
 

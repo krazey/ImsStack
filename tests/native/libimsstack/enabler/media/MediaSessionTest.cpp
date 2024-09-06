@@ -235,7 +235,7 @@ public:
     IMS_UINTP createAudioSession()
     {
         IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
-        m_pSession->FormSDP(negoId, m_pIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND_RECEIVE,
+        m_pSession->FormSdp(negoId, m_pIsession, MEDIA_TYPE_AUDIO, MEDIA_DIRECTION_SEND_RECEIVE,
                 MEDIA_DIRECTION_INVALID, MEDIA_DIRECTION_INVALID);
 
         return negoId;
@@ -244,7 +244,7 @@ public:
     IMS_UINTP createVideoSession()
     {
         IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIOVIDEO);
-        m_pSession->FormSDP(negoId, m_pIsession, MEDIA_TYPE_AUDIOVIDEO,
+        m_pSession->FormSdp(negoId, m_pIsession, MEDIA_TYPE_AUDIOVIDEO,
                 MEDIA_DIRECTION_SEND_RECEIVE, MEDIA_DIRECTION_SEND_RECEIVE,
                 MEDIA_DIRECTION_INVALID);
 
@@ -483,7 +483,7 @@ TEST_F(MediaSessionTest, testGetRemotePort)
     IMS_SINT32 eTextDirection = MEDIA_DIRECTION_INVALID;
 
     IMS_UINTP nNegoId = createVideoSession();
-    m_pSession->NegotiateSDP(nNegoId, m_pIsession, &eAudioDirection, &eVideoDirection,
+    m_pSession->NegotiateSdp(nNegoId, m_pIsession, &eAudioDirection, &eVideoDirection,
             &eTextDirection, eErrorReason);
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO), -1);
     EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_VIDEO), -1);

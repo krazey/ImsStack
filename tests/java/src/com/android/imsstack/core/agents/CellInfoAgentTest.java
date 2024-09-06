@@ -349,6 +349,48 @@ public class CellInfoAgentTest {
         verify(mSpEditor, times(2)).commit();
     }
 
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWhenCarrierConfigChangedWithUtcOffsetEnabled() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                .thenReturn(true);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertFalse(defaultAni[CellInfoAgent.ANI_INDEX_UTC_TIME_FORMAT].endsWith("Z"));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWhenCarrierConfigChangedWithUtcOffsetDisabled() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                .thenReturn(false);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertTrue(defaultAni[CellInfoAgent.ANI_INDEX_UTC_TIME_FORMAT].endsWith("Z"));
+    }
+
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
         setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         setUpAllCellInfo(networkType, false);

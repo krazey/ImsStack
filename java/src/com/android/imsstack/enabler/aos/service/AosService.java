@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
+import android.annotation.IntRange;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
@@ -26,11 +27,15 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -59,6 +64,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -71,40 +77,50 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public static final int PCO_TARGET_ID = 0xff00;
     public static final int PCO_NONE_VALUE = 0;
 
+    private final LocationInterface.Listener mLocationListener = new LocationInterface.Listener() {
+        @Override
+        public void onLastKnownCountryUpdated() {
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.COUNTRY_CHANGED);
+        }
+
+        @Override
+        public void onInstantRequestedLocationUpdated() {
+            sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, LocationInfo.FIXED);
+        }
+    };
     private Handler mHandler;
 
     @VisibleForTesting
-    protected final Set<IAosRegistrationListener> mAosRegistationListeners =
+    final Set<IAosRegistrationListener> mAosRegistrationListeners =
             new CopyOnWriteArraySet<IAosRegistrationListener>();
     @VisibleForTesting
-    protected final Set<IAosInfoListener> mAosInfoListeners =
-            new CopyOnWriteArraySet<IAosInfoListener>();
+    final Set<IAosInfoListener> mAosInfoListeners = new CopyOnWriteArraySet<IAosInfoListener>();
 
     @VisibleForTesting
-    protected final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
+    final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
 
     @VisibleForTesting
-    protected CapabilityPairs mCapabilityPairs;
+    CapabilityPairs mCapabilityPairs;
 
     private long mNativeObject = 0;
     @VisibleForTesting
-    protected JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
+    JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
 
     @VisibleForTesting
-    protected int mRegisteredNetworkType = NetworkType.NONE;
+    int mRegisteredNetworkType = NetworkType.NONE;
 
     private int mRegState = RegistrationState.DEREGISTERED;
 
     @VisibleForTesting
-    protected int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+    int mPreciseCallState = PreciseCallState.PRECISE_CALL_STATE_IDLE;
 
     @VisibleForTesting
-    protected int mFeatureTagBits = 0;
+    int mFeatureTagBits = 0;
     @VisibleForTesting
-    protected final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
+    final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
     @VisibleForTesting
-    protected boolean mIsConnectedOverCrossSim = false;
+    boolean mIsConnectedOverCrossSim = false;
     private NativeStateListener mNativeStateListener;
     private IPhoneStateNotifier mNotifier = null;
 
@@ -176,6 +192,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             phoneState.addNotifier(mNotifier);
         }
 
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.addListener(mLocationListener);
+        }
+
         IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
         if (dnw != null) {
             dnw.addListener(this);
@@ -203,6 +225,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             dnw.removeListener(this);
         }
 
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        if (location != null) {
+            location.removeListener(mLocationListener);
+        }
+
         if (mNotifier != null) {
             PhoneStateInterface phoneState =
                     AgentFactory.getInstance().getAgent(PhoneStateInterface.class, mSlotId);
@@ -221,13 +249,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void addListener(IAosRegistrationListener listener) {
-        mAosRegistationListeners.add(listener);
+    public void addListener(@NonNull IAosRegistrationListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        mAosRegistrationListeners.add(listener);
     }
 
     @Override
-    public void removeListener(IAosRegistrationListener listener) {
-        mAosRegistationListeners.remove(listener);
+    public void removeListener(@NonNull IAosRegistrationListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        mAosRegistrationListeners.remove(listener);
     }
 
     @Override
@@ -251,21 +281,24 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
+    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
+            @Nullable String sipReason) {
+        if (sipCode < 100 || sipCode > 699) {
+            throw new IllegalArgumentException("Invalid sipCode. Must be between 100 and 699.");
+        }
+
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_REQUEST_FULL_REGISTRATION);
         parcel.writeInt(sipCode);
-        parcel.writeString((sipReason == null) ? "" : sipReason);
+        parcel.writeString((sipReason != null) ? sipReason : "");
 
         sendRequest(parcel);
     }
 
     @Override
-    public void changeCapabilities(CapabilityPairs pairs) {
-        if (pairs == null) {
-            return;
-        }
+    public void changeCapabilities(@NonNull CapabilityPairs pairs) {
+        Objects.requireNonNull(pairs, "listener must not be null");
 
         adjustCapabilities(pairs);
 
@@ -351,13 +384,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
-    public void notifyIsimState(int state) {
+    public void notifyIsimState(@Sim.IsimState int state) {
         sendRequest(IIAosService.J2N_NOTIFY_ISIM_STATE, state);
-    }
-
-    @Override
-    public void notifyLocationInfo(int state) {
-        sendRequest(IIAosService.J2N_NOTIFY_LOCATION_INFO, state);
     }
 
     @Override
@@ -387,12 +415,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     @Override
     public void notifyCarrierSignalPcoValueChanged(Intent intent) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleCarrierSignalPcoValueChanged(intent);
-            }
-        });
+        mHandler.post(() -> handleCarrierSignalPcoValueChanged(intent));
     }
 
     @Override
@@ -424,24 +447,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
         if (sim != null) {
-            int isimState = sim.getIsimState();
-
-            switch (isimState) {
-                case Sim.ISIM_STATE_NOT_PRESENT:
-                    notifyIsimState(IsimState.NOT_PRESENT);
-                    break;
-                case Sim.ISIM_STATE_NOT_READY:
-                    notifyIsimState(IsimState.NOT_READY);
-                    break;
-                case Sim.ISIM_STATE_LOADED:
-                    notifyIsimState(IsimState.LOADED);
-                    break;
-                case Sim.ISIM_STATE_REFRESH_STARTED:
-                    notifyIsimState(IsimState.REFRESH_STARTED);
-                    break;
-                default:
-                    break;
-            }
+            notifyIsimState(sim.getIsimState());
+        } else {
+            ImsLog.e(mSlotId, "SimInterface is null for slot: " + mSlotId);
         }
     }
 
@@ -609,15 +617,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
         ImsLog.d("PCO values : " + Arrays.toString(values));
         switch (values.length) {
-            case 1:
-                value = values[0];
-                break;
-            case 4:
-                value = values[3];
-                break;
-            default:
-                ImsLog.i("Invalid PCO values length : " + values.length);
-                break;
+            case 1 -> value = values[0];
+            case 4 -> value = values[3];
+            default -> ImsLog.i("Invalid PCO values length : " + values.length);
         }
         ImsLog.d("Returns PCO value : " + value);
         return value;
@@ -626,7 +628,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void notifyImsServiceChanged() {
         controlRegistration((isImsEnabled()) ? IAosRegistration.RequestType.START :
                 IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
     }
 
     private void adjustCapabilities(CapabilityPairs pairs) {
@@ -646,7 +648,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void updateRegisteredNetworkType(int networkType) {
         ImsLog.d(mSlotId, "updateRegisteredNetworkType :: networkType(" + networkType + ")");
         mRegisteredNetworkType = networkType;
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, mFeatureTagBits, mFeatureTags);
         }
     }
@@ -668,7 +670,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistered(int networkType, int featureTagBits, Set<String> featureTags) {
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERED;
         mRegisteredNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, featureTagBits, featureTags);
         }
     }
@@ -676,7 +678,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistering(int networkType, int featureTagBits, Set<String> featureTags) {
         int adjustedNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERING;
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegistering(adjustedNetworkType, featureTagBits, featureTags);
         }
     }
@@ -703,37 +705,37 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             }
         }
 
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyDeregistered(networkType, reason, getErrorMessage(reason));
         }
     }
 
     private void onTechnologyChangeFailed(int networkType, int causeCode) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyTechnologyChangeFailed(networkType, causeCode, null);
         }
     }
 
     private void onAssociatedUriChanged(Uri[] uris) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyAssociatedUriChanged(uris);
         }
     }
 
     private void onCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyCapabilitiesUpdateFailed(capabilities, networkType, reason);
         }
     }
 
     private void onCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyCapabilitiesUpdated(pairs);
         }
     }
 
     private void onRegEventStateChanged(int statusCode, Set<Uri> impus) {
-        for (IAosRegistrationListener l : mAosRegistationListeners) {
+        for (IAosRegistrationListener l : mAosRegistrationListeners) {
             l.notifyRegEventStateChanged(statusCode, impus);
         }
     }
@@ -760,12 +762,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 "), featureTagBits (" + featureTagBits + "), featureTags : " +
                 featureTags.toString());
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegistered(networkType, featureTagBits, featureTags);
-            }
-        });
+        mHandler.post(() -> onRegistered(networkType, featureTagBits, featureTags));
     }
 
     private void updateRegistering(int networkType, int featureTagBits,
@@ -774,108 +771,58 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         "), featureTagBits (" + featureTagBits + "), featureTags : " +
         featureTags.toString());
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegistering(networkType, featureTagBits, featureTags);
-            }
-        });
+        mHandler.post(() -> onRegistering(networkType, featureTagBits, featureTags));
     }
 
     private void updateDeregistered(int networkType, int reason) {
         ImsLog.d(mSlotId, "updateDeregistered :: networkType(" + networkType + "), reason("
                 + reason + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onDeregistered(networkType, reason);
-            }
-        });
+        mHandler.post(() -> onDeregistered(networkType, reason));
     }
 
     private void updateTechnologyChangeFailed(int networkType, int reason) {
         ImsLog.d(mSlotId, "updateTechnologyChangeFailed :: networkType(" + networkType +
                 "), reason(" + reason + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onTechnologyChangeFailed(networkType, reason);
-            }
-        });
+        mHandler.post(() -> onTechnologyChangeFailed(networkType, reason));
     }
 
     private void updateAssociatedUriChanged(Uri[] uris) {
         ImsLog.d(mSlotId, "updateAssociatedUriChanged :: URIs : " +
                 java.util.Arrays.toString(uris));
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onAssociatedUriChanged(uris);
-            }
-        });
+        mHandler.post(() -> onAssociatedUriChanged(uris));
     }
 
     private void updateCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
         ImsLog.d(mSlotId, "updateCapabilitiesUpdateFailed :: capabilities(" + capabilities +
                 "), networkType(" + networkType + "), reason(" + reason + ")");
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onCapabilitiesUpdateFailed(capabilities, networkType, reason);
-            }
-        });
+        mHandler.post(() -> onCapabilitiesUpdateFailed(capabilities, networkType, reason));
     }
 
     private void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
         ImsLog.d(mSlotId, "notifyCapabilitiesUpdated :: pairs(" + pairs.toString() + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onCapabilitiesUpdated(pairs);
-            }
-        });
+        mHandler.post(() -> onCapabilitiesUpdated(pairs));
     }
 
     private void notifyAosIsimStateChanged(int state) {
         ImsLog.d(mSlotId, "notifyAosIsimStateChanged :: state(" + state + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onAosIsimStateChanged(state);
-            }
-        });
+        mHandler.post(() -> onAosIsimStateChanged(state));
     }
 
     private void notifyRegEventStateChanged(int statusCode, Set<Uri> impus) {
         ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode + "), IMPU: "
                 + impus.toString());
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onRegEventStateChanged(statusCode, impus);
-            }
-        });
+        mHandler.post(() -> onRegEventStateChanged(statusCode, impus));
     }
 
     private void requestPhoneNumberRetry(int command) {
         ImsLog.d(mSlotId, "RequestPhoneNumberRetry :: command(" + command + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onPhoneNumberRetryRequest(command);
-            }
-        });
+        mHandler.post(() -> onPhoneNumberRetryRequest(command));
     }
 
     private void requestWifiService(int command) {
         ImsLog.d(mSlotId, "RequestWifiService :: command(" + command + ")");
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                onWifiServiceRequest(command);
-            }
-        });
+        mHandler.post(() -> onWifiServiceRequest(command));
     }
 
     private String getErrorMessage(int reason) {
@@ -885,42 +832,36 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private static int getRegistrationNetworkType(int telephonyNetworkType) {
-        switch (telephonyNetworkType) {
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return NetworkType.IWLAN;
-            case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_HSPAP: // FALL-THROUGH
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return NetworkType.UTRAN;
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return NetworkType.LTE;
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return NetworkType.NR;
-            default:
-                return NetworkType.NONE;
-        }
+        return switch (telephonyNetworkType) {
+            case TelephonyManager.NETWORK_TYPE_IWLAN -> NetworkType.IWLAN;
+            case TelephonyManager.NETWORK_TYPE_UMTS,
+                    TelephonyManager.NETWORK_TYPE_HSDPA,
+                    TelephonyManager.NETWORK_TYPE_HSUPA,
+                    TelephonyManager.NETWORK_TYPE_HSPA,
+                    TelephonyManager.NETWORK_TYPE_HSPAP,
+                    TelephonyManager.NETWORK_TYPE_TD_SCDMA -> NetworkType.UTRAN;
+            case TelephonyManager.NETWORK_TYPE_LTE -> NetworkType.LTE;
+            case TelephonyManager.NETWORK_TYPE_NR -> NetworkType.NR;
+            default -> NetworkType.NONE;
+        };
     }
 
     private static String convertReasonToKey(int reason) {
-        switch (reason) {
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403:
-                return CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500:
-                return CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY:
-                return CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403:
-                return CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED:
-                return CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
-            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES:
-                return CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
-            default:
-                return null;
-        }
+        return switch (reason) {
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_403 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_REG_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_REG_500 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_REG_500_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_SUB_403 ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_SUB_403_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING;
+            case ReasonCode.CODE_REGISTRATION_ERROR_WFC_OTHER_FAILURES ->
+                    CarrierConfig.Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING;
+            default -> null;
+        };
     }
 
     private String getStringFromBundle(String bundleKey, String key) {
@@ -944,24 +885,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
                 }
 
-                int isimState = sim.getIsimState();
-
-                switch (isimState) {
-                    case Sim.ISIM_STATE_NOT_PRESENT:
-                        notifyIsimState(IsimState.NOT_PRESENT);
-                        break;
-                    case Sim.ISIM_STATE_NOT_READY:
-                        notifyIsimState(IsimState.NOT_READY);
-                        break;
-                    case Sim.ISIM_STATE_LOADED:
-                        notifyIsimState(IsimState.LOADED);
-                        break;
-                    case Sim.ISIM_STATE_REFRESH_STARTED:
-                        notifyIsimState(IsimState.REFRESH_STARTED);
-                        break;
-                    default:
-                        break;
-                }
+                notifyIsimState(sim.getIsimState());
+            } else {
+                ImsLog.e(mSlotId, "SimInterface is null for slot: " + mSlotId);
             }
 
             notifyAosStart();
@@ -983,7 +909,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             ImsLog.i("ListenerProxy.onMessage() :: message=" + message);
 
             switch (message) {
-                case IIAosService.N2J_NOTIFY_REGISTERED: {
+                case IIAosService.N2J_NOTIFY_REGISTERED -> {
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
@@ -994,10 +920,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateRegistered(networkType, featureTagBits, featureTags);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_REGISTERING: {
+                case IIAosService.N2J_NOTIFY_REGISTERING -> {
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
@@ -1008,26 +932,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateRegistering(networkType, featureTagBits, featureTags);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_DEREGISTERED: {
+                case IIAosService.N2J_NOTIFY_DEREGISTERED -> {
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateDeregistered(networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED: {
+                case IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED -> {
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateTechnologyChangeFailed(networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED: {
+                case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED -> {
                     int count = parcel.readInt();
                     if (count <= 0) {
                         ImsLog.d("No URIs");
@@ -1041,19 +959,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     updateAssociatedUriChanged(uris);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED: {
+                case IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED -> {
                     int capabilities = parcel.readInt();
                     int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
                     updateCapabilitiesUpdateFailed(capabilities, networkType, reason);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE: {
+                case IIAosService.N2J_NOTIFY_REG_EVENT_STATE -> {
                     int statusCode = parcel.readInt();
 
                     Set<Uri> impus = new ArraySet<>();
@@ -1063,30 +977,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     }
 
                     notifyRegEventStateChanged(statusCode, impus);
-                    break;
                 }
-
-                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE: {
+                case IIAosService.N2J_NOTIFY_AOS_ISIM_STATE -> {
                     int state = parcel.readInt();
                     notifyAosIsimStateChanged(state);
-                    break;
                 }
-
-                case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY: {
+                case IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY -> {
                     int command = parcel.readInt();
                     requestPhoneNumberRetry(command);
-                    break;
                 }
-
-                case IIAosService.N2J_REQUEST_WIFI_SERVICE: {
+                case IIAosService.N2J_REQUEST_WIFI_SERVICE -> {
                     int command = parcel.readInt();
                     requestWifiService(command);
-                    break;
                 }
-
-                default:
-                    ImsLog.d("Not handled");
-                    break;
+                default -> ImsLog.d("Not handled");
             }
         }
     }

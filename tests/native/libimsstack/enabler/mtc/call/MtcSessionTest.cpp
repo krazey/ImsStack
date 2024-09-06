@@ -653,9 +653,10 @@ TEST_F(MtcSessionTest, GetExtensionSetReturnsMember)
     EXPECT_NE(&objExtensionSet, nullptr);
 }
 
-TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallType)
+TEST_F(MtcSessionTest,
+        HandleStartRequestUpdatesCallTypeAndCapabilityIfVideoTextInRegAndVideoTextInMessage)
 {
-    CreateMtcSession();
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
     ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
@@ -664,55 +665,8 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallType)
     ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
             .WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::VOIP));
-    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
-
-    pMtcSession->HandleRequest(eType, objMessage);
-
-    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
-}
-
-TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeToVoIpIfMessageDoesNotIncludeVideo)
-{
-    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
-    RequestType eType = RequestType::START;
-
-    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
-            .WillByDefault(Return(IMS_FALSE));
-    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
-            .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
-
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::VOIP));
-    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
-
-    pMtcSession->HandleRequest(eType, objMessage);
-
-    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
-}
-
-TEST_F(MtcSessionTest, HandleStartRequestDoesNotChangeCallTypeIfVideoIsOnlyOneRegFeature)
-{
-    CreateMtcSession(CallType::VT, PeerType::MO, IMS_FALSE, IMS_TRUE, IMS_FALSE);
-    RequestType eType = RequestType::START;
-
-    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
-            .WillByDefault(Return(IMS_FALSE));
-    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
-    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
-            .WillByDefault(Return(IMS_FALSE));
-
-    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
@@ -721,15 +675,77 @@ TEST_F(MtcSessionTest, HandleStartRequestDoesNotChangeCallTypeIfVideoIsOnlyOneRe
 
     pMtcSession->HandleRequest(eType, objMessage);
 
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
     EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+    EXPECT_TRUE(pMtcSession->IsVideoCapable());
+    EXPECT_TRUE(pMtcSession->IsRttCapable());
 }
 
-TEST_F(MtcSessionTest, IncomingRttRequestIsRestrictedByRegisteredFeatureIfTextIsNotSupported)
+TEST_F(MtcSessionTest,
+        HandleStartRequestUpdatesCallTypeAndCapabilityIfVideoTextInRegAndVideoTextNotInMessage)
 {
-    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_FALSE, IMS_TRUE, IMS_FALSE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+    EXPECT_FALSE(pMtcSession->IsVideoCapable());
+    EXPECT_FALSE(pMtcSession->IsRttCapable());
+}
+
+TEST_F(MtcSessionTest,
+        HandleStartRequestUpdatesCallTypeAndAndCapabilityIfOnlyVideoInRegAndOnlyTextInMessage)
+{
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_FALSE, IMS_TRUE, IMS_FALSE);
+    RequestType eType = RequestType::START;
+
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+    EXPECT_FALSE(pMtcSession->IsVideoCapable());
+    EXPECT_FALSE(pMtcSession->IsRttCapable());
+}
+
+TEST_F(MtcSessionTest, IncomingRttRequestIsRestrictedByRegisteredFeatureIfTextNotInReg)
+{
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_FALSE, IMS_TRUE, IMS_FALSE);
+    RequestType eType = RequestType::START;
+
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
@@ -738,12 +754,13 @@ TEST_F(MtcSessionTest, IncomingRttRequestIsRestrictedByRegisteredFeatureIfTextIs
 
     pMtcSession->HandleRequest(eType, objMessage);
 
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
     EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
 }
 
 TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVoipIfVoiceOnlyRegistered)
 {
-    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_FALSE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_FALSE, IMS_FALSE);
     RequestType eType = RequestType::START;
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
@@ -755,7 +772,7 @@ TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVoipIfVoiceOnlyRe
 
 TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVtIfVideoRegistered)
 {
-    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_FALSE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_FALSE);
     RequestType eType = RequestType::START;
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
@@ -767,7 +784,7 @@ TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeVtIfVideoRegister
 
 TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeRttIfTextRegistered)
 {
-    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_TRUE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_FALSE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
@@ -775,19 +792,6 @@ TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeRttIfTextRegister
     pMtcSession->HandleRequest(eType, objMessage);
 
     EXPECT_EQ(CallType::RTT, pMtcSession->GetCallType());
-}
-
-TEST_F(MtcSessionTest, HandleStartRequestWithoutSdpSetsCallTypeUnknownIfOnlyUnknownIsInHistory)
-{
-    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_TRUE);
-    RequestType eType = RequestType::START;
-
-    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
-
-    pMtcSession->SetCallType(CallType::UNKNOWN);  // To insert Unknown to the history
-    pMtcSession->HandleRequest(eType, objMessage);
-
-    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetCallType());
 }
 
 TEST_F(MtcSessionTest, HandleRequestUpdatesVideoCapabilityByAvchange)
@@ -872,14 +876,12 @@ TEST_F(MtcSessionTest, HandleEarlyUpdateRequestDoesNotInvokeSetCallTypeIfSameCal
 
 TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndReturnsVt)
 {
-    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
             .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE));
 
@@ -890,14 +892,12 @@ TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndRetu
 
 TEST_F(MtcSessionTest, HandleRequestInvokesSetCallTypeByRegisteredFeatureAndReturnsVideoRtt)
 {
-    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_TRUE, IMS_TRUE);
     RequestType eType = RequestType::START;
 
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::UNKNOWN));
     ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
             .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
 

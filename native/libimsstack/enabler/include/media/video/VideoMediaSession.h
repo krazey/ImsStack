@@ -50,7 +50,7 @@ public:
 
     static const IMS_SINT32 CAMERA_ID_NONE = -1;
 
-    explicit VideoMediaSession(IN IMS_SINT32 nSlodId = 0);
+    explicit VideoMediaSession(IN IMS_SINT32 nSlotId = 0);
     virtual ~VideoMediaSession();
     void SetConfig(IN VideoConfiguration* pConfig);
 
@@ -69,7 +69,14 @@ public:
      *
      * @param nAccessNetwork : AccessNetwork information
      */
-    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
+    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
+     * @brief Set MTU size in the VideoConfig
+     *
+     * @param nMtu : The MTU size to be set to VideoConfig
+     */
+    void SetMtu(IN IMS_SINT32 nMtu);
 
     /**
      * @brief Update MediaQualityThreshold parameters and send it to the java
@@ -126,8 +133,8 @@ private:
     IMS_BOOL OnChangeCameraZoomCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnSetPauseImageCmd(IN IMS_UINTP pParam);
     IMS_BOOL OnChangeOrientation(IN IMS_UINTP pParam);
-    IMS_UINT32 convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile);
-    IMS_UINT32 convertHevcProfile(IN VIDEO_PROFILE_HEVC eProfile);
+    IMS_UINT32 convertAvcProfile(IN IMS_UINT32 nProfile);
+    IMS_UINT32 convertHevcProfile(IN IMS_UINT32 nProfile);
     IMS_UINT32 convertAvcLevel(IN IMS_UINT32 nLevel);
     IMS_UINT32 convertHevcLevel(IN IMS_UINT32 nLevel);
 

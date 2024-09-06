@@ -29,7 +29,7 @@ SipReferSubHeader::SipReferSubHeader(const SipReferSubHeader& objHeader) :
 
 SipReferSubHeader::~SipReferSubHeader() {}
 
-SIP_BOOL SipReferSubHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipReferSubHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {

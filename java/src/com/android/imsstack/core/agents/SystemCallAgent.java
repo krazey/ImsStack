@@ -19,10 +19,11 @@ package com.android.imsstack.core.agents;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
-import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -35,8 +36,11 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.Log;
 
 import java.io.FileDescriptor;
+import java.util.Collections;
+import java.util.List;
 
 /** A class for providing the implementation of system call. */
 public class SystemCallAgent implements SystemCallInterface {
@@ -155,42 +159,34 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Reads the file attributes of the specified ISIM record.
+     * Returns the list of the specified ISIM record.
      *
      * @param fileId The file id to be read.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     * @return The list of ISIM record.
      */
     @Override
-    public int readIsimFileAttributes(int fileId) {
+    public @NonNull List<String> getIsimRecord(int fileId) {
         SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
                 SimInterface.class, mSlotId);
+        List<String> record = null;
 
         if (sim != null) {
-            sim.readIsimFileAttributes(fileId);
-            return RESULT_OK;
+            if (fileId == Sim.ISIM_FILE_ID_IMPI) {
+                String impi = sim.getIsimImpi();
+                record = impi != null ? List.of(impi) : null;
+            } else if (fileId == Sim.ISIM_FILE_ID_DOMAIN) {
+                String domain = sim.getIsimDomain();
+                record = domain != null ? List.of(domain) : null;
+            } else if (fileId == Sim.ISIM_FILE_ID_IMPU) {
+                record = Collections.unmodifiableList(sim.getIsimImpu());
+            }
+
+            Log.d(Log.TAG, "ISIM" + mSlotId + " record: fileId=" + Integer.toHexString(fileId)
+                    + ", name=" + Sim.isimFileIdToString(fileId)
+                    + ", record=" + record);
         }
 
-        return RESULT_FAIL;
-    }
-
-    /**
-     * Reads the value of the specified ISIM record.
-     *
-     * @param fileId The file id to be read.
-     * @param index The index of the record for the given file.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
-     */
-    @Override
-    public int readIsimRecord(int fileId, int index) {
-        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
-                SimInterface.class, mSlotId);
-
-        if (sim != null) {
-            sim.readIsimRecord(fileId, index);
-            return RESULT_OK;
-        }
-
-        return RESULT_FAIL;
+        return record != null ? record : Collections.emptyList();
     }
 
     /**

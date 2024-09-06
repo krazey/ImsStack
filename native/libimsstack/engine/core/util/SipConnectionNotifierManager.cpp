@@ -30,6 +30,7 @@
 #include "ISipServerConnection.h"
 #include "ISipServerConnectionListener.h"
 #include "Service.h"
+#include "ServiceContext.h"
 #include "ServiceManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
@@ -943,7 +944,8 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::IsCalleePreferenceS
 PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         IN ISipServerConnection* piSsc, OUT SipStatusCode& objStatusCode)
 {
-    ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices();
+    ImsList<Service*> objServices =
+            ServiceContext::GetInstance()->GetServiceManager()->GetServices();
 
     if (objServices.IsEmpty())
     {

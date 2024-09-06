@@ -15,9 +15,10 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
-#include "Configuration.h"
+#include "Engine.h"
 #include "IAosService.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "ISubscriberConfig.h"
 #include "SipAddress.h"
 #include "ImsIdentity.h"
@@ -85,6 +86,18 @@ IMS_BOOL AosSubscriberManager::IsReady(IN IMS_BOOL bIsFake /*= IMS_FALSE*/) cons
 }
 
 PUBLIC
+IMS_BOOL AosSubscriberManager::IsIsim() const
+{
+    return m_bIsim;
+}
+
+PUBLIC
+IMS_BOOL AosSubscriberManager::IsUsim() const
+{
+    return m_bUsim;
+}
+
+PUBLIC
 void AosSubscriberManager::AddListener(IN IAosSubscriberManagerListener* piListener)
 {
     if (piListener == IMS_NULL)
@@ -94,7 +107,7 @@ void AosSubscriberManager::AddListener(IN IAosSubscriberManagerListener* piListe
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -115,7 +128,7 @@ void AosSubscriberManager::RemoveListener(IN IAosSubscriberManagerListener* piLi
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -135,7 +148,7 @@ void AosSubscriberManager::AddListenerForMonitor(IN IAosSubscriberManagerListene
 
     for (IMS_UINT32 i = 0; i < m_objMonitorListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -156,7 +169,7 @@ void AosSubscriberManager::RemoveListenerForMonitor(IN IAosSubscriberManagerList
 
     for (IMS_UINT32 i = 0; i < m_objMonitorListeners.GetSize(); ++i)
     {
-        IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
+        const IAosSubscriberManagerListener* pTempListener = m_objMonitorListeners.GetAt(i);
 
         if (pTempListener == piListener)
         {
@@ -307,18 +320,6 @@ void AosSubscriberManager::ClearAll()
 {
     m_objPuids.RemoveAllElements();
     SetProvisioned(IMS_FALSE);
-}
-
-PROTECTED
-IMS_BOOL AosSubscriberManager::IsIsim() const
-{
-    return m_bIsim;
-}
-
-PROTECTED
-IMS_BOOL AosSubscriberManager::IsUsim() const
-{
-    return m_bUsim;
 }
 
 PROTECTED
@@ -567,7 +568,7 @@ PROTECTED
 const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
-    return Configuration::GetInstance()->GetSubscriberConfig(
+    return Engine::GetConfiguration()->GetSubscriberConfig(
             m_nSlotId, (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull());
 }
 

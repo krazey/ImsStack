@@ -205,42 +205,15 @@ SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
 
 const SIP_CHAR* SipViaHeader::GetBranch() const
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-    SipParameterList& objParameterList = pParameters->GetParameterList();
-
-    return objParameterList.GetParamValue("branch");
+    return GetParamValue("branch");
 }
 
 SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
 {
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        InitParameters(SIP_NULL);
-        pParameters = GetParameters();
-    }
-
-    if (pParameters == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    if (pParameters->AddParam("branch", pszBranch) == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Set Branch failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    return SIP_TRUE;
+    return AddParam("branch", pszBranch);
 }
 
-SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipViaHeader::DecHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ COLON port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -255,7 +228,7 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
       hex4 = 1*4HEXDIG
       port = 1*DIGIT */
 
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
     /*check for IPV6 address*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
     {
@@ -311,7 +284,7 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipViaHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -319,9 +292,9 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     /*Search for the Protocol Name End*/
     /*sent-protocol = protocol-name SLASH protocol-version SLASH transport */

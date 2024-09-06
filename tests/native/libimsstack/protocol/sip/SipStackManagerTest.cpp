@@ -146,7 +146,7 @@ TEST_F(SipStackManagerTest, SendRecvMessage)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    char* pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -201,7 +201,7 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    char* pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    SIP_CHAR* pRespMsg = const_cast<SIP_CHAR*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
@@ -255,14 +255,14 @@ Content-Length: 0\r\n\
     pRespSipMessage->SipDelete();
     /* Invite client check for send receive - End */
 
-    char* pAckMsg = const_cast<char*>("ACK sip:userAck@host SIP/2.0\r\n\
+    const SIP_CHAR* pAckMsg = "ACK sip:userAck@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-brAck\r\n\
 From: <sip:userAck@host>;tag=Ackabcd\r\n\
 To: <sip:user@host>;tag=Ackdcba\r\n\
 Call-ID: callidAck\r\n\
 CSeq: 1 ACK\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pAckMsg);
 
@@ -279,14 +279,14 @@ Content-Length: 0\r\n\
     pAckSipMessage->SipDelete();
 
     /* Invite client with fail response receive, response with failure ACK - Start */
-    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pReqMsg);
 
@@ -310,14 +310,14 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    pRespMsg = const_cast<char*>("SIP/2.0 486 Busy Here\r\n\
+    pRespMsg = "SIP/2.0 486 Busy Here\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
@@ -338,14 +338,14 @@ Content-Length: 0\r\n\
     /* Invite client with fail response receive, response with failure ACK - End */
 
     /* Invite server check for send receive - Start */
-    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pReqMsg);
 
@@ -363,14 +363,14 @@ Content-Length: 0\r\n\
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
 
-    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
@@ -394,14 +394,14 @@ Content-Length: 0\r\n\
     pMessage->SipDelete();
     /* Invite server check for send receive - End */
 
-    pAckMsg = const_cast<char*>("ACK sip:userAck@host SIP/2.0\r\n\
+    pAckMsg = "ACK sip:userAck@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-brAck\r\n\
 From: <sip:userAck@host>;tag=Ackabcd\r\n\
 To: <sip:user@host>;tag=Ackdcba\r\n\
 Call-ID: callidAck\r\n\
 CSeq: 1 ACK\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pAckMsg);
 
@@ -426,14 +426,14 @@ Content-Length: 0\r\n\
     /* Send to network fail */
     SipTestNetworkUtil::bSendStatus = SIP_FALSE;
 
-    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    pReqMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pReqMsg);
 
@@ -456,14 +456,14 @@ Content-Length: 0\r\n\
     SipTestNetworkUtil::bSendStatus = SIP_TRUE;
 
     /* Non-Invite server with TCP, check for send receive - Start */
-    pReqMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+    pReqMsg = "REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pReqMsg);
 
@@ -484,14 +484,14 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
 
@@ -509,14 +509,14 @@ Content-Length: 0\r\n\
     /* Non-Invite server with TCP, check for send receive - End */
 
     /* Non-Invite response message received where no transaction present, stray message */
-    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
@@ -546,14 +546,14 @@ Content-Length: 0\r\n\
     pInvalidMsg->SipDelete();
 
     /* Non-Invite Client with receive 1xx in completed state, ignore response, success - Start*/
-    pReqMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+    pReqMsg = "REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pReqMsg);
 
@@ -575,14 +575,14 @@ Content-Length: 0\r\n\
 
     pMessage->SipDelete();
 
-    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pRespMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
@@ -599,14 +599,14 @@ Content-Length: 0\r\n\
 
     pRespSipMessage->SipDelete();
 
-    pRespMsg = const_cast<char*>("SIP/2.0 100 Trying\r\n\
+    pRespMsg = "SIP/2.0 100 Trying\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>;tag=dcba\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     nLength = strlen(pRespMsg);
     eTxnStatus = SipTxn::STATUS_INVALID;
@@ -670,7 +670,7 @@ TEST_F(SipStackManagerTest, OnRecvTanspError)
     ISipUserData objUserData(SIP_NULL);
 
     /* Invite client transaction check - Start */
-    char* pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    SIP_CHAR* pReqMsg = const_cast<SIP_CHAR*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\

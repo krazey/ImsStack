@@ -17,13 +17,13 @@
 #include "ServiceTrace.h"
 #include "config/CodecPcmConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
-CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
-        CodecConfig(nType_, nPayloadTypeNum_)
+CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
+        CodecConfig(nType, nPayloadTypeNum)
 {
-    IMS_TRACE_D("+CodecPcmConfig Type[%d]", nType_, 0, 0);
+    IMS_TRACE_D("+CodecPcmConfig Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()
@@ -31,10 +31,8 @@ PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()
     IMS_TRACE_D("~CodecPcmConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx)
+PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* /* piCc */)
 {
-    (void)piCc;
-    (void)nCodecIdx;
     return IMS_TRUE;
 }
 

@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.base;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.mock;
@@ -134,7 +135,7 @@ public class TestAppContext {
     }
 
     private class FakeSystemServiceProxy implements SystemServiceProxy {
-        private final PersistableBundle mCarrierConfig = mock(PersistableBundle.class);
+        private final PersistableBundle mCarrierConfig = new PersistableBundle();
         private final Map<Class<?>, Object> mManagerProxies = new ArrayMap<>();
 
         FakeSystemServiceProxy() {
@@ -164,7 +165,8 @@ public class TestAppContext {
             when(mSubscriptionManagerProxy.getSubscriptionId(SLOT1)).thenReturn(SUB_ID_2);
             when(mSubscriptionManagerProxy.getDefaultDataSubscriptionId())
                     .thenReturn(MSimUtils.DEFAULT_SUB_ID);
-            when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt())).thenReturn(mCarrierConfig);
+            when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any()))
+                    .thenReturn(mCarrierConfig);
             when(mSmsManagerProxy.createForSubscriptionId(anyInt())).thenReturn(mSmsManagerProxy);
             when(mImsManagerProxy.getImsMmTelManagerProxy(anyInt()))
                     .thenReturn(mImsMmTelManagerProxy);

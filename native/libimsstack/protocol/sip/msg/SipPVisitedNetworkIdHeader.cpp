@@ -31,7 +31,7 @@ SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader(
 
 SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader() {}
 
-SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
     if (nDecLen == SIP_ZERO)
@@ -42,9 +42,9 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
 
     /*First Check the presence of Header Prm i.e. ";"
       And decode if present*/
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)

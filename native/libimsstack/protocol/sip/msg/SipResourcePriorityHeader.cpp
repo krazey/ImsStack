@@ -87,7 +87,7 @@ SIP_BOOL SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
     return SetCharVar(pszRPriority, m_pszRPriority);
 }
 
-SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipResourcePriorityHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -95,8 +95,8 @@ SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
 
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
     {

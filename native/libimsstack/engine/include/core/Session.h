@@ -276,7 +276,7 @@ private:
     {
         return m_bSessionUpdateNotificationInProgress;
     }
-    inline void SetSessionUpdateNotificationState(IN IMS_BOOL bInProgress)
+    inline void SetSessionUpdateNotificationInProgress(IN IMS_BOOL bInProgress)
     {
         m_bSessionUpdateNotificationInProgress = bInProgress;
     }
@@ -484,8 +484,6 @@ private:
     IMS_BOOL m_bSessionUpdateNotificationInProgress;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     IMS_BOOL m_bImplicitRoutingRequired;
-    // FIX_TIMING_ISSUE: ACK_WITH_SDP_IN_PROGRESS
-    IMS_BOOL m_bAckWithSdpInProgress;
     // Runtime configuration for session control
     IMS_SINT32 m_nConfigValue;
     // Manages completed listener calls

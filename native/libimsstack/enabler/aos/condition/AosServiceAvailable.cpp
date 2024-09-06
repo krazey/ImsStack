@@ -137,9 +137,9 @@ void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piList
 }
 
 PUBLIC
-void AosServiceAvailable::RefreshServiceAvailablility()
+void AosServiceAvailable::RefreshServiceAvailability()
 {
-    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailablility", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailability", 0, 0, 0);
     Notify();
 }
 
@@ -150,54 +150,44 @@ IMS_BOOL AosServiceAvailable::IsAvailable()
 }
 
 PUBLIC
-IMS_UINT32 AosServiceAvailable::HandleEvent(
+void AosServiceAvailable::HandleEvent(
         IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
     A_IMS_TRACE_I(
             AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)", EventToString(eEvent), nState, nStateEx);
 
-    IMS_UINT32 eReturn = -1;
-
     switch (eEvent)
     {
         case EVENT_CALL:
             HandleCallStateChanged(nState, nStateEx);
-            eReturn = EVENT_CALL;
             break;
 
         case EVENT_NETWORK:
             HandleNetworkStateChanged();
-            eReturn = EVENT_NETWORK;
             break;
 
         case EVENT_BLOCK:
             HandleBlockChanged(nState, nStateEx);
-            eReturn = EVENT_BLOCK;
             break;
 
         case EVENT_AIRPLANE:
             HandleAirplaneModeChanged(nState);
-            eReturn = EVENT_AIRPLANE;
             break;
 
         case EVENT_ROAMING:
             HandleRoamingChanged(nState);
-            eReturn = EVENT_ROAMING;
             break;
 
         case EVENT_VOPS:
             HandleVopsChanged(nState);
-            eReturn = EVENT_VOPS;
             break;
 
         case EVENT_LOCATION:
             HandleLocationInfoChanged();
-            eReturn = EVENT_LOCATION;
             break;
 
         case EVENT_WIFI_STATE:
             HandleWifiConnectionChanged();
-            eReturn = EVENT_WIFI_STATE;
             break;
 
         default:
@@ -205,8 +195,6 @@ IMS_UINT32 AosServiceAvailable::HandleEvent(
     }
 
     Notify();
-
-    return eReturn;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(

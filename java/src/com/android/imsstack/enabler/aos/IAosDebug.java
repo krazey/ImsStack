@@ -60,8 +60,8 @@ public interface IAosDebug {
         DebugData.KEY_NETWORK_OPERATOR_NUMERIC,
         DebugData.KEY_NETWORK_SUPPORT_VOPS,
         DebugData.KEY_NETWORK_SUPPORT_EMCBS,
-        DebugData.KEY_UTRAN_RSRI,
-        DebugData.KEY_UTRAN_RSCP,
+        DebugData.KEY_UTRAN_LEVEL,
+        DebugData.KEY_UTRAN_DBM,
         DebugData.KEY_EUTRAN_RSRP,
         DebugData.KEY_EUTRAN_RSRQ,
         DebugData.KEY_NGRAN_SSRSRP,
@@ -151,8 +151,8 @@ public interface IAosDebug {
         public static final int KEY_NETWORK_OPERATOR_NUMERIC = 26;
         public static final int KEY_NETWORK_SUPPORT_VOPS = 27;
         public static final int KEY_NETWORK_SUPPORT_EMCBS = 28;
-        public static final int KEY_UTRAN_RSRI = 29;
-        public static final int KEY_UTRAN_RSCP = 30;
+        public static final int KEY_UTRAN_LEVEL = 29;
+        public static final int KEY_UTRAN_DBM = 30;
         public static final int KEY_EUTRAN_RSRP = 31;
         public static final int KEY_EUTRAN_RSRQ = 32;
         public static final int KEY_NGRAN_SSRSRP = 33;

@@ -17,7 +17,6 @@
 #define SUBSCRIBER_CONFIG_H_
 
 #include "IIsimListener.h"
-#include "ITimer.h"
 
 #include "CarrierConfig.h"
 #include "ISubscriberConfig.h"
@@ -29,11 +28,7 @@ class IIsim;
 class AsyncConfigHelper;
 class ISubscriberInfoListener;
 
-class SubscriberConfig :
-        public ConfigBase,
-        public ISubscriberConfig,
-        public IIsimListener,
-        public ITimerListener
+class SubscriberConfig : public ConfigBase, public ISubscriberConfig, public IIsimListener
 {
 public:
     explicit SubscriberConfig(IN IMS_SINT32 nSlotId, IN const AString& strConfName);
@@ -139,15 +134,7 @@ protected:
 
 private:
     // IIsimListener class
-    void Isim_OnField(IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues) override;
-    void Isim_OnHomeDomainName(IN const ByteArray& objDomainName) override;
-    void Isim_OnImpi(IN const ByteArray& objPrivateUserId) override;
-    void Isim_OnImpu(IN const ImsList<ByteArray>& objPublicUserIds) override;
-    void Isim_OnError(IN IMS_SINT32 nErrorCode) override;
     void Isim_OnStateChanged(IN IMS_SINT32 nState) override;
-
-    // ITimerListener class
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     inline IMS_BOOL IsSubscriptionAttributeEnabled(IN IMS_SINT32 nAttribute) const
     {
@@ -167,26 +154,15 @@ private:
     void ClearPcscfAddressAndSubscriberInfo();
     const AString& GetLog(IN const AString& strValue, IN IMS_SINT32 nCount) const;
     inline IMS_SINT32 GetState() const { return m_nState; }
-    void InitProvisioning();
+    void InitIsim();
     void SetPrimaryImpu(IN ImsSubscriberInfo* pSubsInfo);
     void SetState(IN IMS_SINT32 nState);
-    void StartProvisioning(IN IMS_BOOL bIsRefresh = IMS_FALSE);
-
-    inline IMS_BOOL IsIsimProvisioningDone() const
-    {
-        return (m_nIsimRecords & m_nConfiguredIsimRecords) == m_nConfiguredIsimRecords;
-    }
-    void ReadIsimProvisioning();
-    void RecoverIsimProvisioning(IN IMS_SINT32 nErrorCode);
-    void RefreshIsimProvisioning(IN IMS_BOOL bEnforceIsimRefresh);
-
-    inline IMS_BOOL IsIsimRecordSet(IN IMS_SINT32 nRecord) const
-    {
-        return ((m_nIsimRecords & nRecord) == nRecord);
-    }
-    inline void ResetIsimRecord(IN IMS_SINT32 nRecord) { m_nIsimRecords &= (~nRecord); }
-    inline void SetIsimRecord(IN IMS_SINT32 nRecord) { m_nIsimRecords |= nRecord; }
-
+    void CompleteProvisioning();
+    void RefreshIsimRecords();
+    void UpdateIsimRecords();
+    void UpdateHomeDomainName();
+    void UpdatePrivateUserIdentity();
+    void UpdatePublicUserIdentities();
     void NotifyInitCompleted();
     void NotifyRefreshCompleted();
     void NotifyRefreshStarted();
@@ -194,7 +170,7 @@ private:
             IN IMS_SINT32 nErrorCode, IN ISubscriberConfigListener* piTargetListener = IMS_NULL);
 
     void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2);
-    void UpdateAllConfigs(IN IMS_BOOL bEnforceIsimRefresh);
+    void UpdateAllConfigs();
     void WriteProvisioning();
     void ToDebugString();
 
@@ -209,44 +185,27 @@ private:
     /// State of SubscriberConfig
     enum
     {
-        /// Initial state
+        /// Initial state.
         STATE_INIT = 0,
-        /// It is in the STATE_PROVISIONING, while reading the provisioning data from ISIM.
+        /// When ISIM is enabled and reading the ISIM records is in progress.
         STATE_PROVISIONING,
-        /// It is in the STATE_REFRESHING, while reading the provisioning data from ISIM
-        /// by ISIM refresh.
+        /// When all the provisioning data is completely read and IMS service can be started.
+        STATE_PROVISIONED,
+        /// When ISIM refresh occurs or SIM is swapped on the runtime.
         STATE_REFRESHING,
-        /// All the provisioning data is read and IMS service can be started.
-        STATE_PROVISIONED
-    };
-
-    /// ISIM records to be read
-    /// Read order: IMPI -> IMPU -> DOMAIN
-    enum
-    {
-        ISIM_NONE = 0x0000,
-        ISIM_IMPI = 0x0001,
-        ISIM_IMPU = 0x0002,
-        ISIM_DOMAIN = 0x0004,
-        ISIM_IST = 0x0008,
-        ISIM_PCSCF = 0x0010,
-        ISIM_DONE = (ISIM_IMPI | ISIM_IMPU | ISIM_DOMAIN)
+        /// When IMS service of a specific slot is stopped.
+        STATE_INACTIVE
     };
 
     enum
     {
-        ACMSG_START_PROVISIONING = (ACMSG_USER + 1),
-        ACMSG_READ_ISIM_RECORD,
+        ACMSG_UPDATE_ISIM_RECORDS = (ACMSG_USER + 1),
+        ACMSG_REFRESH_ISIM_RECORDS,
         ACMSG_INIT_COMPLETED,
         ACMSG_REFRESH_COMPLETED,
         ACMSG_REFRESH_STARTED,
         ACMSG_NOTIFY_ERROR,
-        ACMSG_UPDATE_ALL_CONFIGS,
-        ACMSG_INIT_RETRY_TIMER,
-        ACMSG_START_RETRY_TIMER,
-        ACMSG_RECOVERY_REQUIRED,
-        ACMSG_UPDATE_ALL_PCSCF,
-        ACMSG_REFRESH_ISIM_PROVISIONING
+        ACMSG_UPDATE_ALL_CONFIGS
     };
 
     /// SubscriberInfo types
@@ -256,11 +215,6 @@ private:
         SUBSCRIBER_INFO_ADD,
         SUBSCRIBER_INFO_REMOVE,
         SUBSCRIBER_INFO_REMOVE_ALL
-    };
-
-    enum
-    {
-        ISIM_NO_ERROR = (-1)
     };
 
 private:
@@ -281,14 +235,6 @@ private:
     ImsVector<ServerAddress*> m_objPcscfAddresses;
 
     IIsim* m_piIsim;
-    IMS_BOOL m_bFlagRequestPending;
-    IMS_SINT32 m_nConfiguredIsimRecords;
-    IMS_SINT32 m_nIsimRecords;
-    // For tracking of ISIM error code
-    IMS_SINT32 m_nIsimErrorCode;
-    // ISIM Service Table
-    IMS_BYTE m_byIst1;
-
     IMS_SINT32 m_nState;
     ImsList<ImsSubscriberInfo*> m_objSubscriberInfos;
 
@@ -297,14 +243,6 @@ private:
 
     // Configurable class
     Configurable* m_pConfigurable;
-
-    // Retry timer when the initialization is failed
-    IMS_SINT32 m_nInitRetryCount;
-    ITimer* m_piInitRetryTimer;
-    // Retry timer when the start operation is failed
-    IMS_SINT32 m_nInitRetryCountByStartRetry;
-    IMS_SINT32 m_nStartRetryCount;
-    ITimer* m_piStartRetryTimer;
 
     // Logging
     mutable AString m_strLog;

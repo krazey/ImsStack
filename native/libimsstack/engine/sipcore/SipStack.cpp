@@ -133,8 +133,6 @@ SIP_BOOL SipTxnListenerProxy::TxnTerminated(ISipUserData* pUserData)
 namespace SipStack
 {
 
-SipParameters* GetParameters(SipHeaderBase* pHeader, IMS_BOOL bCreateIfNotPresent);
-
 // SIP stack last error storage -- starts
 LOCAL SipEn_ErrorTypes s_eError;
 
@@ -169,16 +167,9 @@ LOCAL IMS_BOOL GetParameter(
 {
     SIPStackError(EERR_NOERR);
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
+    IMS_SINT32 nIndex = pHeader->GetParamIndex(strName.GetStr());
 
-    if (pParams == IMS_NULL)
-    {
-        SIPStackError(EERR_NOEXISTS);
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nParamCount = 0;
-    SipNameValue* pTempParam = pParams->GetParamNode(strName.GetStr(), &nParamCount);
+    SipNameValue* pTempParam = (nIndex == -1) ? SIP_NULL : pHeader->GetParam(nIndex);
 
     if (pTempParam == SIP_NULL)
     {
@@ -1191,39 +1182,34 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 {
     ImsList<SipParameter*> objParams;
-    SipParameters* pParams = GetParameters(const_cast<SipHeaderBase*>(pHeader), IMS_FALSE);
 
-    if (pParams != IMS_NULL)
+    IMS_UINT32 nParamCount = pHeader->GetParamCount();
+
+    for (IMS_UINT32 i = 0; i < nParamCount; ++i)
     {
-        const SipParameterList& objParameterList = pParams->GetParameterList();
-        IMS_UINT32 nParamCount = objParameterList.GetCount();
+        SipNameValue* pNameVal = pHeader->GetParam(i);
 
-        for (IMS_UINT32 i = 0; i < nParamCount; ++i)
+        if (pNameVal == IMS_NULL)
         {
-            SipNameValue* pNameVal = objParameterList.GetNameValNode(i);
-
-            if (pNameVal == IMS_NULL)
-            {
-                continue;
-            }
-
-            SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
-
-            IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
-
-            for (IMS_UINT32 j = 0; j < nValueCount; ++j)
-            {
-                IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
-
-                if (pszValue != IMS_NULL)
-                {
-                    AString strValue(pszValue);
-                    pParameter->AddValues(strValue);
-                }
-            }
-
-            objParams.Append(pParameter);
+            continue;
         }
+
+        SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
+
+        IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
+
+        for (IMS_UINT32 j = 0; j < nValueCount; ++j)
+        {
+            IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
+
+            if (pszValue != IMS_NULL)
+            {
+                AString strValue(pszValue);
+                pParameter->AddValues(strValue);
+            }
+        }
+
+        objParams.Append(pParameter);
     }
 
     return objParams;
@@ -1254,7 +1240,7 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
 
         for (IMS_UINT32 i = 0; i < nParamCount; ++i)
         {
-            SipNameValue* pNameVal = pUriParamList->GetNameValNode(i);
+            SipNameValue* pNameVal = pUriParamList->GetParam(i);
 
             if (pNameVal == IMS_NULL)
             {
@@ -2652,16 +2638,7 @@ GLOBAL AString GetParameter(
     }
     else
     {
-        // Normal header parameters
-        SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-        if (pParams == IMS_NULL)
-        {
-            SIPStackError(EERR_NOEXISTS);
-            return AString::ConstNull();
-        }
-
-        pszValue = pParams->GetParamValue(strName.GetStr());
+        pszValue = pHeader->GetParamValue(strName.GetStr());
     }
 
     if (pszValue == SIP_NULL)
@@ -3010,16 +2987,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pHeader, IN const AString& strNam
         return IMS_FALSE;
     }
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-    if (pParams == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nIndex = 0;
-
-    return (pParams->IsParamExists(strName.GetStr(), &nIndex) == SIP_TRUE) ? IMS_TRUE : IMS_FALSE;
+    return (pHeader->IsParamPresent(strName.GetStr()) == SIP_TRUE) ? IMS_TRUE : IMS_FALSE;
 }
 
 GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strName)
@@ -3050,7 +3018,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
             for (IMS_UINT32 i = 0; i < nCount; ++i)
             {
-                SipNameValue* pNameVal = pParamList->GetNameValNode(i);
+                SipNameValue* pNameVal = pParamList->GetParam(i);
 
                 if (pNameVal == SIP_NULL)
                 {
@@ -3076,7 +3044,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
             for (IMS_UINT32 i = 0; i < nCount; ++i)
             {
-                SipNameValue* pNameVal = pParamList->GetNameValNode(i);
+                SipNameValue* pNameVal = pParamList->GetParam(i);
 
                 if (pNameVal == SIP_NULL)
                 {
@@ -3454,33 +3422,14 @@ GLOBAL IMS_BOOL RemoveHeader(IN IMS_SINT32 nType, IN_OUT ::SipMessage*& pMessage
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader)
+GLOBAL void RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader)
 {
     if (pHeader == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-    if (pParams == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nIndex = 0;
-
-    if (pParams->IsParamExists(strName.GetStr(), &nIndex) == SIP_FALSE)
-    {
-        return IMS_TRUE;
-    }
-
-    if (pParams->RemoveParam(strName.GetStr()) == SIP_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
+    pHeader->RemoveParam(strName.GetStr());
 }
 
 GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipAddrSpec*& pAddrSpec)
@@ -3734,20 +3683,6 @@ GLOBAL IMS_BOOL SetMimeHeader(IN IMS_SINT32 nType, IN const AString& strName,
     return IMS_TRUE;
 }
 
-SipParameters* GetParameters(IN SipHeaderBase* pHeader, IN IMS_BOOL bCreateIfNotPresent)
-{
-    SipParameters* pParams = pHeader->GetParameters();
-
-    if ((bCreateIfNotPresent == IMS_TRUE) && (pParams == IMS_NULL))
-    {
-        pHeader->InitParameters(IMS_NULL);
-
-        pParams = pHeader->GetParameters();
-    }
-
-    return pParams;
-}
-
 GLOBAL IMS_BOOL SetParameter(
         IN SipHeaderBase* pHeader, IN const AString& strName, IN const AString& strValue)
 {
@@ -3769,14 +3704,7 @@ GLOBAL IMS_BOOL SetParameter(
     }
     else
     {
-        SipParameters* pParams = GetParameters(pHeader, IMS_TRUE);
-
-        if (pParams == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        if (pParams->SetParamValue(strName.GetStr(), pszValue) == SIP_FALSE)
+        if (pHeader->SetParam(strName.GetStr(), pszValue) == SIP_FALSE)
         {
             SIPStackError(EERR_NOEXISTS);
             return IMS_FALSE;
@@ -4624,7 +4552,7 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue* pNmVl = pHdrParamList->GetNameValNode(i);
+        SipNameValue* pNmVl = pHdrParamList->GetParam(i);
 
         if (pNmVl == IMS_NULL)
         {

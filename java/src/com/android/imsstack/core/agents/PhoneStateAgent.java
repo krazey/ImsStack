@@ -40,6 +40,9 @@ import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.internal.PhoneStateEvents;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -47,6 +50,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A class for providing an interface to monitor the phone state (call sate, service state, ...).
@@ -63,6 +67,8 @@ public class PhoneStateAgent implements PhoneStateInterface,
     private ServiceState mServiceState;
     private BarringInfo mBarringInfo;
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
+    private int mCsCallState = TelephonyManager.CALL_STATE_IDLE;
+    private final AtomicInteger mImsCallState = new AtomicInteger(TelephonyManager.CALL_STATE_IDLE);
     private int mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     public PhoneStateAgent(int slotId) {
@@ -103,6 +109,12 @@ public class PhoneStateAgent implements PhoneStateInterface,
             mPhoneStateListener.dispose();
             mPhoneStateListener = null;
         }
+
+        mServiceState = null;
+        mBarringInfo = null;
+        mCsCallState = TelephonyManager.CALL_STATE_IDLE;
+        mImsCallState.set(TelephonyManager.CALL_STATE_IDLE);
+        mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     @Override
@@ -144,6 +156,26 @@ public class PhoneStateAgent implements PhoneStateInterface,
     }
 
     @Override
+    public @CallState int getCsCallState() {
+        return mCsCallState;
+    }
+
+    @Override
+    public @CallState int getImsCallState() {
+        return mImsCallState.get();
+    }
+
+    @Override
+    public void setImsCallState(@CallState int state) {
+        if (mImsCallState.get() != state) {
+            ImsLog.i(mSlotId, "IMS call state: "
+                    + TelephonyInterface.callStateToString(mImsCallState.get()) + " -> "
+                    + TelephonyInterface.callStateToString(state));
+            mImsCallState.set(state);
+        }
+    }
+
+    @Override
     public void onPhoneStateEventChanged(IPhoneStateNotifier notifier,
             int events, int newEvents) {
         if (!mPhoneStateNotifiers.contains((PhoneStateNotifier) notifier)) {
@@ -161,6 +193,36 @@ public class PhoneStateAgent implements PhoneStateInterface,
     @VisibleForTesting
     public PhoneStateEvents getPhoneStateEvents() {
         return mEvents;
+    }
+
+    private void updateCsCallState(@CallState int state) {
+        if (mImsCallState.get() != TelephonyManager.CALL_STATE_IDLE) {
+            if (mCsCallState == TelephonyManager.CALL_STATE_IDLE) {
+                return;
+            }
+            // Update CS call state to CALL_STATE_IDLE
+            // because IMS call is in progress or active.
+            state = TelephonyManager.CALL_STATE_IDLE;
+        }
+
+        if (state != TelephonyManager.CALL_STATE_IDLE
+                && !MSimUtils.isValidSubId(mPhoneStateListener.getSubId())
+                && !AgentUtils.isAllSimAbsent()) {
+            // Ignore the current call state change event
+            // because this call state is changed from the other slot.
+            return;
+        }
+
+        if (mCsCallState != state) {
+            ImsLog.i(mSlotId, "CS call state: "
+                    + TelephonyInterface.callStateToString(mCsCallState) + " -> "
+                    + TelephonyInterface.callStateToString(state));
+            mCsCallState = state;
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+            if (system != null) {
+                system.notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE, mCsCallState, 0);
+            }
+        }
     }
 
     private void notifyCallState(@CallState int state) {
@@ -408,7 +470,13 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.CallStateListener {
             @Override
             public void onCallStateChanged(@CallState int state) {
-                ImsLog.i(mSlotId, "onCallStateChanged: state=" + state);
+                ImsLog.i(mSlotId, "onCallStateChanged: "
+                        + TelephonyInterface.callStateToString(mCallState) + " -> "
+                        + TelephonyInterface.callStateToString(state));
+                if (state == TelephonyManager.CALL_STATE_IDLE) {
+                    setImsCallState(state);
+                }
+                updateCsCallState(state);
                 // Store the most recent call state
                 mCallState = state;
                 notifyCallState(state);

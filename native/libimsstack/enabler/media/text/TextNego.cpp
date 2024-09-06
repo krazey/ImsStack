@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "ISessionDescriptor.h"
+#include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
-#include "text/TextNego.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaConfigUtil.h"
-#include "MediaResourceManager.h"
-#include "MediaManager.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TN");
+#include "MediaNegoUtil.h"
+#include "MediaProfileFactory.h"
+#include "config/MediaConfigUtil.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
+#include "text/TextNego.h"
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
-        ImsSlot(nSlotId),
-        m_listOaModel(ImsList<OaModel*>()),
-        m_objBaseProfile(TextProfile()),
-        m_pEnvironment(IMS_NULL),
-        m_pConfig(IMS_NULL)
+        BaseNego(nSlotId)
 {
     IMS_TRACE_I("+TextNego() - slot[%d]", nSlotId, 0, 0);
 }
 
 PUBLIC
 TextNego::TextNego(IN const TextNego& objTextNego) :
-        ImsSlot(objTextNego.GetSlotId())
+        BaseNego(objTextNego.GetSlotId())
 {
-    copy(&objTextNego);
+    Copy(&objTextNego);
 }
 
 PUBLIC
@@ -48,7 +45,7 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
 {
     if (this != &obj)
     {
-        copy(&obj);
+        Copy(&obj);
     }
     return (*this);
 }
@@ -56,64 +53,13 @@ TextNego& TextNego::operator=(IN const TextNego& obj)
 PUBLIC VIRTUAL TextNego::~TextNego()
 {
     IMS_TRACE_I("~TextNego()", 0, 0, 0);
-
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager != IMS_NULL)
-    {
-        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-        if (pResourceMngr != IMS_NULL)
-        {
-            if (m_objBaseProfile.nDataPort != 0)
-            {
-                pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
-            }
-        }
-    }
-
-    IMS_TRACE_I("~TextNego() - listOaModel size[%d]", m_listOaModel.GetSize(), 0, 0);
-
-    while (m_listOaModel.GetSize() > 0)
-    {
-        OaModel* pOaModel = m_listOaModel.GetAt(0);
-
-        if (pOaModel != IMS_NULL)
-        {
-            delete pOaModel;
-        }
-
-        m_listOaModel.RemoveAt(0);
-    }
 }
 
-PUBLIC VIRTUAL void TextNego::CreateProfiles(
-        IN MediaEnvironment* pEnvironment, IN TextConfiguration* pConfig)
-{
-    if (pConfig == IMS_NULL || pEnvironment == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "CreateProfiles() - invalid configuration", 0, 0, 0);
-        return;
-    }
-
-    m_pEnvironment = pEnvironment;
-    m_pConfig = pConfig;
-
-    IMS_TRACE_I("CreateProfiles()", 0, 0, 0);
-    TextProfile* pProfile = TextProfileUtil::CreateProfile(pEnvironment, m_pConfig, GetSlotId());
-
-    if (pProfile != IMS_NULL)
-    {
-        m_objBaseProfile = *pProfile;
-        delete pProfile;
-    }
-}
-
-PUBLIC VIRTUAL IMS_BOOL TextNego::FormSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL IMS_BOOL TextNego::FormSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_D("FormSDP() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
+    IMS_TRACE_D("FormSdp() - eDir[%d], bDisable[%d] EnforceReofferMode[%d]", eDir, bDisable,
             bEnforceReofferMode);
 
     switch (eNegoState)
@@ -134,7 +80,7 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
     // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -142,12 +88,13 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     IMS_TRACE_I("IsMediaCodecFromSdpSupported()", 0, 0, 0);
 
     OaModel objOaModel;
-    objOaModel.pLocalProfile = new TextProfile(m_objBaseProfile);
+    objOaModel.pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
 
     // Make a destination profile from SDP
     objOaModel.pPeerProfile = new TextProfile();
 
-    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, objOaModel.pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(&objOaModel)) !=
+            IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -155,8 +102,8 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
     // Make a negotiated profile from the local and peer profile
     objOaModel.pNegotiatedProfile = new TextProfile();
 
-    if (MakeNegotiatedProfile(objOaModel.pLocalProfile, objOaModel.pPeerProfile, IMS_TRUE,
-                objOaModel.pNegotiatedProfile) != IMS_TRUE)
+    if (MakeNegotiatedProfile(GetLocalProfile(&objOaModel), GetPeerProfile(&objOaModel), IMS_TRUE,
+                GetNegotiatedProfile(&objOaModel)) != IMS_TRUE)
     {
         return MEDIA_TYPE_INVALID;
     }
@@ -167,7 +114,7 @@ PUBLIC VIRTUAL IMS_BOOL TextNego::IsMediaCodecFromSdpSupported(
             : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL void TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+PUBLIC VIRTUAL void TextNego::NegotiateSdp(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT IMS_SINT32& nDirection)
 {
@@ -185,109 +132,6 @@ PUBLIC VIRTUAL void TextNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         default:
             break;
     }
-}
-
-PUBLIC VIRTUAL void TextNego::FinalizeSDP(
-        IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
-{
-    IMS_BOOL bFoundOaModel = IMS_FALSE;
-
-    // reset confirmed Session check variable
-    for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
-    {
-        OaModel* pCheckedOaModel = m_listOaModel.GetAt(i);
-
-        if (pCheckedOaModel != IMS_NULL)
-        {
-            pCheckedOaModel->bConfirmedSession = IMS_FALSE;
-        }
-    }
-
-    // check latest OA model
-    OaModel* pLatestOaModel = IMS_NULL;
-
-    if (m_listOaModel.GetSize() > 0)
-    {
-        pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
-    }
-
-    if (pLatestOaModel != IMS_NULL)
-    {
-        if (!(pLatestOaModel->IsAllProfileExist() &&
-                    (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)))
-        {
-            IMS_TRACE_I("FinalizeSDP() - There is incomplete OaModel[%d]. Delete profile",
-                    m_listOaModel.GetSize() - 1, 0, 0);
-            delete pLatestOaModel;
-            m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
-        }
-    }
-
-    for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
-    {
-        // get OaModel
-        OaModel* pTempOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1 - i);
-
-        // find matched SessionDescriptor key
-        if (pTempOaModel != IMS_NULL)
-        {
-            if (pTempOaModel->nSessionDescriptorKey ==
-                    reinterpret_cast<IMS_SINTP>(pSessionDescriptor))
-            {
-                pTempOaModel->bConfirmedSession = IMS_TRUE;
-                bFoundOaModel = IMS_TRUE;
-                IMS_TRACE_D("FinalizeSDP() - find comfirmed Session OaModel[%d]",
-                        m_listOaModel.GetSize() - i, 0, 0);
-                break;
-            }
-        }
-    }
-
-    // SessionDescriptor key mismatch case handling
-    // not select OaModel
-    if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
-    {
-        IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
-    }
-}
-
-PUBLIC IMS_BOOL TextNego::SetPort(IN IMS_UINT32 nPort)
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-
-    if (pMediaManager == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    // Release Current Port
-    if (m_objBaseProfile.nDataPort != 0)
-    {
-        pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
-    }
-
-    IMS_TRACE_I("SetPort() - changed Data Port[%d]->[%d]", m_objBaseProfile.nDataPort, nPort, 0);
-
-    if (nPort != 0)
-    {
-        m_objBaseProfile.nDataPort = pResourceMngr->AcquireRtpPort(nPort, nPort);
-        m_objBaseProfile.nControlPort = m_objBaseProfile.nDataPort + 1;
-    }
-    else
-    {
-        m_objBaseProfile.nDataPort = 0;
-        m_objBaseProfile.nControlPort = 0;
-        IMS_TRACE_I("SetPort() - data port is 0", 0, 0, 0);
-    }
-
-    return IMS_TRUE;
 }
 
 PUBLIC
@@ -323,7 +167,7 @@ TextProfile* TextNego::GetNegotiatedLocalProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pLocalProfile;
+        return GetLocalProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -336,7 +180,7 @@ TextProfile* TextNego::GetNegotiatedNegoProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pNegotiatedProfile;
+        return GetNegotiatedProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -349,7 +193,7 @@ TextProfile* TextNego::GetNegotiatedPeerProfile()
 
     if (pOaModel != IMS_NULL)
     {
-        return pOaModel->pPeerProfile;
+        return GetPeerProfile(pOaModel);
     }
 
     return IMS_NULL;
@@ -393,18 +237,17 @@ TEXT_CODEC TextNego::GetNegotiatedCodec(void)
             return TEXT_CODEC_NONE;
         }
 
-        if (pLatestOaModel->pNegotiatedProfile->nDataPort == 0)
+        if (GetNegotiatedProfile(pLatestOaModel)->nDataPort == 0)
         {
             return TEXT_CODEC_NONE;
         }
 
-        if (pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0)
+        if (GetNegotiatedProfile(pLatestOaModel)->lstPayload.GetSize() == 0)
         {
             return TEXT_CODEC_NONE;
         }
 
-        TextProfile::Payload* pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(0);
-
+        TextProfile::Payload* pPayload = GetNegotiatedProfile(pLatestOaModel)->GetPayloadAt(0);
         if (pPayload == IMS_NULL)
         {
             return TEXT_CODEC_NONE;
@@ -462,60 +305,67 @@ IMS_SINT32 TextNego::GetMediaBandwidth(void)
     {
         OaModel* pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
 
-        if (pLatestOaModel == IMS_NULL || pLatestOaModel->pLocalProfile == IMS_NULL)
+        if (pLatestOaModel == IMS_NULL || GetLocalProfile(pLatestOaModel) == IMS_NULL)
         {
             return -1;
         }
 
         // returned negotiated bandwidth.
-        if (pLatestOaModel->pNegotiatedProfile != IMS_NULL)
+        if (GetNegotiatedProfile(pLatestOaModel) != IMS_NULL)
         {
-            return (IMS_SINT32)pLatestOaModel->pNegotiatedProfile->nBandwidthAs;
+            return (IMS_SINT32)GetNegotiatedProfile(pLatestOaModel)->nBandwidthAs;
         }
 
-        return (IMS_SINT32)pLatestOaModel->pLocalProfile->nBandwidthAs;
+        return (IMS_SINT32)GetLocalProfile(pLatestOaModel)->nBandwidthAs;
     }
 
     return -1;
 }
 
-PRIVATE
-void TextNego::copy(IN const TextNego* pTextNego)
+PROTECTED TextConfiguration* TextNego::ConfigCasting(IN MediaConfiguration* pConfig)
 {
-    if (pTextNego == IMS_NULL)
+    return (pConfig != IMS_NULL) ? static_cast<TextConfiguration*>(pConfig) : IMS_NULL;
+}
+
+PROTECTED TextProfile* TextNego::ProfileCasting(IN MediaBaseProfile* pProfile)
+{
+    return (pProfile != IMS_NULL) ? static_cast<TextProfile*>(pProfile) : IMS_NULL;
+}
+
+PROTECTED TextProfile* TextNego::GetLocalProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetLocalProfile(pOaModel));
+}
+
+PROTECTED TextProfile* TextNego::GetPeerProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetPeerProfile(pOaModel));
+}
+
+PROTECTED TextProfile* TextNego::GetNegotiatedProfile(IN OaModel* pOaModel)
+{
+    return ProfileCasting(BaseNego::GetNegotiatedProfile(pOaModel));
+}
+
+PRIVATE
+void TextNego::Copy(IN const TextNego* pTextNego)
+{
+    if (m_pBaseProfile == IMS_NULL || pTextNego == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_I("copy() - list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
+    IMS_TRACE_I(
+            "Copy() - referenced OaModel list size[%d]", pTextNego->m_listOaModel.GetSize(), 0, 0);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
+    MediaNegoUtil::ReleaseRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
 
-    if (pMediaManager == IMS_NULL)
+    delete m_pBaseProfile;
+    m_pBaseProfile = new TextProfile(ProfileCasting(pTextNego->m_pBaseProfile));
+
+    if (m_pBaseProfile != IMS_NULL && m_pBaseProfile->nDataPort != 0)
     {
-        return;
-    }
-
-    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To release previous used port
-        if (m_objBaseProfile.nDataPort != 0)
-        {
-            pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
-        }
-    }
-
-    m_objBaseProfile = pTextNego->m_objBaseProfile;
-
-    if (pResourceMngr != IMS_NULL)
-    {
-        // To add port (it would be duplicated)
-        if (m_objBaseProfile.nDataPort != 0)
-        {
-            pResourceMngr->AcquireRtpPort(m_objBaseProfile.nDataPort, m_objBaseProfile.nDataPort);
-        }
+        MediaNegoUtil::AcquireRtpPort(GetSlotId(), m_pBaseProfile->nDataPort);
     }
 
     m_pEnvironment = pTextNego->m_pEnvironment;
@@ -527,18 +377,18 @@ void TextNego::copy(IN const TextNego* pTextNego)
 
     OaModel* pNewOaModel = new OaModel();
     OaModel* pOldOaModel = pTextNego->m_listOaModel.GetAt(0);
-    pNewOaModel->pLocalProfile = new TextProfile(*pOldOaModel->pLocalProfile);
+    pNewOaModel->pLocalProfile = new TextProfile(GetLocalProfile(pOldOaModel));
     m_listOaModel.Append(pNewOaModel);
-    this->m_pConfig = pTextNego->m_pConfig;
 
-    IMS_TRACE_I("copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
+    m_pConfig = pTextNego->m_pConfig;
+    IMS_TRACE_I("Copy() - OA model list size[%d]", m_listOaModel.GetSize(), 0, 0);
 }
 
 PRIVATE IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir, IN IMS_BOOL bDisable)
 {
     // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -553,7 +403,12 @@ PRIVATE IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
+
+    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
 
     // Modify a direction by Enabler
     if (eDir > MEDIA_DIRECTION_INVALID && eDir <= MEDIA_DIRECTION_SEND_RECEIVE)
@@ -569,11 +424,10 @@ PRIVATE IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->nControlPort = 0;
     }
 
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_TRUE;
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
@@ -620,7 +474,7 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         if (pNewOaModel->pPeerProfile->lstPayload.GetSize() > 0)
         {
             IMS_TRACE_D("FormAnswer() - use peer profile", 0, 0, 0);
-            *pNewOaModel->pNegotiatedProfile = *pNewOaModel->pPeerProfile;
+            *pNewOaModel->pNegotiatedProfile = *GetPeerProfile(pNewOaModel);
         }
         else
         {
@@ -637,18 +491,18 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
                         pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() > 0)
                 {
                     IMS_TRACE_D("FormAnswer() use previous nego payloads", 0, 0, 0);
-                    *pNewOaModel->pNegotiatedProfile = *pPrevOaModel->pNegotiatedProfile;
+                    *pNewOaModel->pNegotiatedProfile = *GetNegotiatedProfile(pPrevOaModel);
                 }
                 else
                 {
                     IMS_TRACE_D("FormAnswer() use src payloads", 0, 0, 0);
-                    *pNewOaModel->pNegotiatedProfile = *pNewOaModel->pLocalProfile;
+                    *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(pNewOaModel);
                 }
             }
             else
             {
                 IMS_TRACE_D("FormAnswer() use src payloads", 0, 0, 0);
-                *pNewOaModel->pNegotiatedProfile = *pNewOaModel->pLocalProfile;
+                *pNewOaModel->pNegotiatedProfile = *GetLocalProfile(pNewOaModel);
             }
         }
 
@@ -668,10 +522,8 @@ PRIVATE IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pNegotiatedProfile->eDirection = eDir;
     }
 
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_FALSE;
-
     // Make the SDP from profile
-    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pNegotiatedProfile);
+    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, GetNegotiatedProfile(pNewOaModel));
 }
 
 PRIVATE
@@ -686,7 +538,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             bDisable, bEnforceReofferMode);
 
     // Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -703,7 +555,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (m_listOaModel.GetSize() == 0)
     {
-        pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+        pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
         bIsFullCapability = IMS_TRUE;
     }
     else
@@ -728,7 +580,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         if (pPrevOaModel->pNegotiatedProfile->lstPayload.GetSize() == 0 ||
                 bEnforceReofferMode == IMS_TRUE)
         {
-            pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+            pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
             bIsFullCapability = IMS_TRUE;
             IMS_TRACE_I("TextNego::FormReOffer() - Fullcapability - enforce reoffer[%d]",
                     bEnforceReofferMode, 0, 0);
@@ -737,25 +589,31 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         {
             if (pMediaSessionConfig->IsSdpReofferFullCapability() == IMS_TRUE)
             {
-                if (m_objBaseProfile.lstPayload.GetSize() > 0)
+                if (m_pBaseProfile->lstPayload.GetSize() > 0)
                 {
                     IMS_TRACE_I("FormReoffer() - Fullcapability", 0, 0, 0);
-                    pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+                    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
                     bIsFullCapability = IMS_TRUE;
                 }
                 else
                 {
                     // this case is only for reoffer but no src profile payload existed
                     IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
-                    pNewOaModel->pLocalProfile = new TextProfile(*pPrevOaModel->pNegotiatedProfile);
+                    pNewOaModel->pLocalProfile =
+                            new TextProfile(GetNegotiatedProfile(pPrevOaModel));
                 }
             }
             else
             {
                 IMS_TRACE_I("FormReoffer() - use nego profile", 0, 0, 0);
-                pNewOaModel->pLocalProfile = new TextProfile(*pPrevOaModel->pNegotiatedProfile);
+                pNewOaModel->pLocalProfile = new TextProfile(GetNegotiatedProfile(pPrevOaModel));
             }
         }
+    }
+
+    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    {
+        return IMS_FALSE;
     }
 
     // Modify a direction by Enabler
@@ -777,8 +635,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
     else
     {
-        pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;
-        pNewOaModel->pLocalProfile->nControlPort = m_objBaseProfile.nControlPort;
+        pNewOaModel->pLocalProfile->nDataPort = m_pBaseProfile->nDataPort;
+        pNewOaModel->pLocalProfile->nControlPort = m_pBaseProfile->nControlPort;
 
         if (bIsFullCapability)
         {
@@ -787,7 +645,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             {
                 IMS_TRACE_I("FormReoffer() LocalProfile AS value is 0, change to default AS value",
                         0, 0, 0);
-                pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
+                pNewOaModel->pLocalProfile->nBandwidthAs = m_pBaseProfile->nBandwidthAs;
             }
 
             pNewOaModel->pLocalProfile->nBandwidthRs = m_pConfig->GetRsBandwidthBps();
@@ -795,17 +653,16 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         }
     }
 
-    pNewOaModel->pLocalProfile->bISOfferCase = IMS_TRUE;
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, pNewOaModel->pLocalProfile);
+    return MakeSDPFromProfile(pSessionDescriptor, pDescriptor, GetLocalProfile(pNewOaModel));
 }
 
 PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    if (m_pBaseProfile == IMS_NULL || pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
     {
         IMS_TRACE_E(0, "NegotiateOffer() - pSessionDescriptor or pDescriptor is NULL", 0, 0, 0);
         return MEDIA_DIRECTION_INVALID;
@@ -813,12 +670,13 @@ PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
 
     // Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
-    pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+    pNewOaModel->pLocalProfile = new TextProfile(ProfileCasting(m_pBaseProfile));
 
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = new TextProfile();
 
-    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         IMS_TRACE_E(0, "NegotiateOffer() - MakeProfileFromSDP failed", 0, 0, 0);
         delete pNewOaModel;
@@ -828,8 +686,8 @@ PRIVATE IMS_SINT32 TextNego::NegotiateOffer(
     // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new TextProfile();
 
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_TRUE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_TRUE,
+                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
     {
         IMS_TRACE_E(0, "NegotiateOffer() - MakeNegotiatedProfile failed", 0, 0, 0);
     }
@@ -872,7 +730,8 @@ PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
     // Make a destination profile from SDP
     pNewOaModel->pPeerProfile = new TextProfile();
 
-    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, pNewOaModel->pPeerProfile) != IMS_TRUE)
+    if (MakeProfileFromSDP(pSessionDescriptor, pDescriptor, GetPeerProfile(pNewOaModel)) !=
+            IMS_TRUE)
     {
         IMS_TRACE_E(0, "NegotiateAnswer() - MakeProfileFromSDP failed", 0, 0, 0);
         delete pNewOaModel;
@@ -883,8 +742,8 @@ PRIVATE IMS_SINT32 TextNego::NegotiateAnswer(
     // Make a negotiated profile from Local & Peer profile
     pNewOaModel->pNegotiatedProfile = new TextProfile();
 
-    if (MakeNegotiatedProfile(pNewOaModel->pLocalProfile, pNewOaModel->pPeerProfile, IMS_FALSE,
-                pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
+    if (MakeNegotiatedProfile(GetLocalProfile(pNewOaModel), GetPeerProfile(pNewOaModel), IMS_FALSE,
+                GetNegotiatedProfile(pNewOaModel)) != IMS_TRUE)
     {
         delete pNewOaModel;
         m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
@@ -928,14 +787,14 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     // Check and delete "red" type which contains invalid sub payload type
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
             continue;
         }
 
-        if (pPayload->objRtpMap.strPayloadType.Equals("red"))
+        if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pRedFmtp = static_cast<TextProfile::RedFmtp*>(pPayload->pFmtp);
 
@@ -951,7 +810,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
             for (IMS_UINT32 j = 0; j < pProfile->lstPayload.GetSize(); j++)
             {
-                TextProfile::Payload* pTempPayload = pProfile->lstPayload.GetAt(j);
+                TextProfile::Payload* pTempPayload = pProfile->GetPayloadAt(j);
 
                 if (pTempPayload == IMS_NULL)
                 {
@@ -991,7 +850,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1032,7 +891,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
         AString strRtpmap, strFmtp;
-        TextProfile::Payload* pPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1235,23 +1094,13 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
     pNegotiatedProfile->nControlPort = pLocalProfile->nControlPort;
 
-    IpAddress objLocalIPAddr = pLocalProfile->objIpAddress;
-
     if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
     {
-        *pNegotiatedProfile = *pLocalProfile;
+        *pNegotiatedProfile = (pPeerProfile->lstPayload.GetSize() > 0)
+                ? *ProfileCasting(pPeerProfile)
+                : *ProfileCasting(pLocalProfile);
 
-        // copy the dest profile as nego profile
-        if (pPeerProfile->lstPayload.GetSize() > 0)
-        {
-            *pNegotiatedProfile = *pPeerProfile;
-        }
-        else
-        {
-            *pNegotiatedProfile = *pLocalProfile;
-        }
-
-        pNegotiatedProfile->objIpAddress = objLocalIPAddr;
+        pNegotiatedProfile->objIpAddress = pLocalProfile->objIpAddress;
         pNegotiatedProfile->nDataPort = 0;
 
         IMS_TRACE_D("MakeNegotiatedProfile() - ZERO Port. DO NOT Use the text[%d][%d],\
@@ -1267,11 +1116,9 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Compare each payload based destination's profile
-    ImsList<TextProfile::Payload*> listNegotiatedPayloads;
-
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* pPayload = pPeerProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* pPayload = pPeerProfile->GetPayloadAt(i);
 
         if (pPayload == IMS_NULL)
         {
@@ -1293,65 +1140,54 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
                 }
 
                 pNegotiatedProfile->lstPayload.Append(pT140);
-                listNegotiatedPayloads.Append(pT140);
             }
         }
     }
 
     IMS_BOOL bRet = IMS_FALSE;
 
-    if (listNegotiatedPayloads.GetSize() > 0)
+    if (pNegotiatedProfile->lstPayload.GetSize() > 0)
     {
         // Setting direction
-        if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
-                pNegotiatedProfile->lstPayload.GetSize() == 0)
-        {
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
-        }
-        else
+        if (pNegotiatedProfile->nDataPort != 0 && pPeerProfile->nDataPort != 0)
         {
             pNegotiatedProfile->eDirection = UpdateDirectionToMine(
                     pPeerProfile->eDirection, pLocalProfile->eDirection, bIsOfferReceived);
         }
+        else
+        {
+            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+        }
 
-        pNegotiatedProfile->bIsHold = pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE
-                ? IMS_TRUE
-                : IMS_FALSE;
-        TextProfileUtil::MakeNegotiatedBandwidth(
-                m_pConfig, pLocalProfile, pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
+        pNegotiatedProfile->bIsHold =
+                (pNegotiatedProfile->eDirection != MEDIA_DIRECTION_SEND_RECEIVE) ? IMS_TRUE
+                                                                                 : IMS_FALSE;
+        TextProfileUtil::MakeNegotiatedBandwidth(ConfigCasting(m_pConfig), pLocalProfile,
+                pPeerProfile, bIsOfferReceived, -1, pNegotiatedProfile);
         bRet = IMS_TRUE;
     }
     else
     {
-        // TODO: need to change this if condition later
-        if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0 ||
-                pNegotiatedProfile->lstPayload.GetSize() == 0)
-        {
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
-            bRet = IMS_TRUE;  // TODO: need to check later
-            IMS_TRACE_D("eDirection: %d bRet:%d", pNegotiatedProfile->eDirection, bRet, 0);
-        }
-
         if (pLocalProfile->lstPayload.GetSize() > 0)
         {
             IMS_TRACE_D("MakeNegotiatedProfile() - no negotiated payload. use the LocalProfile and "
                         "make port 0 ",
                     0, 0, 0);
-            *pNegotiatedProfile = *pLocalProfile;
-            pNegotiatedProfile->nDataPort = 0;
-            pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
+            *pNegotiatedProfile = *ProfileCasting(pLocalProfile);
+            bRet = IMS_TRUE;
         }
         else
         {
             IMS_TRACE_E(0, "There's no Payload in LocalProfile", 0, 0, 0);
         }
+
+        pNegotiatedProfile->nDataPort = 0;
+        pNegotiatedProfile->eDirection = MEDIA_DIRECTION_INVALID;
     }
 
-    pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
-    pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
-
-    IMS_TRACE_D("MakeNegotiatedProfile() nego rs[%d] rr[%d]", pNegotiatedProfile->nBandwidthRs,
-            pNegotiatedProfile->nBandwidthRr, 0);
+    IMS_TRACE_D("MakeNegotiatedProfile() - eDirection=%d, nego rs=%d, rr=%d",
+            pNegotiatedProfile->eDirection, pNegotiatedProfile->nBandwidthRs,
+            pNegotiatedProfile->nBandwidthRr);
 
     if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
     {
@@ -1409,7 +1245,7 @@ PRIVATE IMS_BOOL TextNego::FindT140InProfile(
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        TextProfile::Payload* comparedPayload = pProfile->lstPayload.GetAt(i);
+        TextProfile::Payload* comparedPayload = pProfile->GetPayloadAt(i);
 
         if (comparedPayload == IMS_NULL)
         {

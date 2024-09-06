@@ -534,9 +534,8 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfSrvccStarted)
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
@@ -548,9 +547,8 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfEpsFallbackOngoing)
 {
     IMS_UINT32 nAnyAosReason = 1;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+            .WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
@@ -573,9 +571,8 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsNotTerm
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
@@ -589,9 +586,8 @@ TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsTermina
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsRegistrationDisconnectReasonToIgnore(nAnyAosReason))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));

@@ -30,6 +30,8 @@ public:
 
     // IAosSubscriber
     IMS_BOOL IsReady() const override;
+    IMS_BOOL IsIsim() const override;
+    IMS_BOOL IsUsim() const override;
     void SetListener(IN IAosSubscriberListener* piListener) override;
     const AStringArray& GetConfiguredImpus() const override;
     const AStringArray& GetFakeImpus() const override;

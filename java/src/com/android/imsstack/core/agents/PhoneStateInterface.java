@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
 import android.os.Looper;
+import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 
 /**
@@ -62,4 +63,32 @@ public interface PhoneStateInterface extends IAgent {
      * Returns the data network type(TelephonyManager#NETWORK_TYPE_XXX) of the cellular network.
      */
     @NetworkType int getCellularDataNetworkType();
+
+    /**
+     * Returns the current CS call state.
+     *
+     * @return The call state. Possible values are:
+     *         TelephonyManager#CALL_STATE_IDLE,
+     *         TelephonyManager#CALL_STATE_RINGING,
+     *         TelephonyManager#CALL_STATE_OFFHOOK.
+     */
+    @CallState int getCsCallState();
+
+    /**
+     * Returns the current IMS call state.
+     *
+     * @return The call state. Possible values are:
+     *         TelephonyManager#CALL_STATE_IDLE,
+     *         TelephonyManager#CALL_STATE_OFFHOOK.
+     */
+    @CallState int getImsCallState();
+
+    /**
+     * Sets the IMS call state.
+     *
+     * @param state The call state. Possible values are:
+     *              TelephonyManager#CALL_STATE_IDLE,
+     *              TelephonyManager#CALL_STATE_OFFHOOK.
+     */
+    void setImsCallState(@CallState int state);
 }

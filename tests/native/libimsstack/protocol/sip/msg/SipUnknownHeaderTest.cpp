@@ -43,10 +43,10 @@ TEST_F(SipUnknownHeaderTest, Constructor)
 TEST_F(SipUnknownHeaderTest, EncodeHdr)
 {
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 

@@ -105,7 +105,7 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defa
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -113,9 +113,9 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
@@ -126,7 +126,7 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pTempPre;
     }
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
         pTempPos = pEndPt;

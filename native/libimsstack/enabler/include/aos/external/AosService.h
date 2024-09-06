@@ -68,7 +68,7 @@ public:
     void NotifyAosStart() override;
     void NotifyIpcanHandoverFailure(
             IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) override;
-    void NotifyIsimState(IN IMS_UINT32 nState) override;
+    void NotifyIsimState(IN IMS_SINT32 nState) override;
     void NotifyLocationInfo(IN IMS_UINT32 nState) override;
     void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) override;
     void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) override;

@@ -18,8 +18,9 @@
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
-#include "Configuration.h"
+#include "Engine.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IRegistration.h"
@@ -155,7 +156,7 @@ IMS_SINT32 AosUtil::GetMinExpiresValue(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
+IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg)
 {
     IMS_BOOL bInitialRegistration = IMS_FALSE;
 
@@ -164,7 +165,7 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
         ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
         if (!objBodyParts.IsEmpty())
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
             if (piBodyPart != IMS_NULL)
             {
                 AString strContentTypeHdr =
@@ -258,7 +259,7 @@ IMS_BOOL AosUtil::IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SIN
 PUBLIC
 IMS_SINT32 AosUtil::GetLocalPort(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    const ISipConfig* piConfig = Configuration::GetInstance()->GetSipConfig(nSlotId);
+    const ISipConfig* piConfig = Engine::GetConfiguration()->GetSipConfig(nSlotId);
     IMS_SINT32 nPort = -1;
 
     if (piConfig != IMS_NULL)
@@ -581,7 +582,7 @@ IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
     }
     else
     {
-        piSipConfigV = Configuration::GetInstance()->GetSipConfig(nSlotId)->GetSipConfigV();
+        piSipConfigV = Engine::GetConfiguration()->GetSipConfig(nSlotId)->GetSipConfigV();
     }
 
     if (piSipConfigV != IMS_NULL)
@@ -655,7 +656,7 @@ IMS_BOOL AosUtil::IsWifiTest() const
 PUBLIC
 IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const
 {
-    ILocationProperties* piLocation =
+    const ILocationProperties* piLocation =
             PhoneInfoService::GetPhoneInfoService()
                     ->GetLocationInfo(nSlotId)
                     ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);

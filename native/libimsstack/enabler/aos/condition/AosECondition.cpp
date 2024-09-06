@@ -50,28 +50,22 @@ PUBLIC VIRTUAL IMS_BOOL AosECondition::IsReady()
     return bReturn;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosECondition::AddAosServiceListener()
+PROTECTED VIRTUAL void AosECondition::AddAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
-        return IMS_TRUE;
     }
-
-    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosECondition::RemoveAosServiceListener()
+PROTECTED VIRTUAL void AosECondition::RemoveAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
-        return IMS_TRUE;
     }
-
-    return IMS_FALSE;
 }
 
 // IAosBlockListener

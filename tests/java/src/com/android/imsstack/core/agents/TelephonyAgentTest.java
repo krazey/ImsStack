@@ -16,6 +16,9 @@
 
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +31,7 @@ import android.telephony.TelephonyManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
@@ -59,11 +63,10 @@ public class TelephonyAgentTest {
         mTestAppContext.setUp();
 
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
-        AgentFactory.getInstance()
-                .setAgent(PhoneStateInterface.class, mPhoneStateInterface, TestAppContext.SLOT0);
-        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT0);
+        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
 
-        mTelephonyAgent = new TelephonyAgent(TestAppContext.SLOT0);
+        mTelephonyAgent = new TelephonyAgent(SLOT0);
         mTelephonyAgent.init(mTestAppContext.getContext());
     }
 
@@ -72,8 +75,9 @@ public class TelephonyAgentTest {
         mTelephonyManagerProxy = null;
         mTelephonyAgent.cleanup();
         mTelephonyAgent = null;
-        DcFactory.setDcAgent(IDcNetWatcher.class, null, TestAppContext.SLOT0);
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, TestAppContext.SLOT0);
+        DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
+        DeviceConfig.setSimCount(1, 1);
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }
@@ -81,13 +85,39 @@ public class TelephonyAgentTest {
     @Test
     @SmallTest
     public void testGetCsCallState() {
+        mTelephonyAgent.getCsCallState();
+
+        verify(mPhoneStateInterface).getCsCallState();
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
+
+        // Expect a default value.
         assertEquals(TelephonyManager.CALL_STATE_IDLE, mTelephonyAgent.getCsCallState());
     }
 
     @Test
     @SmallTest
     public void testGetCsCallStateInOtherSlot() {
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mTelephonyAgent.getCsCallStateInOtherSlot());
+        DeviceConfig.setSimCount(1, 1);
+
+        int callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+        // Skipped for same SIM.
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, callState);
+
+        DeviceConfig.setSimCount(2, 2);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT1);
+        when(mPhoneStateInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+        callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+
+        // Called once for SIM2.
+        verify(mPhoneStateInterface).getCsCallState();
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, callState);
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT1);
+
+        // Expect a default value.
+        callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, callState);
     }
 
     @Test
@@ -111,7 +141,7 @@ public class TelephonyAgentTest {
         verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
 
         // IWLAN & PhoneStateInterface null
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, TestAppContext.SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
 
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mTelephonyAgent.getNetworkType());
         verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_UNKNOWN));
@@ -274,9 +304,9 @@ public class TelephonyAgentTest {
         mTelephonyAgent.getSimOperatorName();
         mTelephonyAgent.getNetworkCountryIso();
 
-        verify(mTelephonyManagerProxy).getSimState(eq(TestAppContext.SLOT0));
-        verify(mTelephonyManagerProxy).getImei(eq(TestAppContext.SLOT0));
-        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(TestAppContext.SLOT0));
+        verify(mTelephonyManagerProxy).getSimState(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getImei(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(SLOT0));
         verify(mTelephonyManagerProxy).getSubscriberId();
         verify(mTelephonyManagerProxy).getSimCountryIso();
         verify(mTelephonyManagerProxy).getSimSerialNumber();
@@ -290,7 +320,7 @@ public class TelephonyAgentTest {
     public void testGetTelephonyStatesWhenSubscriptionInvalid() {
         SubscriptionManagerProxy smp =
                 mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
-        when(smp.getSubscriptionId(eq(TestAppContext.SLOT0)))
+        when(smp.getSubscriptionId(eq(SLOT0)))
                 .thenReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
 
         mTelephonyAgent.getSimState();
@@ -303,9 +333,9 @@ public class TelephonyAgentTest {
         mTelephonyAgent.getSimOperatorName();
         mTelephonyAgent.getNetworkCountryIso();
 
-        verify(mTelephonyManagerProxy).getSimState(eq(TestAppContext.SLOT0));
-        verify(mTelephonyManagerProxy).getImei(eq(TestAppContext.SLOT0));
-        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(TestAppContext.SLOT0));
+        verify(mTelephonyManagerProxy).getSimState(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getImei(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(SLOT0));
         verify(mTelephonyManagerProxy).getSubscriberId();
         verify(mTelephonyManagerProxy).getSimCountryIso();
         verify(mTelephonyManagerProxy).getSimSerialNumber();

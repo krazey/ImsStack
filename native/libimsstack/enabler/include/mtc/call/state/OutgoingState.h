@@ -81,7 +81,7 @@ private:
     void OnSessionForked(IN ISession* piOriginSession);
 
     IMS_BOOL m_bTimer100WaitExpired;
-    IMS_BOOL m_bWaitingRedialEmergency;
+    IMS_BOOL m_bWaitingRedial;
 };
 
 #endif

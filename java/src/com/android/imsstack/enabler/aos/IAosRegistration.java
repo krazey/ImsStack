@@ -18,9 +18,13 @@ package com.android.imsstack.enabler.aos;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 
+import androidx.annotation.NonNull;
+
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -33,49 +37,55 @@ public interface IAosRegistration {
     /**
      * Registers a new Listener to receive registration updates.
      *
-     * @param listener listener to be notified
+     * @param listener The non-null listener to be registered.
+     * @throws NullPointerException if the listener is null.
      */
-    public void addListener(IAosRegistrationListener listener);
+    void addListener(@NonNull IAosRegistrationListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosRegistrationListener)}
      *
-     * @param listener listener previously registered
+     * @param listener The non-null listener to be removed.
+     * @throws NullPointerException if the listener is null.
      */
-    public void removeListener(IAosRegistrationListener listener);
+    void removeListener(@NonNull IAosRegistrationListener listener);
 
     /**
     * Called by the framework to request that the ImsService perform the network registration
     * of all SIP delegates associated with this ImsService.
     */
-    public void updateSipDelegateRegistration();
+    void updateSipDelegateRegistration();
 
     /**
      * Called by the framework to request that the ImsService perform the network deregistration
      * of all SIP delegates associated with this ImsService.
      */
-    public void triggerSipDelegateDeregistration();
+    void triggerSipDelegateDeregistration();
 
     /**
      * Called by the framework to notify the ImsService that a SIP delegate connection has received
-     * a SIP message containing a permanent failure response (such as a 403) or an indication that
-     * a SIP response timer has timed out in response to an outgoing SIP message.
+     * a SIP message containing a permanent failure response (with a SIP status code between
+     * 100 and 699) or an indication that a SIP response timer has timed out in response to
+     * an outgoing SIP message.
+     *
+     * @param sipCode The SIP status code indicating the reason for the failure.
+     *                Must be within the range of 100 to 699 (inclusive).
+     * @param sipReason Optional additional information about the failure reason.
+     * @throws IllegalArgumentException if the sipCode is outside the valid range.
      */
-    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
+    void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
             @Nullable String sipReason);
 
     /**
      * This method is called when capabilities are changed.
-     *
      * If the capabilities changed by calling this method is not updated,
      * the following API is called. {@link IAosRegistrationListener#notifyCapabilitiesUpdateFailed}
      *
-     * @param capabilityPairs Type of {@link CapabilityPairs}, a pair of capabilities and network
-     * Type. {@code capabilityPairs} contains all enabled capabilities for each network type.
-     * See {@link IAosRegistrationListener.Capability} and
-     * {@link IAosRegistrationListener.NetworkType}
+     * @param capabilityPairs A non-null map containing the enabled capabilities for each network
+     *                        type.
+     * @throws NullPointerException if {@code capabilityPairs} is null.
      */
-    public void changeCapabilities(CapabilityPairs capabilityPairs);
+    void changeCapabilities(@NonNull CapabilityPairs capabilityPairs);
 
     /**
      * This method is called when controlling registration.
@@ -93,7 +103,7 @@ public interface IAosRegistration {
      *    {@code IAosRegistrationListener.NetworkType.NONE} if IMS is not registered,
      *    The NetworkType is returns, if IMS is registered.
      */
-    public int getRegisteredNetworkType();
+    int getRegisteredNetworkType();
 
     /**
      * This method provides the IMS registration state
@@ -122,34 +132,79 @@ public interface IAosRegistration {
     }
 
     /**
-     * Cause
+     * Defines possible causes for a specific event or failure.
      */
-    class Cause {
-        public static final int UNKNOWN = 0;
-        public static final int DATA = 1;
-        public static final int RADIO = 2;
-        public static final int IMS_SERVICE = 3;
-        public static final int IMS_SUBSCRIBER = 4;
-        public static final int DATA_CONNECTING = 5;
+    enum Cause {
+        UNKNOWN(0, "UNKNOWN"),
+        DATA(1, "DATA"),
+        RADIO(2, "RADIO"),
+        IMS_SERVICE(3, "IMS_SERVICE"),
+        IMS_SUBSCRIBER(4, "IMS_SUBSCRIBER"),
+        DATA_CONNECTING(5, "DATA_CONNECTING"),
 
-        /* From modem */
-        public static final int RADIO_SIM_REMOVED = 11;
-        public static final int RADIO_SIM_REFRESH = 12;
-        public static final int RADIO_ALLOWED_NETWORK_TYPES_CHANGED = 13;
+        // From modem
+        RADIO_SIM_REMOVED(11, "RADIO_SIM_REMOVED"),
+        RADIO_SIM_REFRESH(12, "RADIO_SIM_REFRESH"),
+        RADIO_ALLOWED_NETWORK_TYPES_CHANGED(13, "RADIO_ALLOWED_NETWORK_TYPES_CHANGED"),
 
-        /* From framework */
-        public static final int RADIO_POWER_OFF = 21;
-        public static final int NON_IMS_CAPABLE_NETWORK = 22;
-        public static final int DATA_STALL = 23;
-        public static final int HANDOVER_FAILED = 24;
-        public static final int VOPS_NOT_SUPPORTED = 25;
-        public static final int WIFI_OFF = 26;
+        // From framework
+        RADIO_POWER_OFF(21, "RADIO_POWER_OFF"),
+        NON_IMS_CAPABLE_NETWORK(22, "NON_IMS_CAPABLE_NETWORK"),
+        DATA_STALL(23, "DATA_STALL"),
+        HANDOVER_FAILED(24, "HANDOVER_FAILED"),
+        VOPS_NOT_SUPPORTED(25, "VOPS_NOT_SUPPORTED"),
+        WIFI_OFF(26, "WIFI_OFF");
+
+        private final int mValue;
+        private final String mLabel;
+
+        /**
+         * Constructs a Cause with the given value and label.
+         *
+         * @param value The integer value of the cause.
+         * @param label The label of the cause.
+         */
+        Cause(int value, String label) {
+            mValue = value;
+            mLabel = label;
+        }
+
+        /**
+         * Returns the integer value of the cause.
+         *
+         * @return The integer value of the cause.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        /**
+         * Returns the label of the cause.
+         *
+         * @return The label of the cause.
+         */
+        public String getLabel() {
+            return mLabel;
+        }
+
+        /**
+         * Returns the Cause enum constant corresponding to the given integer value.
+         *
+         * @param value The integer value to look up.
+         * @return An Optional containing the Cause enum constant with the given value,
+         *         or an empty Optional if no such constant exists.
+         */
+        public static Optional<Cause> fromValue(int value) {
+            return Arrays.stream(values())
+                    .filter(cause -> cause.mValue == value)
+                    .findFirst();
+        }
     }
 
     /**
      * CapabilityPairs
      */
-    public final class CapabilityPairs {
+    final class CapabilityPairs {
 
         /**
          * The key of {@code Map<Integer, Integer>} is networkType.

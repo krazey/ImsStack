@@ -445,6 +445,11 @@ protected:
     ITimer* GetVolteHysTimer() { return m_pAosHandleMtc->m_piVolteHysTimer; }
 
     void Timer_TimerExpired(IN ITimer* piTimer) { m_pAosHandleMtc->Timer_TimerExpired(piTimer); }
+
+    inline void SetServiceType(IN IMS_UINT32 nServiceType)
+    {
+        m_pAosHandleMtc->m_nServiceType = nServiceType;
+    }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -1634,27 +1639,41 @@ TEST_F(AosHandleMtcTest, ProcessBlockChanged_Test3)
     ProcessBlockChanged();
 }
 
-TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test1)
+TEST_F(AosHandleMtcTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
 {
-    // Test1: No capability(LTE,IWLAN,NR), Unsupported network(GSM)
-    // Expectation: Set none capa for all networks. No block.
+    // GIVEN
+    SetServiceType(ImsAosService::EMERGENCY_MTC);
 
     ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
-            static_cast<IMS_UINT32>(AosCapability::NONE));
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO) |
+                    static_cast<IMS_UINT32>(AosCapability::CALL_COMPOSER));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
-    SetNetworkType(NW_REPORT_RADIO_GSM);
-
+    // WHEN
     ProcessCapabilitiesChanged(objNewCapabilities);
 
-    EXPECT_FALSE(IsHandleBlockedBase());
+    // THEN
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
-    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
@@ -1673,6 +1692,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
@@ -1714,6 +1735,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
@@ -1760,6 +1783,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test4)
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
     SetDataConnected(IMS_TRUE);
@@ -1794,6 +1819,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test5)
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
     SetDataConnected(IMS_TRUE);
@@ -1829,6 +1856,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test6)
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
     SetDataConnected(IMS_TRUE);
@@ -1868,6 +1897,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test7)
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
     SetDataConnected(IMS_TRUE);
@@ -1907,6 +1938,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test8)
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
     SetDataConnected(IMS_TRUE);
@@ -1945,6 +1978,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test9)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
@@ -1986,6 +2021,8 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test10)
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::UTRAN),
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);

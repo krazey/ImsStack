@@ -223,7 +223,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
     return pszVal;
 }
 
-SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAuthBase::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -231,8 +231,8 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
 
     if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
@@ -264,7 +264,7 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     while (pStartPt < pEndPt)
     {
-        SIP_CHAR* pTempNext = SIP_NULL;
+        const SIP_CHAR* pTempNext = SIP_NULL;
 
         if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
         {

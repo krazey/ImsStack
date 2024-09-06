@@ -25,7 +25,7 @@
 
 #include "Connector.h"
 #include "IRegBinding.h"
-#include "IServiceManagerListener.h"
+#include "IServiceCloseListener.h"
 #include "ISipClientConnection.h"
 #include "ISipConnectionNotifier.h"
 #include "ISipDialog.h"
@@ -61,7 +61,7 @@ Service::Service(IN const AString& strScheme, IN const AString& strAppId,
         m_strAppId(strAppId),
         m_strServiceId(strServiceId),
         m_pAppConfig(IMS_NULL),
-        m_piServiceManagerListener(IMS_NULL),
+        m_piServiceCloseListener(IMS_NULL),
         m_bImsConnected(IMS_FALSE),
         m_piRegBinding(IMS_NULL),
         m_pSipProfile(IMS_NULL),
@@ -1783,9 +1783,9 @@ PROTECTED VIRTUAL void Service::Close()
         }
     }
 
-    if (m_piServiceManagerListener != IMS_NULL)
+    if (m_piServiceCloseListener != IMS_NULL)
     {
-        m_piServiceManagerListener->ServiceClosed(this);
+        m_piServiceCloseListener->ServiceClosed(this);
     }
 
     if (m_piRegBinding != IMS_NULL)

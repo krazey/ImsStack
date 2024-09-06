@@ -27,7 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
@@ -63,7 +63,7 @@ public class SscXmlGovTest {
     private static final int SLOT_0 = 0;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscXmlCreator mMockXmlCreator;
     @Mock private SscXmlParser mMockXmlParser;
 
@@ -73,8 +73,8 @@ public class SscXmlGovTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscXmlGov = SscXmlGov.getInstance(SLOT_0);
         mSscXmlGov.init();

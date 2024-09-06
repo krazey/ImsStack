@@ -69,7 +69,8 @@
             android:name=".test.menu.ImsConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.IMS_PROVISIONING" />
                 <action android:name="com.android.imsstack.action.IMS_CONFIG_MENU" />
@@ -81,7 +82,8 @@
             android:name=".test.menu.CarrierConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.CARRIER_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -92,7 +94,8 @@
             android:name=".test.menu.TestConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.TEST_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />

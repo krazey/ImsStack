@@ -18,9 +18,10 @@
 #include "ServiceTimer.h"
 #include "ServiceNetworkPolicy.h"
 
-#include "Configuration.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "CarrierConfig.h"
+#include "Engine.h"
 #include "ServerAddress.h"
 
 #include "IRegistration.h"
@@ -49,9 +50,9 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_nSlotId(piAppContext->GetSlotId()),
         m_nChangedType(TYPE_CHANGED_DIFFERENT),
         m_bIsConfigured(IMS_FALSE),
-        m_nCurrentPcscfIndex(0),
         m_bIsDnsQueryRetry(IMS_FALSE),
         m_bOtherIpTypeRequired(IMS_FALSE),
+        m_nCurrentPcscfIndex(0),
         m_nDiscoveryMethodIndex(0)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
@@ -952,7 +953,7 @@ PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
 PROTECTED
 void AosPcscf::PrintPcscfs()
 {
-    if (Configuration::GetInstance()->IsServerInfoHiddenInLog(m_nSlotId))
+    if (Engine::GetConfiguration()->IsServerInfoHiddenInLog(m_nSlotId))
     {
         return;
     }

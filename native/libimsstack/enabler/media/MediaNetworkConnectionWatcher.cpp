@@ -20,7 +20,7 @@
 #include "IMediaNetworkConnectionListener.h"
 #include "MediaNetworkConnectionWatcher.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CW");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
         IN const IpAddress& objIpAddress) :

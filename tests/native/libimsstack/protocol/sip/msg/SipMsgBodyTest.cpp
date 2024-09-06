@@ -36,10 +36,10 @@ TEST_F(SipMsgBodyTest, EncodeSingleMsgBody)
     ASSERT_TRUE(pMessageBody != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->EncodeSingleMsgBody(&pBuff));
 
@@ -73,12 +73,12 @@ TEST_F(SipMsgBodyTest, DecodeSingleMsgBody)
     SipMsgBody* pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    char* pDecodeBody = SIP_NULL;
+    SIP_CHAR* pDecodeBody = SIP_NULL;
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->GetMsgBuffer(&pDecodeBody));
 
-    char* pSingleBody = const_cast<char*>("This is a single body,\r\n\
-and no headers and boundary present\r\n");
+    const SIP_CHAR* pSingleBody = "This is a single body,\r\n\
+and no headers and boundary present\r\n";
     int nLen = strlen(pSingleBody);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeSingleMsgBody(pSingleBody, pSingleBody + nLen));
@@ -109,8 +109,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     SipContentTypeHeader* pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pContentTypeHeader->DecodeHdr(const_cast<char*>("multipart/mixed;boundary=abcxz"), 30));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("multipart/mixed;boundary=abcxz", 30));
     EXPECT_EQ(SIP_TRUE, pMessageBodyLevel1->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -122,9 +121,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pContentTypeHeader->DecodeHdr(
-                    const_cast<char*>("application/test;boundary=12345"), 31));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("application/test;boundary=12345", 31));
     EXPECT_EQ(SIP_TRUE, pMessageBodyLevel2->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -132,7 +129,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     SipMsgBody* pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
     EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<char*>("level2 - message body 1"), 23));
+            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 1"), 23));
     SipMsgBodyList* pMsgBobyList = pMessageBodyLevel2->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
@@ -142,7 +139,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pMessageLevel2 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel2 != nullptr);
     EXPECT_EQ(SIP_TRUE,
-            pMessageLevel2->SetMsgBuffer(const_cast<char*>("level2 - message body 2"), 23));
+            pMessageLevel2->SetMsgBuffer(const_cast<SIP_CHAR*>("level2 - message body 2"), 23));
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel2));
     pMessageLevel2->SipDelete();
     pMsgBobyList->SipDelete();
@@ -156,7 +153,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     SipMsgBody* pMessageLevel1 = new SipMsgBody();
     ASSERT_TRUE(pMessageLevel1 != nullptr);
     EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<char*>("level1 - message body 1"), 23));
+            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 1"), 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
@@ -175,7 +172,7 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pUnknownHeader->SipDelete();
 
     EXPECT_EQ(SIP_TRUE,
-            pMessageLevel1->SetMsgBuffer(const_cast<char*>("level1 - message body 2"), 23));
+            pMessageLevel1->SetMsgBuffer(const_cast<SIP_CHAR*>("level1 - message body 2"), 23));
     pMsgBobyList = pMessageBodyLevel1->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
     EXPECT_EQ(SIP_TRUE, pMsgBobyList->AddBody(pMessageLevel1));
@@ -183,14 +180,14 @@ TEST_F(SipMsgBodyTest, EncodeMIMEMsgBody)
     pMsgBobyList->SipDelete();
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_TRUE, pMessageBodyLevel1->EncodeMIMEMsgBody(&pBuff));
 
-    char* pMessage = const_cast<char*>("--abcxz\r\n\
+    const SIP_CHAR* pMessage = "--abcxz\r\n\
 Content-Type: application/test;boundary=12345\r\n\
 \r\n\
 --12345\r\n\
@@ -208,7 +205,7 @@ level1 - message body 1\r\n\
 UnknownHeaderName1: UnknownHeaderValue1\r\n\
 \r\n\
 level1 - message body 2\r\n\
---abcxz--\r\n");
+--abcxz--\r\n";
 
     EXPECT_STREQ(pMessage, &(aBuffer[0]));
 
@@ -221,15 +218,15 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     ASSERT_TRUE(pMessageBody != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* Empty message body, fail */
     EXPECT_EQ(SIP_FALSE, pMessageBody->EncodeBody(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<char*>("single body"), 11));
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<SIP_CHAR*>("single body"), 11));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
@@ -245,8 +242,7 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     SipContentTypeHeader* pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE,
-            pContentTypeHeader->DecodeHdr(const_cast<char*>("multipart/mixed;boundary=abcxz"), 30));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("multipart/mixed;boundary=abcxz", 30));
     EXPECT_EQ(SIP_TRUE, pMessageBody->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
@@ -256,13 +252,13 @@ TEST_F(SipMsgBodyTest, EncodeBody)
     pContentTypeHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pContentTypeHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
+    EXPECT_EQ(SIP_TRUE, pContentTypeHeader->DecodeHdr("application/sdp", 15));
     EXPECT_EQ(SIP_TRUE, pBody1->SetMimeHdr(pContentTypeHeader));
     pContentTypeHeader->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pBody1->IsMessageBodySDP());
 
-    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer(const_cast<char*>("sdp message body"), 16));
+    EXPECT_EQ(SIP_TRUE, pBody1->SetMsgBuffer(const_cast<SIP_CHAR*>("sdp message body"), 16));
 
     SipMsgBodyList* pMsgBobyList = pMessageBody->GetMessageBodyList();
     ASSERT_TRUE(pMsgBobyList != nullptr);
@@ -275,13 +271,13 @@ TEST_F(SipMsgBodyTest, EncodeBody)
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->EncodeBody(&pBuff));
 
-    char* pMsg = const_cast<char*>("\r\nContent-Type: multipart/mixed;boundary=abcxz\r\n\
+    const SIP_CHAR* pMsg = "\r\nContent-Type: multipart/mixed;boundary=abcxz\r\n\
 \r\n\
 --abcxz\r\n\
 Content-Type: application/sdp\r\n\
 \r\n\
 sdp message body\r\n\
---abcxz--\r\n");
+--abcxz--\r\n";
 
     EXPECT_STREQ(pMsg, &(aBuffer[0]));
 
@@ -300,7 +296,7 @@ TEST_F(SipMsgBodyTest, DecodeMIMEMsgBody)
     EXPECT_TRUE(pMessageBody->GetContentEncoding() == nullptr);
     EXPECT_TRUE(pMessageBody->GetContentDisposition() == nullptr);
 
-    char* pMessage = const_cast<char*>("Content-Type: multipart/mixed;boundary=abcxz\r\n\
+    const SIP_CHAR* pMessage = "Content-Type: multipart/mixed;boundary=abcxz\r\n\
 \r\n\
 --abcxz\r\n\
 Content-Type: multipart/mixed;boundary=12345\r\n\
@@ -326,7 +322,7 @@ Content-Type: application/sdp\r\n\
 UnknownHeaderName1: UnknownHeaderValue1\r\n\
 \r\n\
 level1 - message body 2\r\n\
---abcxz--\r\n");
+--abcxz--\r\n";
     int nLen = strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
@@ -338,7 +334,7 @@ level1 - message body 2\r\n\
     EXPECT_STREQ("multipart", pContentTypeHeader->GetMediaType());
     EXPECT_STREQ("mixed", pContentTypeHeader->GetSubMediaType());
 
-    char* pBoundary = pContentTypeHeader->GetBoundary();
+    SIP_CHAR* pBoundary = pContentTypeHeader->GetBoundary();
     EXPECT_STREQ("abcxz", pBoundary);
     delete[] pBoundary;
 
@@ -444,7 +440,7 @@ level1 - message body 2\r\n\
     pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    pMessage = const_cast<char*>("\r\nlevel1 - message body with no headers\r\n");
+    pMessage = "\r\nlevel1 - message body with no headers\r\n";
     nLen = strlen(pMessage);
 
     EXPECT_EQ(SIP_TRUE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
@@ -459,7 +455,7 @@ level1 - message body 2\r\n\
     pMessageBody = new SipMsgBody();
     ASSERT_TRUE(pMessageBody != nullptr);
 
-    pMessage = const_cast<char*>("Content-Type: multipart/mixed;boundary=abcxz\r\n");
+    pMessage = "Content-Type: multipart/mixed;boundary=abcxz\r\n";
     nLen = strlen(pMessage);
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));

@@ -127,6 +127,7 @@ public class ImsTestHelperTest extends ImsStackTest {
         intent.putExtra("network", "LTE,NR,IWLAN,UTRAN");
         intent.putExtra("video", "1,1,1,0");
         intent.putExtra("voice", "1,1,1,0");
+        intent.putExtra("sms", "1,1,1,0");
         intent.putExtra("call_composer", "1,1,0,0");
         mBroadcastReceiver.onReceive(mContext, intent);
         verify(mMockAosService).changeCapabilities(mChangeCapabilitiesCaptor.capture());
@@ -136,14 +137,17 @@ public class ImsTestHelperTest extends ImsStackTest {
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.VOICE
                 | IAosRegistrationListener.Capability.VIDEO
+                | IAosRegistrationListener.Capability.SMS
                 | IAosRegistrationListener.Capability.CALL_COMPOSER);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NR,
                 IAosRegistrationListener.Capability.VOICE
                 | IAosRegistrationListener.Capability.VIDEO
+                | IAosRegistrationListener.Capability.SMS
                 | IAosRegistrationListener.Capability.CALL_COMPOSER);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
                 IAosRegistrationListener.Capability.VOICE
-                | IAosRegistrationListener.Capability.VIDEO);
+                | IAosRegistrationListener.Capability.VIDEO
+                | IAosRegistrationListener.Capability.SMS);
         expectedCapabilityPairs.addCapability(IAosRegistrationListener.NetworkType.UTRAN,
                 IAosRegistrationListener.Capability.NONE);
 

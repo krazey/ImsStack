@@ -16,40 +16,35 @@
 #ifndef SERVICE_MANAGER_H_
 #define SERVICE_MANAGER_H_
 
-#include "AString.h"
+#include "IServiceManager.h"
 
-#include "IServiceManagerListener.h"
-
+class IMutex;
 class Service;
-class ServiceManagerPrivate;
 
-class ServiceManager : public IServiceManagerListener
+class ServiceManager : public IServiceManager
 {
-private:
-    ServiceManager();
-
 public:
+    ServiceManager();
     virtual ~ServiceManager();
 
     ServiceManager(IN const ServiceManager&) = delete;
     ServiceManager& operator=(IN const ServiceManager&) = delete;
 
 public:
-    IMS_BOOL AttachService(IN Service* pService);
-    void DetachService(IN Service* pService);
+    IMS_BOOL AttachService(IN Service* pService) override;
+    void DetachService(IN Service* pService) override;
     Service* GetService(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
-            IN const AString& strServiceId) const;
-    const ImsList<Service*>& GetServices() const;
-    ImsList<Service*> GetServices(IN IMS_SINT32 nSlotId) const;
-
-    static ServiceManager* GetInstance();
+            IN const AString& strServiceId) const override;
+    inline const ImsList<Service*>& GetServices() const override { return m_objServices; }
+    ImsList<Service*> GetServices(IN IMS_SINT32 nSlotId) const override;
 
 private:
-    // IServiceManagerListener interface
-    void ServiceClosed(IN Service* pService) override;
+    // IServiceCloseListener interface
+    inline void ServiceClosed(IN Service* pService) override { DetachService(pService); }
 
 private:
-    ServiceManagerPrivate* m_pServiceMngrPrivate;
+    IMutex* m_piLock;
+    ImsList<Service*> m_objServices;
 };
 
 #endif

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
@@ -22,6 +23,7 @@ cc_library_headers {
     export_include_dirs: [
         "include/core",
         "include/registration",
+        "include/service",
         "interface",
         "interface/core",
         "interface/registration",
@@ -63,6 +65,7 @@ cc_test {
         "include",
         "include/core",
         "include/registration",
+        "include/service",
         "interface",
         "interface/core",
         "interface/registration",

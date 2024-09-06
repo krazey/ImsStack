@@ -33,8 +33,8 @@ protected:
     inline void AddEventListener() final{};
     inline void RemoveEventListener() final{};
 
-    IMS_BOOL AddAosServiceListener() override;
-    IMS_BOOL RemoveAosServiceListener() override;
+    void AddAosServiceListener() override;
+    void RemoveAosServiceListener() override;
 
     // IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;

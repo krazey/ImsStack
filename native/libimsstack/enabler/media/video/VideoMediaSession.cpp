@@ -33,7 +33,7 @@
 #include <VideoConfig.h>
 using namespace android::telephony::imsmedia;
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VS");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
@@ -89,14 +89,14 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     if (pLocalProfile->nNegotiatedPayloadIndex < 0)
     {
-        pLocalPayload = pLocalProfile->lstPayload.GetAt(0);
+        pLocalPayload = pLocalProfile->GetPayloadAt(0);
     }
     else
     {
-        pLocalPayload = pLocalProfile->lstPayload.GetAt(pLocalProfile->nNegotiatedPayloadIndex);
+        pLocalPayload = pLocalProfile->GetPayloadAt(pLocalProfile->nNegotiatedPayloadIndex);
     }
 
-    pNegoPayload = pNegoProfile->lstPayload.GetAt(0);
+    pNegoPayload = pNegoProfile->GetPayloadAt(0);
 
     if (pLocalPayload == IMS_NULL || pNegoPayload == IMS_NULL)
     {
@@ -116,11 +116,16 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     pVideoConfig->setDscp(m_pConfig->GetVideoDscp());
     pVideoConfig->setMaxMtuBytes(1500);
 
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)
     {
-        pVideoConfig->setMaxMtuBytes(pMediaManager->GetResourceManager()->GetMtu());
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
+
+        if (pResourceMngr != IMS_NULL)
+        {
+            pVideoConfig->setMaxMtuBytes(pResourceMngr->GetRtpFragmentSize());
+        }
     }
 
     IMS_SINT32 nVideoDirection;
@@ -204,6 +209,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
@@ -225,6 +231,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         pVideoConfig->setFramerate(pFmtp->nFrameRate);
         pVideoConfig->setBitrate(pFmtp->nBitrate);
         pVideoConfig->setPacketizationMode(pFmtp->nPacketizationMode);
+        pVideoConfig->setCodecSprop(android::String8(pFmtp->strSpropParam.GetStr()));
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
@@ -270,8 +277,9 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
             pVideoConfig->getCodecType(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - Framerate[%d], Bitrate[%d]", pVideoConfig->getFramerate(),
             pVideoConfig->getBitrate(), 0);
-    IMS_TRACE_D("UpdateRtpConfig() - CodecProfil[%d], CodecLevel[%d]",
-            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(), 0);
+    IMS_TRACE_D("UpdateRtpConfig() - CodecProfile[%d], CodecLevel[%d], Sprop[%s]",
+            pVideoConfig->getCodecProfile(), pVideoConfig->getCodecLevel(),
+            pVideoConfig->getCodecSprop().c_str());
     IMS_TRACE_D("UpdateRtpConfig() - IntraFrameInterval[%d], PacketizationMode[%d]",
             pVideoConfig->getIntraFrameInterval(), pVideoConfig->getPacketizationMode(), 0);
     IMS_TRACE_D("UpdateRtpConfig() - CameraId[%d], CameraZoom[%d]", pVideoConfig->getCameraId(),
@@ -288,13 +296,24 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 }
 
 PUBLIC
-void VideoMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
+void VideoMediaSession::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 {
     if (m_pRtpConfig != NULL)
     {
         m_pRtpConfig->setAccessNetwork(nAccessNetwork);
         IMS_TRACE_D("UpdateAccessNetwork() - accessNetwork[%d]", m_pRtpConfig->getAccessNetwork(),
                 0, 0);
+    }
+}
+
+PUBLIC
+void VideoMediaSession::SetMtu(IN IMS_SINT32 nMtu)
+{
+    if (m_pRtpConfig != NULL)
+    {
+        VideoConfig* pVideoConfig = static_cast<VideoConfig*>(m_pRtpConfig);
+        pVideoConfig->setMaxMtuBytes(nMtu);
+        IMS_TRACE_D("SetMtu() - mtu[%d]", pVideoConfig->getMaxMtuBytes(), 0, 0);
     }
 }
 
@@ -560,7 +579,6 @@ IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
             }
         }
 
-        delete param;
         return IMS_TRUE;
     }
 
@@ -579,8 +597,6 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
         VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
         m_nCameraId = param->nValue;
-
-        delete param;
 
         // the operation independent with the media direction
         if (m_nCameraId != CAMERA_ID_NONE)
@@ -633,7 +649,6 @@ IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
         IMS_TRACE_I(
                 "OnChangeCameraZoomCmd() - state[%d], camera zoom[%d]", m_nState, param->nValue, 0);
         m_nCameraZoom = param->nValue;
-        delete param;
         return IMS_TRUE;
     }
 
@@ -663,7 +678,6 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
             this->Modify();
         }
 
-        delete param;
         return IMS_TRUE;
     }
 
@@ -671,9 +685,9 @@ IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile)
+IMS_UINT32 VideoMediaSession::convertAvcProfile(IN IMS_UINT32 nProfile)
 {
-    switch (eProfile)
+    switch (nProfile)
     {
         case AVC_PROFILE_B:
             return VideoConfig::AVC_PROFILE_BASELINE;
@@ -691,9 +705,9 @@ IMS_UINT32 VideoMediaSession::convertAvcProfile(IN VIDEO_PROFILE_AVC eProfile)
 }
 
 PRIVATE
-IMS_UINT32 VideoMediaSession::convertHevcProfile(IN VIDEO_PROFILE_HEVC eProfile)
+IMS_UINT32 VideoMediaSession::convertHevcProfile(IN IMS_UINT32 nProfile)
 {
-    switch (eProfile)
+    switch (nProfile)
     {
         case HEVC_PROFILE_MAIN:
             return VideoConfig::HEVC_PROFILE_MAIN;

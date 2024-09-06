@@ -433,6 +433,19 @@ public:
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
+     * @brief Flag specifying whether to wait AWT when initial registration proceeds with
+     *        the next pcscf.
+     *
+     * @return IMS_BOOL Returns whether to wait actual wait time(AWT) before attempting initial
+     *         registration with the next pcscf when error responses without retry-after to
+     *         the REGISTER message is received. When true, the UE waits AWT before attempting
+     *         initial registration with next pcscf. When false, the UE doesn't wait.
+     *         This function related to GetRegActualWaitTimePolicy. This is only valid when the
+     *         value of GetRegActualWaitTimePolicy() is CarrierConfig::Assets::AWT_POLICY_RFC_RULE.
+     */
+    virtual IMS_BOOL IsAwtUsedWhenInitRegWithNextPcscf() const = 0;
+
+    /**
      * @brief Flag specifying if service fallback is required when voice call is unavailable.
      *
      * @return IMS_TRUE if required, else IMS_FALSE
@@ -440,9 +453,9 @@ public:
     virtual IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const = 0;
 
     /**
-     * @brief Flag specifying if WFC error message is support.
+     * @brief Flag specifying if WFC error message is supported.
      *
-     * @return IMS_TRUE if support, else IMS_FALSE
+     * @return IMS_TRUE if supported, else IMS_FALSE
      */
     virtual IMS_BOOL IsWfcErrorMessageSupported(IN IMS_SINT32 nError) const = 0;
 
@@ -547,13 +560,13 @@ public:
      *
      *       Specify the number of emergency registration retry attempt to P-CSCFs. UE will try
      *       emergency registration with specified number of P-CSCFs when
-     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer has expired. If the
+     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer has expired. If the
      *       number is zero, UE will try registration on every P-CSCFs once. If the number of
      *       P-CSCF is less than a given number and UE's default retry policy is a
      *       CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF, UE will try
      *       registration from the first P-CSCF again after attempting on all P-CSCFs.
      *       If UE doesn't support emerg-reg-retry defined in 3GPP 24.229, which is configured by
-     *       CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT, this configuration is
+     *       CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT, this configuration is
      *       discarded.
      *
      * @return IMS_SINT32 Return the retry attempt count
@@ -569,7 +582,7 @@ public:
      *        been stopped or expired. Upon this timer expiry, the UE considers that the emergency
      *        registration attempt for this P-CSCF has failed. The UE may retry registration on
      *        a different P-CSCF if available and restart the
-     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
+     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer. If the UE has no
      *        more available P-CSCFs, the UE shall stop the
      *        CarrierConfig::ImsEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT timer by
      *        considering the emergency registration has failed. If the value is zero, it considers
@@ -640,7 +653,7 @@ public:
      *        be established until completion of the emergency registration procedure.
      *        Upon timer expiry, the UE considers the emergency REGISTER request or
      *        the emergency call attempt as failed, and stop the
-     *        CarrierConfig::Assets::KEY_EMC_REG_RETRY_TIMER_MILLIS_INT timer, if running.
+     *        CarrierConfig::Assets::KEY_EREG_RETRY_TIMER_MILLIS_INT timer, if running.
      *
      * @return IMS_SINT32 Return the milli-second time
      */
@@ -937,17 +950,6 @@ public:
      * @return IMS_SINT32 Return max of the extra error
      */
     virtual IMS_SINT32 GetExtraRegErrMaxCount() const = 0;
-
-    /**
-     * @brief Indicate the minimum number for retries when registration or reregistration fails.
-     *
-     *        In case of initial registration, it is retried with the next PCSCF that is available.
-     *        But in case of reregistration, it is retried with the same PCSCF according to
-     *        the minimum number of times.
-     *
-     * @return IMS_SINT32 Return min of the extra error
-     */
-    virtual IMS_SINT32 GetExtraRegErrMinCount() const = 0;
 
     /**
      * @brief Indicate which the PCSCF address  to use when the PCSCF address are changed

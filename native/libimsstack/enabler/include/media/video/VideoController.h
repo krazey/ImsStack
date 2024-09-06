@@ -89,6 +89,13 @@ public:
     void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
 
     /**
+     * @brief Set MTU size in the VideoConfig
+     *
+     * @param nMtu : The MTU size to be set to VideoConfig
+     */
+    void SetMtu(IN IMS_SINT32 nMtu);
+
+    /**
      * @brief Update MediaQualityThreshold and send message to java
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
