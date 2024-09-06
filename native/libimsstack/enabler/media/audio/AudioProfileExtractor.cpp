@@ -1127,5 +1127,7 @@ void AudioProfileExtractor::ExtractAnbr(
     }
 
     pProfile->SetAnbr(
-            (pDescriptor->GetAttribute(SdpAttribute::ANBR) == IMS_SUCCESS) ? IMS_TRUE : IMS_FALSE);
+            (pDescriptor->GetAttribute(SdpAttribute::ANBR).IsEmpty()) ? IMS_TRUE : IMS_FALSE);
+
+    IMS_TRACE_D("ExtractAnbr() - anbr[%d]", pProfile->IsAnbrSupported(), 0, 0);
 }
