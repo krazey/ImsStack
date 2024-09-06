@@ -22,7 +22,7 @@ class AosECondition : public AosCondition
 {
 public:
     explicit AosECondition(IN IAosAppContext* piAppContext);
-    virtual ~AosECondition();
+    ~AosECondition() override;
 
     IMS_BOOL IsReady() final;
 

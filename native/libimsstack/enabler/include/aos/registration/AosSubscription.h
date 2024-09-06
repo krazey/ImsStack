@@ -41,7 +41,7 @@ public:
             IN const AString& strAoR, IN const SipAddress& objContactAddress);
     inline explicit AosSubscription(){};
 
-    virtual ~AosSubscription();
+    ~AosSubscription() override;
 
     virtual void Initialize();
 

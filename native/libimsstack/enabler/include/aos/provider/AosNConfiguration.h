@@ -37,7 +37,7 @@ class AosNConfiguration : public ICarrierConfigListener, public IAosNConfigurati
 {
 public:
     AosNConfiguration();
-    virtual ~AosNConfiguration();
+    ~AosNConfiguration() override;
 
     IMS_SINT32 GetSlotId() const override;
 

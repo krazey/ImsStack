@@ -33,7 +33,7 @@ class AosLocationStarter :
 {
 public:
     AosLocationStarter();
-    virtual ~AosLocationStarter();
+    ~AosLocationStarter() override;
 
     IMS_SINT32 GetSlotId() const override;
     void SetSlotId(IN IMS_SINT32 nSlotId) override;

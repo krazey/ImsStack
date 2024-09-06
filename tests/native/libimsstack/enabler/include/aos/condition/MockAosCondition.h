@@ -27,7 +27,7 @@ public:
             AosCondition()
     {
     }
-    virtual ~MockAosCondition() {}
+    ~MockAosCondition() override {}
 
     MOCK_METHOD(void, Start, (), (override));
     MOCK_METHOD(void, Stop, (), (override));

@@ -23,7 +23,7 @@ class JniAosServiceThread final : public BaseServiceThread, public IJniAosServic
 {
 public:
     JniAosServiceThread();
-    virtual ~JniAosServiceThread();
+    ~JniAosServiceThread() override;
 
     IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
