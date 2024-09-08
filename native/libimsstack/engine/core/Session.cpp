@@ -4268,13 +4268,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAor();
-        const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
-        const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-                : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
-                                                           : pUserAor->GetUser();
-
-        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService()))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
@@ -4319,13 +4313,7 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
         }
 
         // Create a media capabilities for this service & session
-        const SipAddress* pUserAor = GetUserAor();
-        const SipAddress::UserInfoPart* pUserInfo = pUserAor->GetUserInfoPart();
-        const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-                : pUserAor->IsSchemeTel()                  ? pUserAor->GetHost()
-                                                           : pUserAor->GetUser();
-
-        if (!m_pOaState->CreateCapabilities(GetService(), strUserId))
+        if (!m_pOaState->CreateCapabilities(GetService()))
         {
             IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
             return IMS_FALSE;
