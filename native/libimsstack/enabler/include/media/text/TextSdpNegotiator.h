@@ -20,7 +20,7 @@ public:
 
 private:
     IMS_BOOL ResetNegotiatedProfile(IN IMS_BOOL bPeerPreferred, IN TextProfile* pLocalProfile,
-            IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile);
+            IN TextProfile* pPeerProfile, OUT TextProfile** pNegotiatedProfile);
     IMS_BOOL NegotiatePayload(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             OUT TextProfile* pNegotiatedProfile);
     void AppendT140Payload(IN TextProfile::Payload* pPayload, OUT TextProfile* pNegotiatedProfile);

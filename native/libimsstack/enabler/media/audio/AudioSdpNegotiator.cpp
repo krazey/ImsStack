@@ -43,7 +43,7 @@ IMS_BOOL AudioSdpNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
     if (NegotiateIpPort(pLocalProfile, pPeerProfile, pNegotiatedProfile) != IMS_TRUE)
     {
-        ResetNegotiatedProfile(pLocalProfile, pNegotiatedProfile);
+        ResetNegotiatedProfile(pLocalProfile, &pNegotiatedProfile);
     }
 
     AudioProfile::Payload* pNegotiatedPayload = IMS_NULL;
@@ -75,15 +75,15 @@ IMS_BOOL AudioSdpNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
 PRIVATE
 void AudioSdpNegotiator::ResetNegotiatedProfile(
-        IN const AudioProfile* pLocalProfile, OUT AudioProfile* pNegotiatedProfile)
+        IN const AudioProfile* pLocalProfile, OUT AudioProfile** pNegotiatedProfile)
 {
-    if (pLocalProfile == IMS_NULL || pNegotiatedProfile == IMS_NULL)
+    if (pLocalProfile == IMS_NULL)
     {
         return;
     }
 
-    *pNegotiatedProfile = *pLocalProfile;
-    pNegotiatedProfile->SetDataPort(0);
+    **pNegotiatedProfile = *pLocalProfile;
+    (*pNegotiatedProfile)->SetDataPort(0);
 }
 
 PRIVATE
