@@ -493,10 +493,8 @@ void AudioProfileExtractor::ExtractFmtpOctetAlign(
     if (objSplitEqual.GetAt(0).Equals("octet-align") == IMS_TRUE)
     {
         pFmtp->SetOctetAlign((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowOctetAlign(IMS_TRUE);
 
-        IMS_TRACE_D("ExtractFmtpOctetAlign() - octet-align[%d], visible[%d]",
-                pFmtp->GetOctetAlign(), pFmtp->IsOctetAlignVisible(), 0);
+        IMS_TRACE_D("ExtractFmtpOctetAlign() - octet-align[%d]", pFmtp->GetOctetAlign(), 0, 0);
     }
 }
 

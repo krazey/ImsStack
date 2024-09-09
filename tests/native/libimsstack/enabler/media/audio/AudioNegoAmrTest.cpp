@@ -21,7 +21,8 @@ const AString SEMICOLON = ";";
 const AString COMMA = ",";
 
 const AString MODESETLIST = "mode-set=0,1,2";
-const AString OCTETALIGN = "octet-align=1";
+const AString OCTETALIGN0 = "octet-align=0";
+const AString OCTETALIGN1 = "octet-align=1";
 const AString MODECHANGECAPABILITY = "mode-change-capability=2";
 const AString MODECHANGEPERIOD = "mode-change-period=1";
 const AString MODECHANGENEIGHBOR = "mode-change-neighbor=1";
@@ -71,12 +72,12 @@ TEST_F(AudioNegoAmrTest, TestSetSdpFmtpFromAmrFmtp)
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpEmpty);
-    EXPECT_EQ(strFmtp, AString::ConstNull());
+    EXPECT_EQ(strFmtp, OCTETALIGN0);
 
     strFmtp = AudioNegoAmr::SetSdpFmtpFromAmrFmtp(m_pAmrFmtpFull);
 
     EXPECT_EQ(strFmtp.Contains(MODESETLIST), IMS_TRUE);
-    EXPECT_EQ(strFmtp.Contains(OCTETALIGN), IMS_TRUE);
+    EXPECT_EQ(strFmtp.Contains(OCTETALIGN1), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGECAPABILITY), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGEPERIOD), IMS_TRUE);
     EXPECT_EQ(strFmtp.Contains(MODECHANGENEIGHBOR), IMS_TRUE);
@@ -84,7 +85,7 @@ TEST_F(AudioNegoAmrTest, TestSetSdpFmtpFromAmrFmtp)
 
     AString strResult = MODESETLIST;
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
-    strResult.Append(OCTETALIGN);
+    strResult.Append(OCTETALIGN1);
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
     strResult.Append(MODECHANGECAPABILITY);
     AudioNegoAmr::AppendSeparatorIfNotEmpty(strResult, SEMICOLON);
@@ -141,7 +142,7 @@ TEST_F(AudioNegoAmrTest, TestAddOctetAlignToFmtp)
     EXPECT_EQ(strFmtp, AString::ConstNull());
 
     AudioNegoAmr::AddOctetAlignToFmtp(m_pAmrFmtpFull, strFmtp);
-    EXPECT_EQ(strFmtp, OCTETALIGN);
+    EXPECT_EQ(strFmtp, OCTETALIGN1);
 }
 
 TEST_F(AudioNegoAmrTest, TestAddModeChangeCapabilityToFmtp)

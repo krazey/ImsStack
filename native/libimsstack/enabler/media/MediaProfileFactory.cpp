@@ -424,7 +424,7 @@ PRIVATE AudioProfile::Payload* MediaProfileFactory::CreateAmrPayload(
     if (pAmrConfig->GetOctetAlign() != -1)
     {
         pAmrFmtp->SetOctetAlign(pAmrConfig->GetOctetAlign());
-        if (pAmrFmtp->GetOctetAlign() == 1 || pAmrFmtp->GetModeSetList() == 0)
+        if (pAmrFmtp->GetOctetAlign() == 1)
         {
             pAmrFmtp->SetShowOctetAlign(IMS_TRUE);
         }
