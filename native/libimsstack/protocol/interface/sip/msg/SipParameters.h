@@ -109,6 +109,24 @@ public:
     SipParameters(const SipParameters& objParameters);
     ~SipParameters();
 
+    inline SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
+            IParameterComponent* pParameterComponent = SIP_NULL) const
+    {
+        return m_objParameterList.Encode(objBuffer, cDelimiter, pParameterComponent);
+    }
+
+    inline SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
+            IParameterComponent* pParameterComponent = SIP_NULL) const
+    {
+        return m_objParameterList.Encode(ppCurrPos, cDelimiter, pParameterComponent);
+    }
+
+    inline SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+            const SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent = SIP_NULL)
+    {
+        return m_objParameterList.Decode(pStartPt, pEndPt, cDelimiter, pParameterComponent);
+    }
+
     SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue = SIP_NULL);
 
     SIP_VOID RemoveParam(const SIP_CHAR* pszName);

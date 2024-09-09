@@ -42,11 +42,11 @@ private:
     SIP_CHAR* m_pszHost;
     SIP_UINT16 m_nPort;
     SIP_INT32 m_eHostType;
-    SipParameterList* m_pUriParamList;
+    SipParameters* m_pUriParams;
     // for storing each header in
     // "?"   header   *( "&"   header )
     // each node consists of a SipNameValue obj for one header
-    SipParameterList* m_pUriHdrParamList;
+    SipParameters* m_pUriHdrParams;
 
     SIP_BOOL DecUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
@@ -77,24 +77,41 @@ public:
 
     inline SIP_UINT16 GetPort() const { return m_nPort; }
 
-    SipParameterList* GetUriParamList();
+    inline SipNameValue* GetUriParam(SIP_UINT32 nPos)
+    {
+        return (m_pUriParams != SIP_NULL) ? m_pUriParams->GetParam(nPos) : SIP_NULL;
+    }
+
+    inline SIP_CHAR* GetUriParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const
+    {
+        return m_pUriParams->GetParamValue(pszName, nPos);
+    }
 
     inline SIP_UINT32 GetUriParamCount() const
     {
-        return (m_pUriParamList != SIP_NULL) ? m_pUriParamList->GetCount() : SIP_ZERO;
+        return (m_pUriParams != SIP_NULL) ? m_pUriParams->GetParamCount() : SIP_ZERO;
     }
-    SipParameterList* GetHdrParamList();
+    inline SipNameValue* GetHdrParam(SIP_UINT32 nPos) const
+    {
+        return (m_pUriHdrParams != SIP_NULL) ? m_pUriHdrParams->GetParam(nPos) : SIP_NULL;
+    }
 
     inline SIP_UINT32 GetHdrParamCount() const
     {
-        return (m_pUriHdrParamList != SIP_NULL) ? m_pUriHdrParamList->GetCount() : SIP_ZERO;
+        return (m_pUriHdrParams != SIP_NULL) ? m_pUriHdrParams->GetParamCount() : SIP_ZERO;
+    }
+
+    inline SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName)
+    {
+        if (m_pUriHdrParams != SIP_NULL)
+        {
+            m_pUriHdrParams->RemoveParam(pszName);
+        }
     }
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
-
-    SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName);
 
     static const SIP_CHAR* GetSchemeString(UriType eUriType);
 };

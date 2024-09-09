@@ -25,8 +25,8 @@ SipUri::SipUri() :
         m_pszHost(SIP_NULL),
         m_nPort(SIP_ZERO),
         m_eHostType(SipAddrSpec::HOST_NAME),
-        m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL)
+        m_pUriParams(SIP_NULL),
+        m_pUriHdrParams(SIP_NULL)
 {
 }
 
@@ -37,17 +37,17 @@ SipUri::SipUri(const SipUri& objSipUri) :
         m_pszHost(SipPf_Strdup(objSipUri.m_pszHost)),
         m_nPort(objSipUri.m_nPort),
         m_eHostType(objSipUri.m_eHostType),
-        m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL)
+        m_pUriParams(SIP_NULL),
+        m_pUriHdrParams(SIP_NULL)
 {
-    if (objSipUri.m_pUriParamList != SIP_NULL)
+    if (objSipUri.m_pUriParams != SIP_NULL)
     {
-        m_pUriParamList = new SipParameterList(*(objSipUri.m_pUriParamList));
+        m_pUriParams = new SipParameters(*(objSipUri.m_pUriParams));
     }
 
-    if (objSipUri.m_pUriHdrParamList != SIP_NULL)
+    if (objSipUri.m_pUriHdrParams != SIP_NULL)
     {
-        m_pUriHdrParamList = new SipParameterList(*(objSipUri.m_pUriHdrParamList));
+        m_pUriHdrParams = new SipParameters(*(objSipUri.m_pUriHdrParams));
     }
 }
 
@@ -67,14 +67,14 @@ SipUri::~SipUri()
         delete[] m_pszHost;
     }
     /*List of obj of CSipNameValue*/
-    if (m_pUriParamList != SIP_NULL)
+    if (m_pUriParams != SIP_NULL)
     {
-        m_pUriParamList->SipDelete();
+        delete m_pUriParams;
     }
     /*List of obj of CSipNameValue*/
-    if (m_pUriHdrParamList != SIP_NULL)
+    if (m_pUriHdrParams != SIP_NULL)
     {
-        m_pUriHdrParamList->SipDelete();
+        delete m_pUriHdrParams;
     }
 }
 
@@ -107,32 +107,6 @@ SIP_BOOL SipUri::SetUser(const SIP_CHAR* pszUser)
 SIP_BOOL SipUri::SetPassword(const SIP_CHAR* pszPass)
 {
     return SetCharVar(pszPass, m_pszPassword);
-}
-
-SipParameterList* SipUri::GetUriParamList()
-{
-    if (m_pUriParamList != SIP_NULL)
-    {
-        m_pUriParamList->Increment();
-    }
-    return m_pUriParamList;
-}
-
-SipParameterList* SipUri::GetHdrParamList()
-{
-    if (m_pUriHdrParamList != SIP_NULL)
-    {
-        m_pUriHdrParamList->Increment();
-    }
-    return m_pUriHdrParamList;
-}
-
-SIP_VOID SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
-{
-    if (m_pUriHdrParamList != SIP_NULL)
-    {
-        m_pUriHdrParamList->RemoveParam(pszName);
-    }
 }
 
 SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -183,19 +157,17 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         return SIP_FALSE;
     }
 
-    if ((bParams == SIP_TRUE) && (m_pUriParamList != SIP_NULL))
+    if ((bParams == SIP_TRUE) && (m_pUriParams != SIP_NULL))
     {
         const_cast<SipUri*>(this)->SetComponentType(IParameterComponent::URI);
-        m_pUriParamList->Encode(objBuffer, SIP_SEMI,
+        m_pUriParams->Encode(objBuffer, SIP_SEMI,
                 const_cast<IParameterComponent*>(static_cast<const IParameterComponent*>(this)));
     }
 
     // "?"   header   *( "&"   header )
-    if (m_pUriHdrParamList != SIP_NULL)
+    if (m_pUriHdrParams != SIP_NULL)
     {
-        SipVector<SipNameValue*>& objHeaders = m_pUriHdrParamList->GetList();
-
-        if (objHeaders.IsEmpty() == SIP_TRUE)
+        if (m_pUriHdrParams->GetParamCount() == 0)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encode: No URI header parameters", SIP_ZERO, SIP_ZERO);
@@ -204,15 +176,15 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
         objBuffer += QMARK;
 
-        SIP_UINT32 nSize = objHeaders.GetSize();
+        SIP_UINT32 nSize = m_pUriHdrParams->GetParamCount();
 
-        for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pNameValue = objHeaders.GetAt(i);
+            SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
 
             if (pNameValue != SIP_NULL)
             {
-                if (i != SIP_ZERO)
+                if (nIndex != SIP_ZERO)
                 {
                     objBuffer += AMPERSAND;
                 }
@@ -301,37 +273,30 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     }
 
     /*encoding of URI params*/
-    if (m_pUriParamList != SIP_NULL)
+    if (m_pUriParams != SIP_NULL)
     {
         SetComponentType(IParameterComponent::URI);
-        m_pUriParamList->Encode(ppCurrPos, SIP_SEMI, static_cast<IParameterComponent*>(this));
+        m_pUriParams->Encode(ppCurrPos, SIP_SEMI, static_cast<IParameterComponent*>(this));
     }
 
     /*encoding of Hdr params*/
     // "?"   header   *( "&"   header )
-    if (m_pUriHdrParamList != SIP_NULL)
+    if ((m_pUriHdrParams != SIP_NULL) && (m_pUriHdrParams->GetParamCount() != 0))
     {
         SetComponentType(IParameterComponent::HEADER);
-
-        SipVector<SipNameValue*>& sipList = m_pUriHdrParamList->GetList();
-        if (sipList.IsEmpty() == SIP_TRUE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeSipUri: Empty list", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
 
         /*Put a QUESTION MARK*/
         SIP_ENC_QMARK(*ppCurrPos);
 
-        SIP_UINT32 nSize = sipList.GetSize();
+        SIP_UINT32 nSize = m_pUriHdrParams->GetParamCount();
 
-        for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
+        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pParamNamValue = sipList.GetAt(nCount);
+            SipNameValue* pParamNamValue = m_pUriHdrParams->GetParam(nIndex);
 
             if (pParamNamValue != SIP_NULL)
             {
-                if (nCount != SIP_ZERO)
+                if (nIndex != SIP_ZERO)
                 {
                     SIP_ENC_AMPERSAND(*ppCurrPos);
                 }
@@ -502,8 +467,8 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         const SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
 
-        m_pUriHdrParamList = new SipParameterList();
-        if (m_pUriHdrParamList == SIP_NULL)
+        m_pUriHdrParams = new SipParameters();
+        if (m_pUriHdrParams == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -511,7 +476,7 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
         SetComponentType(IParameterComponent::HEADER);
 
-        if (m_pUriHdrParamList->Decode(pHeaderStart, pEndPt, AMPERSAND,
+        if (m_pUriHdrParams->Decode(pHeaderStart, pEndPt, AMPERSAND,
                     static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
             SetComponentType(IParameterComponent::NORMAL);
@@ -527,15 +492,15 @@ SIP_BOOL SipUri::DecodeSipUri(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         const SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
 
-        m_pUriParamList = new SipParameterList();
-        if (m_pUriParamList == SIP_NULL)
+        m_pUriParams = new SipParameters();
+        if (m_pUriParams == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         SetComponentType(IParameterComponent::URI);
-        if (m_pUriParamList->Decode(pUriParamStart, pEndPt, SIP_SEMI,
+        if (m_pUriParams->Decode(pUriParamStart, pEndPt, SIP_SEMI,
                     static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
             SetComponentType(IParameterComponent::NORMAL);
