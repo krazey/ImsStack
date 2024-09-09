@@ -21,10 +21,10 @@
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
-        SipHeaderBase::GetNewObj,                        //    Allow
-        SipAllowEventsHeader::GetNewObj,                 //    AllowEvent
-        SipAuthBase::GetNewObj,                          //    Authorization
-        SipHeaderBase::GetNewObj,                        //    CallId
+        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::ALLOW
+        SipEventHeader::GetNewObj,                       //    SipHeaderBase::ALLOW_EVENTS
+        SipAuthBase::GetNewObj,                          //    SipHeaderBase::AUTHORIZATION
+        SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CALL_ID
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_WILD
         SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_ANY

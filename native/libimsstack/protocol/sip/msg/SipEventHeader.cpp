@@ -18,27 +18,40 @@
 #include "msg/SipMsgUtil.h"
 #include "platform/SipString.h"
 
-SipEventHeader::SipEventHeader() :
-        SipHeaderBase(SipHeaderBase::EVENT),
-        m_pEventTemplateList(SIP_NULL)
+SipEventHeader::SipEventHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
+        m_objEventTemplates(SipVector<SIP_CHAR*>())
 {
 }
 
 SipEventHeader::SipEventHeader(const SipEventHeader& objHeader) :
         SipHeaderBase(objHeader),
-        m_pEventTemplateList(SIP_NULL)
+        m_objEventTemplates(SipVector<SIP_CHAR*>())
 {
-    if (objHeader.m_pEventTemplateList != SIP_NULL)
+    SIP_UINT32 nSize = objHeader.m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
     {
-        m_pEventTemplateList = new SipParameterList(*(objHeader.m_pEventTemplateList));
+        SIP_CHAR* pTemplate = objHeader.m_objEventTemplates.GetAt(nIndex);
+
+        if (pTemplate != SIP_NULL)
+        {
+            SIP_CHAR* pEventTemplate = SipPf_Strdup(pTemplate);
+
+            if (pEventTemplate != SIP_NULL)
+            {
+                m_objEventTemplates.Add(pEventTemplate);
+            }
+        }
     }
 }
 
 SipEventHeader::~SipEventHeader()
 {
-    if (m_pEventTemplateList != SIP_NULL)
+    while (m_objEventTemplates.IsEmpty() != SIP_TRUE)
     {
-        m_pEventTemplateList->SipDelete();
+        delete[] m_objEventTemplates.Top();
+        m_objEventTemplates.Pop();
     }
 }
 
@@ -54,52 +67,38 @@ SIP_BOOL SipEventHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) cons
 
     objBuffer += pszValue;
 
-    if (m_pEventTemplateList != SIP_NULL)
+    SIP_UINT32 nSize = m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
     {
-        SipVector<SipNameValue*>& objNameValues = m_pEventTemplateList->GetList();
-        SIP_UINT32 nSize = objNameValues.GetSize();
-
-        for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
-        {
-            SipNameValue* pNameValue = objNameValues.GetAt(i);
-
-            if (pNameValue != SIP_NULL)
-            {
-                objBuffer += SIP_DOT;
-                objBuffer += pNameValue->m_pszName;
-            }
-        }
+        objBuffer += SIP_DOT;
+        objBuffer += m_objEventTemplates.GetAt(nIndex);
     }
 
     return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
-SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     const SIP_CHAR* pszValue = GetValue();
     if (pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Evt package", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Event package", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SipPf_Strcpy(*ppCurrPos, pszValue);
     SipEnc_UpdateCurrPos(ppCurrPos);
-    if (m_pEventTemplateList != SIP_NULL)
-    {
-        SipVector<SipNameValue*>& sipList = m_pEventTemplateList->GetList();
-        SIP_UINT32 nSize = sipList.GetSize();
-        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
-        {
-            SipNameValue* pNmVl = sipList.GetAt(nIndex);
-            if (pNmVl != SIP_NULL)
-            {
-                SIP_ENC_DOT(*ppCurrPos);
 
-                SipPf_Strcpy(*ppCurrPos, pNmVl->m_pszName);
-                SipEnc_UpdateCurrPos(ppCurrPos);
-            }
-        }
+    SIP_UINT32 nSize = m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        *(*ppCurrPos) = SIP_DOT;
+        (*ppCurrPos)++;
+
+        SipPf_Strcpy(*ppCurrPos, m_objEventTemplates.GetAt(nIndex));
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -126,50 +125,137 @@ SIP_BOOL SipEventHeader::DecodeHdr(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pEndPt = pTempPre;
     }
 
+    // Header ends with DOT. Example : "event-package.event-template."
+    if (*pEndPt == SIP_DOT)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Template ends with DOT", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     const SIP_CHAR* pTempPos = SIP_NULL;
+    /*Case of having event template*/
     if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
 
-    SIP_CHAR* pszEvent = SipCreateString(pStartPt, pTempPos);
-    if (SetValue(pszEvent) == SIP_FALSE)
+    SIP_CHAR* pszValue = SipCreateString(pStartPt, pTempPos);
+    if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        if (pszEvent != SIP_NULL)
+        if (pszValue != SIP_NULL)
         {
-            delete[] pszEvent;
+            delete[] pszValue;
         }
         return SIP_FALSE;
     }
-    delete[] pszEvent;
+    delete[] pszValue;
 
-    if (pTempPos != pEndPt)
+    // No event templates
+    if (pTempPos == pEndPt)
     {
-        m_pEventTemplateList = new SipParameterList();
-        if (m_pEventTemplateList == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
-        pTempPos = pTempPos + SIP_TWO;
-
-        if (m_pEventTemplateList->Decode(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Event Package Decoding Failed", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
+        return SIP_TRUE;
     }
+
+    /*Update the start position to the start of eventTamplate*/
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
+
+    while (pStartPt < pEndPt)
+    {
+        pTempNext = SIP_NULL;
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, SIP_DOT) == SIP_FALSE)
+        {
+            pTempPos = pEndPt;
+            pTempNext = pEndPt;
+        }
+
+        // Consecutive DOTS present without template. Example : "package.templ1..templ2"
+        if ((pTempPos == pStartPt) && (*pTempPos == SIP_DOT))
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty template", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        SIP_CHAR* pTemplate = SipCreateString(pStartPt, pTempPos);
+        if (pTemplate == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        m_objEventTemplates.Add(pTemplate);
+
+        pStartPt = pTempNext;
+        pTempPos = SIP_NULL;
+    }
+
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipEventHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+SIP_BOOL SipEventHeader::IsTemplatePresent(const SIP_CHAR* pTemplateName) const
+{
+    SIP_UINT32 nSize = m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        const SIP_CHAR* pEventTemplate = m_objEventTemplates.GetAt(nIndex);
+        if (SipPf_Strcmp(pTemplateName, pEventTemplate) == 0)
+        {
+            return SIP_TRUE;
+        }
+    }
+    return SIP_FALSE;
+}
+
+SIP_INT32 SipEventHeader::GetTemplateIndex(const SIP_CHAR* pTemplateName) const
+{
+    SIP_UINT32 nSize = m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        const SIP_CHAR* pEventTemplate = m_objEventTemplates.GetAt(nIndex);
+        if (SipPf_Strcmp(pTemplateName, pEventTemplate) == 0)
+        {
+            return nIndex;
+        }
+    }
+    return -1;
+}
+
+SIP_VOID SipEventHeader::AddTemplate(const SIP_CHAR* pTemplateName)
+{
+    SIP_CHAR* pTemplate = SipPf_Strdup(pTemplateName);
+
+    if (pTemplate == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        return;
+    }
+    m_objEventTemplates.Add(pTemplate);
+}
+
+SIP_VOID SipEventHeader::RemoveTemplate(const SIP_CHAR* pTemplateName)
+{
+    SIP_UINT32 nSize = m_objEventTemplates.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        SIP_CHAR* pEventTemplate = m_objEventTemplates.GetAt(nIndex);
+        if (SipPf_Strcmp(pTemplateName, pEventTemplate) == 0)
+        {
+            delete[] pEventTemplate;
+            m_objEventTemplates.RemoveAt(nIndex);
+            return;
+        }
+    }
+}
+
+SipHeaderBase* SipEventHeader::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipEventHeader(*reinterpret_cast<SipEventHeader*>(pHeader));
     }
-    return new SipEventHeader();
+    return new SipEventHeader(eHeaderType);
 }

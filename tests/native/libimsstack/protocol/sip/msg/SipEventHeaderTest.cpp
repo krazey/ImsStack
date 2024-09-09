@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "SipConfiguration.h"
 #include "msg/SipEventHeader.h"
 
 namespace android
@@ -31,7 +32,7 @@ protected:
 
 TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
 {
-    SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
+    SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     const SIP_INT32 BUFFER_SIZE = 4096;
@@ -42,13 +43,14 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE,
+            pHeader->EncodeHdr(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("", 0));
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("event-package", 13));
 
-    SipHeaderBase* pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
+    SipHeaderBase* pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
@@ -60,12 +62,12 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
 
     pCopyHeader->SipDelete();
 
-    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr("event-package.event-template", 28));
 
-    pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
+    pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
@@ -75,12 +77,57 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
     objBuffer = AString::ConstNull();
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template", &(aBuffer[0]));
     EXPECT_STREQ("event-package.event-template", objBuffer.GetCharString());
 
     pCopyHeader->SipDelete();
 
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    // Consecutive DOTS, fail.
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("event-package.event-template1..event-template2", 46));
+
+    pHeader->SipDelete();
+
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    // Ending with DOT, fail.
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr("event-package.event-template1.event-template2.", 46));
+
+    pHeader->SipDelete();
+
+    SipEventHeader* pEventsHeader = reinterpret_cast<SipEventHeader*>(
+            SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr));
+    ASSERT_TRUE(pEventsHeader != nullptr);
+
+    EXPECT_EQ(SIP_TRUE,
+            pEventsHeader->DecodeHdr("event-package.event-template1.event-template2", 45));
+
+    EXPECT_EQ(2, pEventsHeader->GetTemplateCount());
+
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->IsTemplatePresent("event-template1"));
+    EXPECT_EQ(SIP_FALSE, pEventsHeader->IsTemplatePresent("event-template3"));
+
+    EXPECT_EQ(0, pEventsHeader->GetTemplateIndex("event-template1"));
+    EXPECT_EQ(-1, pEventsHeader->GetTemplateIndex("event-template4"));
+
+    EXPECT_STREQ("event-template2", pEventsHeader->GetTemplate(1));
+
+    pEventsHeader->RemoveTemplate("event-template2");
+    pEventsHeader->AddTemplate("event-template5");
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->EncodeHdr(&pBuff));
+    EXPECT_STREQ("event-package.event-template1.event-template5", &(aBuffer[0]));
+
+    pEventsHeader->SipDelete();
+
+    // Event header
     pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
