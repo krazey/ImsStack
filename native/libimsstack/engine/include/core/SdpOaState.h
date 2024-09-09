@@ -52,8 +52,7 @@ public:
     void MarkRejectedOrRemoved(IN IMS_SINT32 nMid) override;
     void RemoveMediaParameter(IN IMS_SINT32 nMid) override;
 
-    IMS_BOOL CreateCapabilities(
-            IN Service* pService, IN const AString& strUserId, IN IMS_BOOL bMProf = IMS_FALSE);
+    IMS_BOOL CreateCapabilities(IN Service* pService, IN IMS_BOOL bMProf = IMS_FALSE);
     const SessionParameter* GetCapabilities() const;
     /**
      * @brief Returns the current local session parameter.

@@ -821,7 +821,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
     SdpSessionDescription objSessionDesc;
 
     // Create a session-level mandatory descriptions
-    if (!objSessionDesc.CreateMandatoryLines(GetUserAor()->GetUri(), objLocalAddress))
+    if (!objSessionDesc.CreateMandatoryLines(SdpOrigin::DEFAULT_USERNAME, objLocalAddress))
     {
         IMS_TRACE_E(0, "Creating a session descriptor failed", 0, 0, 0);
         return IMS_FALSE;

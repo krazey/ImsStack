@@ -23,6 +23,7 @@
 
 __IMS_TRACE_TAG_SDP__;
 
+PUBLIC GLOBAL const IMS_CHAR SdpOrigin::DEFAULT_USERNAME[] = "-";
 PRIVATE GLOBAL IMS_UINT32 SdpOrigin::s_nLastTime = 0;
 
 PUBLIC

@@ -701,8 +701,7 @@ PUBLIC VIRTUAL void SdpOaState::RemoveMediaParameter(IN IMS_SINT32 nMid)
  * @brief Creates a new session parameter for the local capabilities.
  */
 PUBLIC
-IMS_BOOL SdpOaState::CreateCapabilities(
-        IN Service* pService, IN const AString& strUserId, IN IMS_BOOL bMProf /*= IMS_FALSE*/)
+IMS_BOOL SdpOaState::CreateCapabilities(IN Service* pService, IN IMS_BOOL bMProf /*= IMS_FALSE*/)
 {
     if ((m_nState != STATE_IDLE) && (m_nState != STATE_OFFER_RECEIVED))
     {
@@ -712,7 +711,8 @@ IMS_BOOL SdpOaState::CreateCapabilities(
 
     SdpSessionDescription objSessionDesc;
 
-    if (!objSessionDesc.CreateMandatoryLines(strUserId, pService->GetIpAddress()))
+    // Some carriers require to set the username field value of SDP o-line to "-".
+    if (!objSessionDesc.CreateMandatoryLines(SdpOrigin::DEFAULT_USERNAME, pService->GetIpAddress()))
     {
         return IMS_FALSE;
     }
