@@ -18,344 +18,6 @@
 #include "msg/SipParameters.h"
 #include "platform/SipString.h"
 
-SipParameterList::SipParameterList() :
-        m_objPrmList(SipVector<SipNameValue*>())
-{
-}
-
-SipParameterList::SipParameterList(const SipParameterList& objPrmList) :
-        m_objPrmList(SipVector<SipNameValue*>())
-{
-    SIP_UINT32 nSize = objPrmList.m_objPrmList.GetSize();
-
-    for (SIP_UINT32 unCount = SIP_ZERO; unCount < nSize; unCount++)
-    {
-        SipNameValue* pElement = objPrmList.m_objPrmList.GetAt(unCount);
-
-        if (pElement != SIP_NULL)
-        {
-            SipNameValue* pNameValue = new SipNameValue(*pElement);
-
-            if (pNameValue != SIP_NULL)
-            {
-                m_objPrmList.Add(pNameValue);
-            }
-        }
-    }
-}
-
-SipParameterList::~SipParameterList()
-{
-    while (m_objPrmList.IsEmpty() != SIP_TRUE)
-    {
-        m_objPrmList.Top()->SipDelete();
-        m_objPrmList.Pop();
-    }
-}
-
-SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue)
-{
-    if (pszName == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
-    SipNameValue* pNameValue = SIP_NULL;
-    SIP_BOOL bFound = SIP_FALSE;
-    SIP_UINT32 nIndex = SIP_ZERO;
-
-    while (nIndex < nSize)
-    {
-        pNameValue = m_objPrmList.GetAt(nIndex);
-        if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == SIP_ZERO)
-        {
-            bFound = SIP_TRUE;
-            break;
-        }
-        nIndex++;
-    }
-
-    if (bFound == SIP_FALSE)
-    {
-        pNameValue = new SipNameValue();
-        if (pNameValue == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: Malloc Failed", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-        pNameValue->m_pszName = SipPf_Strdup(pszName);
-    }
-
-    if (pszValue != SIP_NULL)
-    {
-        pNameValue->m_valueList.Add(SipPf_Strdup(pszValue));
-    }
-
-    if (bFound == SIP_FALSE)
-    {
-        m_objPrmList.Add(pNameValue);
-    }
-
-    return SIP_TRUE;
-}
-
-SIP_VOID SipParameterList::RemoveParam(const SIP_CHAR* pszName)
-{
-    if (pszName == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
-        return;
-    }
-
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
-    SIP_UINT32 nIndex = SIP_ZERO;
-
-    while (nIndex < nSize)
-    {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
-        if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == 0)
-        {
-            pNameValue->SipDelete();
-            m_objPrmList.RemoveAt(nIndex);
-            return;
-        }
-        nIndex++;
-    }
-}
-
-SIP_BOOL SipParameterList::FindElement(
-        const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_INT32& nPos) const
-{
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
-
-    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
-    {
-        SipNameValue* pElement = m_objPrmList.GetAt(nIndex);
-        if (SipPf_Stricmp(pszName, pElement->m_pszName) == 0)
-        {
-            nPos = nIndex;
-            pNameValue = pElement;
-            return SIP_TRUE;
-        }
-    }
-    return SIP_FALSE;
-}
-
-SIP_BOOL SipParameterList::SetParam(
-        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
-{
-    if (pszName == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    SipNameValue* pNameValue = SIP_NULL;
-    SIP_INT32 nTempPos = -1;
-
-    /*If parameter not found add new entry*/
-    if (FindElement(pszName, pNameValue, nTempPos) == SIP_FALSE)
-    {
-        return Add(pszName, pszValue);
-    }
-
-    /*If parameter already exists, update value*/
-    if (pNameValue->m_valueList.IsEmpty() != SIP_TRUE)
-    {
-        if (pNameValue->m_valueList.GetSize() <= nPos)
-        {
-            return SIP_FALSE;
-        }
-
-        /*If the new value is NULL, remove the existing value*/
-        if ((pszValue == SIP_NULL) || (SipPf_Strlen(pszValue) == SIP_ZERO))
-        {
-            delete pNameValue->m_valueList.GetAt(nPos);
-            pNameValue->m_valueList.RemoveAt(nPos);
-        }
-        else
-        {
-            SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
-            delete pNameValue->m_valueList.GetAt(nPos);
-            pNameValue->m_valueList.RemoveAt(nPos);
-            pNameValue->m_valueList.InsertAt(pszVal, nPos);
-        }
-    }
-    else
-    {
-        /*If parameter already not exists, add value*/
-        if ((pszValue != SIP_NULL) && (SipPf_Strlen(pszValue) != SIP_ZERO))
-        {
-            SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
-            pNameValue->m_valueList.InsertAt(pszVal, SIP_ZERO);
-        }
-    }
-
-    return SIP_TRUE;
-}
-
-SIP_CHAR* SipParameterList::GetParamValue(
-        const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/) const
-{
-    if (pszName == SIP_NULL)
-    {
-        return SIP_NULL;
-    }
-
-    SipNameValue* pNameValue = SIP_NULL;
-    SIP_INT32 nPos1 = -1;
-
-    if (FindElement(pszName, pNameValue, nPos1) == SIP_FALSE)
-    {
-        return SIP_NULL;
-    }
-
-    if (pNameValue->m_valueList.GetSize() <= nPos)
-    {
-        return SIP_NULL;
-    }
-
-    SIP_CHAR* pszElement = pNameValue->m_valueList.GetAt(nPos);
-
-    return (pszElement != SIP_NULL) ? SipPf_Strdup(pszElement) : SIP_NULL;
-}
-
-SIP_BOOL SipParameterList::IsParamPresent(const SIP_CHAR* pszName) const
-{
-    if (pszName == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    SipNameValue* pNameValue = SIP_NULL;
-    SIP_INT32 nPos = -1;
-
-    return FindElement(pszName, pNameValue, nPos);
-}
-
-SIP_INT32 SipParameterList::GetParamIndex(const SIP_CHAR* pszName) const
-{
-    if (pszName == SIP_NULL)
-    {
-        return -1;
-    }
-
-    SipNameValue* pNameValue = SIP_NULL;
-    SIP_INT32 nPos = -1;
-
-    return FindElement(pszName, pNameValue, nPos) ? nPos : -1;
-}
-
-SIP_BOOL SipParameterList::Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
-        IParameterComponent* pParameterComponent /*= SIP_NULL*/) const
-{
-    SIP_UINT32 nSize = m_objPrmList.GetSize();
-    SIP_UINT32 nIndex = SIP_ZERO;
-
-    while (nIndex < nSize)
-    {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
-
-        objBuffer += cDelimiter;
-
-        if (pNameValue->Encode(objBuffer, pParameterComponent) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeList: Encoding parameter is failed",
-                    SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
-        nIndex++;
-    }
-
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipParameterList::Encode(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
-        IParameterComponent* pParameterComponent /*= SIP_NULL*/) const
-{
-    SIP_UINT32 nCount = m_objPrmList.GetSize();
-    SIP_UINT32 nIndex = SIP_ZERO;
-
-    while (nIndex < nCount)
-    {
-        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
-
-        *(*ppCurrPos) = cDelimiter;
-        (*ppCurrPos)++;
-
-        if (pNameValue->Encode(ppCurrPos, pParameterComponent) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeList: Encoding parameter is failed",
-                    SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
-        nIndex++;
-    }
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipParameterList::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
-        const SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent)
-{
-    if ((pStartPt > pEndPt) || ((pStartPt == pEndPt) && (*pStartPt == '\0')))
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    while (pStartPt <= pEndPt)
-    {
-        const SIP_CHAR* pTempPos = SIP_NULL;
-        const SIP_CHAR* pTempNext = SIP_NULL;
-
-        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
-        {
-            pTempPos = pEndPt;
-        }
-
-        SipNameValue* pNameValue = new SipNameValue();
-        if (pNameValue == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
-        if (pNameValue->Decode(pStartPt, pTempPos, pParameterComponent) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Name Val Decode fail", SIP_ZERO, SIP_ZERO);
-            pNameValue->SipDelete();
-            return SIP_FALSE;
-        }
-
-        if (m_objPrmList.Add(pNameValue) < SIP_ZERO)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "Decode: Append in list Failed", SIP_ZERO, SIP_ZERO);
-            pNameValue->SipDelete();
-            return SIP_FALSE;
-        }
-
-        if (pTempPos == pEndPt)
-        {
-            return SIP_TRUE;
-        }
-
-        pStartPt = pTempNext;
-
-        if (pStartPt > pEndPt)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-    }
-    return SIP_TRUE;
-}
-
 SipNameValue::SipNameValue() :
         m_pszName(SIP_NULL),
         m_valueList(SipVector<SIP_CHAR*>()),
@@ -628,42 +290,332 @@ SIP_BOOL SipNameValue::Decode(
     return SIP_TRUE;
 }
 
-SipParameters::SipParameters() {}
+SipParameters::SipParameters() :
+        m_objPrmList(SipVector<SipNameValue*>())
+{
+}
 
 SipParameters::SipParameters(const SipParameters& objParameters) :
-        m_objParameterList(objParameters.m_objParameterList)
+        m_objPrmList(SipVector<SipNameValue*>())
 {
+    SIP_UINT32 nSize = objParameters.m_objPrmList.GetSize();
+
+    for (SIP_UINT32 unCount = SIP_ZERO; unCount < nSize; unCount++)
+    {
+        SipNameValue* pElement = objParameters.m_objPrmList.GetAt(unCount);
+
+        if (pElement != SIP_NULL)
+        {
+            SipNameValue* pNameValue = new SipNameValue(*pElement);
+
+            if (pNameValue != SIP_NULL)
+            {
+                m_objPrmList.Add(pNameValue);
+            }
+        }
+    }
 }
 
 SipParameters::~SipParameters() {}
 
+SIP_BOOL SipParameters::Encode(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
+        IParameterComponent* pParameterComponent) const
+{
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    while (nIndex < nSize)
+    {
+        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+
+        objBuffer += cDelimiter;
+
+        if (pNameValue->Encode(objBuffer, pParameterComponent) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeList: Encoding parameter is failed",
+                    SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        nIndex++;
+    }
+
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipParameters::Encode(
+        SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent) const
+{
+    SIP_UINT32 nCount = m_objPrmList.GetSize();
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    while (nIndex < nCount)
+    {
+        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+
+        *(*ppCurrPos) = cDelimiter;
+        (*ppCurrPos)++;
+
+        if (pNameValue->Encode(ppCurrPos, pParameterComponent) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeList: Encoding parameter is failed",
+                    SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        nIndex++;
+    }
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipParameters::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt,
+        const SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent)
+{
+    if ((pStartPt > pEndPt) || ((pStartPt == pEndPt) && (*pStartPt == '\0')))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    while (pStartPt <= pEndPt)
+    {
+        const SIP_CHAR* pTempPos = SIP_NULL;
+        const SIP_CHAR* pTempNext = SIP_NULL;
+
+        if (SipFindActualPos(pStartPt, pEndPt, &pTempPos, &pTempNext, cDelimiter) == SIP_FALSE)
+        {
+            pTempPos = pEndPt;
+        }
+
+        SipNameValue* pNameValue = new SipNameValue();
+        if (pNameValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        if (pNameValue->Decode(pStartPt, pTempPos, pParameterComponent) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode: Name Val Decode fail", SIP_ZERO, SIP_ZERO);
+            pNameValue->SipDelete();
+            return SIP_FALSE;
+        }
+
+        if (m_objPrmList.Add(pNameValue) < SIP_ZERO)
+        {
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Decode: Append in list Failed", SIP_ZERO, SIP_ZERO);
+            pNameValue->SipDelete();
+            return SIP_FALSE;
+        }
+
+        if (pTempPos == pEndPt)
+        {
+            return SIP_TRUE;
+        }
+
+        pStartPt = pTempNext;
+
+        if (pStartPt > pEndPt)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode: No Value Present", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+    }
+    return SIP_TRUE;
+}
+
 SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue)
 {
-    return m_objParameterList.Add(pszName, pszValue);
+    if (pszName == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SipNameValue* pNameValue = SIP_NULL;
+    SIP_BOOL bFound = SIP_FALSE;
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    while (nIndex < nSize)
+    {
+        pNameValue = m_objPrmList.GetAt(nIndex);
+        if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == SIP_ZERO)
+        {
+            bFound = SIP_TRUE;
+            break;
+        }
+        nIndex++;
+    }
+
+    if (bFound == SIP_FALSE)
+    {
+        pNameValue = new SipNameValue();
+        if (pNameValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: Malloc Failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+        pNameValue->m_pszName = SipPf_Strdup(pszName);
+    }
+
+    if (pszValue != SIP_NULL)
+    {
+        pNameValue->m_valueList.Add(SipPf_Strdup(pszValue));
+    }
+
+    if (bFound == SIP_FALSE)
+    {
+        m_objPrmList.Add(pNameValue);
+    }
+
+    return SIP_TRUE;
 }
 
 SIP_VOID SipParameters::RemoveParam(const SIP_CHAR* pszName)
 {
-    m_objParameterList.RemoveParam(pszName);
+    if (pszName == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
+        return;
+    }
+
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    while (nIndex < nSize)
+    {
+        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+        if (SipPf_Strcmp(pNameValue->m_pszName, pszName) == 0)
+        {
+            pNameValue->SipDelete();
+            m_objPrmList.RemoveAt(nIndex);
+            return;
+        }
+        nIndex++;
+    }
 }
 
 SIP_BOOL SipParameters::SetParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
-    return m_objParameterList.SetParam(pszName, pszValue, nPos);
+    if (pszName == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
+    SipNameValue* pNameValue = SIP_NULL;
+    SIP_INT32 nTempPos = -1;
+
+    /*If parameter not found add new entry*/
+    if (FindElement(pszName, pNameValue, nTempPos) == SIP_FALSE)
+    {
+        return AddParam(pszName, pszValue);
+    }
+
+    /*If parameter already exists, update value*/
+    if (pNameValue->m_valueList.IsEmpty() != SIP_TRUE)
+    {
+        if (pNameValue->m_valueList.GetSize() <= nPos)
+        {
+            return SIP_FALSE;
+        }
+
+        /*If the new value is NULL, remove the existing value*/
+        if ((pszValue == SIP_NULL) || (SipPf_Strlen(pszValue) == SIP_ZERO))
+        {
+            delete pNameValue->m_valueList.GetAt(nPos);
+            pNameValue->m_valueList.RemoveAt(nPos);
+        }
+        else
+        {
+            SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
+            delete pNameValue->m_valueList.GetAt(nPos);
+            pNameValue->m_valueList.RemoveAt(nPos);
+            pNameValue->m_valueList.InsertAt(pszVal, nPos);
+        }
+    }
+    else
+    {
+        /*If parameter already not exists, add value*/
+        if ((pszValue != SIP_NULL) && (SipPf_Strlen(pszValue) != SIP_ZERO))
+        {
+            SIP_CHAR* pszVal = SipPf_Strdup(pszValue);
+            pNameValue->m_valueList.InsertAt(pszVal, SIP_ZERO);
+        }
+    }
+
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipParameters::FindElement(
+        const SIP_CHAR* pszName, SipNameValue*& pNameValue, SIP_INT32& nPos) const
+{
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        SipNameValue* pElement = m_objPrmList.GetAt(nIndex);
+        if (SipPf_Stricmp(pszName, pElement->m_pszName) == 0)
+        {
+            nPos = nIndex;
+            pNameValue = pElement;
+            return SIP_TRUE;
+        }
+    }
+    return SIP_FALSE;
 }
 
 SIP_BOOL SipParameters::IsParamPresent(const SIP_CHAR* pszName) const
 {
-    return m_objParameterList.IsParamPresent(pszName);
-}
+    if (pszName == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
 
-SipParameterList& SipParameters::GetParameterList()
-{
-    return m_objParameterList;
+    SipNameValue* pNameValue = SIP_NULL;
+    SIP_INT32 nPos = -1;
+
+    return FindElement(pszName, pNameValue, nPos);
 }
 
 SIP_CHAR* SipParameters::GetParamValue(
         const SIP_CHAR* pszName, SIP_UINT32 nPos /*= SIP_ZERO*/) const
 {
-    return m_objParameterList.GetParamValue(pszName, nPos);
+    if (pszName == SIP_NULL)
+    {
+        return SIP_NULL;
+    }
+
+    SipNameValue* pNameValue = SIP_NULL;
+    SIP_INT32 nPos1 = -1;
+
+    if (FindElement(pszName, pNameValue, nPos1) == SIP_FALSE)
+    {
+        return SIP_NULL;
+    }
+
+    if (pNameValue->m_valueList.GetSize() <= nPos)
+    {
+        return SIP_NULL;
+    }
+
+    SIP_CHAR* pszElement = pNameValue->m_valueList.GetAt(nPos);
+
+    return (pszElement != SIP_NULL) ? SipPf_Strdup(pszElement) : SIP_NULL;
+}
+
+SIP_INT32 SipParameters::GetParamIndex(const SIP_CHAR* pszName) const
+{
+    if (pszName == SIP_NULL)
+    {
+        return -1;
+    }
+
+    SipNameValue* pNameValue = SIP_NULL;
+    SIP_INT32 nPos = -1;
+
+    return FindElement(pszName, pNameValue, nPos) ? nPos : -1;
 }

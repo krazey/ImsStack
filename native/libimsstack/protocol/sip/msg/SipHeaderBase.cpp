@@ -281,11 +281,9 @@ SIP_BOOL SipHeaderBase::EncodeHeaderParameters(
         return SIP_TRUE;
     }
 
-    const SipParameterList& objParameterList = m_pParameters->GetParameterList();
-
     if (bParams == SIP_TRUE)
     {
-        return objParameterList.Encode(ppCurrPos, SIP_SEMI);
+        return m_pParameters->Encode(ppCurrPos, SIP_SEMI);
     }
 
     return SIP_TRUE;
@@ -298,8 +296,7 @@ SIP_BOOL SipHeaderBase::EncodeParameters(AStringBuffer& objBuffer) const
         return SIP_TRUE;
     }
 
-    const SipParameterList& objParameterList = m_pParameters->GetParameterList();
-    return objParameterList.Encode(objBuffer, SIP_SEMI);
+    return m_pParameters->Encode(objBuffer, SIP_SEMI);
 }
 
 SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -330,7 +327,7 @@ SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP
 }
 
 SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
-        const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimeter)
+        const SIP_CHAR* pStart, const SIP_CHAR* pEnd, const SIP_CHAR cDelimiter)
 {
     if (m_pParameters == SIP_NULL)
     {
@@ -343,9 +340,7 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(
         return SIP_FALSE;
     }
 
-    SipParameterList& objParameterList = m_pParameters->GetParameterList();
-
-    if (objParameterList.Decode(pStart, pEnd, cDelimeter) == SIP_FALSE)
+    if (m_pParameters->Decode(pStart, pEnd, cDelimiter) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
