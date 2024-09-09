@@ -30,9 +30,9 @@ android_test {
         "src/**/*.java",
     ],
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
         "ims-common",
         "telephony-common",
     ],
