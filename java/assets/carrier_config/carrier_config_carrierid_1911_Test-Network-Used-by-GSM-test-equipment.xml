@@ -22,7 +22,7 @@
     <!-- MEDIA -->
     <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
         <int-array name="imsvoice.evs_payload_type_int_array" num="1">
-            <item value="125"/>
+            <item value="127"/>
         </int-array>
         <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
             <item value="115"/>
@@ -40,17 +40,18 @@
         </int-array>
     </pbundle>
     <pbundle name="imsvoice.evs_payload_description_bundle">
-        <pbundle name="125">
-            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+        <pbundle name="127">
+            <int name="imsvoice.codec_attribute_cmr_int" value="1"/>
             <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
             <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
             <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
                 <item value="0"/>
-                <item value="4"/>
+                <item value="6"/>
             </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="0"/>
             <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
-            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
         </pbundle>
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
