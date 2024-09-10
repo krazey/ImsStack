@@ -237,6 +237,7 @@ public:
 
     public:
         EvsFmtp() :
+                AudioFmtp(),
                 m_nHfOnly(DEFAULT_HFMODE),
                 m_nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
                 m_nBrList(0),
@@ -259,6 +260,7 @@ public:
         }
 
         EvsFmtp(IN const EvsFmtp& objFmtp) :
+                AudioFmtp(objFmtp),
                 m_nHfOnly(objFmtp.m_nHfOnly),
                 m_nEvsModeSwitch(objFmtp.m_nEvsModeSwitch),
                 m_nBrList(objFmtp.m_nBrList),
