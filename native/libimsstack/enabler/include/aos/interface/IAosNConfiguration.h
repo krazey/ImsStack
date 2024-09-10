@@ -108,6 +108,13 @@ public:
     virtual IMS_BOOL IsRttSupported() const = 0;
 
     /**
+     * @brief Check if RTT is supported while UE is on roaming network.
+     *
+     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
+     */
+    virtual IMS_BOOL IsRttSupportedWhileRoaming() const = 0;
+
+    /**
      * @brief Check if limited admin sms mode is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.

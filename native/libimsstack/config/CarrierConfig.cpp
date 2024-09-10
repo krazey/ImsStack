@@ -27,6 +27,8 @@ const IMS_CHAR CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL[] =
         "support_emergency_sms_over_ims_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_USSD_METHOD_INT[] = "carrier_ussd_method_int";
 const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_BOOL[] = "rtt_supported_bool";
+const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL[] =
+        "rtt_supported_while_roaming_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL[] =
         "carrier_volte_tty_supported_bool";
 const IMS_CHAR CarrierConfig::KEY_USE_RCS_SIP_OPTIONS_BOOL[] = "use_rcs_sip_options_bool";

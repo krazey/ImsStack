@@ -151,6 +151,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRttSupported() const
     return m_objCarrierConfig.bRttSupported;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRttSupportedWhileRoaming() const
+{
+    return m_objCarrierConfig.bRttSupportedWhileRoaming;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportLimitedAdminSmsMode() const
 {
     return m_objCarrierConfig.bSupportLimitedAdminSmsMode;
@@ -1163,6 +1168,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
     m_objCarrierConfig.bCarrierWfcImsAvailable =
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL);
     m_objCarrierConfig.bRttSupported = piCc->GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_BOOL);
+    m_objCarrierConfig.bRttSupportedWhileRoaming =
+            piCc->GetBoolean(CarrierConfig::KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
     m_objCarrierConfig.bCarrierCrossSimImsAvailable =
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL);
     m_objCarrierConfig.bCarrierVolteTtySupported =
