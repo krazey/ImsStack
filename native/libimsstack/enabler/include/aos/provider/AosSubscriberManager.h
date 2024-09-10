@@ -39,7 +39,7 @@ class AosSubscriberManager :
 {
 public:
     explicit AosSubscriberManager(IN IMS_SINT32 nSlotId);
-    virtual ~AosSubscriberManager();
+    ~AosSubscriberManager() override;
 
 public:
     IMS_BOOL IsReady(IN IMS_BOOL bIsFake = IMS_FALSE) const override;

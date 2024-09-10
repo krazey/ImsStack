@@ -48,7 +48,7 @@ class AosCondition :
 public:
     explicit AosCondition(IN IAosAppContext* piAppContext);
     inline explicit AosCondition(){};
-    virtual ~AosCondition();
+    ~AosCondition() override;
 
     virtual void Start();
     virtual void Stop();

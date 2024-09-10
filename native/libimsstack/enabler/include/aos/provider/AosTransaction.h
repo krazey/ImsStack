@@ -44,7 +44,7 @@ public:
     {
     }
 
-    virtual ~AosTraffic() {}
+    ~AosTraffic() override {}
 
     // IImsRadioConnectionListener
     inline void ImsRadio_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
@@ -78,7 +78,7 @@ class AosTransaction :
 {
 public:
     explicit AosTransaction(IN IMS_SINT32 nSlotId);
-    virtual ~AosTransaction();
+    ~AosTransaction() override;
 
     void SetListener(IN IMS_UINT32 nType, IN IAosTransactionListener* piListener) override;
     void RemoveListener(IN IMS_UINT32 nType, IN IAosTransactionListener* piListener) override;

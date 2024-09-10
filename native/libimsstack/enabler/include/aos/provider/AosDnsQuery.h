@@ -30,7 +30,7 @@ class AosDnsQuery : public ImsActivityEx
 {
 public:
     explicit AosDnsQuery(IN IMS_BOOL bIsTest = IMS_FALSE);
-    virtual ~AosDnsQuery();
+    ~AosDnsQuery() override;
 
 private:
     AosDnsQuery(IN const AosDnsQuery& objRhs);

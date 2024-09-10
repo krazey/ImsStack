@@ -38,7 +38,7 @@ class AosConnector :
 public:
     explicit AosConnector(IN IAosAppContext* piAppContext);
     inline explicit AosConnector(){};
-    virtual ~AosConnector();
+    ~AosConnector() override;
 
     virtual IMS_BOOL Start();
     virtual void Stop();

@@ -24,7 +24,7 @@ class AosHandleMts : public AosHandle
 public:
     AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleMts();
+    ~AosHandleMts() override;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;

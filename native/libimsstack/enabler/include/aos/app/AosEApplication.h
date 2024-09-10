@@ -30,7 +30,7 @@ class AosEApplication : public AosApplication, public IAosRegStateManagerListene
 {
 public:
     AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
-    virtual ~AosEApplication();
+    ~AosEApplication() override;
 
     // IAosApplication
     IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;

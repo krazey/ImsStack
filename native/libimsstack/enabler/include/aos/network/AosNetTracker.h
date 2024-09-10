@@ -40,7 +40,7 @@ class AosNetTracker :
 {
 public:
     explicit AosNetTracker(IN IAosAppContext* piAppContext);
-    virtual ~AosNetTracker();
+    ~AosNetTracker() override;
 
 public:
     // IAosNetTracker

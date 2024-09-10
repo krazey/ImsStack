@@ -61,7 +61,7 @@ class AosHandle :
 public:
     AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_UINT32 nServiceType);
-    virtual ~AosHandle();
+    ~AosHandle() override;
 
     // IAosHandle
     AString& GetAppId() override;

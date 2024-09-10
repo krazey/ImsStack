@@ -29,7 +29,7 @@ class AosService : public IAosService, public ITimerListener
 {
 public:
     explicit AosService(IN IMS_SINT32 nSlotId);
-    virtual ~AosService();
+    ~AosService() override;
 
     void AddListener(IN IAosRegistrationControlListener* piListener) override;
     void RemoveListener(IN IAosRegistrationControlListener* piListener) override;

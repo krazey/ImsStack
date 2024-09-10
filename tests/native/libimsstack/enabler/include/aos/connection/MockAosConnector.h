@@ -38,7 +38,7 @@ public:
             AosConnector()
     {
     }
-    ~MockAosConnector() {}
+    ~MockAosConnector() override {}
     MOCK_METHOD(IMS_BOOL, Start, (), (override));
     MOCK_METHOD(void, Stop, (), (override));
     MOCK_METHOD(void, Stop, (IN IMS_SINT32 nDelayTimeSec), (override));

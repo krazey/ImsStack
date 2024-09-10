@@ -67,7 +67,7 @@ class AosRegistration :
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
-    virtual ~AosRegistration();
+    ~AosRegistration() override;
 
     /// IAosRegistration
     void Start() override;

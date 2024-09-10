@@ -25,7 +25,7 @@ class AosInfo : public IImsAosInfo
 {
 public:
     explicit AosInfo(IN IAosAppContext* piContext);
-    virtual ~AosInfo();
+    ~AosInfo() override;
 
 private:
     // IImsAosInfo

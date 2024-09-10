@@ -28,7 +28,7 @@ public:
             AosKeepAlive(nSlotId)
     {
     }
-    ~MockAosKeepAlive() {}
+    ~MockAosKeepAlive() override {}
     MOCK_METHOD(void, SetListener, (IN IAosKeepAliveListener * piListener), (override));
     MOCK_METHOD(void, KeepAliveHelper_PongReceived, (), (override));
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piTimer), (override));

@@ -26,7 +26,7 @@ class AosRetryRepository : public IAosRetryRepository
 {
 public:
     explicit AosRetryRepository(IN IMS_SINT32 nSlotId);
-    virtual ~AosRetryRepository();
+    ~AosRetryRepository() override;
 
     enum
     {
@@ -34,8 +34,8 @@ public:
         TYPE_EMERGENCY
     };
 
-    virtual IMS_BOOL IncreaseRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL);
-    virtual void ResetRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL);
+    IMS_BOOL IncreaseRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL) override;
+    void ResetRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL) override;
 
 protected:
     IMS_SINT32 m_nRetryCount;

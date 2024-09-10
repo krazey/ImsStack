@@ -32,7 +32,7 @@ class AosHandleMtc :
 public:
     AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleMtc();
+    ~AosHandleMtc() override;
 
     // IAosHandle
     IMS_BOOL App_Notify() override;

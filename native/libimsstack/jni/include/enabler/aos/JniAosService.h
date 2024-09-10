@@ -26,7 +26,7 @@ class JniAosService : public BaseService
 {
 public:
     JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniAosService();
+    ~JniAosService() override;
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
