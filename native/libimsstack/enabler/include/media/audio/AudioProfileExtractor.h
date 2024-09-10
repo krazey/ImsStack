@@ -37,10 +37,6 @@ private:
             IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp);
     IMS_BOOL ExtractFmtpMaxRed(
             IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpPtime(
-            IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp);
-    IMS_BOOL ExtractFmtpMaxPtime(
-            IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp);
     void ExtractFmtpOctetAlign(
             IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AmrFmtp* pFmtp);
     IMS_BOOL ExtractFmtpDtx(

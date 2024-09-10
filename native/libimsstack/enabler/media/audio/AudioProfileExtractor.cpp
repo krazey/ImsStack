@@ -235,14 +235,6 @@ IMS_BOOL AudioProfileExtractor::ExtractAudioBaseFmtp(
     {
         return IMS_TRUE;
     }
-    if (ExtractFmtpPtime(objSplitEqual, pFmtp))
-    {
-        return IMS_TRUE;
-    }
-    if (ExtractFmtpMaxPtime(objSplitEqual, pFmtp))
-    {
-        return IMS_TRUE;
-    }
 
     return IMS_FALSE;
 }
@@ -428,52 +420,6 @@ IMS_BOOL AudioProfileExtractor::ExtractFmtpMaxRed(
 
         IMS_TRACE_D("ExtractFmtpMaxRed() - max-red[%d], visible[%d]", pFmtp->GetMaxRed(),
                 pFmtp->IsMaxRedVisible(), 0);
-
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpPtime(
-        IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
-{
-    if (pFmtp == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (objSplitEqual.GetAt(0).Equals("ptime") == IMS_TRUE)
-    {
-        pFmtp->SetPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowPtime(IMS_TRUE);
-
-        IMS_TRACE_D("ExtractFmtpPtime() - ptime[%d], visible[%d]", pFmtp->GetPtime(),
-                pFmtp->IsPtimeVisible(), 0);
-
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL AudioProfileExtractor::ExtractFmtpMaxPtime(
-        IN const ImsList<AString>& objSplitEqual, OUT AudioProfile::AudioFmtp* pFmtp)
-{
-    if (pFmtp == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (objSplitEqual.GetAt(0).Equals("maxptime") == IMS_TRUE)
-    {
-        pFmtp->SetMaxPtime((IMS_SINT32)objSplitEqual.GetAt(1).ToInt32());
-        pFmtp->SetShowMaxPtime(IMS_TRUE);
-
-        IMS_TRACE_D("ExtractFmtpMaxPtime() - maxptime[%d], visible[%d]", pFmtp->GetMaxPtime(),
-                pFmtp->IsMaxPtimeVisible(), 0);
 
         return IMS_TRUE;
     }
