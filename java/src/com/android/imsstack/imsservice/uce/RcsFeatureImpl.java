@@ -53,7 +53,8 @@ public class RcsFeatureImpl extends RcsFeature {
     public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
             @NonNull CapabilityExchangeEventListener listener) {
         logi("createCapabilityExchangeImpl");
-        return new RcsCapExchangeImpl(listener, mIContext.getSlotId(), mIContext.getContext());
+        return new RcsCapExchangeImpl(listener, mIContext.getSlotId(), mIContext.getContext(),
+                mIContext.getExecutor());
     }
 
     @Override

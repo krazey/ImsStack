@@ -35,51 +35,60 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
+
 @RunWith(JUnit4.class)
 public class RcsCapEventListenerCallBackTest {
-    @Mock
-    CapabilityExchangeEventListener mListener;
-    @Mock
-    RemoteOptionsCallback mRemoteOptionsCallback;
-    @Mock
-    RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
-    @Mock
-    MessageExecutor mMessageExecutor;
-    @Mock
-    MessageExecutor mMessageExecutorRequest;
     private static final String TEST_PHONE_NUMBER = "+123456789";
+    private static final String FEATURE_VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
+
+    @Mock CapabilityExchangeEventListener mListener;
+    @Mock RemoteOptionsCallback mRemoteOptionsCallback;
+    @Mock RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    @Mock Executor mMessageExecutorRequest;
+    @Mock RcsCapOptionsRequestCallback mRcsCapOptionsRequestCallback;
+
+    private MessageExecutor mMessageExecutor;
     private RcsCapEventListenerCallBack mRcsCapEventListenerCallBack;
-    private RcsCapOptionsRequestCallback mRcsCapOptionsRequestCallback;
-    static final String FEATURE_VIDEO = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
 
     @Before
     public void setUp() throws Exception {
-        mListener = Mockito.mock(CapabilityExchangeEventListener.class);
-        mRemoteOptionsCallback = Mockito.mock(RemoteOptionsCallback.class);
-        mRcsCapOptionsResponseCallBack = Mockito.mock(RcsCapOptionsResponseCallBack.class);
+        MockitoAnnotations.initMocks(this);
         mMessageExecutor = new MessageExecutor("RcsUceCAllBack");
-        mMessageExecutorRequest = new MessageExecutor("RcsUceRequestCAllBack");
-        mRcsCapOptionsRequestCallback = Mockito.mock(RcsCapOptionsRequestCallback.class);
-        mRcsCapEventListenerCallBack = new RcsCapEventListenerCallBack(mListener,
-                mMessageExecutor, mMessageExecutorRequest, mRcsCapOptionsRequestCallback);
+        mRcsCapEventListenerCallBack =
+                new RcsCapEventListenerCallBack(
+                        mListener,
+                        mMessageExecutor,
+                        mMessageExecutorRequest,
+                        mRcsCapOptionsRequestCallback);
     }
+
+    @After
+    public void tearDown() throws Exception {
+        mRcsCapEventListenerCallBack = null;
+        mMessageExecutor = null;
+    }
+
     @Test
     public void onRequestPublishCapabilitiesTest() throws ImsException {
         int publishTriggerType = CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED;
         mRcsCapEventListenerCallBack.onRequestPublishCapabilities(publishTriggerType);
         Mockito.verify(mListener, Mockito.timeout(100).times(1))
-                        .onRequestPublishCapabilities(publishTriggerType);
+                .onRequestPublishCapabilities(publishTriggerType);
         publishTriggerType = CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD;
         mRcsCapEventListenerCallBack.onRequestPublishCapabilities(publishTriggerType);
         Mockito.verify(mListener, Mockito.timeout(100).times(1))
                 .onRequestPublishCapabilities(publishTriggerType);
-        doThrow(ImsException.class).when(mListener)
+        doThrow(ImsException.class)
+                .when(mListener)
                 .onRequestPublishCapabilities(publishTriggerType);
         mRcsCapEventListenerCallBack.onRequestPublishCapabilities(publishTriggerType);
     }
+
     @Test
     public void onPublishUpdatedTest() throws ImsException {
         mRcsCapEventListenerCallBack.onPublishUpdated(200, null, 0, null);
@@ -91,6 +100,7 @@ public class RcsCapEventListenerCallBackTest {
         doThrow(ImsException.class).when(mListener).onPublishUpdated(200, null, 0, null);
         mRcsCapEventListenerCallBack.onPublishUpdated(200, null, 0, null);
     }
+
     @Test
     public void onUnPublishTest() throws ImsException {
         mRcsCapEventListenerCallBack.onUnPublish();
@@ -98,29 +108,27 @@ public class RcsCapEventListenerCallBackTest {
         doThrow(ImsException.class).when(mListener).onUnpublish();
         mRcsCapEventListenerCallBack.onUnPublish();
     }
+
     @Test
     public void onRemoteCapabilityRequestTest() throws ImsException {
-        CapabilityExchangeEventListener.OptionsRequestCallback optionsCallback = Mockito.mock(
-                CapabilityExchangeEventListener.OptionsRequestCallback.class);
         RemoteOptionsCallback callback = mock(RemoteOptionsCallback.class);
         Set<String> remoteCapabilities = new HashSet<>();
         remoteCapabilities.add(FEATURE_VIDEO);
-        mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(Uri.parse(TEST_PHONE_NUMBER),
-                remoteCapabilities, callback);
+        mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(
+                Uri.parse(TEST_PHONE_NUMBER), remoteCapabilities, callback);
         Mockito.verify(mRcsCapOptionsRequestCallback).setCallBack(callback);
-        Mockito.verify(mListener, Mockito.timeout(100)).onRemoteCapabilityRequest(
-                Uri.parse(TEST_PHONE_NUMBER), remoteCapabilities, mRcsCapOptionsRequestCallback);
-        doThrow(ImsException.class).when(mListener).onRemoteCapabilityRequest(
-                Uri.parse(TEST_PHONE_NUMBER),
-                remoteCapabilities, mRcsCapOptionsRequestCallback);
-        mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(Uri.parse(TEST_PHONE_NUMBER),
-                remoteCapabilities, callback);
-    }
-    @After
-    public void cleanUp() {
-        mRcsCapEventListenerCallBack = null;
-        mListener = null;
-        mMessageExecutor = null;
-        mRcsCapOptionsResponseCallBack = null;
+        Mockito.verify(mListener, Mockito.timeout(100))
+                .onRemoteCapabilityRequest(
+                        Uri.parse(TEST_PHONE_NUMBER),
+                        remoteCapabilities,
+                        mRcsCapOptionsRequestCallback);
+        doThrow(ImsException.class)
+                .when(mListener)
+                .onRemoteCapabilityRequest(
+                        Uri.parse(TEST_PHONE_NUMBER),
+                        remoteCapabilities,
+                        mRcsCapOptionsRequestCallback);
+        mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(
+                Uri.parse(TEST_PHONE_NUMBER), remoteCapabilities, callback);
     }
 }

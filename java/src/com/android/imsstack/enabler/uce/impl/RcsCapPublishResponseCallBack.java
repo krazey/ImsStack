@@ -26,7 +26,7 @@ import com.android.imsstack.util.MessageExecutor;
 
 public class RcsCapPublishResponseCallBack implements PublishResponse {
 
-    private static final String LOG_TAG = "PublishResponseCallBack";
+    private static final String LOG_TAG = RcsCapPublishResponseCallBack.class.getSimpleName();
     private PublishResponseCallback mPublishResponseCallBack;
     private MessageExecutor mMessageExecutor;
 
