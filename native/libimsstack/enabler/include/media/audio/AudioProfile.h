@@ -40,8 +40,6 @@ public:
             DEFAULT_MODECHANGE_PERIOD = 1,
             DEFAULT_MODECHANGE_NEIGHBOR = 0,
             DEFAULT_MAXRED = -1,
-            DEFAULT_PTIME = -1,
-            DEFAULT_MAXPTIME = -1,
             DEFAULT_DTX = 1,
         };
 
@@ -53,16 +51,12 @@ public:
                 m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
                 m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
                 m_nMaxRed(DEFAULT_MAXRED),
-                m_nPtime(DEFAULT_PTIME),
-                m_nMaxPtime(DEFAULT_MAXPTIME),
                 m_bDtx(DEFAULT_DTX),
                 m_bShowModeSet(IMS_FALSE),
                 m_bShowModeChangeCapability(IMS_FALSE),
                 m_bShowModeChangePeriod(IMS_FALSE),
                 m_bShowModeChangeNeighbor(IMS_FALSE),
                 m_bShowMaxRed(IMS_FALSE),
-                m_bShowPtime(IMS_FALSE),
-                m_bShowMaxPtime(IMS_FALSE),
                 m_bShowDtx(IMS_FALSE)
         {
         }
@@ -74,16 +68,12 @@ public:
                 m_nModeChangePeriod(objFmtp.m_nModeChangePeriod),
                 m_nModeChangeNeighbor(objFmtp.m_nModeChangeNeighbor),
                 m_nMaxRed(objFmtp.m_nMaxRed),
-                m_nPtime(objFmtp.m_nPtime),
-                m_nMaxPtime(objFmtp.m_nMaxPtime),
                 m_bDtx(objFmtp.m_bDtx),
                 m_bShowModeSet(objFmtp.m_bShowModeSet),
                 m_bShowModeChangeCapability(objFmtp.m_bShowModeChangeCapability),
                 m_bShowModeChangePeriod(objFmtp.m_bShowModeChangePeriod),
                 m_bShowModeChangeNeighbor(objFmtp.m_bShowModeChangeNeighbor),
                 m_bShowMaxRed(objFmtp.m_bShowMaxRed),
-                m_bShowPtime(objFmtp.m_bShowPtime),
-                m_bShowMaxPtime(objFmtp.m_bShowMaxPtime),
                 m_bShowDtx(objFmtp.m_bShowDtx)
         {
         }
@@ -117,10 +107,6 @@ public:
         inline IMS_SINT32 GetModeChangeNeighbor() { return m_nModeChangeNeighbor; }
         inline void SetMaxRed(IN const IMS_SINT32 nMaxRed) { m_nMaxRed = nMaxRed; }
         inline IMS_SINT32 GetMaxRed() { return m_nMaxRed; }
-        inline void SetPtime(IN const IMS_SINT32 nPtime) { m_nPtime = nPtime; }
-        inline IMS_SINT32 GetPtime() { return m_nPtime; }
-        inline void SetMaxPtime(IN const IMS_SINT32 nMaxPtime) { m_nMaxPtime = nMaxPtime; }
-        inline IMS_SINT32 GetMaxPtime() { return m_nMaxPtime; }
         inline void SetDtx(IN const IMS_BOOL bDtx) { m_bDtx = bDtx; }
         inline IMS_BOOL IsDtxEnabled() { return m_bDtx; }
         inline void SetShowModeSet(IN const IMS_BOOL bShowModeSet)
@@ -145,13 +131,6 @@ public:
         inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bShowModeChangeNeighbor; }
         inline void SetShowMaxRed(IN const IMS_BOOL bShowMaxRed) { m_bShowMaxRed = bShowMaxRed; }
         inline IMS_BOOL IsMaxRedVisible() { return m_bShowMaxRed; }
-        inline void SetShowPtime(IN const IMS_BOOL bShowPtime) { m_bShowPtime = bShowPtime; }
-        inline IMS_BOOL IsPtimeVisible() { return m_bShowPtime; }
-        inline void SetShowMaxPtime(IN const IMS_BOOL bShowMaxPtime)
-        {
-            m_bShowMaxPtime = bShowMaxPtime;
-        }
-        inline IMS_BOOL IsMaxPtimeVisible() { return m_bShowMaxPtime; }
         inline void SetShowDtx(IN const IMS_BOOL bShowDtx) { m_bShowDtx = bShowDtx; }
         inline IMS_BOOL IsDtxVisible() { return m_bShowDtx; }
 
@@ -162,16 +141,12 @@ public:
         IMS_SINT32 m_nModeChangePeriod;
         IMS_SINT32 m_nModeChangeNeighbor;
         IMS_SINT32 m_nMaxRed;
-        IMS_SINT32 m_nPtime;
-        IMS_SINT32 m_nMaxPtime;
         IMS_BOOL m_bDtx;
         IMS_BOOL m_bShowModeSet;
         IMS_BOOL m_bShowModeChangeCapability;
         IMS_BOOL m_bShowModeChangePeriod;
         IMS_BOOL m_bShowModeChangeNeighbor;
         IMS_BOOL m_bShowMaxRed;
-        IMS_BOOL m_bShowPtime;
-        IMS_BOOL m_bShowMaxPtime;
         IMS_BOOL m_bShowDtx;
     };
 
@@ -522,8 +497,8 @@ public:
     enum
     {
         // COMMON PARAMETER
-        DEFAULT_PTIME = 20,
-        DEFAULT_MAXPTIME = 240,
+        DEFAULT_PTIME = -1,
+        DEFAULT_MAXPTIME = -1,
     };
 
     AudioProfile() :
