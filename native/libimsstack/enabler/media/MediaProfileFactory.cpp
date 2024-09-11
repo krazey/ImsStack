@@ -657,6 +657,28 @@ PRIVATE void MediaProfileFactory::SetAudioCodecFmtp(IN CodecAudioConfig* pCodecC
         pFmtp->SetShowModeChangeNeighbor(IMS_FALSE);
     }
 
+    if (pAudioConfig->GetPtime() != NOT_PRESENT)
+    {
+        pFmtp->SetPtime(pAudioConfig->GetPtime());
+        pFmtp->SetShowPtime(IMS_TRUE);
+    }
+    else
+    {
+        pFmtp->SetPtime(AudioConfiguration::DEFAULT_PTIME);
+        pFmtp->SetShowPtime(IMS_FALSE);
+    }
+
+    if (pAudioConfig->GetMaxPtime() != NOT_PRESENT)
+    {
+        pFmtp->SetMaxPtime(pAudioConfig->GetMaxPtime());
+        pFmtp->SetShowMaxPtime(IMS_TRUE);
+    }
+    else
+    {
+        pFmtp->SetMaxPtime(AudioConfiguration::DEFAULT_MAX_PTIME);
+        pFmtp->SetShowMaxPtime(IMS_FALSE);
+    }
+
     if (pAudioConfig->GetMaxRed() != NOT_PRESENT)
     {
         pFmtp->SetMaxRed(pAudioConfig->GetMaxRed());

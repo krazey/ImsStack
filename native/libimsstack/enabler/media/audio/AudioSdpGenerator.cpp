@@ -156,7 +156,7 @@ void AudioSdpGenerator::GeneratePtime(OUT IMediaDescriptor* pDescriptor, IN Audi
 
     IMS_SINT32 nPtime = pProfile->GetPtime();
 
-    if (nPtime != AudioProfile::DEFAULT_PTIME)
+    if (nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME)
     {
         pDescriptor->AddAttributeInt(SdpAttribute::PTIME, nPtime);
         IMS_TRACE_D("GeneratePtime() - ptime[%d]", nPtime, 0, 0);
@@ -174,7 +174,7 @@ void AudioSdpGenerator::GenerateMaxPtime(
 
     IMS_SINT32 nMaxPtime = pProfile->GetMaxPtime();
 
-    if (nMaxPtime != AudioProfile::DEFAULT_MAXPTIME)
+    if (nMaxPtime != AudioProfile::AmrFmtp::DEFAULT_MAXPTIME)
     {
         pDescriptor->AddAttributeInt(SdpAttribute::MAXPTIME, nMaxPtime);
         IMS_TRACE_D("GenerateMaxPtime() - nMaxPtime[%d]", nMaxPtime, 0, 0);

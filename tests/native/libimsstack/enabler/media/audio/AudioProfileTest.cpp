@@ -28,12 +28,16 @@ const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_CAPABILITY = 2;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_PERIOD = 2;
 const IMS_SINT32 AUDIO_FMTP_MODE_CHANGE_NEIGHBOR = 2;
 const IMS_SINT32 AUDIO_FMTP_MAX_RED = 220;
+const IMS_SINT32 AUDIO_FMTP_PTIME = 20;
+const IMS_SINT32 AUDIO_FMTP_MAX_PTIME = 240;
 const IMS_BOOL AUDIO_FMTP_DTX = IMS_FALSE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MODESET = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_MAX_RED = IMS_TRUE;
+const IMS_BOOL AUDIO_FMTP_SHOW_PTIME = IMS_TRUE;
+const IMS_BOOL AUDIO_FMTP_SHOW_MAX_PTIME = IMS_TRUE;
 const IMS_BOOL AUDIO_FMTP_SHOW_DTX = IMS_TRUE;
 const IMS_SINT32 AMR_FMTP_OCTET_ALIGN = 1;
 const IMS_BOOL AMR_FMTP_SHOW_OCTET_ALIGN = IMS_TRUE;
@@ -142,6 +146,28 @@ TEST_F(AudioProfileTest, testAudioFmtpMaxRed)
     delete pFmtp;
 }
 
+TEST_F(AudioProfileTest, testAudioFmtpPtime)
+{
+    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    EXPECT_EQ(pFmtp->GetPtime(), -1);
+
+    pFmtp->SetPtime(AUDIO_FMTP_PTIME);
+    EXPECT_EQ(pFmtp->GetPtime(), AUDIO_FMTP_PTIME);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testAudioFmtpMaxPtime)
+{
+    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    EXPECT_EQ(pFmtp->GetMaxPtime(), -1);
+
+    pFmtp->SetMaxPtime(AUDIO_FMTP_MAX_PTIME);
+    EXPECT_EQ(pFmtp->GetMaxPtime(), AUDIO_FMTP_MAX_PTIME);
+
+    delete pFmtp;
+}
+
 TEST_F(AudioProfileTest, testAudioFmtpDtx)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
@@ -208,6 +234,28 @@ TEST_F(AudioProfileTest, testAudioFmtpShowMaxRed)
     delete pFmtp;
 }
 
+TEST_F(AudioProfileTest, testAudioFmtpShowPtime)
+{
+    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    EXPECT_EQ(pFmtp->IsPtimeVisible(), IMS_FALSE);
+
+    pFmtp->SetShowPtime(AUDIO_FMTP_SHOW_PTIME);
+    EXPECT_EQ(pFmtp->IsPtimeVisible(), AUDIO_FMTP_SHOW_PTIME);
+
+    delete pFmtp;
+}
+
+TEST_F(AudioProfileTest, testAudioFmtpShowMaxPtime)
+{
+    AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
+    EXPECT_EQ(pFmtp->IsMaxPtimeVisible(), IMS_FALSE);
+
+    pFmtp->SetShowMaxPtime(AUDIO_FMTP_SHOW_MAX_PTIME);
+    EXPECT_EQ(pFmtp->IsMaxPtimeVisible(), AUDIO_FMTP_SHOW_MAX_PTIME);
+
+    delete pFmtp;
+}
+
 TEST_F(AudioProfileTest, testAudioFmtpShowDtx)
 {
     AudioProfile::AudioFmtp* pFmtp = new AudioProfile::AudioFmtp();
@@ -228,12 +276,16 @@ TEST_F(AudioProfileTest, testAudioFmtpCreationDefault)
     EXPECT_EQ(pFmtp->GetModeChangePeriod(), 1);
     EXPECT_EQ(pFmtp->GetModeChangeNeighbor(), 0);
     EXPECT_EQ(pFmtp->GetMaxRed(), -1);
+    EXPECT_EQ(pFmtp->GetPtime(), -1);
+    EXPECT_EQ(pFmtp->GetMaxPtime(), -1);
     EXPECT_EQ(pFmtp->IsDtxEnabled(), IMS_TRUE);
     EXPECT_EQ(pFmtp->IsModeSetVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeCapabilityVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangePeriodVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsModeChangeNeighborVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsMaxRedVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsPtimeVisible(), IMS_FALSE);
+    EXPECT_EQ(pFmtp->IsMaxPtimeVisible(), IMS_FALSE);
     EXPECT_EQ(pFmtp->IsDtxVisible(), IMS_FALSE);
 
     delete pFmtp;
@@ -249,13 +301,16 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     pFmtp1->SetModeChangePeriod(AUDIO_FMTP_MODE_CHANGE_PERIOD);
     pFmtp1->SetModeChangeNeighbor(AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetMaxRed(AUDIO_FMTP_MAX_RED);
+    pFmtp1->SetPtime(AUDIO_FMTP_PTIME);
+    pFmtp1->SetMaxPtime(AUDIO_FMTP_MAX_PTIME);
     pFmtp1->SetDtx(AUDIO_FMTP_DTX);
     pFmtp1->SetShowModeSet(AUDIO_FMTP_SHOW_MODESET);
     pFmtp1->SetShowModeChangeCapability(AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
     pFmtp1->SetShowModeChangePeriod(AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
     pFmtp1->SetShowModeChangeNeighbor(AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     pFmtp1->SetShowMaxRed(AUDIO_FMTP_SHOW_MAX_RED);
-
+    pFmtp1->SetShowPtime(AUDIO_FMTP_SHOW_PTIME);
+    pFmtp1->SetShowMaxPtime(AUDIO_FMTP_SHOW_MAX_PTIME);
     pFmtp1->SetShowDtx(AUDIO_FMTP_SHOW_DTX);
 
     AudioProfile::AudioFmtp* pFmtp2 = new AudioProfile::AudioFmtp(*pFmtp1);
@@ -266,12 +321,16 @@ TEST_F(AudioProfileTest, testAudioFmtpCreation)
     EXPECT_EQ(pFmtp2->GetModeChangePeriod(), AUDIO_FMTP_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp2->GetModeChangeNeighbor(), AUDIO_FMTP_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp2->GetMaxRed(), AUDIO_FMTP_MAX_RED);
+    EXPECT_EQ(pFmtp2->GetPtime(), AUDIO_FMTP_PTIME);
+    EXPECT_EQ(pFmtp2->GetMaxPtime(), AUDIO_FMTP_MAX_PTIME);
     EXPECT_EQ(pFmtp2->IsDtxEnabled(), AUDIO_FMTP_DTX);
     EXPECT_EQ(pFmtp2->IsModeSetVisible(), AUDIO_FMTP_SHOW_MODESET);
     EXPECT_EQ(pFmtp2->IsModeChangeCapabilityVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_CAPABILITY);
     EXPECT_EQ(pFmtp2->IsModeChangePeriodVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_PERIOD);
     EXPECT_EQ(pFmtp2->IsModeChangeNeighborVisible(), AUDIO_FMTP_SHOW_MODE_CHANGE_NEIGHBOR);
     EXPECT_EQ(pFmtp2->IsMaxRedVisible(), AUDIO_FMTP_SHOW_MAX_RED);
+    EXPECT_EQ(pFmtp2->IsPtimeVisible(), AUDIO_FMTP_SHOW_PTIME);
+    EXPECT_EQ(pFmtp2->IsMaxPtimeVisible(), AUDIO_FMTP_SHOW_MAX_PTIME);
     EXPECT_EQ(pFmtp2->IsDtxVisible(), AUDIO_FMTP_SHOW_DTX);
 
     delete pFmtp1;
@@ -1081,6 +1140,30 @@ TEST_F(AudioProfileTest, testRtcpXrAttributesEqualNotEqual)
 
     delete pRtcpXrAttr1;
     delete pRtcpXrAttr2;
+}
+
+TEST_F(AudioProfileTest, testAudioProfilePtime)
+{
+    AudioProfile* pProfile = new AudioProfile();
+
+    EXPECT_EQ(pProfile->GetPtime(), 0);
+
+    pProfile->SetPtime(AUDIO_PROFILE_PTIME);
+    EXPECT_EQ(pProfile->GetPtime(), AUDIO_PROFILE_PTIME);
+
+    delete pProfile;
+}
+
+TEST_F(AudioProfileTest, testAudioProfileMaxPtime)
+{
+    AudioProfile* pProfile = new AudioProfile();
+
+    EXPECT_EQ(pProfile->GetMaxPtime(), 0);
+
+    pProfile->SetMaxPtime(AUDIO_PROFILE_MAX_PTIME);
+    EXPECT_EQ(pProfile->GetMaxPtime(), AUDIO_PROFILE_MAX_PTIME);
+
+    delete pProfile;
 }
 
 TEST_F(AudioProfileTest, testAudioProfileCandidateAttr)
