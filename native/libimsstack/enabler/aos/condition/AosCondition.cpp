@@ -532,7 +532,7 @@ PROTECTED VIRTUAL void AosCondition::ServiceSetting_ServiceChanged(
 
 PROTECTED VIRTUAL void AosCondition::ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn)
 {
-    if (!GET_N_CONFIG(m_nSlotId)->IsTtySupported())
+    if (!GET_N_CONFIG(m_nSlotId)->IsVolteTtySupported())
     {
         return;
     }

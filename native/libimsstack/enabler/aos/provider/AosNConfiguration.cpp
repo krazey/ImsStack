@@ -156,7 +156,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportLimitedAdminSmsMode() const
     return m_objCarrierConfig.bSupportLimitedAdminSmsMode;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTtySupported() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVolteTtySupported() const
 {
     return m_objCarrierConfig.bCarrierVolteTtySupported;
 }

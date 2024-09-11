@@ -115,11 +115,11 @@ public:
     virtual IMS_BOOL IsSupportLimitedAdminSmsMode() const = 0;
 
     /**
-     * @brief Check if TTY is supported.
+     * @brief Check if TTY over VoLTE is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
      */
-    virtual IMS_BOOL IsTtySupported() const = 0;
+    virtual IMS_BOOL IsVolteTtySupported() const = 0;
 
     /**
      * @brief Check if VOPS is ignored for VoLTE enable.

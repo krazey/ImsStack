@@ -1199,7 +1199,8 @@ TEST_F(AosConditionTest, ServiceSetting_ServiceChanged_Off)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
 
@@ -1211,7 +1212,8 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_On_RttNotSupport)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_TRUE));
 
@@ -1224,7 +1226,8 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_True_CombindAttached)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported()).WillRepeatedly(Return(IMS_FALSE));
 
@@ -1237,7 +1240,8 @@ TEST_F(AosConditionTest, ServiceSetting_TtyChanged_False)
 
 TEST_F(AosConditionTest, ServiceSetting_TtyChanged_TtyNotSupport)
 {
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsTtySupported()).WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVolteTtySupported())
+            .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);

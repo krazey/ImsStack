@@ -68,7 +68,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsRttSupported());
     // bCarrierCrossSimImsAvailable (IMS_FALSE)
-    EXPECT_FALSE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_FALSE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_CS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(0, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -382,7 +382,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsRttSupported());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
-    EXPECT_TRUE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -440,7 +440,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsWfcImsAvailable());
     EXPECT_TRUE(m_pAosNConfiguration->IsRttSupported());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
-    EXPECT_TRUE(m_pAosNConfiguration->IsTtySupported());
+    EXPECT_TRUE(m_pAosNConfiguration->IsVolteTtySupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, m_pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, m_pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
